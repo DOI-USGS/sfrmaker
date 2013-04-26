@@ -145,12 +145,12 @@ for line in input_file[1:]:
     if segment in STOP2dict:
         reach=int(line.split()[5])
         linestart=','.join(map(str,line.split()[:3]))
-        lineend=','.join(map(str,line.split()[5:-1]))
+        lineend=','.join(map(str,line.split()[5:]))
         STOP=STOP2dict[segment][reach-1]
         SBOT=STOP2dict[segment][reach-1]-1
-        ofp.write('%s,%s,%s,%s\n' %(linestart,STOP,SBOT,lineend))
+        ofp.write('%s,%s,%s,%s\r\n' %(linestart,STOP,SBOT,lineend))
     else:
-        ofp.write(','.join(map(str,line.split()))+'\n')
+        ofp.write(','.join(map(str,line.split()))+'\r\n')
 ofp.close()
 
 # list of segments to plot
