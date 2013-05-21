@@ -8,11 +8,11 @@ from matplotlib.backends.backend_pdf import PdfPages
 
 # Inputs
 infile='br_stop.dif' # from Daniel's CORR-SFR script
-GWVmat1='BR_Lay_minSlope.COR' # GWV SFR input mat1, from COFF-SFR
+GWVmat1='BR_GWVmat1.dat' # GWV SFR input mat1, from COFF-SFR
 GWVmat2='BR_GWVmat2.dat' # GWV SFR input mat2
 
 # Outputs
-outfile='BR_GVW_SFRmat1.dat' # revised GWV SFR input mat1
+outfile='BR_GWVmat1_corr.dat' # revised GWV SFR input mat1
 pdffile='selected_segments.pdf' # plots of selected segments
 
 # Settings
@@ -167,7 +167,6 @@ for segnum in segments:
         STOP2ups.append(STOP2_up)
     slopesdict[segnum]=slopes
     
-# Still need to include new slopes in output MAT1     
 print "saving new streamtop elevations and slopes to GWV SFR mat. 1 file"
 input_file=open(GWVmat1).readlines()
 ofp=open(outfile,'w')
@@ -178,13 +177,13 @@ for line in input_file[1:]:
         reach=int(line.split()[5])
         linestart=','.join(map(str,line.split()[:3]))
         linemid=','.join(map(str,line.split()[5:-2]))
-        lineend=','.join(map(str,line.split()[-1]))
+        lineend=line.split()[-1]
         STAGE=STOP2dict[segment][reach-1]+1
         STOP=STOP2dict[segment][reach-1]
         slope=slopesdict[segment][reach-1]
-        ofp.write('%s,%s,%s,%s,%s,%s\r\n' %(linestart,STAGE,STOP,linemid,slope,lineend))
+        ofp.write('%s,%s,%s,%s,%s,%s\n' %(linestart,STAGE,STOP,linemid,slope,lineend))
     else:
-        ofp.write(','.join(map(str,line.split()))+'\r\n')
+        ofp.write(','.join(map(str,line.split()))+'\n')
 ofp.close()
 
 # list of segments to plot
