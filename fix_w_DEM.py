@@ -14,10 +14,16 @@ GWVmat2='BR_GWVmat2.dat' # GWV SFR input mat2
 # Outputs
 outfile='BR_GWVmat1_corr.dat' # revised GWV SFR input mat1
 pdffile='selected_segments.pdf' # plots of selected segments
+end_interp_report='fix_w_DEM_interps.txt' # file recording adjustments made using up/dn_increments
+error_report='fix_w_DEM_errors.txt' # file for reporting 0 slope errors, etc.
 
 # Settings
 float_cutoff=-200 # process all segments with reaches that are float_cutoff above land surface
-increment=0.01 # if a minimum in the dem is lower than the segment end, new elev. will be end + increment
+up_increment=1.0 # if a minimum in the dem is lower than the segment end, new elev. will be end + increment
+dn_increment=0.1 # if end+increment is greater than upstream STOP, decrease by dn_increment until current STOP is less
+slope_min=1.0e-6 # replace 0 slope values (resulting from NHD) with an aritrary value
+enforce_slope_min=True # True or False, if True, replaces all slopes <slope_min with slope_min. Affected slopes are listed in error file.
+
 
 print "bringing in segment, reach, streamtop, land surface, and residuals..."
 infile_data=np.genfromtxt(infile, names=True, dtype=None)
@@ -36,8 +42,12 @@ STOP1dict=defaultdict(list)
 STOP2dict=defaultdict(list)
 slopesdict=defaultdict(list)
 
-print "fixing reaches..."
+# open output file to record segments where STOP was interpolated to end, to avoid going below end
+ofp=open(end_interp_report,'w')
+ofp2=open(error_report,'w')
+print "fixing reaches in segments..."
 for segnum in segments:
+    
     print str(segnum)
     seg_inds=list(np.where(infile_data['MSEG']==segnum)[0])
     segment=infile_data[seg_inds]
@@ -69,15 +79,25 @@ for segnum in segments:
         dem_el=segment['TOPNEW'][i]
         
         # in case a minimum in DEM is below segment end, set elev. to increment above, interpolate to end
-        if segment['TOPNEW'][i]<end:
-            dem_el=end+increment
+        if segment['TOPNEW'][i]<=end:
+            dem_el=end+up_increment
+            print "streamtop below segment end elevation,see output file %s " %(end_interp_report)
+            ofp.write("STOP at segment %s reach %s is %s, segment end elevation is %s\nReadjusting to %s\n" %(segnum,i,segment['TOPNEW'][i],end,dem_el))
+            # check to make sure current STOP elevation is still less than previous
+            if dem_el>STOP2[-1]:
+                ofp.write("readjusting again to ")
+                while dem_el>STOP2[-1]:
+                    dem_el-=dn_increment
+                    ofp.write(str(dem_el)+'\n')
+            ofp.write("interpolating to segment end elevation...\n")   
             nextlower=end
             slope=(nextlower-STOP2[-1])/(seg_distances[len(segment)-1]-seg_distances[len(STOP2)-1])
             sub_inds=range(len(segment)-1)[len(STOP2):(len(segment)-1)]
             for s in sub_inds:
                 dist=seg_distances[s]-seg_distances[s-1]
                 STOPint=STOP2[-1]+slope*dist
-                STOP2.append(STOPint)            
+                STOP2.append(STOPint)
+                ofp.write(str(STOPint)+'\n')
             break
         
         # if last rch is the next, need to work with end STOP elevation
@@ -99,7 +119,7 @@ for segnum in segments:
                     STOP2.append(STOPint)
                     
         # next rch is lower but also lower than the end 
-        elif segment['TOPNEW'][i+1]<end:
+        elif segment['TOPNEW'][i+1]<=end:
             flattening=True
             continue
         
@@ -109,8 +129,8 @@ for segnum in segments:
             if descending and not flattening:
                 STOP2.append(dem_el)
             
-            # next reach is lower than current but higher than a previous reach, keep going    
-            elif nextlower>STOP2[-1]:
+            # next reach is lower than current but equal to or higher than a previous reach, keep going    
+            elif nextlower>=STOP2[-1]:
                 continue
             
             # next reach is lower than current, and all previous reaches
@@ -159,14 +179,27 @@ for segnum in segments:
     for reach in range(len(STOP2))[1:]:
         STOP2_up=STOP2[reach-1]-slopes[reach-1]*0.5*reach_lengths[reach-1]
         slope=(STOP2_up-STOP2[reach])/(0.5*reach_lengths[reach])
-
+        
+        if enforce_slope_min and slope<slope_min:
+            if slope<=0:
+                slope=(STOP2[reach-1]-STOP2[reach])/(0.5*reach_lengths[reach-1]+0.5*reach_lengths[reach])
+            if slope<slope_min:
+                ofp2.write("slope less than slope mininum at segment "+str(segnum)+' reach '+str(reach)+'! Reassigned a value of ' +str(slope_min)+'\n')
+                slope=slope_min
         if slope<=0:
             slope=(STOP2[reach-1]-STOP2[reach])/(0.5*reach_lengths[reach-1]+0.5*reach_lengths[reach])
+            if slope<=0:
+                ofp2.write("zero or negative slope at segment "+str(segnum)+' reach '+str(reach)+'! Reassigned a value of ' +str(slope_min)+'\n')
+                # slope is likely 0 because NHD segment end points are equal; assign arbitrary slope
+                slope=slope_min
             STOP2_up=STOP2[reach-1]-0.5*reach_lengths[reach-1]*slope
         slopes.append(slope)
         STOP2ups.append(STOP2_up)
     slopesdict[segnum]=slopes
-    
+
+ofp.close()
+ofp2.close()
+   
 print "saving new streamtop elevations and slopes to GWV SFR mat. 1 file"
 input_file=open(GWVmat1).readlines()
 ofp=open(outfile,'w')
@@ -187,7 +220,7 @@ for line in input_file[1:]:
 ofp.close()
 
 # list of segments to plot
-segs2plot=[1081,324,1188,1060,1201,1076,341,1113,1131,949,523,408,469,1064,200,300,400,500,600,700,800,900,1000,1100,1200]
+segs2plot=[2,1081,324,1188,1060,1201,1076,341,1113,1131,949,523,408,469,1064,200,300,400,500,600,700,800,900,1000,1100,1200]
 segs2plot=sorted(segs2plot)
 
 pdf=PdfPages(pdffile)
