@@ -117,7 +117,7 @@ Workflow for building SFR input:
      - easy to execute manually in the Arcpy window (while looking at the flagged segments in ArcMap)
      - would be better if integrated into a correct version of Fix_flagged_comids.py
           
-6) run RouteRiverCells.py
+6) run RouteRiverCells.py (this script also may take an hour or more)
 
      Inputs:
           - river_cells_dissolve.shp  # from SFR_preproc.py
