@@ -88,7 +88,7 @@ arcpy.MakeTableView_management(Elevslope,"Elevslope")
 arcpy.MakeTableView_management(PlusflowVAA,"PlusflowVAA")
 
 # delete all unneeded fields
-fields2keep=["comid","divergence","lengthkm","thinnercod","maxelevsmo","minelevsmo","hydroseq","uphydroseq","dnhydroseq","reachcode","streamorder","arbolatesu","fcode"]
+fields2keep=["comid","divergence","lengthkm","thinnercod","maxelevsmo","minelevsmo","hydroseq","uphydroseq","dnhydroseq","reachcode","streamorde","arbolatesu","fcode"]
 fields2keep=[x.lower() for x in fields2keep]
 print "\nkeeping: %s fields; deleting the rest" %(','.join(fields2keep))
 print "\ndeleting:"
@@ -117,7 +117,7 @@ arcpy.MakeFeatureLayer_management(Flowlines,"Flowlines")
 
 # If not already, permanently join PlusflowVAA and Elevslope, then to Flowlines    
 if Join:
-    print "Joining Elevslope to PlusflowVAA...\n"
+    print "\nJoining Elevslope to PlusflowVAA...\n"
     comid1=getfield("PlusflowVAA","comid")
     comid2=getfield("Elevslope","comid")
     arcpy.JoinField_management("PlusflowVAA",comid1,"Elevslope",comid2)
