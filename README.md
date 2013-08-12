@@ -72,7 +72,7 @@ Workflow for building SFR input:
           - 'NHD_intersect_edited.shp'
 
 
-5) run RouteStreamNetwork.py
+5) run RouteStreamNetwork.py (note: this may take hours to run with large models/dense stream networks)
 
       Inputs:
           - boundaryclipsrouting.txt
