@@ -215,8 +215,4 @@ OUT2.close()
 outfile.close()
 arcpy.RefreshCatalog(path)
 
-print "\nJoining %s to %s; saving as %s (might take a minute)" %(OUTTAB,INTERSECT,ELEV)
-arcpy.CopyFeatures_management(INTERSECT,ELEV)
-arcpy.JoinField_management(ELEV,"FID",OUTTAB,"OLDFID")
-
-print "Done! Check fix_comids.txt for segments with multiple starts/ends that must be manually deleted."
+print "Done! Check fix_comids.txt for segments with multiple starts/ends that must be manually deleted. Then run intersect.py"
