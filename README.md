@@ -61,11 +61,12 @@ Workflow for building SFR input:
 3) manually delete flowlines and corresponding gridcell polygons for segments that have multiple starts/ends (e.g. those that meander out of the grid and back in)
 
 4) run intersect.py
+
      Inputs:
           - flowlines clipped from previous step
           - unclipped (original) flowlines from NHDPlus
           - polygon of grid boundary
-
+          
      Outputs:
           - boundaryclipsrouting.txt (for segments intersecting model boundary)
           - 'NHD_intersect_edited.shp'
@@ -98,7 +99,7 @@ Workflow for building SFR input:
 
 5.1) (if necessary) run Fix_flagged_comids.py (this program still needs some work):
 
-      Handles the segments in flagged_comids.txt (e.g., making elevations consistent with routing) by:
+     Handles the segments in flagged_comids.txt (e.g., making elevations consistent with routing) by:
           - deleting segments that have an FTYPE of "ArtificialPath" and a "Divergence" value of 2. These segments appeared mostly to be small parts of braids in the channel. References to these segments are removed from check_network.txt
           - for all other segments in flagged_comids.txt:
                - identifies segment end-reaches, and corresponding cells
@@ -117,14 +118,15 @@ Workflow for building SFR input:
      - would be better if integrated into a correct version of Fix_flagged_comids.py
           
 6) run RouteRiverCells.py
+
      Inputs:
-          - 'river_cells_dissolve.shp' # from SFR_preproc.py
-          - 'river_w_elevations.shp' # uses this to route reaches within segments
-          - 'NHD_intersect_edited.shp'  # from intersect.py
+          - river_cells_dissolve.shp  # from SFR_preproc.py
+          - river_w_elevations.shp  # uses this to route reaches within segments
+          - NHD_intersect_edited.shp   # from intersect.py
           - PlusFlowlineVAA database from NHDPlus
           - check_network.txt  # from RouteStreamNetwork.py
           - boundaryclipsrouting.txt  # from intersect.py
-
+          
      Outputs:
           - reach_ordering.txt
           - routed_cells.txt
