@@ -132,11 +132,10 @@ Workflow for building SFR input:
           - routed_cells.txt
 
 7) run Finalize_SFR.py
-added manual step of joining river_w_elevations to river_cells to this script
-also removed hard-coding for grid information (obtains from shapefile of grid exported from GWV) 
-Note: getting grid info this way is slow, should be done ONCE at beginning, in SFR_preproc. Could be appended to input file for rapid re-referencing in following scripts.
 
-had to fix one segment using fixsegelevs function (stored in fix_segment_elevs.py). This function, given the COMID, cellnums of first and last reaches, and desired min/max elevations, resets elevations of all reaches using linear interpolation. Fix_flagged_comids.py (and maybe other scripts) could be cleaned up and made more robust by importing this function, instead of relying on built-in code
+8) run SFR_utilities.py,  
+     improves any segment start/end elevations where there is room for improvement.
+     
+9) run Fix_w_DEM.py
 
 
-8) SFR_utilities.py, to improve any segment start/end elevations where there is room for improvement.
