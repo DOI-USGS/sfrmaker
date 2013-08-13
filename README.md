@@ -5,11 +5,12 @@ NHDPlus datasets are available at: http://www.horizon-systems.com/NHDPlus/NHDPlu
 
 
 Dependencies:
+-------------
 In addition to standard Python modules, ESRI Arcpy is needed.
 Some input and output are designed for the Groundwater Vistas GUI, but this is not necessarily required
 
 Input requirements:
-
+-------------------
 * Polygon shapefile export of model grid (e.g. as exported by Groundwater Vistas)
 * rows x columns ascii matrix of model TOP elevations (e.g. as exported by Groundwater Vistas)
 * Shapefile polygon of model domain (merged polygon of gridcells)
@@ -23,11 +24,12 @@ Input requirements:
 
 
 Outputs:
-SFR package file*
-Text file with reach information (r,c,l,elevation, width, slope, etc.) for importing SFR package into Groundwater Vistas
-Text file with segment/routing data (e.g. icalc, outseg, iupseg, etc.), for copying and pasting into Groundwater Vistas
+--------
+* SFR package file*
+* Text file with reach information (r,c,l,elevation, width, slope, etc.) for importing SFR package into Groundwater Vistas
+* Text file with segment/routing data (e.g. icalc, outseg, iupseg, etc.), for copying and pasting into Groundwater Vistas
 
-* currently the SFR package file is create prior to final elevation corrections with fix_w_dem.py. Until this is fixed, SFR package input should be manually created from the Groundwater Vistas input tables.
+*currently the SFR package file is create prior to final elevation corrections with fix_w_dem.py. Until this is fixed, SFR package input should be manually created from the Groundwater Vistas input tables.
 Note:
 # All shps should be in (same) model coordinate units (e.g. ft.)
 If model domain contains a major divide, need to merge relevant NHD datasets (e.g. 04 and 07) prior to running this script
