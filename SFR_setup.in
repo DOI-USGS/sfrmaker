@@ -4,8 +4,6 @@
 # Put in paths to input/output files as-is (i.e. no double \\), surrounded by single quotes
 ###
 # Settings--------------------------------------------------------------------------------------------------
-ROWS=815
-COLUMNS=995
 computeZonal=False # True if DEM needs to be sampled for model grid (takes a long time to run); False assumes that model grid shp already contains elevations
 reach_cutoff=1 # minimum reach length to retain following explosion of NHD segments to river cells
 # Infiles---------------------------------------------------------------------------------------------------
