@@ -10,16 +10,16 @@ Some input and output are designed for the Groundwater Vistas GUI, but this is n
 
 Input requirements:
 
-*Polygon shapefile export of model grid (e.g. as exported by Groundwater Vistas)
-rows x columns ascii matrix of model TOP elevations (e.g. as exported by Groundwater Vistas)
-Shapefile polygon of model domain (merged polygon of gridcells)
-A DEM for model area, doesn't need to be clipped
-PlusflowVAA database from NHDPlus v2
-Elevslope database from NHDPlus v2
-NHDFlowline shapefile from NHDPlus v2
-Flowlines='Flowlines.shp' # from NHDPlus
-PlusFlow database from NHDPlus v2
-NHDFcode database from NHDPlus v2
+* Polygon shapefile export of model grid (e.g. as exported by Groundwater Vistas)
+* rows x columns ascii matrix of model TOP elevations (e.g. as exported by Groundwater Vistas)
+* Shapefile polygon of model domain (merged polygon of gridcells)
+* A DEM for model area, doesn't need to be clipped
+* PlusflowVAA database from NHDPlus v2
+* Elevslope database from NHDPlus v2
+* NHDFlowline shapefile from NHDPlus v2
+* Flowlines='Flowlines.shp' # from NHDPlus
+* PlusFlow database from NHDPlus v2
+* NHDFcode database from NHDPlus v2
 
 
 Outputs:
