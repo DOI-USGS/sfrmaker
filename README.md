@@ -4,13 +4,13 @@ Set of programs for automating the construction of the MODFLOW Streamflow-Routin
 NHDPlus datasets are available at: http://www.horizon-systems.com/NHDPlus/NHDPlusV2_data.php
 
 
-Dependencies:
--------------
+#### Dependencies:
+
 In addition to standard Python modules, ESRI Arcpy is needed.
 Some input and output are designed for the Groundwater Vistas GUI, but this is not necessarily required
 
-Input requirements:
--------------------
+#### Input requirements:
+
 * Polygon shapefile export of model grid (e.g. as exported by Groundwater Vistas)
 * rows x columns ascii matrix of model TOP elevations (e.g. as exported by Groundwater Vistas)
 * Shapefile polygon of model domain (merged polygon of gridcells)
@@ -24,21 +24,24 @@ Input requirements:
 
 NOTE: XX is Drainage Area ID and YY is VPU (vector processing unit) in the above (see NHDPlus website for details).
 
-Outputs:
---------
+#### Outputs:
+
 * SFR package file*
 * Text file with reach information (r,c,l,elevation, width, slope, etc.) for importing SFR package into Groundwater Vistas
 * Text file with segment/routing data (e.g. icalc, outseg, iupseg, etc.), for copying and pasting into Groundwater Vistas
 
-*currently the SFR package file is create prior to final elevation corrections with fix_w_dem.py. Until this is fixed, SFR package input should be manually created from the Groundwater Vistas input tables.
+#### Notes:
+
+* currently the SFR package file is create prior to final elevation corrections with fix_w_dem.py. Until this is fixed, SFR package input should be manually created from the Groundwater Vistas input tables.
 Note:
-# All shps should be in (same) model coordinate units (e.g. ft.)
-If model domain contains a major divide, need to merge relevant NHD datasets (e.g. 04 and 07) prior to running this script
+* All shps should be in (same) model coordinate units (e.g. ft.)
+* If model domain contains a major divide, need to merge relevant NHD datasets (e.g. 04 and 07) prior to running this script
 
 
-Workflow for building SFR input:
+### Workflow for building SFR input:
 
-1) run SFR_preproc.py (see Steps 1-9 in Howard Reeves' SFR notes)
+##### 1) run SFR_preproc.py
+(see Steps 1-9 in Howard Reeves' SFR notes)
 
      Inputs: 
      Polygon shapefile export of model grid (e.g. as exported by Groundwater Vistas)
@@ -55,15 +58,17 @@ Workflow for building SFR input:
 
 
 
-2) run AssignRiverElev.py, which produces a table of reach midpoint elevations via linear interpolation from NHD segment endpoint elevations
+##### 2) run AssignRiverElev.py, 
+which produces a table of reach midpoint elevations via linear interpolation from NHD segment endpoint elevations
 
      Inputs: river_explode.shp
      Outputs: river_elevs.dbf
                     fix_comids.txt      # list of comids with two or more sets of endpoints.  These are usually segments that meander out of and then back into the grid.
 
-3) manually delete flowlines and corresponding gridcell polygons for segments that have multiple starts/ends (e.g. those that meander out of the grid and back in)
+##### 3) manually delete flowlines and corresponding gridcell polygons
+for segments that have multiple starts/ends (e.g. those that meander out of the grid and back in)
 
-4) run intersect.py
+##### 4) run intersect.py
 
      Inputs:
           - flowlines clipped from previous step
@@ -75,7 +80,8 @@ Workflow for building SFR input:
           - 'NHD_intersect_edited.shp'
 
 
-5) run RouteStreamNetwork.py (note: this may take hours to run with large models/dense stream networks)
+##### 5) run RouteStreamNetwork.py 
+(note: this may take hours to run with large models/dense stream networks)
 
       Inputs:
           - boundaryclipsrouting.txt
@@ -100,7 +106,8 @@ Workflow for building SFR input:
           - Else:
                - 99999, TOCOMID is written (this will happen if stream flows into grid)
 
-5.1) (if necessary) run Fix_flagged_comids.py (this program still needs some work):
+##### 5.1) (if necessary) run Fix_flagged_comids.py 
+(this program still needs some work):
 
      Handles the segments in flagged_comids.txt (e.g., making elevations consistent with routing) by:
           - deleting segments that have an FTYPE of "ArtificialPath" and a "Divergence" value of 2. These segments appeared mostly to be small parts of braids in the channel. References to these segments are removed from check_network.txt
@@ -120,7 +127,8 @@ Workflow for building SFR input:
      - easy to execute manually in the Arcpy window (while looking at the flagged segments in ArcMap)
      - would be better if integrated into a correct version of Fix_flagged_comids.py
           
-6) run RouteRiverCells.py (this script also may take an hour or more)
+##### 6) run RouteRiverCells.py 
+(this script also may take an hour or more)
 
      Inputs:
           - river_cells_dissolve.shp  # from SFR_preproc.py
@@ -134,11 +142,11 @@ Workflow for building SFR input:
           - reach_ordering.txt
           - routed_cells.txt
 
-7) run Finalize_SFR.py
+##### 7) run Finalize_SFR.py
 
-8) run SFR_utilities.py,  
+##### 8) run SFR_utilities.py,  
      improves any segment start/end elevations where there is room for improvement.
      
-9) run Fix_w_DEM.py
+##### 9) run Fix_w_DEM.py
 
 
