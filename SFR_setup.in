@@ -1,0 +1,32 @@
+# Notes on input:
+# All shps should be in (same) model coordinate units (e.g. ft.)
+# If model domain contains a major divide, need to merge relevant NHD datasets (e.g. 04 and 07) prior to running this script
+# Put in paths to input/output files as-is (i.e. no double \\), surrounded by single quotes
+###
+# Settings--------------------------------------------------------------------------------------------------
+ROWS=815
+COLUMNS=995
+computeZonal=False # True if DEM needs to be sampled for model grid (takes a long time to run); False assumes that model grid shp already contains elevations
+reach_cutoff=1 # minimum reach length to retain following explosion of NHD segments to river cells
+# Infiles---------------------------------------------------------------------------------------------------
+MFgrid='MFgrid.shp' # polygon shapefile export of grid from Groundwater Vistas
+MFdomain='MFdomain.shp' # outline of model grid
+DEM='D:\ATLData\Columbia\Maps\WGNHS_Columbia_Co_GW_model_final.gdb\NED_10m_clip' # DEM for model area, doesn't need to be clipped
+PlusflowVAA='PlusFlowlineVAA_0407Merge.dbf' # from NHDPlus
+Elevslope='Elevslope.dbf' # from NHDPlus
+Flowlines='Flowlines.shp' # from NHDPlus
+Flowlines_unclipped='NHDflowline_merge.shp' # original flowlines covering model area (not clipped to grid)
+arcpy_path='C:\python26\ArcGIS10.0\python' # for calling arcpy scripts externally using os.system
+ELEV='river_w_elevations.shp'
+FLOW='PlusFlow_merge.dbf'
+CELLS='river_cells_dissolve.shp' # from SFR_preproc.py
+NHD='NHD_intersect_edited.shp'  # from intersect.py
+FTab='NHDFcode_0407Merge.dbf' # from NHDPlus
+Layer1top='L1TOP.DAT' # matrix of model TOP elevations exported from GWV
+###
+# Outfiles---------------------------------------------------------------------------------------------------
+OUT='Columbia.SFR'
+GIS='SFRfinal_riv_cellinfo.txt'
+MAT1='SFR_GWVmat1.txt'                    #matrix files for use with GWV
+MAT2='SFR_GWVmat2.txt'
+WIDTH='SFRwidthinfo.txt'
