@@ -15,13 +15,14 @@ Input requirements:
 * rows x columns ascii matrix of model TOP elevations (e.g. as exported by Groundwater Vistas)
 * Shapefile polygon of model domain (merged polygon of gridcells)
 * A DEM for model area, doesn't need to be clipped
-* PlusflowVAA database from NHDPlus v2
-* Elevslope database from NHDPlus v2
+* PlusflowVAA database from NHDPlus v2 --> PlusFlowlineVAA.dbf from NHDPlusV21\_XX\_YY\_NHDPlusAttributes\_03.7z
+* Elevslope database from NHDPlus v2 --> elevslope.dbf from NHDPlusV21\_XX\_YY\_NHDPlusAttributes\_03.7z
 * NHDFlowline shapefile from NHDPlus v2
 * Flowlines='Flowlines.shp' # from NHDPlus
-* PlusFlow database from NHDPlus v2
+* PlusFlow database from NHDPlus v2 --> PlusFlow.dbf from NHDPlusV21\_XX\_YY\_NHDPlusAttributes\_03.7z
 * NHDFcode database from NHDPlus v2
 
+NOTE: XX is Drainage Area ID and YY is VPU (vector processing unit) in the above (see NHDPlus website for details).
 
 Outputs:
 --------
