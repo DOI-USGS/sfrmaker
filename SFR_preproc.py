@@ -22,7 +22,7 @@ for line in infile:
         var=line.split("=")[1].split()[0]
         inputs[varname]=var.replace("'","") # strip extra quotes
 
-computeZonal=inputs["computeZonal"]
+computeZonal_flag=inputs["computeZonal"]
 reach_cutoff=float(inputs["reach_cutoff"])
 MFgrid=inputs["MFgrid"]
 MFdomain=inputs["MFdomain"]
@@ -74,7 +74,7 @@ def computeZonal(DEM,MFgrid):
     print "joining sampled DEM elevations to model grid...(note: this operation is very slow)"
     arcpy.JoinField_management("MFgrid",node,"demzstats",value) # note: this takes an unreasonably long time. There may be a better way to do it.
     
-if computeZonal=='True':
+if computeZonal_flag=='True':
     computeZonal(DEM,MFgrid)
 
 print "Clip original NHD flowlines to model domain..."
@@ -161,7 +161,10 @@ node=getfield("river_cells.shp","node")
 arcpy.Dissolve_management("river_cells.shp","river_cells_dissolve.shp",node)
 
 print "Exploding NHD segments to grid cells using Intersect and Multipart to Singlepart..."
-arcpy.Intersect_analysis(["river_cells_dissolve.shp","Flowlines.shp"],"river_intersect.shp")
+# MNF-debug --> Flowlines.shp seemed to be hardcoded instead of LAYER called Flowlines
+#arcpy.Intersect_analysis(["river_cells_dissolve.shp","Flowlines.shp"],"river_intersect.shp")
+arcpy.Intersect_analysis(["river_cells_dissolve.shp","Flowlines"],"river_intersect.shp")
+# MNF-debug
 arcpy.MultipartToSinglepart_management("river_intersect.shp","river_explode.shp")
 print "\n"
 print "Adding in stream geometry"
