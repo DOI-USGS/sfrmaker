@@ -66,9 +66,17 @@ which produces a table of reach midpoint elevations via linear interpolation fro
                     fix_comids.txt      # list of comids with two or more sets of endpoints.  These are usually segments that meander out of and then back into the grid.
 
 ##### 3) manually delete flowlines and corresponding gridcell polygons
-for segments that have multiple starts/ends (e.g. those that meander out of the grid and back in). These should be deleted from river_explode.shp. Then, both river_cells.shp and the original flowlines (in the Flowlines_unclipped variable of the input file) should be clipped to river_cells.shp. After these deletions, rerun AssignRiverElev.py. It's a good idea to retain a copy of fix_comids.txt (from this initial run of AssignRiverElev.py) to be able to investigate specific cases again after the rerun.
+for segments that have multiple starts/ends (e.g. those that meander out of the grid and back in). These should be deleted from river_explode.shp. 
 
-##### 4) run intersect.py
+##### 4) run CleanupRiverCells.py,
+which trims down the river cells shapefiles to reflect the deletiosn that were made in the previous step deleting COMIDs from river_explode.shp
+This also makes a backup copy of fix\_comids.txt --> fix\_comids\_backup.txt which can be used to inspect the results of rerunning AssignRiverElev.py
+
+##### 4a) Rerun AssignRiverElev.py
+Rerun and go through any fix\_comids until fix\_comids.txt returns an empty file.
+
+
+##### 5) run intersect.py
 
      Inputs:
           - flowlines clipped from previous step
@@ -80,7 +88,7 @@ for segments that have multiple starts/ends (e.g. those that meander out of the 
           - 'NHD_intersect_edited.shp'
 
 
-##### 5) run RouteStreamNetwork.py 
+##### 6) run RouteStreamNetwork.py 
 (note: this may take hours to run with large models/dense stream networks)
 
       Inputs:
@@ -106,7 +114,7 @@ for segments that have multiple starts/ends (e.g. those that meander out of the 
           - Else:
                - 99999, TOCOMID is written (this will happen if stream flows into grid)
 
-##### 5.1) (if necessary) run Fix_flagged_comids.py 
+##### 6a) (if necessary) run Fix_flagged_comids.py 
 (this program still needs some work):
 
      Handles the segments in flagged_comids.txt (e.g., making elevations consistent with routing) by:
@@ -127,7 +135,7 @@ for segments that have multiple starts/ends (e.g. those that meander out of the 
      - easy to execute manually in the Arcpy window (while looking at the flagged segments in ArcMap)
      - would be better if integrated into a correct version of Fix_flagged_comids.py
           
-##### 6) run RouteRiverCells.py 
+##### 7) run RouteRiverCells.py 
 (this script also may take an hour or more)
 
      Inputs:
@@ -142,11 +150,11 @@ for segments that have multiple starts/ends (e.g. those that meander out of the 
           - reach_ordering.txt
           - routed_cells.txt
 
-##### 7) run Finalize_SFR.py
+##### 8) run Finalize_SFR.py
 
-##### 8) run SFR_utilities.py,  
+##### 9) run SFR_utilities.py,  
      improves any segment start/end elevations where there is room for improvement.
      
-##### 9) run Fix_w_DEM.py
+##### 10) run Fix_w_DEM.py
 
 
