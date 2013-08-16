@@ -66,7 +66,7 @@ which produces a table of reach midpoint elevations via linear interpolation fro
                     fix_comids.txt      # list of comids with two or more sets of endpoints.  These are usually segments that meander out of and then back into the grid.
 
 ##### 3) manually delete flowlines and corresponding gridcell polygons
-for segments that have multiple starts/ends (e.g. those that meander out of the grid and back in)
+for segments that have multiple starts/ends (e.g. those that meander out of the grid and back in). These should be deleted from river_explode.shp. Then, both river_cells.shp and the original flowlines (in the Flowlines_unclipped variable of the input file) should be clipped to river_cells.shp. After these deletions, rerun AssignRiverElev.py. It's a good idea to retain a copy of fix_comids.txt (from this initial run of AssignRiverElev.py) to be able to investigate specific cases again after the rerun.
 
 ##### 4) run intersect.py
 
