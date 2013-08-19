@@ -84,7 +84,7 @@ newmaxel=dict()
 newminel=dict()
 
 intersects=arcpy.SearchCursor('intersect.shp')
-
+manual_intervention = 0 
 for stream in intersects:
     comid=stream.COMID
     query="COMID ="+str(comid)
@@ -136,9 +136,20 @@ for stream in intersects:
             newmaxel[comid]=round(clmaxel-slope*clippedlength/lenkm)
             newminel[comid]=round(clminel)
         else:
+            manual_intervention +=1
+            if manual_intervention == 1:
+                ofp = open('boundary_manual_fix_issues.txt','w')
+                ofp.write('The following COMIDs identify streams that need manual attention.\n')
+                ofp.write('Fix in the Flowlines variable from the input file. Then rerun intersect.py\n')
+                ofp.write('#' * 16 + '\n')
             print 'both ends are cut off for comid ', comid
+            ofp.write('both ends are cut off for comid %d\n' %(comid))
             print 'need to fix it manually'
 del intersects, stream, clip, clippedstream
+if manual_intervention:
+    ofp.write('#' * 16 + '\n')    
+    ofp.close()
+
 #create a new working NHD shapefile incorporating new values just found
 
 print "Creating new shapefile " + NEWMOD
@@ -167,5 +178,6 @@ for comid in inout:
 OUT.close()
         
     
-    
+if manual_intervention:
+    print 'Some manual intervention required:\nSee boundary_manual_fix_issues.txt for details'
     

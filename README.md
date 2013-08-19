@@ -54,6 +54,7 @@ Note:
      
      Outputs:
      river_explode.shp (lines)
+	 river_cells.shp
      river_cells_dissolve.shp (grid cells (SFR reaches) that contain NHD segment elevations and channel location information (start and end xy; reach length in cell))
 
 
