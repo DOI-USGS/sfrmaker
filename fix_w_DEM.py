@@ -5,35 +5,58 @@ import numpy as np
 from collections import defaultdict
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
+import STOP_compare
+import pdb
+
+# Global Input file for SFR utilities
+infile="SFR_setup.in"
+
+# Get input files locations
+infile=open(infile,'r').readlines()
+inputs=defaultdict()
+for line in infile:
+    if "#" not in line.split()[0]:
+        varname=line.split("=")[0]
+        var=line.split("=")[1].split()[0]
+        inputs[varname]=var.replace("'","") # strip extra quotes
 
 # Inputs
-infile='br_stop.dif' # from Daniel's CORR-SFR script
-GWVmat1='BR_GWVmat1.dat' # GWV SFR input mat1, from COFF-SFR
-GWVmat2='BR_GWVmat2.dat' # GWV SFR input mat2
+infile='STOP_comparison.csv' # from Daniel's CORR-SFR script, or from STOP_compare.py
+GWVmat1=inputs["MAT1"] # GWV SFR input mat1, from COFF-SFR
+GWVmat2=inputs["MAT2"] # GWV SFR input mat2
+DEMfile=inputs["Layer1top"] # Layer 1 (model) TOP elevations
 
 # Outputs
-outfile='BR_GWVmat1_corr.dat' # revised GWV SFR input mat1
+outfile=inputs["MAT1"] # revised GWV SFR input mat1
 pdffile='selected_segments.pdf' # plots of selected segments
 end_interp_report='fix_w_DEM_interps.txt' # file recording adjustments made using up/dn_increments
 error_report='fix_w_DEM_errors.txt' # file for reporting 0 slope errors, etc.
 
 # Settings
-float_cutoff=-200 # process all segments with reaches that are float_cutoff above land surface
+nrow=int(inputs["ROWS"])
+ncol=int(inputs["COLUMNS"])
+float_cutoff=-500 # process all segments with reaches that are float_cutoff above land surface
 up_increment=1.0 # if a minimum in the dem is lower than the segment end, new elev. will be end + increment
 dn_increment=0.1 # if end+increment is greater than upstream STOP, decrease by dn_increment until current STOP is less
 slope_min=1.0e-6 # replace 0 slope values (resulting from NHD) with an aritrary value
 enforce_slope_min=True # True or False, if True, replaces all slopes <slope_min with slope_min. Affected slopes are listed in error file.
-
+plot_slope=False # flag to include plots of streambed slope in output PDF
+num_segs2plot=50 # number of segments to plot (will choose using regular interval)
 
 print "bringing in segment, reach, streamtop, land surface, and residuals..."
-infile_data=np.genfromtxt(infile, names=True, dtype=None)
+STOP_compare.stopcomp(DEMfile,GWVmat1,nrow,ncol) # generates column text file from MAT1 and Layer1 top elevs
+infile_data=np.genfromtxt(infile, delimiter=',',names=True, dtype=None)
 float_inds=np.where(infile_data['DIF']>float_cutoff)[0]
-floaters=infile_data[float_inds]
-segments=list(np.unique(floaters['MSEG']))
+floaters=infile_data['MSEG'][float_inds]
+segments=list(np.unique(floaters))
 
 print "bringing in reach lengths, slopes and routing info..."
-GWVmat1_data=np.genfromtxt(GWVmat1, skiprows=1,dtype=None) # can't use names because of commas in header
-GWVmat2_data=np.genfromtxt(GWVmat2, skiprows=1,dtype=None)
+GWVmat1_data=np.genfromtxt(GWVmat1, delimiter=',',names=True,dtype=None)
+GWVmat2_data=np.genfromtxt(GWVmat2, delimiter=',',names=True,dtype=None)
+
+# make backup of previous MAT1
+GWVmat1old=inputs["MAT1"]+"_old_SFR_utilities"
+os.rename(inputs["MAT1"],GWVmat1old)
 
 seg_distdict=defaultdict(list)
 reach_lengthsdict=defaultdict(list)
@@ -52,10 +75,10 @@ for segnum in segments:
     seg_inds=list(np.where(infile_data['MSEG']==segnum)[0])
     segment=infile_data[seg_inds]
     
-    seg_indsGWVmat=list(np.where(GWVmat1_data['f6']==segnum)[0])
-    seg_distances=list(np.cumsum(GWVmat1_data['f8'][seg_indsGWVmat])) # cumulative distances along segment
-    reach_lengths=list(GWVmat1_data['f8'][seg_indsGWVmat])
-    NHD_slopes=list(GWVmat1_data['f11'][seg_indsGWVmat])
+    seg_indsGWVmat=list(np.where(GWVmat1_data['segment']==segnum)[0])
+    seg_distances=list(np.cumsum(GWVmat1_data['length_in_cell'][seg_indsGWVmat])) # cumulative distances along segment
+    reach_lengths=list(GWVmat1_data['length_in_cell'][seg_indsGWVmat])
+    NHD_slopes=list(GWVmat1_data['bed_slope'][seg_indsGWVmat])
     
     if len(segment)<3: # no interior points; keep ending elevations
         STOP1dict[segnum] = list(segment['STOP'])
@@ -91,12 +114,15 @@ for segnum in segments:
                     ofp.write(str(dem_el)+'\n')
             ofp.write("interpolating to segment end elevation...\n")   
             nextlower=end
-            slope=(nextlower-STOP2[-1])/(seg_distances[len(segment)-1]-seg_distances[len(STOP2)-1])
+            STOP2.append(dem_el) # first append adjusted elevation, then interp to end
+            #slope=(nextlower-STOP2[-1])/(seg_distances[len(segment)-1]-seg_distances[len(STOP2)-1])
+            slope=(nextlower-dem_el)/(seg_distances[len(segment)-1]-seg_distances[len(STOP2)])        
             sub_inds=range(len(segment)-1)[len(STOP2):(len(segment)-1)]
             for s in sub_inds:
                 dist=seg_distances[s]-seg_distances[s-1]
                 STOPint=STOP2[-1]+slope*dist
                 STOP2.append(STOPint)
+                print '%s %s' %(s,STOPint)
                 ofp.write(str(STOPint)+'\n')
             break
         
@@ -201,36 +227,38 @@ ofp.close()
 ofp2.close()
    
 print "saving new streamtop elevations and slopes to GWV SFR mat. 1 file"
-input_file=open(GWVmat1).readlines()
+input_file=open(GWVmat1old).readlines()
 ofp=open(outfile,'w')
 ofp.write(input_file[0])
 for line in input_file[1:]:
-    segment=int(line.split()[6])
+    segment=int(line.split(',')[6])
     if segment in STOP2dict:
-        reach=int(line.split()[5])
-        linestart=','.join(map(str,line.split()[:3]))
-        linemid=','.join(map(str,line.split()[5:-2]))
-        lineend=line.split()[-1]
+        reach=int(line.split(',')[5])
+        linestart=','.join(map(str,line.split(',')[:3]))
+        linemid=','.join(map(str,line.split(',')[5:-2]))
+        lineend=line.split(',')[-1]
         STAGE=STOP2dict[segment][reach-1]+1
         STOP=STOP2dict[segment][reach-1]
         slope=slopesdict[segment][reach-1]
         ofp.write('%s,%s,%s,%s,%s,%s\n' %(linestart,STAGE,STOP,linemid,slope,lineend))
     else:
-        ofp.write(','.join(map(str,line.split()))+'\n')
+        ofp.write(','.join(map(str,line.split(',')))+'\n')
 ofp.close()
 
 # list of segments to plot
-segs2plot=[2,1081,324,1188,1060,1201,1076,341,1113,1131,949,523,408,469,1064,200,300,400,500,600,700,800,900,1000,1100,1200]
+#segs2plot=[2,1081,324,1188,1060,1201,1076,341,1113,1131,949,523,408,469,1064,200,300,400,500,600,700,800,900,1000,1100,1200]
+segs2plot=segments[::int(np.floor(len(segments)/num_segs2plot))]
 segs2plot=sorted(segs2plot)
 
 pdf=PdfPages(pdffile)
 
 print "saving plots of selected segments to " + pdffile
 for seg in segs2plot:
-    
-    fig, ((ax1, ax2)) = plt.subplots(2,1,sharex=True,sharey=False)
+    if plot_slope:
+        fig, ((ax1, ax2)) = plt.subplots(2,1,sharex=True,sharey=False)
+    else:
+        fig,ax1=plt.subplots(1,1,1)
     ax1.grid(True)
-    ax2.grid(True)
     p1=ax1.plot(seg_distdict[seg],TOPNEWdict[seg],'b',label='land surface')
     p2=ax1.plot(seg_distdict[seg],STOP1dict[seg],'r',label='sfr_utilities')
     if len(seg_distdict[seg])==len(STOP2dict[seg]):
@@ -240,14 +268,16 @@ for seg in segs2plot:
     ax1.set_title('segment ' + str(seg))
     plt.xlabel('distance along segment (ft.)')
     ax1.set_ylabel('Elevation (ft)')
-    p4=ax2.plot(seg_distdict[seg],slopesdict[seg],color='0.75',label='streambed slopes')
-    ax2.set_ylabel('Streambed slope')
-    ax3=ax2.twinx()
-    p5=ax3.plot(seg_distdict[seg],reach_lengthsdict[seg],'b',label='reach length')
-    ax3.set_ylabel('reach length (ft)')
-    handles, labels = ax2.get_legend_handles_labels()
-    ax2.legend(handles,labels)
-    ax3.legend(loc=0) 
+    if plot_slope:
+        ax2.grid(True)
+        p4=ax2.plot(seg_distdict[seg],slopesdict[seg],color='0.75',label='streambed slopes')
+        ax2.set_ylabel('Streambed slope')
+        ax3=ax2.twinx()
+        p5=ax3.plot(seg_distdict[seg],reach_lengthsdict[seg],'b',label='reach length')
+        ax3.set_ylabel('reach length (ft)')
+        handles, labels = ax2.get_legend_handles_labels()
+        ax2.legend(handles,labels)
+        ax3.legend(loc=0) 
 
     pdf.savefig(fig)
 pdf.close()
