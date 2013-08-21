@@ -21,10 +21,10 @@ for line in infile:
         inputs[varname]=var.replace("'","") # strip extra quotes
 
 # Inputs
-infile='STOP_comparison.csv' # from Daniel's CORR-SFR script, or from STOP_compare.py
-GWVmat1=inputs["MAT1"] # GWV SFR input mat1, from COFF-SFR
+infile='STOP_comparison.csv' # from STOP_compare.py
+GWVmat1=inputs["MAT1"] # GWV SFR input mat1, from Finalize_SFR.py
 GWVmat2=inputs["MAT2"] # GWV SFR input mat2
-DEMfile=inputs["Layer1top"] # Layer 1 (model) TOP elevations
+L1top=inputs["Layer1top"] # Layer 1 (model) TOP elevations
 
 # Outputs
 outfile=inputs["MAT1"] # revised GWV SFR input mat1
@@ -33,8 +33,6 @@ end_interp_report='fix_w_DEM_interps.txt' # file recording adjustments made usin
 error_report='fix_w_DEM_errors.txt' # file for reporting 0 slope errors, etc.
 
 # Settings
-nrow=int(inputs["ROWS"])
-ncol=int(inputs["COLUMNS"])
 float_cutoff=-500 # process all segments with reaches that are float_cutoff above land surface
 up_increment=1.0 # if a minimum in the dem is lower than the segment end, new elev. will be end + increment
 dn_increment=0.1 # if end+increment is greater than upstream STOP, decrease by dn_increment until current STOP is less
@@ -44,7 +42,8 @@ plot_slope=False # flag to include plots of streambed slope in output PDF
 num_segs2plot=50 # number of segments to plot (will choose using regular interval)
 
 print "bringing in segment, reach, streamtop, land surface, and residuals..."
-STOP_compare.stopcomp(DEMfile,GWVmat1,nrow,ncol) # generates column text file from MAT1 and Layer1 top elevs
+diffs=STOP_compare.stopcomp(L1top,GWVmat1,'STOP_compare_SFR_utilities.csv') # generates column text file from MAT1 and Layer1 top elevs
+STOP_compare.plot_diffstats(diffs,'Land-surface - SFR comparison after SFR_utilities.py')
 infile_data=np.genfromtxt(infile, delimiter=',',names=True, dtype=None)
 float_inds=np.where(infile_data['DIF']>float_cutoff)[0]
 floaters=infile_data['MSEG'][float_inds]
@@ -244,6 +243,10 @@ for line in input_file[1:]:
     else:
         ofp.write(','.join(map(str,line.split(',')))+'\n')
 ofp.close()
+
+# run STOP_compare again, to get results post fix_w_DEM
+diffs=STOP_compare.stopcomp(L1top,outfile,'STOP_compare_fix_w_DEM.csv')
+STOP_compare.plot_diffstats(diffs,'Land-surface - SFR comparison after fix_w_DEM.py')
 
 # list of segments to plot
 #segs2plot=[2,1081,324,1188,1060,1201,1076,341,1113,1131,949,523,408,469,1064,200,300,400,500,600,700,800,900,1000,1100,1200]
