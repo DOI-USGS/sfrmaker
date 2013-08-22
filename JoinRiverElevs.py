@@ -2,7 +2,7 @@
 # Fienen --> 8/2013
 
 
-import arcpy
+import arcpy, os
 from collections import defaultdict
 
 # get name of field (useful for case issues and appended field names in joined tables, etc)
@@ -15,7 +15,9 @@ def getfield(table,joinname):
             break
     return(joinname)
 
-
+#set workspace
+cpath=os.getcwd()
+arcpy.env.workspace=cpath
 
 # Global Input file for SFR utilities (see also for input instructions)
 infile="SFR_setup.in"
@@ -38,7 +40,7 @@ oldfid = getfield('elevations','OLDFID')
 fid = getfield('rivexp','fid')
 print 'joining new elevations (river_elevs.dbf) to trimmed river lines (river_explode.shp)'
 arcpy.JoinField_management('rivexp',fid,'elevations',oldfid)
-print 'Saving joined results to --> %s' %(ELEV)
-if arcpy.Exists(ELEV):
-    arcpy.Delete_management(ELEV)
-arcpy.CopyFeatures_management('rivexp',ELEV)
+print 'Saving joined results to --> %s' %(os.path.join(cpath,ELEV))
+if arcpy.Exists(os.path.join(cpath,ELEV)):
+    arcpy.Delete_management(os.path.join(cpath,ELEV))
+arcpy.CopyFeatures_management('rivexp',os.path.join(cpath,ELEV))
