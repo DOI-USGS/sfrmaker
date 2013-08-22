@@ -76,6 +76,8 @@ This also makes a backup copy of fix\_comids.txt --> fix\_comids\_backup.txt whi
 ##### 4a) Rerun AssignRiverElev.py
 Rerun and go through any fix\_comids until fix\_comids.txt returns an empty file.
 
+##### 4a) Run JoinRiverElevs.py
+Run this code after steps 2-4 such that fix\_comids.txt is empty. This code joins river\_elevs.dbf with river_explode.shp resulting in the file ELEV as identified in the main input file. This ELEV file is reruies
 
 ##### 5) run intersect.py
 

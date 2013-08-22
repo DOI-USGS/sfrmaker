@@ -227,13 +227,4 @@ outfile.close()
 arcpy.RefreshCatalog(path)
 
 
-# MNF added the joining of elevations to river_explode.shp as indicated in the notes. Saves as ELEV file
-arcpy.MakeTableView_management("river_elevs.dbf",'elevations') # this is like bringing something into the table of contents in ArcMap
-arcpy.MakeFeatureLayer_management('river_explode.shp',"rivexp") 
-oldfid = getfield('elevations','OLDFID')
-fid = getfield('rivexp','fid')
-print 'joining new elevations (river_elevs.dbf) to trimmed river lines (river_explode.shp)'
-arcpy.JoinField_management('rivexp',fid,'elevations',oldfid)
-print 'Saving joined results to --> %s' %(ELEV)
-arcpy.CopyFeatures_management('rivexp',ELEV)
 print "Done! Check fix_comids.txt for segments with multiple starts/ends that must be manually deleted. Then run intersect.py"
