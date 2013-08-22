@@ -3,6 +3,18 @@
 
 
 import arcpy
+from collections import defaultdict
+
+# get name of field (useful for case issues and appended field names in joined tables, etc)
+def getfield(table,joinname):
+    Fields=arcpy.ListFields(table)
+    joinname=joinname.lower()
+    for field in Fields:
+        if joinname in field.name.lower():
+            joinname=field.name
+            break
+    return(joinname)
+
 
 
 # Global Input file for SFR utilities (see also for input instructions)
