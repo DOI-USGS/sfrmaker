@@ -72,14 +72,16 @@ print "have all the comids"
 #does not exist, create on by setting maketable=1
 lcount=0
 maketable=1
+lencomids = len(comids)
 print "Creating to/from routing list..."
 if maketable==1:
     outfile=open("check_network.txt",'w')
+    outfile_FAILS = open("check_network_COM_FAILS.txt",'w')
     for com in comids.iterkeys():
         lcount+=1
-        percentdone=round(100*lcount/(len(comids)),2)
-        print "%s percent done" %(percentdone)
-        theQuery="FROMCOMID= "+str(com)
+        percentdone=100.0*lcount/lencomids
+        print "%4.2f percent done" %(percentdone)
+        theQuery="FROMCOMID= %d" %(com)
         print theQuery
         gp.MakeTableView(FLOW,"temp_table",theQuery)
         result=gp.GetCount("temp_table")
@@ -90,9 +92,9 @@ if maketable==1:
             sel=selected.Next()
             while sel:
                 if sel.TOCOMID in comids:
-                    outfile.write(str(com)+","+str(sel.TOCOMID)+"\n")
+                    outfile.write("%d,%d\n" %(com,sel.TOCOMID))
                 else:
-                    outfile.write(str(com)+","+"99999\n")
+                    outfile.write("%d,99999\n" %(com))
                 sel=selected.Next()
         else:
             theQuery="TOCOMID= "+str(com)
@@ -106,17 +108,21 @@ if maketable==1:
                 sel=selected.Next()
                 while sel:
                     if sel.FROMCOMID in comids:
-                        outfile.write(str(sel.FROMCOMID)+","+str(com)+"\n")
+                        outfile.write("%d,%d\n" %(sel.FROMCOMID,com))
                     else:
-                        outfile.write("99999,"+str(com)+"\n")
+                        outfile.write("99999,%d\n" %(com))
                     sel=selected.Next()
             else:
-                outfile.write(str(com)+",check routing, COMID in neither FROM or TO\n")
-                quit()
+                outfile_FAILS.write("%d,check routing, COMID in neither FROM or TO\n" %(com))
     try:
         outfile.close()
     except:
         print "problem closing outfile\n"
+        exit()
+    try:
+        outfile_FAILS.close()
+    except:
+        print "problem closing outfile_FAILS\n"
         exit()
 
 fromCOMIDlist=defaultdict(list)
