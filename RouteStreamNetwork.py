@@ -129,32 +129,30 @@ fromCOMIDlist=defaultdict(list)
 
 #read in the file with information for clipped segments at the boundary
 print "Processing clipped segments along domain boundary..."
-CLIP=open("boundaryClipsRouting.txt",'r')
-CLIP.readline()  #header
+CLIP=open("boundaryClipsRouting.txt",'r').readlines()
+header = CLIP.pop(0) #header
 clipto=dict()
 clipfrom=dict()
 for line in CLIP:
-    vals=re.split(",",line)
-    fromin=int(vals[0])
-    toin=int(vals[1])
+    vals=line.strip().split(',')
+    fromin=int(float(vals[0]))
+    toin=int(float(vals[1]))
     if fromin==99999:
         clipto[toin]=1
     if toin==99999:
         clipfrom[fromin]=1
-CLIP.close()
 
-infile=open("check_network.txt",'r')
+infile=open("check_network.txt",'r').readlines()
 
 for line in infile:
-    vals=re.split(",",line)
-    fromin=int(vals[0])
-    toin=int(vals[1])
+    vals=line.strip().split(",")
+    fromin=int(float(vals[0]))
+    toin=int(float(vals[1]))
     if not toin in clipto:
         if not fromin in clipfrom:
             fromCOMIDlist[fromin].append(toin)
         else:
             fromCOMIDlist[fromin].append(99999)
-infile.close()
 #now have full from->to table as a dictionary of lists
 #go through river_elev file COMID by COMID and check
 #that next downstream COMID has lower river elevation
