@@ -90,6 +90,7 @@ Run this code after steps 2-4 such that fix\_comids.txt is empty. This code join
           - boundaryclipsrouting.txt (for segments intersecting model boundary)
           - 'NHD_intersect_edited.shp'
 
+Look at boundary_manualfix_issues.txt output file and find COMIDs that leave and reenter the domain. Fix them in Flowlines (from input file) and in river_explode.py.
 
 ##### 6) run RouteStreamNetwork.py 
 (note: this may take hours to run with large models/dense stream networks)
@@ -117,7 +118,7 @@ Run this code after steps 2-4 such that fix\_comids.txt is empty. This code join
           - Else:
                - 99999, TOCOMID is written (this will happen if stream flows into grid)
 
-##### 6a) (if necessary) run Fix_flagged_comids.py 
+##### 6a) (if necessary) run Fix\_flagged\_comids.py 
 (this program still needs some work):
 
      Handles the segments in flagged_comids.txt (e.g., making elevations consistent with routing) by:
