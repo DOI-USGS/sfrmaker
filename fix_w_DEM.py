@@ -235,13 +235,13 @@ for line in input_file[1:]:
         reach=int(line.split(',')[5])
         linestart=','.join(map(str,line.split(',')[:3]))
         linemid=','.join(map(str,line.split(',')[5:-2]))
-        lineend=line.split(',')[-1]
+        lineend=line.strip().split(',')[-1]
         STAGE=STOP2dict[segment][reach-1]+1
         STOP=STOP2dict[segment][reach-1]
         slope=slopesdict[segment][reach-1]
         ofp.write('%s,%s,%s,%s,%s,%s\n' %(linestart,STAGE,STOP,linemid,slope,lineend))
     else:
-        ofp.write(','.join(map(str,line.split(',')))+'\n')
+        ofp.write(line)
 ofp.close()
 
 # run STOP_compare again, to get results post fix_w_DEM

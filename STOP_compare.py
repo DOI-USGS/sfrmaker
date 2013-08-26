@@ -10,7 +10,7 @@ def stopcomp(L1top,MAT1,outfile):
     # L1top= ascii matrix export of MODFLOW top elevations (n columns x n rows; no wrapping!)
     # Mat1= output from HWR's SFR_utilities script with SFR reach information
     
-    print "Getting model grid information..."
+    # get grid info
     temp=open(L1top).readlines()
     ncols=len(temp[0].strip().split())
     nrows=len(temp)
@@ -18,13 +18,14 @@ def stopcomp(L1top,MAT1,outfile):
     topdata=np.fromfile(L1top,sep=' ')
     topdata=np.reshape(topdata,(nrows,ncols))
     
+    # build dict of tops by cellnum
     L1tops=dict()
     for r in range(nrows):
         for c in range(ncols):
             cellnum=r*ncols+c+1
             L1tops[cellnum]=topdata[r,c]
     
-    
+    # bring in SFR info
     MAT1data=np.genfromtxt(MAT1, delimiter=',',names=True,dtype=None)
     infile_data=defaultdict(list)
     for i in range(len(MAT1data)):
@@ -83,39 +84,3 @@ def plot_diffstats(diffs,title):
     outfile.savefig()
     outfile.close()
 
-
-
-'''
-L1tops=dict()
-for r in range(nrows):
-    for c in range(ncols):
-        cellnum=r*ncols+c+1
-        L1tops[cellnum]=topdata[r,c]
-    
-    DEM=open(L1top,'r')
-    gwv=dict()
-    for i in range(0,nrow):
-        line=DEM.readline()
-        vals=re.split('\s+',line.strip())
-        for j in range(0,ncol):
-            cellnum=(i*ncol)+(j+1)
-            gwv[cellnum]=float(vals[j])
-    
-    GWVmat1_data=np.genfromtxt(MAT1, delimiter=',',names=True,dtype=None)
-    
-    infile_data=defaultdict(list)
-    for i in range(len(GWVmat1_data)):
-        row,column=GWVmat1_data['row'][i],GWVmat1_data['column'][i]
-        cellnum=(row-1)*ncol+column
-        infile_data['MSEG'].append(GWVmat1_data['segment'][i])
-        infile_data['STOP'].append(GWVmat1_data['top_streambed'][i])
-        infile_data['TOPNEW'].append(gwv[cellnum])
-        infile_data['DIF'].append(gwv[cellnum]-GWVmat1_data['top_streambed'][i])
-    ofp=open('STOP_comparison.csv','w')
-    ofp.write('MSEG,STOP,TOPNEW,DIF\n')
-    for i in range(len(infile_data['MSEG'])):
-        ofp.write("%s,%s,%s,%s\n" %(infile_data['MSEG'][i],infile_data['STOP'][i],infile_data['TOPNEW'][i],infile_data['DIF'][i]))
-    ofp.close()
-'''
-
-    
