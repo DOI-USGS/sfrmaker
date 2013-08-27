@@ -187,7 +187,7 @@ for com in comids.iterkeys():
     i=0
     while i<len(fromCOMIDlist[com]):
         dwnstrm=fromCOMIDlist[com][i]
-        theQuery="COMID= "+str(dwnstrm)
+        theQuery="COMID= %d" %(dwnstrm)
         gp.SelectLayerByAttribute("flow_lyr","NEW_SELECTION",theQuery)
         gp.MakeFeatureLayer("flow_lyr","temp_lyr")
         selected=gp.SearchCursor("temp_lyr")
@@ -202,7 +202,7 @@ for com in comids.iterkeys():
             sel=selected.Next()
         del selected
         if(dwdnmax > (minelev+0.01)):
-            outfile.write(str(com)+", "+str(dwnstrm)+","+str(minelev)+","+str(dwdnmax)+"\n")
+            outfile.write("%d,%d,%f,%f\n" %(com,dwnstrm,minelev,dwdnmax))
             flag=1
         i=i+1
     if(flag == 0):
