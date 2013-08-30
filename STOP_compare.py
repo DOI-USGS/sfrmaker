@@ -46,6 +46,38 @@ def stopcomp(L1top,MAT1,outfile):
     
     return(diffs)
     
+def getbottoms(L1top, botsfile,MAT1):
+    # L1top= ascii matrix export of MODFLOW top elevations (n columns x n rows; no wrapping!)
+    # Mat1= output from HWR's SFR_utilities script with SFR reach information
+    botsfile='Columbia_bots_corr2.dat'
+    
+    # get grid info
+    temp=open(L1top).readlines()
+    ncols=len(temp[0].strip().split())
+    nrows=len(temp)
+    
+    botdata=np.fromfile(botsfile,sep=' ')
+    nlayers=int(len(botdata)/float(nrows*ncols))
+    botdata=np.reshape(botdata,(nlayers,nrows,ncols))
+    
+    # build dict of bottoms by cellnum
+    Bottoms=dict()
+    for r in range(nrows):
+        for c in range(ncols):
+            cellnum=r*ncols+c+1
+            Bottoms[cellnum]=botdata[-1,r,c] 
+    
+    # bring in SFR info
+    MAT1data=np.genfromtxt(MAT1, delimiter=',',names=True,dtype=None)
+    Bottomsdict=defaultdict(list)
+    for i in range(len(MAT1data)):
+        row,column=MAT1data['row'][i],MAT1data['column'][i]
+        cellnum=(row-1)*ncols+column
+        segment=MAT1data['segment'][i]
+        reach=MAT1data['reach'][i]
+        Bottomsdict[segment].append(Bottoms[cellnum])
+    return(Bottomsdict)
+    
     
     # comparative summary statistics
 def plot_diffstats(diffs,title):

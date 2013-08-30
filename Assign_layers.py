@@ -5,7 +5,7 @@ from collections import defaultdict
 
 # Input files
 botsfile='Columbia_bots_corr2.DAT' # GWV mat with bottom elevations for all layers
-L1top='L1top.DAT' # GWV mat with top elevations for layer 1
+L1top='L1TOP.DAT' # GWV mat with top elevations for layer 1
 SFRmat1='SFR_GWVmat1.txt' # SFR matrix 1 from Howard Reeve's scripts
 
 # Settings
@@ -31,7 +31,7 @@ SFRinfo=np.genfromtxt(SFRmat1,delimiter=',',names=True,dtype=None)
 
 print "Assigning layers to SFR cells..."
 below_bottom=open('below_bot.csv','w')
-below_bottom.write('SFRbot,ModelBot,Land_surf,cellnum\n')
+below_bottom.write('SFRbot,ModelBot,Land_surf,cellnum,segment\n')
 New_Layers=[]
 for i in range(len(SFRinfo)):
     r=int(SFRinfo['row'][i])
@@ -46,7 +46,7 @@ for i in range(len(SFRinfo)):
             else:
                 print 'Streambottom elevation=%s, Model bottom=%s at row %s, column %s, cellnum %s' %(STOP-thick-buff,cellbottoms[-1],r,c,(r-1)*ncols+c)
                 print 'Land surface is %s' %(topdata[r-1,c-1])
-                below_bottom.write('%s,%s,%s,%s\n' %(STOP-thick-buff,cellbottoms[-1],topdata[r-1,c-1],(r-1)*ncols+c))
+                below_bottom.write('%s,%s,%s,%s,%s\n' %(STOP-thick-buff,cellbottoms[-1],topdata[r-1,c-1],(r-1)*ncols+c,SFRinfo['segment'][i]))
         else:
             New_Layers.append(b+1)
             break
