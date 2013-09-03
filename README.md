@@ -168,23 +168,23 @@ Look at boundary_manualfix_issues.txt output file and find COMIDs that leave and
 	- can also generate a plot of segments that go below the model bottom, but need to run Assign_Layers.py first to get below_bot.csv
 	
 	
-######	Dependencies:
-     	STOP_compare.py (generates columns of model top elev, SFR streambed top, and their differece, indexed by segment)
-     	Fix_segment_ends.py  (Adjusts segment end elevations within the constraints of up/down segment min/max elevations)
-	Plot_segment_profiles.py  (Has generic code to plot SFR segments with land surface or any other elevation)
-	pandas (non-standard module of Python- used to quickly sort 50 biggest floating and incised reaches; this could probably be done by numpy)
+	Dependencies:
+		-STOP_compare.py (generates columns of model top elev, SFR streambed top, and their differece, indexed by segment)
+		-Fix_segment_ends.py  (Adjusts segment end elevations within the constraints of up/down segment min/max elevations)
+		-Plot_segment_profiles.py  (Has generic code to plot SFR segments with land surface or any other elevation)
+		-pandas (non-standard module of Python- used to quickly sort 50 biggest floating and incised reaches; this could probably be done by numpy)
+		
+	Inputs:
+		- GWVmat1 (from SFR_utilities.py)
+		- GWVmat2 (from SFR_utilties.py)
+		- ascii array of model top elevations
+		- ascii multi-layer array of model bottom elevations
 	
-     Inputs:
-	- GWVmat1 (from SFR_utilities.py)
-	- GWVmat2 (from SFR_utilties.py)
-	- ascii array of model top elevations
-	- ascii multi-layer array of model bottom elevations
-
-     Outputs:
-     	- GWVmat1
-     	- PDF of profiles for selected SFR segments compared to land surface
-     	- fix_w_DEM_interps.txt (file recording adjustments made to reaches that are initially below the segment end)
-     	- fix_w_DEM_errors.txt (reports 0-slope errors, etc.)
+	Outputs:
+		- GWVmat1
+		- PDF of profiles for selected SFR segments compared to land surface
+		- fix_w_DEM_interps.txt (file recording adjustments made to reaches that are initially below the segment end)
+		- fix_w_DEM_errors.txt (reports 0-slope errors, etc.)
 
 ##### 11) run Assign_Layers.py
 
