@@ -9,13 +9,8 @@ def get_sinkers(infile,segment_col):
     
     
 def plot_profiles(segs2plot,seg_distdict,TOPNEWdict,STOP2dict,Bottomsdict,pdffile):
-#segs2plot=[2,1081,324,1188,1060,1201,1076,341,1113,1131,949,523,408,469,1064,200,300,400,500,600,700,800,900,1000,1100,1200]
-#segs2plot=segments[::int(np.floor(len(segments)/num_segs2plot))]
-    segs2plot=get_sinkers('below_bot.csv','segment')
-    segs2plot=sorted(segs2plot)
     
     pdf=PdfPages(pdffile)
-    
     print "saving plots of selected segments to " + pdffile
     for seg in segs2plot:
         

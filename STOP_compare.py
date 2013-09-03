@@ -35,7 +35,6 @@ def stopcomp(L1top,MAT1,outfile):
         infile_data['STOP'].append(MAT1data['top_streambed'][i])
         infile_data['TOPNEW'].append(L1tops[cellnum])
         infile_data['DIF'].append(L1tops[cellnum]-MAT1data['top_streambed'][i])
-    diffs=infile_data['DIF']
     
     # write output file comparing L1top and SFR elevations
     ofp=open(outfile,'w')
@@ -44,7 +43,7 @@ def stopcomp(L1top,MAT1,outfile):
         ofp.write("%s,%s,%s,%s\n" %(infile_data['MSEG'][i],infile_data['STOP'][i],infile_data['TOPNEW'][i],infile_data['DIF'][i]))
     ofp.close()    
     
-    return(diffs)
+    return(infile_data)
     
 def getbottoms(L1top, botsfile,MAT1):
     # L1top= ascii matrix export of MODFLOW top elevations (n columns x n rows; no wrapping!)

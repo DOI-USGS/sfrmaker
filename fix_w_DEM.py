@@ -8,6 +8,7 @@ from matplotlib.backends.backend_pdf import PdfPages
 import STOP_compare
 import Fix_segment_ends
 import Plot_segment_profiles
+import pandas as pd # this is just used to sort segments for plotting, prob. can be done in np
 import pdb
 
 # Global Input file for SFR utilities
@@ -47,8 +48,8 @@ plot_slope=False # flag to include plots of streambed slope in output PDF
 num_segs2plot=50 # number of segments to plot (will choose using regular interval)
 
 print "bringing in segment, reach, streamtop, land surface, and residuals..."
-diffs=STOP_compare.stopcomp(L1top,GWVmat1,'STOP_compare_SFR_utilities.csv') # generates column text file from MAT1 and Layer1 top elevs
-STOP_compare.plot_diffstats(diffs,'Land-surface - SFR comparison after SFR_utilities.py')
+Diffs=STOP_compare.stopcomp(L1top,GWVmat1,'STOP_compare_SFR_utilities.csv') # generates column text file from MAT1 and Layer1 top elevs
+STOP_compare.plot_diffstats(Diffs['DIF'],'Land-surface - SFR comparison after SFR_utilities.py')
 infile_data=np.genfromtxt(infile, delimiter=',',names=True, dtype=None)
 float_inds=np.where(infile_data['DIF']>float_cutoff)[0]
 floaters=infile_data['MSEG'][float_inds]
@@ -287,8 +288,6 @@ ofp.close()
 ofp2.close()
 
 
-
-
 print "saving new streamtop elevations and slopes to GWV SFR mat. 1 file"
 input_file=open(GWVmat1old).readlines()
 ofp=open(outfile,'w')
@@ -310,19 +309,29 @@ for line in input_file[1:]:
 ofp.close()
 
 # run STOP_compare again, to get results post fix_w_DEM
-diffs=STOP_compare.stopcomp(L1top,outfile,'STOP_compare_fix_w_DEM.csv')
-STOP_compare.plot_diffstats(diffs,'Land-surface - SFR comparison after fix_w_DEM.py')
-
-# list of segments to plot
-#segs2plot=[2,1081,324,1188,1060,1201,1076,341,1113,1131,949,523,408,469,1064,200,300,400,500,600,700,800,900,1000,1100,1200]
-segs2plot=segments[::int(np.floor(len(segments)/num_segs2plot))]
-segs2plot=sorted(segs2plot)
-
-pdf=PdfPages(pdffile)
+Diffs=STOP_compare.stopcomp(L1top,outfile,'STOP_compare_fix_w_DEM.csv')
+STOP_compare.plot_diffstats(Diffs['DIF'],'Land-surface - SFR comparison after fix_w_DEM.py')
 
 # profile plots showing where SFR elev goes below model bottom
 sinkers=Plot_segment_profiles.get_sinkers('below_bot.csv','segment')
 Plot_segment_profiles.plot_profiles(sinkers,seg_distdict,TOPNEWdict,STOP2dict,Bottomsdict,'sinkers.pdf')
+
+# profiles of 50 worst floaters
+df=pd.DataFrame(Diffs['DIF'],index=Diffs['MSEG'])
+Floats=df.sort(columns=0,ascending=False)
+floats=list(np.unique(list(Floats[0][0:50].index)))
+Plot_segment_profiles.plot_profiles(floats,seg_distdict,TOPNEWdict,STOP2dict,Bottomsdict,'floaters.pdf')
+
+# profiles of 50 worst incised
+Incised=df.sort(columns=0,ascending=True)
+incised=list(np.unique(list(Incised[0][0:50].index)))
+Plot_segment_profiles.plot_profiles(incised,seg_distdict,TOPNEWdict,STOP2dict,Bottomsdict,'incised.pdf')
+
+# list of segments to plot
+segs2plot=segments[::int(np.floor(len(segments)/num_segs2plot))]
+segs2plot=sorted(segs2plot)
+
+pdf=PdfPages(pdffile)
 
 print "saving plots of selected segments to " + pdffile
 for seg in segs2plot:
