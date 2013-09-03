@@ -157,8 +157,37 @@ Look at boundary_manualfix_issues.txt output file and find COMIDs that leave and
 ##### 8) run Finalize_SFR.py
 
 ##### 9) run SFR_utilities.py,  
-     improves any segment start/end elevations where there is room for improvement.
      
 ##### 10) run Fix_w_DEM.py
+	- runs Fix_segment_ends.py to adjust segment end elevations to match model TOP as closely as possible (minus an adjustable incising parameter)
+	- checks for backward routing in segment ends
+	- adjust segment interior reaches to model TOP, as long as they are monotonically downhill and don't go below segment end
+	- uses linear interpolation otherwise
+	- generates PDF files showing comparative statistics for SFR vs. model top before and after
+	- generates PDF files with comparative plots of SFR before and after, with model top, also 50 worst floating and incised segments
+	- can also generate a plot of segments that go below the model bottom, but need to run Assign_Layers.py first to get below_bot.csv
+	
+	
+######	Dependencies:
+     	STOP_compare.py (generates columns of model top elev, SFR streambed top, and their differece, indexed by segment)
+     	Fix_segment_ends.py  (Adjusts segment end elevations within the constraints of up/down segment min/max elevations)
+	Plot_segment_profiles.py  (Has generic code to plot SFR segments with land surface or any other elevation)
+	pandas (non-standard module of Python- used to quickly sort 50 biggest floating and incised reaches; this could probably be done by numpy)
+	
+     Inputs:
+	- GWVmat1 (from SFR_utilities.py)
+	- GWVmat2 (from SFR_utilties.py)
+	- ascii array of model top elevations
+	- ascii multi-layer array of model bottom elevations
+
+     Outputs:
+     	- GWVmat1
+     	- PDF of profiles for selected SFR segments compared to land surface
+     	- fix_w_DEM_interps.txt (file recording adjustments made to reaches that are initially below the segment end)
+     	- fix_w_DEM_errors.txt (reports 0-slope errors, etc.)
+
+##### 11) run Assign_Layers.py
+
+	
 
 
