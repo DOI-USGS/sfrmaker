@@ -40,7 +40,7 @@ for line in infile:
 CELLS=inputs["CELLS"]
 INTERSECT=inputs["INTERSECT"]
 NHD=inputs["NHD"]  # from intersect.py
-VAA=inputs["VAA"]
+VAA=inputs["PlusflowVAA"]
 
 try:
     OUT=open("routed_cells.txt",'w')
@@ -53,7 +53,7 @@ OUT.write("fromcell, tocell\n")
 
 
 path=os.getcwd()
-gp=arcgisscripting.create(9.3)
+gp=arcgisscripting.create()
 gp.Workspace=path
 
 #make a dictionary of hydroseq, uphydroseq, dnhydroseq numbers by COMID
@@ -92,19 +92,20 @@ toCOMIDlist=defaultdict(list)
 #need to correct routing lists for segments
 #that intersected the boundary
 #read in the file with information for clipped segments at the boundary
-CLIP=open("boundaryClipsRouting.txt",'r')
-CLIP.readline()  #header
+print "Processing clipped segments along domain boundary..."
+CLIP=open("boundaryClipsRouting.txt",'r').readlines()
+header = CLIP.pop(0) #header
 clipto=dict()
 clipfrom=dict()
 for line in CLIP:
-    vals=re.split(",",line)
-    fromin=int(vals[0])
-    toin=int(vals[1])
+    vals=line.strip().split(',')
+    fromin=int(float(vals[0]))
+    toin=int(float(vals[1]))
     if fromin==99999:
         clipto[toin]=1
     if toin==99999:
         clipfrom[fromin]=1
-CLIP.close()
+
 
 infile=open("check_network.txt",'r')
 line=infile.readline()
@@ -151,9 +152,10 @@ icount=0
 for comid in sortedlist:
     icount+=1
     SFRseq=SFRseq+1
+    print SFRseq
     count=count+1
     #find all the intersected cells with the same comid
-    theQuery="COMID= "+str(comid)
+    theQuery="COMID= %d" %(comid)
     print theQuery
     gp.MakeFeatureLayer(INTERSECT,"temp_lyr",theQuery)
     #make hashes of starting and ending x,y and
@@ -236,7 +238,10 @@ for comid in sortedlist:
     orderedFID.append(endingFID[0])
     
     #now the COMID is ordered
-    
+    if orderedFID[0]==orderedFID[-1]:
+        #comid starts and ends in same cell, doesn't help with cell routing, skip
+        print "starts and ends in same cell %d" % comid
+        continue    
     if(top[orderedFID[0]] < top[orderedFID[-1]]):
         orderedFID.reverse()
     elif(top[orderedFID[0]] == top[orderedFID[-1]]):
@@ -262,6 +267,7 @@ for comid in sortedlist:
             gp.MakeFeatureLayer(NHD,"temp_nhd_lyr",theQuery)
             nhds=gp.SearchCursor("temp_nhd_lyr")
             nhd=nhds.Next()
+            print theQuery
             checkelev=nhd.MINELEVSMO
             del nhds
             flag=0
