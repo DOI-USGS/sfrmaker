@@ -67,7 +67,9 @@ which produces a table of reach midpoint elevations via linear interpolation fro
                     fix_comids.txt      # list of comids with two or more sets of endpoints.  These are usually segments that meander out of and then back into the grid.
 
 ##### 3) manually delete flowlines and corresponding gridcell polygons
-for segments that have multiple starts/ends (e.g. those that meander out of the grid and back in). These should be deleted from river_explode.shp. 
+for segments that have multiple starts/ends (e.g. those that meander out of the grid and back in). They are indicated in fix\_comids.txt.
+
+These should be deleted from river_explode.shp. 
 
 ##### 4) run CleanupRiverCells.py,
 which trims down the river cells shapefiles to reflect the deletiosn that were made in the previous step deleting COMIDs from river_explode.shp
@@ -76,10 +78,7 @@ This also makes a backup copy of fix\_comids.txt --> fix\_comids\_backup.txt whi
 ##### 4a) Rerun AssignRiverElev.py
 Rerun and go through any fix\_comids until fix\_comids.txt returns an empty file.
 
-##### 4a) Run JoinRiverElevs.py
-Run this code after steps 2-4 such that fix\_comids.txt is empty. This code joins river\_elevs.dbf with river_explode.shp resulting in the file ELEV as identified in the main input file. This ELEV file is reruies
-
-##### 5) run intersect.py
+##### 5a) run intersect.py
 
      Inputs:
           - flowlines clipped from previous step
@@ -90,8 +89,14 @@ Run this code after steps 2-4 such that fix\_comids.txt is empty. This code join
           - boundaryclipsrouting.txt (for segments intersecting model boundary)
           - 'NHD_intersect_edited.shp'
 
-Look at boundary_manualfix_issues.txt output file and find COMIDs that leave and reenter the domain. Fix them in Flowlines (from input file) and in river_explode.py.
+Look at boundary\_manualfix\_issues.txt output file and find COMIDs that leave and reenter the domain. Fix them in Flowlines (from input file) and in river\_explode.py (if necessary).
 
+Then rerun  CleanupRiverCells.py (if edited any of river\_explode.py) and intersect.py.
+
+Once runs through with no manual fix messages, move on.
+
+##### 5b) Run JoinRiverElevs.py
+Run this code after steps 2-4 such that fix\_comids.txt is empty. This code joins river\_elevs.dbf with river_explode.shp resulting in the file ELEV as identified in the main input file. This ELEV file is required later by RouteStreamNetwork.py
 ##### 6) run RouteStreamNetwork.py 
 (note: this may take hours to run with large models/dense stream networks)
 
@@ -154,7 +159,7 @@ Look at boundary_manualfix_issues.txt output file and find COMIDs that leave and
           - reach_ordering.txt
           - routed_cells.txt
 
-##### 8) run Finalize_SFR.py
+##### 8) run Finalize_SFR2.py
 
 ##### 9) run SFR_utilities.py,  
      

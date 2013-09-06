@@ -204,7 +204,7 @@ dominantcomid=dict()
 estwidth=defaultdict(list)
 for cellnum in row:
     for i in range(0,len(comid[cellnum])):
-         estwidth[cellnum].append(0.1193*math.pow(1000*arbolate[comid[cellnum][i]],0.5032)) # added 1000 to convert from km to m (widths were too small otherwise)
+        estwidth[cellnum].append(0.1193*math.pow(1000*arbolate[comid[cellnum][i]],0.5032)) # added 1000 to convert from km to m (widths were too small otherwise)
 
     biggest=0.
     for i in range(0,len(comid[cellnum])):
