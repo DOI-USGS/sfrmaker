@@ -149,6 +149,11 @@ sortedtuples.sort(key=itemgetter(1), reverse=True)
 sortedlist=map(itemgetter(0),sortedtuples)
 
 icount=0
+needfix = 0 # flag regarding whether or not manual fixes will be needed
+outfixfilename = 'COMIDS_to_fixRRC.dat'
+ofpfix = open(outfixfilename,'w')
+ofpfix.write('The following COMIDs require manual attention.\nFix them in check_network.txt.\n')
+ofpfix.write('Then rerun RouteRiverCells.py.\n' + '#'*42 + '\n')
 for comid in sortedlist:
     icount+=1
     SFRseq=SFRseq+1
@@ -227,8 +232,8 @@ for comid in sortedlist:
         gp.refreshcatalog(path)
         del gp
         print "manually fix COMID =" + str(comid)
-        quit()
-        
+        ofpfix.write("manually fix COMID = %d\n"  %int(comid))
+        needfix +=1
     orderedFID=[]
     orderedFID.append(startingFID[0])
     i=1
@@ -342,6 +347,11 @@ for comid in sortedlist:
         RCH.write(",".join(map(str,[cellnumber[orderedFID[i]],comid,hydroseqused[comid],uphydroseq[comid],dnhydroseq[comid],SFRseq,i+1]))+"\n")
     percentdone=round(100*icount/len(sortedlist),2)
     print "%s %% done" %(percentdone)
+ofpfix.close()
+if needfix:
+    print 'Manual fixes of some COMIDs required -->'
+    print 'see %s for COMIDs and instruction.' %(outfixfilename)
+    print 'then rern RouteRiverCells.py'
 OUT.close()
 RCH.close()
 gp.refreshcatalog(path)
