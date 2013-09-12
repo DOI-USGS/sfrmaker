@@ -162,9 +162,10 @@ Run this code after steps 2-4 such that fix\_comids.txt is empty. This code join
 ##### 8) run Finalize_SFR2.py
 
 ##### 9) run SFR_utilities.py,  
+
      
-##### 10) run Fix_w_DEM.py
-	- runs Fix_segment_ends.py to adjust segment end elevations to match model TOP as closely as possible (minus an adjustable incising parameter)
+##### 10) run Fix\_w\_DEM.py
+	- runs Fix\_segment\_ends.py to adjust segment end elevations to match model TOP as closely as possible (minus an adjustable incising parameter)
 	- checks for backward routing in segment ends
 	- adjust segment interior reaches to model TOP, as long as they are monotonically downhill and don't go below segment end
 	- uses linear interpolation otherwise

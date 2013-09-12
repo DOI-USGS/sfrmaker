@@ -522,10 +522,10 @@ if __name__ == '__main__':
                 if cortop[nextcell] < cortop[cellnum]:
                     cortop[cellnum]=cortop[nextcell]+0.1*(cortop[cellnum]-cortop[nextcell])
                     if cortop[cellnum] > gwv[cellnum]:
-                         cortop[cellnum]=cortop[nextcell]+0.001*(cortop[cellnum]-cortop[nextcell])
+                        cortop[cellnum]=cortop[nextcell]+0.001*(cortop[cellnum]-cortop[nextcell])
                     if cortop[cellnum] > gwv[cellnum]:
-                         segmentstatus[segment][sortedreaches[-1]]=1
-                         #fixSegmentFloat=True #might need to move fixSegment Float switch up from line 499
+                        segmentstatus[segment][sortedreaches[-1]]=1
+                        #fixSegmentFloat=True #might need to move fixSegment Float switch up from line 499
                     else:
                         segmentstatus[segment][sortedreaches[-1]]=0
                     fixSegmentFloat=True
