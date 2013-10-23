@@ -24,10 +24,6 @@ for line in infile:
         inputs[varname]=var.replace("'","") # strip extra quotes
 
 # Inputs
-<<<<<<< HEAD
-=======
-infile='STOP_compare_SFR_utilities.csv' # from STOP_compare.py
->>>>>>> parent of e9ab5ff... Minor bugfixes
 GWVmat1=inputs["MAT1"] # GWV SFR input mat1, from Finalize_SFR.py
 GWVmat2=inputs["MAT2"] # GWV SFR input mat2
 L1top=inputs["Layer1top"] # Layer 1 (model) TOP elevations
@@ -62,15 +58,9 @@ maxsearch=1 # number of cells to search in, in each direction, to find downstrea
 backwards_routing_tol=0.1 # amount of backwards routing that will be tolerated (model units) needed because of floating point precision issues with small or flat gradients
 
 print "bringing in segment, reach, streamtop, land surface, and residuals..."
-<<<<<<< HEAD
 Diffs=STOP_compare.stopcomp(L1top,GWVmat1,STOP_comp_SFR_utilities) # generates column text file from MAT1 and Layer1 top elevs
 STOP_compare.plot_diffstats(Diffs['DIF'],'Land-surface - SFR comparison after SFR_utilities.py')
 infile_data=np.genfromtxt(STOP_comp_SFR_utilities, delimiter=',',names=True, dtype=None)
-=======
-Diffs=STOP_compare.stopcomp(L1top,GWVmat1,'STOP_compare_SFR_utilities.csv') # generates column text file from MAT1 and Layer1 top elevs
-STOP_compare.plot_diffstats(Diffs['DIF'],'Land-surface - SFR comparison after SFR_utilities.py')
-infile_data=np.genfromtxt(infile, delimiter=',',names=True, dtype=None)
->>>>>>> parent of e9ab5ff... Minor bugfixes
 float_inds=np.where(infile_data['DIF']>float_cutoff)[0]
 floaters=infile_data['MSEG'][float_inds]
 segments=list(np.unique(floaters))
@@ -81,53 +71,9 @@ GWVmat2_data=np.genfromtxt(GWVmat2, delimiter=',',names=True,dtype=None)
 
 # make backups of previous MAT1 and MAT2
 GWVmat1old=inputs["MAT1"]+"_old_SFR_utilities"
-<<<<<<< HEAD
 GWVmat2old=inputs["MAT2"]+"_old"
 os.rename(inputs["MAT1"],GWVmat1old)
 os.rename(inputs["MAT2"],GWVmat2old)
-=======
-os.rename(inputs["MAT1"],GWVmat1old)
-
-Bottomsdict=STOP_compare.getbottoms(L1top,bots,GWVmat1old)
-upSEGs=Fix_segment_ends.get_upSEGs(GWVmat2_data)
-
-
-print "fixing segment end elevations to minimze floating and incising..."
-nbackwards=0 # number of segments that are routed backwards
-ofp3=open('Fixed_segment_ends.csv','w') # records changes made to segment end elevations
-ofp3.write('segment,old_start,old_end,upSEG,dnSEG,up_elev,dn_elev,new_start,new_end\n')
-Seg_ends=defaultdict(list)
-
-for segnum in sorted(segments):
-    print str(segnum)
-    seg_inds=list(np.where(infile_data['MSEG']==segnum)[0])
-    segment=infile_data[seg_inds]
-    
-    if len(segment)<2: # no interior points; keep ending elevations
-
-        start,end,nbackwards=Fix_segment_ends.fixends(segnum,segment['STOP'],segment['TOPNEW'],upSEGs,Seg_ends,GWVmat1_data,GWVmat2_data,headwater_incise,ofp3,nbackwards)
-        Seg_ends[segnum]=[start]
-        continue
-    
-    print 'fixing segment end elevations...'
-    start,end,nbackwards=Fix_segment_ends.fixends(segnum,segment['STOP'],segment['TOPNEW'],upSEGs,Seg_ends,GWVmat1_data,GWVmat2_data,headwater_incise,ofp3,nbackwards)    
-    Seg_ends[segnum]=[start,end]
-    
-ofp3.close()
-
-# final check for backwards routing in segment ends
-print "Checking for backwards routing..."
-nbackwards_final,nbackwards_final_file=Fix_segment_ends.check4backwards_routing(Seg_ends,GWVmat2_data)
-if nbackwards>0:
-    print "%s segments had end elevations that were initially backward during correction..." %(nbackwards)
-    if nbackwards_final==0:
-        print "these were all fixed."
-    else:
-        print "Warning! %s segments had final end elevations that were backwards!!" %(nbackwards_final)
-        print "See %s" %(nbackwards_final_file)
-
-
->>>>>>> parent of e9ab5ff... Minor bugfixes
 
 
 if Fix_routing:
@@ -246,17 +192,13 @@ for segnum in sorted(segments):
     reach_lengths=list(GWVmat1_data['length_in_cell'][seg_indsGWVmat])
     NHD_slopes=list(GWVmat1_data['bed_slope'][seg_indsGWVmat])  
     
-<<<<<<< HEAD
     # for segments with one reach
-=======
->>>>>>> parent of e9ab5ff... Minor bugfixes
     if len(segment)<2: # no interior points; keep ending elevations
         STOP1dict[segnum] = list(segment['STOP'])
         seg_distdict[segnum] = seg_distances
         reach_lengthsdict[segnum] = reach_lengths
         TOPNEWdict[segnum] = list(segment['TOPNEW'])
         slopesdict[segnum]=NHD_slopes
-<<<<<<< HEAD
         
         if not Fix_ends:
             STOP2dict[segnum]=STOP1dict[segnum]
@@ -273,26 +215,6 @@ for segnum in sorted(segments):
         STOP2.append(Seg_ends[segnum][0])
         end=Seg_ends[segnum][-1]
     
-=======
-        STOP2dict[segnum]=Seg_ends[segnum]
-        #start,end,nbackwards=Fix_segment_ends.fixends(segnum,segment['STOP'],segment['TOPNEW'],upSEGs,STOP2dict,GWVmat1_data,GWVmat2_data,headwater_incise,ofp3,nbackwards)
-        #STOP2dict[segnum]=[start]
-        continue
-    
-    # Fix end elevations, to the extent allowed by adjacent up and down segments
-    # Note, by getting upstream segment end elevations from STOP2dict, this should self update as the lower-order segment elevations are corrected. However the down-segment starting elevations have to come from pre-existing elevations in the initial GWVmat1, so only the headwater starting reaches will be truly optimized.
-    '''
-    print 'fixing segment end elevations...'
-    start,end,nbackwards=Fix_segment_ends.fixends(segnum,segment['STOP'],segment['TOPNEW'],upSEGs,STOP2dict,GWVmat1_data,GWVmat2_data,headwater_incise,ofp3,nbackwards)
-    '''    
-    # for now, start with existing STOP at RCH1. Could improve by first having a routine that corrects all segment ends to eliminate floaters.
-    STOP2=[]
-    #STOP2.append(segment['STOP'][0])
-    STOP2.append(Seg_ends[segnum][0])
-    #STOP2.append(start)
-    #end=segment['STOP'][-1]
-    end=Seg_ends[segnum][-1]
->>>>>>> parent of e9ab5ff... Minor bugfixes
     
     descending=False # If true, means that current reach is lower than all previous
     flattening=False # means that a reach has been encountered with a STOP below the segment end elev.
@@ -383,13 +305,8 @@ for segnum in sorted(segments):
             else:
                 continue
             
-<<<<<<< HEAD
     #STOP2.append(Seg_ends[segnum][-1])
     STOP2.append(end)
-=======
-    STOP2.append(Seg_ends[segnum][-1])
-    #STOP2.append(end)
->>>>>>> parent of e9ab5ff... Minor bugfixes
     #STOP2.append(segment['STOP'][-1])
     
     # if some condition isn't handled properly by one of the above statements, chances are this will occur:
@@ -457,36 +374,12 @@ for line in input_file[1:]:
 ofp.close()
 
 # run STOP_compare again, to get results post fix_w_DEM
-<<<<<<< HEAD
 Diffs=STOP_compare.stopcomp(L1top,outfile,STOP_comp_fixwDEM)
 STOP_compare.plot_diffstats(Diffs['DIF'],'Land-surface - SFR comparison after fix_w_DEM.py')
 
 # profile plots showing where SFR elev goes below model bottom
 sinkers=Plot_segment_profiles.get_sinkers('below_bot.csv','segment')
 Plot_segment_profiles.plot_profiles(sinkers,seg_distdict,[TOPNEWdict,STOP2dict],['model top','streambed top post-fix_w_DEM'],'Below_bottom.pdf',Bottoms=Bottomsdict)
-=======
-Diffs=STOP_compare.stopcomp(L1top,outfile,'STOP_compare_fix_w_DEM.csv')
-STOP_compare.plot_diffstats(Diffs['DIF'],'Land-surface - SFR comparison after fix_w_DEM.py')
-
-# profile plots showing where SFR elev goes below model bottom
-sinkers=Plot_segment_profiles.get_sinkers('below_bot.csv','segment')
-Plot_segment_profiles.plot_profiles(sinkers,seg_distdict,TOPNEWdict,STOP2dict,Bottomsdict,'sinkers.pdf')
-
-# profiles of 50 worst floaters
-df=pd.DataFrame(Diffs['DIF'],index=Diffs['MSEG'])
-Floats=df.sort(columns=0,ascending=False)
-floats=list(np.unique(list(Floats[0][0:50].index)))
-Plot_segment_profiles.plot_profiles(floats,seg_distdict,TOPNEWdict,STOP2dict,Bottomsdict,'floaters.pdf')
-
-# profiles of 50 worst incised
-Incised=df.sort(columns=0,ascending=True)
-incised=list(np.unique(list(Incised[0][0:50].index)))
-Plot_segment_profiles.plot_profiles(incised,seg_distdict,TOPNEWdict,STOP2dict,Bottomsdict,'incised.pdf')
-
-# list of segments to plot
-segs2plot=segments[::int(np.floor(len(segments)/num_segs2plot))]
-segs2plot=sorted(segs2plot)
->>>>>>> parent of e9ab5ff... Minor bugfixes
 
 # profiles of 50 worst floaters
 df=pd.DataFrame(Diffs['DIF'],index=Diffs['MSEG'])
@@ -494,40 +387,10 @@ Floats=df.sort(columns=0,ascending=True)
 floats=list(np.unique(list(Floats[0][0:50].index)))
 Plot_segment_profiles.plot_profiles(floats,seg_distdict,[TOPNEWdict,STOP2dict],['model top','streambed top post-fix_w_DEM'],'50_worst_floating.pdf')
 
-<<<<<<< HEAD
 # profiles of 50 worst incised
 Incised=df.sort(columns=0,ascending=False)
 incised=list(np.unique(list(Incised[0][0:50].index)))
 Plot_segment_profiles.plot_profiles(incised,seg_distdict,[TOPNEWdict,STOP2dict],['model top','streambed top post-fix_w_DEM'],'50_worst_incised.pdf')
-=======
-print "saving plots of selected segments to " + pdffile
-for seg in segs2plot:
-    fig=plt.figure()
-    if plot_slope:
-        ((ax1, ax2)) = fig.add_subplot(2,1,sharex=True,sharey=False)
-    else:
-        ax1=fig.add_subplot(1,1,1)
-    ax1.grid(True)
-    p1=ax1.plot(seg_distdict[seg],TOPNEWdict[seg],'b',label='land surface')
-    p2=ax1.plot(seg_distdict[seg],STOP1dict[seg],'r',label='sfr_utilities')
-    if len(seg_distdict[seg])==len(STOP2dict[seg]):
-        p3=ax1.plot(seg_distdict[seg],STOP2dict[seg],'g',label='fix_w_DEM')
-    handles, labels = ax1.get_legend_handles_labels()
-    ax1.legend(handles,labels)
-    ax1.set_title('segment ' + str(seg))
-    plt.xlabel('distance along segment (ft.)')
-    ax1.set_ylabel('Elevation (ft)')
-    if plot_slope:
-        ax2.grid(True)
-        p4=ax2.plot(seg_distdict[seg],slopesdict[seg],color='0.75',label='streambed slopes')
-        ax2.set_ylabel('Streambed slope')
-        ax3=ax2.twinx()
-        p5=ax3.plot(seg_distdict[seg],reach_lengthsdict[seg],'b',label='reach length')
-        ax3.set_ylabel('reach length (ft)')
-        handles, labels = ax2.get_legend_handles_labels()
-        ax2.legend(handles,labels)
-        ax3.legend(loc=0) 
->>>>>>> parent of e9ab5ff... Minor bugfixes
 
 # list of selected segments to plot
 segs2plot=segments[::int(np.floor(len(segments)/num_segs2plot))]
