@@ -1,7 +1,7 @@
 # Fix flagged COMIDs from RouteStreamNetwork
 
 import arcpy
-import os, shutil
+import os
 from collections import defaultdict
 import pdb
 
@@ -218,7 +218,7 @@ ofp.close()
 
 # write out new check network file
 print "updating check_network.txt; previous version renamed to 'check_network.old'"
-shutil.move('check_network.txt','check_network.old')
+os.rename('check_network.txt','check_network.old')
 
 ofp=open('check_network.txt','w')
 for line in check_network:

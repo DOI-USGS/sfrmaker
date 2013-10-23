@@ -67,9 +67,7 @@ which produces a table of reach midpoint elevations via linear interpolation fro
                     fix_comids.txt      # list of comids with two or more sets of endpoints.  These are usually segments that meander out of and then back into the grid.
 
 ##### 3) manually delete flowlines and corresponding gridcell polygons
-for segments that have multiple starts/ends (e.g. those that meander out of the grid and back in). They are indicated in fix\_comids.txt.
-
-These should be deleted from river_explode.shp. 
+for segments that have multiple starts/ends (e.g. those that meander out of the grid and back in). These should be deleted from river_explode.shp. 
 
 ##### 4) run CleanupRiverCells.py,
 which trims down the river cells shapefiles to reflect the deletiosn that were made in the previous step deleting COMIDs from river_explode.shp
@@ -78,7 +76,10 @@ This also makes a backup copy of fix\_comids.txt --> fix\_comids\_backup.txt whi
 ##### 4a) Rerun AssignRiverElev.py
 Rerun and go through any fix\_comids until fix\_comids.txt returns an empty file.
 
-##### 5a) run intersect.py
+##### 4a) Run JoinRiverElevs.py
+Run this code after steps 2-4 such that fix\_comids.txt is empty. This code joins river\_elevs.dbf with river_explode.shp resulting in the file ELEV as identified in the main input file. This ELEV file is reruies
+
+##### 5) run intersect.py
 
      Inputs:
           - flowlines clipped from previous step
@@ -89,14 +90,8 @@ Rerun and go through any fix\_comids until fix\_comids.txt returns an empty file
           - boundaryclipsrouting.txt (for segments intersecting model boundary)
           - 'NHD_intersect_edited.shp'
 
-Look at boundary\_manualfix\_issues.txt output file and find COMIDs that leave and reenter the domain. Fix them in Flowlines (from input file) and in river\_explode.py (if necessary).
+Look at boundary_manualfix_issues.txt output file and find COMIDs that leave and reenter the domain. Fix them in Flowlines (from input file) and in river_explode.py.
 
-Then rerun  CleanupRiverCells.py (if edited any of river\_explode.py) and intersect.py.
-
-Once runs through with no manual fix messages, move on.
-
-##### 5b) Run JoinRiverElevs.py
-Run this code after steps 2-4 such that fix\_comids.txt is empty. This code joins river\_elevs.dbf with river_explode.shp resulting in the file ELEV as identified in the main input file. This ELEV file is required later by RouteStreamNetwork.py
 ##### 6) run RouteStreamNetwork.py 
 (note: this may take hours to run with large models/dense stream networks)
 
@@ -159,41 +154,11 @@ Run this code after steps 2-4 such that fix\_comids.txt is empty. This code join
           - reach_ordering.txt
           - routed_cells.txt
 
-##### 8) run Finalize_SFR2.py
+##### 8) run Finalize_SFR.py
 
 ##### 9) run SFR_utilities.py,  
-
+     improves any segment start/end elevations where there is room for improvement.
      
-##### 10) run Fix\_w\_DEM.py
-	- runs Fix\_segment\_ends.py to adjust segment end elevations to match model TOP as closely as possible (minus an adjustable incising parameter)
-	- checks for backward routing in segment ends
-	- adjust segment interior reaches to model TOP, as long as they are monotonically downhill and don't go below segment end
-	- uses linear interpolation otherwise
-	- generates PDF files showing comparative statistics for SFR vs. model top before and after
-	- generates PDF files with comparative plots of SFR before and after, with model top, also 50 worst floating and incised segments
-	- can also generate a plot of segments that go below the model bottom, but need to run Assign_Layers.py first to get below_bot.csv
-	
-	
-	Dependencies:
-		-STOP_compare.py (generates columns of model top elev, SFR streambed top, and their differece, indexed by segment)
-		-Fix_segment_ends.py  (Adjusts segment end elevations within the constraints of up/down segment min/max elevations)
-		-Plot_segment_profiles.py  (Has generic code to plot SFR segments with land surface or any other elevation)
-		-pandas (non-standard module of Python- used to quickly sort 50 biggest floating and incised reaches; this could probably be done by numpy)
-		
-	Inputs:
-		- GWVmat1 (from SFR_utilities.py)
-		- GWVmat2 (from SFR_utilties.py)
-		- ascii array of model top elevations
-		- ascii multi-layer array of model bottom elevations
-	
-	Outputs:
-		- GWVmat1
-		- PDF of profiles for selected SFR segments compared to land surface
-		- fix_w_DEM_interps.txt (file recording adjustments made to reaches that are initially below the segment end)
-		- fix_w_DEM_errors.txt (reports 0-slope errors, etc.)
-
-##### 11) run Assign_Layers.py
-
-	
+##### 10) run Fix_w_DEM.py
 
 

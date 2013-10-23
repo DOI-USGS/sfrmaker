@@ -35,7 +35,6 @@ def stopcomp(L1top,MAT1,outfile):
         infile_data['STOP'].append(MAT1data['top_streambed'][i])
         infile_data['TOPNEW'].append(L1tops[cellnum])
         infile_data['DIF'].append(L1tops[cellnum]-MAT1data['top_streambed'][i])
-    diffs=infile_data['DIF']
     
     # write output file comparing L1top and SFR elevations
     ofp=open(outfile,'w')
@@ -44,7 +43,38 @@ def stopcomp(L1top,MAT1,outfile):
         ofp.write("%s,%s,%s,%s\n" %(infile_data['MSEG'][i],infile_data['STOP'][i],infile_data['TOPNEW'][i],infile_data['DIF'][i]))
     ofp.close()    
     
-    return(diffs)
+    return(infile_data)
+    
+def getbottoms(L1top, botsfile,MAT1):
+    # L1top= ascii matrix export of MODFLOW top elevations (n columns x n rows; no wrapping!)
+    # Mat1= output from HWR's SFR_utilities script with SFR reach information
+    
+    # get grid info
+    temp=open(L1top).readlines()
+    ncols=len(temp[0].strip().split())
+    nrows=len(temp)
+    
+    botdata=np.fromfile(botsfile,sep=' ')
+    nlayers=int(len(botdata)/float(nrows*ncols))
+    botdata=np.reshape(botdata,(nlayers,nrows,ncols))
+    
+    # build dict of bottoms by cellnum
+    Bottoms=dict()
+    for r in range(nrows):
+        for c in range(ncols):
+            cellnum=r*ncols+c+1
+            Bottoms[cellnum]=botdata[-1,r,c] 
+    
+    # bring in SFR info
+    MAT1data=np.genfromtxt(MAT1, delimiter=',',names=True,dtype=None)
+    Bottomsdict=defaultdict(list)
+    for i in range(len(MAT1data)):
+        row,column=MAT1data['row'][i],MAT1data['column'][i]
+        cellnum=(row-1)*ncols+column
+        segment=MAT1data['segment'][i]
+        reach=MAT1data['reach'][i]
+        Bottomsdict[segment].append(Bottoms[cellnum])
+    return(Bottomsdict)
     
     
     # comparative summary statistics
