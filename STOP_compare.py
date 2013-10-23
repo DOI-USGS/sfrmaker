@@ -48,6 +48,10 @@ def stopcomp(L1top,MAT1,outfile):
 def getbottoms(L1top, botsfile,MAT1):
     # L1top= ascii matrix export of MODFLOW top elevations (n columns x n rows; no wrapping!)
     # Mat1= output from HWR's SFR_utilities script with SFR reach information
+<<<<<<< HEAD
+=======
+    botsfile='Columbia_bots_corr2.dat'
+>>>>>>> parent of e9ab5ff... Minor bugfixes
     
     # get grid info
     temp=open(L1top).readlines()

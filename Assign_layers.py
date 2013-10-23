@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 
 # Input files
+<<<<<<< HEAD
 botsfile='Columbia_bots_corr2_SFRcorr.dat' # GWV mat with bottom elevations for all layers
 L1top='L1top.dat' # GWV mat with top elevations for layer 1
 SFRmat1='SFR_GWVmat1.csv' # SFR matrix 1 from Howard Reeve's scripts
@@ -16,6 +17,16 @@ thick=3 # Uniform streambed thickness
 buff=1 # if STOP - thick - buffer < bottom of cell, move to layer below
 Lowerbot=False # if True lowers model bottom where SFR drops below
 minimum_slope=1e-6
+=======
+botsfile='Columbia_bots_corr2_SFRcorr.DAT' # GWV mat with bottom elevations for all layers
+L1top='L1TOP.DAT' # GWV mat with top elevations for layer 1
+SFRmat1='SFR_GWVmat1.txt' # SFR matrix 1 from Howard Reeve's scripts
+
+# Settings
+thick=3 # Uniform streambed thickness
+buff=0 # if STOP - thick - buffer < bottom of cell, move to layer below
+Lowerbot=False # if True lowers model bottom where SFR drops below
+>>>>>>> parent of e9ab5ff... Minor bugfixes
 
 # Outputfiles
 SFRpackage='Columbia.SFR'
@@ -79,7 +90,18 @@ if Lowerbot:
                 print botsnew[r,c]
             else:
                 botsnew[r,c]=bots_rs[-1,r,c]
+<<<<<<< HEAD
 
+=======
+    '''    
+    for rc in below_botdepths.iterkeys():
+        r,c=rc
+        newbotel=bots_rs[-1,r,c]-below_botdepths[(r,c)]
+        print bots_rs[-1,r,c]
+        bots_rs[-1,r,c]=newbotel
+        print bots_rs[-1,r,c] 
+    '''    
+>>>>>>> parent of e9ab5ff... Minor bugfixes
     outarray=botsfile[:-4]+'_SFRcorr.dat'
     bots_rs=np.append(bots_rs[:-1,:,:],botsnew)
     bots_rs=np.reshape(bots_rs,(nlayers,nrows,ncols))
@@ -111,6 +133,7 @@ for i in range(len(SFRinfo)):
     ofp.write(line+'\n')
 ofp.close()
 
+<<<<<<< HEAD
 # writeout results to SFR package file
 icalc=1
 nreaches=len(SFRinfo)
@@ -136,6 +159,8 @@ for i in range(len(SFRinfo2)):
     ofp.write('%s\n' %(seginfo['width_in_cell'][-1]))
 ofp.close()
     
+=======
+>>>>>>> parent of e9ab5ff... Minor bugfixes
 # writeout info on Layer assignments
 ofp=open(Layerinfo,'w')
 ofp.write('Layer\t\tNumber of assigned reaches\n')
