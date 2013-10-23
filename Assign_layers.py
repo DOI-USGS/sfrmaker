@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 
 # Input files
+#need to make these filepaths relative
 botsfile='Columbia_bots_corr2_SFRcorr.dat' # GWV mat with bottom elevations for all layers
 L1top='L1top.dat' # GWV mat with top elevations for layer 1
 SFRmat1='SFR_GWVmat1.csv' # SFR matrix 1 from Howard Reeve's scripts
