@@ -40,7 +40,7 @@ for line in infile:
 CELLS=inputs["CELLS"]
 INTERSECT=inputs["INTERSECT"]
 NHD=inputs["NHD"]  # from intersect.py
-VAA=inputs["VAA"]
+VAA=inputs["PlusflowVAA"]
 
 try:
     OUT=open("routed_cells.txt",'w')
@@ -53,7 +53,7 @@ OUT.write("fromcell, tocell\n")
 
 
 path=os.getcwd()
-gp=arcgisscripting.create(9.3)
+gp=arcgisscripting.create()
 gp.Workspace=path
 
 #make a dictionary of hydroseq, uphydroseq, dnhydroseq numbers by COMID
@@ -92,19 +92,20 @@ toCOMIDlist=defaultdict(list)
 #need to correct routing lists for segments
 #that intersected the boundary
 #read in the file with information for clipped segments at the boundary
-CLIP=open("boundaryClipsRouting.txt",'r')
-CLIP.readline()  #header
+print "Processing clipped segments along domain boundary..."
+CLIP=open("boundaryClipsRouting.txt",'r').readlines()
+header = CLIP.pop(0) #header
 clipto=dict()
 clipfrom=dict()
 for line in CLIP:
-    vals=re.split(",",line)
-    fromin=int(vals[0])
-    toin=int(vals[1])
+    vals=line.strip().split(',')
+    fromin=int(float(vals[0]))
+    toin=int(float(vals[1]))
     if fromin==99999:
         clipto[toin]=1
     if toin==99999:
         clipfrom[fromin]=1
-CLIP.close()
+
 
 infile=open("check_network.txt",'r')
 line=infile.readline()
@@ -148,12 +149,18 @@ sortedtuples.sort(key=itemgetter(1), reverse=True)
 sortedlist=map(itemgetter(0),sortedtuples)
 
 icount=0
+needfix = 0 # flag regarding whether or not manual fixes will be needed
+outfixfilename = 'COMIDS_to_fixRRC.dat'
+ofpfix = open(outfixfilename,'w')
+ofpfix.write('The following COMIDs require manual attention.\nFix them in check_network.txt.\n')
+ofpfix.write('Then rerun RouteRiverCells.py.\n' + '#'*42 + '\n')
 for comid in sortedlist:
     icount+=1
     SFRseq=SFRseq+1
+    print SFRseq
     count=count+1
     #find all the intersected cells with the same comid
-    theQuery="COMID= "+str(comid)
+    theQuery="COMID= %d" %(comid)
     print theQuery
     gp.MakeFeatureLayer(INTERSECT,"temp_lyr",theQuery)
     #make hashes of starting and ending x,y and
@@ -223,119 +230,130 @@ for comid in sortedlist:
         print "starting FIDs: "+",".join(map(str,startingFID))
         print "ending FIDs: " + ",".join(map(str,endingFID))
         gp.refreshcatalog(path)
-        del gp
         print "manually fix COMID =" + str(comid)
-        quit()
-        
-    orderedFID=[]
-    orderedFID.append(startingFID[0])
-    i=1
-    while i<len(end_has_start):
-        orderedFID.append(end_has_start[orderedFID[i-1]])
-        i=i+1
-    orderedFID.append(endingFID[0])
-    
-    #now the COMID is ordered
-    
-    if(top[orderedFID[0]] < top[orderedFID[-1]]):
-        orderedFID.reverse()
-    elif(top[orderedFID[0]] == top[orderedFID[-1]]):
-        bigtest=0
-        testcomid=comid
-        seen=dict()
-        checkdirflag=0
-        endsegment=0
-        startsegment=0
-        i=0
-        while i < len(fromCOMIDlist[testcomid]):
-            if fromCOMIDlist[testcomid][i] == 99999:
-                endsegment=1
+        ofpfix.write("manually fix COMID = %d\n"  %int(comid))
+        needfix +=1
+    else:
+        # MNF DEBUG ----- BIG ASSUMPTION! 
+        # Seems to me that this loop needed indentation to avoid being trapped by error above. Maybe be way off!
+        orderedFID=[]
+        orderedFID.append(startingFID[0])
+        i=1
+        while i<len(end_has_start):
+            orderedFID.append(end_has_start[orderedFID[i-1]])
             i=i+1
-        i=0
-        if testcomid not in toCOMIDlist:
-            startsegment=1
-##        if (startsegment == 1 and endsegment==1):
-##            print "check "+str(testcomid)+" start/end"
-##            exit()
-        while bigtest==0:
-            theQuery="COMID= "+str(testcomid)
-            gp.MakeFeatureLayer(NHD,"temp_nhd_lyr",theQuery)
-            nhds=gp.SearchCursor("temp_nhd_lyr")
-            nhd=nhds.Next()
-            checkelev=nhd.MINELEVSMO
-            del nhds
-            flag=0
-            if startsegment != 1:
-            #there is an upstream comid, keep looking upstream until
-            #a non-equal elevation is found and see if it is more or less
-                for prevCOMID in toCOMIDlist[testcomid]:
-                    print "comid = "+str(testcomid)+" previous comid= "+str(prevCOMID)
-                    theQuery="COMID = "+str(prevCOMID)
-                    gp.MakeFeatureLayer(NHD,"temp_nhd_lyr",theQuery)
-                    nhds=gp.SearchCursor("temp_nhd_lyr")
-                    nhd=nhds.Next()
-                    prevelev=nhd.MINELEVSMO
-                    if prevelev < checkelev:
-                        flag=1
-                    if prevelev == checkelev and flag == 0:
-                        flag=2
-                    if prevelev > checkelev and flag ==2:
-                        flag=0  
-            elif endsegment != 1:
-                #there isn't an upstream COMID, look downstream and check
-                for nextCOMID in fromCOMIDlist[testcomid]:
-                    print "comid = "+str(testcomid)+" next comid= "+str(nextCOMID)
-                    if nextCOMID==99999:
-                        flag=0
-                        continue
-                    theQuery="COMID = "+str(nextCOMID)
-                    gp.MakeFeatureLayer(NHD,"temp_nhd_lyr",theQuery)
-                    nhds=gp.SearchCursor("temp_nhd_lyr")
-                    nhd=nhds.Next()
-                    nextelev=nhd.MINELEVSMO
-                    if nextelev > checkelev:
-                        flag=1
-                    if nextelev == checkelev and flag == 0:
-                        flag=2
-                    if nextelev < checkelev and flag ==2:
-                        flag=0
-            else:
-                #a one-segment long piece, no upstream or downstream
-                flag=0
-            if flag==0:
-                bigtest=1
-            elif flag==1:
-                orderedFID.reverse()
-                bigtest=1
-            elif flag==2:
-                print "flag = 2, COMID="+str(testcomid)
-                if startsegment != 1:
-                    k=0
-                    while k < len(toCOMIDlist[testcomid]):
-                        if not toCOMIDlist[testcomid][k] in seen:
-                            seen[toCOMIDlist[testcomid][k]]=1
-                            testcomid=toCOMIDlist[testcomid][k]
-                            checkdirflag=1
-                        k=k+1
-                else:
-                    k=0
-                    while k < len(fromCOMIDlist[testcomid]):
-                        if not fromCOMIDlist[testcomid][k] in seen:
-                            seen[fromCOMIDlist[testcomid][k]]=1
-                            testcomid=fromCOMIDlist[testcomid][0]
-                        k=k+1
-                bigtest=0
-
+        orderedFID.append(endingFID[0])
     
-    for i in range(0,len(orderedFID)-1):
-        fromcell=cellnumber[orderedFID[i]]
-        tocell=cellnumber[orderedFID[i+1]]
-        OUT.write(str(fromcell)+","+str(tocell)+"\n")
-
-    for i in range(0,len(orderedFID)):
-        RCH.write(",".join(map(str,[cellnumber[orderedFID[i]],comid,hydroseqused[comid],uphydroseq[comid],dnhydroseq[comid],SFRseq,i+1]))+"\n")
-    percentdone=round(100*icount/len(sortedlist),2)
-    print "%s %% done" %(percentdone)
+        #now the COMID is ordered
+        if orderedFID[0]==orderedFID[-1]:
+            #comid starts and ends in same cell, doesn't help with cell routing, skip
+            print "starts and ends in same cell %d" % comid
+            continue    
+        if(top[orderedFID[0]] < top[orderedFID[-1]]):
+            orderedFID.reverse()
+        elif(top[orderedFID[0]] == top[orderedFID[-1]]):
+            bigtest=0
+            testcomid=comid
+            seen=dict()
+            checkdirflag=0
+            endsegment=0
+            startsegment=0
+            i=0
+            while i < len(fromCOMIDlist[testcomid]):
+                if fromCOMIDlist[testcomid][i] == 99999:
+                    endsegment=1
+                i=i+1
+            i=0
+            if testcomid not in toCOMIDlist:
+                startsegment=1
+    ##        if (startsegment == 1 and endsegment==1):
+    ##            print "check "+str(testcomid)+" start/end"
+    ##            exit()
+            while bigtest==0:
+                theQuery="COMID= "+str(testcomid)
+                gp.MakeFeatureLayer(NHD,"temp_nhd_lyr",theQuery)
+                nhds=gp.SearchCursor("temp_nhd_lyr")
+                nhd=nhds.Next()
+                print theQuery
+                checkelev=nhd.MINELEVSMO
+                del nhds
+                flag=0
+                if startsegment != 1:
+                #there is an upstream comid, keep looking upstream until
+                #a non-equal elevation is found and see if it is more or less
+                    for prevCOMID in toCOMIDlist[testcomid]:
+                        print "comid = "+str(testcomid)+" previous comid= "+str(prevCOMID)
+                        theQuery="COMID = "+str(prevCOMID)
+                        gp.MakeFeatureLayer(NHD,"temp_nhd_lyr",theQuery)
+                        nhds=gp.SearchCursor("temp_nhd_lyr")
+                        nhd=nhds.Next()
+                        prevelev=nhd.MINELEVSMO
+                        if prevelev < checkelev:
+                            flag=1
+                        if prevelev == checkelev and flag == 0:
+                            flag=2
+                        if prevelev > checkelev and flag ==2:
+                            flag=0  
+                elif endsegment != 1:
+                    #there isn't an upstream COMID, look downstream and check
+                    for nextCOMID in fromCOMIDlist[testcomid]:
+                        print "comid = "+str(testcomid)+" next comid= "+str(nextCOMID)
+                        if nextCOMID==99999:
+                            flag=0
+                            continue
+                        theQuery="COMID = "+str(nextCOMID)
+                        gp.MakeFeatureLayer(NHD,"temp_nhd_lyr",theQuery)
+                        nhds=gp.SearchCursor("temp_nhd_lyr")
+                        nhd=nhds.Next()
+                        nextelev=nhd.MINELEVSMO
+                        if nextelev > checkelev:
+                            flag=1
+                        if nextelev == checkelev and flag == 0:
+                            flag=2
+                        if nextelev < checkelev and flag ==2:
+                            flag=0
+                else:
+                    #a one-segment long piece, no upstream or downstream
+                    flag=0
+                if flag==0:
+                    bigtest=1
+                elif flag==1:
+                    orderedFID.reverse()
+                    bigtest=1
+                elif flag==2:
+                    print "flag = 2, COMID="+str(testcomid)
+                    if startsegment != 1:
+                        k=0
+                        while k < len(toCOMIDlist[testcomid]):
+                            if not toCOMIDlist[testcomid][k] in seen:
+                                seen[toCOMIDlist[testcomid][k]]=1
+                                testcomid=toCOMIDlist[testcomid][k]
+                                checkdirflag=1
+                            k=k+1
+                    else:
+                        k=0
+                        while k < len(fromCOMIDlist[testcomid]):
+                            if not fromCOMIDlist[testcomid][k] in seen:
+                                seen[fromCOMIDlist[testcomid][k]]=1
+                                testcomid=fromCOMIDlist[testcomid][0]
+                            k=k+1
+                    bigtest=0
+    
+        
+        for i in range(0,len(orderedFID)-1):
+            fromcell=cellnumber[orderedFID[i]]
+            tocell=cellnumber[orderedFID[i+1]]
+            OUT.write(str(fromcell)+","+str(tocell)+"\n")
+    
+        for i in range(0,len(orderedFID)):
+            RCH.write(",".join(map(str,[cellnumber[orderedFID[i]],comid,hydroseqused[comid],uphydroseq[comid],dnhydroseq[comid],SFRseq,i+1]))+"\n")
+        percentdone=round(100*icount/len(sortedlist),2)
+        print "%s %% done" %(percentdone)
+ofpfix.close()
+if needfix:
+    print 'Manual fixes of some COMIDs required -->'
+    print 'see %s for COMIDs and instruction.' %(outfixfilename)
+    print 'then rern RouteRiverCells.py'
 OUT.close()
 RCH.close()
 gp.refreshcatalog(path)

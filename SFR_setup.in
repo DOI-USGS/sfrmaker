@@ -21,6 +21,7 @@ CELLS='river_cells_dissolve.shp' # from SFR_preproc.py
 NHD='NHD_intersect_edited.shp'  # from intersect.py
 FTab='NHDFcode_0407Merge.dbf' # from NHDPlus
 Layer1top='L1TOP.DAT' # matrix of model TOP elevations exported from GWV
+Layer_bots='Columbia_bots_corr2.dat'
 ###
 # Outfiles---------------------------------------------------------------------------------------------------
 OUT='Columbia.SFR'

@@ -161,7 +161,7 @@ node=getfield("river_cells.shp","node")
 arcpy.Dissolve_management("river_cells.shp","river_cells_dissolve.shp",node)
 
 print "Exploding NHD segments to grid cells using Intersect and Multipart to Singlepart..."
-arcpy.Intersect_analysis(["river_cells_dissolve.shp","Flowlines.shp"],"river_intersect.shp")
+arcpy.Intersect_analysis(["river_cells_dissolve.shp","Flowlines"],"river_intersect.shp")
 arcpy.MultipartToSinglepart_management("river_intersect.shp","river_explode.shp")
 print "\n"
 print "Adding in stream geometry"
