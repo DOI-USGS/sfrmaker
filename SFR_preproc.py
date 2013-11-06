@@ -37,6 +37,7 @@ arcpy_path=inputs["arcpy_path"]
 path=os.getcwd()
 arcpy.env.workspace = path
 arcpy.env.overwriteOutput = True 
+arcpy.env.qualifiedFieldNames = False
 
 # Check out any necessary licenses
 arcpy.CheckOutExtension("spatial")
@@ -126,8 +127,24 @@ else:
 
 print "Joining PlusflowVAA to NHDFlowlines...\n"    
 comid1=getfield("Flowlines","comid")
-comid2=getfield("PlusflowVAA","comid")
-arcpy.JoinField_management("Flowlines",comid1,"PlusflowVAA",comid2)
+
+# join to Flowlines, keeping only common
+arcpy.AddJoin_management("Flowlines",comid1,PlusflowVAA,"comid","KEEP_COMMON")
+# save back down the results
+if arcpy.Exists('tmpjunkus.shp'):
+    print 'first removing old version of tmpjunkus.shp'
+    print 'This is a holding temporary file to save down %s' %Flowlines
+    print 'tmpjunkus.shp will be deleted'
+    arcpy.Delete_management('tmpjunkus.shp')
+arcpy.CopyFeatures_management("Flowlines",'tmpjunkus.shp')
+if arcpy.Exists(Flowlines):
+    print 'first removing old version of %s' %Flowlines
+    arcpy.Delete_management(Flowlines)
+arcpy.Rename_management('tmpjunkus.shp',Flowlines)
+
+# reopen flowlines as "Flowlines" --> clunky a bit to save and reopen, but must do so
+arcpy.MakeFeatureLayer_management(Flowlines,"Flowlines")
+
 print "\n"
 print "Removing segments with no elevation information, and with ThinnerCod = -9..."
 ThinnerCod=getfield("Flowlines","thinnercod")
@@ -240,4 +257,4 @@ if count>0:
 else:
     print "no disconnected reaches found!"
 print "\n"
-print "Done with pre-processing, ready to run AssignRiverElev.py!"
+print "Done with pre-processing, ready to run intersect.py!"
