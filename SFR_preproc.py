@@ -215,7 +215,7 @@ for fld in fields:
 for fld in fields:
     print "\tcalculating %s(s)..." %(fld)
     arcpy.CalculateField_management("river_explode.shp",fld,commands[fld],"PYTHON")
-ofp.write('\n' + 25*'#' + '\nRemoving reaches with lengths less than or equal to %s...' %(reach_cutoff))
+ofp.write('\n' + 25*'#' + '\nRemoving reaches with lengths less than or equal to %s...\n' %(reach_cutoff))
 print "\nRemoving reaches with lengths less than or equal to %s..." %(reach_cutoff)
 comid=getfield("river_explode.shp","comid")
 node=getfield("river_explode.shp","node")
@@ -224,8 +224,8 @@ table=arcpy.UpdateCursor("river_explode.shp")
 count=0
 for reaches in table:
     if reaches.getValue(Length)<=reach_cutoff:
-        print "segment: %s, cell: %s, length: %s" %(reaches.getValue(comid),reaches.getValue(node),reaches.getValue(Length))
-        ofp.write("segment: %s, cell: %s, length: %s" 
+        print "segment: %d, cell: %s, length: %s" %(reaches.getValue(comid),reaches.getValue(node),reaches.getValue(Length))
+        ofp.write("segment: %d, cell: %s, length: %s\n" 
                   %(reaches.getValue(comid),reaches.getValue(node),reaches.getValue(Length)))
         table.deleteRow(reaches)
         count+=1
@@ -247,29 +247,30 @@ for row in table:
 arcpy.RemoveJoin_management("river_cells_dissolve","river_explode")
 
 # remove nodes with no elevation information from river_explode
-ofp.write('\n' + 25*'#' + '\nRemoving nodes with no elevation information from river_explode')
+ofp.write('\n' + 25*'#' + '\nRemoving nodes with no elevation information from river_explode\n')
 print 'Removing nodes with no elevation information from river_explode'
 node=getfield("river_cells_dissolve.shp","node")
 table=arcpy.UpdateCursor("river_cells_dissolve.shp")
 count=0
 for cells in table:
     if cells.getValue(node) in nodes2delete:
-        print "%s" %(cells.getValue(node))
+        print "%d" %(cells.getValue(node))
+        ofp.write('%d\n' %(cells.getValue(node)))
         table.deleteRow(cells)
         count+=1
 print "removed %s cells\n" %(count)
 ofp.write("removed %s cells" %(count))
 
 print "removing any remaining disconnected reaches..."
-ofp.write('\n' + 25*'#' + '\nremoving any remaining disconnected reaches...')
+ofp.write('\n' + 25*'#' + '\nremoving any remaining disconnected reaches...\n')
 node=getfield("river_explode.shp","node")
 comid=getfield("river_explode.shp","comid")
 table=arcpy.UpdateCursor("river_explode.shp")
 count=0
 for reaches in table:
     if reaches.getValue(node) in nodes2delete:
-        print "%s" %(reaches.getValue(node))
-        ofp.write('%s\n' %(reaches.getValue(node)))
+        print "%d" %(reaches.getValue(node))
+        ofp.write('%d\n' %(reaches.getValue(node)))
         table.deleteRow(reaches)
         count+=1
 if count>0:
