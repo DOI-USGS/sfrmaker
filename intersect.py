@@ -1,5 +1,5 @@
 # intersect.py
-# authoed by Howard Reeves, MI Water Science Center
+# authored by Howard Reeves, MI Water Science Center
 #
 import os
 import re
@@ -42,6 +42,9 @@ arcpy.CopyFeatures_management('nhd_lyr','intersect.shp')
 #copy the model NHD streams to a temp shapefile, find the ends that match
 #the streams that were clipped by the boundary and update the lengthKm,
 #minsmoothelev, maxsmoothelev in the MODLNHD
+if arcpy.Exists('temp.shp'):
+    print 'first removing old version of temp.shp' 
+    arcpy.Delete_management('temp.shp')
 arcpy.CopyFeatures_management(MODLNHD,'temp.shp')
 
 #add fields for start, end, and length to the temp and intersect
@@ -66,7 +69,7 @@ for shp in shapelist:
     
 #go through intersect, identify which end matches COMID in temp
 #find new length in temp and use linear interpolation to get new elev
-#finally put COMID out to intersect_comid.txt file to indicate
+#finally put COMID out to <outfile> (named above) to indicate
 #if the cut-off is flowing out of grid or into grid so the
 #routing tables in the final datasets do not route out of grid
 #and back in. Also identifies to user ends of streams that
@@ -140,9 +143,9 @@ for stream in intersects:
             if manual_intervention == 1:
                 ofp = open('boundary_manual_fix_issues.txt','w')
                 ofp.write('The following COMIDs identify streams that need manual attention.\n')
-                ofp.write('Fix in the Flowlines variable from the input file. Then rerun intersect.py\n')
+                ofp.write('Fix in the file %s. Then rerun intersect.py\n' %MODLNHD)
                 ofp.write('#' * 16 + '\n')
-            print 'both ends are cut off for comid ', comid
+            print 'both ends are cut off for comid %d' %comid
             ofp.write('both ends are cut off for comid %d\n' %(comid))
             print 'need to fix it manually'
 del intersects, stream, clip, clippedstream
@@ -171,9 +174,9 @@ OUT=open(outfile,'w')
 OUT.write("FROMCOMID,TOCOMID\n")
 for comid in inout:
     if re.match('IN',inout[comid]):
-        OUT.write(",".join(map(str,(99999,comid)))+'\n')
+        OUT.write("99999,%d\n" %comid)
     else:
-        OUT.write(",".join(map(str,(comid,99999)))+'\n')
+        OUT.write("%d,99999\n" %comid)
 
 OUT.close()
         
