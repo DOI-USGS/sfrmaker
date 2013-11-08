@@ -10,6 +10,8 @@ import re
 import arcpy
 from arcpy.sa import *
 import datetime, time
+import SFR_arcpy
+
 ts = time.time()
 st_time = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
 
@@ -29,7 +31,6 @@ for line in infile:
         var=line.split("=")[1].split()[0]
         inputs[varname]=var.replace("'","") # strip extra quotes
 
-computeZonal=inputs["computeZonal"]
 reach_cutoff=float(inputs["reach_cutoff"])
 MFgrid=inputs["MFgrid"]
 MFdomain=inputs["MFdomain"]
@@ -59,31 +60,6 @@ def getfield(table,joinname):
             break
     return(joinname)
 
-
-def computeZonal(DEM,MFgrid):
-    print "extracting model top elevations from DEM..."
-    # create raster of gridcells based on node (cellnum)
-    # run zonal statistics on DEM for each grid cell
-    print "\tbuilding raster of model grid cells for sampling DEM..."
-    DEMres=arcpy.GetRasterProperties_management(DEM,"CELLSIZEX")
-    DEMres=float(DEMres.getOutput(0)) # cell size of DEM in project units
-    arcpy.PolygonToRaster_conversion(MFgrid,"node","MFgrid_raster","MAXIMUM_AREA","node",DEMres)
-    print "\tbuilding raster attribute table..."
-    arcpy.BuildRasterAttributeTable_management("MFgrid_raster")
-    print "\trunning zonal statistics... (this step will likely take several minutes or more)"
-    ZonalStatisticsAsTable("MFgrid_raster","VALUE",DEM,"demzstats.dbf","DATA","ALL")
-
-    # join zonal stats results back to grid
-    print "copying model grid to SFR folder..."
-    arcpy.MakeFeatureLayer_management(MFgrid,"MFgrid") # this is like bringing something into the table of contents in ArcMap
-    arcpy.MakeTableView_management("demzstats.dbf","demzstats")
-    node=getfield("MFgrid","node")
-    value=getfield("demzstats","value")
-    print "joining sampled DEM elevations to model grid...(note: this operation is very slow)"
-    arcpy.JoinField_management("MFgrid",node,"demzstats",value) # note: this takes an unreasonably long time. There may be a better way to do it.
-    
-if computeZonal=='True':
-    computeZonal(DEM,MFgrid)
 
 print "Clip original NHD flowlines to model domain..."
 # this creates a new file so original dataset untouched
@@ -137,18 +113,7 @@ print "Joining PlusflowVAA to NHDFlowlines...\n"
 comid1=getfield("Flowlines","comid")
 
 # join to Flowlines, keeping only common
-arcpy.AddJoin_management("Flowlines",comid1,PlusflowVAA,"comid","KEEP_COMMON")
-# save back down the results
-if arcpy.Exists('tmpjunkus.shp'):
-    print 'first removing old version of tmpjunkus.shp'
-    print 'This is a holding temporary file to save down %s' %Flowlines
-    print 'tmpjunkus.shp will be deleted'
-    arcpy.Delete_management('tmpjunkus.shp')
-arcpy.CopyFeatures_management("Flowlines",'tmpjunkus.shp')
-if arcpy.Exists(Flowlines):
-    print 'first removing old version of %s' %Flowlines
-    arcpy.Delete_management(Flowlines)
-arcpy.Rename_management('tmpjunkus.shp',Flowlines)
+SFR_arcpy.general_join(Flowlines, "Flowlines",comid1,PlusflowVAA,"comid",True)
 
 # reopen flowlines as "Flowlines" --> clunky a bit to save and reopen, but must do so
 arcpy.MakeFeatureLayer_management(Flowlines,"Flowlines")

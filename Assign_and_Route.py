@@ -48,7 +48,7 @@ def getfield(table,joinname):
 
 INTERSECT="river_explode.shp"
 OUTTAB="river_elevs.dbf"
-outfile=open("fix_comids.txt",'w')
+outfilename="fix_comids.txt"
 # Get input files locations
 # Global Input file for SFR utilities (see also for input instructions)
 infile="SFR_setup.in"
@@ -217,6 +217,8 @@ segelevinfo=defaultdict(defaultdict)
 rows=arcpy.InsertCursor(OUTTAB)
 noelev=dict()
 COMID_orderedFID=dict()
+fix_comids_summary = []
+fixcomids_flag = False
 for comid in FID.iterkeys():
     segcounter=segcounter+1
     #print "COMID = ",comid," segment is ",segcounter
@@ -256,11 +258,15 @@ for comid in FID.iterkeys():
             endingFID.append(test)
             numend=numend+1
     if (numstart!=1 or numend !=1):
+        if fixcomids_flag == False:
+            outfile = open(outfilename,'w')
+            fixcomids_flag = True
         outfile.write("numstart ="+ str(numstart)+" \n")
         outfile.write("numend = "+ str(numend)+" \n")
         outfile.write("starting FIDs: " + ",".join(map(str,startingFID))+"\n")
         outfile.write("ending FIDs: " + ",".join(map(str,endingFID))+"\n")
-        outfile.write("manually fix COMID = " + str(comid)+" \n")
+        outfile.write("manually fix COMID = %d\n" %comid)
+        fix_comids_summary.append('%d\n' %comid)
         noelev[comid]=1  #set flag 
         continue
 
@@ -293,7 +299,13 @@ for comid in FID.iterkeys():
         row.ELEVAVE=avecellrivelev
         row.ELEVMIN=mincellrivelev
         rows.insertRow(row)
-
+# write out the summary of comids to fix, then close the outfile
+if len(fix_comids_summary) > 0:
+    print 'Some cells have multiple COMIDs entering and/or leaving.\n See file "fix_comids.txt"'
+    outfile.write('#' * 30 + '\nSummary of COMIDS to fix:\n' +
+    'Delete these COMIDs from river_explode.shp, \nthen run CleanupRiverCells.py and rerun Assign_and_Route.py\n')
+    [outfile.write(line) for line in fix_comids_summary]
+    outfile.close()
 del row
 del rows
 
@@ -434,7 +446,6 @@ arcpy.DeleteField_management("cell_inout.shp",dropfields)
 #drop the dbf file
 arcpy.Delete_management(OUTTAB)
 
-outfile.close()
 arcpy.RefreshCatalog(path)
 
 RIVER_ELEVS="river_elevs.dbf"

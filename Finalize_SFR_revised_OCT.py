@@ -22,6 +22,7 @@ from collections import defaultdict
 from operator import itemgetter
 import math
 import pdb
+import SFR_arcpy
 
 # Global Input file for SFR utilities
 infile="SFR_setup.in"
@@ -54,7 +55,6 @@ MULT=inputs["MULT"]
 CELLS=inputs["CELLS"]      #used as template for GISSHP
 
 # Step 14 in Howard's SFR notes
-#arcpy.JoinField_management(ELEV,"node","river_cells.shp","node")
 
 print "getting grid information.."
 numrow=arcpy.SearchCursor(MFgrid,"","","","row D").next().getValue("row")
@@ -108,6 +108,7 @@ eps=1.0e-02
 
 path=os.getcwd()
 arcpy.env.workspace=path
+arcpy.env.qualifiedFieldNames = False
 
 #delete any working layers if found
 if arcpy.Exists("temp_lyr"):
@@ -128,6 +129,23 @@ comid=defaultdict(list)
 cellslope=defaultdict(list)
 comidseen=dict()
 
+# make sure grid information is in ELEV --- if not, join it in
+arcpy.MakeFeatureLayer_management('river_w_elevations.shp','tmpelevs')
+allfields = arcpy.ListFields('tmpelevs')
+rc_exists = False
+for cfield in allfields:
+    if 'column' in cfield.name.lower(): 
+        rc_exists = True
+        break
+    elif 'row' in cfield.name.lower():
+        rc_exists = True
+        break
+
+if rc_exists == False:
+    print 'need to join river_cells.shp to %s' %ELEV
+    SFR_arcpy.general_join(ELEV,'tmpelevs',"node",MFgrid,"node",True)
+
+arcpy.Delete_management('tmpelevs')
 cellrows=arcpy.SearchCursor(ELEV)
 for cell in cellrows:
     cellnum=int(cell.CELLNUM)
@@ -209,7 +227,7 @@ dominantcomid=dict()
 estwidth=defaultdict(list)
 for cellnum in row:
     for i in range(0,len(comid[cellnum])):
-         estwidth[cellnum].append(0.1193*math.pow(1000*arbolate[comid[cellnum][i]],0.5032)) # added 1000 to convert from km to m (widths were too small otherwise)
+        estwidth[cellnum].append(0.1193*math.pow(1000*arbolate[comid[cellnum][i]],0.5032)) # added 1000 to convert from km to m (widths were too small otherwise)
 
     biggest=0.
     for i in range(0,len(comid[cellnum])):
