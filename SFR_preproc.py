@@ -9,10 +9,17 @@ import os
 import re
 import arcpy
 from arcpy.sa import *
+import datetime, time
+ts = time.time()
+st_time = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
 
 # Global Input file for SFR utilities (see also for input instructions)
 infile="SFR_setup.in"
 
+# set up an output file for logging
+ofp = open('SFR_preproc.log','w')
+ofp.write('SFR_preproc log.')
+ofp.write('\n' + '#' * 25 + '\nStart Time: %s\n' %st_time +'#' * 25 + '\n')
 # Get input files locations
 infile=open(infile,'r').readlines()
 inputs=defaultdict()
@@ -37,6 +44,7 @@ arcpy_path=inputs["arcpy_path"]
 path=os.getcwd()
 arcpy.env.workspace = path
 arcpy.env.overwriteOutput = True 
+arcpy.env.qualifiedFieldNames = False
 
 # Check out any necessary licenses
 arcpy.CheckOutExtension("spatial")
@@ -90,8 +98,9 @@ arcpy.MakeTableView_management(PlusflowVAA,"PlusflowVAA")
 # delete all unneeded fields
 fields2keep=["comid","divergence","lengthkm","thinnercod","maxelevsmo","minelevsmo","hydroseq","uphydroseq","dnhydroseq","reachcode","streamorde","arbolatesu","fcode"]
 fields2keep=[x.lower() for x in fields2keep]
+ofp.write('Joining %s with %s: fields kept:\n')
+ofp.write('%s\n' %(','.join(fields2keep)))
 print "\nkeeping: %s fields; deleting the rest" %(','.join(fields2keep))
-print "\ndeleting:"
 Join=True # whether or not PlusflowVAA and Elevslope need to be joined
 for table in ["PlusflowVAA","Elevslope"]:
     fields2delete=[]
@@ -126,9 +135,26 @@ else:
 
 print "Joining PlusflowVAA to NHDFlowlines...\n"    
 comid1=getfield("Flowlines","comid")
-comid2=getfield("PlusflowVAA","comid")
-arcpy.JoinField_management("Flowlines",comid1,"PlusflowVAA",comid2)
+
+# join to Flowlines, keeping only common
+arcpy.AddJoin_management("Flowlines",comid1,PlusflowVAA,"comid","KEEP_COMMON")
+# save back down the results
+if arcpy.Exists('tmpjunkus.shp'):
+    print 'first removing old version of tmpjunkus.shp'
+    print 'This is a holding temporary file to save down %s' %Flowlines
+    print 'tmpjunkus.shp will be deleted'
+    arcpy.Delete_management('tmpjunkus.shp')
+arcpy.CopyFeatures_management("Flowlines",'tmpjunkus.shp')
+if arcpy.Exists(Flowlines):
+    print 'first removing old version of %s' %Flowlines
+    arcpy.Delete_management(Flowlines)
+arcpy.Rename_management('tmpjunkus.shp',Flowlines)
+
+# reopen flowlines as "Flowlines" --> clunky a bit to save and reopen, but must do so
+arcpy.MakeFeatureLayer_management(Flowlines,"Flowlines")
+
 print "\n"
+ofp.write('\n' + 25*'#' + '\nRemoving segments with no elevation information, and with ThinnerCod = -9..\n')
 print "Removing segments with no elevation information, and with ThinnerCod = -9..."
 ThinnerCod=getfield("Flowlines","thinnercod")
 MaxEl=getfield("Flowlines","maxelevsmo")
@@ -138,17 +164,20 @@ zerocount=0
 tcount=0
 for segments in FLtable:
     if segments.getValue(MaxEl)==0:
-        print str(segments.getValue(comid))+" no elevation data"
+        print "%d no elevation data" %segments.getValue(comid)
+        ofp.write("%d no elevation data\n" %segments.getValue(comid))
         FLtable.deleteRow(segments)
         zerocount+=1
     elif segments.getValue(ThinnerCod)==-9:
-        print str(segments.getValue(comid))+" ThinnerCod=-9"
+        print "%d ThinnerCod=-9" %segments.getValue(comid)
+        ofp.write("%d ThinnerCod=-9\n" %segments.getValue(comid))
         FLtable.deleteRow(segments)
         tcount+=1
             
 print "...removed %s segments with no elevation data" %(zerocount)
+ofp.write("...removed %s segments with no elevation data\n" %(zerocount))
 print "...removed %s segments with ThinnerCod = -9\n" %(tcount)
-
+ofp.write("...removed %s segments with ThinnerCod = -9\n" %(tcount))
 print "Performing spatial join (one-to-many) of NHD flowlines to model grid to get river cells...(this step may take several minutes or more)\n"
 arcpy.SpatialJoin_analysis(MFgrid,"Flowlines","river_cells.shp","JOIN_ONE_TO_MANY","KEEP_COMMON")
 
@@ -186,7 +215,7 @@ for fld in fields:
 for fld in fields:
     print "\tcalculating %s(s)..." %(fld)
     arcpy.CalculateField_management("river_explode.shp",fld,commands[fld],"PYTHON")
-    
+ofp.write('\n' + 25*'#' + '\nRemoving reaches with lengths less than or equal to %s...\n' %(reach_cutoff))
 print "\nRemoving reaches with lengths less than or equal to %s..." %(reach_cutoff)
 comid=getfield("river_explode.shp","comid")
 node=getfield("river_explode.shp","node")
@@ -195,12 +224,15 @@ table=arcpy.UpdateCursor("river_explode.shp")
 count=0
 for reaches in table:
     if reaches.getValue(Length)<=reach_cutoff:
-        print "segment: %s, cell: %s, length: %s" %(reaches.getValue(comid),reaches.getValue(node),reaches.getValue(Length))
+        print "segment: %d, cell: %s, length: %s" %(reaches.getValue(comid),reaches.getValue(node),reaches.getValue(Length))
+        ofp.write("segment: %d, cell: %s, length: %s\n" 
+                  %(reaches.getValue(comid),reaches.getValue(node),reaches.getValue(Length)))
         table.deleteRow(reaches)
         count+=1
-print "removed %s reaches with lengths <= %s" %(count,reach_cutoff)
-print "\n"
+print "removed %s reaches with lengths <= %s\n" %(count,reach_cutoff)
+ofp.write("removed %s reaches with lengths <= %s\n" %(count,reach_cutoff))
 print "removing cells corresponding to those reaches..."
+
 # temporarily join river_cells_dissolve to river explode; record nodes with no elevation information
 arcpy.MakeFeatureLayer_management("river_cells_dissolve.shp","river_cells_dissolve")
 arcpy.MakeFeatureLayer_management("river_explode.shp","river_explode")
@@ -215,29 +247,43 @@ for row in table:
 arcpy.RemoveJoin_management("river_cells_dissolve","river_explode")
 
 # remove nodes with no elevation information from river_explode
+ofp.write('\n' + 25*'#' + '\nRemoving nodes with no elevation information from river_explode\n')
+print 'Removing nodes with no elevation information from river_explode'
 node=getfield("river_cells_dissolve.shp","node")
 table=arcpy.UpdateCursor("river_cells_dissolve.shp")
 count=0
 for cells in table:
     if cells.getValue(node) in nodes2delete:
-        print "%s" %(cells.getValue(node))
+        print "%d" %(cells.getValue(node))
+        ofp.write('%d\n' %(cells.getValue(node)))
         table.deleteRow(cells)
         count+=1
-print "removed %s cells" %(count)
-print "\n"
+print "removed %s cells\n" %(count)
+ofp.write("removed %s cells" %(count))
+
 print "removing any remaining disconnected reaches..."
+ofp.write('\n' + 25*'#' + '\nremoving any remaining disconnected reaches...\n')
 node=getfield("river_explode.shp","node")
 comid=getfield("river_explode.shp","comid")
 table=arcpy.UpdateCursor("river_explode.shp")
 count=0
 for reaches in table:
     if reaches.getValue(node) in nodes2delete:
-        print "%s" %(reaches.getValue(node))
+        print "%d" %(reaches.getValue(node))
+        ofp.write('%d\n' %(reaches.getValue(node)))
         table.deleteRow(reaches)
         count+=1
 if count>0:
     print "removed %s disconnected reaches" %(count)
+    ofp.write("removed %s disconnected reaches\n" %(count))
 else:
     print "no disconnected reaches found!"
+    ofp.write("no disconnected reaches found!\n")
 print "\n"
-print "Done with pre-processing, ready to run AssignRiverElev.py!"
+print "Done with pre-processing, ready to run intersect.py!"
+ofp.write('\n' + '#' * 25 + '\nDone with pre-processing, ready to run intersect.py!')
+ts = time.time()
+end_time = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+
+ofp.write('\n' + '#' * 25 + '\nEnd Time: %s\n' %end_time +'#' * 25)
+ofp.close()
