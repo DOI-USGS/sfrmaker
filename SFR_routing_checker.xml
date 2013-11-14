@@ -1,0 +1,15 @@
+<data>
+<filenames>
+        <spc_file>model.spc</spc_file>
+        <sfr_file>NACP.sfr</sfr_file>
+</filenames>
+<orig_point>
+        <orig_seg>1</orig_seg>
+        <orig_subreach>1</orig_subreach>
+</orig_point>
+<flags>
+        <make_shapefiles>True</make_shapefiles>
+        <make_pdffiles>False</make_pdffiles>
+        <all_layers>False</all_layers>
+</flags>
+</data>

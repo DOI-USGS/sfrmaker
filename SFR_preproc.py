@@ -74,7 +74,7 @@ arcpy.MakeTableView_management(PlusflowVAA,"PlusflowVAA")
 # delete all unneeded fields
 fields2keep=["comid","divergence","lengthkm","thinnercod","maxelevsmo","minelevsmo","hydroseq","uphydroseq","dnhydroseq","reachcode","streamorde","arbolatesu","fcode"]
 fields2keep=[x.lower() for x in fields2keep]
-ofp.write('Joining %s with %s: fields kept:\n')
+ofp.write('Joining %s with %s: fields kept:\n' %(Elevslope,Flowlines))
 ofp.write('%s\n' %(','.join(fields2keep)))
 print "\nkeeping: %s fields; deleting the rest" %(','.join(fields2keep))
 Join=True # whether or not PlusflowVAA and Elevslope need to be joined
