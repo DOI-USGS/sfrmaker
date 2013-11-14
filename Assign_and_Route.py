@@ -167,8 +167,8 @@ tempfromcomid=[]
 temptocomid=[]
 with arcpy.da.SearchCursor(FLOW,("FROMCOMID","TOCOMID")) as cursor:
     for row in cursor:
-       tempfromcomid.append(int(row[0]))
-       temptocomid.append(int(row[1]))
+        tempfromcomid.append(int(row[0]))
+        temptocomid.append(int(row[1]))
 
 print 'have the froms and tos from %s'% FLOW
     

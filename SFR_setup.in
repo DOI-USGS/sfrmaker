@@ -5,10 +5,11 @@
 ###
 # Settings--------------------------------------------------------------------------------------------------
 computeZonal=False # True if DEM needs to be sampled for model grid (takes a long time to run); False assumes that model grid shp already contains elevations
-reach_cutoff=2 # minimum reach length to retain following explosion of NHD segments to river cells
+reach_cutoff=1 # minimum reach length to retain following explosion of NHD segments to river cells
 # Infiles---------------------------------------------------------------------------------------------------
 MFgrid='nacp_mg_cells_chk_node.shp' # polygon shapefile export of grid from Groundwater Vistas
-MFdomain='cpmg_stream_area_ed_v5d.shp' # outline of model grid
+MFdomain='nacp_streams_area_ed_v4b.shp' # outline of model grid
+MFdis='NACP_SWI_Regional.dis' #discretization file
 DEM='nacp_demfti' # DEM for model area, doesn't need to be clipped
 PlusflowVAA='PlusFlowlineVAA.dbf' # from NHDPlus
 Elevslope='elevslope_merged.dbf' # from NHDPlus
@@ -16,17 +17,18 @@ Flowlines_unclipped='flowlines_3plus_edjp_v2.shp' # original flowlines covering 
 arcpy_path='C:\python27\ArcGIS10.1\python' # for calling arcpy scripts externally using os.system
 FLOW='PlusFlow.dbf'
 FTab='FCodes.dbf' # from NHDPlus
-Layer1top='elev0.dat' # matrix of model TOP elevations exported from GWV
+Layer1top='model_top.dat' # matrix of model TOP elevations exported from GWV
+Layer_bots='BOTTOMS.dat'
 # Intermediate Files----------------------------------------------------------------------------------------
 Flowlines='flowlines_clipped.shp' # clipped to active area
 ELEV='river_w_elevations.shp' # this is an output filename
 CELLS='river_cells_dissolve.shp' # from SFR_preproc.py
 NHD='NHD_intersect_edited.shp'  # from intersect.py
-INTERSECT='river_w_elevations.shp'   
 ###
 # Outfiles---------------------------------------------------------------------------------------------------
 OUT='NACP.SFR'
-GIS='SFRfinal_riv_cellinfo.txt'
+GISSHP='SFRfinal_riv_cellinfo.shp'
 MAT1='SFR_GWVmat1.txt'                    #matrix files for use with GWV
 MAT2='SFR_GWVmat2.txt'
 WIDTH='SFRwidthinfo.txt'
+MULT='Multiple_segments.txt'

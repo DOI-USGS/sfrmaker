@@ -143,7 +143,7 @@ for stream in intersects:
             if manual_intervention == 1:
                 ofp = open('boundary_manual_fix_issues.txt','w')
                 ofp.write('The following COMIDs identify streams that need manual attention.\n')
-                ofp.write('Fix in the file %s. Then rerun intersect.py\n' %MODLNHD)
+                ofp.write('Fix in the files %s and river_explode.shp. Then rerun intersect.py\n' %MODLNHD)
                 ofp.write('#' * 16 + '\n')
             print 'both ends are cut off for comid %d' %comid
             ofp.write('both ends are cut off for comid %d\n' %(comid))

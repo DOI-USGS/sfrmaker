@@ -26,8 +26,12 @@ arcpy.env.workspace=path
 # open up the necessary layers
 #convert to layers
 # NB --> for now, making a scratch copy to open to avoid arcpy from not being able to save to an open file
+if arcpy.Exists(os.path.join(path,'river_cells_TMP.shp')):
+    arcpy.Delete_management(os.path.join(path,'river_cells_TMP.shp'))
 arcpy.Copy_management(os.path.join(path,'river_cells.shp'),os.path.join(path,'river_cells_TMP.shp'))
 arcpy.MakeFeatureLayer_management( 'river_cells_TMP.shp','rivcells')
+if arcpy.Exists(os.path.join(path,'river_cells_dissolve_TMP.shp')):
+    arcpy.Delete_management(os.path.join(path,'river_cells_dissolve_TMP.shp'))
 arcpy.Copy_management(os.path.join(path,'river_cells_dissolve.shp'),os.path.join(path,'river_cells_dissolve_TMP.shp'))
 arcpy.MakeFeatureLayer_management('river_cells_dissolve_TMP.shp','rivcellsdiss')
 # opening river_explode.shp as read only so no need for scratch file
@@ -54,6 +58,9 @@ arcpy.CopyFeatures_management(rivdisstrim,os.path.join(path,'river_cells_dissolv
 arcpy.Delete_management('rivcellsdiss')
 arcpy.Delete_management(os.path.join(path,'river_cells_dissolve_TMP.shp'))
 
+# make a backup copy of fix_comids.txt
+print 'making a copy of "boundary_manual_fix_issues.txt" --> "boundary_manual_fix_issues_backup.txt"'
+shutil.copy('boundary_manual_fix_issues.txt','boundary_manual_fix_issues_backup.txt')
 # make a backup copy of fix_comids.txt
 print 'making a copy of "fix_comids.txt" --> "fix_comids_backup.txt"'
 shutil.copy('fix_comids.txt','fix_comids_backup.txt')
