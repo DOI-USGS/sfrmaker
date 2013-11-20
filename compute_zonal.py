@@ -4,8 +4,13 @@ import arcpy
 from collections import defaultdict
 import numpy as np
 
+# Hard coded settings
+nrows,ncolumns=800,800
+delx=250
+
+path='D:\\ATLData\\BadRiver\\Grid\\' # this might not be needed
+
 # Input file
-'''
 infile="SFR_setup.in"
 
 # Get input parameters
@@ -16,12 +21,10 @@ for line in infile:
         varname=line.split("=")[0]
         var=line.split("=")[1].split()[0]
         inputs[varname]=var.replace("'","")
-'''
-nrows,ncolumns=800,800
-delx=250
-MFgrid='BadRiver_cells.shp'
-path='D:\\ATLData\\BadRiver\\Grid\\'
-DEM='ned_ft_utm'
+
+# Input files read from common SFR input file
+MFgrid=inputs["MFgrid"]
+DEM=inputs["DEM"]
 
 # Settings
 arcpy.env.workspace = path
