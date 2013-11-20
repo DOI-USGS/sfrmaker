@@ -1,6 +1,6 @@
 # Program to correct SFR reach streamtop elevations using land surface elevations, while enforcing downstream monotonicity
 
-import os, shutil
+import os
 import numpy as np
 from collections import defaultdict
 import matplotlib.pyplot as plt
@@ -8,7 +8,6 @@ from matplotlib.backends.backend_pdf import PdfPages
 import STOP_compare
 import Fix_segment_ends
 import Plot_segment_profiles
-import discomb_utilities as dis_util
 import pandas as pd # this is just used to sort segments for plotting, prob. can be done in np
 import pdb
 
@@ -29,7 +28,6 @@ GWVmat1=inputs["MAT1"] # GWV SFR input mat1, from Finalize_SFR.py
 GWVmat2=inputs["MAT2"] # GWV SFR input mat2
 L1top=inputs["Layer1top"] # Layer 1 (model) TOP elevations
 bots=inputs["Layer_bots"] # Bottom elevations for all layers
-MFdis = inputs["MFdis"]
 
 # Outputs
 outfile=inputs["MAT1"] # revised GWV SFR input mat1
@@ -51,13 +49,18 @@ up_increment=1.0 # if a minimum in the dem is lower than the segment end, new el
 dn_increment=0.1 # if end+increment is greater than upstream STOP, decrease by dn_increment until current STOP is less
 slope_min=1.0e-6 # replace 0 slope values (resulting from NHD) with an aritrary value
 enforce_slope_min=True # True or False, if True, replaces all slopes <slope_min with slope_min. Affected slopes are listed in error file.
-plot_slope=False # flag to include plots of streambed slope in output PDF
-num_segs2plot=50 # number of segments to plot (will choose using regular interval)
 Fix_ends=False # attempt to adjust segment end elevations to reduce floating and incising
 Fix_routing=False # Fixes instance of incorrect routing where two or more streams come together; 
 # (all lower-order reaches at junction are routed to segment with lowest maximum (i.e. reach 1) elevation
 maxsearch=1 # number of cells to search in, in each direction, to find downstream segments when Fix_routing
 backwards_routing_tol=0.1 # amount of backwards routing that will be tolerated (model units) needed because of floating point precision issues with small or flat gradients
+
+# plot settings
+num_segs2plot=50 # number of segments to plot (will choose using regular interval)
+plot_slope=False # flag to include plots of streambed slope in output PDF
+plot_floating_cutoff=1 # plot all segments with a reach floating higher than cutoff
+plot_incised_cutoff=50 # plot all segments
+
 
 print "bringing in segment, reach, streamtop, land surface, and residuals..."
 Diffs=STOP_compare.stopcomp(L1top,GWVmat1,STOP_comp_SFR_utilities) # generates column text file from MAT1 and Layer1 top elevs
@@ -74,8 +77,8 @@ GWVmat2_data=np.genfromtxt(GWVmat2, delimiter=',',names=True,dtype=None)
 # make backups of previous MAT1 and MAT2
 GWVmat1old=inputs["MAT1"]+"_old_SFR_utilities"
 GWVmat2old=inputs["MAT2"]+"_old"
-shutil.move(inputs["MAT1"],GWVmat1old)
-shutil.move(inputs["MAT2"],GWVmat2old)
+os.rename(inputs["MAT1"],GWVmat1old)
+os.rename(inputs["MAT2"],GWVmat2old)
 
 
 if Fix_routing:
@@ -121,6 +124,7 @@ if Fix_ends:
     ofp4.write('segment,upSTOP,dnSTOP,reason\n')
 
     for segnum in sorted(segments):
+        print str(segnum)
         seg_inds=list(np.where(infile_data['MSEG']==segnum)[0])
         segment=infile_data[seg_inds]
         
@@ -184,7 +188,7 @@ ofp2=open(error_report,'w')
 print "\nfixing reaches in segments..."
 for segnum in sorted(segments):
     
-    #print str(segnum)
+    print str(segnum)
     seg_inds=list(np.where(infile_data['MSEG']==segnum)[0])
     segment=infile_data[seg_inds]
     
@@ -247,7 +251,7 @@ for segnum in sorted(segments):
                 dist=seg_distances[s]-seg_distances[s-1]
                 STOPint=STOP2[-1]+slope*dist
                 STOP2.append(STOPint)
-                #print '%s %s' %(s,STOPint)
+                print '%s %s' %(s,STOPint)
                 ofp.write(str(STOPint)+'\n')
             break
         
@@ -354,23 +358,18 @@ ofp.close()
 ofp2.close()
 
 
-print "saving new streamtop elevations and slopes to GWV_SFRmat1.dat file"
-print "Appending cellnum onto lines"
-print "reading in NROW, NCOL, etc from dis file: %s" %MFdis
-DX,DY,NLAY,NROW,NCOL,foo = dis_util.read_meta_data(MFdis)
+print "saving new streamtop elevations and slopes to GWV SFR mat. 1 file"
 input_file=open(GWVmat1old).readlines()
 ofp=open(outfile,'w')
-ofp.write('%s,%s\n' %(input_file[0].strip(),'cellnum'))
+ofp.write(input_file[0])
 for line in input_file[1:]:
-    line = line.strip().split(',')
-    # add cellnum for later evaluation in Arc
-    line.append((int(line[1])-1)*NCOL + int(line[0]))
-    segment=int(line[6])
+    line=line.strip()
+    segment=int(line.split(',')[6])
     if segment in STOP2dict.keys():
-        reach=int(line[5])
-        linestart=','.join(map(str,line[:3]))
-        linemid=','.join(map(str,line[5:-3]))
-        lineend=','.join(map(str,line[-2:]))
+        reach=int(line.split(',')[5])
+        linestart=','.join(map(str,line.split(',')[:3]))
+        linemid=','.join(map(str,line.split(',')[5:-2]))
+        lineend=line.split(',')[-1]
         STAGE=STOP2dict[segment][reach-1]+1
         STOP=STOP2dict[segment][reach-1]
         slope=slopesdict[segment][reach-1]
@@ -384,19 +383,30 @@ Diffs=STOP_compare.stopcomp(L1top,outfile,STOP_comp_fixwDEM)
 STOP_compare.plot_diffstats(Diffs['DIF'],'Land-surface - SFR comparison after fix_w_DEM.py')
 
 # profile plots showing where SFR elev goes below model bottom
-#sinkers=Plot_segment_profiles.get_sinkers('below_bot.csv','segment')
-#Plot_segment_profiles.plot_profiles(sinkers,seg_distdict,[TOPNEWdict,STOP2dict],['model top','streambed top post-fix_w_DEM'],'Below_bottom.pdf',Bottoms=Bottomsdict)
+try:
+    sinkers=Plot_segment_profiles.get_sinkers('below_bot.csv','segment')
+    Plot_segment_profiles.plot_profiles(sinkers,seg_distdict,[TOPNEWdict,STOP2dict],['model top','streambed top post-fix_w_DEM'],'Below_bottom.pdf',Bottoms=Bottomsdict)
+except IOError:
+    pass
 
-# profiles of 50 worst floaters
+# profiles of worst floating segments
 df=pd.DataFrame(Diffs['DIF'],index=Diffs['MSEG'])
+#nreaches=int(round(len(df)*percentile))
 Floats=df.sort(columns=0,ascending=True)
-floats=list(np.unique(list(Floats[0][0:50].index)))
-Plot_segment_profiles.plot_profiles(floats,seg_distdict,[TOPNEWdict,STOP2dict],['model top','streambed top post-fix_w_DEM'],'50_worst_floating.pdf')
+Floats=Floats[0][Floats[0]<0]
+Floatsegs=Floats.groupby(Floats.index).max() # group floating reaches by segment, only retain reach with largets float difference
+Floatsegs.sort()
+floats=list(Floatsegs[Floatsegs<-plot_floating_cutoff].index) # filter top floating segments to exclude those below the above cutoff
+Plot_segment_profiles.plot_profiles(floats,seg_distdict,[TOPNEWdict,STOP2dict],['model top','streambed top post-fix_w_DEM'],'Segments_floating_by_more_than_%s.pdf' %(plot_floating_cutoff))
 
-# profiles of 50 worst incised
+# profiles of worst incised
+df=pd.DataFrame(Diffs['DIF'],index=Diffs['MSEG'])
 Incised=df.sort(columns=0,ascending=False)
-incised=list(np.unique(list(Incised[0][0:50].index)))
-Plot_segment_profiles.plot_profiles(incised,seg_distdict,[TOPNEWdict,STOP2dict],['model top','streambed top post-fix_w_DEM'],'50_worst_incised.pdf')
+Incised=Incised[0][Incised[0]>0]
+Incisedsegs=Incised.groupby(Incised.index).max() # group floating reaches by segment, only retain reach with largets float difference
+Incisedsegs.sort()
+incised=list(Incisedsegs[Incisedsegs>plot_incised_cutoff].index)
+Plot_segment_profiles.plot_profiles(incised,seg_distdict,[TOPNEWdict,STOP2dict],['model top','streambed top post-fix_w_DEM'],'Segments_incised_by_more_than_%s.pdf' %(plot_incised_cutoff))
 
 # list of selected segments to plot
 segs2plot=segments[::int(np.floor(len(segments)/num_segs2plot))]
