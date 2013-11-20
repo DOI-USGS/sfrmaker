@@ -40,13 +40,18 @@ Note:
 
 ### Workflow for building SFR input:
 
+##### 0) run computeZonal.py
+	
+     Inputs:
+     Polygon shapefile export of model grid (e.g. as exported by Groundwater Vistas)
+     A DEM for model area, doesn't need to be clipped
+     
 ##### 1) run SFR_preproc.py
 (see Steps 1-9 in Howard Reeves' SFR notes)
 
      Inputs: 
-     Polygon shapefile export of model grid (e.g. as exported by Groundwater Vistas)
+     Shapefile of model grid cells with model top elevations (from computeZonal.py above)
      Shapefile polygon of model domain (merged polygon of gridcells)
-     A DEM for model area, doesn't need to be clipped
      PlusflowVAA database from NHDPlus v2
      Elevslope database from NHDPlus v2
      original NHDFlowline shapefile from NHDPlus v2
