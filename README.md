@@ -193,9 +193,17 @@ Run this code after steps 2-4 such that fix\_comids.txt is empty. This code join
 	
 	Outputs:
 		- GWVmat1
-		- PDF of profiles for selected SFR segments compared to land surface
-		- fix_w_DEM_interps.txt (file recording adjustments made to reaches that are initially below the segment end)
-		- fix_w_DEM_errors.txt (reports 0-slope errors, etc.)
+		- GWVmat2
+		- selected_segments.pdf (profile plots of selected segments compared to land surface)
+		- PDF files showing profiles of most floating and most incised segments
+		- PDF files showing cumulative distribution of landsurface - streambed elevations and summary statistics before and after
+		- fix_routing_report='Fix_routing_report.txt' # records which segments were given new outsegs by Fix_routing
+		- fix_ends_report='Fixed_segment_ends.csv' # records changes made to segment end elevations
+		- fix_ends_errors='Fix_segment_ends_errors.txt' # records instances where segments were left with backwards routing
+		- end_interp_report='fix_w_DEM_interps.txt' # file recording adjustments made using up/dn_increments
+		- error_report='fix_w_DEM_errors.txt' # file for reporting 0 slope errors, etc.
+		- STOP_comp_SFR_utilities='STOP_compare_SFR_utilities.csv'# from STOP_compare.py
+		- STOP_comp_fixwDEM='STOP_compare_fix_w_DEM.csv' # from STOP_compare.py
 
 ##### 11) run Assign_Layers.py
 
