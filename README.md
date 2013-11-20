@@ -196,7 +196,7 @@ Run this code after steps 2-4 such that fix\_comids.txt is empty. This code join
 		- GWVmat2
 		- selected_segments.pdf (profile plots of selected segments compared to land surface)
 		- PDF files showing profiles of most floating and most incised segments
-		- PDF files showing cumulative distribution of landsurface - streambed elevations and summary statistics before and after
+		- PDF files showing cumulative distribution of landsurface/streambed elevation differences and summary statistics before and after
 		- fix_routing_report='Fix_routing_report.txt' # records which segments were given new outsegs by Fix_routing
 		- fix_ends_report='Fixed_segment_ends.csv' # records changes made to segment end elevations
 		- fix_ends_errors='Fix_segment_ends_errors.txt' # records instances where segments were left with backwards routing
@@ -205,7 +205,35 @@ Run this code after steps 2-4 such that fix\_comids.txt is empty. This code join
 		- STOP_comp_SFR_utilities='STOP_compare_SFR_utilities.csv'# from STOP_compare.py
 		- STOP_comp_fixwDEM='STOP_compare_fix_w_DEM.csv' # from STOP_compare.py
 
+	###### NOTE: there are also a number of hard-coded settings for fix_w_DEM that are listed with descriptions under the #Settings comment in the source code
+		- in particular,
+			- when Fix_ends is True, functions in Fix_segment_ends.py will be run, which try to reduce floating and incision of segment end elevations relative to the land surface
+			- when Fix_routing is True, functions in Fix_segment_ends.py will search within a specified radius for nearby SFR cells, and reroute to the nearby cell with the lowest starting elevation. This can help with problems at confluences, where two streams come together and route into eachother before routing downstream.
+			- These two features are run before the main body of fix_w_DEM, which attemps to correct interior reaches within the segment
+			- It's not clear if Fix_ends and Fix_routing are always worth using. Best to run without, and then look over the results (saving the summary PDFs to different file names). And then run with these features turned on to see if there is any improvement.
+		- At the start, Fix_w_DEM saves original copies of Mat1 and Mat2, with "_old" appended to the name. If rerunning, need to restore the old versions first (won't save output otherwise)
+		
 ##### 11) run Assign_Layers.py
+	Using the stream bottom elevations, assigns layers to all of the SFR cells
+	If for some reason stream bottoms go below the model bottom, will post a warning, and write all of the violations to output.
+	If lowering the model bottom correct the violations is reasonable, then can rerun the program with Lowerbot=True; this will adjust the model bottom elevations to accomodate the SFR cells
+	Also, there may have been some segments after fix_w_DEM that weren't handled properly. In the Columbia Co. model, many of these were headwaters that were in NHD incorrectly (i.e., connecting across a saddle to the wrong valley, etc.)
+	If these segments are deleted, the segment numbering is no long continuous, and MODFLOW won't run.
+	Assign_Layers will adjust the segment numbering accordingly, to maintain continuity.
+
+	Inputs:
+		- rows x columns text matrix of bottom elevations for all layers (either exported from GW Vistas, or generated seperate from DIS file)
+		- rows x columns text matrix of model top elevations
+		- GWVmat1 from above
+		- GWVmat2 from above
+	Outputs:
+		- MODFLOW SFR package file
+		- revised GWVmat1 file with layers assigned
+		- revised GWVmat2 file with updated segment numbers (if segment renumbering was necessary)
+		- 'SFR_layer_assignments.txt' (summarizes number of reaches assigned to each layer)
+		- 'Model_bottom_adjustments.pdf' PDF images of model bottom before and after adjustments
+		- 'below_bot.csv' - records all stream bottoms that go below the model bottom, with corresponding layer elevation info
+
 
 	
 
