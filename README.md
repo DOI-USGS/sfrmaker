@@ -64,112 +64,45 @@ Note:
 
 
 
-##### 2) run AssignRiverElev.py, 
-which produces a table of reach midpoint elevations via linear interpolation from NHD segment endpoint elevations
-
-     Inputs: river_explode.shp
-     Outputs: river_elevs.dbf
-                    fix_comids.txt      # list of comids with two or more sets of endpoints.  These are usually segments that meander out of and then back into the grid.
-
-##### 3) manually delete flowlines and corresponding gridcell polygons
-for segments that have multiple starts/ends (e.g. those that meander out of the grid and back in). They are indicated in fix\_comids.txt.
-
-These should be deleted from river_explode.shp. 
-
-##### 4) run CleanupRiverCells.py,
-which trims down the river cells shapefiles to reflect the deletiosn that were made in the previous step deleting COMIDs from river_explode.shp
-This also makes a backup copy of fix\_comids.txt --> fix\_comids\_backup.txt which can be used to inspect the results of rerunning AssignRiverElev.py
-
-##### 4a) Rerun AssignRiverElev.py
-Rerun and go through any fix\_comids until fix\_comids.txt returns an empty file.
-
-##### 5a) run intersect.py
+##### 2) run intersect.py
 
      Inputs:
-          - flowlines clipped from previous step
-          - unclipped (original) flowlines from NHDPlus
-          - polygon of grid boundary
+          - <casename>.in
+          - <Flowlines_unclipped>.shp
+          - <MFdomain>.shp
+          - <Flowlines>.shp
           
      Outputs:
-          - boundaryclipsrouting.txt (for segments intersecting model boundary)
-          - 'NHD_intersect_edited.shp'
+          - <NHD>.shp
+          - boundaryClipsRouting.txt
+          - boundary_manual_fix_issues.txt (if manual intervention required)
 
-Look at boundary\_manualfix\_issues.txt output file and find COMIDs that leave and reenter the domain. Fix them in Flowlines (from input file) and in river\_explode.py (if necessary).
-
-Then rerun  CleanupRiverCells.py (if edited any of river\_explode.py) and intersect.py.
+Look at boundary\_manual\_fix\_issues.txt output file and find COMIDs that leave and reenter the domain. Fix them in Flowlines (from input file) and in river\_explode.py (if necessary).
 
 Once runs through with no manual fix messages, move on.
 
-##### 5b) Run JoinRiverElevs.py
-Run this code after steps 2-4 such that fix\_comids.txt is empty. This code joins river\_elevs.dbf with river_explode.shp resulting in the file ELEV as identified in the main input file. This ELEV file is required later by RouteStreamNetwork.py
-##### 6) run RouteStreamNetwork.py 
-(note: this may take hours to run with large models/dense stream networks)
+##### 2a) run CleanupRiverCells.py,
+which trims down the river cells shapefiles to reflect the deletiosn that were made in the previous step deleting COMIDs from river_explode.shp
+This also makes a backup copy of fix\_comids.txt --> fix\_comids\_backup.txt which can be used to inspect the results of rerunning AssignRiverElev.py
 
-      Inputs:
-          - boundaryclipsrouting.txt
-          - river_w_elevations.shp    # "ELEV" in input file; contains line segments for each SFR reach, with preliminary elevation, length and width information
-          - PlusFlow database from NHDPlus v2
-          
-      Outputs:
-          - check_network.txt     List of to/from routing for segments
-          - flagged_comids.txt    List instances where downstream segment has higher start elevation
+##### 2b) rerun intersect.py
+Only if there were COMID repair issues on the previous run. 
 
-     Check Network lines are created as follows:
-          - list of COMIDs is obtained from river_w_elevations
-          - FROMCOMID field in PlusFlow is queried for each comid
-          - If the corresponding TOCOMID is in the list of COMIDs:
-               - FROMCOMID, TOCOMID is written
-          - Else:
-               - FROMCOMID, 99999 is written (this will happen if stream flows outside of grid)
-          - If there are no corresponding FROMCOMIDs:
-               - TOCOMID field is queried for comid in list
-          - If the corresponding FROMCOMID is in the list of comids:
-               - FROMCOMID, TOCOMID is written
-          - Else:
-               - 99999, TOCOMID is written (this will happen if stream flows into grid)
+##### 3) run Assign_and_Route.py
+This works through the COMID definitions along with model cell boundaries to both assign COMIDs to model cells and assign elevations based on those COMID segments. Also handles the routing from NHDplus as much as possible.
 
-##### 6a) (if necessary) run Fix\_flagged\_comids.py 
-(this program still needs some work):
+Once this runs with no manual fixes, move to step 4. Otherwise handle COMIDs listed in fix\_comids.txt
 
-     Handles the segments in flagged_comids.txt (e.g., making elevations consistent with routing) by:
-          - deleting segments that have an FTYPE of "ArtificialPath" and a "Divergence" value of 2. These segments appeared mostly to be small parts of braids in the channel. References to these segments are removed from check_network.txt
-          - for all other segments in flagged_comids.txt:
-               - identifies segment end-reaches, and corresponding cells
-               - looks for other segments in those cells, and identifies global max/min elevations (these could be used to edit routing)
-               - takes segment max elevation, and max elevation of next downstream segment (from check_network.txt)
-                    - re-calculates elevations of all reaches in segment by linear interpolation
-                    - replaces original elevations in river_w_elevations.txt
-                    - 0 gradients on headwater segments are corrected by increasing first reach elevation incrementally
-                    - other zero gradients are passed to next stages of SFR setup process.
+##### 3a) run CleanupRiverCells.py
+If fix\_comids.txt indicated necessary manual fixes, follow direction in that file then run CleanupRiverCells.py
+
+##### 3b) rerun Assign_and_Route.py
+
+
+##### 4) run Finalize\_SFR\_revised\_OCT.py
+Creates the actual SFR file with elevations and routing
      
-     Note: the part of this script that identifies headwaters is incorrect, also, for some reason not all of the ArtificialPaths from above were removed from check_network.txt; the logic in this section of Fix_flagged likely needs to be fixed. Also the resetting of elevations in river_w_elevations could be greatly streamlined by instead using the fixsegelevs function (see below)
-     18 segments were deleted, 22 were corrected
-     
-     fix_segment_elevs.py has a function that enforces downhill monotonicity within a segment, if first and last cellnum (node number), and a desired minimum and maximum elevation are known
-     - easy to execute manually in the Arcpy window (while looking at the flagged segments in ArcMap)
-     - would be better if integrated into a correct version of Fix_flagged_comids.py
-          
-##### 7) run RouteRiverCells.py 
-(this script also may take an hour or more)
-
-     Inputs:
-          - river_cells_dissolve.shp  # from SFR_preproc.py
-          - river_w_elevations.shp  # uses this to route reaches within segments
-          - NHD_intersect_edited.shp   # from intersect.py
-          - PlusFlowlineVAA database from NHDPlus
-          - check_network.txt  # from RouteStreamNetwork.py
-          - boundaryclipsrouting.txt  # from intersect.py
-          
-     Outputs:
-          - reach_ordering.txt
-          - routed_cells.txt
-
-##### 8) run Finalize_SFR2.py
-
-##### 9) run SFR_utilities.py,  
-
-     
-##### 10) run Fix\_w\_DEM.py
+##### 5) run Fix\_w\_DEM.py
 	- runs Fix\_segment\_ends.py to adjust segment end elevations to match model TOP as closely as possible (minus an adjustable incising parameter)
 	- checks for backward routing in segment ends
 	- adjust segment interior reaches to model TOP, as long as they are monotonically downhill and don't go below segment end
@@ -213,7 +146,7 @@ Run this code after steps 2-4 such that fix\_comids.txt is empty. This code join
 			- It's not clear if Fix_ends and Fix_routing are always worth using. Best to run without, and then look over the results (saving the summary PDFs to different file names). And then run with these features turned on to see if there is any improvement.
 		- At the start, Fix_w_DEM saves original copies of Mat1 and Mat2, with "_old" appended to the name. If rerunning, need to restore the old versions first (won't save output otherwise)
 		
-##### 11) run Assign_Layers.py
+##### 6) run Assign_Layers.py
 	Using the stream bottom elevations, assigns layers to all of the SFR cells
 	If for some reason stream bottoms go below the model bottom, will post a warning, and write all of the violations to output.
 	If lowering the model bottom correct the violations is reasonable, then can rerun the program with Lowerbot=True; this will adjust the model bottom elevations to accomodate the SFR cells
