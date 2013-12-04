@@ -367,7 +367,9 @@ for cn in uniqcells:
                     cellelevlist[cn].append(segelevinfo[cellcomidout[cn][i]][cn])
     else:
         comid=cellcomidin[cn][0]
-        if comid in noelev:
+        if not cn in segelevinfo[comid]:
+            cellelevlist[cn].append(99999)
+        elif comid in noelev:
             cellelevlist[cn].append(99999)
         else:
             cellelevlist[cn].append(segelevinfo[comid][cn])
