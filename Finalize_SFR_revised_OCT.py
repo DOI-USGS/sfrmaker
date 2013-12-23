@@ -22,7 +22,6 @@ from collections import defaultdict
 from operator import itemgetter
 import math
 import pdb
-import SFR_arcpy
 
 # Global Input file for SFR utilities
 infile="SFR_setup.in"
@@ -55,6 +54,7 @@ MULT=inputs["MULT"]
 CELLS=inputs["CELLS"]      #used as template for GISSHP
 
 # Step 14 in Howard's SFR notes
+#arcpy.JoinField_management(ELEV,"node","river_cells.shp","node")
 
 print "getting grid information.."
 numrow=arcpy.SearchCursor(MFgrid,"","","","row D").next().getValue("row")
@@ -108,7 +108,6 @@ eps=1.0e-02
 
 path=os.getcwd()
 arcpy.env.workspace=path
-arcpy.env.qualifiedFieldNames = False
 
 #delete any working layers if found
 if arcpy.Exists("temp_lyr"):
@@ -129,23 +128,6 @@ comid=defaultdict(list)
 cellslope=defaultdict(list)
 comidseen=dict()
 
-# make sure grid information is in ELEV --- if not, join it in
-arcpy.MakeFeatureLayer_management('river_w_elevations.shp','tmpelevs')
-allfields = arcpy.ListFields('tmpelevs')
-rc_exists = False
-for cfield in allfields:
-    if 'column' in cfield.name.lower(): 
-        rc_exists = True
-        break
-    elif 'row' in cfield.name.lower():
-        rc_exists = True
-        break
-
-if rc_exists == False:
-    print 'need to join river_cells.shp to %s' %ELEV
-    SFR_arcpy.general_join(ELEV,'tmpelevs',"node",MFgrid,"node",True)
-
-arcpy.Delete_management('tmpelevs')
 cellrows=arcpy.SearchCursor(ELEV)
 for cell in cellrows:
     cellnum=int(cell.CELLNUM)
@@ -227,7 +209,7 @@ dominantcomid=dict()
 estwidth=defaultdict(list)
 for cellnum in row:
     for i in range(0,len(comid[cellnum])):
-        estwidth[cellnum].append(0.1193*math.pow(1000*arbolate[comid[cellnum][i]],0.5032)) # added 1000 to convert from km to m (widths were too small otherwise)
+         estwidth[cellnum].append(0.1193*math.pow(1000*arbolate[comid[cellnum][i]],0.5032)) # added 1000 to convert from km to m (widths were too small otherwise)
 
     biggest=0.
     for i in range(0,len(comid[cellnum])):
@@ -428,10 +410,10 @@ for rawsfrsegment in hydrowork:
         print 'raw sfr segment dropped', rawsfrsegment
         del hydrowork[rawsfrsegment]
 
-#now sort the remaining entries of the dictionary in ascending order and
+#now sort the remaining entries of the dictionary in descending (downstream) order and
 #then use the map command to convert to a list of list of cells
 hydro_ordered=hydrowork.items()
-hydro_ordered.sort(key=itemgetter(0))
+hydro_ordered.sort(key=itemgetter(0),reverse=True)
 hydro_orderedcells=map(itemgetter(1),hydro_ordered)  #list of the lists of cells
 hydro_orderedindex=map(itemgetter(0),hydro_ordered)  #list of the indexes (ordered)
 
@@ -445,11 +427,43 @@ print 'done with hydro_ordered step'
 #maybe entire sfr segments.  Allow for renumbering of segments and reaches
 #and march through to make final SFR output.
 
-#loop over hydro_orderedindex and renumber SFR segment if one if missing
+#the shapefile cell_inout has a list of cells and whether each cell
+#has one comid (same); a single comid in and a single comid out but
+#two or more comids in the cell (onein/oneout); or multiple comids
+#either entering or exiting the cell (multiple).  The last case
+#could be a convergence or non-intersecting streams.
+
+#loop over hydro_orderedindex and renumber SFR segment and reaches
+#if one if missing.  Also tag cells that have been output already and
+#do not repeat writing that cell.
+
+#includes a dictionary of the connections for each segment.  The dictionary
+#key is the SFR final segment number.  The dictionary item is a list with
+#two entries, the first entry is the upstream segment, zero for headwater,
+#and the second entry is the downstream segment, zero for ends- outflows to boundary
+#or other feature where the SFR segment chain ends.  The lambda in the
+#variable definition sets [0,0] as the default for a segment that has not
+#yet been assigned a value.
+
+#read in cell_inout
+celltype=dict()
+cellcomidin=defaultdict(list)
+cellcomidout=defaultdict(list)
+cellnumpieces=dict()
+cellinfo=arcpy.SearchCursor('cell_inout.dbf')
+for cell in cellinfo:
+    cellnum=int(cell.CELLNUM)
+    celltype[cellnum]=cell.TYPE
+    cellnumpieces[cellnum]=cell.COUNT
+    cellcomidin[cellnum]=cell.COMIDIN
+    cellcomidout[cellnum]=cell.COMIDOUT
+del cellinfo
+
 SFRfinalsegment=dict()
 SFRfinalhydroseq=dict()
 SFRfinalreachlist=defaultdict(list)
 SFRfinalcomid=dict()
+SFRconnect=defaultdict(lambda:[0,0])
 ordereduphydro=dict()
 ordereddnhydro=dict()
 iseg=1

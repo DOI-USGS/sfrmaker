@@ -227,23 +227,25 @@ for comid in FID.iterkeys():
     end_has_start=dict()
 
     for i in range(0,len(fidlist)):
+        haveend=False
+        havestart=False
         for j in range(0,len(fidlist)):
             if j==i:
                 continue
-            diffx=startx[comid][i]-endx[comid][j]
-            diffy=starty[comid][i]-endy[comid][j]
-            if(math.fabs(diffx)<fact and math.fabs(diffy)<fact):
+            diffstartx=startx[comid][i]-endx[comid][j]
+            diffstarty=starty[comid][i]-endy[comid][j]
+            diffendx=endx[comid][i]-startx[comid][j]
+            diffendy=endy[comid][i]-starty[comid][j]
+            if(math.fabs(diffstartx)<fact and math.fabs(diffstarty)<fact):
                 start_has_end[fidlist[i]]=fidlist[j]
-                break
-        for j in range(0,len(fidlist)):
-            if j==i:
-                continue
-            diffx=endx[comid][i]-startx[comid][j]
-            diffy=endy[comid][i]-starty[comid][j]
-            if(math.fabs(diffx)<fact and math.fabs(diffy)<fact):
+                haveend=True
+            if(math.fabs(diffendx)<fact and math.fabs(diffendy)<fact):
                 end_has_start[fidlist[i]]=fidlist[j]
+                havestart=True
+            if haveend and havestart:
                 break
-    #find key in start_has_end that didn't match and end and
+        
+    #find key in start_has_end that didn't match an end and
     #key in end_has_start that didn't match a start
         
     numstart=0
