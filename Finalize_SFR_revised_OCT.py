@@ -91,7 +91,7 @@ def getgridinfo(MFgrid):
 
 #set cut off for total stream length to include cell (summed over
 #all the segments (fraction of side edge as a decimal value)
-cutoff=0.0
+cutoff=0.1
 
 #choose how to assign river elevation, max, ave or min
 
@@ -240,135 +240,135 @@ for line in routetable:
     vals=re.split(",",line,2)
     fromCell[int(vals[0])].append(int(vals[1]))
 
-#make a defaultdict list of meander cells.
-#the file ORDER has provisional SFR segment and reaches
-#can use this file to make lists of celles within a meander.
-    
-ordering=open(ORDER,'r')
-ordering.readline()  # skip the header
-meandercell=defaultdict(list)
-segmentcells=defaultdict(list)
-cell_segment=defaultdict(list)
-seg_comid=dict()
-
-for line in ordering:
-    vals=re.split(',',line.strip())
-    cellnum=int(vals[0])
-    provsegment=int(vals[5])
-    provreach=int(vals[6])
-    segmentcells[provsegment].append(cellnum)
-    cell_segment[cellnum].append(provsegment)
-    seg_comid[provsegment]=int(vals[1])
-ordering.close()
-
-for cellnum in old_fid.iterkeys():
-    if cellnum in meandercell:
-        # check if already got it with another FID
-        continue
-    #see if there are repeated FIDS in the same cell using the set() data type
-    reptFID=set([x for x in old_fid[cellnum] if old_fid[cellnum].count(x)>1])
-    if len(reptFID)>0:
-        #assemble a list cells between the two entries
-        #that have the same FID in the cell
-        tempsegment=cell_segment[cellnum]
-        #see if any cell segments in tempsegment are repeated 
-        rept=set([x for x in tempsegment if tempsegment.count(x)>1])
-        #find the indices of the segmentcells list that match the cellnumber with a meander
-        for seg in list(rept):
-            j=[indx for indx in range(len(segmentcells[seg])) if segmentcells[seg][indx]==cellnum]
-            #get a slice of the vector from first to last index of the identified list
-            tmpslice=segmentcells[seg][j[0]:j[-1]]
-            #append the comid of the segment to the end of the list of cells
-            tmpslice.append(seg_comid[seg])
-            if len(tmpslice)>2:   #sometimes divergences had one-cell long meanders in the test, skip 
-                meandercell[cellnum].append(tmpslice)
-            
-del tempsegment,seg_comid
-   
-# go through meander cells and make sure there are no
-# repeats within the same meandercell list: set() takes the unique values from the original list
-# and then list() turns the unique set back into a list
-for cellnum in meandercell:
-    for i in range(0,len(meandercell[cellnum])):
-        meanderlist=meandercell[cellnum][i][0:-1]
-        mlistcomid=meandercell[cellnum][i][-1]
-        uniq=set(meanderlist)
-        meandercell[cellnum][i]=sorted(list(uniq))
-        meandercell[cellnum][i].append(mlistcomid)
-
-print 'done with meander step'
-# go through cells and assign elevation and conductance, also
-# use information from shapefiles of cells tops and bottoms
-# to determine layer of the SFR2 cell
-cellseen=defaultdict(dict)
-condfactor=defaultdict(dict)
-totlength=defaultdict(dict)
-weightwidth=defaultdict(dict)
-elevcell=defaultdict(dict)
-weightedslope=defaultdict(dict)
-meandernum=0
-for cellnum in meandercell.iterkeys():
-    meandernum=meandernum+1
-    for mlist in range(0,len(meandercell[cellnum])):
-        #comid has been appended to the list of cells in each meandercell entry, pull it out
-        meanderlist=meandercell[cellnum][mlist][0:-1]
-        mlistcomid=meandercell[cellnum][mlist][-1]
-        minelev=9999999
-        for cell in meanderlist:
-            if not cell in riverelev:
-                continue
-            elif min(riverelev[cell]) < minelev:
-                minelev=min(riverelev[cell])
-        ttlen=0.
-        sumcondfact=0.
-        ww=0.
-        i=0
-        for i in range(0,len(reachlength[cell])):
-            sumcondfact=sumcondfact+reachlength[cell][i]*estwidth[cell][i]
-            ttlen=ttlen+reachlength[cell][i]
-            ww=ww+estwidth[cell][i]*reachlength[cell][i]
-        reachout=0
-        layer=1
-        for cell in meanderlist:
-            if ttlen > (cutoff*sidelength[cell]):
-                totlength[cell][mlistcomid]=ttlen
-                condfactor[cell][mlistcomid]=sumcondfact
-                elevcell[cell][mlistcomid]=minelev
-                weightedslope[cell][mlistcomid]=minslope   # put a minimum slope in for the meanders
-                ww=ww/ttlen
-                weightwidth[cell][mlistcomid]=ww
-                cellseen[cell][mlistcomid]=1
-            #done with meanders
-
-multiple_segs=dict()
-cols=[]
-for cellnum in row.iterkeys():
-    multsegs=0
-    for i in range(0,len(riverelev[cellnum])):
-        if reachlength[cellnum][i]>(cutoff*sidelength[cellnum]):
-            comidcell=comid[cellnum][i]
-            if cellnum in cellseen:
-                if comidcell in cellseen[cellnum]: 
-                    continue  #skip if already set in the meander step....
-            multsegs+=1
-            condfactor[cellnum][comidcell]=reachlength[cellnum][i]*estwidth[cellnum][i]
-            elevcell[cellnum][comidcell]=riverelev[cellnum][i]
-            totlength[cellnum][comidcell]=reachlength[cellnum][i]
-            weightwidth[cellnum][comidcell]=estwidth[cellnum][i]
-            weightedslope[cellnum][comidcell]=cellslope[cellnum][i]
-            if weightedslope[cellnum][comidcell] < minslope:
-                weightedslope[cellnum][comidcell]=minslope
-    if multsegs>=2:
-        multiple_segs[cellnum]=multsegs
-#go through the cells with multiple entries and identify the one with the largest
-#conductance - set it as the dominantcomid, used in the printing step to choose bigK or bigKmin
-dominantcomid=dict()
-for cellnum in multiple_segs:
-    maxcond=0.
-    for comidcell in condfactor[cellnum].iterkeys():
-        if condfactor[cellnum][comidcell]>maxcond:
-            maxcond=condfactor[cellnum][comidcell]
-            dominantcomid[cellnum]=comidcell
+###make a defaultdict list of meander cells.
+###the file ORDER has provisional SFR segment and reaches
+###can use this file to make lists of celles within a meander.
+##    
+##ordering=open(ORDER,'r')
+##ordering.readline()  # skip the header
+##meandercell=defaultdict(list)
+##segmentcells=defaultdict(list)
+##cell_segment=defaultdict(list)
+##seg_comid=dict()
+##
+##for line in ordering:
+##    vals=re.split(',',line.strip())
+##    cellnum=int(vals[0])
+##    provsegment=int(vals[5])
+##    provreach=int(vals[6])
+##    segmentcells[provsegment].append(cellnum)
+##    cell_segment[cellnum].append(provsegment)
+##    seg_comid[provsegment]=int(vals[1])
+##ordering.close()
+##
+##for cellnum in old_fid.iterkeys():
+##    if cellnum in meandercell:
+##        # check if already got it with another FID
+##        continue
+##    #see if there are repeated FIDS in the same cell using the set() data type
+##    reptFID=set([x for x in old_fid[cellnum] if old_fid[cellnum].count(x)>1])
+##    if len(reptFID)>0:
+##        #assemble a list cells between the two entries
+##        #that have the same FID in the cell
+##        tempsegment=cell_segment[cellnum]
+##        #see if any cell segments in tempsegment are repeated 
+##        rept=set([x for x in tempsegment if tempsegment.count(x)>1])
+##        #find the indices of the segmentcells list that match the cellnumber with a meander
+##        for seg in list(rept):
+##            j=[indx for indx in range(len(segmentcells[seg])) if segmentcells[seg][indx]==cellnum]
+##            #get a slice of the vector from first to last index of the identified list
+##            tmpslice=segmentcells[seg][j[0]:j[-1]]
+##            #append the comid of the segment to the end of the list of cells
+##            tmpslice.append(seg_comid[seg])
+##            if len(tmpslice)>2:   #sometimes divergences had one-cell long meanders in the test, skip 
+##                meandercell[cellnum].append(tmpslice)
+##            
+##del tempsegment,seg_comid
+##   
+### go through meander cells and make sure there are no
+### repeats within the same meandercell list: set() takes the unique values from the original list
+### and then list() turns the unique set back into a list
+##for cellnum in meandercell:
+##    for i in range(0,len(meandercell[cellnum])):
+##        meanderlist=meandercell[cellnum][i][0:-1]
+##        mlistcomid=meandercell[cellnum][i][-1]
+##        uniq=set(meanderlist)
+##        meandercell[cellnum][i]=sorted(list(uniq))
+##        meandercell[cellnum][i].append(mlistcomid)
+##
+##print 'done with meander step'
+### go through cells and assign elevation and conductance, also
+### use information from shapefiles of cells tops and bottoms
+### to determine layer of the SFR2 cell
+##cellseen=defaultdict(dict)
+##condfactor=defaultdict(dict)
+##totlength=defaultdict(dict)
+##weightwidth=defaultdict(dict)
+##elevcell=defaultdict(dict)
+##weightedslope=defaultdict(dict)
+##meandernum=0
+##for cellnum in meandercell.iterkeys():
+##    meandernum=meandernum+1
+##    for mlist in range(0,len(meandercell[cellnum])):
+##        #comid has been appended to the list of cells in each meandercell entry, pull it out
+##        meanderlist=meandercell[cellnum][mlist][0:-1]
+##        mlistcomid=meandercell[cellnum][mlist][-1]
+##        minelev=9999999
+##        for cell in meanderlist:
+##            if not cell in riverelev:
+##                continue
+##            elif min(riverelev[cell]) < minelev:
+##                minelev=min(riverelev[cell])
+##        ttlen=0.
+##        sumcondfact=0.
+##        ww=0.
+##        i=0
+##        for i in range(0,len(reachlength[cell])):
+##            sumcondfact=sumcondfact+reachlength[cell][i]*estwidth[cell][i]
+##            ttlen=ttlen+reachlength[cell][i]
+##            ww=ww+estwidth[cell][i]*reachlength[cell][i]
+##        reachout=0
+##        layer=1
+##        for cell in meanderlist:
+##            if ttlen > (cutoff*sidelength[cell]):
+##                totlength[cell][mlistcomid]=ttlen
+##                condfactor[cell][mlistcomid]=sumcondfact
+##                elevcell[cell][mlistcomid]=minelev
+##                weightedslope[cell][mlistcomid]=minslope   # put a minimum slope in for the meanders
+##                ww=ww/ttlen
+##                weightwidth[cell][mlistcomid]=ww
+##                cellseen[cell][mlistcomid]=1
+##            #done with meanders
+##
+##multiple_segs=dict()
+##cols=[]
+##for cellnum in row.iterkeys():
+##    multsegs=0
+##    for i in range(0,len(riverelev[cellnum])):
+##        if reachlength[cellnum][i]>(cutoff*sidelength[cellnum]):
+##            comidcell=comid[cellnum][i]
+##            if cellnum in cellseen:
+##                if comidcell in cellseen[cellnum]: 
+##                    continue  #skip if already set in the meander step....
+##            multsegs+=1
+##            condfactor[cellnum][comidcell]=reachlength[cellnum][i]*estwidth[cellnum][i]
+##            elevcell[cellnum][comidcell]=riverelev[cellnum][i]
+##            totlength[cellnum][comidcell]=reachlength[cellnum][i]
+##            weightwidth[cellnum][comidcell]=estwidth[cellnum][i]
+##            weightedslope[cellnum][comidcell]=cellslope[cellnum][i]
+##            if weightedslope[cellnum][comidcell] < minslope:
+##                weightedslope[cellnum][comidcell]=minslope
+##    if multsegs>=2:
+##        multiple_segs[cellnum]=multsegs
+###go through the cells with multiple entries and identify the one with the largest
+###conductance - set it as the dominantcomid, used in the printing step to choose bigK or bigKmin
+##dominantcomid=dict()
+##for cellnum in multiple_segs:
+##    maxcond=0.
+##    for comidcell in condfactor[cellnum].iterkeys():
+##        if condfactor[cellnum][comidcell]>maxcond:
+##            maxcond=condfactor[cellnum][comidcell]
+##            dominantcomid[cellnum]=comidcell
             
 #use hydrosequence numbering to generate lists of segments and reaches in hydrosequence order
 #get the hydrosequence and local sequence numbering for SFR2 that was
@@ -386,7 +386,6 @@ hydrowork=defaultdict(list)
 hydroseq=dict()
 uphydroseq=dict()
 dnhydroseq=dict()
-cellhydros=defaultdict(list)
 inv_hydroseq=dict()
 hydrocomid=dict()
 for line in ordering:
@@ -400,7 +399,6 @@ for line in ordering:
     inv_hydroseq[int(vals[2])]=sfrsegment
     uphydroseq[sfrsegment]=int(vals[3])
     dnhydroseq[sfrsegment]=int(vals[4])
-    cellhydros[cellnum].append(hydroseq[sfrsegment])
 
 ordering.close()               
 
@@ -415,7 +413,7 @@ for rawsfrsegment in hydrowork:
 hydro_ordered=hydrowork.items()
 hydro_ordered.sort(key=itemgetter(0),reverse=True)
 hydro_orderedcells=map(itemgetter(1),hydro_ordered)  #list of the lists of cells
-hydro_orderedindex=map(itemgetter(0),hydro_ordered)  #list of the indexes (ordered)
+hydro_orderedindex=map(itemgetter(0),hydro_ordered)  #list of the indexes [hydrosequence] 
 
 print 'done with hydro_ordered step'
 
@@ -459,6 +457,48 @@ for cell in cellinfo:
     cellcomidout[cellnum]=cell.COMIDOUT
 del cellinfo
 
+#for cells with more than one piece of a COMID, get total length
+#and weighted width, comid is a dictionary keyed by cell number
+#with all the comids in the cell.  cellcomidin and cellcomidout
+#get converted to lists of the comids entering and leaving the cell
+
+weightwidth=dict()
+totlength=dict()
+weightedslope=dict()
+elevcell=dict()
+for cell in celltype.iterkeys():
+    if not cell in comid:
+        print 'mismatch in cell numbering from river elevation and cell_inout'
+        print 'check river_w_elevations, that the cellnum entry is not zero'
+        print 'for the line with node = %d' % cell
+    elif re.match('multiple',celltype[cell]) or re.match('onein/oneout',celltype[cell]):
+        if re.search(',',cellcomidin[cell]):
+            comidinlist=map(int,re.split(',',cellcomidin[cell]))
+        else:
+            comidinlist=[int(cellcomidin[cell])]
+        if re.search(',',cellcomidout[cell]):
+            comidoutlist=map(int,re.split(',',cellcomidout[cell]))
+        else:
+            comidoutlist=[int(cellcomidout[cell])]
+        ttlen=0.
+        ww=0.
+        ws=0.
+        el=0.
+        for i in range(0,len(comid[cell])):
+            ttlen=ttlen+reachlength[cell][i]
+            ww=ww+estwidth[cell][i]*reachlength[cell][i]
+            ws=ws+cellslope[cell][i]*reachlength[cell][i]
+            el=el+riverelev[cell][i]
+        elevcell[cell]=el/len(comid[cell])
+        weightwidth[cell]=ww/ttlen
+        totlength[cell]=ttlen
+        weightedslope[cell]=ws/ttlen
+    else:
+        totlength[cell]=reachlength[cell][0]
+        weightwidth[cell]=estwidth[cell][0]
+        weightedslope[cell]=cellslope[cell][0]
+        elevcell[cell]=riverelev[cell][0]
+
 SFRfinalsegment=dict()
 SFRfinalhydroseq=dict()
 SFRfinalreachlist=defaultdict(list)
@@ -469,21 +509,26 @@ ordereddnhydro=dict()
 iseg=1
 totalreach=0
 
+cellseen=dict()   # keep track of which cells have been encoutered
+                  # key is the cell number, value is the segment number
 for i in range(0,len(hydro_orderedindex)):
     irch=0
-    localcomid=hydrocomid[inv_hydroseq[hydro_orderedindex[i]]]
     for j in range(0,len(hydro_orderedcells[i])):
         localcell=hydro_orderedcells[i][j]
-        if localcell in totlength:
-            if localcomid in totlength[localcell]:
-                irch=irch+1
-                totalreach=totalreach+1
-                SFRfinalsegment[iseg]=hydro_orderedindex[i]
-                SFRfinalhydroseq[hydro_orderedindex[i]]=iseg
-                SFRfinalcomid[iseg]=localcomid
-                SFRfinalreachlist[iseg].append(localcell)
-                ordereduphydro[iseg]=uphydroseq[inv_hydroseq[hydro_orderedindex[i]]]
-                ordereddnhydro[iseg]=dnhydroseq[inv_hydroseq[hydro_orderedindex[i]]]
+        if localcell not in cellseen:
+            if (totlength[localcell]<sidelength[localcell]*cutoff):    #skip cells with short lengths
+                break
+            cellseen[localcell]=iseg
+            irch=irch+1
+            totalreach=totalreach+1
+            SFRfinalsegment[iseg]=hydro_orderedindex[i]
+            SFRfinalhydroseq[hydro_orderedindex[i]]=iseg
+            SFRfinalcomid[iseg]=hydrocomid[inv_hydroseq[hydro_orderedindex[i]]]
+            SFRfinalreachlist[iseg].append(localcell)
+            ordereduphydro[iseg]=uphydroseq[inv_hydroseq[hydro_orderedindex[i]]]
+            ordereddnhydro[iseg]=dnhydroseq[inv_hydroseq[hydro_orderedindex[i]]]
+        else:
+            SFRconnect[iseg][1]=cellseen[localcell]
     if irch>0:
         iseg=iseg+1
 
@@ -578,52 +623,52 @@ for i in range(0,nss):
         #assume top of streambed is 1 ft below elevation from NHDPlus
         if localcell in dominantcomid:
             if dominantcomid[localcell]==localcomid:
-                floatlist=[totlength[localcell][localcomid],
-                            elevcell[localcell][localcomid]-1.0,
-                            weightedslope[localcell][localcomid],
+                floatlist=[totlength[localcell],
+                            elevcell[localcell]-1.0,
+                            weightedslope[localcell],
                             bedthick,
                             bedK]
-                mixedlist=(elevcell[localcell][localcomid],
-                   elevcell[localcell][localcomid]-1.0,
+                mixedlist=(elevcell[localcell],
+                   elevcell[localcell]-1.0,
                    irch,
                    iseg,
-                   weightwidth[localcell][localcomid],
-                   totlength[localcell][localcomid],
+                   weightwidth[localcell],
+                   totlength[localcell],
                    bedK,
                    bedthick,
-                   weightedslope[localcell][localcomid],
+                   weightedslope[localcell],
                    roughch)
             else:
-                 floatlist=[totlength[localcell][localcomid],
-                            elevcell[localcell][localcomid]-1.0,
-                            weightedslope[localcell][localcomid],
+                 floatlist=[totlength[localcell],
+                            elevcell[localcell]-1.0,
+                            weightedslope[localcell],
                             bedthick,
                             bedKmin]
-                 mixedlist=(elevcell[localcell][localcomid],
-                   elevcell[localcell][localcomid]-1.0,
+                 mixedlist=(elevcell[localcell],
+                   elevcell[localcell]-1.0,
                    irch,
                    iseg,
-                   weightwidth[localcell][localcomid],
-                   totlength[localcell][localcomid],
+                   weightwidth[localcell],
+                   totlength[localcell],
                    bedKmin,
                    bedthick,
-                   weightedslope[localcell][localcomid],
+                   weightedslope[localcell],
                    roughch)
         else:
-            floatlist=[totlength[localcell][localcomid],
-                            elevcell[localcell][localcomid]-1.0,
-                            weightedslope[localcell][localcomid],
+            floatlist=[totlength[localcell],
+                            elevcell[localcell]-1.0,
+                            weightedslope[localcell],
                             bedthick,
                             bedK]
-            mixedlist=(elevcell[localcell][localcomid],
-                   elevcell[localcell][localcomid]-1.0,
+            mixedlist=(elevcell[localcell],
+                   elevcell[localcell]-1.0,
                    irch,
                    iseg,
-                   weightwidth[localcell][localcomid],
-                   totlength[localcell][localcomid],
+                   weightwidth[localcell],
+                   totlength[localcell],
                    bedK,
                    bedthick,
-                   weightedslope[localcell][localcomid],
+                   weightedslope[localcell],
                    roughch)
         printstring=' {0:.2f} {1:.2f} {2:.3e} {3:.2f} {4:.2e}'.format(*floatlist)
         outfile.write(printstring + '\n')
@@ -739,9 +784,9 @@ for i in range(0,nss):
     #for SFR2, K and thick are in previous line (reach-by-reach) only width is needed here...
     startcell=SFRfinalreachlist[iseg][0]
     endcell=SFRfinalreachlist[iseg][-1]
-    printstring='{0:.1f}'.format(weightwidth[startcell][localcomid])  #width1...
+    printstring='{0:.1f}'.format(weightwidth[startcell])  #width1...
     outfile.write(printstring+'\n')
-    printstring='{0:.1f}'.format(weightwidth[endcell][localcomid])  #width2...
+    printstring='{0:.1f}'.format(weightwidth[endcell])  #width2...
     outfile.write(printstring +'\n')
     #write ouput to GWV matrix 2 file
     mlist1=(iseg,icalc,outseg,iupseg,iprior,nstrpts)
@@ -768,8 +813,8 @@ for i in range(0,nss):
                      localcomid,
                      streamorder[localcomid],
                      arbolate[localcomid],
-                     weightwidth[localcell][localcomid],
-                     totlength[localcell][localcomid],
+                     weightwidth[localcell],
+                     totlength[localcell],
                      reachcode[localcomid],
                      Fcode[localcomid],
                      Fstring[Fcode[localcomid]],
@@ -782,8 +827,8 @@ for i in range(0,nss):
                      comidcell,
                      streamorder[localcomid],
                      arbolate[localcomid],
-                     weightwidth[localcell][localcomid],
-                     totlength[localcell][localcomid],
+                     weightwidth[localcell],
+                     totlength[localcell],
                      reachcode[localcomid],
                      Fcode[localcomid],
                      "Unknown",
@@ -791,14 +836,7 @@ for i in range(0,nss):
                      irch,)
         widthout.write(",".join(map(str,printstring))+'\n')
 
-#print a table of cells with multiple segments
-multout=open(MULT,'w')
-multout.write("cellnumber,row,column,numsegs,dominantcomid\n")
-for localcell in multiple_segs:
-    multout.write(",".join(map(str,[localcell,row[localcell],column[localcell],
-                                    multiple_segs[localcell],dominantcomid[localcell]]))+"\n")
 #close files
-multout.close()
 widthout.close()    
 outfile.close()
 mat1out.close()
