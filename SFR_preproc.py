@@ -1,6 +1,8 @@
-# Driver script for steps 1-9 in Howard Reeves' (USGS MI Water Science Center) SFR Workflow. Includes code from Howard's explode_add_geometry.py
-# Authored by Andrew Leaf, USGS WI Water Water Science Center
-
+'''
+Driver script for steps 1-9 in Howard Reeves' (USGS MI Water Science Center) SFR Workflow.
+Includes code from Howard's explode_add_geometry.py
+Authored by Andrew Leaf, USGS WI Water Water Science Center
+'''
 
 import math
 import numpy as np

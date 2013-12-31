@@ -1,0 +1,73 @@
+<SFR_input>
+<!--
+Notes on SFR input:
+    All shps should be in (same) model coordinate units (e.g. ft.)
+    If model domain contains a major divide, need to merge relevant NHD datasets 
+        (e.g. 04 and 07) prior to running this script
+    Put in paths to input/output files as-is (i.e. no double \\), surrounded by single quotes
+-->
+<GlobalSettings>
+    <!-- computeZonal: 
+    True if DEM needs to be sampled for model grid (takes a long time to run);
+    False assumes that model grid shp already contains elevations -->
+    <compute_zonal>False</compute_zonal>
+    <!-- reach_cutoff: 
+    minimum reach length to retain following explosion of NHD segments to river cells -->
+    <reach_cutoff>1</reach_cutoff>
+    <!-- eps:
+    elevation difference to assign same value to all cells
+    so that check does not get messed up by rounding floats -->
+    <eps>1.0e-02</eps>
+
+</GlobalSettings>
+<InputFiles>
+    <!-- MFgrid: polygon shapefile export of grid from Groundwater Vistas -->
+    <MFgrid>nacp_mg_cells_chk_node.shp</MFgrid>
+    <!-- MFdomain: outline of model grid -->
+    <MFdomain>nacp_streams_area_ed_v4b.shp</MFdomain>    
+    <!-- MFdis: discretization file -->
+    <MFdis>NACP_SWI_Regional.dis</MFdis>    
+    <!-- DEM: DEM for model area, doesn't need to be clipped -->
+    <DEM>nacp_demfti</DEM>    
+    <!-- PlusflowVAA: from NHDPlus -->
+    <PlusflowVAA>PlusFlowlineVAA.dbf</PlusflowVAA>    
+    <!-- Elevslope: from NHDPlus -->
+    <Elevslope>elevslope_merged.dbf</Elevslope>  
+    <!-- Flowlines_unclipped: 
+        original flowlines covering model area (not clipped to grid) -->
+    <Flowlines_unclipped>flowlines_3plus_edjp_v2.shp</Flowlines_unclipped>    
+    <!-- arcpy_path: for calling arcpy scripts externally using os.system -->
+    <arcpy_path>C:\python27\ArcGIS10.1\python</arcpy_path>      
+    <!-- FLOW: from NHDPlus -->
+    <FLOW>PlusFlow.dbf</FLOW>
+    <!-- FTab: from NHDPlus -->
+    <FTab>FCodes.dbf</FTab>     
+</InputFiles>
+
+<IntermediateFiles>
+    <!-- Flowlines: clipped to active area -->
+    <Flowlines>flowlines_clipped.shp</Flowlines> 
+    <!-- ELEV: clipped to active area -->
+    <ELEV>river_w_elevations.shp</ELEV> 
+    <!-- intersect:  flowlines intersected with the grid-->
+    <intersect>river_explode.shp</intersect>
+    <!-- rivers_table:  -->
+    <rivers_table>river_elevs.dbf</rivers_table>
+    <!-- CELLS:  -->
+    <CELLS>river_cells_dissolve.shp</CELLS>
+    <!-- NHD:  -->
+    <NHD>NHD_intersect_edited.shp</NHD> 
+</IntermediateFiles>
+
+<OutputFiles>
+    <OUT>NACP.SFR</OUT> 
+    <GISSHP>SFRfinal_riv_cellinfo.shp</GISSHP> 
+    <!-- MAT1 and MAT2:
+        files for use with Groundwater Vistas -->
+    <MAT1>SFR_GWVmat1.txt</MAT1> 
+    <MAT2>SFR_GWVmat2.txt</MAT2> 
+    <WIDTH>SFRwidthinfo.txt</WIDTH> 
+    <MULT>Multiple_segments.txt</MULT>     
+</OutputFiles>
+
+</SFR_input>
