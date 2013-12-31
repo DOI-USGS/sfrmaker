@@ -1,4 +1,4 @@
-# AssignRiverElev.py
+# Assign_and_Route.py
 # Description: Takes shapefile generated from NHDplus with start (X,Y), end(X,Y),
 # and line length added and a cell-by-cell intersection of the NHDplus
 #
@@ -42,6 +42,43 @@ def getfield(table,joinname):
             joinname=field.name
             break
     return(joinname)
+
+# find next downstream hydrosequence that is used in a model from the
+# full hydrosequence table - sometimes in developing the network for
+# a model some hydrosequences get dropped and this finds the next
+# one or assigns a zero value indicating that the current segment is a
+# downstream end.  Using a formally recursive function exceeded the
+# python recursion depth, so an iterative method using a limit and
+# while loop is used.
+def nextdown(dwn,dnhydroseq,hydroseqseen):
+    # dwn is the current downstream hydrosequence
+    # dnhydroseq is the full down hydrosequence dictionary, keyed by hydroseq
+    # hydroseqseen is a dictionary of hydrosequences used in the model
+    # the full dictionary is read from the NHDPlus, PlusFlowVAA table
+    #
+    # this function is usually called if dwn is not in the
+    # dictionary hydroseqseen
+    limit=1000
+    knt=0
+    while knt<limit:
+        if not dwn in hydroseqseen:
+            if not dwn in dnhydroseq:
+                nxtdwn=0
+                return nxtdwn             #next one not in dnhydroseq, call it the downstream end
+            nxtdwn=dnhydroseq[dwn]
+            if nxtdwn==0:                 #found that it is downstream end
+                return nxtdwn
+            elif nxtdwn in hydroseqseen:  #found an existing downstream hydrosequence
+                return nxtdwn
+            else:
+                knt=knt+1
+                dwn=nxtdwn
+        else:
+            return dwn                    #dwn is in hydroseqseen, so just return it
+                                          #allows function to be called for any hydroseq
+
+    nxtdwn=0                              #fell through, assign it as a downstream end
+    return nxtdwn
 
 
 # HARD CODE INPUT SHAPEFILES
@@ -227,23 +264,25 @@ for comid in FID.iterkeys():
     end_has_start=dict()
 
     for i in range(0,len(fidlist)):
+        haveend=False
+        havestart=False
         for j in range(0,len(fidlist)):
             if j==i:
                 continue
-            diffx=startx[comid][i]-endx[comid][j]
-            diffy=starty[comid][i]-endy[comid][j]
-            if(math.fabs(diffx)<fact and math.fabs(diffy)<fact):
+            diffstartx=startx[comid][i]-endx[comid][j]
+            diffstarty=starty[comid][i]-endy[comid][j]
+            diffendx=endx[comid][i]-startx[comid][j]
+            diffendy=endy[comid][i]-starty[comid][j]
+            if(math.fabs(diffstartx)<fact and math.fabs(diffstarty)<fact):
                 start_has_end[fidlist[i]]=fidlist[j]
-                break
-        for j in range(0,len(fidlist)):
-            if j==i:
-                continue
-            diffx=endx[comid][i]-startx[comid][j]
-            diffy=endy[comid][i]-starty[comid][j]
-            if(math.fabs(diffx)<fact and math.fabs(diffy)<fact):
+                haveend=True
+            if(math.fabs(diffendx)<fact and math.fabs(diffendy)<fact):
                 end_has_start[fidlist[i]]=fidlist[j]
+                havestart=True
+            if haveend and havestart:
                 break
-    #find key in start_has_end that didn't match and end and
+        
+    #find key in start_has_end that didn't match an end and
     #key in end_has_start that didn't match a start
         
     numstart=0
@@ -507,7 +546,8 @@ except:
 
 OUT.write("fromcell, tocell\n")
 
-#make a dictionary of hydroseq, uphydroseq, dnhydroseq numbers by COMID
+#make dictionaris of hydroseq, uphydroseq, dnhydroseq numbers
+#hydroseq by COMID, up and dwn hydroseq keyed by hydroseq
 hydroseq=dict()
 uphydroseq=dict()
 dnhydroseq=dict()
@@ -515,8 +555,8 @@ with arcpy.da.SearchCursor(VAA,("ComID","Hydroseq","UpHydroseq","DnHydroseq")) a
     for row in cursor:
         comid=int(row[0])
         hydroseq[comid]=int(row[1])
-        uphydroseq[comid]=int(row[2])
-        dnhydroseq[comid]=int(row[3])
+        uphydroseq[int(row[1])]=int(row[2])
+        dnhydroseq[int(row[1])]=int(row[3])
 
 print 'have dictionary'
 
@@ -565,6 +605,14 @@ for comid in sortedlist:
     if orderedFID[-1] in cellnum[comid]:
         if orderedFID[0] in cellnum[dwncomid]:
             OUT.write("%d, %d\n" % (fromcell, tocell))
+
+#build a dictionary of the hydroseqences that are used
+#to help find next downstream if needed
+hydroseqseen=dict()
+for comid,seen in hydroseqused.iteritems():
+    #if the comid is in noelev, then it gets skipped below, don't count it as seen
+    if not comid in noelev:
+        hydroseqseen[seen]=1
         
 for comid in sortedlist:
     if comid in noelev:
@@ -583,7 +631,13 @@ for comid in sortedlist:
         orderedFID.reverse()
 
     for i in range(0,len(orderedFID)):
-        RCH.write(",".join(map(str,[cellnum[comid][orderedFID[i]],comid,hydroseqused[comid],uphydroseq[comid],dnhydroseq[comid],SFRseq,i+1]))+"\n")
+        #sometimes a hydrosequence from the full VAA table gets dropped
+        #use a function to find the next downstream hydrosequence number
+        #used in the model
+        dwn=dnhydroseq[hydroseqused[comid]]
+        if not dwn in hydroseqseen:
+            dnhydroseq[hydroseqused[comid]]=nextdown(dwn,dnhydroseq,hydroseqseen)
+        RCH.write(",".join(map(str,[cellnum[comid][orderedFID[i]],comid,hydroseqused[comid],uphydroseq[hydroseqused[comid]],dnhydroseq[hydroseqused[comid]],SFRseq,i+1]))+"\n")
     percentdone=round(100*icount/len(sortedlist),2)
     #print "%s %% done" %(percentdone)
 print 'cell routing done, reach_ordering.txt written' 
