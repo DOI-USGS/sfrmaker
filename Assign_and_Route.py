@@ -14,12 +14,9 @@
 #
 # input shapefiles must have line starts and ends added
 #
-# This version then completes the Route Stream Network tasks of getting
-# the fromCOMID - toCOMID information and checking to see if the
-# COMID elevations are routed downstream
-#
-# Then it does the RouteRiverCell task to map the routed segments and comids
-# to the finite difference cells for assignment of SFR or RIV
+# This version adds LevelPathID information to the ordered_cells.txt file
+# and generalizes the next down function to look at either hydrosequence or
+# levelpathID
 #
 # Requirements: os, sys, arcpy, defaultdict, math
 #
@@ -43,39 +40,40 @@ def getfield(table,joinname):
             break
     return(joinname)
 
-# find next downstream hydrosequence that is used in a model from the
-# full hydrosequence table - sometimes in developing the network for
-# a model some hydrosequences get dropped and this finds the next
+# find next downstream sequence (either hydrosequence or levelpath)
+# that is used in a model from the
+# full sequence table - sometimes in developing the network for
+# a model some sequences get dropped and this finds the next
 # one or assigns a zero value indicating that the current segment is a
 # downstream end.  Using a formally recursive function exceeded the
 # python recursion depth, so an iterative method using a limit and
 # while loop is used.
-def nextdown(dwn,dnhydroseq,hydroseqseen):
-    # dwn is the current downstream hydrosequence
-    # dnhydroseq is the full down hydrosequence dictionary, keyed by hydroseq
-    # hydroseqseen is a dictionary of hydrosequences used in the model
-    # the full dictionary is read from the NHDPlus, PlusFlowVAA table
+def nextdown(dwn,dnseq,seqseen):
+    # dwn is the current downstream sequence (hydrosequence or levelpathID)
+    # dnhydroseq is the full down sequence dictionary, keyed by seq
+    # seqseen is a dictionary of sequences used in the model
+    # the full dictionary is read from the NHDPlus, PlusFlowlineVAA table
     #
     # this function is usually called if dwn is not in the
-    # dictionary hydroseqseen
+    # seqseen dictionary
     limit=1000
     knt=0
     while knt<limit:
-        if not dwn in hydroseqseen:
-            if not dwn in dnhydroseq:
+        if not dwn in seqseen:
+            if not dwn in dnseq:
                 nxtdwn=0
-                return nxtdwn             #next one not in dnhydroseq, call it the downstream end
-            nxtdwn=dnhydroseq[dwn]
+                return nxtdwn             #next one not in dnseq, call it the downstream end
+            nxtdwn=dnseq[dwn]
             if nxtdwn==0:                 #found that it is downstream end
                 return nxtdwn
-            elif nxtdwn in hydroseqseen:  #found an existing downstream hydrosequence
+            elif nxtdwn in seqseen:  #found an existing downstream sequence
                 return nxtdwn
             else:
                 knt=knt+1
                 dwn=nxtdwn
         else:
-            return dwn                    #dwn is in hydroseqseen, so just return it
-                                          #allows function to be called for any hydroseq
+            return dwn                    #dwn is in seqseen, so just return it
+                                          #allows function to be called for any seq
 
     nxtdwn=0                              #fell through, assign it as a downstream end
     return nxtdwn
@@ -536,7 +534,7 @@ print "\nNow routing the river cells"
 
 CELLS=inputs["CELLS"]
 NHD=inputs["NHD"]  # from intersect.py
-VAA=inputs["PlusflowVAA"]
+VAA=inputs["PlusflowVAA.dbf"]
 
 try:
     OUT=open("routed_cells.txt",'w')
@@ -551,13 +549,18 @@ OUT.write("fromcell, tocell\n")
 hydroseq=dict()
 uphydroseq=dict()
 dnhydroseq=dict()
-with arcpy.da.SearchCursor(VAA,("ComID","Hydroseq","UpHydroseq","DnHydroseq")) as cursor:
+levelpathID=dict()
+uplevelpath=dict()
+dnlevelpath=dict()
+with arcpy.da.SearchCursor(VAA,("ComID","Hydroseq","UpHydroseq","DnHydroseq","LevelPathI","UpLevelPat","DnLevelPat")) as cursor:
     for row in cursor:
         comid=int(row[0])
         hydroseq[comid]=int(row[1])
         uphydroseq[int(row[1])]=int(row[2])
         dnhydroseq[int(row[1])]=int(row[3])
-
+        levelpathID[comid]=int(row[4])
+        uplevelpath[levelpathID[comid]]=int(row[5])
+        dnlevelpath[levelpathID[comid]]=int(row[6])
 print 'have dictionary'
 
 #delete any working layers if found
