@@ -3,7 +3,8 @@ __author__ = 'Fienen, Reeves, Leaf - USGS'
 import xml.etree.ElementTree as ET
 import arcpy
 import os
-
+import numpy as np
+import re
 
 class SFRInput:
     """
@@ -74,6 +75,28 @@ class COMIDProps:
         self.to_comid = []
 
 
+class COMIDPropsForIntersect:
+    """
+    Properties for each COMID
+    """
+    def __init__(self, comid, inout, startx, starty, endx, endy, clmaxel,
+                 clminel, cllen, lenkm):
+        self.comid = comid
+        self.inout = inout
+        self.newstartx = startx
+        self.newstarty = starty
+        self.newnewendx = endx
+        self.newendy = endy
+        self.newlength = cllen
+        self.slope = clmaxel - clminel
+        if inout == 'OUT':
+            self.newmaxel = round(clmaxel)
+            self.newminel = round(clmaxel - self.slope*cllen/lenkm)
+        elif inout == 'IN':
+            clippedlength = lenkm - cllen
+            self.newminel = round(clminel)
+            self.newmaxel = round(clmaxel-self.slope*clippedlength/lenkm)
+
 class COMIDPropsAll:
     def __init__(self):
         self.allcomids = dict()
@@ -136,6 +159,7 @@ class COMIDPropsAll:
                 if int(crow[1]) in allCOMIDs:
                     self.allcomids[int(crow[1])].from_comid.append(int(crow[0]))
 
+
 class SFRReachProps:
     """
     class containing just the data for each reach
@@ -153,6 +177,160 @@ class SFRReachesAll:
         j = 1
 
 
+class SFROperations:
+    """
+    class to make operations on data
+    """
+    def __init__(self, SFRdata):
+        self.SFRdata = SFRdata
+        self.newCOMIDdata = dict()
+
+    def intersect(self):
+        """
+        merge the NHDplus information with the model grid
+        this was originally the intersect.py script
+        """
+        # bring data in as layers
+        #set workspace
+        arcpy.env.workspace = os.getcwd()
+        arcpy.env.overwriteOutput = True
+
+        #convert to layers
+        arcpy.MakeFeatureLayer_management(self.SFRdata.Flowlines_unclipped, 'nhd_lyr')
+        arcpy.MakeFeatureLayer_management(self.SFRdata.MFdomain, 'grid_lyr')
+        print "selecting streams that cross model grid boundary..."
+        arcpy.SelectLayerByLocation_management('nhd_lyr', 'CROSSED_BY_THE_OUTLINE_OF', 'grid_lyr')
+        arcpy.CopyFeatures_management('nhd_lyr', 'intersect.shp')
+
+        #copy the model NHD streams to a temp shapefile, find the ends that match
+        #the streams that were clipped by the boundary and update the lengthKm,
+        #minsmoothelev, maxsmoothelev in the MODLNHD
+        if arcpy.Exists('temp.shp'):
+            print 'first removing old version of temp.shp'
+            arcpy.Delete_management('temp.shp')
+        arcpy.CopyFeatures_management(self.SFRdata.Flowlines, 'temp.shp')
+
+        #add fields for start, end, and length to the temp and intersect
+        #shapefiles  (use LENKM as field name because temp already has LENGHTKM)
+        print "adding fields for start, end and length..."
+        shapelist = ('temp.shp', 'intersect.shp')
+        for shp in shapelist:
+            arcpy.AddField_management(shp, 'STARTX', 'DOUBLE')
+            arcpy.AddField_management(shp, 'STARTY', 'DOUBLE')
+            arcpy.AddField_management(shp, 'ENDX', 'DOUBLE')
+            arcpy.AddField_management(shp, 'ENDY', 'DOUBLE')
+            arcpy.AddField_management(shp, 'LENKM', 'DOUBLE')
+
+        print "calculating new info for fields..."
+        #calculate the fields, convert length to km - projection is in feet
+        for shp in shapelist:
+            arcpy.CalculateField_management(shp, 'STARTX', "float(!SHAPE.firstpoint!.split()[0])", "PYTHON")
+            arcpy.CalculateField_management(shp, 'STARTY', "float(!SHAPE.firstpoint!.split()[1])", "PYTHON")
+            arcpy.CalculateField_management(shp, 'ENDX', "float(!SHAPE.lastpoint!.split()[0])", "PYTHON")
+            arcpy.CalculateField_management(shp, 'ENDY', "float(!SHAPE.lastpoint!.split()[1])", "PYTHON")
+            arcpy.CalculateField_management(shp, 'LENKM', "float(!SHAPE.length@kilometers!)", "PYTHON")
+
+        #go through intersect, identify which end matches COMID in temp
+        #find new length in temp and use linear interpolation to get new elev
+        #finally put COMID out to <outfile> (named above) to indicate
+        #if the cut-off is flowing out of grid or into grid so the
+        #routing tables in the final datasets do not route out of grid
+        #and back in. Also identifies to user ends of streams that
+        #could accept inflow conditions for SFR
+        print "fixing routing for streams that cross the grid boundary..."
+
+        eps = self.SFRdata.eps
+        # make a list of COMIDs that are found for later reference
+        comidlist = []
+        intersects = arcpy.SearchCursor('intersect.shp')
+        manual_intervention = 0
+        for stream in intersects:
+            comid = int(stream.COMID)
+            query = "COMID = {0:d}".format(comid)
+            stx = stream.STARTX
+            sty = stream.STARTY
+            endx = stream.ENDX
+            endy = stream.ENDY
+            lenkm = stream.LENKM
+            clippedstream = arcpy.SearchCursor('temp.shp', query)
+            for clip in clippedstream:
+                clstx = clip.STARTX
+                clsty = clip.STARTY
+                clendx = clip.ENDX
+                clendy = clip.ENDY
+                cllen = clip.LENKM
+                clmaxel = clip.MAXELEVSMO
+                clminel = clip.MINELEVSMO
+                #find the end that matches
+                stdiffx = stx-clstx
+                stdiffy = sty-clsty
+                enddiffx = endx-clendx
+                enddiffy = endy-clendy
+                if np.fabs(stdiffx) < eps and np.fabs(stdiffy) < eps:
+                    comidlist.append(comid)
+                    self.newCOMIDdata[comid] = COMIDPropsForIntersect(
+                        comid, 'OUT', clstx, clsty, clendx, clendy, clmaxel,
+                        clminel, cllen, lenkm
+                    )
+                elif np.fabs(enddiffx) < eps and np.fabs(enddiffy) < eps:
+                    comidlist.append(comid)
+                    self.newCOMIDdata[comid] = COMIDPropsForIntersect(
+                        comid, 'IN', clstx, clsty, clendx, clendy, clmaxel,
+                        clminel, cllen, lenkm
+                    )
+                else:
+                    manual_intervention += 1
+                    if manual_intervention == 1:
+                        ofp = open('boundary_manual_fix_issues.txt', 'w')
+                        ofp.write('The following COMIDs identify streams that need manual attention.\n')
+                        ofp.write('Fix in the files {0:s} and river_explode.shp. Then rerun intersect.py\n'.format(self.SFRdata.Flowlines))
+                        ofp.write('#' * 16 + '\n')
+                    print 'both ends are cut off for comid {0:d}\n'.format(comid)
+                    ofp.write('both ends are cut off for comid {0:d}\n'.format(comid))
+                    print 'need to fix it manually'
+        del intersects, stream, clip, clippedstream
+        if manual_intervention:
+            ofp.write('#' * 16 + '\n')
+            ofp.close()
+
+        #create a new working NHD shapefile incorporating new values just found
+
+        print "Creating new shapefile {0:s}".format(self.SFRdata.NHD)
+        arcpy.CopyFeatures_management(self.SFRdata.Flowlines,self.SFRdata.NHD)
+        intersects = arcpy.UpdateCursor(self.SFRdata.NHD)
+        for stream in intersects:
+            comid = stream.COMID
+            if comid in comidlist:
+                stream.LENGTHKM = self.newCOMIDdata[comid].newlength
+                stream.MAXELEVSMO = self.newCOMIDdata[comid].newmaxel
+                stream.MINELEVSMO = self.newCOMIDdata[comid].newminel
+                intersects.updateRow(stream)
+        del stream, intersects
+
+        # finally, save out the routing information
+        print "Saving routing information to {0:s}".format('boundaryClipsRouting.txt')
+        ofp = open('boundaryClipsRouting.txt', 'w')
+        ofp.write("FROMCOMID,TOCOMID\n")
+        for currcomid in self.newCOMIDdata:
+            if currcomid.inout == 'IN':
+                ofp.write("99999,{0:d}\n".format(currcomid.comid))
+            else:
+                ofp.write("{0:d},99999\n".format(currcomid.comid))
+        ofp.close()
+        if manual_intervention:
+            print 'Some manual intervention required:\n' \
+                  'See boundary_manual_fix_issues.txt for details'
+
+    def clip_to_boundary(self, SFRdata):
+        """
+        clip
+        """
+        i = 1
+"""
+###################
+ERROR EXCEPTION CLASSES
+###################
+"""
 class InputFileMissing(Exception):
     def __init__(self, infile):
         self.infile = infile
