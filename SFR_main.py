@@ -1,4 +1,4 @@
-__author__ = 'mnfienen'
+__author__ = 'Fienen, Reeves, Leaf - USGS'
 
 import SFR_classes as SFRc
 

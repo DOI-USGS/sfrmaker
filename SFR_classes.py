@@ -4,10 +4,11 @@ import xml.etree.ElementTree as ET
 import arcpy
 import os
 
+
 class SFRInput:
-    '''
+    """
     the SFRInput class holds all data from the XML-based input file
-    '''
+    """
     def __init__(self, infile):
         try:
             inpardat = ET.parse(infile)
@@ -53,9 +54,9 @@ class SFRInput:
 
 
 class COMIDProps:
-    '''
+    """
     Properties for each COMID
-    '''
+    """
     def __init__(self, comid, startx, starty, endx, endy, FID,
                  maxsmoothelev, minsmoothelev, lengthft, cellnum):
         self.comid = comid
@@ -69,8 +70,8 @@ class COMIDProps:
         self.lengthft = lengthft
         self.cellnum = cellnum
         self.elev = -9898989898
-        self.from_comid = -9898989898
-        self.to_comid = -9898989898
+        self.from_comid = []
+        self.to_comid = []
 
 
 class COMIDPropsAll:
@@ -78,9 +79,9 @@ class COMIDPropsAll:
         self.allcomids = dict()
 
     def populate(self, SFRdata):
-        '''
+        """
         read in the main COMID-related properties from the intersect file
-        '''
+        """
         segments = arcpy.SearchCursor(SFRdata.intersect)
 
         for seg in segments:
@@ -99,9 +100,9 @@ class COMIDPropsAll:
                 )
 
     def populate_elevations(self, SFRdata):
-        '''
+        """
         Read elevation information, per COMID, from the SFRdata.ELEV file
-        '''
+        """
         arcpy.RefreshCatalog(os.getcwd())
         arcpy.env.qualifiedFieldNames = False
         arcpy.env.workspace = os.getcwd()
@@ -122,32 +123,32 @@ class COMIDPropsAll:
                 self.allcomids[int(crow[0])].elev = float(crow[1])
 
     def populate_routing(self, SFRdata):
-        '''
+        """
         Read the COMID routing information from the SFRdata.FLOW file
-        '''
+        """
         allCOMIDs = self.allcomids.keys()
         print ('Reading in routing information from {0:s}'.format(SFRdata.FLOW))
         # open the SFRdata.FLOW file as read-only (using SearchCursor)
         with arcpy.da.SearchCursor(SFRdata.FLOW, ("FROMCOMID", "TOCOMID")) as cursor:
             for crow in cursor:
                 if int(crow[0]) in allCOMIDs:
-                    self.allcomids[int(crow[0])].from_comid = int(crow[1])
+                    self.allcomids[int(crow[0])].to_comid.append(int(crow[1]))
                 if int(crow[1]) in allCOMIDs:
-                    self.allcomids[int(crow[1])].to_comid = int(crow[0])
+                    self.allcomids[int(crow[1])].from_comid.append(int(crow[0]))
 
 class SFRReachProps:
-    '''
+    """
     class containing just the data for each reach
-    '''
+    """
     def __init__(self):
         self.poo = poo
 
 
 class SFRReachesAll:
-    '''
+    """
     class that makes up a list of SFRReachProps objects
     and also contains methods to access them
-    '''
+    """
     def __init__(self):
         j = 1
 
