@@ -534,7 +534,7 @@ print "\nNow routing the river cells"
 
 CELLS=inputs["CELLS"]
 NHD=inputs["NHD"]  # from intersect.py
-VAA=inputs["PlusflowVAA.dbf"]
+VAA=inputs["PlusflowVAA"]
 
 try:
     OUT=open("routed_cells.txt",'w')
@@ -573,14 +573,16 @@ if arcpy.Exists("temp_nhd_lyr"):
 #using logic from AssignRiverElev.py
 count=0
 RCH=open('reach_ordering.txt','w')
-RCH.write('CELLNUM,COMID, hydroseq, uphydroseq, dnhydroseq, SFRseq, localseq\n')
+RCH.write('CELLNUM,COMID, hydroseq, uphydroseq, dnhydroseq, levelpathID, uplevelpath, dnlevelpath, SFRseq, localseq\n')
 
 SFRseq=0
 hydroseqused=dict()
+levelpathused=dict()
 #get a list of the comids/hydroseq in this model
 for comid in fromCOMIDlist.iterkeys():
     if comid in hydroseq:
         hydroseqused[comid]=hydroseq[comid]
+        levelpathused[comid]=levelpathID[comid]
     else:
         exit('check VAA table for COMID %d' % comid)
 
@@ -616,7 +618,12 @@ for comid,seen in hydroseqused.iteritems():
     #if the comid is in noelev, then it gets skipped below, don't count it as seen
     if not comid in noelev:
         hydroseqseen[seen]=1
-        
+levelpathseen=dict()
+for comid,seen in levelpathused.iteritems():
+    #if the comid is in noelev, it gets skipped (same as hydroseq)
+    if not comid in noelev:
+        levelpathseen[seen]=1
+
 for comid in sortedlist:
     if comid in noelev:
         continue
@@ -640,7 +647,15 @@ for comid in sortedlist:
         dwn=dnhydroseq[hydroseqused[comid]]
         if not dwn in hydroseqseen:
             dnhydroseq[hydroseqused[comid]]=nextdown(dwn,dnhydroseq,hydroseqseen)
-        RCH.write(",".join(map(str,[cellnum[comid][orderedFID[i]],comid,hydroseqused[comid],uphydroseq[hydroseqused[comid]],dnhydroseq[hydroseqused[comid]],SFRseq,i+1]))+"\n")
+        #same check for the downstream levelpathID
+        dwn=dnlevelpath[levelpathID[comid]]
+        if not dwn in levelpathseen:
+            dnlevelpath[levelpathID[comid]]=nextdown(dwn,dnlevelpath,levelpathseen)
+        #now write the information to reach_ordering file
+        RCH.write(",".join(map(str,[cellnum[comid][orderedFID[i]],comid,
+                                    hydroseqused[comid],uphydroseq[hydroseqused[comid]],dnhydroseq[hydroseqused[comid]],
+                                    levelpathID[comid],uplevelpath[levelpathID[comid]],dnlevelpath[levelpathID[comid]],
+                                    SFRseq,i+1]))+"\n")
     percentdone=round(100*icount/len(sortedlist),2)
     #print "%s %% done" %(percentdone)
 print 'cell routing done, reach_ordering.txt written' 
