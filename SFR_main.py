@@ -12,4 +12,7 @@ COMIDdata.populate(SFRdata)
 
 COMIDdata.populate_elevations(SFRdata)
 
+COMIDdata.populate_routing(SFRdata)
+
+
 i = 2

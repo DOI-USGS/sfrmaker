@@ -56,8 +56,9 @@ class COMIDProps:
     '''
     Properties for each COMID
     '''
-    def __init__(self, startx, starty, endx, endy, FID,
+    def __init__(self, comid, startx, starty, endx, endy, FID,
                  maxsmoothelev, minsmoothelev, lengthft, cellnum):
+        self.comid = comid
         self.startx = startx
         self.starty = starty
         self.endx = endx
@@ -67,7 +68,9 @@ class COMIDProps:
         self.minsmoothelev = minsmoothelev
         self.lengthft = lengthft
         self.cellnum = cellnum
-        self.elev = -999999
+        self.elev = -9898989898
+        self.from_comid = -9898989898
+        self.to_comid = -9898989898
 
 
 class COMIDPropsAll:
@@ -83,6 +86,7 @@ class COMIDPropsAll:
         for seg in segments:
             comid = int(seg.COMID)
             self.allcomids[comid] = COMIDProps(
+                int(comid),
                 float(seg.X_start),
                 float(seg.Y_start),
                 float(seg.X_end),
@@ -92,11 +96,15 @@ class COMIDPropsAll:
                 float(seg.MINELEVSMO)*3.2808,
                 float(seg.LengthFt),
                 seg.node,
-            )
+                )
 
     def populate_elevations(self, SFRdata):
+        '''
+        Read elevation information, per COMID, from the SFRdata.ELEV file
+        '''
         arcpy.RefreshCatalog(os.getcwd())
         arcpy.env.qualifiedFieldNames = False
+        arcpy.env.workspace = os.getcwd()
         if arcpy.Exists(SFRdata.ELEV):
             arcpy.Delete_management(SFRdata.ELEV)
         if arcpy.Exists("grid_temp"):
@@ -105,15 +113,27 @@ class COMIDPropsAll:
               SFRdata.rivers_table, SFRdata.intersect, SFRdata.ELEV)
         arcpy.MakeFeatureLayer_management(SFRdata.intersect, "grid_temp")
         arcpy.AddJoin_management("grid_temp", "FID", SFRdata.rivers_table, "OLDFID")
-        currelev = os.path.join(os.getcwd(), SFRdata.ELEV)
+        currelev = SFRdata.ELEV
 
         arcpy.CopyFeatures_management("grid_temp", currelev)
 
         with arcpy.da.SearchCursor(currelev, ("COMID", "ELEVAVE")) as cursor:
-            for row in cursor:
-                self.allcomids[int(row[0])].elev = float(row[1])
+            for crow in cursor:
+                self.allcomids[int(crow[0])].elev = float(crow[1])
 
-
+    def populate_routing(self, SFRdata):
+        '''
+        Read the COMID routing information from the SFRdata.FLOW file
+        '''
+        allCOMIDs = self.allcomids.keys()
+        print ('Reading in routing information from {0:s}'.format(SFRdata.FLOW))
+        # open the SFRdata.FLOW file as read-only (using SearchCursor)
+        with arcpy.da.SearchCursor(SFRdata.FLOW, ("FROMCOMID", "TOCOMID")) as cursor:
+            for crow in cursor:
+                if int(crow[0]) in allCOMIDs:
+                    self.allcomids[int(crow[0])].from_comid = int(crow[1])
+                if int(crow[1]) in allCOMIDs:
+                    self.allcomids[int(crow[1])].to_comid = int(crow[0])
 
 class SFRReachProps:
     '''
