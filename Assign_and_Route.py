@@ -559,8 +559,12 @@ with arcpy.da.SearchCursor(VAA,("ComID","Hydroseq","UpHydroseq","DnHydroseq","Le
         uphydroseq[int(row[1])]=int(row[2])
         dnhydroseq[int(row[1])]=int(row[3])
         levelpathID[comid]=int(row[4])
-        uplevelpath[levelpathID[comid]]=int(row[5])
-        dnlevelpath[levelpathID[comid]]=int(row[6])
+        uplevelpathin=int(row[5])
+        if uplevelpathin!=levelpathID[comid]:
+            uplevelpath[levelpathID[comid]]=uplevelpathin
+        dnlevelpathin=int(row[6])
+        if dnlevelpathin!=levelpathID[comid]:
+            dnlevelpath[levelpathID[comid]]=dnlevelpathin
 print 'have dictionary'
 
 #delete any working layers if found

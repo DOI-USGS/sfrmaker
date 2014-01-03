@@ -8,14 +8,13 @@
 #
 # Output file for the SFR2 package
 #
-# Requirements: os, sys, re, arcpy, defaultdict, itemgetter, math, numpy, pdb
+# Requirements: os, re, arcpy, defaultdict, itemgetter, math, numpy, pdb
 #
-# Author: H.W. Reeves; USGS Michigan Water Science Center
-#         with Mike Fienen and Andy Leaf, USGS Wisconsin WSC
+# Author: Howard Reeves; USGS Michigan Water Science Center
+#         Mike Fienen and Andy Leaf, USGS Wisconsin Water Science Center
 # Date: 1/2/2014
 #
 import os
-import sys
 import re
 import arcpy
 import numpy as np
@@ -129,7 +128,7 @@ sidelength=dict()
 comid=defaultdict(list)
 cellslope=defaultdict(list)
 comidseen=dict()
-newreachlength=dict()     #try a reachlength keyed by cellnum+comid (as strings)
+newreachlength=dict()     #try setting up dicts keyed by cellnum+comid (as strings)
 newcellslope=dict()
 newcellelev=dict()
 
@@ -165,6 +164,11 @@ for cell in cellrows:
     riverelev[cellnum].append(elevchoice)
     old_fid[cellnum].append(cell.ORIG_FID)
     old_fid_comid[cell.ORIG_FID]=comidin
+    #dictionaries storing cellnum/comid pair information using
+    #cellnum+comid (as strings) for the key; makes assembly easier
+    #than going through defaultdict lists that are keyed by cellnum
+    #and have comid and other information that has to be retrieved by
+    #order in the list
     newkey=str(int(cell.CELLNUM))+str(int(cell.comid))
     newreachlength[newkey]=float(cell.LengthFT)
     newcellslope[newkey]=localslope
@@ -217,9 +221,12 @@ estwidth=defaultdict(list)
 newestwidth=dict()
 for cellnum in row:
     for i in range(0,len(comid[cellnum])):
-         estwidth[cellnum].append(0.1193*math.pow(1000*arbolate[comid[cellnum][i]],0.5032)) # added 1000 to convert from km to m (widths were too small otherwise)
-         newkey=str(cellnum)+str(comid[cellnum][i])
-         newestwidth[newkey]=0.1193*math.pow(1000*arbolate[comid[cellnum][i]],0.5032)
+        # added 1000 to convert from km to m for arbolate sum (widths were too small otherwise)
+        widthcorrelation=0.1193*math.pow(1000*arbolate[comid[cellnum][i]],0.5032)
+        estwidth[cellnum].append(widthcorrelation)
+        #dictionary keyed by cellnum+comid as strings...
+        newkey=str(cellnum)+str(comid[cellnum][i])
+        newestwidth[newkey]=widthcorrelation
     for i in range(0,len(comid[cellnum])):
         comidcell=comid[cellnum][i]
         printstring=(cellnum,
@@ -261,6 +268,7 @@ ordering.readline()  # skip the header
 hydrocomid=dict()        #keyed by comid
 inv_hydrocomid=dict()    #keyed by hydrosequence
 orderedcell=defaultdict(list)  #list of cells by comid already in downstream order
+dnhydroseq=dict()          #keyed by comid -> gives downstream hydrosequence, used in confluence determination
 uplevelpath=dict()
 dnlevelpath=dict()
 levelpathpair=defaultdict(list)  #levelpathpair will be a dictionary of lists, each entry will be [comid,cellnum]
@@ -270,6 +278,7 @@ for line in ordering:
     cellnum=int(vals[0])
     localcomid=int(vals[1])
     localhydroseq=int(vals[2])
+    dnhydroseq[localcomid]=int(vals[4])
     hydrocomid[localcomid]=localhydroseq
     inv_hydrocomid[localhydroseq]=localcomid
     orderedcell[localcomid].append(cellnum)
@@ -333,8 +342,8 @@ level_ordered=newlist
 SFRfinalreachlist=dict()                # dictionary keyed by levelpathID
                                         # each entry is list of cellnumbers
 SFRfinalseg=dict()                      # dictionary keyed by levelpathID, value is final segment number
+SFRfinalcomid=dict()                    # final comid in an SFR segment, keyed by levelpathID
 totalreach=0
-CHK2=open('check_cell_ordering.txt','w')
 for i in range(0,len(level_ordered)):
     iseg=i+1   # segment ordering starts at 1
     irch=0
@@ -359,9 +368,8 @@ for i in range(0,len(level_ordered)):
     for cell in levelpathcells:
         if cell not in  uniq:
             uniq.append(cell)
-    CHK2.write(str(iseg)+","+str(lpID)+","+",".join(map(str,uniq))+"\n")
     SFRfinalreachlist[lpID]=uniq
-CHK2.close()
+    SFRfinalcomid[lpID]=hydro_orderedcomids[-1]
 
 #go through level_ordered, for each levelpathID, there may be more than one
 #comid in a cell.  Sum the reachlengths and get a weighted width and slope, elevation
@@ -406,6 +414,46 @@ for lpID in level_ordered:
 nss=iseg  #store the number of segments
 print "number of segments = %d and number of reaches = %d" % (nss,totalreach)
 print 'now going to generate SFR files'
+
+#go through levelpaths, find the cells where there are confluences and write to
+#file for checking...
+CHK2=open('check_cell_ordering.txt','w')
+CHK2.write('iseg,levelpathID,iseg_endcell,outseg,outlpID,outseg_begcell,confluence,found\n')
+for i in range(0,nss):
+    iseg=i+1
+    lpID=level_ordered[i]
+    if not lpID in dnlevelpath:
+        outseg=int(0)
+    else:
+        nextlevelpath=dnlevelpath[lpID]
+        if nextlevelpath in SFRfinalseg:
+            outseg=SFRfinalseg[nextlevelpath]
+        else:
+            outseg=int(0)
+    isegend=SFRfinalreachlist[lpID][-1]
+    if outseg>0:
+        outID=level_ordered[outseg-1]
+        outsegbeg=SFRfinalreachlist[outID][0]
+        confluence=1
+        for j in range(0,len(SFRfinalreachlist[outID])):
+            if SFRfinalreachlist[outID][j]==isegend:
+                confluence=SFRfinalreachlist[outID][j]
+    else:
+        outsegbeg=0
+        outID=0
+        confluence=0
+    yesno='YES'
+    if confluence==1:
+        yesno='NO_OVERLAP'
+        lastcomid=SFRfinalcomid[lpID]
+        if lastcomid in dnhydroseq:
+            if dnhydroseq[lastcomid]==0:
+                yesno='NODOWNSTREAMHYDROSEQ'
+    elif confluence==0:
+        yesno='NODOWNSTREAM'
+    pstring=",".join(map(str,[iseg,lpID,isegend,outseg,outID,outsegbeg,confluence,yesno]))
+    CHK2.write(pstring+"\n")
+CHK2.close()
 
 # have it all now by cellnumber... loop over lists by hydrosequence and generate SFR2 package
 try:
@@ -482,6 +530,8 @@ for i in range(0,nss):
     iseg=i+1
     lpID=level_ordered[i]
     levelpathcells=SFRfinalreachlist[lpID]
+    if lpID==200024986:
+        print 'here I am'
     for j in range(0,len(levelpathcells)):
         irch=j+1
         localcell=levelpathcells[j]
@@ -522,7 +572,7 @@ for i in range(0,nss):
         
         #GISSHP information
         #get polygon from CELLS
-        query="node=%d"%localcell
+        query="CELLNUM=%d"%localcell
         if (i % int(nss/10)==0):
             print "%d percent done with shapefile %s"%(int(float(i)/nss*100.),GISSHP)
         poly=arcpy.SearchCursor(CELLS,query)
