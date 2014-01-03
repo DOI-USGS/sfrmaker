@@ -312,10 +312,10 @@ class SFROperations:
         ofp = open('boundaryClipsRouting.txt', 'w')
         ofp.write("FROMCOMID,TOCOMID\n")
         for currcomid in self.newCOMIDdata:
-            if currcomid.inout == 'IN':
-                ofp.write("99999,{0:d}\n".format(currcomid.comid))
+            if self.newCOMIDdata[currcomid].inout == 'IN':
+                ofp.write("99999,{0:d}\n".format(self.newCOMIDdata[currcomid].comid))
             else:
-                ofp.write("{0:d},99999\n".format(currcomid.comid))
+                ofp.write("{0:d},99999\n".format(self.newCOMIDdata[currcomid].comid))
         ofp.close()
         if manual_intervention:
             print 'Some manual intervention required:\n' \
