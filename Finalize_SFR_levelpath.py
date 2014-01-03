@@ -415,10 +415,10 @@ nss=iseg  #store the number of segments
 print "number of segments = %d and number of reaches = %d" % (nss,totalreach)
 print 'now going to generate SFR files'
 
-#go through levelpaths, find the cells where there are confluences and write to
-#file for checking...
-CHK2=open('check_cell_ordering.txt','w')
-CHK2.write('iseg,levelpathID,iseg_endcell,outseg,outlpID,outseg_begcell,confluence,found\n')
+#go through levelpaths, find the cells where there are confluences and
+#make a list of cells of confluences for each segment (levelpathID) that will
+#be used to subdivide and renumber to get the final SFR segments
+confluences=defaultdict(list)
 for i in range(0,nss):
     iseg=i+1
     lpID=level_ordered[i]
@@ -434,27 +434,49 @@ for i in range(0,nss):
     if outseg>0:
         outID=level_ordered[outseg-1]
         outsegbeg=SFRfinalreachlist[outID][0]
-        confluence=1
+        confl=-1                                        #flag in case an end is not found
         for j in range(0,len(SFRfinalreachlist[outID])):
             if SFRfinalreachlist[outID][j]==isegend:
-                confluence=SFRfinalreachlist[outID][j]
+                confl=SFRfinalreachlist[outID][j]
     else:
+        #no downstream levelpathID
         outsegbeg=0
         outID=0
-        confluence=0
-    yesno='YES'
-    if confluence==1:
-        yesno='NO_OVERLAP'
+        confl=0
+    #no end found
+    if confl==-1:
         lastcomid=SFRfinalcomid[lpID]
+        #check to see if dnhydroseq =0, if so the last cell of iseg is a downstream end within the model
         if lastcomid in dnhydroseq:
             if dnhydroseq[lastcomid]==0:
-                yesno='NODOWNSTREAMHYDROSEQ'
-    elif confluence==0:
-        yesno='NODOWNSTREAM'
-    pstring=",".join(map(str,[iseg,lpID,isegend,outseg,outID,outsegbeg,confluence,yesno]))
-    CHK2.write(pstring+"\n")
+                confl=-2
+    #put confluence cells into lists, iseg end is automatically a confluence
+    confluences[lpID].append(isegend)
+    #now check the downstream (receiving) segment, only put one on a list if confl is
+    #greater than zero; otherwise iseg is the downsteam end (or an error indicated by confl=-1)
+    if confl>0:
+        confluences[outID].append(confl)
+    if confl==-1:
+        print 'check downstream connection for levelpathID %d' % lpID
+
+CHK2=open('segment_confluences.txt','w')
+CHK2.write('segment,levelpathID,num_confluences,cells')
+for i in range(0,nss):
+    iseg=i+1
+    lpID=level_ordered[i]
+    #finalreachlist is in hydrosequence order, put confluence in hydrosequence order with no repeats
+    norepeat_ordered=[cell for cell in SFRfinalreachlist[lpID] if cell in set(confluences[lpID])]
+    numconfls=len(norepeat_ordered)
+    #break up segments with multiple confluences
+    if numconfls>1:
+        for confl in range(0,numconfls):
+            subseg=str(iseg)+'-'+str(confl)
+            CHK2.write(subseg+","+str(lpID)+","+str(numconfls)+":"+str(norepeat_ordered[confl])+"\n")
+    else:
+        CHK2.write(str(iseg)+","+str(lpID)+","+str(numconfls)+":"+",".join(map(str,norepeat_ordered))+"\n")
 CHK2.close()
 
+keepgoing=raw_input('made it to here..')
 # have it all now by cellnumber... loop over lists by hydrosequence and generate SFR2 package
 try:
     outfile=open(OUT,'w')
@@ -530,8 +552,7 @@ for i in range(0,nss):
     iseg=i+1
     lpID=level_ordered[i]
     levelpathcells=SFRfinalreachlist[lpID]
-    if lpID==200024986:
-        print 'here I am'
+    progprint=True
     for j in range(0,len(levelpathcells)):
         irch=j+1
         localcell=levelpathcells[j]
@@ -573,8 +594,9 @@ for i in range(0,nss):
         #GISSHP information
         #get polygon from CELLS
         query="CELLNUM=%d"%localcell
-        if (i % int(nss/10)==0):
-            print "%d percent done with shapefile %s"%(int(float(i)/nss*100.),GISSHP)
+        if (iseg % int(nss/5)==0) and progprint:
+            print "%d percent done with shapefile %s"%(int(math.ceil(float(i)/nss*100.)),GISSHP)
+            progprint=False
         poly=arcpy.SearchCursor(CELLS,query)
         newvals=newrows.newRow()
         for entry in poly:
