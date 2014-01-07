@@ -4,7 +4,8 @@ import xml.etree.ElementTree as ET
 import arcpy
 import os
 import numpy as np
-import re
+import SFR_arcpy
+import time
 
 class SFRInput:
     """
@@ -129,19 +130,11 @@ class COMIDPropsAll:
         arcpy.RefreshCatalog(os.getcwd())
         arcpy.env.qualifiedFieldNames = False
         arcpy.env.workspace = os.getcwd()
-        if arcpy.Exists(SFRdata.ELEV):
-            arcpy.Delete_management(SFRdata.ELEV)
-        if arcpy.Exists("grid_temp"):
-            arcpy.Delete_management("grid_temp")
-        print "\nJoining {0:s} to {1:s}; \nsaving as {2:s} (might take a minute)".format(
-              SFRdata.rivers_table, SFRdata.intersect, SFRdata.ELEV)
+
         arcpy.MakeFeatureLayer_management(SFRdata.intersect, "grid_temp")
-        arcpy.AddJoin_management("grid_temp", "FID", SFRdata.rivers_table, "OLDFID")
-        currelev = SFRdata.ELEV
+        SFR_arcpy.general_join(SFRdata.ELEV, "grid_temp", "FID", SFRdata.rivers_table, "OLDFID", keep_common=False)
 
-        arcpy.CopyFeatures_management("grid_temp", currelev)
-
-        with arcpy.da.SearchCursor(currelev, ("COMID", "ELEVAVE")) as cursor:
+        with arcpy.da.SearchCursor(SFRdata.ELEV, ("COMID", "ELEVAVE")) as cursor:
             for crow in cursor:
                 self.allcomids[int(crow[0])].elev = float(crow[1])
 
@@ -175,6 +168,118 @@ class SFRReachesAll:
     """
     def __init__(self):
         j = 1
+
+
+class SFRpreproc:
+    def __init__(self, SFRdata):
+        self.logfile = open('sfr_preproc_log.out')
+        self.joinnames = dict()
+        self.indata = SFRdata
+        ts = time.time()
+        st_time = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+        self.ofp = open('SFR_preproc.log', 'w')
+        self.ofp.write('SFR_preproc log.')
+        self.ofp.write('\n' + '#' * 25 + '\nStart Time: {0:s}\n'.format(st_time) + '#' * 25 + '\n')
+
+        # environmental settings for arcpy
+        arcpy.env.workspace = os.getcwd()
+        arcpy.env.overwriteOutput = True
+        arcpy.env.qualifiedFieldNames = False
+
+        # Check out any necessary arcpy licenses
+        arcpy.CheckOutExtension("spatial")
+
+    def getfield(table, joinname, returnedname):
+    # get name of field (useful for case issues and appended field names in joined tables, etc)
+        Fields = arcpy.ListFields(table)
+        joinname = joinname.lower()
+        for field in Fields:
+            if joinname in field.name.lower():
+                joinname = field.name
+                break
+        self.joinnames[returnedname] = joinname
+
+    def clip_and_join_attributes(self):
+        indat=self.indata
+
+        print "Clip original NHD flowlines to model domain..."
+        # this creates a new file so original dataset untouched
+        arcpy.Clip_analysis(indat.Flowlines_unclipped,
+                            indat.MFdomain,
+                            indat.Flowlines)
+
+        print "joining PlusflowVAA and Elevslope tables to NHD Flowlines..."
+        # copy original tables and import copies
+        print "importing tables..."
+        arcpy.MakeTableView_management(indat.Elevslope, "Elevslope")
+        arcpy.MakeTableView_management(indat.PlusflowVAA, "PlusflowVAA")
+
+        # delete all unneeded fields
+        fields2keep=["comid",
+                     "divergence",
+                     "lengthkm",
+                     "thinnercod",
+                     "maxelevsmo",
+                     "minelevsmo",
+                     "hydroseq",
+                     "uphydroseq",
+                     "dnhydroseq",
+                     "reachcode",
+                     "streamorde",
+                     "arbolatesu",
+                     "fcode",
+                     "levelpathI"]
+        fields2keep=[x.lower() for x in fields2keep]
+        self.ofp.write('Joining {0:s} with {1:s}: fields kept:\n'.format(indat.Elevslope, indat.Flowlines))
+        self.ofp.write('%s\n' %(','.join(fields2keep)))
+        print "\nkeeping: %s fields; deleting the rest" %(','.join(fields2keep))
+        Join = True  # whether or not PlusflowVAA and Elevslope need to be joined
+        for table in ["PlusflowVAA", "Elevslope"]:
+            fields2delete = []
+            allfields = arcpy.ListFields(table)
+
+            for field in allfields:
+                name = field.name
+                namel = name.lower()
+                if namel in fields2keep:
+                    if table == "PlusflowVAA" and namel == "maxelevsmo":
+                        Join = False
+                    continue
+                elif namel == "oid":
+                    continue
+                else:
+                    fields2delete.append(field.name)
+                    print field.name
+            if len(fields2delete) > 0:
+                arcpy.DeleteField_management(table, fields2delete)
+
+        # Join PlusflowVAA and Elevslope to Flowlines
+        arcpy.MakeFeatureLayer_management(Flowlines, "Flowlines")
+
+        # If not already, permanently join PlusflowVAA and Elevslope, then to Flowlines
+        if Join:
+            print "\nJoining Elevslope to PlusflowVAA...\n"
+            self.getfield("PlusflowVAA", "comid", "comid1")
+            self.getfield("Elevslope", "comid", "comid2")
+            arcpy.JoinField_management("PlusflowVAA",
+                                       self.joinnames['comid1'],
+                                       "Elevslope",
+                                       self.joinnames['comid2'])
+        else:
+            print "PlusflowVAA and Elevslope already joined from previous run..."
+
+        print "Joining PlusflowVAA to NHDFlowlines...\n"
+        self.getfield("Flowlines", "comid", 'comid1')
+
+        # join to Flowlines, keeping only common
+        SFR_arcpy.general_join(Flowlines, "Flowlines", self.joinnames['comid1'], indat.PlusflowVAA, "comid", True)
+
+        # reopen flowlines as "Flowlines" --> clunky a bit to save and reopen, but must do so
+        arcpy.MakeFeatureLayer_management(Flowlines, "Flowlines")
+
+        print "\n"
+        ofp.write('\n' + 25*'#' + '\nRemoving segments with no elevation information, and with ThinnerCod = -9..\n')
+        print "Removing segments with no elevation information, and with ThinnerCod = -9..."
 
 
 class SFROperations:
