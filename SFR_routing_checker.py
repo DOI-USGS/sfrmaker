@@ -101,7 +101,7 @@ origseg = int(inpars.findall('.//orig_seg')[0].text)
 origreach = int(inpars.findall('.//orig_reach')[0].text)
 
 
-print 'Calculating routing from seg: {0:d} reach: {1:d}'.format(origseg,origreach)
+print 'Calculating routing from seg: {0:d} reach: {1:d}'.format(origseg, origreach)
 model_spc_data= model_rc_conversion(modspecfile)
 
 # read in the model.spc file
