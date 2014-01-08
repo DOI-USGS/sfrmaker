@@ -6,6 +6,7 @@ import os
 import numpy as np
 import SFR_arcpy
 import time
+import datetime
 
 class SFRInput:
     """
@@ -172,7 +173,7 @@ class SFRReachesAll:
 
 class SFRpreproc:
     def __init__(self, SFRdata):
-        self.logfile = open('sfr_preproc_log.out')
+        self.logfile = open('sfr_preproc_log.out', 'w')
         self.joinnames = dict()
         self.indata = SFRdata
         ts = time.time()
@@ -189,7 +190,7 @@ class SFRpreproc:
         # Check out any necessary arcpy licenses
         arcpy.CheckOutExtension("spatial")
 
-    def getfield(table, joinname, returnedname):
+    def getfield(self, table, joinname, returnedname):
     # get name of field (useful for case issues and appended field names in joined tables, etc)
         Fields = arcpy.ListFields(table)
         joinname = joinname.lower()
@@ -200,7 +201,7 @@ class SFRpreproc:
         self.joinnames[returnedname] = joinname
 
     def clip_and_join_attributes(self):
-        indat=self.indata
+        indat = self.indata
 
         print "Clip original NHD flowlines to model domain..."
         # this creates a new file so original dataset untouched
@@ -215,7 +216,7 @@ class SFRpreproc:
         arcpy.MakeTableView_management(indat.PlusflowVAA, "PlusflowVAA")
 
         # delete all unneeded fields
-        fields2keep=["comid",
+        fields2keep = ["comid",
                      "divergence",
                      "lengthkm",
                      "thinnercod",
@@ -229,10 +230,10 @@ class SFRpreproc:
                      "arbolatesu",
                      "fcode",
                      "levelpathI"]
-        fields2keep=[x.lower() for x in fields2keep]
+        fields2keep = [x.lower() for x in fields2keep]
         self.ofp.write('Joining {0:s} with {1:s}: fields kept:\n'.format(indat.Elevslope, indat.Flowlines))
-        self.ofp.write('%s\n' %(','.join(fields2keep)))
-        print "\nkeeping: %s fields; deleting the rest" %(','.join(fields2keep))
+        self.ofp.write('%s\n' % ('\n'.join(fields2keep)))
+        print "\nkeeping: %s fields; deleting the rest" % ('\n'.join(fields2keep))
         Join = True  # whether or not PlusflowVAA and Elevslope need to be joined
         for table in ["PlusflowVAA", "Elevslope"]:
             fields2delete = []
@@ -252,9 +253,8 @@ class SFRpreproc:
                     print field.name
             if len(fields2delete) > 0:
                 arcpy.DeleteField_management(table, fields2delete)
-
         # Join PlusflowVAA and Elevslope to Flowlines
-        arcpy.MakeFeatureLayer_management(Flowlines, "Flowlines")
+        arcpy.MakeFeatureLayer_management(indat.Flowlines, "Flowlines")
 
         # If not already, permanently join PlusflowVAA and Elevslope, then to Flowlines
         if Join:
@@ -272,15 +272,162 @@ class SFRpreproc:
         self.getfield("Flowlines", "comid", 'comid1')
 
         # join to Flowlines, keeping only common
-        SFR_arcpy.general_join(Flowlines, "Flowlines", self.joinnames['comid1'], indat.PlusflowVAA, "comid", True)
+        SFR_arcpy.general_join(indat.Flowlines,
+                               "Flowlines",
+                               self.joinnames['comid1'],
+                               indat.PlusflowVAA,
+                               "comid",
+                               True)
 
         # reopen flowlines as "Flowlines" --> clunky a bit to save and reopen, but must do so
-        arcpy.MakeFeatureLayer_management(Flowlines, "Flowlines")
+        arcpy.MakeFeatureLayer_management(indat.Flowlines, "Flowlines")
 
         print "\n"
-        ofp.write('\n' + 25*'#' + '\nRemoving segments with no elevation information, and with ThinnerCod = -9..\n')
+        self.ofp.write('\n' + 25*'#' + '\nRemoving segments with no elevation information, and with ThinnerCod = -9..\n')
         print "Removing segments with no elevation information, and with ThinnerCod = -9..."
 
+        self.getfield("Flowlines", "thinnercod", "ThinnerCod")
+        self.getfield("Flowlines", "maxelevsmo", "MaxEl")
+        self.getfield("Flowlines", "comid", "comid")
+        FLtable = arcpy.UpdateCursor("Flowlines")
+        zerocount = 0
+        tcount = 0
+        for segments in FLtable:
+            if segments.getValue(self.joinnames['MaxEl']) == 0:
+                print "%d no elevation data" % segments.getValue(self.joinnames['comid'])
+                self.ofp.write("%d no elevation data\n" % segments.getValue(self.joinnames['comid']))
+                FLtable.deleteRow(segments)
+                zerocount += 1
+            elif segments.getValue(self.joinnames['ThinnerCod']) == -9:
+                print "%d ThinnerCod=-9" % segments.getValue(self.joinnames['comid'])
+                self.ofp.write("%d ThinnerCod=-9\n" % segments.getValue(self.joinnames['comid']))
+                FLtable.deleteRow(segments)
+                tcount += 1
+
+        print "...removed %s segments with no elevation data" %(zerocount)
+        self.ofp.write("...removed %s segments with no elevation data\n" %(zerocount))
+        print "...removed %s segments with ThinnerCod = -9\n" %(tcount)
+        self.ofp.write("...removed %s segments with ThinnerCod = -9\n" %(tcount))
+        print ("Performing spatial join (one-to-many) of NHD flowlines to model grid to get river cells..." +
+               "(this step may take several minutes or more)\n")
+        arcpy.SpatialJoin_analysis(indat.MFgrid, "Flowlines",
+                                   "river_cells.shp",
+                                   "JOIN_ONE_TO_MANY",
+                                   "KEEP_COMMON")
+
+        # add in cellnum field for backwards compatibility
+        arcpy.AddField_management("river_cells.shp", "CELLNUM", "LONG")
+        arcpy.CalculateField_management("river_cells.shp", "CELLNUM", "!node!", "PYTHON")
+
+        print "Dissolving river cells on cell number to isolate unique cells...\n"
+        self.getfield("river_cells.shp", "node", "node")
+        arcpy.Dissolve_management("river_cells.shp", "river_cells_dissolve.shp", self.joinnames['node'])
+
+        print "Exploding NHD segments to grid cells using Intersect and Multipart to Singlepart..."
+        arcpy.Intersect_analysis(["river_cells_dissolve.shp", "Flowlines"], "river_intersect.shp")
+        arcpy.MultipartToSinglepart_management("river_intersect.shp", "river_explode.shp")
+        print "\n"
+        print "Adding in stream geometry"
+        #set up list and dictionary for fields, types, and associated commands
+        fields = ('X_start', 'Y_start', 'X_end', 'Y_end', 'LengthFt')
+        types = {'X_start': 'DOUBLE',
+                 'Y_start': 'DOUBLE',
+                 'X_end': 'DOUBLE',
+                 'Y_end': 'DOUBLE',
+                 'LengthFt': 'DOUBLE'}
+        commands = {'X_start': "float(!SHAPE.firstpoint!.split()[0])",
+                    'Y_start': "float(!SHAPE.firstpoint!.split()[1])",
+                    'X_end': "float(!SHAPE.lastpoint!.split()[0])",
+                    'Y_end': "float(!SHAPE.lastpoint!.split()[1])",
+                    'LengthFt': "float(!SHAPE.length!)"}
+
+        #add fields for start, end, and length
+        for fld in fields:
+            arcpy.AddField_management("river_explode.shp", fld, types[fld])
+
+        #calculate the fields
+        for fld in fields:
+            print "\tcalculating %s(s)..." % (fld)
+            arcpy.CalculateField_management("river_explode.shp", fld, commands[fld], "PYTHON")
+        self.ofp.write('\n' + 25*'#' + '\nRemoving reaches with lengths less than or equal to %s...\n' % indat.reach_cutoff)
+        print "\nRemoving reaches with lengths less than or equal to %s..." % indat.reach_cutoff
+        self.getfield("river_explode.shp", "comid", "comid")
+        self.getfield("river_explode.shp", "node", "node")
+        self.getfield("river_explode.shp", "lengthft", "Length")
+        table = arcpy.UpdateCursor("river_explode.shp")
+        count = 0
+        for reaches in table:
+            if reaches.getValue(self.joinnames["Length"]) <= indat.reach_cutoff:
+                print "segment: %d, cell: %s, length: %s" % (reaches.getValue(self.joinnames["comid"]),
+                                                            reaches.getValue(self.joinnames["node"]),
+                                                            reaches.getValue(self.joinnames["Length"]))
+                self.ofp.write("segment: %d, cell: %s, length: %s\n"
+                          % (reaches.getValue(self.joinnames["comid"]),
+                            reaches.getValue(self.joinnames["node"]),
+                            reaches.getValue(self.joinnames["Length"])))
+                table.deleteRow(reaches)
+                count += 1
+        print "removed %s reaches with lengths <= %s\n" % (count, indat.reach_cutoff)
+        self.ofp.write("removed %s reaches with lengths <= %s\n" % (count, indat.reach_cutoff))
+        print "removing cells corresponding to those reaches..."
+
+        # temporarily join river_cells_dissolve to river explode; record nodes with no elevation information
+        arcpy.MakeFeatureLayer_management("river_cells_dissolve.shp", "river_cells_dissolve")
+        arcpy.MakeFeatureLayer_management("river_explode.shp", "river_explode")
+        arcpy.AddJoin_management("river_cells_dissolve",
+                                 "node",
+                                 "river_explode",
+                                 "node",
+                                 "KEEP_ALL")  # this might not work as-in in stand-alone mode
+        self.getfield("river_cells_dissolve", "node", "node")
+        self.getfield("river_cells_dissolve", "maxelevsmo", "maxelevsmo")
+        table = arcpy.SearchCursor("river_cells_dissolve")
+        nodes2delete = []
+        for row in table:
+            if row.isNull(self.joinnames["maxelevsmo"]):
+                nodes2delete.append(row.getValue(self.joinnames["node"]))
+        arcpy.RemoveJoin_management("river_cells_dissolve", "river_explode")
+
+        # remove nodes with no elevation information from river_explode
+        self.ofp.write('\n' + 25*'#' + '\nRemoving nodes with no elevation information from river_explode\n')
+        print 'Removing nodes with no elevation information from river_explode'
+        self.getfield("river_cells_dissolve.shp", "node", "node")
+        table = arcpy.UpdateCursor("river_cells_dissolve.shp")
+        count = 0
+        for cells in table:
+            if cells.getValue(self.joinnames["node"]) in nodes2delete:
+                print "%d" % (cells.getValue(self.joinnames["node"]))
+                ofp.write('%d\n' % (cells.getValue(self.joinnames["node"])))
+                table.deleteRow(cells)
+                count += 1
+        print "removed %s cells\n" % (count)
+        self.ofp.write("removed %s cells" % (count))
+
+        print "removing any remaining disconnected reaches..."
+        self.ofp.write('\n' + 25*'#' + '\nremoving any remaining disconnected reaches...\n')
+        self.getfield("river_explode.shp", "node", "node")
+        table = arcpy.UpdateCursor("river_explode.shp")
+        count = 0
+        for reaches in table:
+            if reaches.getValue(self.joinnames["node"]) in nodes2delete:
+                print "%d" % (reaches.getValue(self.joinnames["node"]))
+                self.ofp.write('%d\n' % (reaches.getValue(self.joinnames["node"])))
+                table.deleteRow(reaches)
+                count += 1
+        if count > 0:
+            print "removed %s disconnected reaches" % count
+            self.ofp.write("removed %s disconnected reaches\n" % count)
+        else:
+            print "no disconnected reaches found!"
+            self.ofp.write("no disconnected reaches found!\n")
+        print "\n"
+        print "Done with pre-processing, ready to run intersect!"
+        self.ofp.write('\n' + '#' * 25 + '\nDone with pre-processing, ready to run intersect!')
+        ts = time.time()
+        end_time = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+
+        self.ofp.write('\n' + '#' * 25 + '\nEnd Time: %s\n' % end_time + '#' * 25)
+        self.ofp.close()
 
 class SFROperations:
     """

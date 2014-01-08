@@ -141,20 +141,21 @@ for segments in FLtable:
         FLtable.deleteRow(segments)
         tcount+=1
             
-print "...removed %s segments with no elevation data" %(zerocount)
-ofp.write("...removed %s segments with no elevation data\n" %(zerocount))
-print "...removed %s segments with ThinnerCod = -9\n" %(tcount)
-ofp.write("...removed %s segments with ThinnerCod = -9\n" %(tcount))
-print "Performing spatial join (one-to-many) of NHD flowlines to model grid to get river cells...(this step may take several minutes or more)\n"
+print "...removed %s segments with no elevation data" % zerocount
+ofp.write("...removed %s segments with no elevation data\n" % zerocount)
+print "...removed %s segments with ThinnerCod = -9\n" % tcount
+ofp.write("...removed %s segments with ThinnerCod = -9\n" % tcount)
+print ("Performing spatial join (one-to-many) of NHD flowlines to model grid to get river cells..." +
+       "this step may take several minutes or more\n")
 arcpy.SpatialJoin_analysis(MFgrid,"Flowlines","river_cells.shp","JOIN_ONE_TO_MANY","KEEP_COMMON")
 
 # add in cellnum field for backwards compatibility
 arcpy.AddField_management("river_cells.shp","CELLNUM","LONG")
-arcpy.CalculateField_management("river_cells.shp","CELLNUM","!node!","PYTHON")
+arcpy.CalculateField_management("river_cells.shp","CELLNUM", "!node!", "PYTHON")
 
 print "Dissolving river cells on cell number to isolate unique cells...\n"
 node=getfield("river_cells.shp","node")
-arcpy.Dissolve_management("river_cells.shp","river_cells_dissolve.shp",node)
+arcpy.Dissolve_management("river_cells.shp","river_cells_dissolve.shp", node)
 
 print "Exploding NHD segments to grid cells using Intersect and Multipart to Singlepart..."
 arcpy.Intersect_analysis(["river_cells_dissolve.shp","Flowlines"],"river_intersect.shp")
