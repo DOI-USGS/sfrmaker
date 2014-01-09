@@ -48,6 +48,13 @@ class SFRInput:
         except:
             self.eps = 1.0000001e-02 # default value used if not in the input file
 
+        # initialize the arcpy environment
+        arcpy.env.workspace = os.getcwd()
+        arcpy.env.overwriteOutput = True
+        arcpy.env.qualifiedFieldNames = False
+        # Check out any necessary arcpy licenses
+        arcpy.CheckOutExtension("spatial")
+
     def tf2flag(self, intxt):
         # converts text written in XML file to True or False flag
         if intxt.lower() == 'true':
@@ -128,9 +135,7 @@ class COMIDPropsAll:
         """
         Read elevation information, per COMID, from the SFRdata.ELEV file
         """
-        arcpy.RefreshCatalog(os.getcwd())
-        arcpy.env.qualifiedFieldNames = False
-        arcpy.env.workspace = os.getcwd()
+
 
         arcpy.MakeFeatureLayer_management(SFRdata.intersect, "grid_temp")
         SFR_arcpy.general_join(SFRdata.ELEV, "grid_temp", "FID", SFRdata.rivers_table, "OLDFID", keep_common=False)
@@ -182,13 +187,6 @@ class SFRpreproc:
         self.ofp.write('SFR_preproc log.')
         self.ofp.write('\n' + '#' * 25 + '\nStart Time: {0:s}\n'.format(st_time) + '#' * 25 + '\n')
 
-        # environmental settings for arcpy
-        arcpy.env.workspace = os.getcwd()
-        arcpy.env.overwriteOutput = True
-        arcpy.env.qualifiedFieldNames = False
-
-        # Check out any necessary arcpy licenses
-        arcpy.CheckOutExtension("spatial")
 
     def getfield(self, table, joinname, returnedname):
     # get name of field (useful for case issues and appended field names in joined tables, etc)
@@ -444,8 +442,7 @@ class SFROperations:
         """
         # bring data in as layers
         #set workspace
-        arcpy.env.workspace = os.getcwd()
-        arcpy.env.overwriteOutput = True
+
 
         #convert to layers
         arcpy.MakeFeatureLayer_management(self.SFRdata.Flowlines_unclipped, 'nhd_lyr')
@@ -573,11 +570,26 @@ class SFROperations:
             print 'Some manual intervention required:\n' \
                   'See boundary_manual_fix_issues.txt for details'
 
+    def make_rivers_table(self):
+        """
+        from assign_and_route -->
+        """
+        if arcpy.Exists(self.SFRdata.rivers_table):
+            arcpy.Delete_management(self.SFRdata.rivers_table)
+        arcpy.CreateTable_management(os.getcwd(), self.SFRdata.rivers_table)
+        arcpy.AddField_management(OUTTAB, "OLDFID", "LONG")
+        arcpy.AddField_management(OUTTAB, "CELLNUM", "LONG")
+        arcpy.AddField_management(OUTTAB, "ELEVMAX", "DOUBLE")
+        arcpy.AddField_management(OUTTAB, "ELEVAVE", "DOUBLE")
+        arcpy.AddField_management(OUTTAB, "ELEVMIN", "DOUBLE")
+
     def clip_to_boundary(self, SFRdata):
         """
         clip
         """
         i = 1
+
+
 """
 ###################
 ERROR EXCEPTION CLASSES
