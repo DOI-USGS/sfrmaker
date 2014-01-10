@@ -5,14 +5,14 @@ import SFR_classes as SFRc
 infile = 'SFR_input.xml'
 
 SFRdata = SFRc.SFRInput(infile)
-'''
+
 SFRpre = SFRc.SFRpreproc(SFRdata)
 
 SFRpre.clip_and_join_attributes()
 
 
 SFRops = SFRc.SFROperations(SFRdata)
-'''
+
 SFRops.intersect()
 
 

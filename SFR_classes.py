@@ -7,6 +7,8 @@ import numpy as np
 import SFR_arcpy
 import time
 import datetime
+import discomb_utilities as disutil #  utility to read in a dis file
+
 
 class SFRInput:
     """
@@ -38,6 +40,7 @@ class SFRInput:
         self.Flowlines = inpars.findall('.//Flowlines')[0].text
         self.ELEV = inpars.findall('.//ELEV')[0].text
         self.CELLS = inpars.findall('.//CELLS')[0].text
+        self.CELLS_DISS = inpars.findall('.//CELLS_DISS')[0].text
         self.NHD = inpars.findall('.//NHD')[0].text
         self.OUT = inpars.findall('.//OUT')[0].text
         self.MAT1 = inpars.findall('.//MAT1')[0].text
@@ -64,10 +67,16 @@ class SFRInput:
             return False
 
 
-class FIDprops:
+class FIDprops(object):
     """
     Properties for each COMID
     """
+    __slots__ = ['comid', 'startx', 'starty', 'endx', 'endy', 'FID',
+                 'maxsmoothelev', 'minsmoothelev', 'lengthft',
+                 'cellnum', 'elev', 'from_comid', 'to_comid',
+                 'segelevinfo', 'noelev', 'COMID_orderedFID', 'start_has_end', 'end_has_start']
+    #  using __slots__ makes it required to declare properties of the object here in place
+    #  and saves significant memory
     def __init__(self, comid, startx, starty, endx, endy, FID,
                  maxsmoothelev, minsmoothelev, lengthft, cellnum):
         self.comid = comid
@@ -182,12 +191,13 @@ class FIDPropsAll:
                         self.allfids[cfid].from_comid = int(crow[0])
 
 
-class SFRReachProps:
+class SFRReachProps(object):
     """
     class containing just the data for each reach
     """
+    __slots__ = ['junk']
     def __init__(self):
-        self.poo = poo
+        self.junk = junk
 
 
 class SFRReachesAll:
@@ -324,6 +334,29 @@ class SFRpreproc:
                 self.ofp.write("%d ThinnerCod=-9\n" % segments.getValue(self.joinnames['comid']))
                 FLtable.deleteRow(segments)
                 tcount += 1
+        #  read in discretization information
+        DX,DY,NLAY,NROW,NCOL,i = disutil.read_meta_data(indat.MFdis)
+
+        # update the "node" field in indat.MFgrid
+        # first delete the column if it already exists
+        print 'verifying that there is a "node" field in {0:s}'.format(indat.MFgrid)
+        MFgridflds = arcpy.ListFields(indat.MFgrid)
+        for cfield in MFgridflds:
+            if cfield.name.lower() == 'node':
+                arcpy.DeleteField_management(indat.MFgrid, 'node')
+        arcpy.AddField_management(indat.MFgrid, 'node', 'LONG')
+
+        print 'Updating "node" field in {0:s}'.format(indat.MFgrid)
+        # now loop through and set "node" which is equivalent to "cellnum"
+        cursor = arcpy.UpdateCursor(indat.MFgrid)
+        for row in cursor:
+            crow = row.getValue('row')
+            ccol = row.getValue('column')
+            row.setValue('node', ((int(crow)-1) * NCOL) + int(ccol))
+            cursor.updateRow(row)
+        del row
+        del cursor
+
 
         print "...removed %s segments with no elevation data" %(zerocount)
         self.ofp.write("...removed %s segments with no elevation data\n" %(zerocount))
@@ -332,20 +365,20 @@ class SFRpreproc:
         print ("Performing spatial join (one-to-many) of NHD flowlines to model grid to get river cells..." +
                "(this step may take several minutes or more)\n")
         arcpy.SpatialJoin_analysis(indat.MFgrid, "Flowlines",
-                                   "river_cells.shp",
+                                   indat.CELLS,
                                    "JOIN_ONE_TO_MANY",
                                    "KEEP_COMMON")
 
         # add in cellnum field for backwards compatibility
-        arcpy.AddField_management("river_cells.shp", "CELLNUM", "LONG")
-        arcpy.CalculateField_management("river_cells.shp", "CELLNUM", "!node!", "PYTHON")
+        arcpy.AddField_management(indat.CELLS, "CELLNUM", "LONG")
+        arcpy.CalculateField_management(indat.CELLS, "CELLNUM", "!node!", "PYTHON")
 
         print "Dissolving river cells on cell number to isolate unique cells...\n"
-        self.getfield("river_cells.shp", "node", "node")
-        arcpy.Dissolve_management("river_cells.shp", "river_cells_dissolve.shp", self.joinnames['node'])
+        self.getfield(indat.CELLS, "node", "node")
+        arcpy.Dissolve_management(indat.CELLS, indat.CELLS_DISS, self.joinnames['node'])
 
         print "Exploding NHD segments to grid cells using Intersect and Multipart to Singlepart..."
-        arcpy.Intersect_analysis(["river_cells_dissolve.shp", "Flowlines"], "river_intersect.shp")
+        arcpy.Intersect_analysis([indat.CELLS_DISS, "Flowlines"], "river_intersect.shp")
         arcpy.MultipartToSinglepart_management("river_intersect.shp", "river_explode.shp")
         print "\n"
         print "Adding in stream geometry"
@@ -393,7 +426,7 @@ class SFRpreproc:
         print "removing cells corresponding to those reaches..."
 
         # temporarily join river_cells_dissolve to river explode; record nodes with no elevation information
-        arcpy.MakeFeatureLayer_management("river_cells_dissolve.shp", "river_cells_dissolve")
+        arcpy.MakeFeatureLayer_management(indat.CELLS_DISS, "river_cells_dissolve")
         arcpy.MakeFeatureLayer_management("river_explode.shp", "river_explode")
         arcpy.AddJoin_management("river_cells_dissolve",
                                  "node",
@@ -412,8 +445,8 @@ class SFRpreproc:
         # remove nodes with no elevation information from river_explode
         self.ofp.write('\n' + 25*'#' + '\nRemoving nodes with no elevation information from river_explode\n')
         print 'Removing nodes with no elevation information from river_explode'
-        self.getfield("river_cells_dissolve.shp", "node", "node")
-        table = arcpy.UpdateCursor("river_cells_dissolve.shp")
+        self.getfield(indat.CELLS_DISS, "node", "node")
+        table = arcpy.UpdateCursor(indat.CELLS_DISS)
         count = 0
         for cells in table:
             if cells.getValue(self.joinnames["node"]) in nodes2delete:
@@ -578,7 +611,7 @@ class SFROperations:
         #create a new working NHD shapefile incorporating new values just found
 
         print "Creating new shapefile {0:s}".format(self.SFRdata.NHD)
-        arcpy.CopyFeatures_management(self.SFRdata.Flowlines,self.SFRdata.NHD)
+        arcpy.CopyFeatures_management(self.SFRdata.Flowlines, self.SFRdata.NHD)
         intersects = arcpy.UpdateCursor(self.SFRdata.NHD)
         for stream in intersects:
             comid = stream.COMID

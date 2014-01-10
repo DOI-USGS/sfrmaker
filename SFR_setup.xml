@@ -53,8 +53,11 @@ Notes on SFR input:
     <intersect>river_explode.shp</intersect>
     <!-- rivers_table:  -->
     <rivers_table>river_elevs.dbf</rivers_table>
+    <!-- CELLS_DISS:  -->
+    <CELLS_DISS>river_cells_dissolve.shp</CELLS_DISS>
     <!-- CELLS:  -->
-    <CELLS>river_cells_dissolve.shp</CELLS>
+    <CELLS>river_cells.shp</CELLS>
+
     <!-- NHD:  -->
     <NHD>NHD_intersect_edited.shp</NHD> 
 </IntermediateFiles>
