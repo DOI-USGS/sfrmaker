@@ -22,6 +22,7 @@ class SFRInput:
 
         self.compute_zonal = self.tf2flag(inpars.findall('.//compute_zonal')[0].text)
         self.reach_cutoff = float(inpars.findall('.//reach_cutoff')[0].text)
+        self.rfact = float(inpars.findall('.//rfact')[0].text)
         self.MFgrid = inpars.findall('.//MFgrid')[0].text
         self.MFdomain = inpars.findall('.//MFdomain')[0].text
         self.MFdis = inpars.findall('.//MFdis')[0].text
@@ -46,7 +47,7 @@ class SFRInput:
         try:
             self.eps = float(inpars.findall('.//eps')[0].text)
         except:
-            self.eps = 1.0000001e-02 # default value used if not in the input file
+            self.eps = 1.0000001e-02  # default value used if not in the input file
 
         # initialize the arcpy environment
         arcpy.env.workspace = os.getcwd()
@@ -82,6 +83,13 @@ class COMIDProps:
         self.elev = -9898989898
         self.from_comid = []
         self.to_comid = []
+        self.segelevinfo = dict()
+        self.noelev = None
+        self.COMID_orderedFID = None
+        self.start_has_end = None
+        self.end_has_start = None
+
+
 
 
 class COMIDPropsForIntersect:
@@ -108,7 +116,18 @@ class COMIDPropsForIntersect:
 
 class COMIDPropsAll:
     def __init__(self):
-        self.allcomids = dict()
+        self.allfids = dict()
+        self.allcomids = []  #
+    def return_fid_comid_list(self):
+        """
+        Return a dict of lists of comids linked with each FID
+        """
+        self.comid_fid = dict()
+        allfids = self.allfids.keys()
+        for cfids in allfids:
+
+
+
 
     def populate(self, SFRdata):
         """
@@ -117,9 +136,9 @@ class COMIDPropsAll:
         segments = arcpy.SearchCursor(SFRdata.intersect)
 
         for seg in segments:
-            comid = int(seg.COMID)
-            self.allcomids[comid] = COMIDProps(
-                int(comid),
+            fid = int(seg.FID)
+            self.allfids[fid] = COMIDProps(
+                int(seg.COMID),
                 float(seg.X_start),
                 float(seg.Y_start),
                 float(seg.X_end),
@@ -140,23 +159,24 @@ class COMIDPropsAll:
         arcpy.MakeFeatureLayer_management(SFRdata.intersect, "grid_temp")
         SFR_arcpy.general_join(SFRdata.ELEV, "grid_temp", "FID", SFRdata.rivers_table, "OLDFID", keep_common=False)
 
-        with arcpy.da.SearchCursor(SFRdata.ELEV, ("COMID", "ELEVAVE")) as cursor:
+        with arcpy.da.SearchCursor(SFRdata.ELEV, ("FID", "ELEVAVE")) as cursor:
             for crow in cursor:
-                self.allcomids[int(crow[0])].elev = float(crow[1])
+                self.allfids[int(crow[0])].elev = float(crow[1])
 
     def populate_routing(self, SFRdata):
         """
         Read the COMID routing information from the SFRdata.FLOW file
         """
-        allCOMIDs = self.allcomids.keys()
+        allFIDs = self.allcomids.keys()
+        allCOMIDs
         print ('Reading in routing information from {0:s}'.format(SFRdata.FLOW))
         # open the SFRdata.FLOW file as read-only (using SearchCursor)
         with arcpy.da.SearchCursor(SFRdata.FLOW, ("FROMCOMID", "TOCOMID")) as cursor:
             for crow in cursor:
                 if int(crow[0]) in allCOMIDs:
-                    self.allcomids[int(crow[0])].to_comid.append(int(crow[1]))
+                    self.allfids[int(crow[0])].to_comid.append(int(crow[1]))
                 if int(crow[1]) in allCOMIDs:
-                    self.allcomids[int(crow[1])].from_comid.append(int(crow[0]))
+                    self.allfids[int(crow[1])].from_comid.append(int(crow[0]))
 
 
 class SFRReachProps:
@@ -435,6 +455,16 @@ class SFROperations:
         self.SFRdata = SFRdata
         self.newCOMIDdata = dict()
 
+    def getfield(self, table, joinname, returnedname):
+    # get name of field (useful for case issues and appended field names in joined tables, etc)
+        Fields = arcpy.ListFields(table)
+        joinname = joinname.lower()
+        for field in Fields:
+            if joinname in field.name.lower():
+                joinname = field.name
+                break
+        self.joinnames[returnedname] = joinname
+
     def intersect(self):
         """
         merge the NHDplus information with the model grid
@@ -570,18 +600,121 @@ class SFROperations:
             print 'Some manual intervention required:\n' \
                   'See boundary_manual_fix_issues.txt for details'
 
-    def make_rivers_table(self):
+    def make_rivers_table(self, COMIDdata):
         """
         from assign_and_route -->
         """
         if arcpy.Exists(self.SFRdata.rivers_table):
             arcpy.Delete_management(self.SFRdata.rivers_table)
         arcpy.CreateTable_management(os.getcwd(), self.SFRdata.rivers_table)
-        arcpy.AddField_management(OUTTAB, "OLDFID", "LONG")
-        arcpy.AddField_management(OUTTAB, "CELLNUM", "LONG")
-        arcpy.AddField_management(OUTTAB, "ELEVMAX", "DOUBLE")
-        arcpy.AddField_management(OUTTAB, "ELEVAVE", "DOUBLE")
-        arcpy.AddField_management(OUTTAB, "ELEVMIN", "DOUBLE")
+        arcpy.AddField_management(self.SFRdata.rivers_table, "OLDFID", "LONG")
+        arcpy.AddField_management(self.SFRdata.rivers_table, "CELLNUM", "LONG")
+        arcpy.AddField_management(self.SFRdata.rivers_table, "ELEVMAX", "DOUBLE")
+        arcpy.AddField_management(self.SFRdata.rivers_table, "ELEVAVE", "DOUBLE")
+        arcpy.AddField_management(self.SFRdata.rivers_table, "ELEVMIN", "DOUBLE")
+        ##########################
+        segcounter = 0
+        rows = arcpy.InsertCursor(self.SFRdata.rivers_table)
+        fix_comids_summary = []
+        fixcomids_flag = False
+        for comid in COMIDdata.iterkeys():
+            segcounter += 1
+            #print "COMID = ",comid," segment is ",segcounter
+            fidlist = FID[comid]
+            start_has_end = dict()
+            end_has_start = dict()
+
+            for i in range(0,len(fidlist)):
+                haveend=False
+                havestart=False
+                for j in range(0,len(fidlist)):
+                    if j==i:
+                        continue
+                    diffstartx = startx[comid][i]-endx[comid][j]
+                    diffstarty = starty[comid][i]-endy[comid][j]
+                    diffendx = endx[comid][i]-startx[comid][j]
+                    diffendy = endy[comid][i]-starty[comid][j]
+                    if(np.fabs(diffstartx) < COMIDdata.rfact and np.fabs(diffstarty) < COMIDdata.rfact):
+                        start_has_end[fidlist[i]]=fidlist[j]
+                        haveend=True
+                    if(math.fabs(diffendx)<fact and math.fabs(diffendy)<fact):
+                        end_has_start[fidlist[i]]=fidlist[j]
+                        havestart=True
+                    if haveend and havestart:
+                        break
+
+            #find key in start_has_end that didn't match an end and
+            #key in end_has_start that didn't match a start
+
+            numstart=0
+            numend=0
+            startingFID=[]
+            endingFID=[]
+            for test in fidlist:
+                if test not in start_has_end:
+                    startingFID.append(test)
+                    numstart=numstart+1
+                if test not in end_has_start:
+                    endingFID.append(test)
+                    numend=numend+1
+            if (numstart!=1 or numend !=1):
+                if fixcomids_flag == False:
+                    outfile = open(outfilename,'w')
+                    fixcomids_flag = True
+                outfile.write("numstart ="+ str(numstart)+" \n")
+                outfile.write("numend = "+ str(numend)+" \n")
+                outfile.write("starting FIDs: " + ",".join(map(str,startingFID))+"\n")
+                outfile.write("ending FIDs: " + ",".join(map(str,endingFID))+"\n")
+                outfile.write("manually fix COMID = %d\n" %comid)
+                fix_comids_summary.append('%d\n' %comid)
+                noelev[comid]=1  #set flag
+                continue
+
+            orderedFID=[]
+            orderedFID.append(startingFID[0])
+            for i in range(1,len(end_has_start)):
+                orderedFID.append(end_has_start[orderedFID[i-1]])
+            if orderedFID[-1]!=endingFID[0]:       #don't repeat the last entry FID...
+                orderedFID.append(endingFID[0])
+            #total length read through lengthkm didn't always match up
+            #to the sum of the lengths of the segments (exactly), sumup total length
+            totallength=0
+            for i in range(0,len(orderedFID)):
+                totallength=totallength+lengthft[comid][orderedFID[i]]
+            if totallength==0:
+                exit('check length ft for FIDs in COMID= %d' % comid)
+            slope=(maxsmoothelev[comid]-minsmoothelev[comid])/totallength
+            distance=0.
+            COMID_orderedFID[comid]=orderedFID
+            for i in range(0,len(orderedFID)):
+                maxcellrivelev=maxsmoothelev[comid]-slope*distance
+                distance=distance+lengthft[comid][orderedFID[i]]
+                mincellrivelev=maxsmoothelev[comid]-slope*distance
+                avecellrivelev=0.5*(maxcellrivelev+mincellrivelev)
+                segelevinfo[comid][cellnum[comid][orderedFID[i]]]=avecellrivelev
+                row=rows.newRow()
+                row.OLDFID=orderedFID[i]
+                row.CELLNUM=cellnum[comid][orderedFID[i]]
+                row.ELEVMAX=maxcellrivelev
+                row.ELEVAVE=avecellrivelev
+                row.ELEVMIN=mincellrivelev
+                rows.insertRow(row)
+        # write out the summary of comids to fix, then close the outfile
+        if len(fix_comids_summary) > 0:
+            print 'Some cells have multiple COMIDs entering and/or leaving.\n See file "fix_comids.txt"'
+            outfile.write('#' * 30 + '\nSummary of COMIDS to fix:\n' +
+            'Delete these COMIDs from river_explode.shp, \nthen run CleanupRiverCells.py and rerun Assign_and_Route.py\n')
+            [outfile.write(line) for line in fix_comids_summary]
+            outfile.close()
+        del row
+        del rows
+
+
+
+
+
+
+
 
     def clip_to_boundary(self, SFRdata):
         """
