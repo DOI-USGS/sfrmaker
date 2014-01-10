@@ -64,7 +64,7 @@ class SFRInput:
             return False
 
 
-class COMIDProps:
+class FIDprops:
     """
     Properties for each COMID
     """
@@ -80,9 +80,9 @@ class COMIDProps:
         self.minsmoothelev = minsmoothelev
         self.lengthft = lengthft
         self.cellnum = cellnum
-        self.elev = -9898989898
-        self.from_comid = []
-        self.to_comid = []
+        self.elev = None
+        self.from_comid = None
+        self.to_comid = None
         self.segelevinfo = dict()
         self.noelev = None
         self.COMID_orderedFID = None
@@ -92,7 +92,7 @@ class COMIDProps:
 
 
 
-class COMIDPropsForIntersect:
+class FIDPropsForIntersect:
     """
     Properties for each COMID
     """
@@ -114,19 +114,20 @@ class COMIDPropsForIntersect:
             self.newminel = round(clminel)
             self.newmaxel = round(clmaxel-self.slope*clippedlength/lenkm)
 
-class COMIDPropsAll:
+
+class FIDPropsAll:
     def __init__(self):
         self.allfids = dict()
-        self.allcomids = []  #
+        self.allcomids = []  # comprehensive list of all comids
+
     def return_fid_comid_list(self):
         """
         Return a dict of lists of comids linked with each FID
         """
-        self.comid_fid = dict()
+        self.comid_fid = {ccomid: [] for ccomid in self.allcomids}
         allfids = self.allfids.keys()
-        for cfids in allfids:
-
-
+        for cfid in allfids:
+            self.comid_fid[self.allfids[cfid].comid].append(cfid)
 
 
     def populate(self, SFRdata):
@@ -137,7 +138,7 @@ class COMIDPropsAll:
 
         for seg in segments:
             fid = int(seg.FID)
-            self.allfids[fid] = COMIDProps(
+            self.allfids[fid] = FIDprops(
                 int(seg.COMID),
                 float(seg.X_start),
                 float(seg.Y_start),
@@ -147,8 +148,10 @@ class COMIDPropsAll:
                 float(seg.MAXELEVSMO)*3.2808,
                 float(seg.MINELEVSMO)*3.2808,
                 float(seg.LengthFt),
-                seg.node,
+                seg.node
                 )
+            self.allcomids.append(int(seg.COMID))
+        self.allcomids = list(set(self.allcomids))
 
     def populate_elevations(self, SFRdata):
         """
@@ -167,16 +170,16 @@ class COMIDPropsAll:
         """
         Read the COMID routing information from the SFRdata.FLOW file
         """
-        allFIDs = self.allcomids.keys()
-        allCOMIDs
         print ('Reading in routing information from {0:s}'.format(SFRdata.FLOW))
         # open the SFRdata.FLOW file as read-only (using SearchCursor)
         with arcpy.da.SearchCursor(SFRdata.FLOW, ("FROMCOMID", "TOCOMID")) as cursor:
             for crow in cursor:
-                if int(crow[0]) in allCOMIDs:
-                    self.allfids[int(crow[0])].to_comid.append(int(crow[1]))
-                if int(crow[1]) in allCOMIDs:
-                    self.allfids[int(crow[1])].from_comid.append(int(crow[0]))
+                if int(crow[0]) in self.allcomids:
+                    for cfid in self.comid_fid[int(crow[0])]:
+                        self.allfids[cfid].to_comid = int(crow[1])
+                if int(crow[1]) in self.allcomids:
+                    for cfid in self.comid_fid[int(crow[1])]:
+                        self.allfids[cfid].from_comid = int(crow[0])
 
 
 class SFRReachProps:
@@ -547,13 +550,13 @@ class SFROperations:
                 enddiffy = endy-clendy
                 if np.fabs(stdiffx) < eps and np.fabs(stdiffy) < eps:
                     comidlist.append(comid)
-                    self.newCOMIDdata[comid] = COMIDPropsForIntersect(
+                    self.newCOMIDdata[comid] = FIDPropsForIntersect(
                         comid, 'OUT', clstx, clsty, clendx, clendy, clmaxel,
                         clminel, cllen, lenkm
                     )
                 elif np.fabs(enddiffx) < eps and np.fabs(enddiffy) < eps:
                     comidlist.append(comid)
-                    self.newCOMIDdata[comid] = COMIDPropsForIntersect(
+                    self.newCOMIDdata[comid] = FIDPropsForIntersect(
                         comid, 'IN', clstx, clsty, clendx, clendy, clmaxel,
                         clminel, cllen, lenkm
                     )
