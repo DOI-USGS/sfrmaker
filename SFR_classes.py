@@ -338,24 +338,50 @@ class SFRpreproc:
         DX,DY,NLAY,NROW,NCOL,i = disutil.read_meta_data(indat.MFdis)
 
         # update the "node" field in indat.MFgrid
-        # first delete the column if it already exists
+        # if there is a field with unique values, assume it's ok
+        # otherwise delete the column if it already exists
+        # NB --> only evaluating the first 100 rows...
         print 'verifying that there is a "node" field in {0:s}'.format(indat.MFgrid)
+        hasnode = False
         MFgridflds = arcpy.ListFields(indat.MFgrid)
         for cfield in MFgridflds:
             if cfield.name.lower() == 'node':
-                arcpy.DeleteField_management(indat.MFgrid, 'node')
-        arcpy.AddField_management(indat.MFgrid, 'node', 'LONG')
+                hasnode = True
+        if hasnode:
+            # now check to see that there are unique values in node
+            cursor = arcpy.SearchCursor(indat.MFgrid)
+            nodevals = []
+            crows = 0
+            for row in cursor:
+                if crows > 100:
+                    break
+                else:
+                    crows += 1
+                    nodevals.append(row.getValue('node'))
+            nodeunique = len(set(nodevals))
+            del nodevals
+            del row
+            del cursor
+        else:
+            arcpy.AddField_management(indat.MFgrid, 'node', 'LONG')
 
-        print 'Updating "node" field in {0:s}'.format(indat.MFgrid)
-        # now loop through and set "node" which is equivalent to "cellnum"
-        cursor = arcpy.UpdateCursor(indat.MFgrid)
-        for row in cursor:
-            crow = row.getValue('row')
-            ccol = row.getValue('column')
-            row.setValue('node', ((int(crow)-1) * NCOL) + int(ccol))
-            cursor.updateRow(row)
-        del row
-        del cursor
+        if nodeunique > 1:
+            print '"node" field in place with unique values in {0:s}'.format(indat.MFgrid)
+        else:
+            arcpy.DeleteField_management(indat.MFgrid, 'node')
+            print 'Updating "node" field in {0:s}'.format(indat.MFgrid)
+            # now loop through and set "node" which is equivalent to "cellnum"
+            cursor = arcpy.UpdateCursor(indat.MFgrid)
+            for row in cursor:
+                crow = row.getValue('row')
+                ccol = row.getValue('column')
+                row.setValue('node', ((int(crow)-1) * NCOL) + int(ccol))
+                cursor.updateRow(row)
+            del row
+            del cursor
+
+
+
 
 
         print "...removed %s segments with no elevation data" %(zerocount)
@@ -451,7 +477,7 @@ class SFRpreproc:
         for cells in table:
             if cells.getValue(self.joinnames["node"]) in nodes2delete:
                 print "%d" % (cells.getValue(self.joinnames["node"]))
-                ofp.write('%d\n' % (cells.getValue(self.joinnames["node"])))
+                self.ofp.write('%d\n' % (cells.getValue(self.joinnames["node"])))
                 table.deleteRow(cells)
                 count += 1
         print "removed %s cells\n" % (count)
