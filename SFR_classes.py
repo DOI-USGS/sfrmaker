@@ -74,7 +74,7 @@ class FIDprops(object):
     __slots__ = ['comid', 'startx', 'starty', 'endx', 'endy', 'FID',
                  'maxsmoothelev', 'minsmoothelev', 'lengthft',
                  'cellnum', 'elev', 'from_comid', 'to_comid',
-                 'segelevinfo', 'noelev', 'COMID_orderedFID', 'start_has_end', 'end_has_start']
+                 'segelevinfo', 'start_has_end', 'end_has_start']
     #  using __slots__ makes it required to declare properties of the object here in place
     #  and saves significant memory
     def __init__(self, comid, startx, starty, endx, endy, FID,
@@ -92,12 +92,9 @@ class FIDprops(object):
         self.elev = None
         self.from_comid = None
         self.to_comid = None
-        self.segelevinfo = dict()
-        self.noelev = None
-        self.COMID_orderedFID = None
+        self.segelevinfo = None
         self.start_has_end = None
         self.end_has_start = None
-
 
 
 
@@ -117,17 +114,21 @@ class FIDPropsForIntersect:
         self.slope = clmaxel - clminel
         if inout == 'OUT':
             self.newmaxel = round(clmaxel)
-            self.newminel = round(clmaxel - self.slope*cllen/lenkm)
+            self.newminel = round(clmaxel - self.slope * cllen / lenkm)
         elif inout == 'IN':
             clippedlength = lenkm - cllen
             self.newminel = round(clminel)
-            self.newmaxel = round(clmaxel-self.slope*clippedlength/lenkm)
+            self.newmaxel = round(clmaxel - self.slope * clippedlength / lenkm)
 
 
 class FIDPropsAll:
     def __init__(self):
         self.allfids = dict()
         self.allcomids = []  # comprehensive list of all comids
+        self.maxelev = None
+        self.minelev = None
+        self.noelev = dict()
+        self.COMID_orderedFID = dict()
 
     def return_fid_comid_list(self):
         """
@@ -138,6 +139,15 @@ class FIDPropsAll:
         for cfid in allfids:
             self.comid_fid[self.allfids[cfid].comid].append(cfid)
 
+    def return_smoothelev_comid(self,comid):
+        self.maxelev = -np.inf
+        self.minelev = np.inf
+        fids = self.comid_fid[comid]
+        for cid in fids:
+            if self.allfids[cid].maxsmoothelev > self.maxelev:
+                self.maxelev = self.allfids[cid].maxsmoothelev
+            if self.allfids[cid].minsmoothelev < self.minelev:
+                self.minelev = self.allfids[cid].minsmoothelev
 
     def populate(self, SFRdata):
         """
@@ -158,7 +168,7 @@ class FIDPropsAll:
                 float(seg.MINELEVSMO)*3.2808,
                 float(seg.LengthFt),
                 seg.node
-                )
+            )
             self.allcomids.append(int(seg.COMID))
         self.allcomids = list(set(self.allcomids))
 
@@ -662,10 +672,11 @@ class SFROperations:
             print 'Some manual intervention required:\n' \
                   'See boundary_manual_fix_issues.txt for details'
 
-    def make_rivers_table(self, COMIDdata):
+    def make_rivers_table(self, FIDdata):
         """
         from assign_and_route -->
         """
+        print "Setting up the elevation table --> {0:s}".format(self.SFRdata.rivers_table)
         if arcpy.Exists(self.SFRdata.rivers_table):
             arcpy.Delete_management(self.SFRdata.rivers_table)
         arcpy.CreateTable_management(os.getcwd(), self.SFRdata.rivers_table)
@@ -674,104 +685,101 @@ class SFROperations:
         arcpy.AddField_management(self.SFRdata.rivers_table, "ELEVMAX", "DOUBLE")
         arcpy.AddField_management(self.SFRdata.rivers_table, "ELEVAVE", "DOUBLE")
         arcpy.AddField_management(self.SFRdata.rivers_table, "ELEVMIN", "DOUBLE")
-        ##########################
         segcounter = 0
         rows = arcpy.InsertCursor(self.SFRdata.rivers_table)
         fix_comids_summary = []
         fixcomids_flag = False
-        for comid in COMIDdata.iterkeys():
+        for comid in FIDdata.allcomids:
             segcounter += 1
-            #print "COMID = ",comid," segment is ",segcounter
-            fidlist = FID[comid]
+            fidlist = FIDdata.comid_fid[comid]
             start_has_end = dict()
             end_has_start = dict()
 
-            for i in range(0,len(fidlist)):
-                haveend=False
-                havestart=False
-                for j in range(0,len(fidlist)):
-                    if j==i:
+            for i in range(0, len(fidlist)):
+                haveend = False
+                havestart = False
+                for j in range(0, len(fidlist)):
+                    if j == i:
                         continue
-                    diffstartx = startx[comid][i]-endx[comid][j]
-                    diffstarty = starty[comid][i]-endy[comid][j]
-                    diffendx = endx[comid][i]-startx[comid][j]
-                    diffendy = endy[comid][i]-starty[comid][j]
-                    if(np.fabs(diffstartx) < COMIDdata.rfact and np.fabs(diffstarty) < COMIDdata.rfact):
-                        start_has_end[fidlist[i]]=fidlist[j]
-                        haveend=True
-                    if(math.fabs(diffendx)<fact and math.fabs(diffendy)<fact):
-                        end_has_start[fidlist[i]]=fidlist[j]
-                        havestart=True
+                    diffstartx = FIDdata.allfids[i].startx - FIDdata.allfids[j].endx
+                    diffstarty = FIDdata.allfids[i].starty - FIDdata.allfids[j].endy
+                    diffendx = FIDdata.allfids[i].endx - FIDdata.allfids[j].startx
+                    diffendy = FIDdata.allfids[i].endy - FIDdata.allfids[j].starty
+                    if np.fabs(diffstartx) < self.SFRdata.rfact and np.fabs(diffstarty) < self.SFRdata.rfact:
+                        start_has_end[fidlist[i]] = fidlist[j]
+                        haveend = True
+                    if np.fabs(diffendx) < self.SFRdata.rfact and np.fabs(diffendy) < self.SFRdata.rfact:
+                        end_has_start[fidlist[i]] = fidlist[j]
+                        havestart = True
                     if haveend and havestart:
                         break
 
             #find key in start_has_end that didn't match an end and
             #key in end_has_start that didn't match a start
-
-            numstart=0
-            numend=0
-            startingFID=[]
-            endingFID=[]
+            numstart = 0
+            numend = 0
+            startingFID = []
+            endingFID = []
             for test in fidlist:
                 if test not in start_has_end:
                     startingFID.append(test)
-                    numstart=numstart+1
+                    numstart += 1
                 if test not in end_has_start:
                     endingFID.append(test)
-                    numend=numend+1
-            if (numstart!=1 or numend !=1):
-                if fixcomids_flag == False:
-                    outfile = open(outfilename,'w')
+                    numend += 1
+            if numstart != 1 or numend != 1:
+                if not fixcomids_flag:
+                    outfile = open("fix_com_IDs.txt", 'w')
                     fixcomids_flag = True
-                outfile.write("numstart ="+ str(numstart)+" \n")
-                outfile.write("numend = "+ str(numend)+" \n")
-                outfile.write("starting FIDs: " + ",".join(map(str,startingFID))+"\n")
-                outfile.write("ending FIDs: " + ",".join(map(str,endingFID))+"\n")
+                outfile.write("numstart =" + str(numstart) + " \n")
+                outfile.write("numend = " + str(numend) + " \n")
+                outfile.write("starting FIDs: " + ",".join(map(str, startingFID)) + "\n")
+                outfile.write("ending FIDs: " + ",".join(map(str, endingFID)) + "\n")
                 outfile.write("manually fix COMID = %d\n" %comid)
                 fix_comids_summary.append('%d\n' %comid)
-                noelev[comid]=1  #set flag
+                FIDdata.noelev[comid] = 1  #set flag
                 continue
 
-            orderedFID=[]
+            orderedFID = []
             orderedFID.append(startingFID[0])
-            for i in range(1,len(end_has_start)):
+            for i in range(1, len(end_has_start)):
                 orderedFID.append(end_has_start[orderedFID[i-1]])
-            if orderedFID[-1]!=endingFID[0]:       #don't repeat the last entry FID...
+            if orderedFID[-1] != endingFID[0]:       #don't repeat the last entry FID...
                 orderedFID.append(endingFID[0])
             #total length read through lengthkm didn't always match up
             #to the sum of the lengths of the segments (exactly), sumup total length
-            totallength=0
-            for i in range(0,len(orderedFID)):
-                totallength=totallength+lengthft[comid][orderedFID[i]]
-            if totallength==0:
+            totallength = 0
+            for i in range(0, len(orderedFID)):
+                totallength += FIDdata.allfids[orderedFID[i]].lengthft
+            if totallength == 0:
                 exit('check length ft for FIDs in COMID= %d' % comid)
-            slope=(maxsmoothelev[comid]-minsmoothelev[comid])/totallength
-            distance=0.
-            COMID_orderedFID[comid]=orderedFID
-            for i in range(0,len(orderedFID)):
-                maxcellrivelev=maxsmoothelev[comid]-slope*distance
-                distance=distance+lengthft[comid][orderedFID[i]]
-                mincellrivelev=maxsmoothelev[comid]-slope*distance
-                avecellrivelev=0.5*(maxcellrivelev+mincellrivelev)
-                segelevinfo[comid][cellnum[comid][orderedFID[i]]]=avecellrivelev
-                row=rows.newRow()
-                row.OLDFID=orderedFID[i]
-                row.CELLNUM=cellnum[comid][orderedFID[i]]
-                row.ELEVMAX=maxcellrivelev
-                row.ELEVAVE=avecellrivelev
-                row.ELEVMIN=mincellrivelev
+            FIDdata.return_smoothelev_comid(comid)
+            slope = (FIDdata.maxelev - FIDdata.minelev)/totallength
+            distance = 0.
+            FIDdata.COMID_orderedFID[comid] = orderedFID
+            for i in range(0, len(orderedFID)):
+                maxcellrivelev = FIDdata.maxelev - slope*distance
+                distance += FIDdata.allfids[orderedFID[i]].lengthft
+                mincellrivelev = FIDdata.maxelev - slope*distance
+                avecellrivelev = 0.5*(maxcellrivelev + mincellrivelev)
+                FIDdata.allfids[orderedFID[i]].segelevinfo = avecellrivelev
+                row = rows.newRow()
+                row.OLDFID = orderedFID[i]
+                row.CELLNUM = FIDdata.allfids[orderedFID[i]].cellnum
+                row.ELEVMAX = maxcellrivelev
+                row.ELEVAVE = avecellrivelev
+                row.ELEVMIN = mincellrivelev
                 rows.insertRow(row)
         # write out the summary of comids to fix, then close the outfile
         if len(fix_comids_summary) > 0:
             print 'Some cells have multiple COMIDs entering and/or leaving.\n See file "fix_comids.txt"'
             outfile.write('#' * 30 + '\nSummary of COMIDS to fix:\n' +
-            'Delete these COMIDs from river_explode.shp, \nthen run CleanupRiverCells.py and rerun Assign_and_Route.py\n')
+                          'Delete these COMIDs from river_explode.shp, \n' +
+                          'then run CleanupRiverCells.py and rerun Assign_and_Route.py\n')
             [outfile.write(line) for line in fix_comids_summary]
             outfile.close()
         del row
         del rows
-
-
 
 
 
