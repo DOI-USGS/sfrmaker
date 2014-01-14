@@ -22,13 +22,14 @@ class SFRInput:
 
         inpars = inpardat.getroot()
 
-        #self.compute_zonal = self.tf2flag(inpars.findall('.//compute_zonal')[0].text)
-        #self.reach_cutoff = float(inpars.findall('.//reach_cutoff')[0].text)
-        #self.rfact = float(inpars.findall('.//rfact')[0].text)
-        #self.MFgrid = inpars.findall('.//MFgrid')[0].text
-        #self.MFdomain = inpars.findall('.//MFdomain')[0].text
-        #self.MFdis = inpars.findall('.//MFdis')[0].text
-        #self.DEM = inpars.findall('.//DEM')[0].text
+        self.compute_zonal = self.tf2flag(inpars.findall('.//compute_zonal')[0].text)
+        self.preproc = self.tf2flag(inpars.findall('.//preproc')[0].text)
+        self.reach_cutoff = float(inpars.findall('.//reach_cutoff')[0].text)
+        self.rfact = float(inpars.findall('.//rfact')[0].text)
+        self.MFgrid = inpars.findall('.//MFgrid')[0].text
+        self.MFdomain = inpars.findall('.//MFdomain')[0].text
+        self.MFdis = inpars.findall('.//MFdis')[0].text
+        self.DEM = inpars.findall('.//DEM')[0].text
         self.intersect = inpars.findall('.//intersect')[0].text
         self.rivers_table = inpars.findall('.//rivers_table')[0].text
         self.PlusflowVAA = inpars.findall('.//PlusflowVAA')[0].text
@@ -47,8 +48,6 @@ class SFRInput:
         self.MAT2 = inpars.findall('.//MAT2')[0].text
         self.WIDTH = inpars.findall('.//WIDTH')[0].text
         self.MULT = inpars.findall('.//MULT')[0].text
-        self.ELEVcontours = inpars.findall('.//ELEVcontours')[0].text
-        self.Routes = inpars.findall('.//Routes')[0].text
         try:
             self.eps = float(inpars.findall('.//eps')[0].text)
         except:
@@ -75,7 +74,7 @@ class FIDprops(object):
     """
     __slots__ = ['comid', 'startx', 'starty', 'endx', 'endy', 'FID',
                  'maxsmoothelev', 'minsmoothelev', 'lengthft',
-                 'cellnum', 'elev', 'from_comid', 'to_comid',
+                 'cellnum', 'elev',
                  'segelevinfo', 'start_has_end', 'end_has_start']
     #  using __slots__ makes it required to declare properties of the object here in place
     #  and saves significant memory
@@ -92,15 +91,100 @@ class FIDprops(object):
         self.lengthft = lengthft
         self.cellnum = cellnum
         self.elev = None
-        self.from_comid = None
-        self.to_comid = None
         self.segelevinfo = None
-        self.start_has_end = None
-        self.end_has_start = None
 
 
+class COMIDprops(object):
+    """
+    routing information by COMIDs
+    """
+    __slots__ = ['from_comid', 'to_comid', 'hydrosequence', 'levelpathID']
 
-class FIDPropsForIntersect:
+    def __init__(self):
+        self.from_comid = list()
+        self.to_comid = list()
+        self.hydrosequence = None
+        self.levelpathID = None
+
+class LevelPathIDprops(object):
+    """
+    routing of LevelPathIDs
+    """
+    __slots__ = ["down_levelpathID"]
+    def __init__(self):
+        self.down_levelpathID = None
+
+class LevelPathIDpropsAll:
+    def __init__(self):
+        self.allids = dict()
+        self.level_ordered = list()
+
+class COMIDPropsAll:
+    def __init__(self):
+        self.allcomids = dict()
+
+    def populate_routing(self, SFRdata, FIDdata, LevelPathdata):
+        """
+        Read the COMID routing information from the SFRdata.FLOW file
+        """
+        print ('Reading in routing information from {0:s}'.format(SFRdata.FLOW))
+        # open the SFRdata.FLOW file as read-only (using SearchCursor)
+
+        CLIP = np.loadtxt('boundaryClipsRouting.txt', skiprows=1, delimiter=',', dtype=int)
+
+        for ccomid in FIDdata.allcomids:
+            self.allcomids[ccomid] = COMIDprops()
+
+        with arcpy.da.SearchCursor(SFRdata.FLOW, ("FROMCOMID", "TOCOMID")) as cursor:
+            for crow in cursor:
+                if int(crow[0]) in FIDdata.allcomids:
+                    if (crow[0]) in CLIP[:, 0]:
+                        self.allcomids[crow[0]].to_comid.append(999999)
+                    else:
+                        self.allcomids[crow[0]].to_comid.append(int(crow[1]))
+                if int(crow[1]) in FIDdata.allcomids:
+                    if crow[1] in CLIP[:, 1]:
+                        self.allcomids[crow[1]].from_comid.append(999999)
+                    else:
+                        self.allcomids[crow[1]].from_comid.append(int(crow[0]))
+        del crow, cursor
+        comidseen = list()
+        with arcpy.da.SearchCursor(SFRdata.PlusflowVAA,
+                                   ("ComID", "Hydroseq", "LevelPathI", "UpLevelPat", "DnLevelPat")) as cursor:
+            for crow in cursor:
+                comid = int(crow[0])
+                hydrosequence = int(crow[1])
+                levelpathid = int(crow[2])
+                if int(comid) in FIDdata.allcomids:
+                    self.allcomids[crow[0]].hydrosequence = hydrosequence
+                    self.allcomids[crow[0]].levelpathID = levelpathid
+                    LevelPathdata.level_ordered.append(levelpathid)
+                    comidseen.append(comid)
+            # find unique levelpathIDs
+            LevelPathdata.level_ordered = sorted(list(set(LevelPathdata.level_ordered)), reverse=True)
+
+            for clevelpathid in LevelPathdata.level_ordered:
+                LevelPathdata.allids[clevelpathid] = LevelPathIDprops()
+
+            # assign levelpathID routing
+        del crow, cursor
+
+        with arcpy.da.SearchCursor(SFRdata.PlusflowVAA,
+                                   ("ComID", "Hydroseq", "LevelPathI", "UpLevelPat", "DnLevelPat")) as cursor:
+            for crow in cursor:
+                levelpathid = int(crow[2])
+                uplevelpathid = int(crow[3])
+                downlevelpathid = int(crow[4])
+                if levelpathid in LevelPathdata.level_ordered:
+                    if downlevelpathid != levelpathid:
+                        LevelPathdata.allids[levelpathid].down_levelpathID = downlevelpathid
+
+
+        comid_missing = list(set(FIDdata.allcomids).difference(comidseen))
+        if len(comid_missing) > 0:
+            print "WARNING! the following COMIDs are missing from \n{0:s}".format('\n'.join(map(str(comid_missing))))
+
+class COMIDPropsForIntersect:
     """
     Properties for each COMID
     """
@@ -126,7 +210,8 @@ class FIDPropsForIntersect:
 class FIDPropsAll:
     def __init__(self):
         self.allfids = dict()
-        self.allcomids = []  # comprehensive list of all comids
+        self.allcomids = list()  # comprehensive list of all comids
+        self.unique_cells = list()  # list of unique cellnum values in the grid/streams intersection
         self.maxelev = None
         self.minelev = None
         self.noelev = dict()
@@ -141,7 +226,7 @@ class FIDPropsAll:
         for cfid in allfids:
             self.comid_fid[self.allfids[cfid].comid].append(cfid)
 
-    def return_smoothelev_comid(self,comid):
+    def return_smoothelev_comid(self, comid):
         self.maxelev = -np.inf
         self.minelev = np.inf
         fids = self.comid_fid[comid]
@@ -150,6 +235,11 @@ class FIDPropsAll:
                 self.maxelev = self.allfids[cid].maxsmoothelev
             if self.allfids[cid].minsmoothelev < self.minelev:
                 self.minelev = self.allfids[cid].minsmoothelev
+
+    def return_unique_cells(self):
+        for cid in self.allfids.keys():
+            self.unique_cells.append(self.allfids[cid].cellnum)
+        self.unique_cells = set(self.unique_cells)
 
     def populate(self, SFRdata):
         """
@@ -166,8 +256,8 @@ class FIDPropsAll:
                 float(seg.X_end),
                 float(seg.Y_end),
                 int(seg.FID),
-                float(seg.MAXELEVSMO)*3.2808,
-                float(seg.MINELEVSMO)*3.2808,
+                float(seg.MAXELEVSMO)*3.2808,  # UNIT CONVERSION
+                float(seg.MINELEVSMO)*3.2808,  # UNIT CONVERSION
                 float(seg.LengthFt),
                 seg.node
             )
@@ -187,20 +277,7 @@ class FIDPropsAll:
             for crow in cursor:
                 self.allfids[int(crow[0])].elev = float(crow[1])
 
-    def populate_routing(self, SFRdata):
-        """
-        Read the COMID routing information from the SFRdata.FLOW file
-        """
-        print ('Reading in routing information from {0:s}'.format(SFRdata.FLOW))
-        # open the SFRdata.FLOW file as read-only (using SearchCursor)
-        with arcpy.da.SearchCursor(SFRdata.FLOW, ("FROMCOMID", "TOCOMID")) as cursor:
-            for crow in cursor:
-                if int(crow[0]) in self.allcomids:
-                    for cfid in self.comid_fid[int(crow[0])]:
-                        self.allfids[cfid].to_comid = int(crow[1])
-                if int(crow[1]) in self.allcomids:
-                    for cfid in self.comid_fid[int(crow[1])]:
-                        self.allfids[cfid].from_comid = int(crow[0])
+
 
 
 class SFRReachProps(object):
@@ -223,7 +300,6 @@ class SFRReachesAll:
 
 class SFRpreproc:
     def __init__(self, SFRdata):
-        self.logfile = open('sfr_preproc_log.out', 'w')
         self.joinnames = dict()
         self.indata = SFRdata
         ts = time.time()
@@ -272,7 +348,9 @@ class SFRpreproc:
                      "streamorde",
                      "arbolatesu",
                      "fcode",
-                     "levelpathI"]
+                     "levelpathI",
+                     "uplevelpat",
+                     "dnlevelpat"]
         fields2keep = [x.lower() for x in fields2keep]
         self.ofp.write('Joining {0:s} with {1:s}: fields kept:\n'.format(indat.Elevslope, indat.Flowlines))
         self.ofp.write('%s\n' % ('\n'.join(fields2keep)))
@@ -347,7 +425,7 @@ class SFRpreproc:
                 FLtable.deleteRow(segments)
                 tcount += 1
         #  read in discretization information
-        DX,DY,NLAY,NROW,NCOL,i = disutil.read_meta_data(indat.MFdis)
+        DX, DY, NLAY, NROW, NCOL, i = disutil.read_meta_data(indat.MFdis)
 
         # update the "node" field in indat.MFgrid
         # if there is a field with unique values, assume it's ok
@@ -416,8 +494,8 @@ class SFRpreproc:
         arcpy.Dissolve_management(indat.CELLS, indat.CELLS_DISS, self.joinnames['node'])
 
         print "Exploding NHD segments to grid cells using Intersect and Multipart to Singlepart..."
-        arcpy.Intersect_analysis([indat.CELLS_DISS, "Flowlines"], "river_intersect.shp")
-        arcpy.MultipartToSinglepart_management("river_intersect.shp", "river_explode.shp")
+        arcpy.Intersect_analysis([indat.CELLS_DISS, "Flowlines"], "tmp_intersect.shp")
+        arcpy.MultipartToSinglepart_management("tmp_intersect.shp", indat.intersect)
         print "\n"
         print "Adding in stream geometry"
         #set up list and dictionary for fields, types, and associated commands
@@ -435,18 +513,18 @@ class SFRpreproc:
 
         #add fields for start, end, and length
         for fld in fields:
-            arcpy.AddField_management("river_explode.shp", fld, types[fld])
+            arcpy.AddField_management(indat.intersect, fld, types[fld])
 
         #calculate the fields
         for fld in fields:
             print "\tcalculating %s(s)..." % (fld)
-            arcpy.CalculateField_management("river_explode.shp", fld, commands[fld], "PYTHON")
+            arcpy.CalculateField_management(indat.intersect, fld, commands[fld], "PYTHON")
         self.ofp.write('\n' + 25*'#' + '\nRemoving reaches with lengths less than or equal to %s...\n' % indat.reach_cutoff)
         print "\nRemoving reaches with lengths less than or equal to %s..." % indat.reach_cutoff
-        self.getfield("river_explode.shp", "comid", "comid")
-        self.getfield("river_explode.shp", "node", "node")
-        self.getfield("river_explode.shp", "lengthft", "Length")
-        table = arcpy.UpdateCursor("river_explode.shp")
+        self.getfield(indat.intersect, "comid", "comid")
+        self.getfield(indat.intersect, "node", "node")
+        self.getfield(indat.intersect, "lengthft", "Length")
+        table = arcpy.UpdateCursor(indat.intersect)
         count = 0
         for reaches in table:
             if reaches.getValue(self.joinnames["Length"]) <= indat.reach_cutoff:
@@ -465,7 +543,7 @@ class SFRpreproc:
 
         # temporarily join river_cells_dissolve to river explode; record nodes with no elevation information
         arcpy.MakeFeatureLayer_management(indat.CELLS_DISS, "river_cells_dissolve")
-        arcpy.MakeFeatureLayer_management("river_explode.shp", "river_explode")
+        arcpy.MakeFeatureLayer_management(indat.intersect, "river_explode")
         arcpy.AddJoin_management("river_cells_dissolve",
                                  "node",
                                  "river_explode",
@@ -497,8 +575,8 @@ class SFRpreproc:
 
         print "removing any remaining disconnected reaches..."
         self.ofp.write('\n' + 25*'#' + '\nremoving any remaining disconnected reaches...\n')
-        self.getfield("river_explode.shp", "node", "node")
-        table = arcpy.UpdateCursor("river_explode.shp")
+        self.getfield(indat.intersect, "node", "node")
+        table = arcpy.UpdateCursor(indat.intersect)
         count = 0
         for reaches in table:
             if reaches.getValue(self.joinnames["node"]) in nodes2delete:
@@ -621,13 +699,13 @@ class SFROperations:
                 enddiffy = endy-clendy
                 if np.fabs(stdiffx) < eps and np.fabs(stdiffy) < eps:
                     comidlist.append(comid)
-                    self.newCOMIDdata[comid] = FIDPropsForIntersect(
+                    self.newCOMIDdata[comid] = COMIDPropsForIntersect(
                         comid, 'OUT', clstx, clsty, clendx, clendy, clmaxel,
                         clminel, cllen, lenkm
                     )
                 elif np.fabs(enddiffx) < eps and np.fabs(enddiffy) < eps:
                     comidlist.append(comid)
-                    self.newCOMIDdata[comid] = FIDPropsForIntersect(
+                    self.newCOMIDdata[comid] = COMIDPropsForIntersect(
                         comid, 'IN', clstx, clsty, clendx, clendy, clmaxel,
                         clminel, cllen, lenkm
                     )
@@ -746,7 +824,7 @@ class SFROperations:
             orderedFID.append(startingFID[0])
             for i in range(1, len(end_has_start)):
                 orderedFID.append(end_has_start[orderedFID[i-1]])
-            if orderedFID[-1] != endingFID[0]:       #don't repeat the last entry FID...
+            if orderedFID[-1] != endingFID[0]:       #  don't repeat the last entry FID...
                 orderedFID.append(endingFID[0])
             #total length read through lengthkm didn't always match up
             #to the sum of the lengths of the segments (exactly), sumup total length
@@ -782,11 +860,6 @@ class SFROperations:
             outfile.close()
         del row
         del rows
-
-
-
-
-
 
     def clip_to_boundary(self, SFRdata):
         """

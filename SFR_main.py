@@ -5,16 +5,17 @@ import SFR_classes as SFRc
 infile = 'SFR_input.xml'
 
 SFRdata = SFRc.SFRInput(infile)
-'''
-SFRpre = SFRc.SFRpreproc(SFRdata)
 
-SFRpre.clip_and_join_attributes()
-'''
+if SFRdata.preproc:
+    print 'Running preprocessing routine'
+    SFRpre = SFRc.SFRpreproc(SFRdata)
+
+    SFRpre.clip_and_join_attributes()
+
 
 SFRops = SFRc.SFROperations(SFRdata)
 
 SFRops.intersect()
-
 
 FIDdata = SFRc.FIDPropsAll()
 
@@ -24,9 +25,13 @@ FIDdata.return_fid_comid_list()
 
 SFRops.make_rivers_table(FIDdata)
 
-
 FIDdata.populate_elevations(SFRdata)
 
-FIDdata.populate_routing(SFRdata)
+COMIDdata = SFRc.COMIDPropsAll()
+
+LevelPathdata = SFRc.LevelPathIDpropsAll()
+
+COMIDdata.populate_routing(SFRdata, FIDdata, LevelPathdata)
+
 
 i = 2
