@@ -22,13 +22,13 @@ class SFRInput:
 
         inpars = inpardat.getroot()
 
-        self.compute_zonal = self.tf2flag(inpars.findall('.//compute_zonal')[0].text)
-        self.reach_cutoff = float(inpars.findall('.//reach_cutoff')[0].text)
-        self.rfact = float(inpars.findall('.//rfact')[0].text)
-        self.MFgrid = inpars.findall('.//MFgrid')[0].text
-        self.MFdomain = inpars.findall('.//MFdomain')[0].text
-        self.MFdis = inpars.findall('.//MFdis')[0].text
-        self.DEM = inpars.findall('.//DEM')[0].text
+        #self.compute_zonal = self.tf2flag(inpars.findall('.//compute_zonal')[0].text)
+        #self.reach_cutoff = float(inpars.findall('.//reach_cutoff')[0].text)
+        #self.rfact = float(inpars.findall('.//rfact')[0].text)
+        #self.MFgrid = inpars.findall('.//MFgrid')[0].text
+        #self.MFdomain = inpars.findall('.//MFdomain')[0].text
+        #self.MFdis = inpars.findall('.//MFdis')[0].text
+        #self.DEM = inpars.findall('.//DEM')[0].text
         self.intersect = inpars.findall('.//intersect')[0].text
         self.rivers_table = inpars.findall('.//rivers_table')[0].text
         self.PlusflowVAA = inpars.findall('.//PlusflowVAA')[0].text
@@ -47,6 +47,8 @@ class SFRInput:
         self.MAT2 = inpars.findall('.//MAT2')[0].text
         self.WIDTH = inpars.findall('.//WIDTH')[0].text
         self.MULT = inpars.findall('.//MULT')[0].text
+        self.ELEVcontours = inpars.findall('.//ELEVcontours')[0].text
+        self.Routes = inpars.findall('.//Routes')[0].text
         try:
             self.eps = float(inpars.findall('.//eps')[0].text)
         except:
