@@ -48,6 +48,8 @@ class SFRInput:
         self.MAT2 = inpars.findall('.//MAT2')[0].text
         self.WIDTH = inpars.findall('.//WIDTH')[0].text
         self.MULT = inpars.findall('.//MULT')[0].text
+        self.ELEVcontours = inpars.findall('.//ELEVcontours')[0].text
+        self.Routes = inpars.findall('.//Routes')[0].text
         try:
             self.eps = float(inpars.findall('.//eps')[0].text)
         except:

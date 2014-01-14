@@ -41,7 +41,9 @@ Notes on SFR input:
     <!-- FLOW: from NHDPlus -->
     <FLOW>PlusFlow.dbf</FLOW>
     <!-- FTab: from NHDPlus -->
-    <FTab>FCodes.dbf</FTab>     
+    <FTab>FCodes.dbf</FTab>
+    <!-- ELEVcontours: from National Map -->
+    <ELEVcontours>D:\ATLData\BadRiver\BCs\elevation_from_contours\contours_NAD27_wsp_ft.shp</ELEVcontours>
 </InputFiles>
 
 <IntermediateFiles>
@@ -50,14 +52,16 @@ Notes on SFR input:
     <!-- ELEV: clipped to active area -->
     <ELEV>river_w_elevations.shp</ELEV> 
     <!-- intersect:  flowlines intersected with the grid-->
-    <intersect>river_explode.shp</intersect>
+    <intersect>D:\ATLData\BadRiver\BCs\elevation_from_contours\river_explode_clip.shp</intersect>
     <!-- rivers_table:  -->
     <rivers_table>river_elevs.dbf</rivers_table>
     <!-- CELLS_DISS:  -->
     <CELLS_DISS>river_cells_dissolve.shp</CELLS_DISS>
     <!-- CELLS:  -->
     <CELLS>river_cells.shp</CELLS>
-
+    <!-- Intersections between elevations and stream contours:  -->
+    <!-- river_explode converted into Arc routes:  -->
+    <Routes>D:\ATLData\BadRiver\BCs\elevation_from_contours\river_explode_routes.shp</Routes>
     <!-- NHD:  -->
     <NHD>NHD_intersect_edited.shp</NHD> 
 </IntermediateFiles>
