@@ -791,8 +791,6 @@ class SFROperations:
         clip
         """
         i = 1
-
-
 """
 ###################
 ERROR EXCEPTION CLASSES
