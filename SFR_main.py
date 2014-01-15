@@ -33,5 +33,6 @@ LevelPathdata = SFRc.LevelPathIDpropsAll()
 
 COMIDdata.populate_routing(SFRdata, FIDdata, LevelPathdata)
 
+LevelPathdata.return_cutoffs(FIDdata)
 
 i = 2

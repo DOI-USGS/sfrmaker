@@ -81,7 +81,7 @@ class FIDprops(object):
     """
     __slots__ = ['comid', 'startx', 'starty', 'endx', 'endy', 'FID',
                  'maxsmoothelev', 'minsmoothelev', 'lengthft',
-                 'cellnum', 'elev',
+                 'cellnum', 'elev', 'sidelength'
                  'segelevinfo', 'start_has_end', 'end_has_start']
     #  using __slots__ makes it required to declare properties of the object here in place
     #  and saves significant memory
@@ -125,13 +125,18 @@ class LevelPathIDpropsAll:
     def __init__(self):
         self.allids = dict()
         self.level_ordered = list()
-        self.levelpathpair = dict()
+        self.levelpath_fid = dict()
 
-    def return_cutoffs(self,level_ordered,levelpathpair):
-        self.rmpair - dict()
-        for lpID in level_ordered:
-            for entry in range(0,len(levelpathpair[lpID])):
-                print entry, levelpathpair[lpID][entry]
+    def return_cutoffs(self, FIDdata, SFRdata):
+        self.rmlist = []
+        self.indata = SFRdata
+        for lpID in self.level_ordered:
+            for fid in self.levelpath_fid[lpID]:
+                reachlength=FIDdata.allfids[fid].lengthft
+                if reachlength < FIDdata.allfids[fid].sidelength*self.indata.cutoff:
+                    print '{0}, {1}\n'.format(fid, self.indata.cutoff)
+                    self.rmlist.append(fid)
+
 
 
 class COMIDPropsAll:
@@ -174,8 +179,6 @@ class COMIDPropsAll:
                     self.allcomids[crow[0]].hydrosequence = hydrosequence
                     self.allcomids[crow[0]].levelpathID = levelpathid
                     LevelPathdata.level_ordered.append(levelpathid)
-                    for cell in FIDdata.unique_cells:
-                        LevelPathdata.levelpathpair[lpID].append([cell,comid])
                     comidseen.append(comid)
 
             # find unique levelpathIDs
@@ -183,6 +186,8 @@ class COMIDPropsAll:
 
             for clevelpathid in LevelPathdata.level_ordered:
                 LevelPathdata.allids[clevelpathid] = LevelPathIDprops()
+                LevelPathdata.levelpath_fid[clevelpathid]=[]
+
 
             # assign levelpathID routing
         del crow, cursor
@@ -190,12 +195,15 @@ class COMIDPropsAll:
         with arcpy.da.SearchCursor(SFRdata.PlusflowVAA,
                                    ("ComID", "Hydroseq", "LevelPathI", "UpLevelPat", "DnLevelPat")) as cursor:
             for crow in cursor:
+                comid = int(crow[0])
                 levelpathid = int(crow[2])
                 uplevelpathid = int(crow[3])
                 downlevelpathid = int(crow[4])
                 if levelpathid in LevelPathdata.level_ordered:
                     if downlevelpathid != levelpathid:
                         LevelPathdata.allids[levelpathid].down_levelpathID = downlevelpathid
+                    if comid in FIDdata.comid_fid:
+                        LevelPathdata.levelpath_fid[levelpathid].extend(FIDdata.comid_fid[comid])
 
 
         comid_missing = list(set(FIDdata.allcomids).difference(comidseen))
@@ -234,6 +242,7 @@ class FIDPropsAll:
         self.minelev = None
         self.noelev = dict()
         self.COMID_orderedFID = dict()
+        self.comid_fid = None
 
     def return_fid_comid_list(self):
         """
