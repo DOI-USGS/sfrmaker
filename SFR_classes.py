@@ -87,7 +87,7 @@ class FIDprops(object):
     """
     __slots__ = ['comid', 'startx', 'starty', 'endx', 'endy', 'FID',
                  'maxsmoothelev', 'minsmoothelev', 'lengthft',
-                 'cellnum', 'elev', 'sidelength'
+                 'cellnum', 'elev',
                  'segelevinfo', 'start_has_end', 'end_has_start','elev_distance']
     #  using __slots__ makes it required to declare properties of the object here in place
     #  and saves significant memory
@@ -134,16 +134,59 @@ class LevelPathIDpropsAll:
         self.level_ordered = list()
         self.levelpath_fid = dict()
 
-    def return_cutoffs(self, FIDdata, SFRdata):
-        self.rmlist = []
-        self.indata = SFRdata
+    def return_cutoffs(self, FIDdata, CELLdata, SFRdata):
         for lpID in self.level_ordered:
+            #check to see if individual reachlengths are less than cutoff
+            #prescibed by sidelength*cutoff
+            rmlist=[]
             for fid in self.levelpath_fid[lpID]:
                 reachlength=FIDdata.allfids[fid].lengthft
-                if reachlength < FIDdata.allfids[fid].sidelength*self.indata.cutoff:
-                    print '{0}, {1}\n'.format(fid, self.indata.cutoff)
-                    self.rmlist.append(fid)
+                cellnum = FIDdata.allfids[fid].cellnum
+                if reachlength < CELLdata.allcells[cellnum].sidelength*SFRdata.cutoff:
+                    rmlist.append(fid)
+            #if any were too short remove from levelpath list of FIDs
+            newlist = [fid for fid in self.levelpath_fid[lpID] if fid not in rmlist]
+            self.levelpath_fid[lpID] = newlist
+        rmlist = []
+        #if any of the levelpath list of FIDs is now empty, remove that levelpathID
+        for lpID in self.level_ordered:
+            if len(self.levelpath_fid[lpID]) == 0:
+                rmlist.append[lpID]
+        newlist = [lpID for lpID in self.level_ordered if lpID not in rmlist]
+        self.level_ordered = newlist
 
+
+class CellProps(object):
+    """
+    class for cell objects - initially used to hold delx, dely for each cell
+    may be needed in future to hold neighboring cell numbers
+    """
+    __slots__ = ['delx', 'dely', 'sidelength']
+
+    def __init__(self, delx, dely, sidelength):
+        self.delx = delx
+        self.delx = dely
+        self.sidelength = sidelength
+
+class CellPropsAll:
+    def __init__(self):
+        self.allcells = dict()
+
+    def populate_cells(self, SFRdata):
+        #use the CELLS dataset to get the length of the cell sides, used
+        #to weed out short river reaches.  If the length in the cell is
+        #less than sidelength * the input 'cutoff'
+
+        cells = arcpy.SearchCursor(SFRdata.CELLS)
+
+        for cell in cells:
+            cellnum = int(cell.CELLNUM)
+            dx = float(cell.delx)
+            dy = float(cell.dely)
+            minside = float(cell.delx)
+            if float(cell.dely) < minside:
+                minside = float(cell.dely)
+            self.allcells[cellnum] = CellProps(dx, dy, minside)
 
 
 class COMIDPropsAll:
@@ -311,6 +354,9 @@ class FIDPropsAll:
 
             self.allcomids.append(int(seg.COMID))
         self.allcomids = list(set(self.allcomids))
+
+
+
 
     def populate_elevations(self, SFRdata):
         """
