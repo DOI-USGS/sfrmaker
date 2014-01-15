@@ -32,7 +32,7 @@ Notes on SFR input:
     <!-- DEM: DEM for model area, doesn't need to be clipped -->
     <DEM>nacp_demfti</DEM>    
     <!-- PlusflowVAA: from NHDPlus -->
-    <PlusflowVAA>PlusFlowlineVAA.dbf</PlusflowVAA>    
+    <PlusflowVAA>PlusFlowlineVAA_0407Merge.dbf</PlusflowVAA>    
     <!-- Elevslope: from NHDPlus -->
     <Elevslope>elevslope_merged.dbf</Elevslope>  
     <!-- Flowlines_unclipped: 
@@ -41,7 +41,7 @@ Notes on SFR input:
     <!-- arcpy_path: for calling arcpy scripts externally using os.system -->
     <arcpy_path>C:\python27\ArcGIS10.1\python</arcpy_path>      
     <!-- FLOW: from NHDPlus -->
-    <FLOW>PlusFlow.dbf</FLOW>
+    <FLOW>PlusFlow_merge.dbf</FLOW>
     <!-- FTab: from NHDPlus -->
     <FTab>FCodes.dbf</FTab>
     <!-- ELEVcontours: from National Map -->
@@ -65,6 +65,8 @@ Notes on SFR input:
     <Contours_intersect>D:\ATLData\BadRiver\BCs\elevation_from_contours\contours_river_intersect.shp</Contours_intersect>
     <!-- river_explode converted into Arc routes:  -->
     <Routes>D:\ATLData\BadRiver\BCs\elevation_from_contours\river_explode_routes.shp</Routes>
+    <!-- locations of contour intersections along each FID:  -->
+    <Contours_intersect_distances>D:\ATLData\BadRiver\BCs\elevation_from_contours\Distances.dbf</Contours_intersect_distances>
     <!-- NHD:  -->
     <NHD>NHD_intersect_edited.shp</NHD> 
 </IntermediateFiles>
