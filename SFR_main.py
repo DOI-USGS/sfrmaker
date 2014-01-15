@@ -14,17 +14,17 @@ if SFRdata.preproc:
 
 
 SFRops = SFRc.SFROperations(SFRdata)
-'''
+
 SFRops.intersect()
-'''
+
 FIDdata = SFRc.FIDPropsAll()
 
 FIDdata.populate(SFRdata)
 
 FIDdata.return_fid_comid_list()
-'''
+
 SFRops.make_rivers_table(FIDdata)
-'''
+
 FIDdata.populate_elevations(SFRdata)
 
 COMIDdata = SFRc.COMIDPropsAll()
@@ -34,6 +34,9 @@ LevelPathdata = SFRc.LevelPathIDpropsAll()
 COMIDdata.populate_routing(SFRdata, FIDdata, LevelPathdata)
 
 COMIDdata.return_hydrosequence_comid()
-LevelPathdata.return_cutoffs(FIDdata)
+
+SFRops.reach_ordering(COMIDdata, FIDdata)
+
+#LevelPathdata.return_cutoffs(FIDdata)
 
 i = 2

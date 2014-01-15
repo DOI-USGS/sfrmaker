@@ -88,7 +88,7 @@ class FIDprops(object):
     __slots__ = ['comid', 'startx', 'starty', 'endx', 'endy', 'FID',
                  'maxsmoothelev', 'minsmoothelev', 'lengthft',
                  'cellnum', 'elev', 'sidelength'
-                 'segelevinfo', 'start_has_end', 'end_has_start','elev_distance']
+                 'segelevinfo', 'start_has_end', 'end_has_start', 'elev_distance', 'segelevinfo']
     #  using __slots__ makes it required to declare properties of the object here in place
     #  and saves significant memory
     def __init__(self, comid, startx, starty, endx, endy, FID,
@@ -195,7 +195,7 @@ class COMIDPropsAll:
 
             for clevelpathid in LevelPathdata.level_ordered:
                 LevelPathdata.allids[clevelpathid] = LevelPathIDprops()
-                LevelPathdata.levelpath_fid[clevelpathid]=[]
+                LevelPathdata.levelpath_fid[clevelpathid] = []
 
 
             # assign levelpathID routing
@@ -823,24 +823,23 @@ class SFROperations:
             start_has_end = dict()
             end_has_start = dict()
 
-            for i in range(0, len(fidlist)):
+            for i in fidlist:
                 haveend = False
                 havestart = False
-                for j in range(0, len(fidlist)):
-                    if j == i:
-                        continue
-                    diffstartx = FIDdata.allfids[i].startx - FIDdata.allfids[j].endx
-                    diffstarty = FIDdata.allfids[i].starty - FIDdata.allfids[j].endy
-                    diffendx = FIDdata.allfids[i].endx - FIDdata.allfids[j].startx
-                    diffendy = FIDdata.allfids[i].endy - FIDdata.allfids[j].starty
-                    if np.fabs(diffstartx) < self.SFRdata.rfact and np.fabs(diffstarty) < self.SFRdata.rfact:
-                        start_has_end[fidlist[i]] = fidlist[j]
-                        haveend = True
-                    if np.fabs(diffendx) < self.SFRdata.rfact and np.fabs(diffendy) < self.SFRdata.rfact:
-                        end_has_start[fidlist[i]] = fidlist[j]
-                        havestart = True
-                    if haveend and havestart:
-                        break
+                for j in fidlist:
+                    if j != i:
+                        diffstartx = FIDdata.allfids[i].startx - FIDdata.allfids[j].endx
+                        diffstarty = FIDdata.allfids[i].starty - FIDdata.allfids[j].endy
+                        diffendx = FIDdata.allfids[i].endx - FIDdata.allfids[j].startx
+                        diffendy = FIDdata.allfids[i].endy - FIDdata.allfids[j].starty
+                        if np.fabs(diffstartx) < self.SFRdata.rfact and np.fabs(diffstarty) < self.SFRdata.rfact:
+                            start_has_end[i] = j
+                            haveend = True
+                        if np.fabs(diffendx) < self.SFRdata.rfact and np.fabs(diffendy) < self.SFRdata.rfact:
+                            end_has_start[i] = j
+                            havestart = True
+                        if haveend and havestart:
+                            break
 
             #find key in start_has_end that didn't match an end and
             #key in end_has_start that didn't match a start
@@ -867,7 +866,6 @@ class SFROperations:
                 fix_comids_summary.append('%d\n' %comid)
                 FIDdata.noelev[comid] = 1  #set flag
                 continue
-
             orderedFID = []
             orderedFID.append(startingFID[0])
             for i in range(1, len(end_has_start)):
@@ -909,7 +907,7 @@ class SFROperations:
         del row
         del rows
 
-    def reach_ordering(self):
+    def reach_ordering(self, COMIDdata, FIDdata):
         """
         crawl through the hydrosequence values and
         set a preliminary reach ordering file
@@ -918,6 +916,9 @@ class SFROperations:
         ofp = open(indat.RCH, 'w')
         ofp.write('CELLNUM,COMID, hydroseq, uphydroseq, dnhydroseq, '
                   'levelpathID, uplevelpath, dnlevelpath, SFRseq, localseq\n')
+        for currhydroseq in COMIDdata.hydrosequence_sorted:
+            ccomid = COMIDdata.hydrosequence_comids
+            fids = FIDdata.COMID_orderedFID[ccomid]
 
 class Elevs_from_contours:
     def __init__(self,SFRdata,FIDdata):
