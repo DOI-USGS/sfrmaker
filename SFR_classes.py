@@ -112,12 +112,14 @@ class COMIDprops(object):
     """
     routing information by COMIDs
     """
-    __slots__ = ['from_comid', 'to_comid', 'hydrosequence', 'levelpathID']
+    __slots__ = ['from_comid', 'to_comid', 'hydrosequence', 'uphydrosequence', 'downhydrosequence', 'levelpathID']
 
     def __init__(self):
         self.from_comid = list()
         self.to_comid = list()
         self.hydrosequence = None
+        self.uphydrosequence = None
+        self.downhydrosequence = None
         self.levelpathID = None
 
 class LevelPathIDprops(object):
@@ -179,13 +181,18 @@ class COMIDPropsAll:
         del crow, cursor
         comidseen = list()
         with arcpy.da.SearchCursor(SFRdata.PlusflowVAA,
-                                   ("ComID", "Hydroseq", "LevelPathI", "UpLevelPat", "DnLevelPat")) as cursor:
+                                   ("ComID", "Hydroseq", "uphydroseq", "dnhydroseq")) as cursor:
             for crow in cursor:
                 comid = int(crow[0])
                 hydrosequence = int(crow[1])
+                uphydrosequence = int(crow[2])
+                downhydrosequence = int(crow[3])
+
                 levelpathid = int(crow[2])
                 if int(comid) in FIDdata.allcomids:
                     self.allcomids[crow[0]].hydrosequence = hydrosequence
+                    self.allcomids[crow[0]].uphydrosequence = uphydrosequence
+                    self.allcomids[crow[0]].downhydrosequence = downhydrosequence
                     self.allcomids[crow[0]].levelpathID = levelpathid
                     LevelPathdata.level_ordered.append(levelpathid)
                     comidseen.append(comid)
@@ -202,12 +209,11 @@ class COMIDPropsAll:
         del crow, cursor
 
         with arcpy.da.SearchCursor(SFRdata.PlusflowVAA,
-                                   ("ComID", "Hydroseq", "LevelPathI", "UpLevelPat", "DnLevelPat")) as cursor:
+                                   ("ComID", "LevelPathI", "DnLevelPat")) as cursor:
             for crow in cursor:
                 comid = int(crow[0])
-                levelpathid = int(crow[2])
-                uplevelpathid = int(crow[3])
-                downlevelpathid = int(crow[4])
+                levelpathid = int(crow[1])
+                downlevelpathid = int(crow[2])
                 if levelpathid in LevelPathdata.level_ordered:
                     if downlevelpathid != levelpathid:
                         LevelPathdata.allids[levelpathid].down_levelpathID = downlevelpathid
@@ -913,12 +919,32 @@ class SFROperations:
         set a preliminary reach ordering file
         """
         indat = self.SFRdata
+        SFRseq = 0
         ofp = open(indat.RCH, 'w')
         ofp.write('CELLNUM,COMID, hydroseq, uphydroseq, dnhydroseq, '
-                  'levelpathID, uplevelpath, dnlevelpath, SFRseq, localseq\n')
+                  'levelpathID, dnlevelpath, SFRseq, localseq\n')
         for currhydroseq in COMIDdata.hydrosequence_sorted:
-            ccomid = COMIDdata.hydrosequence_comids
-            fids = FIDdata.COMID_orderedFID[ccomid]
+            ccomid = COMIDdata.hydrosequence_comids[currhydroseq]
+            if ccomid not in FIDdata.noelev.keys():
+                SFRseq += 1
+                localseq = 0
+                for cfid in FIDdata.COMID_orderedFID[ccomid]:
+                    localseq += 1
+                    ofp.write('{0:d},{1:d},{2:d},{3:d},{4:d},{5:d},{6:d},{7:d}\n'.format(
+                    FIDdata.allfids[cfid].cellnum,
+                    ccomid,
+                    COMIDdata.allcomids[ccomid].hydrosequence,
+                    COMIDdata.allcomids[ccomid].uphydrosequence,
+                    COMIDdata.allcomids[ccomid].downhydrosequence,
+                    COMIDdata.allcomids[ccomid].levelpathID,
+                    SFRseq,
+                    localseq
+
+
+                    ))
+
+
+        ofp.close()
 
 class Elevs_from_contours:
     def __init__(self,SFRdata,FIDdata):
