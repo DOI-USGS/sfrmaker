@@ -23,7 +23,7 @@ class SFRInput:
         inpars = inpardat.getroot()
 
         self.compute_zonal = self.tf2flag(inpars.findall('.//compute_zonal')[0].text)
-        #self.preproc = self.tf2flag(inpars.findall('.//preproc')[0].text)
+        self.preproc = self.tf2flag(inpars.findall('.//preproc')[0].text)
         self.reach_cutoff = float(inpars.findall('.//reach_cutoff')[0].text)
         self.rfact = float(inpars.findall('.//rfact')[0].text)
         self.MFgrid = inpars.findall('.//MFgrid')[0].text
@@ -52,10 +52,19 @@ class SFRInput:
         self.Routes = inpars.findall('.//Routes')[0].text
         self.Contours_intersect = inpars.findall('.//Contours_intersect')[0].text
         self.Contours_intersect_distances = inpars.findall('.//Contours_intersect_distances')[0].text
+        self.RCH = inpars.findall('.//RCH')[0].text
+
         try:
             self.eps = float(inpars.findall('.//eps')[0].text)
         except:
             self.eps = 1.0000001e-02  # default value used if not in the input file
+
+        #cutoff to check stream length in cell against fraction of cell dimension
+        #if the stream length is less than cutoff*side length, the piece of stream is dropped
+        try:
+            self.cutoff = float(inpars.finall('.//cutoff')[0].text)
+        except:
+            self.cutoff = 0.0
 
         # initialize the arcpy environment
         arcpy.env.workspace = os.getcwd()
@@ -78,7 +87,7 @@ class FIDprops(object):
     """
     __slots__ = ['comid', 'startx', 'starty', 'endx', 'endy', 'FID',
                  'maxsmoothelev', 'minsmoothelev', 'lengthft',
-                 'cellnum', 'elev',
+                 'cellnum', 'elev', 'sidelength'
                  'segelevinfo', 'start_has_end', 'end_has_start','elev_distance']
     #  using __slots__ makes it required to declare properties of the object here in place
     #  and saves significant memory
@@ -123,10 +132,25 @@ class LevelPathIDpropsAll:
     def __init__(self):
         self.allids = dict()
         self.level_ordered = list()
+        self.levelpath_fid = dict()
+
+    def return_cutoffs(self, FIDdata, SFRdata):
+        self.rmlist = []
+        self.indata = SFRdata
+        for lpID in self.level_ordered:
+            for fid in self.levelpath_fid[lpID]:
+                reachlength=FIDdata.allfids[fid].lengthft
+                if reachlength < FIDdata.allfids[fid].sidelength*self.indata.cutoff:
+                    print '{0}, {1}\n'.format(fid, self.indata.cutoff)
+                    self.rmlist.append(fid)
+
+
 
 class COMIDPropsAll:
     def __init__(self):
         self.allcomids = dict()
+        self.hydrosequence_sorted = list()
+        self.hydrosequence_comids = dict()
 
     def populate_routing(self, SFRdata, FIDdata, LevelPathdata):
         """
@@ -165,11 +189,14 @@ class COMIDPropsAll:
                     self.allcomids[crow[0]].levelpathID = levelpathid
                     LevelPathdata.level_ordered.append(levelpathid)
                     comidseen.append(comid)
+
             # find unique levelpathIDs
             LevelPathdata.level_ordered = sorted(list(set(LevelPathdata.level_ordered)), reverse=True)
 
             for clevelpathid in LevelPathdata.level_ordered:
                 LevelPathdata.allids[clevelpathid] = LevelPathIDprops()
+                LevelPathdata.levelpath_fid[clevelpathid]=[]
+
 
             # assign levelpathID routing
         del crow, cursor
@@ -177,17 +204,32 @@ class COMIDPropsAll:
         with arcpy.da.SearchCursor(SFRdata.PlusflowVAA,
                                    ("ComID", "Hydroseq", "LevelPathI", "UpLevelPat", "DnLevelPat")) as cursor:
             for crow in cursor:
+                comid = int(crow[0])
                 levelpathid = int(crow[2])
                 uplevelpathid = int(crow[3])
                 downlevelpathid = int(crow[4])
                 if levelpathid in LevelPathdata.level_ordered:
                     if downlevelpathid != levelpathid:
                         LevelPathdata.allids[levelpathid].down_levelpathID = downlevelpathid
+                    if comid in FIDdata.comid_fid:
+                        LevelPathdata.levelpath_fid[levelpathid].extend(FIDdata.comid_fid[comid])
 
 
         comid_missing = list(set(FIDdata.allcomids).difference(comidseen))
         if len(comid_missing) > 0:
             print "WARNING! the following COMIDs are missing from \n{0:s}".format('\n'.join(map(str(comid_missing))))
+
+    def return_hydrosequence_comid(self):
+        """
+        return a dictionary of hydrosequence linked up with COMIDs
+        """
+        # first get a unique set of hydrosequences
+        for ccomid in self.allcomids:
+            self.hydrosequence_sorted.append(self.allcomids[ccomid].hydrosequence)
+        self.hydrosequence_sorted.sort(reverse=True)
+        for ccomid in self.allcomids:
+            self.hydrosequence_comids[self.allcomids[ccomid].hydrosequence] = ccomid
+
 
 class COMIDPropsForIntersect:
     """
@@ -221,6 +263,7 @@ class FIDPropsAll:
         self.minelev = None
         self.noelev = dict()
         self.COMID_orderedFID = dict()
+        self.comid_fid = None
 
     def return_fid_comid_list(self):
         """
@@ -436,6 +479,7 @@ class SFRpreproc:
         # NB --> only evaluating the first 100 rows...
         print 'verifying that there is a "node" field in {0:s}'.format(indat.MFgrid)
         hasnode = False
+        nodeunique = 0
         MFgridflds = arcpy.ListFields(indat.MFgrid)
         for cfield in MFgridflds:
             if cfield.name.lower() == 'node':
@@ -462,6 +506,7 @@ class SFRpreproc:
             print '"node" field in place with unique values in {0:s}'.format(indat.MFgrid)
         else:
             arcpy.DeleteField_management(indat.MFgrid, 'node')
+            arcpy.AddField_management(indat.MFgrid, 'node', 'LONG')
             print 'Updating "node" field in {0:s}'.format(indat.MFgrid)
             # now loop through and set "node" which is equivalent to "cellnum"
             cursor = arcpy.UpdateCursor(indat.MFgrid)
@@ -864,11 +909,15 @@ class SFROperations:
         del row
         del rows
 
-    def clip_to_boundary(self, SFRdata):
+    def reach_ordering(self):
         """
-        clip
+        crawl through the hydrosequence values and
+        set a preliminary reach ordering file
         """
-        i = 1
+        indat = self.SFRdata
+        ofp = open(indat.RCH, 'w')
+        ofp.write('CELLNUM,COMID, hydroseq, uphydroseq, dnhydroseq, '
+                  'levelpathID, uplevelpath, dnlevelpath, SFRseq, localseq\n')
 
 class Elevs_from_contours:
     def __init__(self,SFRdata,FIDdata):
@@ -942,7 +991,6 @@ class Elevs_from_contours:
                 while interp:
                     upcomid = COMIDdata.allcomids[comid].from_comid
                     dist,slope,end_elev,interp = get_dist_slope(self.FIDdata,upcomid,start_elev,end_elev,dist,interp)
-
 
 
 
