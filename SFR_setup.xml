@@ -18,6 +18,8 @@ Notes on SFR input:
     elevation difference to assign same value to all cells
     so that check does not get messed up by rounding floats -->
     <eps>1.0e-02</eps>
+    <!-- A parameter from Assign_and_Route (needs definition!) -->
+    <rfact>0.95</rfact>
 
 </GlobalSettings>
 <InputFiles>
@@ -60,6 +62,7 @@ Notes on SFR input:
     <!-- CELLS:  -->
     <CELLS>river_cells.shp</CELLS>
     <!-- Intersections between elevations and stream contours:  -->
+    <Contours_intersect>D:\ATLData\BadRiver\BCs\elevation_from_contours\contours_river_intersect.shp</Contours_intersect>
     <!-- river_explode converted into Arc routes:  -->
     <Routes>D:\ATLData\BadRiver\BCs\elevation_from_contours\river_explode_routes.shp</Routes>
     <!-- NHD:  -->
