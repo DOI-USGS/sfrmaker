@@ -53,6 +53,13 @@ class SFRInput:
         except:
             self.eps = 1.0000001e-02  # default value used if not in the input file
 
+        #cutoff to check stream length in cell against fraction of cell dimension
+        #if the stream length is less than cutoff*side length, the piece of stream is dropped
+        try:
+            self.cutoff = float(inpars.finall('.//cutoff')[0].text)
+        except:
+            self.cutoff = 0.0
+
         # initialize the arcpy environment
         arcpy.env.workspace = os.getcwd()
         arcpy.env.overwriteOutput = True
@@ -118,6 +125,14 @@ class LevelPathIDpropsAll:
     def __init__(self):
         self.allids = dict()
         self.level_ordered = list()
+        self.levelpathpair = dict()
+
+    def return_cutoffs(self,level_ordered,levelpathpair):
+        self.rmpair - dict()
+        for lpID in level_ordered:
+            for entry in range(0,len(levelpathpair[lpID])):
+                print entry, levelpathpair[lpID][entry]
+
 
 class COMIDPropsAll:
     def __init__(self):
@@ -159,7 +174,10 @@ class COMIDPropsAll:
                     self.allcomids[crow[0]].hydrosequence = hydrosequence
                     self.allcomids[crow[0]].levelpathID = levelpathid
                     LevelPathdata.level_ordered.append(levelpathid)
+                    for cell in FIDdata.unique_cells:
+                        LevelPathdata.levelpathpair[lpID].append([cell,comid])
                     comidseen.append(comid)
+
             # find unique levelpathIDs
             LevelPathdata.level_ordered = sorted(list(set(LevelPathdata.level_ordered)), reverse=True)
 
