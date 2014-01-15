@@ -29,14 +29,19 @@ FIDdata.populate_elevations(SFRdata)
 
 COMIDdata = SFRc.COMIDPropsAll()
 
+CELLdata = SFRc.CellPropsAll()
+
+CELLdata.populate_cells(SFRdata)
+
 LevelPathdata = SFRc.LevelPathIDpropsAll()
 
 COMIDdata.populate_routing(SFRdata, FIDdata, LevelPathdata)
 
 COMIDdata.return_hydrosequence_comid()
 
+LevelPathdata.return_cutoffs(FIDdata, CELLdata, SFRdata)
 SFRops.reach_ordering(COMIDdata, FIDdata)
 
-#LevelPathdata.return_cutoffs(FIDdata)
+LevelPathdata.return_cutoffs(FIDdata)
 
 i = 2
