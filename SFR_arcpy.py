@@ -26,14 +26,14 @@ def general_join(target_name, target_lay, joinfield1, joined, joinfield2, keep_c
         join_type = "KEEP_ALL"
     print "\nJoining field {0:s} of {1:s} to field {2:s} of {3:s}".format(
               joinfield2, target_lay, joinfield2, joined)
-    arcpy.AddJoin_management(target_lay,joinfield1,joined,joinfield2,join_type)
+    arcpy.AddJoin_management(target_lay, joinfield1, joined, joinfield2, join_type)
     # save back down the results
     if arcpy.Exists('tmpjunkus.shp'):
         print 'Removing old version of tmpjunkus.shp'
         print 'This is a holding temporary file to save down %s' %target_name
         print 'tmpjunkus.shp will be deleted'
         arcpy.Delete_management('tmpjunkus.shp')
-    arcpy.CopyFeatures_management(target_lay,'tmpjunkus.shp')
+    arcpy.CopyFeatures_management(target_lay, 'tmpjunkus.shp')
     if arcpy.Exists(target_name):
         print 'Removing old version of %s' %target_name
         arcpy.Delete_management(target_name)
