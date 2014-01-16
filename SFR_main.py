@@ -40,8 +40,7 @@ COMIDdata.populate_routing(SFRdata, FIDdata, LevelPathdata)
 COMIDdata.return_hydrosequence_comid()
 
 LevelPathdata.return_cutoffs(FIDdata, CELLdata, SFRdata)
-SFRops.reach_ordering(COMIDdata, FIDdata)
 
-LevelPathdata.return_cutoffs(FIDdata)
+SFRops.reach_ordering(COMIDdata, FIDdata)
 
 i = 2
