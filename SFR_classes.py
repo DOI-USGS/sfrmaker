@@ -8,8 +8,33 @@ import SFR_arcpy
 import time
 import datetime
 import discomb_utilities as disutil #  utility to read in a dis file
+import pickle
+import math
+import gzip
 
+'''
+debugging functions
+'''
+def savetmp(savedict):
+    for carg in savedict:
+        outfilename = '{0:s}###.pklz'.format(carg)
+        print "Pickling down {0:s} to file {1:}".format(carg, outfilename)
+        ofp = gzip.open(outfilename, 'wb')
+        pickle.dump(savedict[carg], ofp)
+        ofp.close()
 
+def loadtmp(savedict):
+    a = dict()
+    for carg in savedict:
+        infilename = '{0:s}###.pklz'.format(carg)
+        ofp = gzip.open(infilename, 'rb')
+        a[carg] = (pickle.load(ofp))
+        ofp.close()
+    return a
+
+'''
+end debugging functions
+'''
 class SFRInput:
     """
     the SFRInput class holds all data from the XML-based input file
@@ -23,7 +48,7 @@ class SFRInput:
         inpars = inpardat.getroot()
 
         self.compute_zonal = self.tf2flag(inpars.findall('.//compute_zonal')[0].text)
-        #self.preproc = self.tf2flag(inpars.findall('.//preproc')[0].text)
+        self.preproc = self.tf2flag(inpars.findall('.//preproc')[0].text)
         self.reach_cutoff = float(inpars.findall('.//reach_cutoff')[0].text)
         self.rfact = float(inpars.findall('.//rfact')[0].text)
         self.MFgrid = inpars.findall('.//MFgrid')[0].text
@@ -72,6 +97,15 @@ class SFRInput:
         except:
             self.cutoff = 0.0
 
+        #read the Fcode-Fstring table and save it into a dictionary, Fstring
+        descrips = arcpy.SearchCursor(self.FTab)
+        self.Fstring = dict()
+        for description in descrips:
+            Fcodevalue = int(description.FCode)
+            if not Fcodevalue in self.Fstring:
+                self.Fstring[Fcodevalue]=description.Descriptio
+        del descrips
+
         # initialize the arcpy environment
         arcpy.env.workspace = os.getcwd()
         arcpy.env.overwriteOutput = True
@@ -91,11 +125,13 @@ class FIDprops(object):
     """
     Properties for each COMID
     """
+    '''
     __slots__ = ['comid', 'startx', 'starty', 'endx', 'endy', 'FID',
                  'maxsmoothelev', 'minsmoothelev', 'lengthft',
                  'cellnum', 'contour_elev','elev', 'sidelength',
                  'segelevinfo', 'start_has_end', 'end_has_start', 'elev_distance', 'segelevinfo',
                  'elev_min','elev_max','elev_mean',]
+    '''
     #  using __slots__ makes it required to declare properties of the object here in place
     #  and saves significant memory
     def __init__(self, comid, startx, starty, endx, endy, FID,
@@ -122,8 +158,11 @@ class COMIDprops(object):
     """
     routing information by COMIDs
     """
-    __slots__ = ['from_comid', 'to_comid', 'hydrosequence', 'uphydrosequence', 'downhydrosequence', 'levelpathID']
-
+    '''
+    __slots__ = ['from_comid', 'to_comid', 'hydrosequence', 'uphydrosequence',
+                 'downhydrosequence', 'levelpathID','stream_order','arbolate_sum',
+                 'est_width','reachcode','Fcode']
+    '''
     def __init__(self):
         self.from_comid = list()
         self.to_comid = list()
@@ -131,14 +170,27 @@ class COMIDprops(object):
         self.uphydrosequence = None
         self.downhydrosequence = None
         self.levelpathID = None
+        self.stream_order = None
+        self.arbolate_sum = None
+        self.est_width = None
+        self.reachcode = None
+        self.Fcode = None
+
+
 
 class LevelPathIDprops(object):
     """
     routing of LevelPathIDs
     """
-    __slots__ = ["down_levelpathID"]
+    '''
+    __slots__ = ["down_levelpathID", "ordered_cellnums", "ordered_FIDs", "ordered_hydrosequence"]
+    '''
     def __init__(self):
         self.down_levelpathID = None
+        self.ordered_hydrosequence = list()
+        self.ordered_cellnums = list()  # NB - this is unique even though duplicates may have existed due to meanders
+        self.ordered_FIDs = list()
+
 
 class LevelPathIDpropsAll:
     def __init__(self):
@@ -172,8 +224,9 @@ class CellProps(object):
     """
     class for cell objects
     """
+    '''
     __slots__ = ['delx', 'dely', 'sidelength', 'row', 'column']
-
+    '''
     def __init__(self, delx, dely, sidelength, row, column):
         self.delx = delx
         self.dely = dely
@@ -238,20 +291,30 @@ class COMIDPropsAll:
         del crow, cursor
         comidseen = list()
         with arcpy.da.SearchCursor(SFRdata.PlusflowVAA,
-                                   ("ComID", "Hydroseq", "uphydroseq", "dnhydroseq")) as cursor:
+                                   ("ComID", "Hydroseq", "uphydroseq", "dnhydroseq",
+                                   "ReachCode","StreamOrde","ArbolateSu","Fcode", "levelpathI")) as cursor:
             for crow in cursor:
                 comid = int(crow[0])
                 hydrosequence = int(crow[1])
                 uphydrosequence = int(crow[2])
                 downhydrosequence = int(crow[3])
-
-                levelpathid = int(crow[2])
+                reachcode = crow[4]
+                stream_order = int(crow[5])
+                arbolate_sum = float(crow[6])
+                Fcode = int(crow[7])
+                levelpathid = int(crow[8])
                 if int(comid) in FIDdata.allcomids:
                     self.allcomids[crow[0]].hydrosequence = hydrosequence
                     self.allcomids[crow[0]].uphydrosequence = uphydrosequence
                     self.allcomids[crow[0]].downhydrosequence = downhydrosequence
                     self.allcomids[crow[0]].levelpathID = levelpathid
                     LevelPathdata.level_ordered.append(levelpathid)
+                    self.allcomids[crow[0]].reachcode = reachcode
+                    self.allcomids[crow[0]].stream_order = stream_order
+                    self.allcomids[crow[0]].arbolate_sum = arbolate_sum
+                    self.allcomids[crow[0]].Fcode = Fcode
+                    #estimate the width
+                    self.allcomids[crow[0]].est_width = widthcorrelation(arbolate_sum)
                     comidseen.append(comid)
 
             # find unique levelpathIDs
@@ -410,6 +473,58 @@ class SFRReachesAll:
     def __init__(self):
         j = 1
 
+class SFRSegmentsAll:
+    """
+    class that makes up a dictionary of SFR objects
+    and contains methods to accumulate properties of the
+    same levelpathID within a call, find confluences, subdivide
+    levelpathIDs and establish the final SFR segments
+    """
+    def __init__(self):
+        allSegs = dict()
+
+    def accumulate_same_levelpathID(self, LevelPathdata):
+        """
+        method to add lengths and weight widths and slopes
+        for parts of a stream that have the same levelpathID
+        within a cell
+        """
+        self.totlength=defaultdict(dict)
+        self.weightwidth=defaultdict(dict)
+        self.elevcell=defaultdict(dict)
+        self.weightedslope=defaultdict(dict)
+        for lpID in LevelPathdata.level_ordered:
+            segment=SFRprovseg[lpID]
+            for localcell in SFRprovreachlist[lpID]:
+                tt=0.
+                ww=0.
+                ws=0.
+                el=0.
+                for entry in range(0,len(levelpathpair[lpID])):
+                    lpcell=levelpathpair[lpID][entry][0]
+                    lpcomid=levelpathpair[lpID][entry][1]
+                    knt=0
+                    if lpcell==localcell:
+                        knt=knt+1
+                        newkey=str(lpcell)+str(lpcomid)
+                        tt=tt+newreachlength[newkey]
+                        ww=ww+newestwidth[newkey]*newreachlength[newkey]
+                        el=el+newcellelev[newkey]
+                        ws=ws+newcellslope[newkey]*newreachlength[newkey]
+                if knt==0:
+                    totlength[lpID][localcell]=reachlength[localcell][0]
+                    elevcell[lpID][localcell]=riverelev[localcell][0]
+                    weightedslope[lpID][localcell]=cellslope[localcell][0]
+                    weightwidth[lpID][localcell]=estwidth[localcell][0]
+                else:
+                    totlength[lpID][localcell]=tt
+                    elevcell[lpID][localcell]=el/float(knt)
+                    if tt>0:
+                        weightwidth[lpID][localcell]=ww/tt
+                        weightedslope[lpID][localcell]=ws/tt
+                    else:
+                        weightwidth[lpID][localcell]=99999.
+                        weightedslope[lpID][localcell]=99999.
 
 class SFRpreproc:
     def __init__(self, SFRdata):
@@ -974,38 +1089,55 @@ class SFROperations:
         del row
         del rows
 
-    def reach_ordering(self, COMIDdata, FIDdata):
+    def reach_ordering(self, COMIDdata, FIDdata, LevelPathdata):
         """
         crawl through the hydrosequence values and
         set a preliminary reach ordering file
         """
         indat = self.SFRdata
         SFRseq = 0
+        # write out the candidate routing information by hydrosequence ordered
         ofp = open(indat.RCH, 'w')
-        ofp.write('CELLNUM,COMID, hydroseq, uphydroseq, dnhydroseq, '
+        ofp.write('CELLNUM, COMID, hydroseq, uphydroseq, dnhydroseq, '
                   'levelpathID, dnlevelpath, SFRseq, localseq\n')
         for currhydroseq in COMIDdata.hydrosequence_sorted:
             ccomid = COMIDdata.hydrosequence_comids[currhydroseq]
             if ccomid not in FIDdata.noelev.keys():
+                # update the levelpathID hydrosequence data
+                LevelPathdata.allids[COMIDdata.allcomids[ccomid].levelpathID].ordered_hydrosequence.append(currhydroseq)
                 SFRseq += 1
                 localseq = 0
                 for cfid in FIDdata.COMID_orderedFID[ccomid]:
                     localseq += 1
-                    ofp.write('{0:d},{1:d},{2:d},{3:d},{4:d},{5:d},{6:d},{7:d}\n'.format(
+                    ofp.write('{0:d},{1:d},{2:d},{3:d},{4:d},{5:d},{6:d},{7:d},{8:d}\n'.format(
                     FIDdata.allfids[cfid].cellnum,
                     ccomid,
                     COMIDdata.allcomids[ccomid].hydrosequence,
                     COMIDdata.allcomids[ccomid].uphydrosequence,
                     COMIDdata.allcomids[ccomid].downhydrosequence,
                     COMIDdata.allcomids[ccomid].levelpathID,
+                    LevelPathdata.allids[COMIDdata.allcomids[ccomid].levelpathID].down_levelpathID,
                     SFRseq,
                     localseq
-
-
                     ))
-
-
         ofp.close()
+
+        # calculate and list unique cellnums and fids in downstream order by levelpathID
+        for clevelpathid in LevelPathdata.level_ordered:
+   #         LevelPathdata.allids[clevelpathid].ordered_hydrosequence = \
+   #             list(set(LevelPathdata.allids[clevelpathid].ordered_hydrosequence)).sort(reverse=True)
+            for currhydroseq in LevelPathdata.allids[clevelpathid].ordered_hydrosequence:
+                ccomid = COMIDdata.hydrosequence_comids[currhydroseq]
+                if ccomid not in FIDdata.noelev.keys():
+                    for cfid in FIDdata.COMID_orderedFID[ccomid]:
+                        if FIDdata.allfids[cfid].cellnum not in LevelPathdata.allids[clevelpathid].ordered_cellnums:
+                            LevelPathdata.allids[clevelpathid].ordered_cellnums.append(
+                            FIDdata.allfids[cfid].cellnum
+                            )
+                        LevelPathdata.allids[clevelpathid].ordered_FIDs.append(cfid)
+
+
+        kkkk=1
 
 class Elevs_from_contours:
     def __init__(self,SFRdata,FIDdata):
@@ -1179,7 +1311,8 @@ class Elevs_from_contours:
             reachlist = self.FIDdata.COMID_orderedFID[to_comid[0]]
             interp = True
             slope,dist,start_fid,end_fid,end_elev,interp = get_dist_slope(to_comid[0],reachlist,end_elev,dist,interp,elevs_edited)
-
+            except:
+                print "um, exception"
             # if upstream contour not in current to_comid, go to next downstream to_comid
             current_comid = comid
             comid = to_comid
@@ -1214,7 +1347,13 @@ class Elevs_from_contours:
 
 
 
-
+def widthcorrelation(arbolate):
+    #estimate widths, equation from Feinstein and others (Lake
+    #Michigan Basin model) width=0.1193*(x^0.5032)
+    # x=arbolate sum of stream upstream of the COMID in meters
+    #NHDPlus has arbolate sum in kilometers.
+    #print a table with reachcode, order, estimated width, Fcode
+    estwidth = 0.1193*math.pow(1000*arbolate,0.5032)
 
 
 """

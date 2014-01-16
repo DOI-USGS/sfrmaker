@@ -6,6 +6,7 @@ infile = 'SFR_input.xml'
 
 SFRdata = SFRc.SFRInput(infile)
 
+
 if SFRdata.preproc:
     print 'Running preprocessing routine'
     SFRpre = SFRc.SFRpreproc(SFRdata)
@@ -15,6 +16,16 @@ if SFRdata.preproc:
 
 SFRops = SFRc.SFROperations(SFRdata)
 
+saveme ={'SFRdata':  SFRdata,
+              'SFRops': SFRops}
+
+SFRc.savetmp(saveme)
+
+a = SFRc.loadtmp(saveme)
+
+SFRdata = a['SFRdata']
+
+'''
 SFRops.intersect()
 
 FIDdata = SFRc.FIDPropsAll()
@@ -41,6 +52,8 @@ COMIDdata.return_hydrosequence_comid()
 
 LevelPathdata.return_cutoffs(FIDdata, CELLdata, SFRdata)
 
-SFRops.reach_ordering(COMIDdata, FIDdata)
+SFRops.reach_ordering(COMIDdata, FIDdata, LevelPathdata)
+
+'''
 
 i = 2
