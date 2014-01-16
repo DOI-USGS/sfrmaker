@@ -459,20 +459,40 @@ class FIDPropsAll:
 
 class SFRReachProps(object):
     """
-    class containing just the data for each reach
+    class containing an object for each reach
     """
-    __slots__ = ['junk']
+    '''
+    __slots__ = ['cellnum','rch_number','eff_length','eff_slope','elevreach','bedthick','bedK','roughch']
+    '''
     def __init__(self):
-        self.junk = junk
+        self.cellnum = None
+        self.rch_number = None
+        self.eff_length = None
+        self.eff_slope = None
+        self.elevreach = None
+        self.bedthick = None
+        self.bedK = None
+        self.roughch = None
 
 
-class SFRReachesAll:
+class SFRSegmentProps(object):
     """
-    class that makes up a list of SFRReachProps objects
-    and also contains methods to access them
+    class object to hold final SFR segment information
     """
+    '''
+    __slots__ = ['seg_cells','icalc','iupseg','outseg','runoff','etsw','pptsw']
+    '''
     def __init__(self):
-        j = 1
+        self.seg_cells = list()
+        self.outseg = None
+        self.icalc = None
+        self.iupseg = 0    #iupseg default zero right now, diversions could be added
+        self.outseg = None
+        self.runoff = None
+        self.estw = None
+        self.pptsw = None
+        self.seg_reaches = dict()   #reach object with properties from SFRReachProps keyed by rch_number
+
 
 class SFRSegmentsAll:
     """
@@ -490,7 +510,7 @@ class SFRSegmentsAll:
         for parts of a stream that have the same levelpathID
         within a cell
         """
-        self.totlength=dict()
+        self.totlength=dict()   #these should be pointed to reach properties....
         self.weightwidth=dict()
         self.elevcell=dict()
         self.weightedslope=dict()
