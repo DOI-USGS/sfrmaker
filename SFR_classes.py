@@ -27,6 +27,7 @@ def loadtmp(savedict):
     a = dict()
     for carg in savedict:
         infilename = '{0:s}###.pklz'.format(carg)
+        print "loading {0:s} from file {1:}".format(carg, infilename)
         ofp = gzip.open(infilename, 'rb')
         a[carg] = (pickle.load(ofp))
         ofp.close()
@@ -1124,8 +1125,8 @@ class SFROperations:
 
         # calculate and list unique cellnums and fids in downstream order by levelpathID
         for clevelpathid in LevelPathdata.level_ordered:
-   #         LevelPathdata.allids[clevelpathid].ordered_hydrosequence = \
-   #             list(set(LevelPathdata.allids[clevelpathid].ordered_hydrosequence)).sort(reverse=True)
+            LevelPathdata.allids[clevelpathid].ordered_hydrosequence = \
+                sorted(list(set(LevelPathdata.allids[clevelpathid].ordered_hydrosequence)), reverse=True)
             for currhydroseq in LevelPathdata.allids[clevelpathid].ordered_hydrosequence:
                 ccomid = COMIDdata.hydrosequence_comids[currhydroseq]
                 if ccomid not in FIDdata.noelev.keys():
@@ -1136,8 +1137,6 @@ class SFROperations:
                             )
                         LevelPathdata.allids[clevelpathid].ordered_FIDs.append(cfid)
 
-
-        kkkk=1
 
 class Elevs_from_contours:
     def __init__(self,SFRdata,FIDdata):
@@ -1305,8 +1304,7 @@ class Elevs_from_contours:
             reachlist = self.FIDdata.COMID_orderedFID[to_comid[0]]
             interp = True
             slope,dist,start_fid,end_fid,end_elev,interp = get_dist_slope(to_comid[0],reachlist,end_elev,dist,interp,elevs_edited)
-            except:
-                print "um, exception"
+
             # if upstream contour not in current to_comid, go to next downstream to_comid
             current_comid = comid
             comid = to_comid
