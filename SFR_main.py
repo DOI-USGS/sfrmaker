@@ -13,19 +13,8 @@ if SFRdata.preproc:
 
     SFRpre.clip_and_join_attributes()
 
-
 SFRops = SFRc.SFROperations(SFRdata)
 
-saveme ={'SFRdata':  SFRdata,
-              'SFRops': SFRops}
-
-SFRc.savetmp(saveme)
-
-a = SFRc.loadtmp(saveme)
-
-SFRdata = a['SFRdata']
-
-'''
 SFRops.intersect()
 
 FIDdata = SFRc.FIDPropsAll()
@@ -53,6 +42,21 @@ COMIDdata.return_hydrosequence_comid()
 LevelPathdata.return_cutoffs(FIDdata, CELLdata, SFRdata)
 
 SFRops.reach_ordering(COMIDdata, FIDdata, LevelPathdata)
+
+'''
+saveme ={'COMIDdata' : COMIDdata,
+         'FIDdata' : FIDdata,
+         'LevelPathdata' : LevelPathdata}
+SFRc.savetmp(saveme)
+
+loadme = ['COMIDdata', 'FIDdata', 'LevelPathdata']
+
+instuff = SFRc.loadtmp(loadme)
+
+
+SFRops.reach_ordering(instuff['COMIDdata'],
+                      instuff['FIDdata'],
+                      instuff['LevelPathdata'])
 
 '''
 
