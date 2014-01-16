@@ -459,20 +459,40 @@ class FIDPropsAll:
 
 class SFRReachProps(object):
     """
-    class containing just the data for each reach
+    class containing an object for each reach
     """
-    __slots__ = ['junk']
+    '''
+    __slots__ = ['cellnum','rch_number','eff_length','eff_slope','elevreach','bedthick','bedK','roughch']
+    '''
     def __init__(self):
-        self.junk = junk
+        self.cellnum = None
+        self.rch_number = None
+        self.eff_length = None
+        self.eff_slope = None
+        self.elevreach = None
+        self.bedthick = None
+        self.bedK = None
+        self.roughch = None
 
 
-class SFRReachesAll:
+class SFRSegmentProps(object):
     """
-    class that makes up a list of SFRReachProps objects
-    and also contains methods to access them
+    class object to hold final SFR segment information
     """
+    '''
+    __slots__ = ['seg_cells','icalc','iupseg','outseg','runoff','etsw','pptsw']
+    '''
     def __init__(self):
-        j = 1
+        self.seg_cells = list()
+        self.outseg = None
+        self.icalc = None
+        self.iupseg = 0    #iupseg default zero right now, diversions could be added
+        self.outseg = None
+        self.runoff = None
+        self.estw = None
+        self.pptsw = None
+        self.seg_reaches = dict()   #reach object with properties from SFRReachProps keyed by rch_number
+
 
 class SFRSegmentsAll:
     """
@@ -484,48 +504,45 @@ class SFRSegmentsAll:
     def __init__(self):
         allSegs = dict()
 
-    def accumulate_same_levelpathID(self, LevelPathdata):
+    def accumulate_same_levelpathID(self, LevelPathdata, COMIDdata, FIDdata):
         """
         method to add lengths and weight widths and slopes
         for parts of a stream that have the same levelpathID
         within a cell
         """
-        self.totlength=defaultdict(dict)
-        self.weightwidth=defaultdict(dict)
-        self.elevcell=defaultdict(dict)
-        self.weightedslope=defaultdict(dict)
+        self.totlength=dict()   #these should be pointed to reach properties....
+        self.weightwidth=dict()
+        self.elevcell=dict()
+        self.weightedslope=dict()
         for lpID in LevelPathdata.level_ordered:
             segment=SFRprovseg[lpID]
-            for localcell in SFRprovreachlist[lpID]:
+            for localcell in yyyyyy:
                 tt=0.
                 ww=0.
                 ws=0.
                 el=0.
-                for entry in range(0,len(levelpathpair[lpID])):
-                    lpcell=levelpathpair[lpID][entry][0]
-                    lpcomid=levelpathpair[lpID][entry][1]
+                for cfid in xxxxxx:
                     knt=0
                     if lpcell==localcell:
                         knt=knt+1
-                        newkey=str(lpcell)+str(lpcomid)
-                        tt=tt+newreachlength[newkey]
-                        ww=ww+newestwidth[newkey]*newreachlength[newkey]
-                        el=el+newcellelev[newkey]
-                        ws=ws+newcellslope[newkey]*newreachlength[newkey]
+                        tt = tt + FIDdata.allfids[cfid].lengthft
+                        ww = ww + COMIDdata[ccomid].est_width* FIDdata.allfids[cfid].lengthft
+                       # el = el +
+                       # ws = ws +
                 if knt==0:
-                    totlength[lpID][localcell]=reachlength[localcell][0]
-                    elevcell[lpID][localcell]=riverelev[localcell][0]
-                    weightedslope[lpID][localcell]=cellslope[localcell][0]
-                    weightwidth[lpID][localcell]=estwidth[localcell][0]
+                    totlength[cfid] = FIDdata.allfids[cfid].lengthft
+                    #elevcell[lpID][localcell] = riverelev[localcell][0]
+                    #weightedslope[lpID][localcell] = cellslope[localcell][0]
+                    weightwidth[cfid]= COMIDdata[ccomid].est_width
                 else:
-                    totlength[lpID][localcell]=tt
-                    elevcell[lpID][localcell]=el/float(knt)
+                    totlength[cfid] = tt
+                    #elevcell[cfid]=el/float(knt)
                     if tt>0:
-                        weightwidth[lpID][localcell]=ww/tt
-                        weightedslope[lpID][localcell]=ws/tt
+                        weightwidth[cfid] = ww/tt
+                        #weightedslope[cfid] = ws/tt
                     else:
-                        weightwidth[lpID][localcell]=99999.
-                        weightedslope[lpID][localcell]=99999.
+                        weightwidth[cfid] = 99999.
+                        #weightedslope[cfid] = 99999.
 
 class SFRpreproc:
     def __init__(self, SFRdata):
