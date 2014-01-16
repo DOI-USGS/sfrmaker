@@ -8,8 +8,32 @@ import SFR_arcpy
 import time
 import datetime
 import discomb_utilities as disutil #  utility to read in a dis file
+import pickle
+import gzip
 
+'''
+debugging functions
+'''
+def savetmp(savedict):
+    for carg in savedict:
+        outfilename = '{0:s}###.pklz'.format(carg)
+        print "Pickling down {0:s} to file {1:}".format(carg, outfilename)
+        ofp = gzip.open(outfilename, 'wb')
+        pickle.dump(savedict[carg], ofp)
+        ofp.close()
 
+def loadtmp(savedict):
+    a = dict()
+    for carg in savedict:
+        infilename = '{0:s}###.pklz'.format(carg)
+        ofp = gzip.open(infilename, 'rb')
+        a[carg] = (pickle.load(ofp))
+        ofp.close()
+    return a
+
+'''
+end debugging functions
+'''
 class SFRInput:
     """
     the SFRInput class holds all data from the XML-based input file
@@ -23,7 +47,7 @@ class SFRInput:
         inpars = inpardat.getroot()
 
         self.compute_zonal = self.tf2flag(inpars.findall('.//compute_zonal')[0].text)
-        #self.preproc = self.tf2flag(inpars.findall('.//preproc')[0].text)
+        self.preproc = self.tf2flag(inpars.findall('.//preproc')[0].text)
         self.reach_cutoff = float(inpars.findall('.//reach_cutoff')[0].text)
         self.rfact = float(inpars.findall('.//rfact')[0].text)
         self.MFgrid = inpars.findall('.//MFgrid')[0].text
@@ -91,10 +115,12 @@ class FIDprops(object):
     """
     Properties for each COMID
     """
+    '''
     __slots__ = ['comid', 'startx', 'starty', 'endx', 'endy', 'FID',
                  'maxsmoothelev', 'minsmoothelev', 'lengthft',
                  'cellnum', 'elev', 'sidelength',
                  'segelevinfo', 'start_has_end', 'end_has_start', 'elev_distance', 'segelevinfo']
+    '''
     #  using __slots__ makes it required to declare properties of the object here in place
     #  and saves significant memory
     def __init__(self, comid, startx, starty, endx, endy, FID,
@@ -118,8 +144,9 @@ class COMIDprops(object):
     """
     routing information by COMIDs
     """
+    '''
     __slots__ = ['from_comid', 'to_comid', 'hydrosequence', 'uphydrosequence', 'downhydrosequence', 'levelpathID']
-
+    '''
     def __init__(self):
         self.from_comid = list()
         self.to_comid = list()
@@ -132,7 +159,9 @@ class LevelPathIDprops(object):
     """
     routing of LevelPathIDs
     """
+    '''
     __slots__ = ["down_levelpathID", "ordered_cellnums", "ordered_FIDs", "ordered_hydrosequence"]
+    '''
     def __init__(self):
         self.down_levelpathID = None
         self.ordered_hydrosequence = list()
@@ -172,8 +201,9 @@ class CellProps(object):
     """
     class for cell objects
     """
+    '''
     __slots__ = ['delx', 'dely', 'sidelength', 'row', 'column']
-
+    '''
     def __init__(self, delx, dely, sidelength, row, column):
         self.delx = delx
         self.dely = dely
@@ -1191,7 +1221,8 @@ class Elevs_from_contours:
                 reachlist = self.FIDdata.COMID_orderedFID[to_comid[0]]
                 interp = True
                 slope,dist,start_fid,end_fid,end_elev,interp = get_dist_slope(to_comid,reachlist,end_elev,dist,interp,elevs_edited)
-
+            except:
+                print "um, exception"
             # if upstream contour not in current to_comid, go to next downstream to_comid
             current_comid = comid
             comid = to_comid
