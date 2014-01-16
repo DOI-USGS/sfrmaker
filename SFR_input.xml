@@ -13,13 +13,17 @@ Notes on SFR input:
     <compute_zonal>False</compute_zonal>
     <!-- reach_cutoff: 
     minimum reach length to retain following explosion of NHD segments to river cells -->
-    <reach_cutoff>1</reach_cutoff>
+    <reach_cutoff>1.0</reach_cutoff>
     <!-- eps:
     elevation difference to assign same value to all cells
     so that check does not get messed up by rounding floats -->
     <eps>1.0e-02</eps>
-    <!-- A parameter from Assign_and_Route (needs definition!) -->
+    <!-- rfact:
+    a factor within which start(x,y) and end(x,y) can be found -->
     <rfact>0.95</rfact>
+	<!-- preproc:
+    a factor within which start(x,y) and end(x,y) can be found -->
+    <preproc>False</preproc>
 
 </GlobalSettings>
 <InputFiles>
@@ -32,7 +36,7 @@ Notes on SFR input:
     <!-- DEM: DEM for model area, doesn't need to be clipped -->
     <DEM>nacp_demfti</DEM>    
     <!-- PlusflowVAA: from NHDPlus -->
-    <PlusflowVAA>PlusFlowlineVAA_0407Merge.dbf</PlusflowVAA>    
+    <PlusflowVAA>PlusFlowlineVAA.dbf</PlusflowVAA>    
     <!-- Elevslope: from NHDPlus -->
     <Elevslope>elevslope_merged.dbf</Elevslope>  
     <!-- Flowlines_unclipped: 
@@ -41,12 +45,9 @@ Notes on SFR input:
     <!-- arcpy_path: for calling arcpy scripts externally using os.system -->
     <arcpy_path>C:\python27\ArcGIS10.1\python</arcpy_path>      
     <!-- FLOW: from NHDPlus -->
-    <FLOW>PlusFlow_merge.dbf</FLOW>
+    <FLOW>PlusFlow.dbf</FLOW>
     <!-- FTab: from NHDPlus -->
-    <FTab>FCodes.dbf</FTab>
-    <!-- ELEVcontours: from National Map -->
-    <ELEVcontours>D:\ATLData\BadRiver\BCs\elevation_from_contours\contours_NAD27_wsp_ft.shp</ELEVcontours>
-    <RCH>stuff</RCH>
+    <FTab>FCodes.dbf</FTab>     
 </InputFiles>
 
 <IntermediateFiles>
@@ -55,21 +56,25 @@ Notes on SFR input:
     <!-- ELEV: clipped to active area -->
     <ELEV>river_w_elevations.shp</ELEV> 
     <!-- intersect:  flowlines intersected with the grid-->
-    <intersect>D:\ATLData\BadRiver\BCs\elevation_from_contours\river_explode_clip.shp</intersect>
+    <intersect>river_explode.shp</intersect>
     <!-- rivers_table:  -->
     <rivers_table>river_elevs.dbf</rivers_table>
-    <!-- CELLS_DISS:  -->
-    <CELLS_DISS>river_cells_dissolve.shp</CELLS_DISS>
     <!-- CELLS:  -->
     <CELLS>river_cells.shp</CELLS>
-    <!-- Intersections between elevations and stream contours:  -->
-    <Contours_intersect>D:\ATLData\BadRiver\BCs\elevation_from_contours\contours_river_intersect.shp</Contours_intersect>
-    <!-- river_explode converted into Arc routes:  -->
-    <Routes>D:\ATLData\BadRiver\BCs\elevation_from_contours\river_explode_routes.shp</Routes>
-    <!-- locations of contour intersections along each FID:  -->
-    <Contours_intersect_distances>D:\ATLData\BadRiver\BCs\elevation_from_contours\Distances.dbf</Contours_intersect_distances>
+	<!-- CELLS_DISS: -->
+	<CELLS_DISS>river_cells_dissolve.shp</CELLS_DISS>
     <!-- NHD:  -->
     <NHD>NHD_intersect_edited.shp</NHD> 
+	 <!-- RCH: Reach ordering (preliminary) file -->
+    <RCH>reach_ordering.txt</RCH>
+    <!-- ELEVcontours -->
+    <ELEVcontours>nothing.txt</ELEVcontours>
+    <!-- Routes:  -->
+    <Routes>nothing.txt</Routes>
+    <!-- Contours_intersect: -->
+    <Contours_intersect>nothing.txt</Contours_intersect>
+    <!-- Contours_intersect_distances: -->
+    <Contours_intersect_distances>nothing.txt</Contours_intersect_distances>
 </IntermediateFiles>
 
 <OutputFiles>
@@ -77,10 +82,48 @@ Notes on SFR input:
     <GISSHP>SFRfinal_riv_cellinfo.shp</GISSHP> 
     <!-- MAT1 and MAT2:
         files for use with Groundwater Vistas -->
-    <MAT1>D:\ATLData\BadRiver\BCs\SFR_v2\BR_GWVmat1.csv</MAT1> 
+    <MAT1>SFR_GWVmat1.txt</MAT1> 
     <MAT2>SFR_GWVmat2.txt</MAT2> 
     <WIDTH>SFRwidthinfo.txt</WIDTH> 
     <MULT>Multiple_segments.txt</MULT>     
 </OutputFiles>
+
+<SFR_parameters>
+<!--
+default parameter values output to final SFR2 input file for MODFLOW -
+could read some of these in through a shapefile if variation in the domain
+is desired
+-->
+	<nsfrpar>0</nsfrpar>
+	<nsfrpar>0</nsfrpar>
+	<nsfrpar>128390.4</nsfrpar>  <!-- 1.486*86400. -->
+	<dleak>0.0001</dleak>
+	<nstrail>10</nstrail>
+	<isuzn>1</isuzn>
+	<nsfrsets>30</nsfrsets>
+	<istcb1>50</istcb1>
+	<istcb2>66</istcb2>
+	<isfropt>1</isfropt>
+	<bedK>5.0</bedK>
+	<bedKmin>1.0e-08</bedKmin>
+	<bedthick>1.0</bedthick>
+	<icalc>1</icalc>
+	<nstrpts>0</nstrpts>
+	<iprior>0</iprior>
+	<flow>0.</flow>
+	<runoff>0.</runoff>
+	<etsw>0.</etsw>
+	<pptsw>0.</pptsw>
+	<roughch>0.037</roughch>
+	<roughbk>0.</roughbk>
+	<cdepth>0.</cdepth>
+	<fdepth>0.</fdepth>
+	<awdth>0.</awdth>
+	<bwdth>0.</bwdth>
+	<thickm1>1.0</thickm1>
+	<thickm2>1.0</thickm2>
+	<Hc1fact>1.0</Hc1fact>
+	<Hc2fact>1.0</Hc2fact>
+</SFR_parameters>
 
 </SFR_input>
