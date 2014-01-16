@@ -14,9 +14,9 @@ if SFRdata.preproc:
 
 
 SFRops = SFRc.SFROperations(SFRdata)
-
+'''
 SFRops.intersect()
-
+'''
 FIDdata = SFRc.FIDPropsAll()
 
 FIDdata.populate(SFRdata)
@@ -40,8 +40,8 @@ COMIDdata.populate_routing(SFRdata, FIDdata, LevelPathdata)
 COMIDdata.return_hydrosequence_comid()
 
 LevelPathdata.return_cutoffs(FIDdata, CELLdata, SFRdata)
-SFRops.reach_ordering(COMIDdata, FIDdata)
+SFRops.reach_ordering(COMIDdata, FIDdata, LevelPathdata)
 
-LevelPathdata.return_cutoffs(FIDdata)
+
 
 i = 2

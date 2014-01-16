@@ -126,9 +126,13 @@ class LevelPathIDprops(object):
     """
     routing of LevelPathIDs
     """
-    __slots__ = ["down_levelpathID"]
+    __slots__ = ["down_levelpathID", "ordered_cellnums", "ordered_FIDs", "ordered_hydrosequence"]
     def __init__(self):
         self.down_levelpathID = None
+        self.ordered_hydrosequence = list()
+        self.ordered_cellnums = list()  # NB - this is unique even though duplicates may have existed due to meanders
+        self.ordered_FIDs = list()
+
 
 class LevelPathIDpropsAll:
     def __init__(self):
@@ -153,7 +157,7 @@ class LevelPathIDpropsAll:
         #if any of the levelpath list of FIDs is now empty, remove that levelpathID
         for lpID in self.level_ordered:
             if len(self.levelpath_fid[lpID]) == 0:
-                rmlist.append[lpID]
+                rmlist.append(lpID)
         newlist = [lpID for lpID in self.level_ordered if lpID not in rmlist]
         self.level_ordered = newlist
 
@@ -224,14 +228,14 @@ class COMIDPropsAll:
         del crow, cursor
         comidseen = list()
         with arcpy.da.SearchCursor(SFRdata.PlusflowVAA,
-                                   ("ComID", "Hydroseq", "uphydroseq", "dnhydroseq")) as cursor:
+                                   ("ComID", "Hydroseq", "uphydroseq", "dnhydroseq", "levelpathI")) as cursor:
             for crow in cursor:
                 comid = int(crow[0])
                 hydrosequence = int(crow[1])
                 uphydrosequence = int(crow[2])
                 downhydrosequence = int(crow[3])
 
-                levelpathid = int(crow[2])
+                levelpathid = int(crow[4])
                 if int(comid) in FIDdata.allcomids:
                     self.allcomids[crow[0]].hydrosequence = hydrosequence
                     self.allcomids[crow[0]].uphydrosequence = uphydrosequence
@@ -959,38 +963,55 @@ class SFROperations:
         del row
         del rows
 
-    def reach_ordering(self, COMIDdata, FIDdata):
+    def reach_ordering(self, COMIDdata, FIDdata, LevelPathdata):
         """
         crawl through the hydrosequence values and
         set a preliminary reach ordering file
         """
         indat = self.SFRdata
         SFRseq = 0
+        # write out the candidate routing information by hydrosequence ordered
         ofp = open(indat.RCH, 'w')
-        ofp.write('CELLNUM,COMID, hydroseq, uphydroseq, dnhydroseq, '
+        ofp.write('CELLNUM, COMID, hydroseq, uphydroseq, dnhydroseq, '
                   'levelpathID, dnlevelpath, SFRseq, localseq\n')
         for currhydroseq in COMIDdata.hydrosequence_sorted:
             ccomid = COMIDdata.hydrosequence_comids[currhydroseq]
             if ccomid not in FIDdata.noelev.keys():
+                # update the levelpathID hydrosequence data
+                LevelPathdata.allids[COMIDdata.allcomids[ccomid].levelpathID].ordered_hydrosequence.append(currhydroseq)
                 SFRseq += 1
                 localseq = 0
                 for cfid in FIDdata.COMID_orderedFID[ccomid]:
                     localseq += 1
-                    ofp.write('{0:d},{1:d},{2:d},{3:d},{4:d},{5:d},{6:d},{7:d}\n'.format(
+                    ofp.write('{0:d},{1:d},{2:d},{3:d},{4:d},{5:d},{6:d},{7:d},{8:d}\n'.format(
                     FIDdata.allfids[cfid].cellnum,
                     ccomid,
                     COMIDdata.allcomids[ccomid].hydrosequence,
                     COMIDdata.allcomids[ccomid].uphydrosequence,
                     COMIDdata.allcomids[ccomid].downhydrosequence,
                     COMIDdata.allcomids[ccomid].levelpathID,
+                    COMIDdata.allcomids[ccomid].down_levelpathID,
                     SFRseq,
                     localseq
-
-
                     ))
-
-
         ofp.close()
+
+        # calculate and list unique cellnums and fids in downstream order by levelpathID
+        for clevelpathid in LevelPathdata.level_ordered:
+            LevelPathdata.allids[clevelpathid].ordered_hydrosequence = \
+                list(set(LevelPathdata.allids[clevelpathid].ordered_hydrosequence)).sort(reverse=True)
+            for currhydroseq in LevelPathdata.allids[clevelpathid].ordered_hydrosequence:
+                ccomid = COMIDdata.hydrosequence_comids[currhydroseq]
+                if ccomid not in FIDdata.noelev.keys():
+                    for cfid in FIDdata.COMID_orderedFID[ccomid]:
+                        if FIDdata.allfids[cfid].cellnum not in LevelPathdata.allids[clevelpathid].ordered_cellnums:
+                            LevelPathdata.allids[clevelpathid].ordered_cellnums.append(
+                            FIDdata.allfids[cfid].cellnum
+                            )
+                        LevelPathdata.allids[clevelpathid].ordered_FIDs.append(cfid)
+
+
+        kkkk=1
 
 class Elevs_from_contours:
     def __init__(self,SFRdata,FIDdata):
