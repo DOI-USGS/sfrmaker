@@ -153,31 +153,33 @@ class LevelPathIDpropsAll:
         #if any of the levelpath list of FIDs is now empty, remove that levelpathID
         for lpID in self.level_ordered:
             if len(self.levelpath_fid[lpID]) == 0:
-                rmlist.append[lpID]
+                rmlist.append(lpID)
         newlist = [lpID for lpID in self.level_ordered if lpID not in rmlist]
         self.level_ordered = newlist
 
 
 class CellProps(object):
     """
-    class for cell objects - initially used to hold delx, dely for each cell
-    may be needed in future to hold neighboring cell numbers
+    class for cell objects
     """
-    __slots__ = ['delx', 'dely', 'sidelength']
+    __slots__ = ['delx', 'dely', 'sidelength', 'row', 'column']
 
-    def __init__(self, delx, dely, sidelength):
+    def __init__(self, delx, dely, sidelength, row, column):
         self.delx = delx
-        self.delx = dely
+        self.dely = dely
         self.sidelength = sidelength
+        self.row = row
+        self.column = column
 
 class CellPropsAll:
     def __init__(self):
         self.allcells = dict()
 
     def populate_cells(self, SFRdata):
-        #use the CELLS dataset to get the length of the cell sides, used
+        #use the CELLS shapefile to get the length of the cell sides, used
         #to weed out short river reaches.  If the length in the cell is
-        #less than sidelength * the input 'cutoff'
+        #less than sidelength * the input 'cutoff', also get row and column
+        #for each cellnumber
 
         cells = arcpy.SearchCursor(SFRdata.CELLS)
 
@@ -188,7 +190,9 @@ class CellPropsAll:
             minside = float(cell.delx)
             if float(cell.dely) < minside:
                 minside = float(cell.dely)
-            self.allcells[cellnum] = CellProps(dx, dy, minside)
+            row = int(cell.row)
+            column = int(cell.column)
+            self.allcells[cellnum] = CellProps(dx, dy, minside, row, column)
 
 
 class COMIDPropsAll:
