@@ -990,7 +990,7 @@ class SFROperations:
                     COMIDdata.allcomids[ccomid].uphydrosequence,
                     COMIDdata.allcomids[ccomid].downhydrosequence,
                     COMIDdata.allcomids[ccomid].levelpathID,
-                    COMIDdata.allcomids[ccomid].down_levelpathID,
+                    LevelPathdata.allids[COMIDdata.allcomids[ccomid].levelpathID].down_levelpathID,
                     SFRseq,
                     localseq
                     ))
@@ -998,8 +998,8 @@ class SFROperations:
 
         # calculate and list unique cellnums and fids in downstream order by levelpathID
         for clevelpathid in LevelPathdata.level_ordered:
-            LevelPathdata.allids[clevelpathid].ordered_hydrosequence = \
-                list(set(LevelPathdata.allids[clevelpathid].ordered_hydrosequence)).sort(reverse=True)
+   #         LevelPathdata.allids[clevelpathid].ordered_hydrosequence = \
+   #             list(set(LevelPathdata.allids[clevelpathid].ordered_hydrosequence)).sort(reverse=True)
             for currhydroseq in LevelPathdata.allids[clevelpathid].ordered_hydrosequence:
                 ccomid = COMIDdata.hydrosequence_comids[currhydroseq]
                 if ccomid not in FIDdata.noelev.keys():
