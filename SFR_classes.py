@@ -8,6 +8,7 @@ import SFR_arcpy
 import time
 import datetime
 import discomb_utilities as disutil #  utility to read in a dis file
+import math
 
 
 class SFRInput:
@@ -66,6 +67,15 @@ class SFRInput:
         except:
             self.cutoff = 0.0
 
+        #read the Fcode-Fstring table and save it into a dictionary, Fstring
+        descrips = arcpy.SearchCursor(self.FTab)
+        self.Fstring = dict()
+        for description in descrips:
+            Fcodevalue = int(description.FCode)
+            if not Fcodevalue in self.Fstring:
+                self.Fstring[Fcodevalue]=description.Descriptio
+        del descrips
+
         # initialize the arcpy environment
         arcpy.env.workspace = os.getcwd()
         arcpy.env.overwriteOutput = True
@@ -112,7 +122,9 @@ class COMIDprops(object):
     """
     routing information by COMIDs
     """
-    __slots__ = ['from_comid', 'to_comid', 'hydrosequence', 'uphydrosequence', 'downhydrosequence', 'levelpathID']
+    __slots__ = ['from_comid', 'to_comid', 'hydrosequence', 'uphydrosequence',
+                 'downhydrosequence', 'levelpathID','stream_order','arbolate_sum',
+                 'est_width','reachcode','Fcode']
 
     def __init__(self):
         self.from_comid = list()
@@ -121,6 +133,13 @@ class COMIDprops(object):
         self.uphydrosequence = None
         self.downhydrosequence = None
         self.levelpathID = None
+        self.stream_order = None
+        self.arbolate_sum = None
+        self.est_width = None
+        self.reachcode = None
+        self.Fcode = None
+
+
 
 class LevelPathIDprops(object):
     """
@@ -228,13 +247,17 @@ class COMIDPropsAll:
         del crow, cursor
         comidseen = list()
         with arcpy.da.SearchCursor(SFRdata.PlusflowVAA,
-                                   ("ComID", "Hydroseq", "uphydroseq", "dnhydroseq")) as cursor:
+                                   ("ComID", "Hydroseq", "uphydroseq", "dnhydroseq",
+                                   "ReachCode","StreamOrde","ArbolateSu","Fcode")) as cursor:
             for crow in cursor:
                 comid = int(crow[0])
                 hydrosequence = int(crow[1])
                 uphydrosequence = int(crow[2])
                 downhydrosequence = int(crow[3])
-
+                reachcode = crow[4]
+                stream_order = int(crow[5])
+                arbolate_sum = float(crow[6])
+                Fcode = int(crow[7])
                 levelpathid = int(crow[2])
                 if int(comid) in FIDdata.allcomids:
                     self.allcomids[crow[0]].hydrosequence = hydrosequence
@@ -242,6 +265,12 @@ class COMIDPropsAll:
                     self.allcomids[crow[0]].downhydrosequence = downhydrosequence
                     self.allcomids[crow[0]].levelpathID = levelpathid
                     LevelPathdata.level_ordered.append(levelpathid)
+                    self.allcomids[crow[0]].reachcode = reachcode
+                    self.allcomids[crow[0]].stream_order = stream_order
+                    self.allcomids[crow[0]].arbolate_sum = arbolate_sum
+                    self.allcomids[crow[0]].Fcode = Fcode
+                    #estimate the width
+                    self.allcomids[crow[0]].est_width = widthcorrelation(arbolate_sum)
                     comidseen.append(comid)
 
             # find unique levelpathIDs
@@ -399,6 +428,58 @@ class SFRReachesAll:
     def __init__(self):
         j = 1
 
+class SFRSegmentsAll:
+    """
+    class that makes up a dictionary of SFR objects
+    and contains methods to accumulate properties of the
+    same levelpathID within a call, find confluences, subdivide
+    levelpathIDs and establish the final SFR segments
+    """
+    def __init__(self):
+        allSegs = dict()
+
+    def accumulate_same_levelpathID(self, LevelPathdata):
+        """
+        method to add lengths and weight widths and slopes
+        for parts of a stream that have the same levelpathID
+        within a cell
+        """
+        self.totlength=defaultdict(dict)
+        self.weightwidth=defaultdict(dict)
+        self.elevcell=defaultdict(dict)
+        self.weightedslope=defaultdict(dict)
+        for lpID in LevelPathdata.level_ordered:
+            segment=SFRprovseg[lpID]
+            for localcell in SFRprovreachlist[lpID]:
+                tt=0.
+                ww=0.
+                ws=0.
+                el=0.
+                for entry in range(0,len(levelpathpair[lpID])):
+                    lpcell=levelpathpair[lpID][entry][0]
+                    lpcomid=levelpathpair[lpID][entry][1]
+                    knt=0
+                    if lpcell==localcell:
+                        knt=knt+1
+                        newkey=str(lpcell)+str(lpcomid)
+                        tt=tt+newreachlength[newkey]
+                        ww=ww+newestwidth[newkey]*newreachlength[newkey]
+                        el=el+newcellelev[newkey]
+                        ws=ws+newcellslope[newkey]*newreachlength[newkey]
+                if knt==0:
+                    totlength[lpID][localcell]=reachlength[localcell][0]
+                    elevcell[lpID][localcell]=riverelev[localcell][0]
+                    weightedslope[lpID][localcell]=cellslope[localcell][0]
+                    weightwidth[lpID][localcell]=estwidth[localcell][0]
+                else:
+                    totlength[lpID][localcell]=tt
+                    elevcell[lpID][localcell]=el/float(knt)
+                    if tt>0:
+                        weightwidth[lpID][localcell]=ww/tt
+                        weightedslope[lpID][localcell]=ws/tt
+                    else:
+                        weightwidth[lpID][localcell]=99999.
+                        weightedslope[lpID][localcell]=99999.
 
 class SFRpreproc:
     def __init__(self, SFRdata):
@@ -1076,7 +1157,13 @@ class Elevs_from_contours:
 
 
 
-
+def widthcorrelation(arbolate):
+    #estimate widths, equation from Feinstein and others (Lake
+    #Michigan Basin model) width=0.1193*(x^0.5032)
+    # x=arbolate sum of stream upstream of the COMID in meters
+    #NHDPlus has arbolate sum in kilometers.
+    #print a table with reachcode, order, estimated width, Fcode
+    estwidth = 0.1193*math.pow(1000*arbolate,0.5032)
 
 
 """
