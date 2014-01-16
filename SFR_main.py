@@ -16,14 +16,6 @@ if SFRdata.preproc:
 
 SFRops = SFRc.SFROperations(SFRdata)
 
-saveme ={'SFRdata':  SFRdata,
-              'SFRops': SFRops}
-
-SFRc.savetmp(saveme)
-
-a = SFRc.loadtmp(saveme)
-
-SFRdata = a['SFRdata']
 
 '''
 SFRops.intersect()
@@ -55,5 +47,12 @@ LevelPathdata.return_cutoffs(FIDdata, CELLdata, SFRdata)
 SFRops.reach_ordering(COMIDdata, FIDdata, LevelPathdata)
 
 '''
+saveme ={}
+
+SFRc.savetmp(saveme)
+
+a = SFRc.loadtmp(saveme)
+
+SFRdata = a['SFRdata']
 
 i = 2
