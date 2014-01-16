@@ -46,6 +46,7 @@ Notes on SFR input:
     <FTab>FCodes.dbf</FTab>
     <!-- ELEVcontours: from National Map -->
     <ELEVcontours>D:\ATLData\BadRiver\BCs\elevation_from_contours\contours_NAD27_wsp_ft.shp</ELEVcontours>
+    <RCH>stuff</RCH>
 </InputFiles>
 
 <IntermediateFiles>
@@ -76,7 +77,7 @@ Notes on SFR input:
     <GISSHP>SFRfinal_riv_cellinfo.shp</GISSHP> 
     <!-- MAT1 and MAT2:
         files for use with Groundwater Vistas -->
-    <MAT1>SFR_GWVmat1.txt</MAT1> 
+    <MAT1>D:\ATLData\BadRiver\BCs\SFR_v2\BR_GWVmat1.csv</MAT1> 
     <MAT2>SFR_GWVmat2.txt</MAT2> 
     <WIDTH>SFRwidthinfo.txt</WIDTH> 
     <MULT>Multiple_segments.txt</MULT>     

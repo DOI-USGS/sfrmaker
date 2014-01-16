@@ -23,7 +23,7 @@ class SFRInput:
         inpars = inpardat.getroot()
 
         self.compute_zonal = self.tf2flag(inpars.findall('.//compute_zonal')[0].text)
-        self.preproc = self.tf2flag(inpars.findall('.//preproc')[0].text)
+        #self.preproc = self.tf2flag(inpars.findall('.//preproc')[0].text)
         self.reach_cutoff = float(inpars.findall('.//reach_cutoff')[0].text)
         self.rfact = float(inpars.findall('.//rfact')[0].text)
         self.MFgrid = inpars.findall('.//MFgrid')[0].text
@@ -59,6 +59,12 @@ class SFRInput:
         except:
             self.eps = 1.0000001e-02  # default value used if not in the input file
 
+        # conversion for vertical length units between NHDPlus v2. (usually cm) and model
+        try:
+            self.z_conversion = float(inpars.findall('.//z_conversion')[0].text)
+        except:
+            self.z_conversion = 1.0/(2.54 *12)  # default value used if not in the input file
+
         #cutoff to check stream length in cell against fraction of cell dimension
         #if the stream length is less than cutoff*side length, the piece of stream is dropped
         try:
@@ -87,12 +93,12 @@ class FIDprops(object):
     """
     __slots__ = ['comid', 'startx', 'starty', 'endx', 'endy', 'FID',
                  'maxsmoothelev', 'minsmoothelev', 'lengthft',
-                 'cellnum', 'elev', 'sidelength'
+                 'cellnum', 'elev', 'sidelength',
                  'segelevinfo', 'start_has_end', 'end_has_start','elev_distance']
     #  using __slots__ makes it required to declare properties of the object here in place
     #  and saves significant memory
     def __init__(self, comid, startx, starty, endx, endy, FID,
-                 maxsmoothelev, minsmoothelev, lengthft, cellnum):
+                 maxsmoothelev, minsmoothelev, lengthft, cellnum,elev,segelevinfo,elev_distance):
         self.comid = comid
         self.startx = startx
         self.starty = starty
@@ -103,9 +109,9 @@ class FIDprops(object):
         self.minsmoothelev = minsmoothelev
         self.lengthft = lengthft
         self.cellnum = cellnum
-        self.elev = None
-        self.segelevinfo = None
-        self.elev_distance = None
+        self.elev = elev
+        self.segelevinfo = segelevinfo
+        self.elev_distance = elev_distance
 
 
 class COMIDprops(object):
@@ -304,10 +310,11 @@ class FIDPropsAll:
                 float(seg.X_end),
                 float(seg.Y_end),
                 int(seg.FID),
-                float(seg.MAXELEVSMO)*3.2808,  # UNIT CONVERSION
-                float(seg.MINELEVSMO)*3.2808,  # UNIT CONVERSION
+                float(seg.MAXELEVSMO)*SFRdata.z_conversion,  # UNIT CONVERSION
+                float(seg.MINELEVSMO)*SFRdata.z_conversion,  # UNIT CONVERSION
                 float(seg.LengthFt),
-                seg.node)
+                seg.node,
+                None,None,None)
 
             self.allcomids.append(int(seg.COMID))
         self.allcomids = list(set(self.allcomids))
@@ -921,14 +928,15 @@ class SFROperations:
 
 class Elevs_from_contours:
     def __init__(self,SFRdata,FIDdata):
-        self.contours_intersect_distances = SFRdata.Contours_intersect_distances
+        self.intersect_dist_table = SFRdata.Contours_intersect_distances
         self.FIDdata = FIDdata
 
     def assign_elevations_to_FID(self,COMIDdata):
 
         # loop through rows in contours intersect table
-        distances = arcpy.SearchCursor(self.contours_intersect_distances)
+        distances = arcpy.SearchCursor(self.intersect_dist_table)
         elevs_edited = []
+        print "getting elevations from elevation contour intersections..."
         for row in distances:
             comid = int(row.COMID)
             cellnum = int(row.node)
@@ -946,22 +954,28 @@ class Elevs_from_contours:
                 self.FIDdata.allfids[fid].elev = 0
 
         # update elevations by COMID
+        print "updating elevations in FID database..."
+        comids_with_no_contour_intersects = []
         for comid in self.FIDdata.COMID_orderedFID.keys():
+            print comid
             from_comid = COMIDdata.allcomids[comid].from_comid
             to_comid = COMIDdata.allcomids[comid].to_comid
 
             # within each COMID, iterate going upstream (reversed)
             start_elev,end_elev = None,None
+            start_reach = 0
+            end_reach = len(self.FIDdata.COMID_orderedFID[comid])
             dist = 0
             interp = False
 
-            def get_dist_slope(FIDdata,comid,start_elev,end_elev,dist,interp):
-
-                for fid in self.FIDdata.COMID_orderedFID[comid].reverse():
+            def get_dist_slope(comid,reachlist,end_elev,dist,interp,elevs_edited):
+                end_fid = None
+                for fid in reachlist:
 
                     # if the FID intersects a contour, record elevation and position
                     if not interp and fid in elevs_edited:
                         end_elev = self.FIDdata.allfids[fid].elev
+                        end_fid = fid
                         dist +=self.FIDdata.allfids[fid].elev_distance
                         interp = True
                         continue
@@ -974,23 +988,137 @@ class Elevs_from_contours:
                     # at upstream contour, record elevation and calculate slope
                     if interp and fid in elevs_edited:
                         start_elev = self.FIDdata.allfids[fid].elev
+                        start_fid = fid
                         dist += self.FIDdata.allfids[fid].lengthft - self.FIDdata.allfids[fid].elev_distance
                         slope = (start_elev - end_elev)/dist
                         interp = False
-                        return dist,slope,interp
+                        return slope,dist,start_fid,end_fid,end_elev,interp
 
                     else: #upstream contour not in current comid
+
+                        # headwaters
+                        if COMIDdata.allcomids[comid].from_comid[0] == 0:
+                            slope = 0
                         slope = None
-                        return dist,slope,interp
+                        start_fid = self.FIDdata.COMID_orderedFID[comid][0]
+                        return slope,dist,start_fid,end_fid,end_elev,interp
 
+            def interpolate_elevs(start_fid,end_fid,slope):
+                # interpolate max/min elevation values for each FID between start and end fids
 
-            dist,slope,end_elev,interp = get_dist_slope(self.FIDdata,comid,start_elev,end_elev,dist,interp)
+                # first setup indexing
+                comid = self.FIDdata.allfids[start_fid].comid
+                start_reach = np.where(self.FIDdata.COMID_orderedFID[comid] == start_fid)[0][0]
+                end_reach = np.where(self.FIDdata.COMID_orderedFID[comid] == end_fid)[0][0]
+
+                dist = self.FIDdata.allfids[end_fid].elev_distance
+                self.FIDdata.allfids[end_fid].maxsmoothelev = slope*dist + self.FIDdata.allfids[end_fid].elev
+
+                for fid in self.FIDdata.COMID_orderedFID[comid][start_reach:end_reach:-1]:
+                    dist += self.FIDdata.allfids[fid].lengthft
+                    self.FIDdata.allfids[fid].minsmoothelev = self.FIDdata.allfids[fid+1].maxsmoothelev
+                    self.FIDdata.allfids[fid].maxsmoothelev = dist*slope + self.FIDdata.allfids[fid].minsmoothelev
+                self.FIDdata.allfids[start_fid].minsmoothelev = self.FIDdata.allfids[start_fid+1].maxsmoothelev
+
+            def average_elevs(comid):
+                for fid in self.FIDdata.COMID_orderedFID[comid]:
+                    self.FIDdata.allfids[fid].segelevinfo = 0.5*self.FIDdata.allfids[fid].minsmoothelev + self.FIDdata.allfids[fid].maxsmoothelev
+                    print self.FIDdata.allfids[fid].segelevinfo
+
+            # going upstream in comid, find contour intersection and upstream slope
+
+            # first, if outlet, set ending elevation to NHD elevation (and upstream interpolation will start from there)
+            if COMIDdata.allcomids[comid].to_comid[0] == 0:
+                print "outlet!"
+                end_fid = self.FIDdata.COMID_orderedFID[comid][-1]
+                self.FIDdata.allfids[end_fid].elev == self.FIDdata.allfids[end_fid].minsmoothelev
+
+            # for each attempt, when first contour intersection is found, interp is set to True;
+            # when second contour intersection is found, interp is set to false and slope is returned
+            while not interp:
+                print "found upstream contour!"
+                reachlist = self.FIDdata.COMID_orderedFID[comid][start_reach:end_reach][::-1]
+                slope,dist,start_fid,end_fid,end_elev,interp = get_dist_slope(comid,reachlist,end_elev,dist,interp,elevs_edited)
+                if not interp:
+                    break
+                interpolate_elevs(self.FIDdata,start_fid,end_fid,slope)
+                # reset end fid to
+                end_fid = start_fid
 
             # if upstream contour not in current comid, go to from_comid
             if interp and slope == None:
+                print "next upstream contour not found in current comid"
+                slopes = []
+                # loop through comids in from_comid
+                for upcomid in from_comid:
+                    print "trying %s" %(upcomid)
+                    interp = True
+                    while interp:
+                        start_comid = comid
+                        comid = COMIDdata.allcomids[comid].from_comid
+                        reachlist = self.FIDdata.COMID_orderedFID[from_comid].reverse()
+                        slope,dist,start_fid,end_fid,end_elev,interp = get_dist_slope(comid,reachlist,end_elev,dist,interp,elevs_edited)
+                    # append slope to list of slopes
+                    slopes.append(slope)
+                start_fid = self.FIDdata.COMID_orderedFID[comid][0]
+                # base slope below confluence on average of all slopes for pairs of upstream/downstream contour intersections around confluence
+                slope = np.mean(slopes)
+                interpolate_elevs(self.FIDdata,start_fid,end_fid,slope)
+                # append first FID in comid downstream to elevs_edited, so that interpolation will stop here subsequently (avoids problems with multiple interpolations through confluence)
+                elevs_edited.append(start_fid)
+
+
+            # no contour intersected this comid; skip it for now
+            elif not interp and slope == None:
+                print "skipping %s, no contours found" %(comid)
+                comids_with_no_contour_intersects.append(comid)
+                continue
+
+            # now find slope in downstream portion of comid that isn't populated yet
+            # if outlet, all elevations have already been updated
+            if to_comid[0] == 0:
+                continue
+
+            # first get distance to end of comid
+            # first distance is length in end_fid minus position of contour intersection
+            dist = self.FIDdata.allfids[end_fid].lengthft - self.FIDdata.allfids[end_fid].elev_distance
+
+            # the append distances going towards downstream end of comid
+            for fid in range(self.FIDdata.COMID_orderedFID[comid][-1]+1)[end_fid:-1]:
+                dist += self.FIDdata.allfids[fid].lengthft
+
+            # starting with total distance to end of current comid; continue into to_comid
+            # end_elev should be preserved from above
+            try:
+                reachlist = self.FIDdata.COMID_orderedFID[to_comid[0]]
+                interp = True
+                slope,dist,start_fid,end_fid,end_elev,interp = get_dist_slope(to_comid,reachlist,end_elev,dist,interp,elevs_edited)
+
+            # if upstream contour not in current to_comid, go to next downstream to_comid
+            current_comid = comid
+            comid = to_comid
+            if slope == None:
                 while interp:
-                    upcomid = COMIDdata.allcomids[comid].from_comid
-                    dist,slope,end_elev,interp = get_dist_slope(self.FIDdata,upcomid,start_elev,end_elev,dist,interp)
+                    comid = COMIDdata.allcomids[comid].to_comid
+                    reachlist = self.FIDdata.COMID_orderedFID[to_comid]
+                    slope,dist,start_fid,end_fid,end_elev,interp = get_dist_slope(comid,reachlist,end_elev,dist,interp)
+
+            slope = slope *-1 # need to invert slope since we're going in opposite direction
+
+            # reset start and end FIDs to downstream portion of segment (only interpolating FIDs in current_comid)
+            start_fid = end_fid
+            end_fid = self.FIDdata.COMID_orderedFID[current_comid][-1]
+            interpolate_elevs(self.FIDdata,start_fid,end_fid,slope)
+
+            # finally, update all average elevation values for FIDs
+            average_elevs(current_comid)
+
+    def writeout_elevs(self):
+        indata = open(SFRdata.MAT1)
+        ofp = open('')
+
+
+
 
 
 
