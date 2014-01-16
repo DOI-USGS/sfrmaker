@@ -1017,23 +1017,29 @@ class Elevs_from_contours:
         # loop through rows in contours intersect table
         distances = arcpy.SearchCursor(self.intersect_dist_table)
         elevs_edited = []
+        in_between_contours = []
         print "getting elevations from elevation contour intersections..."
         for row in distances:
+            print row
             comid = int(row.COMID)
             cellnum = int(row.node)
 
             # loop through FIDdata: if comid and cellnum match, update elevation from contours intersect table
-            for fid in self.FIDdata.allfids.keys():
-                if self.FIDdata.allfids[fid].cellnum == cellnum and self.FIDdata.allfids[fid].comid == comid:
+            for fid in self.FIDdata.COMID_orderedFID[comid]:
+                if self.FIDdata.allfids[fid].cellnum == cellnum:
                     self.FIDdata.allfids[fid].contour_elev == float(row.ContourEle)
                     self.FIDdata.allfids[fid].elev_distance = float(row.fmp)
                     elevs_edited.append(fid)
-
-        # reset all elevations not updated from the contours to 0
+                # reset all elevations not updated from the contours to 0
+                elif fid not in in_between_contours:
+                    self.FIDdata.allfids[fid].contour_elev = 0
+                    in_between_contours.append(fid)
+        '''
+        # not sure if this way would be faster or slower
         for fid in self.FIDdata.allfids.keys():
             if fid not in elevs_edited:
                 self.FIDdata.allfids[fid].contour_elev = 0
-
+        '''
         # update elevations by COMID
         print "updating elevations in FID database..."
         comids_with_no_contour_intersects = []
@@ -1142,8 +1148,8 @@ class Elevs_from_contours:
                     # append slope to list of slopes
                     slopes.append(slope)
                 start_fid = self.FIDdata.COMID_orderedFID[comid][0]
-                # base slope below confluence on average of all slopes for pairs of upstream/downstream contour intersections around confluence
-                slope = np.mean(slopes)
+                # slope below confluence is minimum of all slopes for pairs of upstream/downstream contour intersections around confluence
+                slope = np.min(slopes)
                 interpolate_elevs(self.FIDdata,start_fid,end_fid,slope)
                 # append first FID in comid downstream to elevs_edited, so that interpolation will stop here subsequently (avoids problems with multiple interpolations through confluence)
                 elevs_edited.append(start_fid)
@@ -1192,11 +1198,6 @@ class Elevs_from_contours:
 
             # finally, update all average elevation values for FIDs
             average_elevs(current_comid)
-
-    '''
-    def writeout_elevs(self,SFRdata):
-        #Mat1data = np.genfromtxt(SFRdata.MAT1,delimiter=',',names=True,dtype=None)
-    '''
 
 
 
