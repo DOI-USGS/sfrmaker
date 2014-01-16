@@ -1198,26 +1198,7 @@ class Elevs_from_contours:
         #Mat1data = np.genfromtxt(SFRdata.MAT1,delimiter=',',names=True,dtype=None)
     '''
 
-class plot_segments:
-    def __init__(self):
-        pass
-    def get_segment_plotting_info(self,COMIDdata,FIDdata):
-        segs2plot = sorted(COMIDdata.allcomids.keys())[:,:,50]
-        seg_dist_dict = dict(list)
-        seg_elev_dict = dict(list)
-        for seg in segs2plot:
-            distances=[]
-            elevs=[]
-            dist=0
-            for fid in FIDdata.COMID_orderedFID[seg]:
-                dist+=FIDdata.allfids[fid].lengthft
-                distances.append(dist)
-                elevs.append(FIDdata.allfids[fid].elev_mean)
-            seg_dist_dict[seg]=distances
 
-
-        profiles=[seg_elev_dict]
-        profile_names = ['elevations interpolated from topographic contours']
 
 
 
