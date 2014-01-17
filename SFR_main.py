@@ -17,15 +17,15 @@ SFRops = SFRc.SFROperations(SFRdata)
 
 SFRops.intersect()
 
-FIDdata = SFRc.FIDPropsAll()
+FragIDdata = SFRc.FragIDPropsAll()
 
-FIDdata.populate(SFRdata)
+FragIDdata.populate(SFRdata)
 
-FIDdata.return_fid_comid_list()
+FragIDdata.return_FragID_comid_list()
 
-SFRops.make_rivers_table(FIDdata)
+SFRops.make_rivers_table(FragIDdata)
 
-FIDdata.populate_elevations(SFRdata)
+FragIDdata.populate_elevations(SFRdata)
 
 COMIDdata = SFRc.COMIDPropsAll()
 
@@ -35,27 +35,27 @@ CELLdata.populate_cells(SFRdata)
 
 LevelPathdata = SFRc.LevelPathIDpropsAll()
 
-COMIDdata.populate_routing(SFRdata, FIDdata, LevelPathdata)
+COMIDdata.populate_routing(SFRdata, FragIDdata, LevelPathdata)
 
 COMIDdata.return_hydrosequence_comid()
 
-LevelPathdata.return_cutoffs(FIDdata, CELLdata, SFRdata)
+LevelPathdata.return_cutoffs(FragIDdata, CELLdata, SFRdata)
 
-SFRops.reach_ordering(COMIDdata, FIDdata, LevelPathdata)
+SFRops.reach_ordering(COMIDdata, FragIDdata, LevelPathdata)
 
 '''
 saveme ={'COMIDdata' : COMIDdata,
-         'FIDdata' : FIDdata,
+         'FragIDdata' : FragIDdata,
          'LevelPathdata' : LevelPathdata}
 SFRc.savetmp(saveme)
 
-loadme = ['COMIDdata', 'FIDdata', 'LevelPathdata']
+loadme = ['COMIDdata', 'FragIDdata', 'LevelPathdata']
 
 instuff = SFRc.loadtmp(loadme)
 
 
 SFRops.reach_ordering(instuff['COMIDdata'],
-                      instuff['FIDdata'],
+                      instuff['FragIDdata'],
                       instuff['LevelPathdata'])
 
 '''

@@ -122,12 +122,12 @@ class SFRInput:
             return False
 
 
-class FIDprops(object):
+class FragIDprops(object):
     """
     Properties for each COMID
     """
     '''
-    __slots__ = ['comid', 'startx', 'starty', 'endx', 'endy', 'FID',
+    __slots__ = ['comid', 'startx', 'starty', 'endx', 'endy', 'FragID',
                  'maxsmoothelev', 'minsmoothelev', 'lengthft',
                  'cellnum', 'contour_elev','elev', 'sidelength',
                  'segelevinfo', 'start_has_end', 'end_has_start', 'elev_distance', 'segelevinfo',
@@ -135,14 +135,14 @@ class FIDprops(object):
     '''
     #  using __slots__ makes it required to declare properties of the object here in place
     #  and saves significant memory
-    def __init__(self, comid, startx, starty, endx, endy, FID,
+    def __init__(self, comid, startx, starty, endx, endy, FragID,
                  maxsmoothelev, minsmoothelev, lengthft, cellnum,contour_elev,segelevinfo,elev_min,elev_max,elev_mean,elev_distance):
         self.comid = comid
         self.startx = startx
         self.starty = starty
         self.endx = endx
         self.endy = endy
-        self.FID = FID
+        self.FragID = FragID
         self.maxsmoothelev = maxsmoothelev
         self.minsmoothelev = minsmoothelev
         self.lengthft = lengthft
@@ -184,38 +184,38 @@ class LevelPathIDprops(object):
     routing of LevelPathIDs
     """
     '''
-    __slots__ = ["down_levelpathID", "ordered_cellnums", "ordered_FIDs", "ordered_hydrosequence"]
+    __slots__ = ["down_levelpathID", "ordered_cellnums", "ordered_FragIDs", "ordered_hydrosequence"]
     '''
     def __init__(self):
         self.down_levelpathID = None
         self.ordered_hydrosequence = list()
         self.ordered_cellnums = list()  # NB - this is unique even though duplicates may have existed due to meanders
-        self.ordered_FIDs = list()
+        self.ordered_FragIDs = list()
 
 
 class LevelPathIDpropsAll:
     def __init__(self):
         self.allids = dict()
         self.level_ordered = list()
-        self.levelpath_fid = dict()
+        self.levelpath_FragID = dict()
 
-    def return_cutoffs(self, FIDdata, CELLdata, SFRdata):
+    def return_cutoffs(self, FragIDdata, CELLdata, SFRdata):
         for lpID in self.level_ordered:
             #check to see if individual reachlengths are less than cutoff
             #prescibed by sidelength*cutoff
             rmlist=[]
-            for fid in self.levelpath_fid[lpID]:
-                reachlength=FIDdata.allfids[fid].lengthft
-                cellnum = FIDdata.allfids[fid].cellnum
+            for FragID in self.levelpath_FragID[lpID]:
+                reachlength=FragIDdata.allFragIDs[FragID].lengthft
+                cellnum = FragIDdata.allFragIDs[FragID].cellnum
                 if reachlength < CELLdata.allcells[cellnum].sidelength*SFRdata.cutoff:
-                    rmlist.append(fid)
-            #if any were too short remove from levelpath list of FIDs
-            newlist = [fid for fid in self.levelpath_fid[lpID] if fid not in rmlist]
-            self.levelpath_fid[lpID] = newlist
+                    rmlist.append(FragID)
+            #if any were too short remove from levelpath list of FragIDs
+            newlist = [FragID for FragID in self.levelpath_FragID[lpID] if FragID not in rmlist]
+            self.levelpath_FragID[lpID] = newlist
         rmlist = []
-        #if any of the levelpath list of FIDs is now empty, remove that levelpathID
+        #if any of the levelpath list of FragIDs is now empty, remove that levelpathID
         for lpID in self.level_ordered:
-            if len(self.levelpath_fid[lpID]) == 0:
+            if len(self.levelpath_FragID[lpID]) == 0:
                 rmlist.append(lpID)
         newlist = [lpID for lpID in self.level_ordered if lpID not in rmlist]
         self.level_ordered = newlist
@@ -265,7 +265,7 @@ class COMIDPropsAll:
         self.hydrosequence_sorted = list()
         self.hydrosequence_comids = dict()
 
-    def populate_routing(self, SFRdata, FIDdata, LevelPathdata):
+    def populate_routing(self, SFRdata, FragIDdata, LevelPathdata):
         """
         Read the COMID routing information from the SFRdata.FLOW file
         """
@@ -274,17 +274,17 @@ class COMIDPropsAll:
 
         CLIP = np.loadtxt('boundaryClipsRouting.txt', skiprows=1, delimiter=',', dtype=int)
 
-        for ccomid in FIDdata.allcomids:
+        for ccomid in FragIDdata.allcomids:
             self.allcomids[ccomid] = COMIDprops()
 
         with arcpy.da.SearchCursor(SFRdata.FLOW, ("FROMCOMID", "TOCOMID")) as cursor:
             for crow in cursor:
-                if int(crow[0]) in FIDdata.allcomids:
+                if int(crow[0]) in FragIDdata.allcomids:
                     if (crow[0]) in CLIP[:, 0]:
                         self.allcomids[crow[0]].to_comid.append(999999)
                     else:
                         self.allcomids[crow[0]].to_comid.append(int(crow[1]))
-                if int(crow[1]) in FIDdata.allcomids:
+                if int(crow[1]) in FragIDdata.allcomids:
                     if crow[1] in CLIP[:, 1]:
                         self.allcomids[crow[1]].from_comid.append(999999)
                     else:
@@ -304,7 +304,7 @@ class COMIDPropsAll:
                 arbolate_sum = float(crow[6])
                 Fcode = int(crow[7])
                 levelpathid = int(crow[8])
-                if int(comid) in FIDdata.allcomids:
+                if int(comid) in FragIDdata.allcomids:
                     self.allcomids[crow[0]].hydrosequence = hydrosequence
                     self.allcomids[crow[0]].uphydrosequence = uphydrosequence
                     self.allcomids[crow[0]].downhydrosequence = downhydrosequence
@@ -323,7 +323,7 @@ class COMIDPropsAll:
 
             for clevelpathid in LevelPathdata.level_ordered:
                 LevelPathdata.allids[clevelpathid] = LevelPathIDprops()
-                LevelPathdata.levelpath_fid[clevelpathid] = []
+                LevelPathdata.levelpath_FragID[clevelpathid] = []
 
 
             # assign levelpathID routing
@@ -338,11 +338,11 @@ class COMIDPropsAll:
                 if levelpathid in LevelPathdata.level_ordered:
                     if downlevelpathid != levelpathid:
                         LevelPathdata.allids[levelpathid].down_levelpathID = downlevelpathid
-                    if comid in FIDdata.comid_fid:
-                        LevelPathdata.levelpath_fid[levelpathid].extend(FIDdata.comid_fid[comid])
+                    if comid in FragIDdata.comid_FragID:
+                        LevelPathdata.levelpath_FragID[levelpathid].extend(FragIDdata.comid_FragID[comid])
 
 
-        comid_missing = list(set(FIDdata.allcomids).difference(comidseen))
+        comid_missing = list(set(FragIDdata.allcomids).difference(comidseen))
         if len(comid_missing) > 0:
             print "WARNING! the following COMIDs are missing from \n{0:s}".format('\n'.join(map(str(comid_missing))))
 
@@ -381,39 +381,39 @@ class COMIDPropsForIntersect:
             self.newmaxel = round(clmaxel - self.slope * clippedlength / lenkm)
 
 
-class FIDPropsAll:
+class FragIDPropsAll:
     def __init__(self):
-        self.allfids = dict()
+        self.allFragIDs = dict()
         self.allcomids = list()  # comprehensive list of all comids
         self.unique_cells = list()  # list of unique cellnum values in the grid/streams intersection
         self.maxelev = None
         self.minelev = None
         self.noelev = dict()
-        self.COMID_orderedFID = dict()
-        self.comid_fid = None
+        self.COMID_orderedFragID = dict()
+        self.comid_FragID = None
 
-    def return_fid_comid_list(self):
+    def return_FragID_comid_list(self):
         """
-        Return a dict of lists of comids linked with each FID
+        Return a dict of lists of comids linked with each FragID
         """
-        self.comid_fid = {ccomid: [] for ccomid in self.allcomids}
-        allfids = self.allfids.keys()
-        for cfid in allfids:
-            self.comid_fid[self.allfids[cfid].comid].append(cfid)
+        self.comid_FragID = {ccomid: [] for ccomid in self.allcomids}
+        allFragIDs = self.allFragIDs.keys()
+        for cFragID in allFragIDs:
+            self.comid_FragID[self.allFragIDs[cFragID].comid].append(cFragID)
 
     def return_smoothelev_comid(self, comid):
         self.maxelev = -np.inf
         self.minelev = np.inf
-        fids = self.comid_fid[comid]
-        for cid in fids:
-            if self.allfids[cid].maxsmoothelev > self.maxelev:
-                self.maxelev = self.allfids[cid].maxsmoothelev
-            if self.allfids[cid].minsmoothelev < self.minelev:
-                self.minelev = self.allfids[cid].minsmoothelev
+        FragIDs = self.comid_FragID[comid]
+        for cid in FragIDs:
+            if self.allFragIDs[cid].maxsmoothelev > self.maxelev:
+                self.maxelev = self.allFragIDs[cid].maxsmoothelev
+            if self.allFragIDs[cid].minsmoothelev < self.minelev:
+                self.minelev = self.allFragIDs[cid].minsmoothelev
 
     def return_unique_cells(self):
-        for cid in self.allfids.keys():
-            self.unique_cells.append(self.allfids[cid].cellnum)
+        for cid in self.allFragIDs.keys():
+            self.unique_cells.append(self.allFragIDs[cid].cellnum)
         self.unique_cells = set(self.unique_cells)
 
     def populate(self, SFRdata):
@@ -423,18 +423,18 @@ class FIDPropsAll:
         segments = arcpy.SearchCursor(SFRdata.intersect)
 
         for seg in segments:
-            fid = int(seg.FID)
-            self.allfids[fid] = FIDprops(
+            FragID = int(seg.FragID)
+            self.allFragIDs[FragID] = FragIDprops(
                 int(seg.COMID),
                 float(seg.X_start),
                 float(seg.Y_start),
                 float(seg.X_end),
                 float(seg.Y_end),
-                int(seg.FID),
+                int(seg.FragID),
                 float(seg.MAXELEVSMO)*SFRdata.z_conversion,  # UNIT CONVERSION
                 float(seg.MINELEVSMO)*SFRdata.z_conversion,  # UNIT CONVERSION
                 float(seg.LengthFt),
-                seg.node,
+                seg.cellnum,
                 None,None,None,None,None,None)
 
             self.allcomids.append(int(seg.COMID))
@@ -450,11 +450,11 @@ class FIDPropsAll:
 
 
         arcpy.MakeFeatureLayer_management(SFRdata.intersect, "grid_temp")
-        SFR_arcpy.general_join(SFRdata.ELEV, "grid_temp", "FID", SFRdata.rivers_table, "OLDFID", keep_common=False)
+        SFR_arcpy.general_join(SFRdata.ELEV, "grid_temp", "FragID", SFRdata.rivers_table, "OLDFragID", keep_common=False)
 
-        with arcpy.da.SearchCursor(SFRdata.ELEV, ("FID", "ELEVAVE")) as cursor:
+        with arcpy.da.SearchCursor(SFRdata.ELEV, ("FragID", "ELEVAVE")) as cursor:
             for crow in cursor:
-                self.allfids[int(crow[0])].elev = float(crow[1])
+                self.allFragIDs[int(crow[0])].elev = float(crow[1])
 
 
 class SFRReachProps(object):
@@ -504,7 +504,7 @@ class SFRSegmentsAll:
     def __init__(self):
         allSegs = dict()
 
-    def accumulate_same_levelpathID(self, LevelPathdata, COMIDdata, FIDdata):
+    def accumulate_same_levelpathID(self, LevelPathdata, COMIDdata, FragIDdata):
         """
         method to add lengths and weight widths and slopes
         for parts of a stream that have the same levelpathID
@@ -521,28 +521,28 @@ class SFRSegmentsAll:
                 ww=0.
                 ws=0.
                 el=0.
-                for cfid in xxxxxx:
+                for cFragID in xxxxxx:
                     knt=0
                     if lpcell==localcell:
                         knt=knt+1
-                        tt = tt + FIDdata.allfids[cfid].lengthft
-                        ww = ww + COMIDdata[ccomid].est_width* FIDdata.allfids[cfid].lengthft
+                        tt = tt + FragIDdata.allFragIDs[cFragID].lengthft
+                        ww = ww + COMIDdata[ccomid].est_width* FragIDdata.allFragIDs[cFragID].lengthft
                        # el = el +
                        # ws = ws +
                 if knt==0:
-                    totlength[cfid] = FIDdata.allfids[cfid].lengthft
+                    totlength[cFragID] = FragIDdata.allFragIDs[cFragID].lengthft
                     #elevcell[lpID][localcell] = riverelev[localcell][0]
                     #weightedslope[lpID][localcell] = cellslope[localcell][0]
-                    weightwidth[cfid]= COMIDdata[ccomid].est_width
+                    weightwidth[cFragID]= COMIDdata[ccomid].est_width
                 else:
-                    totlength[cfid] = tt
-                    #elevcell[cfid]=el/float(knt)
+                    totlength[cFragID] = tt
+                    #elevcell[cFragID]=el/float(knt)
                     if tt>0:
-                        weightwidth[cfid] = ww/tt
-                        #weightedslope[cfid] = ws/tt
+                        weightwidth[cFragID] = ww/tt
+                        #weightedslope[cFragID] = ws/tt
                     else:
-                        weightwidth[cfid] = 99999.
-                        #weightedslope[cfid] = 99999.
+                        weightwidth[cFragID] = 99999.
+                        #weightedslope[cFragID] = 99999.
 
 class SFRpreproc:
     def __init__(self, SFRdata):
@@ -677,47 +677,38 @@ class SFRpreproc:
         # if there is a field with unique values, assume it's ok
         # otherwise delete the column if it already exists
         # NB --> only evaluating the first 100 rows...
-        print 'verifying that there is a "node" field in {0:s}'.format(indat.MFgrid)
-        hasnode = False
-        nodeunique = 0
+        print 'verifying that there is a "cellnum" field in {0:s}'.format(indat.MFgrid)
+        hascellnum = False
+        cellnumunique = 0
         MFgridflds = arcpy.ListFields(indat.MFgrid)
         for cfield in MFgridflds:
-            if cfield.name.lower() == 'node':
-                hasnode = True
-        if hasnode:
-            # now check to see that there are unique values in node
+            if cfield.name.lower() == 'cellnum':
+                hascellnum = True
+        if hascellnum:
+            # now check to see that there are unique values in cell
             cursor = arcpy.SearchCursor(indat.MFgrid)
-            nodevals = []
+            cellvals = []
             crows = 0
             for row in cursor:
                 if crows > 100:
                     break
                 else:
                     crows += 1
-                    nodevals.append(row.getValue('node'))
-            nodeunique = len(set(nodevals))
-            del nodevals
-            del row
-            del cursor
-        else:
-            arcpy.AddField_management(indat.MFgrid, 'node', 'LONG')
-
-        if nodeunique > 1:
-            print '"node" field in place with unique values in {0:s}'.format(indat.MFgrid)
-        else:
-            arcpy.DeleteField_management(indat.MFgrid, 'node')
-            arcpy.AddField_management(indat.MFgrid, 'node', 'LONG')
-            print 'Updating "node" field in {0:s}'.format(indat.MFgrid)
-            # now loop through and set "node" which is equivalent to "cellnum"
-            cursor = arcpy.UpdateCursor(indat.MFgrid)
-            for row in cursor:
-                crow = row.getValue('row')
-                ccol = row.getValue('column')
-                row.setValue('node', ((int(crow)-1) * NCOL) + int(ccol))
-                cursor.updateRow(row)
+                    cellvals.append(row.getValue('cellnum'))
+            cellnumunique = len(set(cellvals))
+            del cellvals
             del row
             del cursor
 
+        if cellnumunique > 1:
+            print '"cellnum" field in place with unique values in {0:s}'.format(indat.MFgrid)
+        else:
+            if arcpy.Exists(indat.MFgrid, 'cellnum'):
+                arcpy.DeleteField_management(indat.MFgrid, 'cellnum')
+            arcpy.AddField_management(indat.MFgrid, 'cellnum', 'LONG')
+            calcexpression = '((!row!-1)*{0:d}) + !column!'.format(NCOL)
+            arcpy.CalculateField_management(indat.MFgrid, 'cellnum', calcexpression, 'PYTHON')
+            print 'updated "cellnum" field in {0:s}'.format(indat.MFgrid)
 
 
 
@@ -734,12 +725,12 @@ class SFRpreproc:
                                    "KEEP_COMMON")
 
         # add in cellnum field for backwards compatibility
-        arcpy.AddField_management(indat.CELLS, "CELLNUM", "LONG")
-        arcpy.CalculateField_management(indat.CELLS, "CELLNUM", "!node!", "PYTHON")
+ #       arcpy.AddField_management(indat.CELLS, "CELLNUM", "LONG")
+ #       arcpy.CalculateField_management(indat.CELLS, "CELLNUM", "!node!", "PYTHON")
 
         print "Dissolving river cells on cell number to isolate unique cells...\n"
-        self.getfield(indat.CELLS, "node", "node")
-        arcpy.Dissolve_management(indat.CELLS, indat.CELLS_DISS, self.joinnames['node'])
+        self.getfield(indat.CELLS, "cellnum", "cellnum")
+        arcpy.Dissolve_management(indat.CELLS, indat.CELLS_DISS, self.joinnames['cellnum'])
 
         print "Exploding NHD segments to grid cells using Intersect and Multipart to Singlepart..."
         arcpy.Intersect_analysis([indat.CELLS_DISS, "Flowlines"], "tmp_intersect.shp")
@@ -770,18 +761,18 @@ class SFRpreproc:
         self.ofp.write('\n' + 25*'#' + '\nRemoving reaches with lengths less than or equal to %s...\n' % indat.reach_cutoff)
         print "\nRemoving reaches with lengths less than or equal to %s..." % indat.reach_cutoff
         self.getfield(indat.intersect, "comid", "comid")
-        self.getfield(indat.intersect, "node", "node")
+        self.getfield(indat.intersect, "cellnum", "cellnum")
         self.getfield(indat.intersect, "lengthft", "Length")
         table = arcpy.UpdateCursor(indat.intersect)
         count = 0
         for reaches in table:
             if reaches.getValue(self.joinnames["Length"]) <= indat.reach_cutoff:
                 print "segment: %d, cell: %s, length: %s" % (reaches.getValue(self.joinnames["comid"]),
-                                                            reaches.getValue(self.joinnames["node"]),
+                                                            reaches.getValue(self.joinnames["cellnum"]),
                                                             reaches.getValue(self.joinnames["Length"]))
                 self.ofp.write("segment: %d, cell: %s, length: %s\n"
-                          % (reaches.getValue(self.joinnames["comid"]),
-                            reaches.getValue(self.joinnames["node"]),
+                          %(reaches.getValue(self.joinnames["comid"]),
+                            reaches.getValue(self.joinnames["cellnum"]),
                             reaches.getValue(self.joinnames["Length"])))
                 table.deleteRow(reaches)
                 count += 1
@@ -793,29 +784,33 @@ class SFRpreproc:
         arcpy.MakeFeatureLayer_management(indat.CELLS_DISS, "river_cells_dissolve")
         arcpy.MakeFeatureLayer_management(indat.intersect, "river_explode")
         arcpy.AddJoin_management("river_cells_dissolve",
-                                 "node",
+                                 "cellnum",
                                  "river_explode",
-                                 "node",
+                                 "cellnum",
                                  "KEEP_ALL")  # this might not work as-in in stand-alone mode
-        self.getfield("river_cells_dissolve", "node", "node")
+        self.getfield("river_cells_dissolve", "cellnum", "cellnum")
         self.getfield("river_cells_dissolve", "maxelevsmo", "maxelevsmo")
         table = arcpy.SearchCursor("river_cells_dissolve")
         nodes2delete = []
         for row in table:
             if row.isNull(self.joinnames["maxelevsmo"]):
-                nodes2delete.append(row.getValue(self.joinnames["node"]))
+                nodes2delete.append(row.getValue(self.joinnames["cellnum"]))
         arcpy.RemoveJoin_management("river_cells_dissolve", "river_explode")
 
-        # remove nodes with no elevation information from river_explode
+        # preserve the FragID code as FragID for all future reference
+        arcpy.AddField_management(indat.intersect, "FragID", "LONG")
+        arcpy.CalculateField_management(indat.intersect, "FragID", "!FID!", "PYTHON")
+
+        # remove cellnums with no elevation information from river_explode
         self.ofp.write('\n' + 25*'#' + '\nRemoving nodes with no elevation information from river_explode\n')
         print 'Removing nodes with no elevation information from river_explode'
-        self.getfield(indat.CELLS_DISS, "node", "node")
+        self.getfield(indat.CELLS_DISS, "cellnum", "cellnum")
         table = arcpy.UpdateCursor(indat.CELLS_DISS)
         count = 0
         for cells in table:
-            if cells.getValue(self.joinnames["node"]) in nodes2delete:
-                print "%d" % (cells.getValue(self.joinnames["node"]))
-                self.ofp.write('%d\n' % (cells.getValue(self.joinnames["node"])))
+            if cells.getValue(self.joinnames["cellnum"]) in nodes2delete:
+                print "%d" % (cells.getValue(self.joinnames["cellnum"]))
+                self.ofp.write('%d\n' % (cells.getValue(self.joinnames["cellnum"])))
                 table.deleteRow(cells)
                 count += 1
         print "removed %s cells\n" % (count)
@@ -823,13 +818,13 @@ class SFRpreproc:
 
         print "removing any remaining disconnected reaches..."
         self.ofp.write('\n' + 25*'#' + '\nremoving any remaining disconnected reaches...\n')
-        self.getfield(indat.intersect, "node", "node")
+        self.getfield(indat.intersect, "cellnum", "cellnum")
         table = arcpy.UpdateCursor(indat.intersect)
         count = 0
         for reaches in table:
-            if reaches.getValue(self.joinnames["node"]) in nodes2delete:
-                print "%d" % (reaches.getValue(self.joinnames["node"]))
-                self.ofp.write('%d\n' % (reaches.getValue(self.joinnames["node"])))
+            if reaches.getValue(self.joinnames["cellnum"]) in nodes2delete:
+                print "%d" % (reaches.getValue(self.joinnames["cellnum"]))
+                self.ofp.write('%d\n' % (reaches.getValue(self.joinnames["cellnum"])))
                 table.deleteRow(reaches)
                 count += 1
         if count > 0:
@@ -1000,7 +995,7 @@ class SFROperations:
             print 'Some manual intervention required:\n' \
                   'See boundary_manual_fix_issues.txt for details'
 
-    def make_rivers_table(self, FIDdata):
+    def make_rivers_table(self, FragIDdata):
         """
         from assign_and_route -->
         """
@@ -1008,7 +1003,7 @@ class SFROperations:
         if arcpy.Exists(self.SFRdata.rivers_table):
             arcpy.Delete_management(self.SFRdata.rivers_table)
         arcpy.CreateTable_management(os.getcwd(), self.SFRdata.rivers_table)
-        arcpy.AddField_management(self.SFRdata.rivers_table, "OLDFID", "LONG")
+        arcpy.AddField_management(self.SFRdata.rivers_table, "OLDFragID", "LONG")
         arcpy.AddField_management(self.SFRdata.rivers_table, "CELLNUM", "LONG")
         arcpy.AddField_management(self.SFRdata.rivers_table, "ELEVMAX", "DOUBLE")
         arcpy.AddField_management(self.SFRdata.rivers_table, "ELEVAVE", "DOUBLE")
@@ -1017,21 +1012,21 @@ class SFROperations:
         rows = arcpy.InsertCursor(self.SFRdata.rivers_table)
         fix_comids_summary = []
         fixcomids_flag = False
-        for comid in FIDdata.allcomids:
+        for comid in FragIDdata.allcomids:
             segcounter += 1
-            fidlist = FIDdata.comid_fid[comid]
+            FragIDlist = FragIDdata.comid_FragID[comid]
             start_has_end = dict()
             end_has_start = dict()
 
-            for i in fidlist:
+            for i in FragIDlist:
                 haveend = False
                 havestart = False
-                for j in fidlist:
+                for j in FragIDlist:
                     if j != i:
-                        diffstartx = FIDdata.allfids[i].startx - FIDdata.allfids[j].endx
-                        diffstarty = FIDdata.allfids[i].starty - FIDdata.allfids[j].endy
-                        diffendx = FIDdata.allfids[i].endx - FIDdata.allfids[j].startx
-                        diffendy = FIDdata.allfids[i].endy - FIDdata.allfids[j].starty
+                        diffstartx = FragIDdata.allFragIDs[i].startx - FragIDdata.allFragIDs[j].endx
+                        diffstarty = FragIDdata.allFragIDs[i].starty - FragIDdata.allFragIDs[j].endy
+                        diffendx = FragIDdata.allFragIDs[i].endx - FragIDdata.allFragIDs[j].startx
+                        diffendy = FragIDdata.allFragIDs[i].endy - FragIDdata.allFragIDs[j].starty
                         if np.fabs(diffstartx) < self.SFRdata.rfact and np.fabs(diffstarty) < self.SFRdata.rfact:
                             start_has_end[i] = j
                             haveend = True
@@ -1045,14 +1040,14 @@ class SFROperations:
             #key in end_has_start that didn't match a start
             numstart = 0
             numend = 0
-            startingFID = []
-            endingFID = []
-            for test in fidlist:
+            startingFragID = []
+            endingFragID = []
+            for test in FragIDlist:
                 if test not in start_has_end:
-                    startingFID.append(test)
+                    startingFragID.append(test)
                     numstart += 1
                 if test not in end_has_start:
-                    endingFID.append(test)
+                    endingFragID.append(test)
                     numend += 1
             if numstart != 1 or numend != 1:
                 if not fixcomids_flag:
@@ -1060,38 +1055,38 @@ class SFROperations:
                     fixcomids_flag = True
                 outfile.write("numstart =" + str(numstart) + " \n")
                 outfile.write("numend = " + str(numend) + " \n")
-                outfile.write("starting FIDs: " + ",".join(map(str, startingFID)) + "\n")
-                outfile.write("ending FIDs: " + ",".join(map(str, endingFID)) + "\n")
+                outfile.write("starting FragIDs: " + ",".join(map(str, startingFragID)) + "\n")
+                outfile.write("ending FragIDs: " + ",".join(map(str, endingFragID)) + "\n")
                 outfile.write("manually fix COMID = %d\n" %comid)
                 fix_comids_summary.append('%d\n' %comid)
-                FIDdata.noelev[comid] = 1  #set flag
+                FragIDdata.noelev[comid] = 1  #set flag
                 continue
-            orderedFID = []
-            orderedFID.append(startingFID[0])
+            orderedFragID = []
+            orderedFragID.append(startingFragID[0])
             for i in range(1, len(end_has_start)):
-                orderedFID.append(end_has_start[orderedFID[i-1]])
-            if orderedFID[-1] != endingFID[0]:       #  don't repeat the last entry FID...
-                orderedFID.append(endingFID[0])
+                orderedFragID.append(end_has_start[orderedFragID[i-1]])
+            if orderedFragID[-1] != endingFragID[0]:       #  don't repeat the last entry FragID...
+                orderedFragID.append(endingFragID[0])
             #total length read through lengthkm didn't always match up
             #to the sum of the lengths of the segments (exactly), sumup total length
             totallength = 0
-            for i in range(0, len(orderedFID)):
-                totallength += FIDdata.allfids[orderedFID[i]].lengthft
+            for i in range(0, len(orderedFragID)):
+                totallength += FragIDdata.allFragIDs[orderedFragID[i]].lengthft
             if totallength == 0:
-                exit('check length ft for FIDs in COMID= %d' % comid)
-            FIDdata.return_smoothelev_comid(comid)
-            slope = (FIDdata.maxelev - FIDdata.minelev)/totallength
+                exit('check length ft for FragIDs in COMID= %d' % comid)
+            FragIDdata.return_smoothelev_comid(comid)
+            slope = (FragIDdata.maxelev - FragIDdata.minelev)/totallength
             distance = 0.
-            FIDdata.COMID_orderedFID[comid] = orderedFID
-            for i in range(0, len(orderedFID)):
-                maxcellrivelev = FIDdata.maxelev - slope*distance
-                distance += FIDdata.allfids[orderedFID[i]].lengthft
-                mincellrivelev = FIDdata.maxelev - slope*distance
+            FragIDdata.COMID_orderedFragID[comid] = orderedFragID
+            for i in range(0, len(orderedFragID)):
+                maxcellrivelev = FragIDdata.maxelev - slope*distance
+                distance += FragIDdata.allFragIDs[orderedFragID[i]].lengthft
+                mincellrivelev = FragIDdata.maxelev - slope*distance
                 avecellrivelev = 0.5*(maxcellrivelev + mincellrivelev)
-                FIDdata.allfids[orderedFID[i]].segelevinfo = avecellrivelev
+                FragIDdata.allFragIDs[orderedFragID[i]].segelevinfo = avecellrivelev
                 row = rows.newRow()
-                row.OLDFID = orderedFID[i]
-                row.CELLNUM = FIDdata.allfids[orderedFID[i]].cellnum
+                row.OLDFragID = orderedFragID[i]
+                row.CELLNUM = FragIDdata.allFragIDs[orderedFragID[i]].cellnum
                 row.ELEVMAX = maxcellrivelev
                 row.ELEVAVE = avecellrivelev
                 row.ELEVMIN = mincellrivelev
@@ -1107,7 +1102,7 @@ class SFROperations:
         del row
         del rows
 
-    def reach_ordering(self, COMIDdata, FIDdata, LevelPathdata):
+    def reach_ordering(self, COMIDdata, FragIDdata, LevelPathdata):
         """
         crawl through the hydrosequence values and
         set a preliminary reach ordering file
@@ -1120,15 +1115,15 @@ class SFROperations:
                   'levelpathID, dnlevelpath, SFRseq, localseq\n')
         for currhydroseq in COMIDdata.hydrosequence_sorted:
             ccomid = COMIDdata.hydrosequence_comids[currhydroseq]
-            if ccomid not in FIDdata.noelev.keys():
+            if ccomid not in FragIDdata.noelev.keys():
                 # update the levelpathID hydrosequence data
                 LevelPathdata.allids[COMIDdata.allcomids[ccomid].levelpathID].ordered_hydrosequence.append(currhydroseq)
                 SFRseq += 1
                 localseq = 0
-                for cfid in FIDdata.COMID_orderedFID[ccomid]:
+                for cFragID in FragIDdata.COMID_orderedFragID[ccomid]:
                     localseq += 1
                     ofp.write('{0:d},{1:d},{2:d},{3:d},{4:d},{5:d},{6:d},{7:d},{8:d}\n'.format(
-                    FIDdata.allfids[cfid].cellnum,
+                    FragIDdata.allFragIDs[cFragID].cellnum,
                     ccomid,
                     COMIDdata.allcomids[ccomid].hydrosequence,
                     COMIDdata.allcomids[ccomid].uphydrosequence,
@@ -1140,226 +1135,19 @@ class SFROperations:
                     ))
         ofp.close()
 
-        # calculate and list unique cellnums and fids in downstream order by levelpathID
+        # calculate and list unique cellnums and FragIDs in downstream order by levelpathID
         for clevelpathid in LevelPathdata.level_ordered:
             LevelPathdata.allids[clevelpathid].ordered_hydrosequence = \
                 sorted(list(set(LevelPathdata.allids[clevelpathid].ordered_hydrosequence)), reverse=True)
             for currhydroseq in LevelPathdata.allids[clevelpathid].ordered_hydrosequence:
                 ccomid = COMIDdata.hydrosequence_comids[currhydroseq]
-                if ccomid not in FIDdata.noelev.keys():
-                    for cfid in FIDdata.COMID_orderedFID[ccomid]:
-                        if FIDdata.allfids[cfid].cellnum not in LevelPathdata.allids[clevelpathid].ordered_cellnums:
+                if ccomid not in FragIDdata.noelev.keys():
+                    for cFragID in FragIDdata.COMID_orderedFragID[ccomid]:
+                        if FragIDdata.allFragIDs[cFragID].cellnum not in LevelPathdata.allids[clevelpathid].ordered_cellnums:
                             LevelPathdata.allids[clevelpathid].ordered_cellnums.append(
-                            FIDdata.allfids[cfid].cellnum
+                            FragIDdata.allFragIDs[cFragID].cellnum
                             )
-                        LevelPathdata.allids[clevelpathid].ordered_FIDs.append(cfid)
-
-
-class Elevs_from_contours:
-    def __init__(self,SFRdata,FIDdata):
-        self.intersect_dist_table = SFRdata.Contours_intersect_distances
-        self.FIDdata = FIDdata
-
-    def assign_elevations_to_FID(self,COMIDdata):
-
-        # loop through rows in contours intersect table
-        distances = arcpy.SearchCursor(self.intersect_dist_table)
-        elevs_edited = []
-        print "getting elevations from elevation contour intersections..."
-        for row in distances:
-            comid = int(row.COMID)
-            cellnum = int(row.node)
-
-            # loop through FIDdata: if comid and cellnum match, update elevation from contours intersect table
-            for fid in self.FIDdata.allfids.keys():
-                if self.FIDdata.allfids[fid].cellnum == cellnum and self.FIDdata.allfids[fid].comid == comid:
-                    self.FIDdata.allfids[fid].contour_elev == float(row.ContourEle)
-                    self.FIDdata.allfids[fid].elev_distance = float(row.fmp)
-                    elevs_edited.append(fid)
-
-        # reset all elevations not updated from the contours to 0
-        for fid in self.FIDdata.allfids.keys():
-            if fid not in elevs_edited:
-                self.FIDdata.allfids[fid].contour_elev = 0
-
-        # update elevations by COMID
-        print "updating elevations in FID database..."
-        comids_with_no_contour_intersects = []
-        for comid in self.FIDdata.COMID_orderedFID.keys():
-            print comid
-            from_comid = COMIDdata.allcomids[comid].from_comid
-            to_comid = COMIDdata.allcomids[comid].to_comid
-
-            # within each COMID, iterate going upstream (reversed)
-            start_elev,end_elev = None,None
-            start_reach = 0
-            end_reach = len(self.FIDdata.COMID_orderedFID[comid])
-            dist = 0
-            interp = False
-
-            def get_dist_slope(comid,reachlist,end_elev,dist,interp,elevs_edited):
-                end_fid = None
-                for fid in reachlist:
-
-                    # if the FID intersects a contour, record elevation and position
-                    if not interp and fid in elevs_edited:
-                        end_elev = self.FIDdata.allfids[fid].contour_elev
-                        end_fid = fid
-                        dist +=self.FIDdata.allfids[fid].elev_distance
-                        interp = True
-                        continue
-
-                    # between contours, add distance
-                    if interp and fid not in elevs_edited:
-                        dist += self.FIDdata.allfids[fid].lengthft
-                        continue
-
-                    # at upstream contour, record elevation and calculate slope
-                    if interp and fid in elevs_edited:
-                        start_elev = self.FIDdata.allfids[fid].contour_elev
-                        start_fid = fid
-                        dist += self.FIDdata.allfids[fid].lengthft - self.FIDdata.allfids[fid].elev_distance
-                        slope = (start_elev - end_elev)/dist
-                        interp = False
-                        return slope,dist,start_fid,end_fid,end_elev,interp
-
-                    else: #upstream contour not in current comid
-
-                        # headwaters
-                        if COMIDdata.allcomids[comid].from_comid[0] == 0:
-                            slope = 0
-                        slope = None
-                        start_fid = self.FIDdata.COMID_orderedFID[comid][0]
-                        return slope,dist,start_fid,end_fid,end_elev,interp
-
-            def interpolate_elevs(start_fid,end_fid,slope):
-                # interpolate max/min elevation values for each FID between start and end fids
-
-                # first setup indexing
-                comid = self.FIDdata.allfids[start_fid].comid
-                start_reach = np.where(self.FIDdata.COMID_orderedFID[comid] == start_fid)[0][0]
-                end_reach = np.where(self.FIDdata.COMID_orderedFID[comid] == end_fid)[0][0]
-
-                dist = self.FIDdata.allfids[end_fid].elev_distance
-                self.FIDdata.allfids[end_fid].elev_max = slope*dist + self.FIDdata.allfids[end_fid].contour_elev
-
-                for fid in self.FIDdata.COMID_orderedFID[comid][start_reach:end_reach:-1]:
-                    dist += self.FIDdata.allfids[fid].lengthft
-                    self.FIDdata.allfids[fid].elev_min = self.FIDdata.allfids[fid+1].elev_max
-                    self.FIDdata.allfids[fid].elev_max = dist*slope + self.FIDdata.allfids[fid].elev_mean
-                self.FIDdata.allfids[start_fid].elev_min = self.FIDdata.allfids[start_fid+1].elev_max
-
-            def average_elevs(comid):
-                for fid in self.FIDdata.COMID_orderedFID[comid]:
-                    self.FIDdata.allfids[fid].segelevinfo = 0.5*self.FIDdata.allfids[fid].elev_min + self.FIDdata.allfids[fid].elev_max
-                    print self.FIDdata.allfids[fid].segelevinfo
-
-            # going upstream in comid, find contour intersection and upstream slope
-
-            # first, if outlet, set ending elevation to NHD elevation (and upstream interpolation will start from there)
-            if COMIDdata.allcomids[comid].to_comid[0] == 0:
-                print "outlet!"
-                end_fid = self.FIDdata.COMID_orderedFID[comid][-1]
-                self.FIDdata.allfids[end_fid].elev_mean == self.FIDdata.allfids[end_fid].elev_min
-
-            # for each attempt, when first contour intersection is found, interp is set to True;
-            # when second contour intersection is found, interp is set to false and slope is returned
-            while not interp:
-                print "found upstream contour!"
-                reachlist = self.FIDdata.COMID_orderedFID[comid][start_reach:end_reach][::-1]
-                slope,dist,start_fid,end_fid,end_elev,interp = get_dist_slope(comid,reachlist,end_elev,dist,interp,elevs_edited)
-                if not interp:
-                    break
-                interpolate_elevs(self.FIDdata,start_fid,end_fid,slope)
-                # reset end fid to
-                end_fid = start_fid
-
-            # if upstream contour not in current comid, go to from_comid
-            if interp and slope == None:
-                print "next upstream contour not found in current comid"
-                slopes = []
-                # loop through comids in from_comid
-                for upcomid in from_comid:
-                    print "trying %s" %(upcomid)
-                    interp = True
-                    while interp:
-                        start_comid = comid
-                        comid = COMIDdata.allcomids[comid].from_comid
-                        reachlist = self.FIDdata.COMID_orderedFID[from_comid].reverse()
-                        slope,dist,start_fid,end_fid,end_elev,interp = get_dist_slope(comid,reachlist,end_elev,dist,interp,elevs_edited)
-                    # append slope to list of slopes
-                    slopes.append(slope)
-                start_fid = self.FIDdata.COMID_orderedFID[comid][0]
-                # base slope below confluence on average of all slopes for pairs of upstream/downstream contour intersections around confluence
-                slope = np.mean(slopes)
-                interpolate_elevs(self.FIDdata,start_fid,end_fid,slope)
-                # append first FID in comid downstream to elevs_edited, so that interpolation will stop here subsequently (avoids problems with multiple interpolations through confluence)
-                elevs_edited.append(start_fid)
-
-
-            # no contour intersected this comid; skip it for now
-            elif not interp and slope == None:
-                print "skipping %s, no contours found" %(comid)
-                comids_with_no_contour_intersects.append(comid)
-                continue
-
-            # now find slope in downstream portion of comid that isn't populated yet
-            # if outlet, all elevations have already been updated
-            if to_comid[0] == 0:
-                continue
-
-            # first get distance to end of comid
-            # first distance is length in end_fid minus position of contour intersection
-            dist = self.FIDdata.allfids[end_fid].lengthft - self.FIDdata.allfids[end_fid].elev_distance
-
-            # the append distances going towards downstream end of comid
-            for fid in range(self.FIDdata.COMID_orderedFID[comid][-1]+1)[end_fid:-1]:
-                dist += self.FIDdata.allfids[fid].lengthft
-
-            # starting with total distance to end of current comid; continue into to_comid
-            # end_elev should be preserved from above
-            reachlist = self.FIDdata.COMID_orderedFID[to_comid[0]]
-            interp = True
-            slope,dist,start_fid,end_fid,end_elev,interp = get_dist_slope(to_comid[0],reachlist,end_elev,dist,interp,elevs_edited)
-
-            # if upstream contour not in current to_comid, go to next downstream to_comid
-            current_comid = comid
-            comid = to_comid
-            if slope == None:
-                while interp:
-                    comid = COMIDdata.allcomids[comid].to_comid
-                    reachlist = self.FIDdata.COMID_orderedFID[to_comid]
-                    slope,dist,start_fid,end_fid,end_elev,interp = get_dist_slope(comid,reachlist,end_elev,dist,interp)
-
-            slope = slope *-1 # need to invert slope since we're going in opposite direction
-
-            # reset start and end FIDs to downstream portion of segment (only interpolating FIDs in current_comid)
-            start_fid = end_fid
-            end_fid = self.FIDdata.COMID_orderedFID[current_comid][-1]
-            interpolate_elevs(self.FIDdata,start_fid,end_fid,slope)
-
-            # finally, update all average elevation values for FIDs
-            average_elevs(current_comid)
-
-    '''
-    def writeout_elevs(self,SFRdata):
-        #Mat1data = np.genfromtxt(SFRdata.MAT1,delimiter=',',names=True,dtype=None)
-    '''
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+                        LevelPathdata.allids[clevelpathid].ordered_FragIDs.append(cFragID)
 
 def widthcorrelation(arbolate):
     #estimate widths, equation from Feinstein and others (Lake
