@@ -49,6 +49,7 @@ saveme ={'COMIDdata' : COMIDdata,
          'LevelPathdata' : LevelPathdata}
 SFRc.savetmp(saveme)
 
+
 loadme = ['COMIDdata', 'FragIDdata', 'LevelPathdata']
 
 instuff = SFRc.loadtmp(loadme)
@@ -59,12 +60,18 @@ SFRops.reach_ordering(instuff['COMIDdata'],
                       instuff['LevelPathdata'])
 
 '''
+Segmentdata = SFRc.SFRSegmentsAll()
+Segmentdata.divide_at_confluences(LevelPathdata, FragIDdata, COMIDdata)
+
+'''
 saveme ={}
+
 
 SFRc.savetmp(saveme)
 
 a = SFRc.loadtmp(saveme)
 
 SFRdata = a['SFRdata']
+'''
 
 i = 2
