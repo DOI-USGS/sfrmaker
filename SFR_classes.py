@@ -504,6 +504,29 @@ class SFRSegmentsAll:
     def __init__(self):
         allSegs = dict()
 
+    def divide_at_confluences(self,LevelPathdata):
+        #establish provisional segment numbers from downstream (decending)
+        #list of levelpathIDs
+        provSFRseg = dict()
+        for i,lpID in enumerate(LevelPathdata.level_ordered):
+            provSFRseg[lpID] = i
+
+        confluences=dict()
+        for clevelpathid in LevelPathdata.allids.iterkeys():
+            nextlevelpath = LevelPathdata.allids[clevelpathid].down_levelpathID
+            cellist = LevelPathdata.allids[clevelpathid].ordered_cellnums
+            if nextlevelpath == 0:
+                outseg = 0
+            else:
+                if nextlevelpath in SFRprovseg:
+                    outseg=provSFRseg[nextlevelpath]
+                else:
+                    outseg=int(0)
+            segend = cellist[-1]
+            if outseg > 0:
+
+
+
     def accumulate_same_levelpathID(self, LevelPathdata, COMIDdata, FragIDdata):
         """
         method to add lengths and weight widths and slopes
