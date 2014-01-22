@@ -606,37 +606,36 @@ class SFRSegmentsAll:
                     outID = nextlevelpath
                     if outseg in subconfl:
                         printed=False
-                for dnlabl in subconfl[outseg]:
-                    #see if the beginning of an outsegment matches the end of the current segment
-                    #or if the cell connected to the end of the current segment is the beginning
-                    #of a segment (no overlap, end of current segment is connected to beginning of
-                    #next segment in an adjacent cell)
-                    overlapcell=subreaches[dnlabl][0]
-                    if overlapcell==lastcell:
-                        self.SFRfinaloutseg[subseg[upstlabl]]=subseg[dnlabl]
-                        plist=('overlap',iseg, upstlabl, subseg[upstlabl], lastcell, outseg, dnlabl, subseg[dnlabl], subreaches[dnlabl])
-                        CHK2.write(",".join(map(str,plist))+'\n')
-                        printed=True
-                    if not printed:
-                        for nxtdwnstream in set(fromCell[lastcell]):
-                            if nxtdwnstream==overlapcell:
+                        for dnlabl in subconfl[outseg]:
+                            #see if the beginning of an outsegment matches the end of the current segment
+                            #or if the cell connected to the end of the current segment is the beginning
+                            #of a segment (no overlap, end of current segment is connected to beginning of
+                            #next segment in an adjacent cell)
+                            overlapcell=subreaches[dnlabl][0]
+                            if overlapcell==lastcell:
                                 self.SFRfinaloutseg[subseg[upstlabl]]=subseg[dnlabl]
-                                plist=('offset',iseg, upstlabl, subseg[upstlabl], lastcell, outseg, dnlabl, subseg[dnlabl], subreaches[dnlabl])
+                                plist=('overlap',iseg, upstlabl, subseg[upstlabl], lastcell, outseg, dnlabl, subseg[dnlabl], subreaches[dnlabl])
                                 CHK2.write(",".join(map(str,plist))+'\n')
                                 printed=True
+                            if not printed:
+                                for nxtdwnstream in set(fromCell[lastcell]):
+                                    if nxtdwnstream==overlapcell:
+                                        self.SFRfinaloutseg[subseg[upstlabl]]=subseg[dnlabl]
+                                        plist=('offset',iseg, upstlabl, subseg[upstlabl], lastcell, outseg, dnlabl, subseg[dnlabl], subreaches[dnlabl])
+                                        CHK2.write(",".join(map(str,plist))+'\n')
+                                        printed=True
 
-                if not printed:
-                    self.SFRfinaloutseg[subseg[upstlabl]]=int(99999)
-                    plist=('no connection',iseg,upstlabl,subseg[upstlabl],lastcell,99999,99999)
-                    CHK2.write(",".join(map(str,plist))+'\n')
-            else:
-                self.SFRfinaloutseg[subseg[upstlabl]]=int(0)
-                plist=('downstream end',iseg,upstlabl,subseg[upstlabl],lastcell,0,0)
-                CHK2.write(",".join(map(str,plist))+'\n')
-        else:
-            self.SFRfinaloutseg[subseg[upstlabl]]=int(0)
-            plist=('downstream end',iseg,upstlabl,subseg[upstlabl],lastcell,0,0)
-            CHK2.write(",".join(map(str,plist))+'\n')
+                        if not printed:
+                            self.SFRfinaloutseg[subseg[upstlabl]]=int(99999)
+                            plist=('no connection',iseg,upstlabl,subseg[upstlabl],lastcell,99999,99999)
+                            CHK2.write(",".join(map(str,plist))+'\n')
+                    else:
+                        self.SFRfinaloutseg[subseg[upstlabl]]=int(0)
+                        plist=('downstream end',iseg,upstlabl,subseg[upstlabl],lastcell,0,0)
+                 else:
+                        self.SFRfinaloutseg[subseg[upstlabl]]=int(0)
+                        plist=('downstream end',iseg,upstlabl,subseg[upstlabl],lastcell,0,0)
+                        CHK2.write(",".join(map(str,plist))+'\n')       CHK2.write(",".join(map(str,plist))+'\n')
 
 
         CHK2.write('segment, confluence-based label, outsegment, cells(reaches) in segment\n')

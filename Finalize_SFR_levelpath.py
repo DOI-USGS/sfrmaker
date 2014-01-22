@@ -533,7 +533,7 @@ for i in range(0,nss):
                         plist=('overlap',iseg, upstlabl, subseg[upstlabl], lastcell, outseg, dnlabl, subseg[dnlabl], subreaches[dnlabl])
                         CHK2.write(",".join(map(str,plist))+'\n')
                         printed=True
-                    if not printed:
+                    if not printed: 
                         for nxtdwnstream in set(fromCell[lastcell]):
                             if nxtdwnstream==overlapcell:
                                 SFRfinaloutseg[subseg[upstlabl]]=subseg[dnlabl]
