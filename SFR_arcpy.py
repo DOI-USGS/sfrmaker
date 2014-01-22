@@ -6,7 +6,9 @@
 #
 
 import arcpy
-
+from collections import defaultdict
+import numpy as np
+import os
 
 def general_join(target_name, target_lay, joinfield1, joined, joinfield2, keep_common=True):
     # input:
@@ -38,3 +40,35 @@ def general_join(target_name, target_lay, joinfield1, joined, joinfield2, keep_c
         print 'Removing old version of %s' %target_name
         arcpy.Delete_management(target_name)
     arcpy.Rename_management('tmpjunkus.shp',target_name)
+
+
+def compute_zonal(nrows, ncolumns, delxy, z_conversion_factor, MFgrid, DEM):
+
+    # Settings
+    output_path = MFgrid.split('\\')[:1]
+    arcpy.env.workspace = output_path
+    arcpy.env.overwriteOutput = True
+    arcpy.env.qualifiedFieldNames = False
+
+    # Check out any necessary licenses
+    arcpy.CheckOutExtension("spatial")
+
+    #arcpy.AddField_management(MFgrid,"cellnum","LONG") #isn't needed if there is a node column
+    print "multipling DEM z-values by %s to convert units..." %(z_conversion_factor)
+    DEM2=arcpy.sa.Raster(DEM)*z_conversion_factor
+
+    print "extracting model top elevations from DEM..."
+    # create raster of gridcells based on node (cellnum)
+    # run zonal statistics on DEM for each grid cell
+    print "\tbuilding raster of model grid cells for sampling DEM..."
+    DEMres=arcpy.GetRasterProperties_management(DEM2, "CELLSIZEX")
+    DEMres=float(DEMres.getOutput(0)) # cell size of DEM in project units
+    arcpy.PolygonToRaster_conversion(MFgrid, "node", os.path.join(output_path, "MFgrid_raster"), "MAXIMUM_AREA", "node", DEMres)
+    print "\tbuilding raster attribute table..."
+    arcpy.BuildRasterAttributeTable_management(os.path.join(output_path, "MFgrid_raster"))
+    print "\trunning zonal statistics... (this step will likely take several minutes or more)"
+    arcpy.sa.ZonalStatisticsAsTable(os.path.join(output_path, "MFgrid_raster"), "VALUE", DEM2, os.path.join(output_path, "demzstats.dbf"), "DATA", "ALL")
+
+    print "joining elevations back to model grid cells..."
+    arcpy.MakeFeatureLayer_management(MFgrid, "MFgrid")
+    general_join(os.path.join(output_path, MFgrid[:-4]+'_elevs.shp'), "MFgrid", "node", os.path.join(output_path, "demzstats.dbf"), "VALUE", True)
