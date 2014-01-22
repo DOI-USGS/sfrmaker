@@ -1269,7 +1269,367 @@ class SFROperations:
 
 
 
+class ElevsFromContours:
+    def __init__(self, SFRdata):
+        self.intersect_dist_table = SFRdata.Contours_intersect_distances
+        self.elevs_edited = []
+        self.in_between_contours = []
+        self.comids_with_no_contour_intersects = []
 
+    def interpolate_elevs(self, FragIDdata, start_fid, end_fid):
+        # interpolate max/min elevation values for each FragID between start and end fids
+
+        # first setup indexing
+        # start_fid is between first reach in current comid and end_fid
+        # (for cases where up/down contour is outide of current comid, it was already reset to the first or last reach)
+        dist = 0
+        end_reach = FragIDdata.COMID_orderedFragID[self.current_comid].index(end_fid)
+        start_reach = FragIDdata.COMID_orderedFragID[self.current_comid].index(start_fid)
+
+        # compute max elevation in first FragID
+        if end_fid == FragIDdata.COMID_orderedFragID[self.current_comid][-1]:
+            # downstream contour was below current comid
+            dist += self.downstream_dist
+            FragIDdata.allfids[end_fid].elev_min = self.end_elev + self.slope * dist
+            dist += FragIDdata.allfids[end_fid].lengthft
+            FragIDdata.allfids[end_fid].elev_max = self.end_elev + self.slope * dist
+
+        else:
+            dist = np.min(FragIDdata.allfids[end_fid].elev_distance)
+            FragIDdata.allfids[end_fid].elev_max = self.end_elev + self.slope * dist
+        print 'fid:%s min/max elevs %s %s' % (end_fid, FragIDdata.allfids[end_fid].elev_min, FragIDdata.allfids[end_fid].elev_max)
+
+        # compute max and min elevations in subsequent FragIDs
+        ind = end_reach
+        for fid in FragIDdata.COMID_orderedFragID[self.current_comid][start_reach:end_reach][::-1]:
+            ind -= 1
+            previous_fid = FragIDdata.COMID_orderedFragID[self.current_comid][ind + 1]
+            FragIDdata.allfids[fid].elev_min = FragIDdata.allfids[previous_fid].elev_max
+            dist += FragIDdata.allfids[fid].lengthft
+            FragIDdata.allfids[fid].elev_max = self.end_elev + self.slope * dist
+            print 'fid:%s min/max elevs %s %s' % (fid, FragIDdata.allfids[fid].elev_min, FragIDdata.allfids[fid].elev_max)
+
+
+    def get_dist_slope(self, comid, FragIDdata, COMIDdata):
+
+            for fid in self.reachlist:
+                print "comid %s, fid %s" %(comid,fid)
+
+                # looking downstream for first contour below current comid
+                if self.downstream:
+
+                    # at end of comid, check for outlet
+                    if fid == self.reachlist[-1]:
+                        # another downcomid exists, continue
+                        try:
+                            COMIDdata.allcomids[COMIDdata.allcomids[comid].to_comid[0]]
+                        # at outlet; assign downstream elev using NHD
+                        except KeyError:
+                            self.downstream_dist += FragIDdata.allfids[fid].lengthft
+                            self.downstream_contour_comid = comid
+                            self.end_elev = FragIDdata.allfids[fid].minsmoothelev
+                            self.downstream = False
+                            break
+                    # found contour; assign downstream elev
+                    elif fid in self.elevs_edited:
+                        self.downstream_dist += np.min(FragIDdata.allfids[fid].elev_distance)
+                        self.downstream_contour_comid = comid
+                        self.end_elev = np.max(FragIDdata.allfids[fid].contour_elev)
+                        self.downstream = False
+                        break
+                    else:
+                        self.downstream_dist += FragIDdata.allfids[fid].lengthft
+
+                # moving upstream
+                if self.upstream:
+
+                    # most upstream reach in comid, check for headwaters or edge of grid
+                    # if from_comid is 0, headwater; or, if no from_comid, stream originates outside of grid
+                    # in both cases, use NHD to set end elevation, unless slope is negative, then set slope to 0
+                    if fid == FragIDdata.COMID_orderedFragID[comid][0]:
+
+                        # in all cases, add distance first
+                        self.upstream_dist += FragIDdata.allfids[fid].lengthft
+
+                        # for multiple from_comids (confluence)
+                        for upid in COMIDdata.allcomids[comid].from_comid:
+                            try:
+                                COMIDdata.allcomids[upid]
+                                if upid == 0:
+                                    headwater = True
+                                else:
+                                    # if an upstream segment is encountered that isn't a headwater,
+                                    # continue interpolating into that segment
+                                    headwater = False
+                                    break
+                            except KeyError:
+                                headwater = True
+
+                        if headwater:
+
+                            # set start_elev and calculate slope
+                            self.start_elev = FragIDdata.allfids[fid].maxsmoothelev
+                            self.slope = (self.start_elev - self.end_elev) / self.upstream_dist
+                            if self.slope < 0:
+                                self.slope = 0
+
+                            # set end_fid (default is last FragID in current_comid)
+                            # if downstream contour found in current comid:
+                            #if self.downstream_contour_comid == self.current_comid:
+                                #self.end_FragID = self.reachlist[0]
+
+                            # set start_FragID
+                            # if upstream contour found in current comid:
+                            if comid == self.current_comid:
+                                self.start_FragID = FragID
+                            # or if upstream contour was found above current comid
+                            else:
+                                self.start_FragID = FragIDdata.COMID_orderedFragID[self.current_comid][0]
+
+                            # go to interpolation
+                            break
+
+                        else:
+                            continue
+
+                    # found a contour
+                    elif FragID in self.elevs_edited:
+
+                        # calculate distance; reset downstream distance
+                        self.upstream_dist += FragIDdata.allFragIDs[FragID].lengthft - np.max(FragIDdata.allFragIDs[FragID].elev_distance)
+
+                        # set start_elev and calculate slope
+                        self.start_elev = np.min(FragIDdata.allFragIDs[FragID].contour_elev)
+                        self.slope = (self.start_elev - self.end_elev) / self.upstream_dist
+
+                        # set end_FragID (default is last FragID in current_comid)
+                        # if downstream contour found in current comid:
+                        #if self.downstream_contour_comid == self.current_comid:
+                            #self.end_FragID = self.reachlist[0]
+
+                        # set start_FragID
+                        # if upstream contour found in current comid:
+                        if comid == self.current_comid:
+                            self.start_FragID = FragID
+                        # or if upstream contour was found above current comid
+                        else:
+                            self.start_FragID = FragIDdata.COMID_orderedFragID[self.current_comid][0]
+
+                        # break out of get_dist_slope and go to interpolation
+                        break
+
+                    # no contour found, keep moving upstream
+                    else:
+                        self.upstream_dist += FragIDdata.allFragIDs[FragID].lengthft
+
+
+    def get_contour_intersections(self, FragIDdata, COMIDdata):
+
+        '''
+        #The slow way with Arc
+        # loop through rows in contours intersect table
+        distances = arcpy.SearchCursor(self.intersect_dist_table)
+
+        print "getting elevations from topographic contour intersections..."
+        for row in distances:
+            comid = int(row.COMID)
+            cellnum = int(row.node)
+
+            # loop through FragIDs in comid, if cellnum matches, get contour elevation and distance
+            for FragID in FragIDdata.COMID_orderedFragID[comid]:
+                if FragIDdata.allFragIDs[FragID].cellnum == cellnum:
+
+                    # multiple contours in a FragID are appended to a list
+                    # up and downstream slopes from an intersected FragID are calculated using
+                    # respective max and min intersected contour values
+                    FragIDdata.allFragIDs[FragID].contour_elev.append(float(row.ContourEle))
+                    FragIDdata.allFragIDs[FragID].elev_distance.append(float(row.fmp))
+
+                    self.elevs_edited.append(FragID)
+
+            # build list of FragIDs that do not intersect any contours
+            for FragID in FragIDdata.allFragIDs.keys():
+                if FragID not in self.elevs_edited:
+                    self.in_between_contours.append(FragID)
+        '''
+        # faster way with python
+        distances = np.genfromtxt('distances.csv', names=True, delimiter=',', dtype=None)
+
+        for row in distances:
+            comid = int(row['COMID'])
+            cellnum = int(row['node'])
+
+            # loop through FragIDs in comid, if cellnum matches, get contour elevation and distance
+            for FragID in FragIDdata.COMID_orderedFragID[comid]:
+                if FragIDdata.allFragIDs[FragID].cellnum == cellnum:
+                    # multiple contours in a FragID are appended to a list
+                    # up and downstream slopes from an intersected FragID are calculated using
+                    # respective max and min intersected contour values
+                    FragIDdata.allFragIDs[FragID].contour_elev.append(float(row['ContourEle']))
+                    FragIDdata.allFragIDs[FragID].elev_distance.append(float(row['fmp']))
+
+                    self.elevs_edited.append(FragID)
+
+
+    def assign_elevations_to_FragID(self, FragIDdata, COMIDdata):
+
+        print "interpolating elevations to FragIDs..."
+        knt = 0
+        for comid in FragIDdata.COMID_orderedFragID.keys():
+            knt += 1
+            print comid
+            print "comid number %s" % (knt)
+            from_comid = COMIDdata.allcomids[comid].from_comid
+            to_comid = COMIDdata.allcomids[comid].to_comid
+            self.current_comid = comid
+
+            # within each COMID, iterate going upstream (reversed)
+            self.start_elev = None
+            self.end_elev = None
+            self.start_reach = 0
+            self.start_FragID = FragIDdata.COMID_orderedFragID[comid][-1]
+            self.end_FragID = FragIDdata.COMID_orderedFragID[comid][-1]
+            self.end_reach = len(FragIDdata.COMID_orderedFragID[comid])
+            self.dist = 0
+            self.downstream_dist = 0
+            self.upstream_dist = 0
+            self.interp = False
+            self.slope = -9999
+            self.upstream = False
+            self.downstream = False
+            outlet = False
+
+            # If comid is outlet, place "contour" elevation from NHD at end
+            # (and upstream interpolation will start from there)
+            if COMIDdata.allcomids[comid].to_comid[0] == 0:
+                print "outlet!"
+                outlet = True
+            try:
+                COMIDdata.allcomids[COMIDdata.allcomids[comid].to_comid[0]]
+            except KeyError:
+                print "outlet!"
+                outlet = True
+            if outlet:
+                self.end_elev = FragIDdata.allFragIDs[self.end_FragID].minsmoothelev
+                self.downstream_contour_comid = comid
+
+            # Go downstream to find downstream contour in pair
+            if not outlet:
+                print "looking downstream for first contour"
+                self.downstream = True
+                self.in_current_comid = False
+                self.reachlist = FragIDdata.COMID_orderedFragID[to_comid[0]]
+                downcomid = to_comid[0]
+                while self.downstream:
+                    # reachlist is iterated over;
+                    # self.start_reach is always 0 (termination is based on finding a contour)
+                    # self.end_reach is updated each time a pair of contours is found
+                    self.get_dist_slope(downcomid, FragIDdata, COMIDdata)
+                    # if self.downstream = False, a contour or an outlet was found
+                    if self.downstream:
+                        downcomid = COMIDdata.allcomids[downcomid].to_comid[0]
+                        self.reachlist = FragIDdata.COMID_orderedFragID[downcomid]
+
+            # Go upstream to find upstream contour in pair; add distance from downstream
+            print "looking upstream for second contour"
+            self.upstream_dist += self.downstream_dist
+            self.upstream = True
+            self.interp = True
+             # upstream from end of comid
+            while self.interp:
+                # reachlist is iterated over;
+                # self.start_reach is always 0 (termination is based on finding a contour)
+                # self.end_reach is updated each time a pair of contours is found
+                self.reachlist = FragIDdata.COMID_orderedFragID[comid][self.start_reach:self.end_reach][::-1]
+                self.get_dist_slope(comid, FragIDdata, COMIDdata)
+
+                # if no slope yet, get_dist_slope ran to upstream end of comid without finding contour
+                # break out of while loop to move to next comid
+                if self.slope == -9999:
+                    print "upstream contour not found in this comid, moving to next"
+                    break
+
+                # otherwise, currently an even number of contours in current comid (an upstream contour was found);
+                # interpolate between before moving to next
+                print "interpolating within comid..."
+                # self.start_FragID was updated to current upstream contour by get_dist_slope
+                # self.end_FragID was updated to next contour downstream by get_dist_slope
+                self.interpolate_elevs(FragIDdata, self.start_FragID, self.end_FragID)
+
+                # reset everything for next contour pair
+                # upstream_dist begins with remainder of end_FragID (upstream contour)
+                self.end_FragID = self.start_FragID
+                self.end_elev = self.start_elev
+                try:
+                    self.upstream_dist = np.min(FragIDdata.allFragIDs[self.end_FragID].elev_distance)
+                except ValueError:
+                    self.upstream_dist = 0
+                self.end_reach = FragIDdata.COMID_orderedFragID[comid].index(self.start_FragID)
+                self.slope = -9999
+
+                # if updated end_reach is 0, a contour intersects the most upstream FragID in current comid
+                # (i.e. entire comid has been interpolated); break out of while loop
+                if self.end_reach == 0:
+                    self.interp = False
+                    break
+
+            # Next upstream contour not in current comid, go to (upstream) from_comid
+            if self.interp and self.slope == -9999:
+                print "looking in upstream comids..."
+                slopes = []
+
+                # loop through comids in from_comid
+                for upcomid in from_comid:
+                    print upcomid
+                    self.interp = True  # self.interp might be false from another upcomid in from_comid list
+
+                    # look in subsequent from_comids until upstream contour is found
+                    # get_dist_slope will terminate
+                    # Note: this does not guarantee that the minimum slope in the tree will be returned
+                    # because the loop will terminate upon the first instance of an upstream contour in that branch
+                    upcomids = [upcomid]
+                    while self.interp:
+                        for upid in upcomids:
+
+                            # if multiple upids, and only first is headwater, get_dist_slope will leave interp = True.
+                            # Skip past headwater.
+                            try:
+                                self.reachlist = FragIDdata.COMID_orderedFragID[upid][::-1]
+                            except KeyError:
+                                # if on the last upcomid, set interp to False and slope to 0
+                                if upid == upcomids[-1]:
+                                    self.interp = False
+                                    self.slope = 0
+                                continue
+
+                            self.get_dist_slope(upid, FragIDdata, COMIDdata)
+                            if not self.interp:
+                                break
+                            # need something here that handles missing keys for
+                            # streams that originate outside of grid
+                            upcomids = COMIDdata.allcomids[upid].from_comid
+                            print "looking further upstream in %s" %(upcomids)
+
+                    # append slope to list of slopes
+                    slopes.append(self.slope)
+
+                # slope below confluence is minimum of all slopes going through confluence
+                # (avoids possible downstream elevation increase at confluence)
+                self.slope = np.min(slopes)
+
+                # to limit interpolation to current comid, reset start_FragID to first reach in current comid
+                # end_FragID is preserved from downstream elevation contour in pair
+                self.start_FragID = FragIDdata.COMID_orderedFragID[comid][0]
+
+                self.interpolate_elevs(FragIDdata, self.start_FragID, self.end_FragID)
+
+                # add "contour" elevation at first FragID downstream of confluence,
+                # so that any subsequent interpolation from upstream will stop here
+                # (avoids problems with multiple interpolations through confluence)
+
+                FragIDdata.allFragIDs[self.start_FragID].contour_elev = FragIDdata.allFragIDs[self.start_FragID].elev_max
+                FragIDdata.allFragIDs[self.start_FragID].elev_distance = [0]
+                self.elevs_edited.append(self.start_FragID)
 
 
 
