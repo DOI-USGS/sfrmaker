@@ -935,6 +935,33 @@ class SFRpreproc:
         self.ofp.write('\n' + '#' * 25 + '\nEnd Time: %s\n' % end_time + '#' * 25)
         self.ofp.close()
 
+    def intersect_contours(self, SFRdata):
+        # GIS preprocessing to intersect topographic contours with river_explode.shp
+
+        # create set of points where elevation contours intersect the streams
+        arcpy.Intersect_analysis([SFRdata.ELEVcontours, SFRdata.intersect], SFRdata.Contours_intersect, "ALL", "", "POINT")
+
+        # add field to river_explode that uniquely identifies each FID (but isn't named FID)
+        arcpy.AddField_management(SFRdata.intersect, "Route", "LONG")
+        arcpy.CalculateField_management(SFRdata.intersect, "Route", "!FID!", "PYTHON")
+
+        # add field of 0s to river_explode to designate starting points for route measurements
+        # (from_measure_field for routes)
+        arcpy.AddField_management(SFRdata.intersect, "FromM", "SHORT")
+
+        # convert stream linework to Arc routes (necessary for LocateFeaturesAlongRoutes_lr)
+        # maintain m-data from original NHD, by specifying starting and ending distance fields for each FID
+        # all "FromM" values are 0 (measurements are from the start of each segment, as defined in the m-direction);
+        # "LengthFt" is used for the to_measure_field field
+        arcpy.CreateRoutes_lr(SFRdata.intersect, "Route", SFRdata.Routes, "TWO_FIELDS", "FromM", "LengthFt")
+
+        # returns location of contour intersections along each FID of stream in river_explode,
+        # as a distance from the line segment start identified from CreateRoutes_lr
+        arcpy.LocateFeaturesAlongRoutes_lr(SFRdata.Contours_intersect, SFRdata.Routes, "Route", "1 feet",
+                                SFRdata.Contours_intersect_distances, "Route POINT fmp", "", "", "", "", "M_DIRECTON")
+
+
+
 class SFROperations:
     """
     class to make operations on data
@@ -1357,44 +1384,44 @@ class ElevsFromContours:
 
         # compute max and min elevations in subsequent FragIDs
         ind = end_reach
-        for fid in FragIDdata.COMID_orderedFragID[self.current_comid][start_reach:end_reach][::-1]:
+        for FragID in FragIDdata.COMID_orderedFragID[self.current_comid][start_reach:end_reach][::-1]:
             ind -= 1
             previous_fid = FragIDdata.COMID_orderedFragID[self.current_comid][ind + 1]
-            FragIDdata.allfids[fid].elev_min = FragIDdata.allfids[previous_fid].elev_max
-            dist += FragIDdata.allfids[fid].lengthft
-            FragIDdata.allfids[fid].elev_max = self.end_elev + self.slope * dist
-            print 'fid:%s min/max elevs %s %s' % (fid, FragIDdata.allfids[fid].elev_min, FragIDdata.allfids[fid].elev_max)
+            FragIDdata.allfids[FragID].elev_min = FragIDdata.allfids[previous_fid].elev_max
+            dist += FragIDdata.allfids[FragID].lengthft
+            FragIDdata.allfids[FragID].elev_max = self.end_elev + self.slope * dist
+            print 'fid:%s min/max elevs %s %s' % (FragID, FragIDdata.allfids[FragID].elev_min, FragIDdata.allfids[FragID].elev_max)
 
 
     def get_dist_slope(self, comid, FragIDdata, COMIDdata):
 
-            for fid in self.reachlist:
-                print "comid %s, fid %s" %(comid,fid)
+            for FragID in self.reachlist:
+                print "comid %s, fid %s" %(comid, FragID)
 
                 # looking downstream for first contour below current comid
                 if self.downstream:
 
                     # at end of comid, check for outlet
-                    if fid == self.reachlist[-1]:
+                    if FragID == self.reachlist[-1]:
                         # another downcomid exists, continue
                         try:
                             COMIDdata.allcomids[COMIDdata.allcomids[comid].to_comid[0]]
                         # at outlet; assign downstream elev using NHD
                         except KeyError:
-                            self.downstream_dist += FragIDdata.allfids[fid].lengthft
+                            self.downstream_dist += FragIDdata.allfids[FragID].lengthft
                             self.downstream_contour_comid = comid
-                            self.end_elev = FragIDdata.allfids[fid].minsmoothelev
+                            self.end_elev = FragIDdata.allfids[FragID].minsmoothelev
                             self.downstream = False
                             break
                     # found contour; assign downstream elev
                     elif fid in self.elevs_edited:
-                        self.downstream_dist += np.min(FragIDdata.allfids[fid].elev_distance)
+                        self.downstream_dist += np.min(FragIDdata.allfids[FragID].elev_distance)
                         self.downstream_contour_comid = comid
-                        self.end_elev = np.max(FragIDdata.allfids[fid].contour_elev)
+                        self.end_elev = np.max(FragIDdata.allfids[FragID].contour_elev)
                         self.downstream = False
                         break
                     else:
-                        self.downstream_dist += FragIDdata.allfids[fid].lengthft
+                        self.downstream_dist += FragIDdata.allfids[FragID].lengthft
 
                 # moving upstream
                 if self.upstream:
@@ -1402,10 +1429,10 @@ class ElevsFromContours:
                     # most upstream reach in comid, check for headwaters or edge of grid
                     # if from_comid is 0, headwater; or, if no from_comid, stream originates outside of grid
                     # in both cases, use NHD to set end elevation, unless slope is negative, then set slope to 0
-                    if fid == FragIDdata.COMID_orderedFragID[comid][0]:
+                    if FragID == FragIDdata.COMID_orderedFragID[comid][0]:
 
                         # in all cases, add distance first
-                        self.upstream_dist += FragIDdata.allfids[fid].lengthft
+                        self.upstream_dist += FragIDdata.allfids[FragID].lengthft
 
                         # for multiple from_comids (confluence)
                         for upid in COMIDdata.allcomids[comid].from_comid:
@@ -1424,7 +1451,7 @@ class ElevsFromContours:
                         if headwater:
 
                             # set start_elev and calculate slope
-                            self.start_elev = FragIDdata.allfids[fid].maxsmoothelev
+                            self.start_elev = FragIDdata.allfids[FragID].maxsmoothelev
                             self.slope = (self.start_elev - self.end_elev) / self.upstream_dist
                             if self.slope < 0:
                                 self.slope = 0
