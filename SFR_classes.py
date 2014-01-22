@@ -11,6 +11,7 @@ import discomb_utilities as disutil #  utility to read in a dis file
 import pickle
 import math
 import gzip
+from collections import defaultdict
 
 '''
 debugging functions
@@ -539,7 +540,61 @@ class SFRSegmentsAll:
     levelpathIDs and establish the final SFR segments
     """
     def __init__(self):
-        allSegs = dict()
+        self.allSegs = dict()
+        self.confluences = defaultdict(list)    # dictionary of lists keyed by levelpathID
+
+    def divide_at_confluences(self,LevelPathdata, FragIDdata, COMIDdata):
+        #establish provisional segment numbers from downstream (decending)
+        #list of levelpathIDs
+        provSFRseg = dict()
+        for i,lpID in enumerate(LevelPathdata.level_ordered):
+            provSFRseg[lpID] = i
+
+        for clevelpathid in LevelPathdata.allids.iterkeys():
+            iseg = provSFRseg[clevelpathid]
+            nextlevelpath = LevelPathdata.allids[clevelpathid].down_levelpathID
+            cellist = LevelPathdata.allids[clevelpathid].ordered_cellnums
+            if len(cellist) == 0:
+                print 'check levelpathID {0}, no cells are assigned'.format(clevelpathid)
+            else:
+                if nextlevelpath == 0:
+                    outseg = 0
+                else:
+                    if nextlevelpath in provSFRseg:
+                        outseg = provSFRseg[nextlevelpath]
+                    else:
+                        outseg = int(0)
+                isegend = cellist[-1]
+                if outseg > 0:
+                    outid = nextlevelpath
+                    outsegbeg = LevelPathdata.allids[outid].ordered_cellnums[0]
+                    confl = -1    # flag in case an end is not found
+                    for cell in LevelPathdata.allids[outid].ordered_cellnums:
+                        if cell == isegend:
+                            confl = cell
+                else:
+                    #no downstream levelpath
+                    outsegbeg = 0
+                    outid = 0
+                    confl = 0
+                #no end found
+                if confl == -1:
+                    lastfragid = LevelPathdata.allids[clevelpathid].ordered_FragIDs[-1]
+                    lastcomid = FragIDdata.allFragIDs[lastfragid].comid
+                    #check down_hydrosequence
+                    if COMIDdata.allcomids[lastcomid].downhydrosequence == 0:
+                        confl = -2     #its a downstream end within the model
+                #put confluence cells into lists, iseg end is a confluence for iseg
+                self.confluences[clevelpathid].append(isegend)
+                #if a confluence was found, put it on the confluence list
+                if confl > 0:
+                    self.confluences[outid].append(confl)
+                if confl == -1:
+                    print 'check downstream connection for levelpathID {0}'.format(clevelpathid)
+                #put it in downstream order with no repeats
+                self.confluences[clevelpathid]=[cell for cell in LevelPathdata.allids[clevelpathid].ordered_cellnums \
+                    if cell in set(self.confluences[clevelpathid])]
+
 
     def accumulate_same_levelpathID(self, LevelPathdata, COMIDdata, FragIDdata):
         """
@@ -740,8 +795,9 @@ class SFRpreproc:
         if cellnumunique > 1:
             print '"cellnum" field in place with unique values in {0:s}'.format(indat.MFgrid)
         else:
-            if arcpy.Exists(indat.MFgrid, 'cellnum'):
-                arcpy.DeleteField_management(indat.MFgrid, 'cellnum')
+            for fld in arcpy.ListFields(indat.MFgrid):
+                if fld == 'cellnum':
+                    arcpy.DeleteField_management(indat.MFgrid, 'cellnum')
             arcpy.AddField_management(indat.MFgrid, 'cellnum', 'LONG')
             calcexpression = '((!row!-1)*{0:d}) + !column!'.format(NCOL)
             arcpy.CalculateField_management(indat.MFgrid, 'cellnum', calcexpression, 'PYTHON')
