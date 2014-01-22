@@ -1715,6 +1715,27 @@ class ElevsFromContours:
                 self.elevs_edited.append(self.start_FragID)
 
 
+class ElevsFromDEM:
+
+    def __init__(self, SFRData):
+        arcpy.MakeFeatureLayer_management(SFRData.MFgrid, "MFgrid")
+
+        self.MFgrid_elev_field = 'MEAN'
+        self.ElevsbyFragID = dict()
+        self.MFgrid = SFRData.MFgrid
+
+
+
+    def DEM_elevs_by_cellnum(self, SFRpreproc):
+
+        SFRpreproc.getfield("MFgrid", "cellnum", "cellnum")
+        SFRpreproc.getfield("MFgrid", self.MFgrid_elev_field, self.MFgrid_elev_field.lower())
+        # get elevations in each stream cell, from grid shapefile table
+        MFgridtable = arcpy.SearchCursor(self.MFgrid)
+        self.DEM_elevs_by_cellnum = dict()
+        for row in MFgridtable:
+            cellnum = row.getValue(SFRpreproc.joinnames["cellnum"])
+            self.min_DEM_elevs_by_cellnum[cellnum] = row.getValue(SFRpreproc.joinnames[self.MFgrid_elev_field.lower()])
 
 
 
