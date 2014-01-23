@@ -59,6 +59,8 @@ Notes on SFR input:
     <ELEV>river_w_elevations.shp</ELEV> 
     <!-- intersect:  flowlines intersected with the grid-->
     <intersect>river_explode.shp</intersect>
+    <!-- intersect_points: end vertices of "intersect" fragments as points-->
+    <intersect_points>river_explode_points.shp</intersect_points>
     <!-- rivers_table:  -->
     <rivers_table>river_elevs.dbf</rivers_table>
     <!-- CELLS:  -->

@@ -15,6 +15,8 @@ if SFRdata.preproc:
 
 SFRops = SFRc.SFROperations(SFRdata)
 
+SFRops.assign_layers(SFRdata)
+
 SFRops.intersect()
 
 FragIDdata = SFRc.FragIDPropsAll()
