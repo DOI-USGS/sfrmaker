@@ -12,6 +12,8 @@ import pickle
 import math
 import gzip
 from collections import defaultdict
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_pdf import PdfPages
 
 '''
 debugging functions
@@ -53,6 +55,9 @@ class SFRInput:
         self.preproc = self.tf2flag(inpars.findall('.//preproc')[0].text)
         self.reach_cutoff = float(inpars.findall('.//reach_cutoff')[0].text)
         self.rfact = float(inpars.findall('.//rfact')[0].text)
+        self.Lowerbot = self.tf2flag(inpars.findall('.//Lowerbot')[0].text)
+        self.buff = float(inpars.findall('.//buff')[0].text)
+        self.minimum_slope = float(inpars.findall('.//minimum_slope')[0].text)
         self.tpl = self.tf2flag(inpars.findall('.//tpl')[0].text)
         self.MFgrid = inpars.findall('.//MFgrid')[0].text
         self.MFdomain = inpars.findall('.//MFdomain')[0].text
@@ -84,7 +89,6 @@ class SFRInput:
         self.RCH = inpars.findall('.//RCH')[0].text
         self.nsfrpar = int(inpars.findall('.//nsfrpar')[0].text)
         self.nparseg = int(inpars.findall('.//nparseg')[0].text)
-        self.nsfrpar = float(inpars.findall('.//nsfrpar')[0].text)
         self.const = float(inpars.findall('.//const')[0].text)
         self.dleak = float(inpars.findall('.//dleak')[0].text)
         self.nstrail = int(inpars.findall('.//nstrail')[0].text)
@@ -114,7 +118,6 @@ class SFRInput:
         self.Hc1fact = float(inpars.findall('.//Hc1fact')[0].text)
         self.Hc2fact = float(inpars.findall('.//Hc2fact')[0].text)
         self.stream_depth = float(inpars.findall('.//stream_depth')[0].text)
-        self.bedthickness = float(inpars.findall('.//bedthickness')[0].text)
         self.minimum_slope = float(inpars.findall('.//minimum_slope')[0].text)
         self.roughness_coeff = float(inpars.findall('.//roughness_coeff')[0].text)
 
@@ -1301,6 +1304,114 @@ class SFROperations:
                             FragIDdata.allFragIDs[cFragID].cellnum
                             )
                         LevelPathdata.allids[clevelpathid].ordered_FragIDs.append(cFragID)
+
+    def assign_layers(self, SFRdata):
+        """
+        from Assign_Layers.py --> uses model layer information to assign SFR cells to proper layers
+        """
+
+        BotcorPDF = "Corrected_Bottom_Elevations.pdf"  # PDF file showing original and corrected bottom elevations
+        Layerinfo = "SFR_layer_assignments.txt"  # text file documenting how many reaches are in each layer as assigned
+        DX, DY, NLAY, NROW, NCOL, i = disutil.read_meta_data(SFRdata.MFdis)
+
+        print "Read in model grid top elevations from {0:s}".format(SFRdata.MFdis)
+        topdata, i = disutil.read_nrow_ncol_vals(SFRdata.MFdis, NROW, NCOL, np.float, i)
+        print "Read in model grid bottom layer elevations from {0:s}".format(SFRdata.MFdis)
+        bots = np.zeros([NLAY, NROW, NCOL])
+        for clay in np.arange(NLAY):
+            print 'reading layer {0:d}'.format(clay+1)
+            bots[clay, :, :], i = disutil.read_nrow_ncol_vals(SFRdata.MFdis, NROW, NCOL, np.float, i)
+        SFRinfo = np.genfromtxt(SFRdata.MAT1, delimiter=',', names=True, dtype=None)
+
+        print 'Now assiging stream cells to appropriate layers'
+        below_bottom = open('below_bot.csv', 'w')
+        below_bottom.write('SFRbot,ModelBot,Land_surf,cellnum,segment\n')
+        below_bot_adjust = defaultdict()  # list row,column locations where SFR goes below model bottom
+        nbelow = 0
+        New_Layers = []
+        for i in range(len(SFRinfo)):
+            r = SFRinfo['row'][i]
+            c = SFRinfo['column'][i]
+            STOP = SFRinfo['top_streambed'][i]
+            cellbottoms = list(bots[:, r-1, c-1])
+            for b in range(NLAY):
+                SFRbot = STOP - SFRdata.bedthick - SFRdata.buff
+                if SFRbot < cellbottoms[b]:
+                    if b+1 > nlayers:
+                        print 'Streambottom elevation={0:f}, Model bottom={1:f} at ' \
+                              'row {2:d}, column {3:d}, cellnum {4:d}'.format(
+                              SFRbot, cellbottoms[-1], r, c, (r-1)*NCOL + c)
+                        print 'Land surface is {0:f}'.format(topdata[r-1, c-1])
+                        below_bottom.write('{0:f},{1:f},{2:f},{3:d},{4:d}\n'.format(
+                            SFRbot, cellbottoms[-1], topdata[r-1, c-1], (r-1)*NCOL+c, SFRinfo['segment'][i]))
+                        below_bot_adjust[(r-1, c-1)] = cellbottoms[-1] - SFRbot  # diff between SFR bottom and model bot
+                        nbelow += 1
+                        New_Layers.append(b+1)
+                else:
+                    New_Layers.append(b+1)
+                    break
+        below_bottom.close()
+        New_Layers = np.array(New_Layers)
+        bots_orig = bots[-1, :, :].copy()  # keep a copy of non-changed bottom elevations for plotting
+
+        # create a new array of bottom elevations with dimensions like topdata
+        if Lowerbot:
+            print "\n\nAdjusting model bottom to accomdate SFR cells that were below bottom"
+            print "see {0:s}\n".format(BotcorPDF)
+            for r in range(NROW):
+                for c in range(NCOL):
+                    if (r, c) in below_bot_adjust.keys():
+                        bots[r, c] -= below_bot_adjust[(r, c)]
+
+            outarray = 'SFR_Adjusted_bottom_layer.dat'
+
+            with file(outarray, 'w') as outfile:
+                for slice_2d in bots:
+                    np.savetxt(outfile, slice_2d, fmt='%.5e')
+            outfile.close()
+
+            # show bottom before and after corrections
+            outpdf = PdfPages(BotcorPDF)
+            befaft = ['before', 'after']
+            for i, mat in enumerate([bots_orig, bots[-1, :, :]]):
+                plt.figure()
+                plt.imshow(mat)
+                plt.colorbar()
+                plt.title('Bottom of model {0:s} adjustment'.format(befaft[i]))
+                outpdf.savefig()
+            outpdf.close()
+
+        # histogram of layer assignments
+        freq = np.histogram(list(New_Layers), range(nlayers + 2)[1:])
+
+        # write new SFRmat1 file
+        print "\nWriting output to %s..." %(newSFRmat1)
+        ofp = open(newSFRmat1,'w')
+        ofp.write(','.join(SFRinfo.dtype.names)+'\n')
+
+        SFRinfo['layer'] = New_Layers
+        for i in range(len(SFRinfo)):
+            line = list(SFRinfo[i])
+            line = ','.join(map(str, line))
+            ofp.write('{0:s}\n'.format(line))
+        ofp.close()
+
+
+        # writeout info on Layer assignments
+        ofp = open(Layerinfo, 'w')
+        ofp.write('Layer\t\tNumber of assigned reaches\n')
+        print '\nLayer assignments:'
+        for i in range(nlayers):
+            ofp.write('{0:d}\t\t{1:d}\n'.format(freq[1][i], freq[0][i]))
+            print '{0:d}\t\t{1:d}\n'.format(freq[1][i], freq[0][i])
+        ofp.close()
+
+        if not Lowerbot:
+            if nbelow > 0:
+                print "Warning {0:d} SFR streambed bottoms were below the model bottom. See below_bots.csv".format(
+                    nbelow)
+        print "Done!"
+
 
     def build_SFR_package(self, SFRdata):
 
