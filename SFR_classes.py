@@ -123,7 +123,7 @@ class SFRInput:
         self.roughness_coeff = float(inpars.findall('.//roughness_coeff')[0].text)
         '''
         # read in model information
-        self.DX, self.DY, self.NLAY, self.NROW, self.NCOL, i = disutil.read_meta_data(self..MFdis)
+        self.DX, self.DY, self.NLAY, self.NROW, self.NCOL, i = disutil.read_meta_data(self.MFdis)
 
         try:
             self.eps = float(inpars.findall('.//eps')[0].text)
@@ -482,6 +482,7 @@ class FragIDPropsAll:
         self.noelev = dict()
         self.COMID_orderedFragID = dict()
         self.comid_FragID = None
+        self.cellnum_FragID = None
 
     def return_FragID_comid_list(self):
         """
@@ -507,6 +508,16 @@ class FragIDPropsAll:
             self.unique_cells.append(self.allFragIDs[cid].cellnum)
         self.unique_cells = set(self.unique_cells)
 
+    def return_cellnum_FragID(self):
+        """
+        method to return a default dictionary keyed by cellnum returning a list FragIDs - used
+        to relate the properties in the FragID object to the cellnumber
+        """
+        self.cellnum_FragID = {cellnum: [] for cellnum in self.unique_cells}
+        for cFragID in self.allFragIDs.iterkeys():
+            self.cellnum_FragID[self.allFragIDs[cFragID].cellnum].append(cFragID)
+
+
     def populate(self, SFRdata):
         """
         read in the main COMID-related properties from the intersect file
@@ -530,6 +541,8 @@ class FragIDPropsAll:
 
             self.allcomids.append(int(seg.COMID))
         self.allcomids = list(set(self.allcomids))
+        self.allFragIDs.return_unique_cells()
+        self.allFragIDs.return_cellnum_FragID()
 
 
 
@@ -553,11 +566,12 @@ class SFRReachProps(object):
     class containing an object for each reach
     """
     '''
-    __slots__ = ['cellnum','eff_length','eff_slope','elevreach','bedthick','bedK','roughch']
+    __slots__ = ['cellnum','eff_length','eff_width','eff_slope','elevreach','bedthick','bedK','roughch']
     '''
     def __init__(self):
         self.cellnum = None
         self.eff_length = None
+        self.eff_width = None
         self.eff_slope = None
         self.elevreach = None
         self.bedthick = None
@@ -596,7 +610,9 @@ class SFRSegmentsAll:
     """
     def __init__(self):
         self.allSegs = dict()              #dictionary of segment objects keyed by final segment number
-        self.confluences = defaultdict(list)    # dictionary of lists keyed by levelpathID
+        self.confluences = defaultdict(list)    #dictionary of lists keyed by levelpathID
+        self.allReaches = defaultdict(dict)     #default dictionary of reach objects
+                                                #keyed by final segment and reach allReaches[segment][reach] -> object
 
     def divide_at_confluences(self,LevelPathdata, FragIDdata, COMIDdata, CELLdata):
         #establish provisional segment numbers from downstream (decending)
@@ -653,7 +669,7 @@ class SFRSegmentsAll:
         subseg = dict()
         subconfl = defaultdict(list)
         subcell = dict()
-        subreaches = dict()
+        subordered_cells = dict()
         conf_count = 1
         for clevelpathid in LevelPathdata.level_ordered:
             iseg = provSFRseg[clevelpathid]
@@ -670,17 +686,17 @@ class SFRSegmentsAll:
                 #find the index that matches the cell given by conflunces[id][confl]
                 lpcells = LevelPathdata.allids[clevelpathid].ordered_cellnums
                 endindx = lpcells.index(self.confluences[clevelpathid][confl])
-                subreaches[sublabel] = lpcells[strt:endindx+1]
+                subordered_cells[sublabel] = lpcells[strt:endindx+1]
                 strt = endindx + 1
         #use confluence information to build final SFR segments and reaches
 
         for clevelpathid, iseg in provSFRseg.iteritems():
             for upstlabl in subconfl[iseg]:
                 self.allSegs[subseg[upstlabl]] = SFRSegmentProps()
-                self.allSegs[subseg[upstlabl]].seg_cells = subreaches[upstlabl]
+                self.allSegs[subseg[upstlabl]].seg_cells = subordered_cells[upstlabl]
                 self.allSegs[subseg[upstlabl]].seg_label = upstlabl
                 self.allSegs[subseg[upstlabl]].levelpathID = clevelpathid
-                lastcell = subreaches[upstlabl][-1]
+                lastcell = subordered_cells[upstlabl][-1]
                 nextlevelpath = LevelPathdata.allids[clevelpathid].down_levelpathID
                 if nextlevelpath == 0:
                     outseg = 0
@@ -697,7 +713,7 @@ class SFRSegmentsAll:
                             #or if the cell connected to the end of the current segment is the beginning
                             #of a segment (no overlap, end of current segment is connected to beginning of
                             #next segment in an adjacent cell)
-                            overlapcell=subreaches[dnlabl][0]
+                            overlapcell=subordered_cells[dnlabl][0]
                             if overlapcell==lastcell:
                                 self.allSegs[subseg[upstlabl]].outseg=subseg[dnlabl]
                                 foundout=True
@@ -720,41 +736,30 @@ class SFRSegmentsAll:
         """
         method to add lengths and weight widths and slopes
         for parts of a stream that have the same levelpathID
-        within a cell
+        within a cell and within the same SFR segment
+
+        THIS VERSION DOESN'T CHECK LEVELPATHID, JUST SUMS
+        ALL THE FRAGIDS IN A CELL FOR TESTING.....
         """
-        self.totlength=dict()   #these should be pointed to reach properties....
-        self.weightwidth=dict()
-        self.elevcell=dict()
-        self.weightedslope=dict()
-        for lpID in LevelPathdata.level_ordered:
-            segment=SFRprovseg[lpID]
-            for localcell in yyyyyy:
+
+        for segment in self.allSegs.iterkeys():
+            rch = 0
+            for localcell in self.allSegs[segment].seg_cells:
+                rch = rch + 1        #seg_cells attribute is ordered...
                 tt=0.
                 ww=0.
-                ws=0.
-                el=0.
-                for cFragID in xxxxxx:
-                    knt=0
-                    if lpcell==localcell:
-                        knt=knt+1
-                        tt = tt + FragIDdata.allFragIDs[cFragID].lengthft
-                        ww = ww + COMIDdata[ccomid].est_width* FragIDdata.allFragIDs[cFragID].lengthft
-                       # el = el +
-                       # ws = ws +
-                if knt==0:
-                    totlength[cFragID] = FragIDdata.allFragIDs[cFragID].lengthft
-                    #elevcell[lpID][localcell] = riverelev[localcell][0]
-                    #weightedslope[lpID][localcell] = cellslope[localcell][0]
-                    weightwidth[cFragID]= COMIDdata[ccomid].est_width
+                knt=0
+                for cFragID in allFragIDs.cellnum_FragID[localcell]:
+                    ccomid = FragIDdata.allFragIDs[cFragID].comid
+                    knt=knt+1
+                    tt = tt + FragIDdata.allFragIDs[cFragID].lengthft
+                    ww = ww + COMIDdata[ccomid].est_width* FragIDdata.allFragIDs[cFragID].lengthft
+
+                self.allReaches[segment][rch].eff_length = tt
+                if tt>0:
+                    self.allReaches[segment][rch].eff_width = ww/tt
                 else:
-                    totlength[cFragID] = tt
-                    #elevcell[cFragID]=el/float(knt)
-                    if tt>0:
-                        weightwidth[cFragID] = ww/tt
-                        #weightedslope[cFragID] = ws/tt
-                    else:
-                        weightwidth[cFragID] = 99999.
-                        #weightedslope[cFragID] = 99999.
+                    self.allReaches[segment][rch].eff_width = 99999.
 
 class SFRpreproc:
     def __init__(self, SFRdata):

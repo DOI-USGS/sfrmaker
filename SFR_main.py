@@ -64,6 +64,7 @@ SFRops.reach_ordering(instuff['COMIDdata'],
 '''
 Segmentdata = SFRc.SFRSegmentsAll()
 Segmentdata.divide_at_confluences(LevelPathdata, FragIDdata, COMIDdata, CELLdata)
+Segmentdata.accumulate_same_levelpathID(LevelPathdata, COMIDdata, FragIDdata)
 
 '''
 saveme ={}
