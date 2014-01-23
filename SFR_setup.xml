@@ -20,6 +20,8 @@ Notes on SFR input:
     <eps>1.0e-02</eps>
     <!-- A parameter from Assign_and_Route (needs definition!) -->
     <rfact>0.95</rfact>
+    <!-- flag for TPL file -->
+    <tpl>False</tpl>
 
 </GlobalSettings>
 <InputFiles>

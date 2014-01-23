@@ -81,6 +81,7 @@ class SFRInput:
         self.Contours_intersect = inpars.findall('.//Contours_intersect')[0].text
         self.Contours_intersect_distances = inpars.findall('.//Contours_intersect_distances')[0].text
         self.RCH = inpars.findall('.//RCH')[0].text
+        '''
         self.nsfrpar = int(inpars.findall('.//nsfrpar')[0].text)
         self.nparseg = int(inpars.findall('.//nparseg')[0].text)
         self.nsfrpar = float(inpars.findall('.//nsfrpar')[0].text)
@@ -116,7 +117,7 @@ class SFRInput:
         self.bedthickness = float(inpars.findall('.//bedthickness')[0].text)
         self.minimum_slope = float(inpars.findall('.//minimum_slope')[0].text)
         self.roughness_coeff = float(inpars.findall('.//roughness_coeff')[0].text)
-
+        '''
 
         try:
             self.eps = float(inpars.findall('.//eps')[0].text)
@@ -202,8 +203,7 @@ class COMIDprops(object):
                  'downhydrosequence', 'levelpathID','stream_order','arbolate_sum',
                  'est_width','reachcode','Fcode']
     '''
-    def __init__
-    (self):
+    def __init__(self):
         self.from_comid = list()
         self.to_comid = list()
         self.hydrosequence = None
@@ -265,7 +265,7 @@ class CellProps(object):
     class for cell objects
     """
     '''
-    __slots__ = ['delx', 'dely', 'sidelength', 'row', 'column']
+    __slots__ = ['delx', 'dely', 'sidelength', 'row', 'column', 'fromCell']
     '''
     def __init__(self, delx, dely, sidelength, row, column):
         self.delx = delx
@@ -273,6 +273,7 @@ class CellProps(object):
         self.sidelength = sidelength
         self.row = row
         self.column = column
+        self.fromCell = []
 
 class CellPropsAll:
     def __init__(self):
@@ -304,7 +305,7 @@ class COMIDPropsAll:
         self.hydrosequence_sorted = list()
         self.hydrosequence_comids = dict()
 
-    def populate_routing(self, SFRdata, FragIDdata, LevelPathdata):
+    def populate_routing(self, SFRdata, FragIDdata, LevelPathdata, CELLdata):
         """
         Read the COMID routing information from the SFRdata.FLOW file
         """
@@ -384,6 +385,37 @@ class COMIDPropsAll:
         comid_missing = list(set(FragIDdata.allcomids).difference(comidseen))
         if len(comid_missing) > 0:
             print "WARNING! the following COMIDs are missing from \n{0:s}".format('\n'.join(map(str(comid_missing))))
+
+        #populate the cell-to-cell routing dictionary, fromCell, using the routing information.
+        #this dictionary returns a list of cells and is keyed by cellnum- the list are the next downstream
+        #cell from the key.  It is a list because multiple stream segments could be going through a cell
+        #and connecting to different downstream cells
+
+        for ccomid in FragIDdata.COMID_orderedFragID:
+            if not comid in FragIDdata.noelev:
+                ordfragid = FragIDdata.COMID_orderedFragID[ccomid]
+                for i in range(0,len(ordfragid)-1):
+                    cfid = ordfragid[i]
+                    cfidp1 = ordfragid[i+1]
+                    fmcell = FragIDdata.allFragIDs[cfid].cellnum
+                    tocell = FragIDdata.allFragIDs[cfidp1].cellnum
+                    if not tocell == fmcell:
+                        if fmcell not in CELLdata.allcells:
+                            CELLdata.allcells[frmcell].fromCell = tocell
+                        else:
+                            CELLdata.allcells[fmcell].fromCell.append(tocell)
+                lastcell = FragIDdata.allFragIDs[ordfragid[-1]].cellnum
+                nextcomid = self.allcomids[ccomid].to_comid[0]
+                if nextcomid in FragIDdata.COMID_orderedFragID:
+                    nextordfragid = FragIDdata.COMID_orderedFragID[nextcomid]
+                    nextfragid = nextordfragid[0]
+                    if nextfragid in FragIDdata.allFragIDs:
+                        nextcell = FragIDdata.allFragIDs[nextfragid].cellnum
+                        if lastcell not in CELLdata.allcells:
+                            CELLdata.allcells[lastcell].fromCell = nextcell
+                        else:
+                            CELLdata.allcells[lastcell].fromCell.append(nextcell)
+
 
     def return_hydrosequence_comid(self):
         """
@@ -501,11 +533,10 @@ class SFRReachProps(object):
     class containing an object for each reach
     """
     '''
-    __slots__ = ['cellnum','rch_number','eff_length','eff_slope','elevreach','bedthick','bedK','roughch']
+    __slots__ = ['cellnum','eff_length','eff_slope','elevreach','bedthick','bedK','roughch']
     '''
     def __init__(self):
         self.cellnum = None
-        self.rch_number = None
         self.eff_length = None
         self.eff_slope = None
         self.elevreach = None
@@ -519,7 +550,8 @@ class SFRSegmentProps(object):
     class object to hold final SFR segment information
     """
     '''
-    __slots__ = ['seg_cells','icalc','iupseg','outseg','runoff','etsw','pptsw']
+    __slots__ = ['seg_cells','icalc','iupseg','outseg','runoff','etsw','pptsw',
+    'seg_reaches','seg_label','levelpathID']
     '''
     def __init__(self):
         self.seg_cells = list()
@@ -531,6 +563,8 @@ class SFRSegmentProps(object):
         self.estw = None
         self.pptsw = None
         self.seg_reaches = dict()   #reach object with properties from SFRReachProps keyed by rch_number
+        self.seg_label = None  #segment label from confluence step
+        self.levelpathID = None          #levelpathID corresponding to the segment
 
 
 class SFRSegmentsAll:
@@ -541,10 +575,10 @@ class SFRSegmentsAll:
     levelpathIDs and establish the final SFR segments
     """
     def __init__(self):
-        self.allSegs = dict()
+        self.allSegs = dict()              #dictionary of segment objects keyed by final segment number
         self.confluences = defaultdict(list)    # dictionary of lists keyed by levelpathID
 
-    def divide_at_confluences(self,LevelPathdata, FragIDdata, COMIDdata):
+    def divide_at_confluences(self,LevelPathdata, FragIDdata, COMIDdata, CELLdata):
         #establish provisional segment numbers from downstream (decending)
         #list of levelpathIDs
         provSFRseg = dict()
@@ -619,17 +653,13 @@ class SFRSegmentsAll:
                 subreaches[sublabel] = lpcells[strt:endindx+1]
                 strt = endindx + 1
         #use confluence information to build final SFR segments and reaches
-        self.SFRfinalreachlist = dict()    #dictionary keyed by final segment number to a list of cells
-        self.SFRfinaloutseg = dict()       #dictionary of outsegment keyed by final segment number
-        self.SFRfinalseg = dict()          #dictionary of segment labels from confluence step keyed by final segment number
-        self.SFRfinalID = dict()           #dictionary of levelpathID keyed by final segment number
 
-        CHK2=open('checksegments.txt','w')
         for clevelpathid, iseg in provSFRseg.iteritems():
             for upstlabl in subconfl[iseg]:
-                self.SFRfinalreachlist[subseg[upstlabl]] = subreaches[upstlabl]
-                self.SFRfinalseg[subseg[upstlabl]] = upstlabl
-                self.SFRfinalID[subseg[upstlabl]] = clevelpathid
+                self.allSegs[subseg[upstlabl]] = SFRSegmentProps()
+                self.allSegs[subseg[upstlabl]].seg_cells = subreaches[upstlabl]
+                self.allSegs[subseg[upstlabl]].seg_label = upstlabl
+                self.allSegs[subseg[upstlabl]].levelpathID = clevelpathid
                 lastcell = subreaches[upstlabl][-1]
                 nextlevelpath = LevelPathdata.allids[clevelpathid].down_levelpathID
                 if nextlevelpath == 0:
@@ -640,9 +670,8 @@ class SFRSegmentsAll:
                     else:
                         outseg = 0
                 if outseg > 0:
-                    outID = nextlevelpath
                     if outseg in subconfl:
-                        printed=False
+                        foundout=False
                         for dnlabl in subconfl[outseg]:
                             #see if the beginning of an outsegment matches the end of the current segment
                             #or if the cell connected to the end of the current segment is the beginning
@@ -650,37 +679,21 @@ class SFRSegmentsAll:
                             #next segment in an adjacent cell)
                             overlapcell=subreaches[dnlabl][0]
                             if overlapcell==lastcell:
-                                self.SFRfinaloutseg[subseg[upstlabl]]=subseg[dnlabl]
-                                plist=('overlap',iseg, upstlabl, subseg[upstlabl], lastcell, outseg, dnlabl, subseg[dnlabl], subreaches[dnlabl])
-                                CHK2.write(",".join(map(str,plist))+'\n')
-                                printed=True
-                            if not printed:
-                                for nxtdwnstream in set(fromCell[lastcell]):
-                                    if nxtdwnstream==overlapcell:
-                                        self.SFRfinaloutseg[subseg[upstlabl]]=subseg[dnlabl]
-                                        plist=('offset',iseg, upstlabl, subseg[upstlabl], lastcell, outseg, dnlabl, subseg[dnlabl], subreaches[dnlabl])
-                                        CHK2.write(",".join(map(str,plist))+'\n')
-                                        printed=True
+                                self.allSegs[subseg[upstlabl]].outseg=subseg[dnlabl]
+                                foundout=True
+                            if not foundout:
+                                for nxtdwnstream in set(CELLdata.allcells[lastcell].fromCell):
+                                    if nxtdwnstream == overlapcell:
+                                        self.allSegs[subseg[upstlabl]].outseg=subseg[dnlabl]
+                                        foundout=True
 
-                        if not printed:
-                            self.SFRfinaloutseg[subseg[upstlabl]]=int(99999)
-                            plist=('no connection',iseg,upstlabl,subseg[upstlabl],lastcell,99999,99999)
-                            CHK2.write(",".join(map(str,plist))+'\n')
+                        if not foundout:
+                            self.allSegs[subseg[upstlabl]].outseg=int(99999)
                     else:
-                        self.SFRfinaloutseg[subseg[upstlabl]]=int(0)
-                        plist=('downstream end',iseg,upstlabl,subseg[upstlabl],lastcell,0,0)
-                 else:
-                        self.SFRfinaloutseg[subseg[upstlabl]]=int(0)
-                        plist=('downstream end',iseg,upstlabl,subseg[upstlabl],lastcell,0,0)
-                        CHK2.write(",".join(map(str,plist))+'\n')       CHK2.write(",".join(map(str,plist))+'\n')
+                        self.allSegs[subseg[upstlabl]].outseg=int(0)
+                else:
+                    self.allSegs[subseg[upstlabl]].outseg=int(0)
 
-
-        CHK2.write('segment, confluence-based label, outsegment, cells(reaches) in segment\n')
-        for seg in self.SFRfinalseg.iterkeys():
-            CHK2.write("%d, %s, %d, " % (seg, self.SFRfinalseg[seg], self.SFRfinaloutseg[seg]))
-            CHK2.write("; ".join(map(str,self.SFRfinalreachlist[seg]))+"\n")
-
-        CHK2.close()
 
 
     def accumulate_same_levelpathID(self, LevelPathdata, COMIDdata, FragIDdata):
