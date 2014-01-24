@@ -90,6 +90,10 @@ class SFRInput:
         self.Contours_intersect = inpars.findall('.//Contours_intersect')[0].text
         self.Contours_intersect_distances = inpars.findall('.//Contours_intersect_distances')[0].text
         self.RCH = inpars.findall('.//RCH')[0].text
+<<<<<<< HEAD
+=======
+
+>>>>>>> upstream/classy
         self.nsfrpar = int(inpars.findall('.//nsfrpar')[0].text)
         self.nparseg = int(inpars.findall('.//nparseg')[0].text)
         self.const = float(inpars.findall('.//const')[0].text)
@@ -1473,7 +1477,11 @@ class SFROperations:
             for b in range(SFRdata.NLAY):
                 SFRbot = STOP - SFRdata.bedthick - SFRdata.buff
                 if SFRbot < cellbottoms[b]:
+<<<<<<< HEAD
                     if b+1 > SFRdata.NLAY:
+=======
+                    if b+1 > NLAY:
+>>>>>>> upstream/classy
                         print 'Streambottom elevation={0:f}, Model bottom={1:f} at ' \
                               'row {2:d}, column {3:d}, cellnum {4:d}'.format(
                               SFRbot, cellbottoms[-1], r, c, (r-1)*SFRdata.NCOL + c)
@@ -1521,8 +1529,13 @@ class SFROperations:
         freq = np.histogram(list(New_Layers), range(NLAY + 2)[1:])
 
         # write new SFRmat1 file
+<<<<<<< HEAD
+        print "\nWriting output to %s..." %(newSFRmat1)
+        ofp = open(newSFRmat1, 'w')
+=======
         print "\nWriting output to %s..." %(SFRdata.MAT1)
         ofp = open(SFRdata.MAT1,'w')
+>>>>>>> upstream/classy
         ofp.write(','.join(SFRinfo.dtype.names)+'\n')
 
         SFRinfo['layer'] = New_Layers
@@ -1537,7 +1550,11 @@ class SFROperations:
         ofp = open(Layerinfo, 'w')
         ofp.write('Layer\t\tNumber of assigned reaches\n')
         print '\nLayer assignments:'
+<<<<<<< HEAD
         for i in range(SFRdata.NLAY):
+=======
+        for i in range(NLAY):
+>>>>>>> upstream/classy
             ofp.write('{0:d}\t\t{1:d}\n'.format(freq[1][i], freq[0][i]))
             print '{0:d}\t\t{1:d}\n'.format(freq[1][i], freq[0][i])
         ofp.close()
