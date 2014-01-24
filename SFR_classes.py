@@ -90,7 +90,7 @@ class SFRInput:
         self.Contours_intersect = inpars.findall('.//Contours_intersect')[0].text
         self.Contours_intersect_distances = inpars.findall('.//Contours_intersect_distances')[0].text
         self.RCH = inpars.findall('.//RCH')[0].text
-
+        self.Elev_method = inpars.findall('.//Elev_method')[0].text
         self.nsfrpar = int(inpars.findall('.//nsfrpar')[0].text)
         self.nparseg = int(inpars.findall('.//nparseg')[0].text)
         self.const = float(inpars.findall('.//const')[0].text)
@@ -183,17 +183,17 @@ class FragIDprops(object):
     '''
     __slots__ = ['comid', 'startx', 'starty', 'endx', 'endy', 'FragID',
                  'maxsmoothelev', 'minsmoothelev', 'lengthft',
-                 'cellnum', 'contour_elev','elev', 'sidelength',
-                 'segelevinfo', 'start_has_end', 'end_has_start', 'elev_distance', 'segelevinfo',
-                 'elev_min','elev_max','elev_mean','DEM_elev_min','DEM_elev_min','DEM_elev_min', 'smoothed_DEM_elev_min',
-                  'smoothed_DEM_elev_max', 'smoothed_DEM_elev_mean', 'slope']
+                 'cellnum', 'elev', 'sidelength',
+                 'segelevinfo', 'start_has_end', 'end_has_start', 'contour_elev', 'contour_elev_distance', 'segelevinfo',
+                 'interpolated_contour_elev_min','interpolated_contour_elev_max','DEM_elev_max','DEM_elev_min', 'smoothed_DEM_elev_min',
+                  'smoothed_DEM_elev_max', 'slope']
     '''
     #  using __slots__ makes it required to declare properties of the object here in place
     #  and saves significant memory
     def __init__(self, comid, startx, starty, endx, endy, FragID,
-                 maxsmoothelev, minsmoothelev, lengthft, cellnum, contour_elev, elev_distance, segelevinfo, elev_min,
-                 elev_max, elev_mean, DEM_elev_min, DEM_elev_max, DEM_elev_mean, smoothed_DEM_elev_min,
-                 smoothed_DEM_elev_max, smoothed_DEM_elev_mean, slope):
+                 maxsmoothelev, minsmoothelev, lengthft, cellnum, contour_elev, contour_elev_distance, segelevinfo, interpolated_contour_elev_min,
+                 interpolated_contour_elev_max, DEM_elev_min, DEM_elev_max, smoothed_DEM_elev_min,
+                 smoothed_DEM_elev_max, slope):
         self.comid = comid
         self.startx = startx
         self.starty = starty
@@ -205,17 +205,14 @@ class FragIDprops(object):
         self.lengthft = lengthft
         self.cellnum = cellnum
         self.contour_elev = contour_elev
+        self.contour_elev_distance = contour_elev_distance
         self.segelevinfo = segelevinfo
-        self.elev_min = elev_min
-        self.elev_max = elev_max
-        self.elev_mean = elev_mean
-        self.elev_distance = elev_distance
+        self.interpolated_contour_elev_min = interpolated_contour_elev_min
+        self.interpolated_contour_elev_max = interpolated_contour_elev_max
         self.DEM_elev_min = DEM_elev_min
         self.DEM_elev_max = DEM_elev_max
-        self.DEM_elev_mean = DEM_elev_mean
-        self.smoothed_DEM_elev_min = smoothed_DEM_elev_min # ATL: I wonder if we want to break out the calculated elevations into their own object class
+        self.smoothed_DEM_elev_min = smoothed_DEM_elev_min
         self.smoothed_DEM_elev_max = smoothed_DEM_elev_max
-        self.smoothed_DEM_elev_mean = smoothed_DEM_elev_mean
         self.slope = slope
 
 
@@ -542,7 +539,7 @@ class FragIDPropsAll:
                 float(seg.MINELEVSMO)*SFRdata.z_conversion,  # UNIT CONVERSION
                 float(seg.LengthFt),
                 seg.cellnum,
-                list(), list(), None, None, None, None, None, None, None, None, None, None, None)
+                list(), list(), None, None, None, None, None, None, None, None)
 
             self.allcomids.append(int(seg.COMID))
         self.allcomids = list(set(self.allcomids))
@@ -923,8 +920,6 @@ class SFRpreproc:
                 self.ofp.write("%d ThinnerCod=-9\n" % segments.getValue(self.joinnames['comid']))
                 FLtable.deleteRow(segments)
                 tcount += 1
-        #  read in discretization information
-        DX, DY, NLAY, NROW, NCOL, i = disutil.read_meta_data(indat.MFdis)
 
         # update the "node" field in indat.MFgrid
         # if there is a field with unique values, assume it's ok
@@ -960,7 +955,7 @@ class SFRpreproc:
                 if fld == 'cellnum':
                     arcpy.DeleteField_management(indat.MFgrid, 'cellnum')
             arcpy.AddField_management(indat.MFgrid, 'cellnum', 'LONG')
-            calcexpression = '((!row!-1)*{0:d}) + !column!'.format(NCOL)
+            calcexpression = '((!row!-1)*{0:d}) + !column!'.format(indat.NCOL)
             arcpy.CalculateField_management(indat.MFgrid, 'cellnum', calcexpression, 'PYTHON')
             print 'updated "cellnum" field in {0:s}'.format(indat.MFgrid)
 
@@ -1455,15 +1450,14 @@ class SFROperations:
 
         BotcorPDF = "Corrected_Bottom_Elevations.pdf"  # PDF file showing original and corrected bottom elevations
         Layerinfo = "SFR_layer_assignments.txt"  # text file documenting how many reaches are in each layer as assigned
-        DX, DY, NLAY, NROW, NCOL, i = disutil.read_meta_data(SFRdata.MFdis)
 
         print "Read in model grid top elevations from {0:s}".format(SFRdata.MFdis)
         topdata, i = disutil.read_nrow_ncol_vals(SFRdata.MFdis, NROW, NCOL, np.float, i)
         print "Read in model grid bottom layer elevations from {0:s}".format(SFRdata.MFdis)
-        bots = np.zeros([NLAY, NROW, NCOL])
-        for clay in np.arange(NLAY):
+        bots = np.zeros([SFRdata.NLAY, SFRdata.NROW, SFRdata.NCOL])
+        for clay in np.arange(SFRdata.NLAY):
             print 'reading layer {0:d}'.format(clay+1)
-            bots[clay, :, :], i = disutil.read_nrow_ncol_vals(SFRdata.MFdis, NROW, NCOL, np.float, i)
+            bots[clay, :, :], i = disutil.read_nrow_ncol_vals(SFRdata.MFdis, SFRdata.NROW, SFRdata.NCOL, np.float, i)
         SFRinfo = np.genfromtxt(SFRdata.MAT1, delimiter=',', names=True, dtype=None)
 
         print 'Now assiging stream cells to appropriate layers'
@@ -1477,16 +1471,16 @@ class SFROperations:
             c = SFRinfo['column'][i]
             STOP = SFRinfo['top_streambed'][i]
             cellbottoms = list(bots[:, r-1, c-1])
-            for b in range(NLAY):
+            for b in range(SFRdata.NLAY):
                 SFRbot = STOP - SFRdata.bedthick - SFRdata.buff
                 if SFRbot < cellbottoms[b]:
-                    if b+1 > NLAY:
+                    if b+1 > SFRdata.NLAY:
                         print 'Streambottom elevation={0:f}, Model bottom={1:f} at ' \
                               'row {2:d}, column {3:d}, cellnum {4:d}'.format(
-                              SFRbot, cellbottoms[-1], r, c, (r-1)*NCOL + c)
+                              SFRbot, cellbottoms[-1], r, c, (r-1)*SFRdata.NCOL + c)
                         print 'Land surface is {0:f}'.format(topdata[r-1, c-1])
                         below_bottom.write('{0:f},{1:f},{2:f},{3:d},{4:d}\n'.format(
-                            SFRbot, cellbottoms[-1], topdata[r-1, c-1], (r-1)*NCOL+c, SFRinfo['segment'][i]))
+                            SFRbot, cellbottoms[-1], topdata[r-1, c-1], (r-1)*SFRdata.NCOL+c, SFRinfo['segment'][i]))
                         below_bot_adjust[(r-1, c-1)] = cellbottoms[-1] - SFRbot  # diff between SFR bottom and model bot
                         nbelow += 1
                         New_Layers.append(b+1)
@@ -1501,8 +1495,8 @@ class SFROperations:
         if SFRdata.Lowerbot:
             print "\n\nAdjusting model bottom to accomdate SFR cells that were below bottom"
             print "see {0:s}\n".format(BotcorPDF)
-            for r in range(NROW):
-                for c in range(NCOL):
+            for r in range(SFRdata.NROW):
+                for c in range(SFRdata.NCOL):
                     if (r, c) in below_bot_adjust.keys():
                         bots[r, c] -= below_bot_adjust[(r, c)]
 
@@ -1544,7 +1538,7 @@ class SFROperations:
         ofp = open(Layerinfo, 'w')
         ofp.write('Layer\t\tNumber of assigned reaches\n')
         print '\nLayer assignments:'
-        for i in range(NLAY):
+        for i in range(SFRdata.NLAY):
             ofp.write('{0:d}\t\t{1:d}\n'.format(freq[1][i], freq[0][i]))
             print '{0:d}\t\t{1:d}\n'.format(freq[1][i], freq[0][i])
         ofp.close()
@@ -1554,89 +1548,6 @@ class SFROperations:
                 print "Warning {0:d} SFR streambed bottoms were below the model bottom. See below_bots.csv".format(
                     nbelow)
         print "Done!"
-
-
-    def build_SFR_package(self, SFRdata):
-
-        print "Building new SFR package file..."
-        Mat1 = np.genfromtxt(SFRdata.MAT1, delimiter=',', names=True, dtype=None)
-        Mat2 = np.genfromtxt(SFRdata.MAT1, names=True, delimiter=',', dtype=None)
-
-        SFRoutfile = SFRdata.OUT
-
-        if SFRdata.tpl:
-            SFRoutfile = '_'.join(SFRdata.OUT.split('.'))+'.tpl'
-        else:
-            # if building an SFR package (after PEST has written it)
-            # read in PEST-adjusted value for streambed conductance
-            SFRinputdata = open(SFRoutfile, 'r').readlines()
-            Cond = float(SFRinputdata[3].strip().split()[-1])
-            Mat1['bed_K'] = np.ones(len(Mat1))*Cond
-        nreaches = len(Mat1)
-        nseg = np.max(Mat1['segment'])
-        ofp = open(SFRoutfile, 'w')
-        if SFRdata.tpl:
-            ofp.write("ptf ~\n")
-        ofp.write("#SFRpackage file generated by Python Script using NHDPlus v2 data\n")
-        ofp.write('{0:d} {1:d} {2:d} {3:d} {4:d} {5:d} {6:d} {7:d} {8:d} {9:d} {10:d} {11:d}\n'.format(
-            -1*nreaches,
-            nseg,
-            SFRdata.nsfrpar,
-            SFRdata.nparseg,
-            SFRdata.const,
-            SFRdata.dleak,
-            SFRdata.istcb1,
-            SFRdata.istcb2,
-            SFRdata.isfropt,
-            SFRdata.nstrail,
-            SFRdata.isuzn,
-            SFRdata.nsfrsets
-        ))
-
-        for i in range(len(Mat1)):
-            slope = Mat1['bed_slope'][i]
-            if slope <= SFRdata.minimum_slope: # one last check for negative or zero slopes
-                slope = SFRdata.minimum_slope
-            if SFRdata.tpl:
-                bedK = '~SFRc'
-            else:
-                bedK = '{0:e}'.format(Mat1['bed_K'][i])
-            ofp.write('{0:d} {1:d} {2:d} {3:d} {4:d} {5:e} {6:e} {7:e} {8:e} {9:s}\n'.format(
-                Mat1['layer'][i],
-                Mat1['row'][i],
-                Mat1['column'][i],
-                Mat1['segment'][i],
-                Mat1['reach'][i],
-                Mat1['length_in_cell'][i],
-                Mat1['top_streambed'][i],
-                slope,
-                SFRdata.bedthick,
-                bedK))
-        ofp.write('{0:d} 0 0 0\n'.format(nseg))
-        for i in range(len(Mat2)):
-            seg = Mat2['segment'][i]
-            seg_Mat1_inds = np.where(Mat1['segment'] == seg)
-            seginfo = Mat1[seg_Mat1_inds]
-            ofp.write('{0:d} {1:d} {2:d} 0 {3:e} 0.0 0.0 0.0 {4:e}\n'.format(
-                seg,
-                SFRdata.icalc,
-                Mat2['outseg'][i],
-                Mat2['flow'][i],
-                SFRdata.roughness_coeff
-                ))
-
-            if SFRdata.modify_segment_widths and seg in segments2modify:
-                ofp.write('{0:e}\n'.format(seginfo['width_in_cell'][0]))
-                ofp.write('{0:e}\n'.format(seginfo['width_in_cell'][-1]))
-            else:
-                if icalc==0:
-                    ofp.write('{0:e} {1:e}\n'.format(seginfo['width_in_cell'][0], SFRdata.stream_depth))
-                    ofp.write('{0:e} {1:e}\n'.format(seginfo['width_in_cell'][-1], SFRdata.stream_depth))
-                else:
-                    ofp.write('{0:e}\n'.format(seginfo['width_in_cell'][0]))
-                    ofp.write('{0:e}\n'.format(seginfo['width_in_cell'][-1]))
-        ofp.close()
-
 
 class ElevsFromContours:
     def __init__(self, SFRdata):
@@ -1659,24 +1570,24 @@ class ElevsFromContours:
         if end_fid == FragIDdata.COMID_orderedFragID[self.current_comid][-1]:
             # downstream contour was below current comid
             dist += self.downstream_dist
-            FragIDdata.allFragIDs[end_fid].elev_min = self.end_elev + self.slope * dist
+            FragIDdata.allFragIDs[end_fid].interpolated_contour_elev_min = self.end_elev + self.slope * dist
             dist += FragIDdata.allFragIDs[end_fid].lengthft
-            FragIDdata.allFragIDs[end_fid].elev_max = self.end_elev + self.slope * dist
+            FragIDdata.allFragIDs[end_fid].interpolated_contour_elev_max = self.end_elev + self.slope * dist
 
         else:
-            dist = np.min(FragIDdata.allFragIDs[end_fid].elev_distance)
-            FragIDdata.allFragIDs[end_fid].elev_max = self.end_elev + self.slope * dist
-        print 'fid:%s min/max elevs %s %s' % (end_fid, FragIDdata.allFragIDs[end_fid].elev_min, FragIDdata.allFragIDs[end_fid].elev_max)
+            dist = np.min(FragIDdata.allFragIDs[end_fid].contour_elev_distance)
+            FragIDdata.allFragIDs[end_fid].interpolated_contour_elev_max = self.end_elev + self.slope * dist
+        print 'fid:%s min/max elevs %s %s' % (end_fid, FragIDdata.allFragIDs[end_fid].interpolated_contour_elev_min, FragIDdata.allFragIDs[end_fid].interpolated_contour_elev_max)
 
         # compute max and min elevations in subsequent FragIDs
         ind = end_reach
         for FragID in FragIDdata.COMID_orderedFragID[self.current_comid][start_reach:end_reach][::-1]:
             ind -= 1
             previous_fid = FragIDdata.COMID_orderedFragID[self.current_comid][ind + 1]
-            FragIDdata.allFragIDs[FragID].elev_min = FragIDdata.allFragIDs[previous_fid].elev_max
+            FragIDdata.allFragIDs[FragID].interpolated_contour_elev_min = FragIDdata.allFragIDs[previous_fid].interpolated_contour_elev_max
             dist += FragIDdata.allFragIDs[FragID].lengthft
-            FragIDdata.allFragIDs[FragID].elev_max = self.end_elev + self.slope * dist
-            print 'FragID:%s min/max elevs %s %s' % (FragID, FragIDdata.allFragIDs[FragID].elev_min, FragIDdata.allFragIDs[FragID].elev_max)
+            FragIDdata.allFragIDs[FragID].interpolated_contour_elev_max = self.end_elev + self.slope * dist
+            print 'FragID:%s min/max elevs %s %s' % (FragID, FragIDdata.allFragIDs[FragID].interpolated_contour_elev_min, FragIDdata.allFragIDs[FragID].interpolated_contour_elev_max)
 
 
     def get_dist_slope(self, comid, FragIDdata, COMIDdata):
@@ -1701,7 +1612,7 @@ class ElevsFromContours:
                             break
                     # found contour; assign downstream elev
                     elif FragID in self.elevs_edited:
-                        self.downstream_dist += np.min(FragIDdata.allFragIDs[FragID].elev_distance)
+                        self.downstream_dist += np.min(FragIDdata.allFragIDs[FragID].contour_elev_distance)
                         self.downstream_contour_comid = comid
                         self.end_elev = np.max(FragIDdata.allFragIDs[FragID].contour_elev)
                         self.downstream = False
@@ -1765,7 +1676,7 @@ class ElevsFromContours:
                     elif FragID in self.elevs_edited:
 
                         # calculate distance; reset downstream distance
-                        self.upstream_dist += FragIDdata.allFragIDs[FragID].lengthft - np.max(FragIDdata.allFragIDs[FragID].elev_distance)
+                        self.upstream_dist += FragIDdata.allFragIDs[FragID].lengthft - np.max(FragIDdata.allFragIDs[FragID].contour_elev_distance)
 
                         # set start_elev and calculate slope
                         self.start_elev = np.min(FragIDdata.allFragIDs[FragID].contour_elev)
@@ -1812,7 +1723,7 @@ class ElevsFromContours:
                     # up and downstream slopes from an intersected FragID are calculated using
                     # respective max and min intersected contour values
                     FragIDdata.allFragIDs[FragID].contour_elev.append(float(row.ContourEle))
-                    FragIDdata.allFragIDs[FragID].elev_distance.append(float(row.fmp))
+                    FragIDdata.allFragIDs[FragID].contour_elev_distance.append(float(row.fmp))
 
                     self.elevs_edited.append(FragID)
 
@@ -1835,7 +1746,7 @@ class ElevsFromContours:
                     # up and downstream slopes from an intersected FragID are calculated using
                     # respective max and min intersected contour values
                     FragIDdata.allFragIDs[FragID].contour_elev.append(float(row['ContourEle']))
-                    FragIDdata.allFragIDs[FragID].elev_distance.append(float(row['fmp']))
+                    FragIDdata.allFragIDs[FragID].contour_elev_distance.append(float(row['fmp']))
 
                     self.elevs_edited.append(FragID)
 
@@ -1930,7 +1841,7 @@ class ElevsFromContours:
                 self.end_FragID = self.start_FragID
                 self.end_elev = self.start_elev
                 try:
-                    self.upstream_dist = np.min(FragIDdata.allFragIDs[self.end_FragID].elev_distance)
+                    self.upstream_dist = np.min(FragIDdata.allFragIDs[self.end_FragID].contour_elev_distance)
                 except ValueError:
                     self.upstream_dist = 0
                 self.end_reach = FragIDdata.COMID_orderedFragID[comid].index(self.start_FragID)
@@ -1996,8 +1907,8 @@ class ElevsFromContours:
                 # so that any subsequent interpolation from upstream will stop here
                 # (avoids problems with multiple interpolations through confluence)
 
-                FragIDdata.allFragIDs[self.start_FragID].contour_elev = FragIDdata.allFragIDs[self.start_FragID].elev_max
-                FragIDdata.allFragIDs[self.start_FragID].elev_distance = [0]
+                FragIDdata.allFragIDs[self.start_FragID].contour_elev = FragIDdata.allFragIDs[self.start_FragID].interpolated_contour_elev_max
+                FragIDdata.allFragIDs[self.start_FragID].contour_elev_distance = [0]
                 self.elevs_edited.append(self.start_FragID)
 
 
@@ -2089,7 +2000,7 @@ class ElevsFromDEM:
             FragIDdata.allFragIDs[reachlist[i]].slope = slope
 
             self.ofp.write('{0}\n'.format(FragIDdata.allFragIDs[reachlist[i]].smoothed_DEM_elev_min))
-            print "Reach {0}, max_elev: {1}, min_elev: {2}".format(reachlist[i],
+            print "Reach {0}, max_elev: {1}, min_elev: {2}".format(i,
             FragIDdata.allFragIDs[reachlist[i]].smoothed_DEM_elev_max, FragIDdata.allFragIDs[reachlist[i]].smoothed_DEM_elev_min)
 
 
@@ -2107,6 +2018,9 @@ class ElevsFromDEM:
 
         for comid in FragIDdata.COMID_orderedFragID.keys():
             print comid
+
+            if comid == 1796827:
+                j=2
             FragIDs = FragIDdata.COMID_orderedFragID[comid]
             self.ind_current_minimum = 0
 
@@ -2122,8 +2036,13 @@ class ElevsFromDEM:
             for i in range(len(FragIDs))[1:]:
 
                 # assign DEM elevations at Fragment ends using intersections with adjacent fragment pairs
-                FragIDdata.allFragIDs[FragIDs[i-1]].DEM_elev_min = \
-                list(set(self.ElevsbyFragID[FragIDs[i-1]]).intersection(set(self.ElevsbyFragID[FragIDs[i]])))[0]
+                #FragIDdata.allFragIDs[FragIDs[i-1]].DEM_elev_min = \
+                #list(set(self.ElevsbyFragID[FragIDs[i-1]]).intersection(set(self.ElevsbyFragID[FragIDs[i]])))[0]
+
+                # assign DEM elevation at previous Fragment end (same as current Fragment start),
+                # using minimum of sampled DEM elevations
+                FragIDdata.allFragIDs[FragIDs[i-1]].DEM_elev_min = np.min(self.ElevsbyFragID[FragIDs[i-1]])
+
                 FragIDdata.allFragIDs[FragIDs[i]].DEM_elev_max = FragIDdata.allFragIDs[FragIDs[i-1]].DEM_elev_min
 
                 # adjusted elevation initially set at DEM elevation for beginning of current reach
@@ -2185,9 +2104,118 @@ class ElevsFromDEM:
                     continue
 
                 if FragIDdata.allFragIDs[FragIDs[i]].smoothed_DEM_elev_max:
-                    print "Reach {0}, max_elev: {1}, min_elev: {2}".format(i, FragIDdata.allFragIDs[FragIDs[i]].smoothed_DEM_elev_max,
-                                                                       FragIDdata.allFragIDs[FragIDs[i]].smoothed_DEM_elev_min)
+                    print "Reach {0}, max_elev: {1}, min_elev: {2}".format(i-1, FragIDdata.allFragIDs[FragIDs[i-1]].smoothed_DEM_elev_max,
+                                                                       FragIDdata.allFragIDs[FragIDs[i-1]].smoothed_DEM_elev_min)
         self.ofp.close()
+
+class SFRoutput:
+    """
+    Class with methods to write the output both for external processors (e.g. GWV)
+    and also to write the SFR file
+    """
+    def __init__(self, SFRdata):
+        self.indat = SFRdata
+
+    def write_SFR_tables(self, SFRSegsAll):
+        #open GWV files
+        mat1out = open(self.indat.MAT1, 'w')
+        mat1out.write('row,column,layer,stage,top_streambed,reach,segment,'
+                      'width_in_cell,length_in_cell,bed_K,bed_thickness,bed_slope,bed_roughness\n')
+
+        mat2out = open(self.indat.MAT2, 'w')
+        mat2out.write('segment,icalc,outseg,iupseg,iprior,nstrpts,flow,runoff,'
+                      'etsw,pptsw,roughch,roughbk,cdepth,fdepth,awdth,bwdth\n')
+
+        seglist = sorted(list(SFRSegsAll.allSegs.keys()), reverse=True)
+        nss = len(seglist)  # calcualte the total number of segments
+
+        for cseg in seglist:
+            reachlist = sorted(SFRSegsAll.allSegs[cseg].seg_reaches)
+            for creach in reachlist:
+                printstring = ()
+
+    def build_SFR_package(self):
+
+        print "Building new SFR package file..."
+        Mat1 = np.genfromtxt(self.indat.MAT1, delimiter=',', names=True, dtype=None)
+        Mat2 = np.genfromtxt(self.indat.MAT1, names=True, delimiter=',', dtype=None)
+
+        SFRoutfile = self.indat.OUT
+
+        if self.indat.tpl:
+            SFRoutfile = '_'.join(self.indat.OUT.split('.'))+'.tpl'
+        else:
+            # if building an SFR package (after PEST has written it)
+            # read in PEST-adjusted value for streambed conductance
+            SFRinputdata = open(SFRoutfile, 'r').readlines()
+            Cond = float(SFRinputdata[3].strip().split()[-1])
+            Mat1['bed_K'] = np.ones(len(Mat1))*Cond
+        nreaches = len(Mat1)
+        nseg = np.max(Mat1['segment'])
+        ofp = open(SFRoutfile, 'w')
+        if self.indat.tpl:
+            ofp.write("ptf ~\n")
+        ofp.write("#SFRpackage file generated by Python Script using NHDPlus v2 data\n")
+        ofp.write('{0:d} {1:d} {2:d} {3:d} {4:d} {5:d} {6:d} {7:d} {8:d} {9:d} {10:d} {11:d}\n'.format(
+            -1*nreaches,
+            nseg,
+            self.indat.nsfrpar,
+            self.indat.nparseg,
+            self.indat.const,
+            self.indat.dleak,
+            self.indat.istcb1,
+            self.indat.istcb2,
+            self.indat.isfropt,
+            self.indat.nstrail,
+            self.indat.isuzn,
+            self.indat.nsfrsets
+        ))
+
+        for i in range(len(Mat1)):
+            slope = Mat1['bed_slope'][i]
+            if slope <= self.indat.minimum_slope: # one last check for negative or zero slopes
+                slope = self.indat.minimum_slope
+            if self.indat.tpl:
+                bedK = '~SFRc'
+            else:
+                bedK = '{0:e}'.format(Mat1['bed_K'][i])
+            ofp.write('{0:d} {1:d} {2:d} {3:d} {4:d} {5:e} {6:e} {7:e} {8:e} {9:s}\n'.format(
+                Mat1['layer'][i],
+                Mat1['row'][i],
+                Mat1['column'][i],
+                Mat1['segment'][i],
+                Mat1['reach'][i],
+                Mat1['length_in_cell'][i],
+                Mat1['top_streambed'][i],
+                slope,
+                self.indat.bedthick,
+                bedK))
+
+        ofp.write('{0:d} 0 0 0\n'.format(nseg))
+        for i in range(len(Mat2)):
+            seg = Mat2['segment'][i]
+            seg_Mat1_inds = np.where(Mat1['segment'] == seg)
+            seginfo = Mat1[seg_Mat1_inds]
+            ofp.write('{0:d} {1:d} {2:d} 0 {3:e} 0.0 0.0 0.0 {4:e}\n'.format(
+                seg,
+                self.indat.icalc,
+                Mat2['outseg'][i],
+                Mat2['flow'][i],
+                self.indat.roughness_coeff
+                ))
+
+            if self.indat.modify_segment_widths and seg in segments2modify:
+                ofp.write('{0:e}\n'.format(seginfo['width_in_cell'][0]))
+                ofp.write('{0:e}\n'.format(seginfo['width_in_cell'][-1]))
+            else:
+                if self.indat.icalc == 0:
+                    ofp.write('{0:e} {1:e}\n'.format(seginfo['width_in_cell'][0], self.indat.stream_depth))
+                    ofp.write('{0:e} {1:e}\n'.format(seginfo['width_in_cell'][-1], self.indat.stream_depth))
+                else:
+                    ofp.write('{0:e}\n'.format(seginfo['width_in_cell'][0]))
+                    ofp.write('{0:e}\n'.format(seginfo['width_in_cell'][-1]))
+        ofp.close()
+
 
 def widthcorrelation(arbolate):
     #estimate widths, equation from Feinstein and others (Lake
