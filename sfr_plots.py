@@ -16,9 +16,11 @@ class plot_segments:
         self.elevs_by_cellnum = dict()
         self.seg_dist_dict = dict()
         self.seg_elev_dict = dict()
+        self.seg_elev_fromDEM_dict = dict()
         self.L1top_elev_dict = dict()
-        self.profiles = [self.L1top_elev_dict, self.seg_elev_dict]
-        self.profile_names = ['model top', 'streambed elevations interpolated from topographic contours']
+        self.profiles = [self.L1top_elev_dict, self.seg_elev_dict, self.seg_elev_fromDEM_dict]
+        self.profile_names = ['model top', 'streambed elevations interpolated from topographic contours',
+                               'smoothed streambed elevations sampled from DEM']
 
 
     def read_DIS(self):
@@ -37,23 +39,27 @@ class plot_segments:
                 self.elevs_by_cellnum[cellnum] = self.layer_elevs[0, r, c]
 
 
-    def get_segment_plotting_info(self, FIDdata):
+    def get_segment_plotting_info(self, FragIDdata):
 
         for seg in self.segs2plot:
             distances = []
             elevs = []
+            elevs_fromDEM = []
             L1top_top_elevs = []
             dist = 0
-            for fid in FIDdata.COMID_orderedFID[seg]:
-                dist += FIDdata.allfids[fid].lengthft
+            for fid in FragIDdata.COMID_orderedFragID[seg]:
+                dist += FragIDdata.allFragIDs[fid].lengthft
                 distances.append(dist)
-                mean_elev = 0.5 * (FIDdata.allfids[fid].elev_max + FIDdata.allfids[fid].elev_min)
+                mean_elev = 0.5 * (FragIDdata.allFragIDs[fid].elev_max + FragIDdata.allFragIDs[fid].elev_min)
+                mean_elev_fromDEM = 0.5 * (FragIDdata.allFragIDs[fid].smoothed_DEM_elev_max + FragIDdata.allFragIDs[fid].smoothed_DEM_elev_min)
                 elevs.append(mean_elev)
-                cellnum = FIDdata.allfids[fid].cellnum
+                elevs_fromDEM.append(mean_elev_fromDEM)
+                cellnum = FragIDdata.allFragIDs[fid].cellnum
                 L1top_top_elevs.append(self.elevs_by_cellnum[cellnum])
 
             self.seg_dist_dict[seg] = distances
             self.seg_elev_dict[seg] = elevs
+            self.seg_elev_fromDEM_dict[seg] = elevs_fromDEM
             self.L1top_elev_dict[seg] = L1top_top_elevs
 
 

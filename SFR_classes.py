@@ -119,7 +119,7 @@ class SFRInput:
         self.roughness_coeff = float(inpars.findall('.//roughness_coeff')[0].text)
 
         # read in model information
-        self.DX, self.DY, self.NLAY, self.NROW, self.NCOL, i = disutil.read_meta_data(self..MFdis)
+        self.DX, self.DY, self.NLAY, self.NROW, self.NCOL, i = disutil.read_meta_data(self.MFdis)
 
         try:
             self.eps = float(inpars.findall('.//eps')[0].text)
@@ -178,14 +178,15 @@ class FragIDprops(object):
                  'maxsmoothelev', 'minsmoothelev', 'lengthft',
                  'cellnum', 'contour_elev','elev', 'sidelength',
                  'segelevinfo', 'start_has_end', 'end_has_start', 'elev_distance', 'segelevinfo',
-                 'elev_min','elev_max','elev_mean','DEM_elev_min','DEM_elev_min','DEM_elev_min']
+                 'elev_min','elev_max','elev_mean','DEM_elev_min','DEM_elev_min','DEM_elev_min', 'smoothed_DEM_elev_min',
+                  'smoothed_DEM_elev_max', 'smoothed_DEM_elev_mean', 'slope']
     '''
     #  using __slots__ makes it required to declare properties of the object here in place
     #  and saves significant memory
     def __init__(self, comid, startx, starty, endx, endy, FragID,
-                 maxsmoothelev, minsmoothelev, lengthft, cellnum, contour_elev, segelevinfo,elev_min, elev_max,
-                 elev_mean, elev_distance, DEM_elev_min, DEM_elev_max, DEM_elev_mean, smoothed_DEM_elev_min,
-                  smoothed_DEM_elev_max, smoothed_DEM_elev_mean):
+                 maxsmoothelev, minsmoothelev, lengthft, cellnum, contour_elev, elev_distance, segelevinfo, elev_min,
+                 elev_max, elev_mean, DEM_elev_min, DEM_elev_max, DEM_elev_mean, smoothed_DEM_elev_min,
+                 smoothed_DEM_elev_max, smoothed_DEM_elev_mean, slope):
         self.comid = comid
         self.startx = startx
         self.starty = starty
@@ -208,6 +209,7 @@ class FragIDprops(object):
         self.smoothed_DEM_elev_min = smoothed_DEM_elev_min # ATL: I wonder if we want to break out the calculated elevations into their own object class
         self.smoothed_DEM_elev_max = smoothed_DEM_elev_max
         self.smoothed_DEM_elev_mean = smoothed_DEM_elev_mean
+        self.slope = slope
 
 
 class COMIDprops(object):
@@ -231,7 +233,6 @@ class COMIDprops(object):
         self.est_width = None
         self.reachcode = None
         self.Fcode = None
-
 
 
 class LevelPathIDprops(object):
@@ -289,6 +290,7 @@ class CellProps(object):
         self.sidelength = sidelength
         self.row = row
         self.column = column
+
 
 class CellPropsAll:
     def __init__(self):
@@ -490,7 +492,7 @@ class FragIDPropsAll:
                 float(seg.MINELEVSMO)*SFRdata.z_conversion,  # UNIT CONVERSION
                 float(seg.LengthFt),
                 seg.cellnum,
-                None, None, None, None, None, None, None, None, None, None, None, None)
+                list(), list(), None, None, None, None, None, None, None, None, None, None, None)
 
             self.allcomids.append(int(seg.COMID))
         self.allcomids = list(set(self.allcomids))
@@ -653,6 +655,7 @@ class SFRSegmentsAll:
                         weightwidth[cFragID] = 99999.
                         #weightedslope[cFragID] = 99999.
 
+
 class SFRpreproc:
     def __init__(self, SFRdata):
         self.joinnames = dict()
@@ -662,7 +665,6 @@ class SFRpreproc:
         self.ofp = open('SFR_preproc.log', 'w')
         self.ofp.write('SFR_preproc log.')
         self.ofp.write('\n' + '#' * 25 + '\nStart Time: {0:s}\n'.format(st_time) + '#' * 25 + '\n')
-
 
     def getfield(self, table, joinname, returnedname):
     # get name of field (useful for case issues and appended field names in joined tables, etc)
@@ -955,6 +957,7 @@ class SFRpreproc:
     def intersect_contours(self, SFRdata):
         # GIS preprocessing to intersect topographic contours with river_explode.shp
 
+        print "Intersecting NHD flowlines with elevation contours..."
         # create set of points where elevation contours intersect the streams
         arcpy.Intersect_analysis([SFRdata.ELEVcontours, SFRdata.intersect], SFRdata.Contours_intersect, "ALL", "", "POINT")
 
@@ -967,12 +970,12 @@ class SFRpreproc:
         arcpy.AddField_management(SFRdata.intersect, "FromM", "SHORT")
 
         # convert stream linework to Arc routes (necessary for LocateFeaturesAlongRoutes_lr)
-        # maintain m-data from original NHD, by specifying starting and ending distance fields for each FID
+        # maintain m-data from original NHD, by specifying starting and ending distance fields for each FragID
         # all "FromM" values are 0 (measurements are from the start of each segment, as defined in the m-direction);
         # "LengthFt" is used for the to_measure_field field
         arcpy.CreateRoutes_lr(SFRdata.intersect, "FragID", SFRdata.Routes, "TWO_FIELDS", "FromM", "LengthFt")
 
-        # returns location of contour intersections along each FID of stream in river_explode,
+        # returns location of contour intersections along each FragID of stream in river_explode,
         # as a distance from the line segment start identified from CreateRoutes_lr
         arcpy.LocateFeaturesAlongRoutes_lr(SFRdata.Contours_intersect, SFRdata.Routes, "FragID", "1 feet",
                                 SFRdata.Contours_intersect_distances, "Route POINT fmp", "", "", "", "", "M_DIRECTON")
@@ -980,6 +983,7 @@ class SFRpreproc:
     def intersect_DEM(self, SFRdata):
         # GIS preprocessing to intersect DEM with river_explode.shp
 
+        print "Intersecting NHD flowline fragments with DEM..."
         # convert end vertices of river_explode Fragments to points
         arcpy.FeatureVerticesToPoints_management(SFRdata.intersect, SFRdata.intersect_points)
 
@@ -991,8 +995,7 @@ class SFRpreproc:
             arcpy.CalculateField_management(SFRdata.intersect, "FragID", "!FID!", "PYTHON")
 
         # extract DEM values at locations of points
-        arcpy.sa.ExtractMultiValuesToPoints(SFRdata.intersect_points, [SFRdata.DEM, "DEM_elev"])
-
+        arcpy.sa.ExtractMultiValuesToPoints(SFRdata.intersect_points, [[SFRdata.DEM, "DEM_elev"]])
 
 
 class SFROperations:
@@ -1002,6 +1005,7 @@ class SFROperations:
     def __init__(self, SFRdata):
         self.SFRdata = SFRdata
         self.newCOMIDdata = dict()
+        self.joinnames = dict()
 
     def getfield(self, table, joinname, returnedname):
     # get name of field (useful for case issues and appended field names in joined tables, etc)
@@ -1384,7 +1388,6 @@ class SFROperations:
         ofp.close()
 
 
-
 class ElevsFromContours:
     def __init__(self, SFRdata):
         self.intersect_dist_table = SFRdata.Contours_intersect_distances
@@ -1406,30 +1409,30 @@ class ElevsFromContours:
         if end_fid == FragIDdata.COMID_orderedFragID[self.current_comid][-1]:
             # downstream contour was below current comid
             dist += self.downstream_dist
-            FragIDdata.allfids[end_fid].elev_min = self.end_elev + self.slope * dist
-            dist += FragIDdata.allfids[end_fid].lengthft
-            FragIDdata.allfids[end_fid].elev_max = self.end_elev + self.slope * dist
+            FragIDdata.allFragIDs[end_fid].elev_min = self.end_elev + self.slope * dist
+            dist += FragIDdata.allFragIDs[end_fid].lengthft
+            FragIDdata.allFragIDs[end_fid].elev_max = self.end_elev + self.slope * dist
 
         else:
-            dist = np.min(FragIDdata.allfids[end_fid].elev_distance)
-            FragIDdata.allfids[end_fid].elev_max = self.end_elev + self.slope * dist
-        print 'fid:%s min/max elevs %s %s' % (end_fid, FragIDdata.allfids[end_fid].elev_min, FragIDdata.allfids[end_fid].elev_max)
+            dist = np.min(FragIDdata.allFragIDs[end_fid].elev_distance)
+            FragIDdata.allFragIDs[end_fid].elev_max = self.end_elev + self.slope * dist
+        print 'fid:%s min/max elevs %s %s' % (end_fid, FragIDdata.allFragIDs[end_fid].elev_min, FragIDdata.allFragIDs[end_fid].elev_max)
 
         # compute max and min elevations in subsequent FragIDs
         ind = end_reach
         for FragID in FragIDdata.COMID_orderedFragID[self.current_comid][start_reach:end_reach][::-1]:
             ind -= 1
             previous_fid = FragIDdata.COMID_orderedFragID[self.current_comid][ind + 1]
-            FragIDdata.allfids[FragID].elev_min = FragIDdata.allfids[previous_fid].elev_max
-            dist += FragIDdata.allfids[FragID].lengthft
-            FragIDdata.allfids[FragID].elev_max = self.end_elev + self.slope * dist
-            print 'fid:%s min/max elevs %s %s' % (FragID, FragIDdata.allfids[FragID].elev_min, FragIDdata.allfids[FragID].elev_max)
+            FragIDdata.allFragIDs[FragID].elev_min = FragIDdata.allFragIDs[previous_fid].elev_max
+            dist += FragIDdata.allFragIDs[FragID].lengthft
+            FragIDdata.allFragIDs[FragID].elev_max = self.end_elev + self.slope * dist
+            print 'FragID:%s min/max elevs %s %s' % (FragID, FragIDdata.allFragIDs[FragID].elev_min, FragIDdata.allFragIDs[FragID].elev_max)
 
 
     def get_dist_slope(self, comid, FragIDdata, COMIDdata):
 
             for FragID in self.reachlist:
-                print "comid %s, fid %s" %(comid, FragID)
+                print "comid %s, FragID %s" %(comid, FragID)
 
                 # looking downstream for first contour below current comid
                 if self.downstream:
@@ -1441,20 +1444,20 @@ class ElevsFromContours:
                             COMIDdata.allcomids[COMIDdata.allcomids[comid].to_comid[0]]
                         # at outlet; assign downstream elev using NHD
                         except KeyError:
-                            self.downstream_dist += FragIDdata.allfids[FragID].lengthft
+                            self.downstream_dist += FragIDdata.allFragIDs[FragID].lengthft
                             self.downstream_contour_comid = comid
-                            self.end_elev = FragIDdata.allfids[FragID].minsmoothelev
+                            self.end_elev = FragIDdata.allFragIDs[FragID].minsmoothelev
                             self.downstream = False
                             break
                     # found contour; assign downstream elev
-                    elif fid in self.elevs_edited:
-                        self.downstream_dist += np.min(FragIDdata.allfids[FragID].elev_distance)
+                    elif FragID in self.elevs_edited:
+                        self.downstream_dist += np.min(FragIDdata.allFragIDs[FragID].elev_distance)
                         self.downstream_contour_comid = comid
-                        self.end_elev = np.max(FragIDdata.allfids[FragID].contour_elev)
+                        self.end_elev = np.max(FragIDdata.allFragIDs[FragID].contour_elev)
                         self.downstream = False
                         break
                     else:
-                        self.downstream_dist += FragIDdata.allfids[FragID].lengthft
+                        self.downstream_dist += FragIDdata.allFragIDs[FragID].lengthft
 
                 # moving upstream
                 if self.upstream:
@@ -1465,7 +1468,7 @@ class ElevsFromContours:
                     if FragID == FragIDdata.COMID_orderedFragID[comid][0]:
 
                         # in all cases, add distance first
-                        self.upstream_dist += FragIDdata.allfids[FragID].lengthft
+                        self.upstream_dist += FragIDdata.allFragIDs[FragID].lengthft
 
                         # for multiple from_comids (confluence)
                         for upid in COMIDdata.allcomids[comid].from_comid:
@@ -1484,7 +1487,7 @@ class ElevsFromContours:
                         if headwater:
 
                             # set start_elev and calculate slope
-                            self.start_elev = FragIDdata.allfids[FragID].maxsmoothelev
+                            self.start_elev = FragIDdata.allFragIDs[FragID].maxsmoothelev
                             self.slope = (self.start_elev - self.end_elev) / self.upstream_dist
                             if self.slope < 0:
                                 self.slope = 0
@@ -1754,15 +1757,23 @@ class ElevsFromDEM:
 
         self.MFgrid_elev_field = 'MEAN'
         self.DEM_elevs_by_cellnum = dict()
-        self.ElevsbyFragID = dict()
+        self.ElevsbyFragID = defaultdict(list)
         self.up_increment = 1.0
-        self.dn_increment = 0.1
         self.end_interp_report = "end_interp_report.txt"
-        self.ofp = open(self.end_interp_report, 'w')
-        self.current_minimum = None
-
-
-    def DEM_elevs_by_cellnum(self, SFRData, SFRpreproc):
+        self.adjusted_elev = -9999
+        self.joinnames = dict()
+    '''
+    def getfield(self, table, joinname, returnedname):
+    # get name of field (useful for case issues and appended field names in joined tables, etc)
+        Fields = arcpy.ListFields(table)
+        joinname = joinname.lower()
+        for field in Fields:
+            if joinname in field.name.lower():
+                joinname = field.name
+                break
+        self.joinnames[returnedname] = joinname
+    '''
+    def DEM_elevs_by_cellnum(self, SFRData, SFROperations):
 
         # makes dictionary of DEM elevations by cellnum, using table for grid shapefile (column: cellnum)
         # i.e. DEM elevations are at the grid scale
@@ -1777,31 +1788,33 @@ class ElevsFromDEM:
             SFR_arcpy.compute_zonal(self.NROW, self.NCOL, self.DX, SFRData.DEM_z_conversion, SFRData.MFgrid, SFRData.DEM)
 
         # reference fields for cellnum and elevation, case-insensitive
-        SFRpreproc.getfield("MFgrid", "cellnum", "cellnum")
-        SFRpreproc.getfield("MFgrid", self.MFgrid_elev_field, self.MFgrid_elev_field.lower())
+        self.getfield("MFgrid", "cellnum", "cellnum")
+        self.getfield("MFgrid", self.MFgrid_elev_field, self.MFgrid_elev_field.lower())
 
         # get elevations in each stream cell, from grid shapefile table
         MFgridtable = arcpy.SearchCursor(self.MFgrid)
         self.DEM_elevs_by_cellnum = dict()
         for row in MFgridtable:
-            cellnum = row.getValue(SFRpreproc.joinnames["cellnum"])
-            self.DEM_elevs_by_cellnum[cellnum] = row.getValue(SFRpreproc.joinnames[self.MFgrid_elev_field.lower()])
+            cellnum = row.getValue(self.joinnames["cellnum"])
+            self.DEM_elevs_by_cellnum[cellnum] = row.getValue( self.joinnames[self.MFgrid_elev_field.lower()])
 
-    def DEM_elevs_by_FragID(self, SFRdata, FragIDdata):
+
+    def DEM_elevs_by_FragID(self, SFRdata, SFROperations):
 
         # assigns max and min DEM elevations to each FragID following intersect_DEM preprocessing
         try:
             Frag_vertices = arcpy.SearchCursor(SFRdata.intersect_points)
             arcpy.MakeFeatureLayer_management(SFRdata.intersect_points, "intersect_points")
-            SFRpreproc.getfield("intersect_points", "fragid", "fragid")
-            SFRpreproc.getfield("intersect_points", "dem_elev", "dem_elev")
+            SFROperations.getfield("intersect_points", "fragid", "fragid")
+            SFROperations.getfield("intersect_points", "dem_elev", "dem_elev")
         except:
-            raise IOError("Cannot open Fragment end vertices shapefile. intersect_DEM in SFRpreproc must be run first.")
+            raise IOError("Cannot open Fragment end vertices shapefile {0}. "
+                          "intersect_DEM in SFRpreproc must be run first.".format(SFRdata.intersect_points))
 
         # append all DEM elevations sampled along each fragment to a dictionary
         for point in Frag_vertices:
-            FragID = point.getValue(SFRpreproc.joinnames["fragid"])
-            elev = point.getValue(SFRpreproc.joinnames["dem_elev"])
+            FragID = point.getValue(SFROperations.joinnames["fragid"])
+            elev = point.getValue(SFROperations.joinnames["dem_elev"])
             self.ElevsbyFragID[FragID].append(elev)
 
 
@@ -1811,172 +1824,120 @@ class ElevsFromDEM:
         dist_to_end = 0
         for FragID in reachlist[start_reach: end_reach]:
             dist_to_end += FragIDdata.allFragIDs[FragID].lengthft
-        slope = dS * dist_to_end
+        slope = dS / dist_to_end
 
         # calculate elevs
         for i in range(len(reachlist))[start_reach: end_reach]:
             FragIDdata.allFragIDs[reachlist[i]].smoothed_DEM_elev_max = \
             FragIDdata.allFragIDs[reachlist[i-1]].smoothed_DEM_elev_min
 
-            if i+1 < len(reachlist): # don't calculate minimum for end; already assigned
-                FragIDdata.allFragIDs[reachlist[i]].smoothed_DEM_elev_min = \
-                FragIDdata.allFragIDs[reachlist[i]].smoothed_DEM_elev_max - \
-                FragIDdata.allFragIDs[reachlist[i]].lengthft * slope
+            #if i+1 < len(reachlist): # don't calculate minimum for end; already assigned
+            FragIDdata.allFragIDs[reachlist[i]].smoothed_DEM_elev_min = \
+            FragIDdata.allFragIDs[reachlist[i]].smoothed_DEM_elev_max - \
+            FragIDdata.allFragIDs[reachlist[i]].lengthft * slope
+
+            FragIDdata.allFragIDs[reachlist[i]].slope = slope
 
             self.ofp.write('{0}\n'.format(FragIDdata.allFragIDs[reachlist[i]].smoothed_DEM_elev_min))
+            print "Reach {0}, max_elev: {1}, min_elev: {2}".format(reachlist[i],
+            FragIDdata.allFragIDs[reachlist[i]].smoothed_DEM_elev_max, FragIDdata.allFragIDs[reachlist[i]].smoothed_DEM_elev_min)
+
+
+    def assign_elevation_and_slope(self, FragIDs, reach, FragIDdata):
+        FragIDdata.allFragIDs[FragIDs[reach-1]].smoothed_DEM_elev_min = self.adjusted_elev
+        FragIDdata.allFragIDs[FragIDs[reach-1]].slope = \
+            (FragIDdata.allFragIDs[FragIDs[reach-1]].smoothed_DEM_elev_max - self.adjusted_elev) / \
+            FragIDdata.allFragIDs[FragIDs[reach-1]].lengthft
 
 
     def connect_downhill(self, FragIDdata):
 
+        print "smoothing DEM elevations along streams... "
+        self.ofp = open(self.end_interp_report, 'w')
+
         for comid in FragIDdata.COMID_orderedFragID.keys():
-
             print comid
-
             FragIDs = FragIDdata.COMID_orderedFragID[comid]
-
-            # for segments with one reach
-            if len(FragIDs) < 2: # no interior points; keep ending elevations
-                continue
+            self.ind_current_minimum = 0
 
             # set segment end elevations to NHD:
-            self.ElevsbyFragID[FragIDs[0]].smoothed_DEM_elev_max = self.ElevsbyFragID[FragIDs[0]].maxsmoothelev
-            self.ElevsbyFragID[FragIDs[-1]].smoothed_DEM_elev_min = self.ElevsbyFragID[FragIDs[-1]].minsmoothelev
-            end = self.ElevsbyFragID[FragIDs[-1]].smoothed_DEM_elev_min
+            FragIDdata.allFragIDs[FragIDs[0]].smoothed_DEM_elev_max = FragIDdata.allFragIDs[FragIDs[0]].maxsmoothelev
+            FragIDdata.allFragIDs[FragIDs[-1]].smoothed_DEM_elev_min = FragIDdata.allFragIDs[FragIDs[-1]].minsmoothelev
 
-            # determine DEM elevations at Fragment ends using intersections with adjacent fragment pairs
+            # for segments with only end reaches
+            if len(FragIDs) < 3: # no interior points; keep ending elevations
+                continue
+            end = FragIDdata.allFragIDs[FragIDs[-1]].smoothed_DEM_elev_min
+
             for i in range(len(FragIDs))[1:]:
+
+                # assign DEM elevations at Fragment ends using intersections with adjacent fragment pairs
                 FragIDdata.allFragIDs[FragIDs[i-1]].DEM_elev_min = \
-                set(self.ElevsbyFragID[FragIDs[i-1]]).intersection(set(self.ElevsbyFragID[FragIDs[i]]))
+                list(set(self.ElevsbyFragID[FragIDs[i-1]]).intersection(set(self.ElevsbyFragID[FragIDs[i]])))[0]
                 FragIDdata.allFragIDs[FragIDs[i]].DEM_elev_max = FragIDdata.allFragIDs[FragIDs[i-1]].DEM_elev_min
 
-            descending = False # If true, means that current reach is lower than all previous
-            flattening = False # means that a reach has been encountered with a STOP below the segment end elev.
-            belowbot = False # means that a reach has been encounted with a SBOT below the model bottom
+                # adjusted elevation initially set at DEM elevation for beginning of current reach
+                self.adjusted_elev = FragIDdata.allFragIDs[FragIDs[i-1]].DEM_elev_min
 
-            # if starting elevation is above minimum DEM elevation in first Fragment
-            if self.ElevsbyFragID[FragIDs[0]].smoothed_DEM_elev_max > FragIDdata.allFragIDs[FragIDs[0]].DEM_elev_min:
-                descending = True
+                # in case DEM elevation for current reach is below segment end, set elev. to increment above, interpolate to end
+                if self.adjusted_elev <= end:
 
-            # for i in range(len(segment['TOPNEW']))[1:-1]
-            for i in range(len(FragIDs))[1:]:
+                    # make sure that initially adjusted elevation is still below previous minimum
+                    if end + self.up_increment < FragIDdata.allFragIDs[FragIDs[self.ind_current_minimum]].smoothed_DEM_elev_max:
+                        self.adjusted_elev = end + self.up_increment
 
-                # "dem_el" should be changed to "adjusted_el" for clarity
-                # determine minimum elevation in previous reach that is same as max in this reach
-                # then set DEM values (max and previous min) to this intersection
-
-                dem_el = FragIDdata.allFragIDs[FragIDs[i-1]].DEM_elev_min
-
-                # in case a minimum in DEM is below segment end, set elev. to increment above, interpolate to end
-                # ensure that elev doesn't go above previous
-                if FragIDdata.allFragIDs[FragIDs[i-1]].DEM_elev_min <= end:
-
-                    if end + self.upincrement < FragIDdata.allFragIDs[FragIDs[i-1]].DEM_elev_max:
-                        dem_el = end + self.up_increment
-
-                    elif end < FragIDdata.allFragIDs[FragIDs[i-1]].DEM_elev_max - self.dn_increment:
-                        dem_el = FragIDdata.allFragIDs[FragIDs[i-1]].DEM_elev_max - self.dn_increment
+                    # otherwise set it to the average of the upstream elevation and the end
                     else:
-                        dem_el = end
+                        self.adjusted_elev = 0.5 * (FragIDdata.allFragIDs[FragIDs[self.ind_current_minimum]].smoothed_DEM_elev_max + end)
 
                     print "streamtop below segment end elevation,see output file {0} ".format(self.end_interp_report)
                     self.ofp.write("Streambed top at COMID {0} reach {1} is {2}, segment end elevation is {3}\n"
-                                   "Readjusting to {4}\n".format(comid, i, FragIDdata.allFragIDs[FragIDs[i-1]].DEM_elev_min, end, dem_el))
-
-
+                                   "Readjusting to {4}\n".format(comid, i, FragIDdata.allFragIDs[FragIDs[i-1]].DEM_elev_min,
+                                                                 end, self.adjusted_elev))
                     self.ofp.write("interpolating to segment end elevation...\n")
-                    nextlower = end
-                    FragIDdata.allFragIDs[FragIDs[i-1]].smoothed_DEM_elev_min = dem_el # first append adjusted elevation, then interp to end
 
-                    dS = FragIDdata.allFragIDs[FragIDs[i-1]].smoothed_DEM_elev_min - end
-                    self.interpolate_between_minima(FragIDdata, FragIDs, 1, len(FragIDs), dS)
+                    # if current reach is past previous minimum, interpolate to current before interpolating to end
+                    if i > self.ind_current_minimum:
+                        dS = FragIDdata.allFragIDs[FragIDs[self.ind_current_minimum]].smoothed_DEM_elev_max - self.adjusted_elev
+                        self.interpolate_between_minima(FragIDdata, FragIDs, self.ind_current_minimum, i, dS)
 
+                    # first assign adjusted elevation and slope, then interpolate to end
+                    # this might be redundant
+                    self.assign_elevation_and_slope(FragIDs, i, FragIDdata)
+
+                    dS = self.adjusted_elev - end
+                    self.interpolate_between_minima(FragIDdata, FragIDs, i, len(FragIDs), dS)
                     break
 
-                # if last rch is the next, need to work with end STOP elevation
-                if i == len(FragIDs)-2:
-                    nextlower = end
+                # DEM elevation for current reach is above end and below all previous
+                elif self.adjusted_elev < FragIDdata.allFragIDs[FragIDs[self.ind_current_minimum]].smoothed_DEM_elev_max:
 
-                    # current reach is below all previous, and above end
-                    if descending:
-                        FragIDdata.allFragIDs[FragIDs[i-1]].smoothed_DEM_elev_min = dem_el
-                        self.current_minimum = dem_el
-                    # current reach is not below current minimum
-                    # perform linear interpolation between current minimum and end, recording points
+                    # if previous reach was minimum, append the current DEM elevation
+                    if self.ind_current_minimum == i-1:
+
+                        # set minimum elevation in previous reach and assign slope
+                        self.assign_elevation_and_slope(FragIDs, i, FragIDdata)
+
+                    # if previous reach was above minimum, interpolate back to current minimum
                     else:
-                        dS = self.current_minimum - end
-                        self.interpolate_between_minima(FragIDdata, FragIDs, len(FragIDs)-2, len(FragIDs), dS)
+                        dS = FragIDdata.allFragIDs[FragIDs[self.ind_current_minimum]].smoothed_DEM_elev_max - self.adjusted_elev
+                        self.interpolate_between_minima(FragIDdata, FragIDs, self.ind_current_minimum, i, dS)
 
-                # next rch is lower but also lower than the end
-                elif FragIDdata.allFragIDs[i].DEM_elev_min <= end:
-                    flattening = True
-                    continue
-
-                # next rch elevation is lower
-                elif FragIDdata.allFragIDs[i].DEM_elev_min < dem_el:
-                    #nextlower = FragIDdata.allFragIDs[i].DEM_elev_min
-                    if descending and not flattening:
-                        FragIDdata.allFragIDs[FragIDs[i-1]].smoothed_DEM_elev_min = dem_el
-                        self.current_minimum = dem_el
-                    # next reach is lower than current but equal to or higher than a previous reach, keep going
-                    elif FragIDdata.allFragIDs[i].DEM_elev_min >= self.current_minimum:
-                        continue
-
-                    # next reach is lower than current, and all previous reaches
-                    # perform linear interpolation between previous low and next, recording points
-                    else:
-                        dS - self.current_minimum - FragIDdata.allFragIDs[i].DEM_elev_min
-                        self.interpolate_between_minima(FragIDdata, FragIDs, NEED_INDEX, i, dS)
-                        descending=True
-                        continue
-
-                # next rch elevation is equal or higher
-                elif FragIDdata.allFragIDs[i].DEM_elev_min >= dem_el:
-
-                    # current reach is still lower than all previous, record
-                    if descending and not flattening:
-                        FragIDdata.allFragIDs[FragIDs[i-1]].smoothed_DEM_elev_min = dem_el
-                        self.current_minimum = dem_el
-                        descending = False
-                    else:
-                        continue
-
-                # update max elev to minimum in adjacent upstream segment
-                FragIDdata.allFragIDs[FragIDs[i]].smoothed_DEM_elev_max = \
+                    # update max elev to minimum in adjacent upstream reach (interp routine stops after upstream reach)
+                    FragIDdata.allFragIDs[FragIDs[i]].smoothed_DEM_elev_max = \
                     FragIDdata.allFragIDs[FragIDs[i-1]].smoothed_DEM_elev_min
 
+                    # update minimum to current reach
+                    self.ind_current_minimum = i
 
-            # update stream bottom slopes for each reach, by interpolating streambed elevations at reach boundaries
+                # DEM elevation for current reach is not below all previous
+                else:
+                    continue
 
-            # Slope in reach 1 is NHD slope
-            # For reaches 2+, interpolate STOP at upstream reach boundary (STOPup), using reach 1 slope
-            # Calculate reach slope: STOPup-STOPreach / 0.5* reachlength = reach slope
-            # If slope is <0, calculate slope by interpolation between previous reach STOP, and current STOP (because of the above STOP2 algorithm, this value will be positive.
-            '''
-            # calculation of slopes should be rolled into its own class, or be made part of writing to output
-            slopes=[]
-            STOP2ups=[]
-            slopes.append(NHD_slopes[0]) # start with NHD slope for segment
-            for reach in range(len(STOP2))[1:]:
-                STOP2_up=STOP2[reach-1]-slopes[reach-1]*0.5*reach_lengths[reach-1]
-                slope=(STOP2_up-STOP2[reach])/(0.5*reach_lengths[reach])
-
-                if enforce_slope_min and slope<slope_min:
-                    if slope<=0:
-                        slope=(STOP2[reach-1]-STOP2[reach])/(0.5*reach_lengths[reach-1]+0.5*reach_lengths[reach])
-                    if slope<slope_min:
-                        ofp2.write("slope less than slope mininum at segment "+str(segnum)+' reach '+str(reach)+'! Reassigned a value of ' +str(slope_min)+'\n')
-                        slope=slope_min
-                if slope<=0:
-                    slope=(STOP2[reach-1]-STOP2[reach])/(0.5*reach_lengths[reach-1]+0.5*reach_lengths[reach])
-                    if slope<=0:
-                        ofp2.write("zero or negative slope at segment "+str(segnum)+' reach '+str(reach)+'! Reassigned a value of ' +str(slope_min)+'\n')
-                        # slope is likely 0 because NHD segment end points are equal; assign arbitrary slope
-                        slope=slope_min
-                    STOP2_up=STOP2[reach-1]-0.5*reach_lengths[reach-1]*slope
-                slopes.append(slope)
-                STOP2ups.append(STOP2_up)
-            slopesdict[segnum]=slopes
-            '''
+                if FragIDdata.allFragIDs[FragIDs[i]].smoothed_DEM_elev_max:
+                    print "Reach {0}, max_elev: {1}, min_elev: {2}".format(i, FragIDdata.allFragIDs[FragIDs[i]].smoothed_DEM_elev_max,
+                                                                       FragIDdata.allFragIDs[FragIDs[i]].smoothed_DEM_elev_min)
+        self.ofp.close()
 
 def widthcorrelation(arbolate):
     #estimate widths, equation from Feinstein and others (Lake
@@ -1985,7 +1946,6 @@ def widthcorrelation(arbolate):
     #NHDPlus has arbolate sum in kilometers.
     #print a table with reachcode, order, estimated width, Fcode
     estwidth = 0.1193*math.pow(1000*arbolate,0.5032)
-
 
 """
 ###################
