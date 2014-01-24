@@ -24,6 +24,8 @@ Notes on SFR input:
 	<!-- preproc:
     a factor within which start(x,y) and end(x,y) can be found -->
     <preproc>False</preproc>
+    <!-- flag for TPL file -->
+    <tpl>False</tpl>
 
 </GlobalSettings>
 <InputFiles>
@@ -36,7 +38,7 @@ Notes on SFR input:
     <!-- DEM: DEM for model area, doesn't need to be clipped -->
     <DEM>nacp_demfti</DEM>    
     <!-- PlusflowVAA: from NHDPlus -->
-    <PlusflowVAA>PlusFlowlineVAA.dbf</PlusflowVAA>    
+    <PlusflowVAA>PFVAAmerge.dbf</PlusflowVAA>    
     <!-- Elevslope: from NHDPlus -->
     <Elevslope>elevslope_merged.dbf</Elevslope>  
     <!-- Flowlines_unclipped: 

@@ -38,7 +38,7 @@ CELLdata.populate_cells(SFRdata)
 
 LevelPathdata = SFRc.LevelPathIDpropsAll()
 
-COMIDdata.populate_routing(SFRdata, FragIDdata, LevelPathdata)
+COMIDdata.populate_routing(SFRdata, FragIDdata, LevelPathdata, CELLdata)
 
 COMIDdata.return_hydrosequence_comid()
 
@@ -97,7 +97,8 @@ SFRops.reach_ordering(instuff['COMIDdata'],
 
 
 Segmentdata = SFRc.SFRSegmentsAll()
-Segmentdata.divide_at_confluences(LevelPathdata, FragIDdata, COMIDdata)
+Segmentdata.divide_at_confluences(LevelPathdata, FragIDdata, COMIDdata, CELLdata)
+Segmentdata.accumulate_same_levelpathID(LevelPathdata, COMIDdata, FragIDdata)
 
 
 saveme ={}

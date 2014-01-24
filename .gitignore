@@ -5,4 +5,5 @@ BR_GWV_SFRmat1.dat
 selected_segments.pdf
 *.bak
 .idea/*
+*.pyc
 .gitignore
