@@ -87,6 +87,7 @@ class SFRInput:
         self.Contours_intersect = inpars.findall('.//Contours_intersect')[0].text
         self.Contours_intersect_distances = inpars.findall('.//Contours_intersect_distances')[0].text
         self.RCH = inpars.findall('.//RCH')[0].text
+        self.Elev_method = inpars.findall('.//Elev_method')[0].text
         '''
         self.nsfrpar = int(inpars.findall('.//nsfrpar')[0].text)
         self.nparseg = int(inpars.findall('.//nparseg')[0].text)
@@ -540,8 +541,8 @@ class FragIDPropsAll:
 
             self.allcomids.append(int(seg.COMID))
         self.allcomids = list(set(self.allcomids))
-        self.allFragIDs.return_unique_cells()
-        self.allFragIDs.return_cellnum_FragID()
+        self.return_unique_cells()
+        self.return_cellnum_FragID()
 
 
 
@@ -748,7 +749,7 @@ class SFRSegmentsAll:
                 tt=0.
                 ww=0.
                 knt=0
-                for cFragID in allFragIDs.cellnum_FragID[localcell]:
+                for cFragID in FragIDdata.cellnum_FragID[localcell]:
                     ccomid = FragIDdata.allFragIDs[cFragID].comid
                     knt=knt+1
                     tt = tt + FragIDdata.allFragIDs[cFragID].lengthft
@@ -2052,7 +2053,7 @@ class ElevsFromDEM:
             FragIDdata.allFragIDs[reachlist[i]].slope = slope
 
             self.ofp.write('{0}\n'.format(FragIDdata.allFragIDs[reachlist[i]].smoothed_DEM_elev_min))
-            print "Reach {0}, max_elev: {1}, min_elev: {2}".format(reachlist[i],
+            print "Reach {0}, max_elev: {1}, min_elev: {2}".format(i,
             FragIDdata.allFragIDs[reachlist[i]].smoothed_DEM_elev_max, FragIDdata.allFragIDs[reachlist[i]].smoothed_DEM_elev_min)
 
 
@@ -2070,6 +2071,9 @@ class ElevsFromDEM:
 
         for comid in FragIDdata.COMID_orderedFragID.keys():
             print comid
+
+            if comid == 1796827:
+                j=2
             FragIDs = FragIDdata.COMID_orderedFragID[comid]
             self.ind_current_minimum = 0
 
@@ -2085,8 +2089,13 @@ class ElevsFromDEM:
             for i in range(len(FragIDs))[1:]:
 
                 # assign DEM elevations at Fragment ends using intersections with adjacent fragment pairs
-                FragIDdata.allFragIDs[FragIDs[i-1]].DEM_elev_min = \
-                list(set(self.ElevsbyFragID[FragIDs[i-1]]).intersection(set(self.ElevsbyFragID[FragIDs[i]])))[0]
+                #FragIDdata.allFragIDs[FragIDs[i-1]].DEM_elev_min = \
+                #list(set(self.ElevsbyFragID[FragIDs[i-1]]).intersection(set(self.ElevsbyFragID[FragIDs[i]])))[0]
+
+                # assign DEM elevation at previous Fragment end (same as current Fragment start),
+                # using minimum of sampled DEM elevations
+                FragIDdata.allFragIDs[FragIDs[i-1]].DEM_elev_min = np.min(self.ElevsbyFragID[FragIDs[i-1]])
+
                 FragIDdata.allFragIDs[FragIDs[i]].DEM_elev_max = FragIDdata.allFragIDs[FragIDs[i-1]].DEM_elev_min
 
                 # adjusted elevation initially set at DEM elevation for beginning of current reach
@@ -2148,8 +2157,8 @@ class ElevsFromDEM:
                     continue
 
                 if FragIDdata.allFragIDs[FragIDs[i]].smoothed_DEM_elev_max:
-                    print "Reach {0}, max_elev: {1}, min_elev: {2}".format(i, FragIDdata.allFragIDs[FragIDs[i]].smoothed_DEM_elev_max,
-                                                                       FragIDdata.allFragIDs[FragIDs[i]].smoothed_DEM_elev_min)
+                    print "Reach {0}, max_elev: {1}, min_elev: {2}".format(i-1, FragIDdata.allFragIDs[FragIDs[i-1]].smoothed_DEM_elev_max,
+                                                                       FragIDdata.allFragIDs[FragIDs[i-1]].smoothed_DEM_elev_min)
         self.ofp.close()
 
 def widthcorrelation(arbolate):
