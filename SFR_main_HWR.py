@@ -16,10 +16,10 @@ if SFRdata.preproc:
 '''
 SFRops = SFRc.SFROperations(SFRdata)
 
-
+#SFRops.assign_layers(SFRdata)
 
 SFRops.intersect()
-'''
+
 FragIDdata = SFRc.FragIDPropsAll()
 
 FragIDdata.populate(SFRdata)
@@ -45,7 +45,7 @@ COMIDdata.return_hydrosequence_comid()
 LevelPathdata.return_cutoffs(FragIDdata, CELLdata, SFRdata)
 
 SFRops.reach_ordering(COMIDdata, FragIDdata, LevelPathdata)
-
+'''
 SFRpre.intersect_contours(SFRdata)
 ContourElevs = SFRc.ElevsFromContours(SFRdata)
 ContourElevs.get_contour_intersections(FragIDdata, COMIDdata)
@@ -59,12 +59,12 @@ saveme ={'SFRdata':  SFRdata, 'COMIDdata': COMIDdata, 'FragIDdata': FragIDdata,
               'SFRops': SFRops, 'ContourElevs': ContourElevs, 'DEMelevs': DEMelevs, 'LevelPathdata' : LevelPathdata}
 
 SFRc.savetmp(saveme)
-'''
-a = SFRc.loadtmp(['SFRdata', 'COMIDdata', 'FragIDdata', 'SFRops', 'ContourElevs', 'LevelPathdata'])
+
+a = SFRc.loadtmp(['SFRdata', 'COMIDdata', 'FIDdata', 'SFRops', 'ContourElevs', 'LevelPathdata'])
 
 SFRdata = a['SFRdata']
 COMIDdata = a['COMIDdata']
-FragIDdata = a['FragIDdata']
+FragIDdata = a['FIDdata']
 SFRops = a['SFRops']
 Contour_elevs = a['ContourElevs']
 LevelPathdata = a['LevelPathdata']
@@ -95,12 +95,12 @@ SFRops.reach_ordering(instuff['COMIDdata'],
                       instuff['FragIDdata'],
                       instuff['LevelPathdata'])
 
-
+'''
 Segmentdata = SFRc.SFRSegmentsAll()
 Segmentdata.divide_at_confluences(LevelPathdata, FragIDdata, COMIDdata, CELLdata)
 Segmentdata.accumulate_same_levelpathID(LevelPathdata, COMIDdata, FragIDdata, SFRdata)
 
-SFRops.assign_layers(SFRdata)
+'''
 saveme ={}
 
 
@@ -109,6 +109,6 @@ SFRc.savetmp(saveme)
 a = SFRc.loadtmp(saveme)
 
 SFRdata = a['SFRdata']
-
+'''
 
 i = 2

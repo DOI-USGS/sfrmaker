@@ -90,7 +90,11 @@ class SFRInput:
         self.Contours_intersect = inpars.findall('.//Contours_intersect')[0].text
         self.Contours_intersect_distances = inpars.findall('.//Contours_intersect_distances')[0].text
         self.RCH = inpars.findall('.//RCH')[0].text
+<<<<<<< HEAD
         self.Elev_method = inpars.findall('.//Elev_method')[0].text
+        '''
+=======
+>>>>>>> 50898aff66a2736e2ffac22280351e6d9df76000
         self.nsfrpar = int(inpars.findall('.//nsfrpar')[0].text)
         self.nparseg = int(inpars.findall('.//nparseg')[0].text)
         self.const = float(inpars.findall('.//const')[0].text)
