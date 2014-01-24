@@ -749,6 +749,7 @@ class SFRSegmentsAll:
 
         #use flag from SFRdata to determine which elevation to use
         #for the reaches
+        '''
         elevflag=SFRdata.elevflag
         if elevflag == 'DEM':
             elevattr = 'DEM_elev_mean'
@@ -764,7 +765,9 @@ class SFRSegmentsAll:
             slopeattr = 'NHDPlus_slope'
         else:
             raise(BadElevChoice(elevflag))
-
+        '''
+        elevattr = 'segelevinfo'
+        slopeattr = 'slope'
         for segment in self.allSegs.iterkeys():
             rch = 0
             for localcell in self.allSegs[segment].seg_cells:
@@ -774,21 +777,21 @@ class SFRSegmentsAll:
                 el=0.
                 ws=0.
                 knt=0
-                for cFragID in allFragIDs.cellnum_FragID[localcell]:
+                for cFragID in FragIDdata.cellnum_FragID[localcell]:
                     ccomid = FragIDdata.allFragIDs[cFragID].comid
                     knt=knt+1
                     tt = tt + FragIDdata.allFragIDs[cFragID].lengthft
-                    ww = ww + COMIDdata[ccomid].est_width*FragIDdata.allFragIDs[cFragID].lengthft
-                    el = el + getattr(FradIDdata.allFragIDs[cFragID],elevattr)
-                    ws = ws + getattr(FradIDdata.allFragIDs[cFragID],slopeattr)*FragIDdata.allFragIDs[cFragID].lengthft
+                    ww = ww + COMIDdata.allcomids[ccomid].est_width*FragIDdata.allFragIDs[cFragID].lengthft
+                    el = el + getattr(FragIDdata.allFragIDs[cFragID],elevattr)
+                    #ws = ws + getattr(FragIDdata.allFragIDs[cFragID],slopeattr)*FragIDdata.allFragIDs[cFragID].lengthft
 
                 self.allReaches[segment][rch].eff_length = tt
                 if tt>0:
                     self.allReaches[segment][rch].eff_width = ww/tt
-                    self.allReaches[segment][rch].eff_slope = ws/tt
+                    #self.allReaches[segment][rch].eff_slope = ws/tt
                 else:
                     self.allReaches[segment][rch].eff_width = 99999.
-                    self.allReaches[segment][rch].eff_slope = 99999.
+                    #self.allReaches[segment][rch].eff_slope = 99999.
                 if knt > 0:
                     self.allReaches[segment][rch].elevreach = el/knt
                 else:
@@ -2193,6 +2196,7 @@ def widthcorrelation(arbolate):
     #NHDPlus has arbolate sum in kilometers.
     #print a table with reachcode, order, estimated width, Fcode
     estwidth = 0.1193*math.pow(1000*arbolate,0.5032)
+    return estwidth
 
 """
 ###################
