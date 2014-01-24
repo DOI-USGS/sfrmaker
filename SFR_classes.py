@@ -732,7 +732,7 @@ class SFRSegmentsAll:
 
 
 
-    def accumulate_same_levelpathID(self, LevelPathdata, COMIDdata, FragIDdata):
+    def accumulate_same_levelpathID(self, LevelPathdata, COMIDdata, FragIDdata, SFRdata):
         """
         method to add lengths and weight widths and slopes
         for parts of a stream that have the same levelpathID
@@ -742,24 +742,52 @@ class SFRSegmentsAll:
         ALL THE FRAGIDS IN A CELL FOR TESTING.....
         """
 
+        #use flag from SFRdata to determine which elevation to use
+        #for the reaches
+        elevflag=SFRdata.elevflag
+        if elevflag == 'DEM':
+            elevattr = 'DEM_elev_mean'
+            slopeattr = 'DEM_slope'
+        elif elevflag == 'SmoothDEM':
+            elevattr = 'smoothed_DEM_elev_mean'
+            slopeattr = 'smooth_DEM_slope'
+        elif elevflag == 'Contour':
+            elevattr = 'contour_elev'
+            slopeattr = 'contour_slope'
+        elif elevflag == 'NHDPlus':
+            elevattr = 'elev_mean'
+            slopeattr = 'NHDPlus_slope'
+        else:
+            raise(BadElevChoice(elevflag))
+
         for segment in self.allSegs.iterkeys():
             rch = 0
             for localcell in self.allSegs[segment].seg_cells:
                 rch = rch + 1        #seg_cells attribute is ordered...
                 tt=0.
                 ww=0.
+                el=0.
+                ws=0.
                 knt=0
                 for cFragID in allFragIDs.cellnum_FragID[localcell]:
                     ccomid = FragIDdata.allFragIDs[cFragID].comid
                     knt=knt+1
                     tt = tt + FragIDdata.allFragIDs[cFragID].lengthft
-                    ww = ww + COMIDdata[ccomid].est_width* FragIDdata.allFragIDs[cFragID].lengthft
+                    ww = ww + COMIDdata[ccomid].est_width*FragIDdata.allFragIDs[cFragID].lengthft
+                    el = el + getattr(FradIDdata.allFragIDs[cFragID],elevattr)
+                    ws = ws + getattr(FradIDdata.allFragIDs[cFragID],slopeattr)*FragIDdata.allFragIDs[cFragID].lengthft
 
                 self.allReaches[segment][rch].eff_length = tt
                 if tt>0:
                     self.allReaches[segment][rch].eff_width = ww/tt
+                    self.allReaches[segment][rch].eff_slope = ws/tt
                 else:
                     self.allReaches[segment][rch].eff_width = 99999.
+                    self.allReaches[segment][rch].eff_slope = 99999.
+                if knt > 0:
+                    self.allReaches[segment][rch].elevreach = el/knt
+                else:
+                    self.allReaches[segment][rch].elevreach = 99999.
 
 class SFRpreproc:
     def __init__(self, SFRdata):
@@ -2213,3 +2241,9 @@ class InputFileMissing(Exception):
         self.infile = infile
     def __str__(self):
         return('\n\nCould not open or parse input file {0}\n'.format(self.infile))
+
+class BadElevChoice(Exception):
+    def __init__(self, choice):
+        self.choice = choice
+    def __str__(self):
+        return('\n\nElevation Choice in XML is not allowable {0}\n'.format(self.choice))
