@@ -14,6 +14,7 @@ import gzip
 from collections import defaultdict
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
+import shutil
 
 '''
 debugging functions
@@ -79,6 +80,8 @@ class SFRInput:
         self.NHD = inpars.findall('.//NHD')[0].text
         self.OUT = inpars.findall('.//OUT')[0].text
         self.MAT1 = inpars.findall('.//MAT1')[0].text
+        MAT1backup = "{0}_backup".format(self.MAT1)
+        shutil.copyfile(self.MAT1,MAT1backup)
         self.MAT2 = inpars.findall('.//MAT2')[0].text
         self.WIDTH = inpars.findall('.//WIDTH')[0].text
         self.MULT = inpars.findall('.//MULT')[0].text
@@ -87,7 +90,7 @@ class SFRInput:
         self.Contours_intersect = inpars.findall('.//Contours_intersect')[0].text
         self.Contours_intersect_distances = inpars.findall('.//Contours_intersect_distances')[0].text
         self.RCH = inpars.findall('.//RCH')[0].text
-        '''
+
         self.nsfrpar = int(inpars.findall('.//nsfrpar')[0].text)
         self.nparseg = int(inpars.findall('.//nparseg')[0].text)
         self.const = float(inpars.findall('.//const')[0].text)
@@ -121,7 +124,7 @@ class SFRInput:
         self.stream_depth = float(inpars.findall('.//stream_depth')[0].text)
         self.minimum_slope = float(inpars.findall('.//minimum_slope')[0].text)
         self.roughness_coeff = float(inpars.findall('.//roughness_coeff')[0].text)
-        '''
+
         # read in model information
         self.DX, self.DY, self.NLAY, self.NROW, self.NCOL, i = disutil.read_meta_data(self.MFdis)
 
@@ -543,8 +546,8 @@ class FragIDPropsAll:
 
             self.allcomids.append(int(seg.COMID))
         self.allcomids = list(set(self.allcomids))
-        self.allFragIDs.return_unique_cells()
-        self.allFragIDs.return_cellnum_FragID()
+        self.return_unique_cells()
+        self.return_cellnum_FragID()
 
 
 
@@ -1474,7 +1477,7 @@ class SFROperations:
             for b in range(NLAY):
                 SFRbot = STOP - SFRdata.bedthick - SFRdata.buff
                 if SFRbot < cellbottoms[b]:
-                    if b+1 > nlayers:
+                    if b+1 > NLAY:
                         print 'Streambottom elevation={0:f}, Model bottom={1:f} at ' \
                               'row {2:d}, column {3:d}, cellnum {4:d}'.format(
                               SFRbot, cellbottoms[-1], r, c, (r-1)*NCOL + c)
@@ -1492,7 +1495,7 @@ class SFROperations:
         bots_orig = bots[-1, :, :].copy()  # keep a copy of non-changed bottom elevations for plotting
 
         # create a new array of bottom elevations with dimensions like topdata
-        if Lowerbot:
+        if SFRdata.Lowerbot:
             print "\n\nAdjusting model bottom to accomdate SFR cells that were below bottom"
             print "see {0:s}\n".format(BotcorPDF)
             for r in range(NROW):
@@ -1519,11 +1522,11 @@ class SFROperations:
             outpdf.close()
 
         # histogram of layer assignments
-        freq = np.histogram(list(New_Layers), range(nlayers + 2)[1:])
+        freq = np.histogram(list(New_Layers), range(NLAY + 2)[1:])
 
         # write new SFRmat1 file
-        print "\nWriting output to %s..." %(newSFRmat1)
-        ofp = open(newSFRmat1,'w')
+        print "\nWriting output to %s..." %(SFRdata.MAT1)
+        ofp = open(SFRdata.MAT1,'w')
         ofp.write(','.join(SFRinfo.dtype.names)+'\n')
 
         SFRinfo['layer'] = New_Layers
@@ -1538,7 +1541,7 @@ class SFROperations:
         ofp = open(Layerinfo, 'w')
         ofp.write('Layer\t\tNumber of assigned reaches\n')
         print '\nLayer assignments:'
-        for i in range(nlayers):
+        for i in range(NLAY):
             ofp.write('{0:d}\t\t{1:d}\n'.format(freq[1][i], freq[0][i]))
             print '{0:d}\t\t{1:d}\n'.format(freq[1][i], freq[0][i])
         ofp.close()
