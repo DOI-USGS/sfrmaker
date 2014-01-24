@@ -180,17 +180,17 @@ class FragIDprops(object):
     '''
     __slots__ = ['comid', 'startx', 'starty', 'endx', 'endy', 'FragID',
                  'maxsmoothelev', 'minsmoothelev', 'lengthft',
-                 'cellnum', 'contour_elev','elev', 'sidelength',
-                 'segelevinfo', 'start_has_end', 'end_has_start', 'elev_distance', 'segelevinfo',
-                 'elev_min','elev_max','elev_mean','DEM_elev_min','DEM_elev_min','DEM_elev_min', 'smoothed_DEM_elev_min',
-                  'smoothed_DEM_elev_max', 'smoothed_DEM_elev_mean', 'slope']
+                 'cellnum', 'elev', 'sidelength',
+                 'segelevinfo', 'start_has_end', 'end_has_start', 'contour_elev', 'contour_elev_distance', 'segelevinfo',
+                 'interpolated_contour_elev_min','interpolated_contour_elev_max','DEM_elev_max','DEM_elev_min', 'smoothed_DEM_elev_min',
+                  'smoothed_DEM_elev_max', 'slope']
     '''
     #  using __slots__ makes it required to declare properties of the object here in place
     #  and saves significant memory
     def __init__(self, comid, startx, starty, endx, endy, FragID,
-                 maxsmoothelev, minsmoothelev, lengthft, cellnum, contour_elev, elev_distance, segelevinfo, elev_min,
-                 elev_max, elev_mean, DEM_elev_min, DEM_elev_max, DEM_elev_mean, smoothed_DEM_elev_min,
-                 smoothed_DEM_elev_max, smoothed_DEM_elev_mean, slope):
+                 maxsmoothelev, minsmoothelev, lengthft, cellnum, contour_elev, contour_elev_distance, segelevinfo, interpolated_contour_elev_min,
+                 interpolated_contour_elev_max, DEM_elev_min, DEM_elev_max, smoothed_DEM_elev_min,
+                 smoothed_DEM_elev_max, slope):
         self.comid = comid
         self.startx = startx
         self.starty = starty
@@ -202,17 +202,14 @@ class FragIDprops(object):
         self.lengthft = lengthft
         self.cellnum = cellnum
         self.contour_elev = contour_elev
+        self.contour_elev_distance = contour_elev_distance
         self.segelevinfo = segelevinfo
-        self.elev_min = elev_min
-        self.elev_max = elev_max
-        self.elev_mean = elev_mean
-        self.elev_distance = elev_distance
+        self.interpolated_contour_elev_min = interpolated_contour_elev_min
+        self.interpolated_contour_elev_max = interpolated_contour_elev_max
         self.DEM_elev_min = DEM_elev_min
         self.DEM_elev_max = DEM_elev_max
-        self.DEM_elev_mean = DEM_elev_mean
-        self.smoothed_DEM_elev_min = smoothed_DEM_elev_min # ATL: I wonder if we want to break out the calculated elevations into their own object class
+        self.smoothed_DEM_elev_min = smoothed_DEM_elev_min
         self.smoothed_DEM_elev_max = smoothed_DEM_elev_max
-        self.smoothed_DEM_elev_mean = smoothed_DEM_elev_mean
         self.slope = slope
 
 
@@ -539,7 +536,7 @@ class FragIDPropsAll:
                 float(seg.MINELEVSMO)*SFRdata.z_conversion,  # UNIT CONVERSION
                 float(seg.LengthFt),
                 seg.cellnum,
-                list(), list(), None, None, None, None, None, None, None, None, None, None, None)
+                list(), list(), None, None, None, None, None, None, None, None)
 
             self.allcomids.append(int(seg.COMID))
         self.allcomids = list(set(self.allcomids))
@@ -1625,24 +1622,24 @@ class ElevsFromContours:
         if end_fid == FragIDdata.COMID_orderedFragID[self.current_comid][-1]:
             # downstream contour was below current comid
             dist += self.downstream_dist
-            FragIDdata.allFragIDs[end_fid].elev_min = self.end_elev + self.slope * dist
+            FragIDdata.allFragIDs[end_fid].interpolated_contour_elev_min = self.end_elev + self.slope * dist
             dist += FragIDdata.allFragIDs[end_fid].lengthft
-            FragIDdata.allFragIDs[end_fid].elev_max = self.end_elev + self.slope * dist
+            FragIDdata.allFragIDs[end_fid].interpolated_contour_elev_max = self.end_elev + self.slope * dist
 
         else:
-            dist = np.min(FragIDdata.allFragIDs[end_fid].elev_distance)
-            FragIDdata.allFragIDs[end_fid].elev_max = self.end_elev + self.slope * dist
-        print 'fid:%s min/max elevs %s %s' % (end_fid, FragIDdata.allFragIDs[end_fid].elev_min, FragIDdata.allFragIDs[end_fid].elev_max)
+            dist = np.min(FragIDdata.allFragIDs[end_fid].contour_elev_distance)
+            FragIDdata.allFragIDs[end_fid].interpolated_contour_elev_max = self.end_elev + self.slope * dist
+        print 'fid:%s min/max elevs %s %s' % (end_fid, FragIDdata.allFragIDs[end_fid].interpolated_contour_elev_min, FragIDdata.allFragIDs[end_fid].interpolated_contour_elev_max)
 
         # compute max and min elevations in subsequent FragIDs
         ind = end_reach
         for FragID in FragIDdata.COMID_orderedFragID[self.current_comid][start_reach:end_reach][::-1]:
             ind -= 1
             previous_fid = FragIDdata.COMID_orderedFragID[self.current_comid][ind + 1]
-            FragIDdata.allFragIDs[FragID].elev_min = FragIDdata.allFragIDs[previous_fid].elev_max
+            FragIDdata.allFragIDs[FragID].interpolated_contour_elev_min = FragIDdata.allFragIDs[previous_fid].interpolated_contour_elev_max
             dist += FragIDdata.allFragIDs[FragID].lengthft
-            FragIDdata.allFragIDs[FragID].elev_max = self.end_elev + self.slope * dist
-            print 'FragID:%s min/max elevs %s %s' % (FragID, FragIDdata.allFragIDs[FragID].elev_min, FragIDdata.allFragIDs[FragID].elev_max)
+            FragIDdata.allFragIDs[FragID].interpolated_contour_elev_max = self.end_elev + self.slope * dist
+            print 'FragID:%s min/max elevs %s %s' % (FragID, FragIDdata.allFragIDs[FragID].interpolated_contour_elev_min, FragIDdata.allFragIDs[FragID].interpolated_contour_elev_max)
 
 
     def get_dist_slope(self, comid, FragIDdata, COMIDdata):
@@ -1667,7 +1664,7 @@ class ElevsFromContours:
                             break
                     # found contour; assign downstream elev
                     elif FragID in self.elevs_edited:
-                        self.downstream_dist += np.min(FragIDdata.allFragIDs[FragID].elev_distance)
+                        self.downstream_dist += np.min(FragIDdata.allFragIDs[FragID].contour_elev_distance)
                         self.downstream_contour_comid = comid
                         self.end_elev = np.max(FragIDdata.allFragIDs[FragID].contour_elev)
                         self.downstream = False
@@ -1731,7 +1728,7 @@ class ElevsFromContours:
                     elif FragID in self.elevs_edited:
 
                         # calculate distance; reset downstream distance
-                        self.upstream_dist += FragIDdata.allFragIDs[FragID].lengthft - np.max(FragIDdata.allFragIDs[FragID].elev_distance)
+                        self.upstream_dist += FragIDdata.allFragIDs[FragID].lengthft - np.max(FragIDdata.allFragIDs[FragID].contour_elev_distance)
 
                         # set start_elev and calculate slope
                         self.start_elev = np.min(FragIDdata.allFragIDs[FragID].contour_elev)
@@ -1778,7 +1775,7 @@ class ElevsFromContours:
                     # up and downstream slopes from an intersected FragID are calculated using
                     # respective max and min intersected contour values
                     FragIDdata.allFragIDs[FragID].contour_elev.append(float(row.ContourEle))
-                    FragIDdata.allFragIDs[FragID].elev_distance.append(float(row.fmp))
+                    FragIDdata.allFragIDs[FragID].contour_elev_distance.append(float(row.fmp))
 
                     self.elevs_edited.append(FragID)
 
@@ -1801,7 +1798,7 @@ class ElevsFromContours:
                     # up and downstream slopes from an intersected FragID are calculated using
                     # respective max and min intersected contour values
                     FragIDdata.allFragIDs[FragID].contour_elev.append(float(row['ContourEle']))
-                    FragIDdata.allFragIDs[FragID].elev_distance.append(float(row['fmp']))
+                    FragIDdata.allFragIDs[FragID].contour_elev_distance.append(float(row['fmp']))
 
                     self.elevs_edited.append(FragID)
 
@@ -1896,7 +1893,7 @@ class ElevsFromContours:
                 self.end_FragID = self.start_FragID
                 self.end_elev = self.start_elev
                 try:
-                    self.upstream_dist = np.min(FragIDdata.allFragIDs[self.end_FragID].elev_distance)
+                    self.upstream_dist = np.min(FragIDdata.allFragIDs[self.end_FragID].contour_elev_distance)
                 except ValueError:
                     self.upstream_dist = 0
                 self.end_reach = FragIDdata.COMID_orderedFragID[comid].index(self.start_FragID)
@@ -1962,8 +1959,8 @@ class ElevsFromContours:
                 # so that any subsequent interpolation from upstream will stop here
                 # (avoids problems with multiple interpolations through confluence)
 
-                FragIDdata.allFragIDs[self.start_FragID].contour_elev = FragIDdata.allFragIDs[self.start_FragID].elev_max
-                FragIDdata.allFragIDs[self.start_FragID].elev_distance = [0]
+                FragIDdata.allFragIDs[self.start_FragID].contour_elev = FragIDdata.allFragIDs[self.start_FragID].interpolated_contour_elev_max
+                FragIDdata.allFragIDs[self.start_FragID].contour_elev_distance = [0]
                 self.elevs_edited.append(self.start_FragID)
 
 
