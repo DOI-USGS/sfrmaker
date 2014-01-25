@@ -80,8 +80,6 @@ class SFRInput:
         self.NHD = inpars.findall('.//NHD')[0].text
         self.OUT = inpars.findall('.//OUT')[0].text
         self.MAT1 = inpars.findall('.//MAT1')[0].text
-        MAT1backup = "{0}_backup".format(self.MAT1)
-        shutil.copyfile(self.MAT1,MAT1backup)
         self.MAT2 = inpars.findall('.//MAT2')[0].text
         self.WIDTH = inpars.findall('.//WIDTH')[0].text
         self.MULT = inpars.findall('.//MULT')[0].text
@@ -127,6 +125,13 @@ class SFRInput:
 
         # read in model information
         self.DX, self.DY, self.NLAY, self.NROW, self.NCOL, i = disutil.read_meta_data(self.MFdis)
+
+        # make backup copy of MAT 1, if it exists
+        MAT1backup = "{0}_backup".format(self.MAT1)
+        try:
+            shutil.copyfile(self.MAT1, MAT1backup)
+        except IOError:
+            print "Tried to make a backup copy of {0} but no file found.".format(self.MAT1)
 
         try:
             self.eps = float(inpars.findall('.//eps')[0].text)
@@ -1986,8 +1991,9 @@ class ElevsFromDEM:
 
         # calculate elevs
         for i in range(len(reachlist))[start_reach: end_reach]:
-            FragIDdata.allFragIDs[reachlist[i]].smoothed_DEM_elev_max = \
-            FragIDdata.allFragIDs[reachlist[i-1]].smoothed_DEM_elev_min
+            if i > start_reach:
+                FragIDdata.allFragIDs[reachlist[i]].smoothed_DEM_elev_max = \
+                FragIDdata.allFragIDs[reachlist[i-1]].smoothed_DEM_elev_min
 
             #if i+1 < len(reachlist): # don't calculate minimum for end; already assigned
             FragIDdata.allFragIDs[reachlist[i]].smoothed_DEM_elev_min = \
@@ -2016,8 +2022,9 @@ class ElevsFromDEM:
         for comid in FragIDdata.COMID_orderedFragID.keys():
             print comid
 
-            if comid == 1796827:
+            if comid == 1815273:
                 j=2
+
             FragIDs = FragIDdata.COMID_orderedFragID[comid]
             self.ind_current_minimum = 0
 
@@ -2025,12 +2032,25 @@ class ElevsFromDEM:
             FragIDdata.allFragIDs[FragIDs[0]].smoothed_DEM_elev_max = FragIDdata.allFragIDs[FragIDs[0]].maxsmoothelev
             FragIDdata.allFragIDs[FragIDs[-1]].smoothed_DEM_elev_min = FragIDdata.allFragIDs[FragIDs[-1]].minsmoothelev
 
+            print "start_elev: {0}, end_elev {1}".format(FragIDdata.allFragIDs[FragIDs[0]].smoothed_DEM_elev_max,
+                                                         FragIDdata.allFragIDs[FragIDs[-1]].smoothed_DEM_elev_min)
             # for segments with only end reaches
-            if len(FragIDs) < 3: # no interior points; keep ending elevations
+            if len(FragIDs) < 2: # no interior points; keep ending elevations
                 continue
             end = FragIDdata.allFragIDs[FragIDs[-1]].smoothed_DEM_elev_min
 
             for i in range(len(FragIDs))[1:]:
+
+                if FragIDs[i] == 1926:
+                    j=2
+
+                # if COMID start and end elevations are equal, assign all interior elevations to same value
+                if FragIDdata.allFragIDs[FragIDs[0]].smoothed_DEM_elev_max == end:
+                    self.adjusted_elev = end
+                    self.assign_elevation_and_slope(FragIDs, i, FragIDdata)
+                    dS = 0
+                    self.interpolate_between_minima(FragIDdata, FragIDs, i, len(FragIDs), dS)
+                    break
 
                 # assign DEM elevations at Fragment ends using intersections with adjacent fragment pairs
                 #FragIDdata.allFragIDs[FragIDs[i-1]].DEM_elev_min = \
@@ -2044,6 +2064,8 @@ class ElevsFromDEM:
 
                 # adjusted elevation initially set at DEM elevation for beginning of current reach
                 self.adjusted_elev = FragIDdata.allFragIDs[FragIDs[i-1]].DEM_elev_min
+                if i == 37:
+                    j=2
 
                 # in case DEM elevation for current reach is below segment end, set elev. to increment above, interpolate to end
                 if self.adjusted_elev <= end:
@@ -2084,7 +2106,7 @@ class ElevsFromDEM:
                         # set minimum elevation in previous reach and assign slope
                         self.assign_elevation_and_slope(FragIDs, i, FragIDdata)
 
-                    # if previous reach was above minimum, interpolate back to current minimum
+                    # if previous reach was above or equal to minimum, interpolate back to current minimum
                     else:
                         dS = FragIDdata.allFragIDs[FragIDs[self.ind_current_minimum]].smoothed_DEM_elev_max - self.adjusted_elev
                         self.interpolate_between_minima(FragIDdata, FragIDs, self.ind_current_minimum, i, dS)
@@ -2096,6 +2118,16 @@ class ElevsFromDEM:
                     # update minimum to current reach
                     self.ind_current_minimum = i
 
+                # on the last reach, and DEM elevation for current reach (max DEM elevation) is above end, but >= previous minimum
+                # interpolate back to current minimum
+                elif i == len(FragIDs)-1:
+                    dS = FragIDdata.allFragIDs[FragIDs[self.ind_current_minimum]].smoothed_DEM_elev_max - end
+                    self.interpolate_between_minima(FragIDdata, FragIDs, self.ind_current_minimum, i, dS)
+
+                    # update max elev to minimum in adjacent upstream reach (interp routine stops after upstream reach)
+                    FragIDdata.allFragIDs[FragIDs[i]].smoothed_DEM_elev_max = \
+                    FragIDdata.allFragIDs[FragIDs[i-1]].smoothed_DEM_elev_min
+
                 # DEM elevation for current reach is not below all previous
                 else:
                     continue
@@ -2103,6 +2135,7 @@ class ElevsFromDEM:
                 if FragIDdata.allFragIDs[FragIDs[i]].smoothed_DEM_elev_max:
                     print "Reach {0}, max_elev: {1}, min_elev: {2}".format(i-1, FragIDdata.allFragIDs[FragIDs[i-1]].smoothed_DEM_elev_max,
                                                                        FragIDdata.allFragIDs[FragIDs[i-1]].smoothed_DEM_elev_min)
+
         self.ofp.close()
 
 class SFRoutput:
