@@ -100,6 +100,10 @@ Segmentdata = SFRc.SFRSegmentsAll()
 Segmentdata.divide_at_confluences(LevelPathdata, FragIDdata, COMIDdata, CELLdata)
 Segmentdata.accumulate_same_levelpathID(LevelPathdata, COMIDdata, FragIDdata, SFRdata, CELLdata)
 
+#make some output
+
+SFRoutput = SFRc.SFRoutput(SFRdata)
+SFRoutput.build_SFR_shapefile(Segmentdata)
 '''
 saveme ={}
 
