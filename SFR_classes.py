@@ -491,6 +491,7 @@ class FragIDPropsAll:
         self.COMID_orderedFragID = dict()
         self.comid_FragID = None
         self.cellnum_FragID = None
+        self.cellnum_LevelPathID = None
 
     def return_FragID_comid_list(self):
         """
@@ -518,12 +519,36 @@ class FragIDPropsAll:
 
     def return_cellnum_FragID(self):
         """
-        method to return a default dictionary keyed by cellnum returning a list FragIDs - used
+        method to return a dictionary keyed by cellnum returning a list FragIDs - used
         to relate the properties in the FragID object to the cellnumber
         """
         self.cellnum_FragID = {cellnum: [] for cellnum in self.unique_cells}
         for cFragID in self.allFragIDs.iterkeys():
             self.cellnum_FragID[self.allFragIDs[cFragID].cellnum].append(cFragID)
+
+    def return_cellnum_LevelPathID(self, LevelPathdata):
+        """
+        method to return a list of levelpathIDs within a given cell; keyed by
+        cellnum and returning a list of LevelPathIDs - especially used where properties are
+        accumulated into reaches for a given cell to distinguish between different segments
+        """
+        self.cellnum_LevelPathID = {cellnum : [] for cellnum in self.unique_cells}
+        #each FragID has only one level path, invert the levelpath/fragID dictionary
+        #accounting for the value of the dict is a list of FragIDs
+        fragid_lpid=dict()
+        for lpID, fragidlist in LevelPathdata.levelpath_FragID.iteritems():
+            for frg in fragidlist:
+                fragid_lpid[frg]=lpID
+
+        for localcell, fragidlist in self.cellnum_FragID.items():
+            for cfragid in fragidlist:
+                self.cellnum_LevelPathID[localcell].append(fragid_lpid[cfragid])
+
+        #go over the localcells once more and make the list unique
+        for localcell in self.cellnum_LevelPathID.iterkeys():
+            self.cellnum_LevelPathID[localcell] = list(set(self.cellnum_LevelPathID[localcell]))
+
+
 
 
     def populate(self, SFRdata):
@@ -746,8 +771,6 @@ class SFRSegmentsAll:
         for parts of a stream that have the same levelpathID
         within a cell and within the same SFR segment
 
-        THIS VERSION DOESN'T CHECK LEVELPATHID, JUST SUMS
-        ALL THE FRAGIDS IN A CELL FOR TESTING.....
         """
 
         #use flag from SFRdata to determine which elevation to use
@@ -771,22 +794,32 @@ class SFRSegmentsAll:
         '''
         elevattr = 'maxsmoothelev'
         slopeattr = 'slope'
+        CHK=open('check.out','w')
+        CHK.write('SEGMENT, LPID, REACH, LOCALCELL: LEVELPATHS: FRAGIDs/levelpath\n')
         for segment in self.allSegs.iterkeys():
             rch = 0
+            #get the levelpath ID for the segment of interest
+            seglpid = self.allSegs[segment].levelpathID
             for localcell in self.allSegs[segment].seg_cells:
                 rch = rch + 1        #seg_cells attribute is ordered...
                 tt=0.
                 ww=0.
                 el=0.
                 ws=0.
+                #loop over fids and combine/assign to reach if levelpathID matches
+                #the levelpath ID for the segment of interest; other levelpathIDs will
+                #be combined and assigned during their segment - doesn't subdivide
+                #at confluences...
                 knt=0
                 for cFragID in FragIDdata.cellnum_FragID[localcell]:
                     ccomid = FragIDdata.allFragIDs[cFragID].comid
-                    knt=knt+1
-                    tt = tt + FragIDdata.allFragIDs[cFragID].lengthft
-                    ww = ww + COMIDdata.allcomids[ccomid].est_width*FragIDdata.allFragIDs[cFragID].lengthft
-                    el = el + getattr(FragIDdata.allFragIDs[cFragID],elevattr)
-                    #ws = ws + getattr(FragIDdata.allFragIDs[cFragID],slopeattr)*FragIDdata.allFragIDs[cFragID].lengthft
+                    clpID = COMIDdata.allcomids[ccomid].levelpathID
+                    if clpID == seglpid:
+                        knt=knt+1
+                        tt = tt + FragIDdata.allFragIDs[cFragID].lengthft
+                        ww = ww + COMIDdata.allcomids[ccomid].est_width*FragIDdata.allFragIDs[cFragID].lengthft
+                        el = el + getattr(FragIDdata.allFragIDs[cFragID],elevattr)
+                        #ws = ws + getattr(FragIDdata.allFragIDs[cFragID],slopeattr)*FragIDdata.allFragIDs[cFragID].lengthft
 
                 eff_length = tt
                 eff_slope = 99999.
@@ -807,6 +840,7 @@ class SFRSegmentsAll:
                 #the if for unstructured will be added in the future
                 self.allSegs[segment].seg_reaches[rch].row = CELLdata.allcells[localcell].row
                 self.allSegs[segment].seg_reaches[rch].column = CELLdata.allcells[localcell].column
+        CHK.close()
 
 class SFRpreproc:
     def __init__(self, SFRdata):
