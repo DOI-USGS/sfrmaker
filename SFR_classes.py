@@ -620,8 +620,6 @@ class SFRSegmentsAll:
     def __init__(self):
         self.allSegs = dict()              #dictionary of segment objects keyed by final segment number
         self.confluences = defaultdict(list)    #dictionary of lists keyed by levelpathID
-        self.allReaches = defaultdict(dict)     #default dictionary of reach objects
-                                                #keyed by final segment and reach allReaches[segment][reach] -> object
 
     def divide_at_confluences(self,LevelPathdata, FragIDdata, COMIDdata, CELLdata):
         #establish provisional segment numbers from downstream (decending)
@@ -741,7 +739,7 @@ class SFRSegmentsAll:
 
 
 
-    def accumulate_same_levelpathID(self, LevelPathdata, COMIDdata, FragIDdata, SFRdata):
+    def accumulate_same_levelpathID(self, LevelPathdata, COMIDdata, FragIDdata, SFRdata, CELLdata):
         """
         method to add lengths and weight widths and slopes
         for parts of a stream that have the same levelpathID
@@ -801,9 +799,13 @@ class SFRSegmentsAll:
                     elevreach = el/knt
                 else:
                     elevreach = 99999.
-                self.allReaches[segment][rch]=SFRReachProps(localcell,eff_width,eff_length,
+                self.allSegs[segment].seg_reaches[rch]=SFRReachProps(localcell,eff_width,eff_length,
                                                             eff_slope,elevreach, SFRdata.bedthick,
                                                             SFRdata.bedK, SFRdata.roughch)
+                #if its a structured grid, add row and column to seg_reaches
+                #the if for unstructured will be added in the future
+                self.allSegs[segment].seg_reaches[rch].row = CELLdata.allcells[localcell].row
+                self.allSegs[segment].seg_reaches[rch].column = CELLdata.allcells[localcell].column
 
 class SFRpreproc:
     def __init__(self, SFRdata):
@@ -2176,7 +2178,7 @@ class SFRoutput:
                 mat1out.write(','.join(map(str, printstring)))
                 mixedlist = (curr_reaches[creach].elevreach,
                     curr_reaches[creach].elevreach - self.indat.stream_depth,
-                    creach
+                    creach,
                     cseg,
                     curr_reaches[creach].eff_width,
                     curr_reaches[creach].eff_length,
