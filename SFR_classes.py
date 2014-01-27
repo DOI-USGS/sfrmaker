@@ -122,6 +122,7 @@ class SFRInput:
         self.stream_depth = float(inpars.findall('.//stream_depth')[0].text)
         self.minimum_slope = float(inpars.findall('.//minimum_slope')[0].text)
         self.roughness_coeff = float(inpars.findall('.//roughness_coeff')[0].text)
+        self.GISSHP = inpars.findall('.//GISSHP')[0].text
 
         # read in model information
         self.DX, self.DY, self.NLAY, self.NROW, self.NCOL, i = disutil.read_meta_data(self.MFdis)
@@ -2274,6 +2275,48 @@ class SFRoutput:
                     ofp.write('{0:e}\n'.format(seginfo['width_in_cell'][0]))
                     ofp.write('{0:e}\n'.format(seginfo['width_in_cell'][-1]))
         ofp.close()
+
+    def build_SFR_shapefile(self, SFRSegsAll):
+        print 'building a shapefile of final SFR segments and reaches'
+        path=os.getcwd()
+        arcpy.env.workspace=path
+        outshapefile = self.indat.GISSHP
+        rivcells = self.indat.CELLS_DISS
+        if arcpy.Exists(outshapefile):
+            arcpy.Delete_management(outshapefile)
+
+        arcpy.CreateFeatureclass_management(path,outshapefile,"POLYGON",rivcells)
+        arcpy.AddField_management(outshapefile,"CELLNUM","LONG")
+        arcpy.AddField_management(outshapefile,"ROW","LONG")
+        arcpy.AddField_management(outshapefile,"COLUMN","LONG")
+        arcpy.AddField_management(outshapefile,"LAYER","LONG")
+        arcpy.AddField_management(outshapefile,"SEGMENT","LONG")
+        arcpy.AddField_management(outshapefile,"REACH","LONG")
+        newrows = arcpy.InsertCursor(outshapefile)
+        shapeName = arcpy.Describe(rivcells).shapeFieldName
+
+        for seg in SFRSegsAll.allSegs.iterkeys():
+            reachdict = SFRSegsAll.allSegs[seg].seg_reaches
+            for rch in reachdict.iterkeys():
+                localcell = reachdict[rch].cellnum
+                layer = int(9999)           #flag to remind us to link layer here..
+                query = "CELLNUM={0}".format(localcell)
+                poly = arcpy.SearchCursor(rivcells,query)
+                # skips if poly is empty, should only go through it once
+                for entry in poly:
+                    newvals = newrows.newRow()
+                    feature = entry.getValue(shapeName)
+                    newvals.Shape = feature
+                    newvals.CELLNUM = localcell
+                    newvals.ROW = reachdict[rch].row
+                    newvals.COLUMN = reachdict[rch].column
+                    newvals.LAYER = layer
+                    newvals.SEGMENT = seg
+                    newvals.REACH = rch
+                    newrows.insertRow(newvals)
+
+        del newvals, newrows
+
 
 
 def widthcorrelation(arbolate):
