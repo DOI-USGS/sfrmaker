@@ -95,7 +95,7 @@ Notes on SFR input:
     <MULT>Multiple_segments.txt</MULT>     
 </OutputFiles>
 
-<SFR_par<SFR_parameters>
+<SFR_parameters>
 <!--
 default parameter values output to final SFR2 input file for MODFLOW -
 could read some of these in through a shapefile if variation in the domain

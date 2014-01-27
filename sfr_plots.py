@@ -50,7 +50,7 @@ class plot_segments:
             for fid in FragIDdata.COMID_orderedFragID[seg]:
                 dist += FragIDdata.allFragIDs[fid].lengthft
                 distances.append(dist)
-                mean_elev = 0.5 * (FragIDdata.allFragIDs[fid].elev_max + FragIDdata.allFragIDs[fid].elev_min)
+                mean_elev = 0.5 * (FragIDdata.allFragIDs[fid].interpolated_contour_elev_max + FragIDdata.allFragIDs[fid].interpolated_contour_elev_min)
                 mean_elev_fromDEM = 0.5 * (FragIDdata.allFragIDs[fid].smoothed_DEM_elev_max + FragIDdata.allFragIDs[fid].smoothed_DEM_elev_min)
                 elevs.append(mean_elev)
                 elevs_fromDEM.append(mean_elev_fromDEM)
