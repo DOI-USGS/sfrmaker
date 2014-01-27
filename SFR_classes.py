@@ -817,17 +817,8 @@ class SFRpreproc:
         self.ofp.write('SFR_preproc log.')
         self.ofp.write('\n' + '#' * 25 + '\nStart Time: {0:s}\n'.format(st_time) + '#' * 25 + '\n')
 
-    def getfield(self, table, joinname, returnedname):
-    # get name of field (useful for case issues and appended field names in joined tables, etc)
-        Fields = arcpy.ListFields(table)
-        joinname = joinname.lower()
-        for field in Fields:
-            if joinname in field.name.lower():
-                joinname = field.name
-                break
-        self.joinnames[returnedname] = joinname
 
-    def clip_and_join_attributes(self):
+    def clip_and_join_attributes(self, SFRoperations):
         indat = self.indata
 
         print "Clip original NHD flowlines to model domain..."
@@ -888,22 +879,22 @@ class SFRpreproc:
         # If not already, permanently join PlusflowVAA and Elevslope, then to Flowlines
         if Join:
             print "\nJoining Elevslope to PlusflowVAA...\n"
-            self.getfield("PlusflowVAA", "comid", "comid1")
-            self.getfield("Elevslope", "comid", "comid2")
+            SFRoperations.getfield("PlusflowVAA", "comid", "comid1")
+            SFRoperations.getfield("Elevslope", "comid", "comid2")
             arcpy.JoinField_management("PlusflowVAA",
-                                       self.joinnames['comid1'],
+                                       SFRoperations.joinnames['comid1'],
                                        "Elevslope",
-                                       self.joinnames['comid2'])
+                                       SFRoperations.joinnames['comid2'])
         else:
             print "PlusflowVAA and Elevslope already joined from previous run..."
 
         print "Joining PlusflowVAA to NHDFlowlines...\n"
-        self.getfield("Flowlines", "comid", 'comid1')
+        SFRoperations.getfield("Flowlines", "comid", 'comid1')
 
         # join to Flowlines, keeping only common
         SFR_arcpy.general_join(indat.Flowlines,
                                "Flowlines",
-                               self.joinnames['comid1'],
+                               SFRoperations.joinnames['comid1'],
                                indat.PlusflowVAA,
                                "comid",
                                True)
@@ -915,21 +906,21 @@ class SFRpreproc:
         self.ofp.write('\n' + 25*'#' + '\nRemoving segments with no elevation information, and with ThinnerCod = -9..\n')
         print "Removing segments with no elevation information, and with ThinnerCod = -9..."
 
-        self.getfield("Flowlines", "thinnercod", "ThinnerCod")
-        self.getfield("Flowlines", "maxelevsmo", "MaxEl")
-        self.getfield("Flowlines", "comid", "comid")
+        SFRoperations.getfield("Flowlines", "thinnercod", "ThinnerCod")
+        SFRoperations.getfield("Flowlines", "maxelevsmo", "MaxEl")
+        SFRoperations.getfield("Flowlines", "comid", "comid")
         FLtable = arcpy.UpdateCursor("Flowlines")
         zerocount = 0
         tcount = 0
         for segments in FLtable:
-            if segments.getValue(self.joinnames['MaxEl']) == 0:
-                print "%d no elevation data" % segments.getValue(self.joinnames['comid'])
-                self.ofp.write("%d no elevation data\n" % segments.getValue(self.joinnames['comid']))
+            if segments.getValue(SFRoperations.joinnames['MaxEl']) == 0:
+                print "%d no elevation data" % segments.getValue(SFRoperations.joinnames['comid'])
+                self.ofp.write("%d no elevation data\n" % segments.getValue(SFRoperations.joinnames['comid']))
                 FLtable.deleteRow(segments)
                 zerocount += 1
-            elif segments.getValue(self.joinnames['ThinnerCod']) == -9:
-                print "%d ThinnerCod=-9" % segments.getValue(self.joinnames['comid'])
-                self.ofp.write("%d ThinnerCod=-9\n" % segments.getValue(self.joinnames['comid']))
+            elif segments.getValue(SFRoperations.joinnames['ThinnerCod']) == -9:
+                print "%d ThinnerCod=-9" % segments.getValue(SFRoperations.joinnames['comid'])
+                self.ofp.write("%d ThinnerCod=-9\n" % segments.getValue(SFRoperations.joinnames['comid']))
                 FLtable.deleteRow(segments)
                 tcount += 1
 
@@ -990,8 +981,8 @@ class SFRpreproc:
  #       arcpy.CalculateField_management(indat.CELLS, "CELLNUM", "!node!", "PYTHON")
 
         print "Dissolving river cells on cell number to isolate unique cells...\n"
-        self.getfield(indat.CELLS, "cellnum", "cellnum")
-        arcpy.Dissolve_management(indat.CELLS, indat.CELLS_DISS, self.joinnames['cellnum'])
+        SFRoperations.getfield(indat.CELLS, "cellnum", "cellnum")
+        arcpy.Dissolve_management(indat.CELLS, indat.CELLS_DISS, SFRoperations.joinnames['cellnum'])
 
         print "Exploding NHD segments to grid cells using Intersect and Multipart to Singlepart..."
         arcpy.Intersect_analysis([indat.CELLS_DISS, "Flowlines"], "tmp_intersect.shp")
@@ -1021,20 +1012,20 @@ class SFRpreproc:
             arcpy.CalculateField_management(indat.intersect, fld, commands[fld], "PYTHON")
         self.ofp.write('\n' + 25*'#' + '\nRemoving reaches with lengths less than or equal to %s...\n' % indat.reach_cutoff)
         print "\nRemoving reaches with lengths less than or equal to %s..." % indat.reach_cutoff
-        self.getfield(indat.intersect, "comid", "comid")
-        self.getfield(indat.intersect, "cellnum", "cellnum")
-        self.getfield(indat.intersect, "lengthft", "Length")
+        SFRoperations.getfield(indat.intersect, "comid", "comid")
+        SFRoperations.getfield(indat.intersect, "cellnum", "cellnum")
+        SFRoperations.getfield(indat.intersect, "lengthft", "Length")
         table = arcpy.UpdateCursor(indat.intersect)
         count = 0
         for reaches in table:
             if reaches.getValue(self.joinnames["Length"]) <= indat.reach_cutoff:
-                print "segment: %d, cell: %s, length: %s" % (reaches.getValue(self.joinnames["comid"]),
-                                                            reaches.getValue(self.joinnames["cellnum"]),
-                                                            reaches.getValue(self.joinnames["Length"]))
+                print "segment: %d, cell: %s, length: %s" % (reaches.getValue(SFRoperations.joinnames["comid"]),
+                                                            reaches.getValue(SFRoperations.joinnames["cellnum"]),
+                                                            reaches.getValue(SFRoperations.joinnames["Length"]))
                 self.ofp.write("segment: %d, cell: %s, length: %s\n"
-                          %(reaches.getValue(self.joinnames["comid"]),
-                            reaches.getValue(self.joinnames["cellnum"]),
-                            reaches.getValue(self.joinnames["Length"])))
+                          %(reaches.getValue(SFRoperations.joinnames["comid"]),
+                            reaches.getValue(SFRoperations.joinnames["cellnum"]),
+                            reaches.getValue(SFRoperations.joinnames["Length"])))
                 table.deleteRow(reaches)
                 count += 1
         print "removed %s reaches with lengths <= %s\n" % (count, indat.reach_cutoff)
@@ -1049,13 +1040,13 @@ class SFRpreproc:
                                  "river_explode",
                                  "cellnum",
                                  "KEEP_ALL")  # this might not work as-in in stand-alone mode
-        self.getfield("river_cells_dissolve", "cellnum", "cellnum")
-        self.getfield("river_cells_dissolve", "maxelevsmo", "maxelevsmo")
+        SFRoperations.getfield("river_cells_dissolve", "cellnum", "cellnum")
+        SFRoperations.getfield("river_cells_dissolve", "maxelevsmo", "maxelevsmo")
         table = arcpy.SearchCursor("river_cells_dissolve")
         nodes2delete = []
         for row in table:
             if row.isNull(self.joinnames["maxelevsmo"]):
-                nodes2delete.append(row.getValue(self.joinnames["cellnum"]))
+                nodes2delete.append(row.getValue(SFRoperations.joinnames["cellnum"]))
         arcpy.RemoveJoin_management("river_cells_dissolve", "river_explode")
 
         # preserve the FragID code as FragID for all future reference
@@ -1065,13 +1056,13 @@ class SFRpreproc:
         # remove cellnums with no elevation information from river_explode
         self.ofp.write('\n' + 25*'#' + '\nRemoving nodes with no elevation information from river_explode\n')
         print 'Removing nodes with no elevation information from river_explode'
-        self.getfield(indat.CELLS_DISS, "cellnum", "cellnum")
+        SFRoperations.getfield(indat.CELLS_DISS, "cellnum", "cellnum")
         table = arcpy.UpdateCursor(indat.CELLS_DISS)
         count = 0
         for cells in table:
-            if cells.getValue(self.joinnames["cellnum"]) in nodes2delete:
-                print "%d" % (cells.getValue(self.joinnames["cellnum"]))
-                self.ofp.write('%d\n' % (cells.getValue(self.joinnames["cellnum"])))
+            if cells.getValue(SFRoperations.joinnames["cellnum"]) in nodes2delete:
+                print "%d" % (cells.getValue(SFRoperations.joinnames["cellnum"]))
+                self.ofp.write('%d\n' % (cells.getValue(SFRoperations.joinnames["cellnum"])))
                 table.deleteRow(cells)
                 count += 1
         print "removed %s cells\n" % (count)
@@ -1079,13 +1070,13 @@ class SFRpreproc:
 
         print "removing any remaining disconnected reaches..."
         self.ofp.write('\n' + 25*'#' + '\nremoving any remaining disconnected reaches...\n')
-        self.getfield(indat.intersect, "cellnum", "cellnum")
+        SFRoperations.getfield(indat.intersect, "cellnum", "cellnum")
         table = arcpy.UpdateCursor(indat.intersect)
         count = 0
         for reaches in table:
-            if reaches.getValue(self.joinnames["cellnum"]) in nodes2delete:
-                print "%d" % (reaches.getValue(self.joinnames["cellnum"]))
-                self.ofp.write('%d\n' % (reaches.getValue(self.joinnames["cellnum"])))
+            if reaches.getValue(SFRoperations.joinnames["cellnum"]) in nodes2delete:
+                print "%d" % (reaches.getValue(SFRoperations.joinnames["cellnum"]))
+                self.ofp.write('%d\n' % (reaches.getValue(SFRoperations.joinnames["cellnum"])))
                 table.deleteRow(reaches)
                 count += 1
         if count > 0:
@@ -1935,17 +1926,7 @@ class ElevsFromDEM:
         self.end_interp_report = "end_interp_report.txt"
         self.adjusted_elev = -9999
         self.joinnames = dict()
-    '''
-    def getfield(self, table, joinname, returnedname):
-    # get name of field (useful for case issues and appended field names in joined tables, etc)
-        Fields = arcpy.ListFields(table)
-        joinname = joinname.lower()
-        for field in Fields:
-            if joinname in field.name.lower():
-                joinname = field.name
-                break
-        self.joinnames[returnedname] = joinname
-    '''
+
     def DEM_elevs_by_cellnum(self, SFRData, SFROperations):
 
         # makes dictionary of DEM elevations by cellnum, using table for grid shapefile (column: cellnum)
@@ -1961,15 +1942,15 @@ class ElevsFromDEM:
             SFR_arcpy.compute_zonal(self.NROW, self.NCOL, self.DX, SFRData.DEM_z_conversion, SFRData.MFgrid, SFRData.DEM)
 
         # reference fields for cellnum and elevation, case-insensitive
-        self.getfield("MFgrid", "cellnum", "cellnum")
-        self.getfield("MFgrid", self.MFgrid_elev_field, self.MFgrid_elev_field.lower())
+        SFROperations.getfield("MFgrid", "cellnum", "cellnum")
+        SFROperations.getfield("MFgrid", self.MFgrid_elev_field, self.MFgrid_elev_field.lower())
 
         # get elevations in each stream cell, from grid shapefile table
         MFgridtable = arcpy.SearchCursor(self.MFgrid)
         self.DEM_elevs_by_cellnum = dict()
         for row in MFgridtable:
-            cellnum = row.getValue(self.joinnames["cellnum"])
-            self.DEM_elevs_by_cellnum[cellnum] = row.getValue( self.joinnames[self.MFgrid_elev_field.lower()])
+            cellnum = row.getValue(SFROperations.joinnames["cellnum"])
+            self.DEM_elevs_by_cellnum[cellnum] = row.getValue(SFROperations.joinnames[self.MFgrid_elev_field.lower()])
 
 
     def DEM_elevs_by_FragID(self, SFRdata, SFROperations):
