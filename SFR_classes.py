@@ -575,17 +575,17 @@ class SFRReachProps(object):
     '''
     __slots__ = ['cellnum','eff_length','eff_width','eff_slope','elevreach','bedthick','bedK','roughch']
     '''
-    def __init__(self):
-        self.cellnum = None
+    def __init__(self, cellnum, eff_length, eff_width, eff_slope, elevreach, bedthick, bedK, roughch):
+        self.cellnum = cellnum
         self.row = None
         self.column = None
-        self.eff_length = None
-        self.eff_width = None
-        self.eff_slope = None
-        self.elevreach = None
-        self.bedthick = None
-        self.bedK = None
-        self.roughch = None
+        self.eff_length = eff_length
+        self.eff_width = eff_width
+        self.eff_slope = eff_slope
+        self.elevreach = elevreach
+        self.bedthick = bedthick
+        self.bedK = bedK
+        self.roughch = roughch
 
 
 class SFRSegmentProps(object):
@@ -753,6 +753,7 @@ class SFRSegmentsAll:
 
         #use flag from SFRdata to determine which elevation to use
         #for the reaches
+        '''
         elevflag=SFRdata.elevflag
         if elevflag == 'DEM':
             elevattr = 'DEM_elev_mean'
@@ -768,7 +769,9 @@ class SFRSegmentsAll:
             slopeattr = 'NHDPlus_slope'
         else:
             raise(BadElevChoice(elevflag))
-
+        '''
+        elevattr = 'maxsmoothelev'
+        slopeattr = 'slope'
         for segment in self.allSegs.iterkeys():
             rch = 0
             for localcell in self.allSegs[segment].seg_cells:
@@ -782,22 +785,25 @@ class SFRSegmentsAll:
                     ccomid = FragIDdata.allFragIDs[cFragID].comid
                     knt=knt+1
                     tt = tt + FragIDdata.allFragIDs[cFragID].lengthft
-                    ww = ww + COMIDdata[ccomid].est_width*FragIDdata.allFragIDs[cFragID].lengthft
-                    el = el + getattr(FradIDdata.allFragIDs[cFragID],elevattr)
-                    ws = ws + getattr(FradIDdata.allFragIDs[cFragID],slopeattr)*FragIDdata.allFragIDs[cFragID].lengthft
+                    ww = ww + COMIDdata.allcomids[ccomid].est_width*FragIDdata.allFragIDs[cFragID].lengthft
+                    el = el + getattr(FragIDdata.allFragIDs[cFragID],elevattr)
+                    #ws = ws + getattr(FragIDdata.allFragIDs[cFragID],slopeattr)*FragIDdata.allFragIDs[cFragID].lengthft
 
-                self.allReaches[segment][rch].eff_length = tt
+                eff_length = tt
+                eff_slope = 99999.
                 if tt>0:
-                    self.allReaches[segment][rch].eff_width = ww/tt
-                    self.allReaches[segment][rch].eff_slope = ws/tt
+                    eff_width = ww/tt
+                    #eff_slope = ws/tt
                 else:
-                    self.allReaches[segment][rch].eff_width = 99999.
-                    self.allReaches[segment][rch].eff_slope = 99999.
+                    eff_width = 99999.
+                    #eff_slope = 99999.
                 if knt > 0:
-                    self.allReaches[segment][rch].elevreach = el/knt
+                    elevreach = el/knt
                 else:
-                    self.allReaches[segment][rch].elevreach = 99999.
-
+                    elevreach = 99999.
+                self.allReaches[segment][rch]=SFRReachProps(localcell,eff_width,eff_length,
+                                                            eff_slope,elevreach, SFRdata.bedthick,
+                                                            SFRdata.bedK, SFRdata.roughch)
 
 class SFRpreproc:
     def __init__(self, SFRdata):
@@ -2273,6 +2279,7 @@ def widthcorrelation(arbolate):
     #NHDPlus has arbolate sum in kilometers.
     #print a table with reachcode, order, estimated width, Fcode
     estwidth = 0.1193*math.pow(1000*arbolate,0.5032)
+    return estwidth
 
 """
 ###################

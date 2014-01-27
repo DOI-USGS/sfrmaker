@@ -71,6 +71,8 @@ Notes on SFR input:
     <NHD>NHD_intersect_edited.shp</NHD> 
 	 <!-- RCH: Reach ordering (preliminary) file -->
     <RCH>reach_ordering.txt</RCH>
+    <!-- Elevation Method -->
+    <Elev_method>NHDPlus</Elev_method>
     <!-- ELEVcontours -->
     <ELEVcontours>nothing.txt</ELEVcontours>
     <!-- Routes:  -->
