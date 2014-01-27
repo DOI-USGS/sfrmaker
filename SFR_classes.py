@@ -577,6 +577,8 @@ class SFRReachProps(object):
     '''
     def __init__(self, cellnum, eff_length, eff_width, eff_slope, elevreach, bedthick, bedK, roughch):
         self.cellnum = cellnum
+        self.row = None
+        self.column = None
         self.eff_length = eff_length
         self.eff_width = eff_width
         self.eff_slope = eff_slope
@@ -2167,8 +2169,25 @@ class SFRoutput:
 
         for cseg in seglist:
             reachlist = sorted(SFRSegsAll.allSegs[cseg].seg_reaches)
+            curr_reaches = SFRSegsAll.allSegs[cseg].seg_reaches
             for creach in reachlist:
-                printstring = ()
+                printstring = (curr_reaches[creach].row,
+                curr_reaches[creach].column, 1)
+                mat1out.write(','.join(map(str, printstring)))
+                mixedlist = (curr_reaches[creach].elevreach,
+                    curr_reaches[creach].elevreach - self.indat.stream_depth,
+                    creach
+                    cseg,
+                    curr_reaches[creach].eff_width,
+                    curr_reaches[creach].eff_length,
+                    self.indat.bedK,
+                    self.indat.bedthick,
+                    curr_reaches[creach].eff_slope,
+                    self.indat.roughness_coeff)
+                printstring = ',{0:.4e},{1:.4e},{2:d},{3:d},{4:.4e},{5:.4e},{6:.4e},{7:.4e},{8:.4e},{9:.4e}\n'.format(
+                    *mixedlist)
+                mat1out.write(printstring)
+
 
     def build_SFR_package(self):
 
