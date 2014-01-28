@@ -2369,6 +2369,8 @@ class SFRoutput:
         if arcpy.Exists(outshapefile):
             arcpy.Delete_management(outshapefile)
 
+        #add fields including outseg for checking, note could have multiple
+        #lines for the same cellnum.
         arcpy.CreateFeatureclass_management(path,outshapefile,"POLYGON",rivcells)
         arcpy.AddField_management(outshapefile,"CELLNUM","LONG")
         arcpy.AddField_management(outshapefile,"ROW","LONG")
