@@ -104,10 +104,10 @@ Segmentdata.accumulate_same_levelpathID(LevelPathdata, COMIDdata, FragIDdata, SF
 
 #make some output
 
-SFRoutput = SFRc.SFRoutput(SFRdata)
-SFRoutput.write_SFR_tables(Segmentdata)
-SFRoutput.build_SFR_package()
-SFRoutput.build_SFR_shapefile(Segmentdata)
+#SFRoutput = SFRc.SFRoutput(SFRdata)
+#SFRoutput.write_SFR_tables(Segmentdata)
+#SFRoutput.build_SFR_package()
+#SFRoutput.build_SFR_shapefile(Segmentdata)
 '''
 saveme ={}
 

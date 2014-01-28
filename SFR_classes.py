@@ -706,6 +706,8 @@ class SFRSegmentsAll:
         subcell = dict()
         subordered_cells = dict()
         conf_count = 1
+        CHK2 = open('check2.out','w')
+        CHK2.write("LevelpathID, provisionalSegment, Sublabel, finalseg, cells\n")
         for clevelpathid in LevelPathdata.level_ordered:
             iseg = provSFRseg[clevelpathid]
             numconfls = len(self.confluences[clevelpathid])
@@ -722,15 +724,18 @@ class SFRSegmentsAll:
                 lpcells = LevelPathdata.allids[clevelpathid].ordered_cellnums
                 endindx = lpcells.index(self.confluences[clevelpathid][confl])
                 subordered_cells[sublabel] = lpcells[strt:endindx+1]
+                CHK2.write('{0}, {1}, {2}, {3}:'.format(clevelpathid, iseg, sublabel, subseg[sublabel]))
+                CHK2.write(','.join(map(str,subordered_cells[sublabel]))+'\n')
                 strt = endindx + 1
+        CHK2.close()
         #use confluence information to build final SFR segments and reaches
         for clevelpathid, iseg in provSFRseg.iteritems():
-            for upstlabl in subconfl[iseg]:
-                self.allSegs[subseg[upstlabl]] = SFRSegmentProps()
-                self.allSegs[subseg[upstlabl]].seg_cells = subordered_cells[upstlabl]
-                self.allSegs[subseg[upstlabl]].seg_label = upstlabl
-                self.allSegs[subseg[upstlabl]].levelpathID = clevelpathid
-                lastcell = subordered_cells[upstlabl][-1]
+            for labl in subconfl[iseg]:
+                self.allSegs[subseg[labl]] = SFRSegmentProps()
+                self.allSegs[subseg[labl]].seg_cells = subordered_cells[labl]
+                self.allSegs[subseg[labl]].seg_label = labl
+                self.allSegs[subseg[labl]].levelpathID = clevelpathid
+                lastcell = subordered_cells[labl][-1]
                 nextlevelpath = LevelPathdata.allids[clevelpathid].down_levelpathID
                 if nextlevelpath == 0:
                     outseg = 0
@@ -749,20 +754,20 @@ class SFRSegmentsAll:
                             #next segment in an adjacent cell)
                             overlapcell=subordered_cells[dnlabl][0]
                             if overlapcell==lastcell:
-                                self.allSegs[subseg[upstlabl]].outseg=subseg[dnlabl]
+                                self.allSegs[subseg[labl]].outseg=subseg[dnlabl]
                                 foundout=True
                             if not foundout:
                                 for nxtdwnstream in set(CELLdata.allcells[lastcell].fromCell):
                                     if nxtdwnstream == overlapcell:
-                                        self.allSegs[subseg[upstlabl]].outseg=subseg[dnlabl]
+                                        self.allSegs[subseg[labl]].outseg=subseg[dnlabl]
                                         foundout=True
 
                         if not foundout:
-                            self.allSegs[subseg[upstlabl]].outseg=int(999999)
+                            self.allSegs[subseg[labl]].outseg=int(999999)
                     else:
-                        self.allSegs[subseg[upstlabl]].outseg=int(0)
+                        self.allSegs[subseg[labl]].outseg=int(0)
                 else:
-                    self.allSegs[subseg[upstlabl]].outseg=int(0)
+                    self.allSegs[subseg[labl]].outseg=int(0)
 
         #make a list of what segments are connected to each using outseg information
         #also load in other segment information from SFRdata (XML file information)
@@ -2379,6 +2384,7 @@ class SFRoutput:
         arcpy.AddField_management(outshapefile,"SEGMENT","LONG")
         arcpy.AddField_management(outshapefile,"REACH","LONG")
         arcpy.AddField_management(outshapefile,"OUTSEG","LONG")
+        arcpy.AddField_management(outshapefile,"LEVELPATH","LONG")
         newrows = arcpy.InsertCursor(outshapefile)
         shapeName = arcpy.Describe(rivcells).shapeFieldName
 
@@ -2401,6 +2407,7 @@ class SFRoutput:
                     newvals.SEGMENT = seg
                     newvals.REACH = rch
                     newvals.OUTSEG = SFRSegsAll.allSegs[seg].outseg
+                    newvals.LEVELPATH = SFRSegsAll.allSegs[seg].levelpathID
                     newrows.insertRow(newvals)
 
         del newvals, newrows
