@@ -730,20 +730,32 @@ class SFRSegmentsAll:
         CHK2.close()
         #use confluence information to build final SFR segments and reaches
         for clevelpathid, iseg in provSFRseg.iteritems():
-            for labl in subconfl[iseg]:
+            for i in range(0,len(subconfl[iseg])):
+                labl = subconfl[iseg][i]
                 self.allSegs[subseg[labl]] = SFRSegmentProps()
                 self.allSegs[subseg[labl]].seg_cells = subordered_cells[labl]
                 self.allSegs[subseg[labl]].seg_label = labl
                 self.allSegs[subseg[labl]].levelpathID = clevelpathid
                 lastcell = subordered_cells[labl][-1]
-                nextlevelpath = LevelPathdata.allids[clevelpathid].down_levelpathID
+                nextlabl = 999999  # initialize in case nextlevelpath is not found
+                if i < len(subconfl[iseg])-1:
+                    nextlevelpath=clevelpathid
+                    nextlabl = subconfl[iseg][i+1]
+                else:
+                    nextlevelpath = LevelPathdata.allids[clevelpathid].down_levelpathID
+                    if nextlevelpath in provSFRseg and nextlevelpath > 0:
+                        nextlabl = subconfl[provSFRseg[nextlevelpath]][0]
+
                 if nextlevelpath == 0:
                     outseg = 0
+                elif nextlabl == 999999:
+                    outseg = 999999
                 else:
-                    if nextlevelpath in provSFRseg:
-                        outseg = provSFRseg[nextlevelpath]
-                    else:
-                        outseg = 0
+                    outseg = subseg[nextlabl]
+
+                self.allSegs[subseg[labl]].outseg = outseg
+
+                '''
                 if outseg > 0:
                     if outseg in subconfl:
                         foundout=False
@@ -768,6 +780,7 @@ class SFRSegmentsAll:
                         self.allSegs[subseg[labl]].outseg=int(0)
                 else:
                     self.allSegs[subseg[labl]].outseg=int(0)
+                '''
 
         #make a list of what segments are connected to each using outseg information
         #also load in other segment information from SFRdata (XML file information)
