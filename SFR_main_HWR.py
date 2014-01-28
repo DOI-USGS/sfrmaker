@@ -99,12 +99,14 @@ SFRops.reach_ordering(instuff['COMIDdata'],
 
 '''
 Segmentdata = SFRc.SFRSegmentsAll()
-Segmentdata.divide_at_confluences(LevelPathdata, FragIDdata, COMIDdata, CELLdata)
+Segmentdata.divide_at_confluences(LevelPathdata, FragIDdata, COMIDdata, CELLdata, SFRdata)
 Segmentdata.accumulate_same_levelpathID(LevelPathdata, COMIDdata, FragIDdata, SFRdata, CELLdata)
 
 #make some output
 
 SFRoutput = SFRc.SFRoutput(SFRdata)
+SFRoutput.write_SFR_tables(Segmentdata)
+SFRoutput.build_SFR_package()
 SFRoutput.build_SFR_shapefile(Segmentdata)
 '''
 saveme ={}

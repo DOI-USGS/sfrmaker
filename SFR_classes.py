@@ -129,10 +129,11 @@ class SFRInput:
 
         # make backup copy of MAT 1, if it exists
         MAT1backup = "{0}_backup".format(self.MAT1)
-        try:
-            shutil.copyfile(self.MAT1, MAT1backup)
-        except IOError:
-            print "Tried to make a backup copy of {0} but no file found.".format(self.MAT1)
+        if os.path.isfile(self.MAT1):
+            try:
+                shutil.copyfile(self.MAT1, MAT1backup)
+            except IOError:
+                print "Tried to make a backup copy of {0} but got an error.".format(self.MAT1)
 
         try:
             self.eps = float(inpars.findall('.//eps')[0].text)
@@ -599,9 +600,9 @@ class SFRReachProps(object):
     class containing an object for each reach
     """
     '''
-    __slots__ = ['cellnum','eff_length','eff_width','eff_slope','elevreach','bedthick','bedK','roughch']
+    __slots__ = ['cellnum','eff_length','eff_width','eff_slope','elevreach','bedthick','bedK']
     '''
-    def __init__(self, cellnum, eff_length, eff_width, eff_slope, elevreach, bedthick, bedK, roughch):
+    def __init__(self, cellnum, eff_length, eff_width, eff_slope, elevreach, bedthick, bedK):
         self.cellnum = cellnum
         self.row = None
         self.column = None
@@ -611,7 +612,6 @@ class SFRReachProps(object):
         self.elevreach = elevreach
         self.bedthick = bedthick
         self.bedK = bedK
-        self.roughch = roughch
 
 
 class SFRSegmentProps(object):
@@ -620,7 +620,7 @@ class SFRSegmentProps(object):
     """
     '''
     __slots__ = ['seg_cells','icalc','iupseg','outseg','runoff','etsw','pptsw',
-    'seg_reaches','seg_label','levelpathID']
+    'seg_reaches','seg_label','levelpathID','inseg', 'roughch']
     '''
     def __init__(self):
         self.seg_cells = list()
@@ -629,11 +629,14 @@ class SFRSegmentProps(object):
         self.iupseg = 0    #iupseg default zero right now, diversions could be added
         self.outseg = None
         self.runoff = None
-        self.estw = None
+        self.etsw = None
         self.pptsw = None
+        self.roughch = None
         self.seg_reaches = dict()   #reach object with properties from SFRReachProps keyed by rch_number
         self.seg_label = None  #segment label from confluence step
         self.levelpathID = None          #levelpathID corresponding to the segment
+        self.inseg = list()     #list of segments connecting to the current segment,
+                                 #convenience list for looking at connections
 
 
 class SFRSegmentsAll:
@@ -647,7 +650,7 @@ class SFRSegmentsAll:
         self.allSegs = dict()              #dictionary of segment objects keyed by final segment number
         self.confluences = defaultdict(list)    #dictionary of lists keyed by levelpathID
 
-    def divide_at_confluences(self,LevelPathdata, FragIDdata, COMIDdata, CELLdata):
+    def divide_at_confluences(self,LevelPathdata, FragIDdata, COMIDdata, CELLdata, SFRdata):
         #establish provisional segment numbers from downstream (decending)
         #list of levelpathIDs
         provSFRseg = dict()
@@ -677,7 +680,6 @@ class SFRSegmentsAll:
                             confl = cell
                 else:
                     #no downstream levelpath
-                    outsegbeg = 0
                     outid = 0
                     confl = 0
                 #no end found
@@ -722,7 +724,6 @@ class SFRSegmentsAll:
                 subordered_cells[sublabel] = lpcells[strt:endindx+1]
                 strt = endindx + 1
         #use confluence information to build final SFR segments and reaches
-
         for clevelpathid, iseg in provSFRseg.iteritems():
             for upstlabl in subconfl[iseg]:
                 self.allSegs[subseg[upstlabl]] = SFRSegmentProps()
@@ -757,13 +758,23 @@ class SFRSegmentsAll:
                                         foundout=True
 
                         if not foundout:
-                            self.allSegs[subseg[upstlabl]].outseg=int(99999)
+                            self.allSegs[subseg[upstlabl]].outseg=int(999999)
                     else:
                         self.allSegs[subseg[upstlabl]].outseg=int(0)
                 else:
                     self.allSegs[subseg[upstlabl]].outseg=int(0)
 
-
+        #make a list of what segments are connected to each using outseg information
+        #also load in other segment information from SFRdata (XML file information)
+        for seg in self.allSegs.iterkeys():
+            outseg = self.allSegs[seg].outseg
+            if outseg > 0 and outseg < 999999:
+                self.allSegs[outseg].inseg.append(seg)
+            self.allSegs[seg].etsw = SFRdata.etsw
+            self.allSegs[seg].pptsw = SFRdata.pptsw
+            self.allSegs[seg].runoff = SFRdata.runoff
+            self.allSegs[seg].roughch = SFRdata.roughch
+            self.allSegs[seg].icalc = SFRdata.icalc
 
     def accumulate_same_levelpathID(self, LevelPathdata, COMIDdata, FragIDdata, SFRdata, CELLdata):
         """
@@ -794,12 +805,44 @@ class SFRSegmentsAll:
         '''
         elevattr = 'maxsmoothelev'
         slopeattr = 'slope'
-        CHK=open('check.out','w')
-        CHK.write('SEGMENT, LPID, REACH, LOCALCELL: LEVELPATHS: FRAGIDs/levelpath\n')
+        #CHK = open('check.out','w')
+        #CHK.write('segment, cell, lpID ** segment, cell, lpID\n')
         for segment in self.allSegs.iterkeys():
             rch = 0
-            #get the levelpath ID for the segment of interest
             seglpid = self.allSegs[segment].levelpathID
+            #get the levelpath ID for the segment of interest
+            #and the first and last cell; see if either overlap
+            #with the proceeding or next segment and then check to see
+            #if the levelpathIDs are the same
+            '''
+            firstcell = self.allSegs[segment].seg_cells[0]
+            lastcell = self.allSegs[segment].seg_cells[-1]
+            outseg = self.allSegs[segment].outseg
+            for inseg in self.allSegs[segment].inseg:
+                if firstcell == self.allSegs[inseg].seg_cells[-1]:
+                    CHK.write('topoverlap {0}, {1}, {2} ** {3}, {4}, {5}'.format(segment,
+                                                                                 firstcell,
+                                                                                 seglpid,
+                                                                                 inseg,
+                                                                                 self.allSegs[inseg].seg_cells[-1],
+                                                                                 self.allSegs[inseg].levelpathID))
+                    if self.allSegs[inseg].levelpathID == seglpid:
+                        CHK.write(" overlap split needed!\n")
+                    else:
+                        CHK.write("\n")
+            if outseg > 0 and outseg < 999999:
+                if lastcell == self.allSegs[outseg].seg_cells[0]:
+                    CHK.write('endoverlap  {0}, {1}, {2} ** {3}, {4}, {5}\n'.format(segment,
+                                                                                    lastcell,
+                                                                                    seglpid,
+                                                                                    outseg,
+                                                                                    self.allSegs[outseg].seg_cells[0],
+                                                                                    self.allSegs[outseg].levelpathID))
+                    if self.allSegs[outseg].levelpathID == seglpid:
+                        CHK.write(" overlap split needed!\n")
+                    else:
+                        CHK.write("\n")
+            '''
             for localcell in self.allSegs[segment].seg_cells:
                 rch = rch + 1        #seg_cells attribute is ordered...
                 tt=0.
@@ -835,12 +878,15 @@ class SFRSegmentsAll:
                     elevreach = 99999.
                 self.allSegs[segment].seg_reaches[rch]=SFRReachProps(localcell,eff_width,eff_length,
                                                             eff_slope,elevreach, SFRdata.bedthick,
-                                                            SFRdata.bedK, SFRdata.roughch)
+                                                            SFRdata.bedK)
                 #if its a structured grid, add row and column to seg_reaches
                 #the if for unstructured will be added in the future
                 self.allSegs[segment].seg_reaches[rch].row = CELLdata.allcells[localcell].row
                 self.allSegs[segment].seg_reaches[rch].column = CELLdata.allcells[localcell].column
-        CHK.close()
+
+
+
+        #CHK.close()
 
 class SFRpreproc:
     def __init__(self, SFRdata):
@@ -2217,8 +2263,8 @@ class SFRoutput:
             iprior = 0
             flow = 0
             #write ouput to GWV matrix 2 file
-            mlist1 = (cseg, indat.icalc, curr_seg.outseg, iupseg, iprior, indat.nstrpts)
-            mlist2 = (flow, curr_seg.runoff, curr_seg.etsw, curr_seg.pptsw, indat.roughch, indat.roughbk)
+            mlist1 = (cseg, curr_seg.icalc, curr_seg.outseg, iupseg, iprior, indat.nstrpts)
+            mlist2 = (flow, curr_seg.runoff, curr_seg.etsw, curr_seg.pptsw, curr_seg.roughch, indat.roughbk)
             mlist3 = (indat.cdepth, indat.fdepth, indat.awdth, indat.bwdth)
             printstring = '{0:d},{1:d},{2:d},{3:d},{4:d},{5:d}'.format(*mlist1)
             printstring = printstring+',{0:.5e},{1:.5e},{2:.5e},{3:.5e},{4:.5e},{5:.5e}'.format(*mlist2)
@@ -2240,17 +2286,19 @@ class SFRoutput:
             SFRoutfile = '_'.join(self.indat.OUT.split('.'))+'.tpl'
         else:
             # if building an SFR package (after PEST has written it)
-            # read in PEST-adjusted value for streambed conductance
-            SFRinputdata = open(SFRoutfile, 'r').readlines()
-            Cond = float(SFRinputdata[3].strip().split()[-1])
-            Mat1['bed_K'] = np.ones(len(Mat1))*Cond
+            # read in PEST-adjusted value for streambed conductance, SFRoutfile must exist
+            if os.path.isfile(SFRoutfile):
+                SFRinputdata = open(SFRoutfile, 'r').readlines()
+                if len(SFRinputdata) > 0:  #in case the file is empty...
+                    Cond = float(SFRinputdata[3].strip().split()[-1])
+                    Mat1['bed_K'] = np.ones(len(Mat1))*Cond
         nreaches = len(Mat1)
         nseg = np.max(Mat1['segment'])
         ofp = open(SFRoutfile, 'w')
         if self.indat.tpl:
             ofp.write("ptf ~\n")
         ofp.write("#SFRpackage file generated by Python Script using NHDPlus v2 data\n")
-        ofp.write('{0:d} {1:d} {2:d} {3:d} {4:d} {5:d} {6:d} {7:d} {8:d} {9:d} {10:d} {11:d}\n'.format(
+        ofp.write('{0:d} {1:d} {2:d} {3:d} {4:e} {5:e} {6:d} {7:d} {8:d} {9:d} {10:d} {11:d}\n'.format(
             -1*nreaches,
             nseg,
             self.indat.nsfrpar,
@@ -2298,7 +2346,9 @@ class SFRoutput:
                 self.indat.roughness_coeff
                 ))
 
-            if self.indat.modify_segment_widths and seg in segments2modify:
+            #need to add the input of modify_segment_widths
+            #if self.indat.modify_segment_widths and seg in segments2modify:
+            if seginfo['width_in_cell'][0] > 0.:
                 ofp.write('{0:e}\n'.format(seginfo['width_in_cell'][0]))
                 ofp.write('{0:e}\n'.format(seginfo['width_in_cell'][-1]))
             else:
@@ -2319,6 +2369,8 @@ class SFRoutput:
         if arcpy.Exists(outshapefile):
             arcpy.Delete_management(outshapefile)
 
+        #add fields including outseg for checking, note could have multiple
+        #lines for the same cellnum.
         arcpy.CreateFeatureclass_management(path,outshapefile,"POLYGON",rivcells)
         arcpy.AddField_management(outshapefile,"CELLNUM","LONG")
         arcpy.AddField_management(outshapefile,"ROW","LONG")
@@ -2326,6 +2378,7 @@ class SFRoutput:
         arcpy.AddField_management(outshapefile,"LAYER","LONG")
         arcpy.AddField_management(outshapefile,"SEGMENT","LONG")
         arcpy.AddField_management(outshapefile,"REACH","LONG")
+        arcpy.AddField_management(outshapefile,"OUTSEG","LONG")
         newrows = arcpy.InsertCursor(outshapefile)
         shapeName = arcpy.Describe(rivcells).shapeFieldName
 
@@ -2347,6 +2400,7 @@ class SFRoutput:
                     newvals.LAYER = layer
                     newvals.SEGMENT = seg
                     newvals.REACH = rch
+                    newvals.OUTSEG = SFRSegsAll.allSegs[seg].outseg
                     newrows.insertRow(newvals)
 
         del newvals, newrows
