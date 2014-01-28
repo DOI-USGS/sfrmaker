@@ -42,6 +42,8 @@ COMIDdata.populate_routing(SFRdata, FragIDdata, LevelPathdata, CELLdata)
 
 COMIDdata.return_hydrosequence_comid()
 
+FragIDdata.return_cellnum_LevelPathID(LevelPathdata)
+
 LevelPathdata.return_cutoffs(FragIDdata, CELLdata, SFRdata)
 
 SFRops.reach_ordering(COMIDdata, FragIDdata, LevelPathdata)
