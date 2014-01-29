@@ -88,7 +88,7 @@ class SFRInput:
         self.Contours_intersect = inpars.findall('.//Contours_intersect')[0].text
         self.Contours_intersect_distances = inpars.findall('.//Contours_intersect_distances')[0].text
         self.RCH = inpars.findall('.//RCH')[0].text
-        self.Elev_method = inpars.findall('.//Elev_method')[0].text
+#        self.Elev_method = inpars.findall('.//Elev_method')[0].text
         self.nsfrpar = int(inpars.findall('.//nsfrpar')[0].text)
         self.nparseg = int(inpars.findall('.//nparseg')[0].text)
         self.const = float(inpars.findall('.//const')[0].text)
@@ -908,7 +908,6 @@ class SFRSegmentsAll:
 
 class SFRpreproc:
     def __init__(self, SFRdata):
-        self.joinnames = dict()
         self.indata = SFRdata
         ts = time.time()
         st_time = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
@@ -1117,7 +1116,7 @@ class SFRpreproc:
         table = arcpy.UpdateCursor(indat.intersect)
         count = 0
         for reaches in table:
-            if reaches.getValue(self.joinnames["Length"]) <= indat.reach_cutoff:
+            if reaches.getValue(SFRoperations.joinnames["Length"]) <= indat.reach_cutoff:
                 print "segment: %d, cell: %s, length: %s" % (reaches.getValue(SFRoperations.joinnames["comid"]),
                                                             reaches.getValue(SFRoperations.joinnames["cellnum"]),
                                                             reaches.getValue(SFRoperations.joinnames["Length"]))
@@ -1144,7 +1143,7 @@ class SFRpreproc:
         table = arcpy.SearchCursor("river_cells_dissolve")
         nodes2delete = []
         for row in table:
-            if row.isNull(self.joinnames["maxelevsmo"]):
+            if row.isNull(SFRoperations.joinnames["maxelevsmo"]):
                 nodes2delete.append(row.getValue(SFRoperations.joinnames["cellnum"]))
         arcpy.RemoveJoin_management("river_cells_dissolve", "river_explode")
 
@@ -1807,7 +1806,7 @@ class ElevsFromContours:
 
     def get_contour_intersections(self, FragIDdata, COMIDdata):
 
-        '''
+
         #The slow way with Arc
         # loop through rows in contours intersect table
         distances = arcpy.SearchCursor(self.intersect_dist_table)
@@ -1815,7 +1814,7 @@ class ElevsFromContours:
         print "getting elevations from topographic contour intersections..."
         for row in distances:
             comid = int(row.COMID)
-            cellnum = int(row.node)
+            cellnum = int(row.cellnum)
 
             # loop through FragIDs in comid, if cellnum matches, get contour elevation and distance
             for FragID in FragIDdata.COMID_orderedFragID[comid]:
@@ -1835,7 +1834,7 @@ class ElevsFromContours:
                     self.in_between_contours.append(FragID)
         '''
         # faster way with python
-        distances = np.genfromtxt('distances.csv', names=True, delimiter=',', dtype=None)
+        distances = np.genfromtxt(self.intersect_dist_table, names=True, delimiter=',', dtype=None)
 
         for row in distances:
             comid = int(row['COMID'])
@@ -1851,7 +1850,7 @@ class ElevsFromContours:
                     FragIDdata.allFragIDs[FragID].contour_elev_distance.append(float(row['fmp']))
 
                     self.elevs_edited.append(FragID)
-
+        '''
 
     def assign_elevations_to_FragID(self, FragIDdata, COMIDdata):
 
@@ -2024,7 +2023,7 @@ class ElevsFromDEM:
         self.up_increment = 1.0
         self.end_interp_report = "end_interp_report.txt"
         self.adjusted_elev = -9999
-        self.joinnames = dict()
+
 
     def DEM_elevs_by_cellnum(self, SFRData, SFROperations):
 

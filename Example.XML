@@ -18,6 +18,7 @@ Notes on SFR input:
     elevation difference to assign same value to all cells
     so that check does not get messed up by rounding floats -->
     <eps>1.0e-02</eps>
+
     <!-- rfact:
     a factor within which start(x,y) and end(x,y) can be found -->
     <rfact>0.95</rfact>
