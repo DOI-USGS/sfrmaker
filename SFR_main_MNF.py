@@ -7,15 +7,14 @@ infile = 'SFR_input.xml'
 
 SFRdata = SFRc.SFRInput(infile)
 
-SFRops = SFRc.SFROperations(SFRdata)
+SFRpre = SFRc.SFRpreproc(SFRdata)
 
 if SFRdata.preproc:
     print 'Running preprocessing routine'
-    SFRpre = SFRc.SFRpreproc(SFRdata)
 
-    SFRpre.clip_and_join_attributes(SFRops)
+    SFRpre.clip_and_join_attributes()
 
-
+SFRops = SFRc.SFROperations(SFRdata)
 
 #SFRops.assign_layers(SFRdata)
 
@@ -47,35 +46,25 @@ FragIDdata.return_cellnum_LevelPathID(LevelPathdata)
 
 LevelPathdata.return_cutoffs(FragIDdata, CELLdata, SFRdata)
 
-SFRops.reach_ordering(COMIDdata, FragIDdata, LevelPathdata)
-'''
-SFRpre.intersect_contours(SFRdata)
-ContourElevs = SFRc.ElevsFromContours(SFRdata)
-ContourElevs.get_contour_intersections(FragIDdata, COMIDdata)
 
-SFRpre.intersect_DEM(SFRdata)
-DEMelevs = SFRc.ElevsFromDEM()
-DEMelevs.DEM_elevs_by_FragID(SFRdata, SFRops)
 
 
 saveme ={'SFRdata':  SFRdata, 'COMIDdata': COMIDdata, 'FragIDdata': FragIDdata,
-              'SFRops': SFRops, 'ContourElevs': ContourElevs, 'DEMelevs': DEMelevs, 'LevelPathdata' : LevelPathdata}
+              'SFRops': SFRops, 'LevelPathdata' : LevelPathdata, 'CELLdata' : CELLdata}
 
 SFRc.savetmp(saveme)
-
-a = SFRc.loadtmp(['SFRdata', 'COMIDdata', 'FIDdata', 'SFRops', 'ContourElevs', 'LevelPathdata'])
+'''
+a = SFRc.loadtmp(['SFRdata', 'CELLdata', 'COMIDdata', 'FragIDdata', 'SFRops', 'LevelPathdata'])
 
 SFRdata = a['SFRdata']
 COMIDdata = a['COMIDdata']
-FragIDdata = a['FIDdata']
+FragIDdata = a['FragIDdata']
 SFRops = a['SFRops']
-Contour_elevs = a['ContourElevs']
 LevelPathdata = a['LevelPathdata']
 
 DEMelevs = SFRc.ElevsFromDEM()
 DEMelevs.DEM_elevs_by_FragID(SFRdata, SFRops)
 
-Contour_elevs.assign_elevations_to_FragID(FragIDdata, COMIDdata)
 DEMelevs.connect_downhill(FragIDdata)
 
 SFRp = sfr_plots.plot_segments(SFRdata, COMIDdata)
@@ -85,23 +74,34 @@ SFRp.plot_profiles('elevs_from_contours.pdf')
 
 saveme ={'COMIDdata' : COMIDdata,
          'FragIDdata' : FragIDdata,
-         'LevelPathdata' : LevelPathdata}
+         'LevelPathdata' : LevelPathdata,
+         'CELLdata' : CELLdata}
 SFRc.savetmp(saveme)
 
-
-loadme = ['COMIDdata', 'FragIDdata', 'LevelPathdata']
+'''
+loadme = ['COMIDdata', 'CELLdata', 'FragIDdata', 'LevelPathdata']
 
 instuff = SFRc.loadtmp(loadme)
+
+
+
+
+
+
+
 
 
 SFRops.reach_ordering(instuff['COMIDdata'],
                       instuff['FragIDdata'],
                       instuff['LevelPathdata'])
-
-'''
+SFRpre.intersect_contours(SFRdata)
 Segmentdata = SFRc.SFRSegmentsAll()
-Segmentdata.divide_at_confluences(LevelPathdata, FragIDdata, COMIDdata, CELLdata, SFRdata)
-Segmentdata.accumulate_same_levelpathID(LevelPathdata, COMIDdata, FragIDdata, SFRdata, CELLdata)
+ContourElevs = SFRc.ElevsFromContours(SFRdata)
+ContourElevs.get_contour_intersections(instuff['FragIDdata'], instuff['COMIDdata'])
+Segmentdata.divide_at_confluences(instuff['LevelPathdata'], instuff['FragIDdata'],
+                                  instuff['COMIDdata'], instuff['CELLdata'], SFRdata)
+Segmentdata.accumulate_same_levelpathID(instuff['LevelPathdata'], instuff['COMIDdata'],
+                                        instuff['FragIDdata'], SFRdata, instuff['CELLdata'])
 
 #make some output
 
@@ -109,15 +109,6 @@ SFRoutput = SFRc.SFRoutput(SFRdata)
 SFRoutput.write_SFR_tables(Segmentdata)
 SFRoutput.build_SFR_package()
 SFRoutput.build_SFR_shapefile(Segmentdata)
-'''
-saveme ={}
 
-
-SFRc.savetmp(saveme)
-
-a = SFRc.loadtmp(saveme)
-
-SFRdata = a['SFRdata']
-'''
 
 i = 2
