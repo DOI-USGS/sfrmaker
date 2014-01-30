@@ -88,7 +88,6 @@ class SFRInput:
         self.Contours_intersect = inpars.findall('.//Contours_intersect')[0].text
         self.Contours_intersect_distances = inpars.findall('.//Contours_intersect_distances')[0].text
         self.RCH = inpars.findall('.//RCH')[0].text
-#        self.Elev_method = inpars.findall('.//Elev_method')[0].text
         self.nsfrpar = int(inpars.findall('.//nsfrpar')[0].text)
         self.nparseg = int(inpars.findall('.//nparseg')[0].text)
         self.const = float(inpars.findall('.//const')[0].text)
@@ -123,6 +122,7 @@ class SFRInput:
         self.minimum_slope = float(inpars.findall('.//minimum_slope')[0].text)
         self.roughness_coeff = float(inpars.findall('.//roughness_coeff')[0].text)
         self.GISSHP = inpars.findall('.//GISSHP')[0].text
+        self.elevflag = inpars.findall('.//elevflag')[0].text
 
         # read in model information
         self.DX, self.DY, self.NLAY, self.NROW, self.NCOL, i = disutil.read_meta_data(self.MFdis)
@@ -191,16 +191,20 @@ class FragIDprops(object):
     __slots__ = ['comid', 'startx', 'starty', 'endx', 'endy', 'FragID',
                  'maxsmoothelev', 'minsmoothelev', 'lengthft',
                  'cellnum', 'elev', 'sidelength',
-                 'segelevinfo', 'start_has_end', 'end_has_start', 'contour_elev', 'contour_elev_distance', 'segelevinfo',
-                 'interpolated_contour_elev_min','interpolated_contour_elev_max','DEM_elev_max','DEM_elev_min', 'smoothed_DEM_elev_min',
-                  'smoothed_DEM_elev_max', 'slope']
+                 'start_has_end', 'end_has_start', 'contour_elev', 'contour_elev_distance', 'segelevinfo',
+                 'NHDPlus_elev_min', 'NHDPlus_elev_max', 'NHDPlus_elev_mean', 'NHDPlus_slope',
+                 'interpolated_contour_elev_min', 'interpolated_contour_elev_max', 'interpolated_contour_elev_mean',
+                 'interpolated_contour_slope', 'DEM_elev_min', 'DEM_elev_max', 'DEM_elev_mean', 'DEM_slope',
+                 'smoothed_DEM_elev_min', 'smoothed_DEM_elev_max', 'smoothed_DEM_elev_mean', 'smoothed_DEM_slope']
     '''
     #  using __slots__ makes it required to declare properties of the object here in place
     #  and saves significant memory
     def __init__(self, comid, startx, starty, endx, endy, FragID,
-                 maxsmoothelev, minsmoothelev, lengthft, cellnum, contour_elev, contour_elev_distance, segelevinfo, interpolated_contour_elev_min,
-                 interpolated_contour_elev_max, DEM_elev_min, DEM_elev_max, smoothed_DEM_elev_min,
-                 smoothed_DEM_elev_max, slope):
+                 maxsmoothelev, minsmoothelev, lengthft, cellnum, contour_elev, contour_elev_distance,
+                 NHDPlus_elev_min, NHDPlus_elev_max, NHDPlus_elev_mean, NHDPlus_slope,
+                 interpolated_contour_elev_min, interpolated_contour_elev_max, interpolated_contour_elev_mean,
+                 interpolated_contour_slope, DEM_elev_min, DEM_elev_max, DEM_elev_mean, DEM_slope,
+                 smoothed_DEM_elev_min, smoothed_DEM_elev_max, smoothed_DEM_elev_mean, smoothed_DEM_slope):
         self.comid = comid
         self.startx = startx
         self.starty = starty
@@ -213,14 +217,23 @@ class FragIDprops(object):
         self.cellnum = cellnum
         self.contour_elev = contour_elev
         self.contour_elev_distance = contour_elev_distance
-        self.segelevinfo = segelevinfo
+        self.NHDPlus_elev_min = NHDPlus_elev_min
+        self.NHDPlus_elev_max = NHDPlus_elev_max
+        self.NHDPlus_elev_mean = NHDPlus_elev_mean
+        self.NHDPlus_slope = NHDPlus_slope
         self.interpolated_contour_elev_min = interpolated_contour_elev_min
         self.interpolated_contour_elev_max = interpolated_contour_elev_max
+        self.interpolated_contour_elev_mean = interpolated_contour_elev_mean
+        self.interpolated_contour_slope = interpolated_contour_slope
         self.DEM_elev_min = DEM_elev_min
         self.DEM_elev_max = DEM_elev_max
+        self.DEM_elev_mean = DEM_elev_mean
+        self.DEM_slope = DEM_slope
         self.smoothed_DEM_elev_min = smoothed_DEM_elev_min
         self.smoothed_DEM_elev_max = smoothed_DEM_elev_max
-        self.slope = slope
+        self.smoothed_DEM_elev_mean = smoothed_DEM_elev_mean
+        self.smoothed_DEM_slope = smoothed_DEM_slope
+        #self.slope = slope
 
 
 class COMIDprops(object):
@@ -809,14 +822,14 @@ class SFRSegmentsAll:
         if elevflag == 'DEM':
             elevattr = 'DEM_elev_mean'
             slopeattr = 'DEM_slope'
-        elif elevflag == 'SmoothDEM':
+        elif elevflag == 'smoothed_DEM':
             elevattr = 'smoothed_DEM_elev_mean'
             slopeattr = 'smooth_DEM_slope'
-        elif elevflag == 'Contour':
-            elevattr = 'contour_elev'
-            slopeattr = 'contour_slope'
+        elif elevflag == 'elevation_contours':
+            elevattr = 'interpolated_contour_elev_mean'
+            slopeattr = 'interpolated_contour_slope'
         elif elevflag == 'NHDPlus':
-            elevattr = 'elev_mean'
+            elevattr = 'NHDPlus_elev_mean'
             slopeattr = 'NHDPlus_slope'
         else:
             raise(BadElevChoice(elevflag))
@@ -1478,7 +1491,11 @@ class SFROperations:
                 distance += FragIDdata.allFragIDs[orderedFragID[i]].lengthft
                 mincellrivelev = FragIDdata.maxelev - slope*distance
                 avecellrivelev = 0.5*(maxcellrivelev + mincellrivelev)
-                FragIDdata.allFragIDs[orderedFragID[i]].segelevinfo = avecellrivelev
+
+                # assign NHD elevations to FragID properties
+                FragIDdata.allFragIDs[orderedFragID[i]].NHDPlus_elev_min = mincellrivelev
+                FragIDdata.allFragIDs[orderedFragID[i]].NHDPlus_elev_max = maxcellrivelev
+                FragIDdata.allFragIDs[orderedFragID[i]].NHD_elev_mean = avecellrivelev
                 row = rows.newRow()
                 row.OLDFragID = orderedFragID[i]
                 row.CELLNUM = FragIDdata.allFragIDs[orderedFragID[i]].cellnum
@@ -1649,6 +1666,7 @@ class SFROperations:
                 print "Warning {0:d} SFR streambed bottoms were below the model bottom. See below_bots.csv".format(
                     nbelow)
         print "Done!"
+
 
 class ElevsFromContours:
     def __init__(self, SFRdata):
