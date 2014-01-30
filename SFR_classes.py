@@ -706,7 +706,7 @@ class SFRSegmentsAll:
         subcell = dict()
         subordered_cells = dict()
         conf_count = 1
-        CHK2 = open('check2.out','w')
+        CHK2 = open('check2.out', 'w')
         CHK2.write("LevelpathID, provisionalSegment, Sublabel, finalseg, cells\n")
         for clevelpathid in LevelPathdata.level_ordered:
             iseg = provSFRseg[clevelpathid]
@@ -717,7 +717,7 @@ class SFRSegmentsAll:
                 sublabel = str(iseg) + '-' + str(confl)
                 subseg[sublabel] = conf_count
                 subconfl[iseg].append(sublabel)
-                subcell[sublabel]=self.confluences[clevelpathid][confl]
+                subcell[sublabel] = self.confluences[clevelpathid][confl]
                 conf_count += 1
                 #build  cell lists for each subsection of a provisional segment
                 #find the index that matches the cell given by conflunces[id][confl]
@@ -725,7 +725,7 @@ class SFRSegmentsAll:
                 endindx = lpcells.index(self.confluences[clevelpathid][confl])
                 subordered_cells[sublabel] = lpcells[strt:endindx+1]
                 CHK2.write('{0}, {1}, {2}, {3}:'.format(clevelpathid, iseg, sublabel, subseg[sublabel]))
-                CHK2.write(','.join(map(str,subordered_cells[sublabel]))+'\n')
+                CHK2.write(','.join(map(str, subordered_cells[sublabel]))+'\n')
                 strt = endindx + 1
         CHK2.close()
         #use confluence information to build final SFR segments and reaches
