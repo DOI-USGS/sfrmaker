@@ -650,11 +650,11 @@ class SFRSegmentsAll:
         self.allSegs = dict()              #dictionary of segment objects keyed by final segment number
         self.confluences = defaultdict(list)    #dictionary of lists keyed by levelpathID
 
-    def divide_at_confluences(self,LevelPathdata, FragIDdata, COMIDdata, CELLdata, SFRdata):
+    def divide_at_confluences(self, LevelPathdata, FragIDdata, COMIDdata, CELLdata, SFRdata):
         #establish provisional segment numbers from downstream (decending)
         #list of levelpathIDs
         provSFRseg = dict()
-        for i,lpID in enumerate(LevelPathdata.level_ordered):
+        for i, lpID in enumerate(LevelPathdata.level_ordered):
             provSFRseg[lpID] = i+1
 
         print 'finding confluences for provisional SFR segments'
