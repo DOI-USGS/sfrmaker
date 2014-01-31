@@ -28,7 +28,10 @@ Notes on SFR input:
     <!-- tpl:
     a flag for writing out a PEST tpl file instead of SFR package file -->
     <tpl>True</tpl>
-
+    <!-- elevflag:
+    a flag for choosing the streambed elevation source
+    options: (NHDPlus, elevation_contours, smoothed_DEM) -->
+    <elevflag>elevation_contours</elevflag>
 </GlobalSettings>
 <InputFiles>
     <!-- MFgrid: polygon shapefile export of grid from Groundwater Vistas -->
