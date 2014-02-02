@@ -306,11 +306,12 @@ class CellProps(object):
     class for cell objects
     """
     '''
-    __slots__ = ['delx', 'dely', 'sidelength', 'row', 'column', 'fromCell']
+    __slots__ = ['delx', 'dely', 'centroid','sidelength', 'row', 'column', 'fromCell']
     '''
-    def __init__(self, delx, dely, sidelength, row, column):
+    def __init__(self, delx, dely, centroid, sidelength, row, column):
         self.delx = delx
         self.dely = dely
+        self.centroid = centroid
         self.sidelength = sidelength
         self.row = row
         self.column = column
@@ -320,6 +321,7 @@ class CellProps(object):
 class CellPropsAll:
     def __init__(self):
         self.allcells = dict()
+        self.centroids = dict()
 
     def populate_cells(self, SFRdata):
         #use the CELLS shapefile to get the length of the cell sides, used
@@ -327,18 +329,22 @@ class CellPropsAll:
         #less than sidelength * the input 'cutoff', also get row and column
         #for each cellnumber
 
-        cells = arcpy.SearchCursor(SFRdata.CELLS)
+        with arcpy.da.SearchCursor(SFRdata.CELLS, ['SHAPE@XY', 'delx', 'dely', 'CELLNUM', 'row', 'column']) as cells:
 
-        for cell in cells:
-            cellnum = int(cell.CELLNUM)
-            dx = float(cell.delx)
-            dy = float(cell.dely)
-            minside = float(cell.delx)
-            if float(cell.dely) < minside:
-                minside = float(cell.dely)
-            row = int(cell.row)
-            column = int(cell.column)
-            self.allcells[cellnum] = CellProps(dx, dy, minside, row, column)
+            for cell in cells:
+                cellnum = int(cell[3])
+                dx = float(cell[1])
+                dy = float(cell[2])
+                centroid = cell[0]
+                minside = min([dx, dy])
+                row = int(cell[4])
+                column = int(cell[5])
+                self.allcells[cellnum] = CellProps(dx, dy, centroid, minside, row, column)
+
+    def return_centroids(self):
+        # returns a dictionary, keyed by cellnum, with cell centroids
+        for ccell in self.allcells:
+            self.centroids[ccell] = self.allcells[ccell].centroid
 
 
 class COMIDPropsAll:
@@ -584,7 +590,9 @@ class FragIDPropsAll:
                 float(seg.MINELEVSMO)*SFRdata.z_conversion,  # UNIT CONVERSION
                 float(seg.LengthFt),
                 seg.cellnum,
-                list(), list(), None, None, None, None, None, None, None, None)
+                list(), list(), None, None, None, None, None, None, None, None,
+                None, None, None, None, None, None, None, None)
+
 
             self.allcomids.append(int(seg.COMID))
         self.allcomids = list(set(self.allcomids))
@@ -633,11 +641,13 @@ class SFRSegmentProps(object):
     """
     '''
     __slots__ = ['seg_cells','icalc','iupseg','outseg','runoff','etsw','pptsw',
-    'seg_reaches','seg_label','levelpathID','inseg', 'roughch']
+    'seg_reaches','seg_label','levelpathID','inseg', 'roughch', 'startseg_xy', 'endseg_xy']
     '''
     def __init__(self):
         self.seg_cells = list()
         self.outseg = None
+        self.endseg_xy = None
+        self.startseg_xy = None
         self.icalc = None
         self.iupseg = 0    #iupseg default zero right now, diversions could be added
         self.outseg = None
@@ -669,6 +679,8 @@ class SFRSegmentsAll:
         provSFRseg = dict()
         for i, lpID in enumerate(LevelPathdata.level_ordered):
             provSFRseg[lpID] = i+1
+
+        CELLdata.return_centroids()
 
         print 'finding confluences for provisional SFR segments'
         for clevelpathid in LevelPathdata.level_ordered:
@@ -726,7 +738,7 @@ class SFRSegmentsAll:
             numconfls = len(self.confluences[clevelpathid])
             #break up segments with multiple confluences
             strt = 0
-            for confl in range(0,numconfls):
+            for confl in range(0, numconfls):
                 sublabel = str(iseg) + '-' + str(confl)
                 subseg[sublabel] = conf_count
                 subconfl[iseg].append(sublabel)
@@ -743,16 +755,22 @@ class SFRSegmentsAll:
         CHK2.close()
         #use confluence information to build final SFR segments and reaches
         for clevelpathid, iseg in provSFRseg.iteritems():
-            for i in range(0,len(subconfl[iseg])):
+            for i in range(0, len(subconfl[iseg])):
                 labl = subconfl[iseg][i]
                 self.allSegs[subseg[labl]] = SFRSegmentProps()
                 self.allSegs[subseg[labl]].seg_cells = subordered_cells[labl]
+                self.allSegs[subseg[labl]].startseg_xy = CELLdata.centroids[
+                    self.allSegs[subseg[labl]].seg_cells[0]
+                ]
+                self.allSegs[subseg[labl]].endseg_xy = CELLdata.centroids[
+                    self.allSegs[subseg[labl]].seg_cells[-1]
+                ]
                 self.allSegs[subseg[labl]].seg_label = labl
                 self.allSegs[subseg[labl]].levelpathID = clevelpathid
                 lastcell = subordered_cells[labl][-1]
                 nextlabl = 999999  # initialize in case nextlevelpath is not found
                 if i < len(subconfl[iseg])-1:
-                    nextlevelpath=clevelpathid
+                    nextlevelpath = clevelpathid
                     nextlabl = subconfl[iseg][i+1]
                 else:
                     nextlevelpath = LevelPathdata.allids[clevelpathid].down_levelpathID
