@@ -98,10 +98,10 @@ make_shapefiles = tf2flag(make_shapefiles)
 make_PDFs = tf2flag(make_PDFs)
 make_all_layers = tf2flag(make_all_layers)
 origseg = int(inpars.findall('.//orig_seg')[0].text)
-origsubreach = int(inpars.findall('.//orig_subreach')[0].text)
+origreach = int(inpars.findall('.//orig_reach')[0].text)
 
 
-
+print 'Calculating routing from seg: {0:d} reach: {1:d}'.format(origseg, origreach)
 model_spc_data= model_rc_conversion(modspecfile)
 
 # read in the model.spc file
@@ -144,23 +144,30 @@ nlays = np.max(reachdata[:,0])
 
 
 startind = np.where((reachdata[:,3]==origseg) &
-                    (reachdata[:,4]==origsubreach))[0]
+                    (reachdata[:,4]==origreach))[0]
 starting_reach = startind[0]
 starting_seg = reachdata[starting_reach,3]
 
 # find all the upstream parents of our starting segment
 parents = np.zeros(0)
 livesegs  = [starting_seg]
-while 1:
+segcount = 0
+while 1 and segcount < numsegs:
+    segcount += 1
     tmp = np.zeros(0)
     for cseg in livesegs:
-        upinds = np.where(segdata[:,2]==cseg)
+        upinds = np.where(segdata[:,2]==cseg)[0]
+        circular = np.intersect1d(parents,segdata[upinds,0])
+        if len(circular) > 0:
+            print 'WARNING! -- possible circular routing!'
         parents = np.append(parents,segdata[upinds,0])
         tmp = np.append(tmp,segdata[upinds,0])
     livesegs = tmp
     if len(tmp) < 1:
         break
-
+    del tmp
+if segcount == numsegs:
+    print 'WARNING! -- possible circular routing!'
 np.savetxt('parents.dat',parents,fmt='%12d')
 
 plotting = np.zeros((nlays,nrows,ncols))
@@ -179,7 +186,7 @@ for i in np.arange(nlays):
     
     inds = np.where((reachdata[:,0]==i+1) & 
                     (reachdata[:,3]==origseg) & 
-                    (reachdata[:,4]<origsubreach))[0]
+                    (reachdata[:,4]<origreach))[0]
     plotting[i,reachdata[inds,1]-1,reachdata[inds,2]-1] = model_spc_data.upstream_routed
     for cind in inds:
         allsegs[i,reachdata[cind,1]-1,reachdata[cind,2]-1] = reachdata[cind,3]
