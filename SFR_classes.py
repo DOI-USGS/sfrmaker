@@ -1495,7 +1495,9 @@ class SFROperations:
                 # assign NHD elevations to FragID properties
                 FragIDdata.allFragIDs[orderedFragID[i]].NHDPlus_elev_min = mincellrivelev
                 FragIDdata.allFragIDs[orderedFragID[i]].NHDPlus_elev_max = maxcellrivelev
-                FragIDdata.allFragIDs[orderedFragID[i]].NHD_elev_mean = avecellrivelev
+                FragIDdata.allFragIDs[orderedFragID[i]].NHDPlus_elev_mean = avecellrivelev
+                FragIDdata.allFragIDs[orderedFragID[i]].NHDPlus_slope = slope
+
                 row = rows.newRow()
                 row.OLDFragID = orderedFragID[i]
                 row.CELLNUM = FragIDdata.allFragIDs[orderedFragID[i]].cellnum
