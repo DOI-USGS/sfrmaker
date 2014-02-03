@@ -641,13 +641,13 @@ class SFRSegmentProps(object):
     """
     '''
     __slots__ = ['seg_cells','icalc','iupseg','outseg','runoff','etsw','pptsw',
-    'seg_reaches','seg_label','levelpathID','inseg', 'roughch', 'startseg_xy', 'endseg_xy']
+    'seg_reaches','seg_label','levelpathID','inseg', 'roughch', 'startreach_xy', 'endreach_xy']
     '''
     def __init__(self):
         self.seg_cells = list()
         self.outseg = None
-        self.endseg_xy = None
-        self.startseg_xy = None
+        self.endreach_xy = None
+        self.startreach_xy = None
         self.icalc = None
         self.iupseg = 0    #iupseg default zero right now, diversions could be added
         self.outseg = None
@@ -759,10 +759,10 @@ class SFRSegmentsAll:
                 labl = subconfl[iseg][i]
                 self.allSegs[subseg[labl]] = SFRSegmentProps()
                 self.allSegs[subseg[labl]].seg_cells = subordered_cells[labl]
-                self.allSegs[subseg[labl]].startseg_xy = CELLdata.centroids[
+                self.allSegs[subseg[labl]].startreach_xy = CELLdata.centroids[
                     self.allSegs[subseg[labl]].seg_cells[0]
                 ]
-                self.allSegs[subseg[labl]].endseg_xy = CELLdata.centroids[
+                self.allSegs[subseg[labl]].endreach_xy = CELLdata.centroids[
                     self.allSegs[subseg[labl]].seg_cells[-1]
                 ]
                 self.allSegs[subseg[labl]].seg_label = labl
