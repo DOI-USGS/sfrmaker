@@ -1223,7 +1223,9 @@ class SFRpreproc:
         for row in table:
             if row.isNull(SFRoperations.joinnames["maxelevsmo"]):
                 nodes2delete.append(row.getValue(SFRoperations.joinnames["cellnum"]))
-        arcpy.RemoveJoin_management("river_cells_dissolve", "river_explode")
+        # this RemoveJoin operation was causing an arcpy error (000800: The value is not a member of | river_explode)
+        # and may not be necessary
+        #arcpy.RemoveJoin_management("river_cells_dissolve", "river_explode")
 
         # preserve the FragID code as FragID for all future reference
         arcpy.AddField_management(indat.intersect, "FragID", "LONG")
@@ -1741,6 +1743,7 @@ class ElevsFromContours:
         self.elevs_edited = []
         self.in_between_contours = []
         self.comids_with_no_contour_intersects = []
+        self.verbose = True # prints interpolation information to screen for debugging/troubleshooting
 
     def interpolate_elevs(self, FragIDdata, start_fid, end_fid):
         # interpolate max/min elevation values for each FragID between start and end fids
@@ -1763,7 +1766,8 @@ class ElevsFromContours:
         else:
             dist = np.min(FragIDdata.allFragIDs[end_fid].contour_elev_distance)
             FragIDdata.allFragIDs[end_fid].interpolated_contour_elev_max = self.end_elev + self.slope * dist
-        print 'fid:%s min/max elevs %s %s' % (end_fid, FragIDdata.allFragIDs[end_fid].interpolated_contour_elev_min, FragIDdata.allFragIDs[end_fid].interpolated_contour_elev_max)
+        if self.verbose:
+            print 'fid:%s min/max elevs %s %s' % (end_fid, FragIDdata.allFragIDs[end_fid].interpolated_contour_elev_min, FragIDdata.allFragIDs[end_fid].interpolated_contour_elev_max)
 
         # compute max and min elevations in subsequent FragIDs
         ind = end_reach
@@ -1773,13 +1777,15 @@ class ElevsFromContours:
             FragIDdata.allFragIDs[FragID].interpolated_contour_elev_min = FragIDdata.allFragIDs[previous_fid].interpolated_contour_elev_max
             dist += FragIDdata.allFragIDs[FragID].lengthft
             FragIDdata.allFragIDs[FragID].interpolated_contour_elev_max = self.end_elev + self.slope * dist
-            print 'FragID:%s min/max elevs %s %s' % (FragID, FragIDdata.allFragIDs[FragID].interpolated_contour_elev_min, FragIDdata.allFragIDs[FragID].interpolated_contour_elev_max)
+            if self.verbose:
+                print 'FragID:%s min/max elevs %s %s' % (FragID, FragIDdata.allFragIDs[FragID].interpolated_contour_elev_min, FragIDdata.allFragIDs[FragID].interpolated_contour_elev_max)
 
 
     def get_dist_slope(self, comid, FragIDdata, COMIDdata):
 
             for FragID in self.reachlist:
-                print "comid %s, FragID %s" %(comid, FragID)
+                if self.verbose:
+                    print "comid %s, FragID %s" %(comid, FragID)
 
                 # looking downstream for first contour below current comid
                 if self.downstream:
@@ -1789,6 +1795,9 @@ class ElevsFromContours:
                         # another downcomid exists, continue
                         try:
                             COMIDdata.allcomids[COMIDdata.allcomids[comid].to_comid[0]]
+                            # additional test to see if COMID listed in FragIDdata
+                            # if not, is in the list of COMIDs that were flagged earlier as having multiple starts/ends
+                            FragIDdata.COMID_orderedFragID[COMIDdata.allcomids[comid].to_comid[0]]
                         # at outlet; assign downstream elev using NHD
                         except KeyError:
                             self.downstream_dist += FragIDdata.allFragIDs[FragID].lengthft
@@ -1834,7 +1843,7 @@ class ElevsFromContours:
                         if headwater:
 
                             # set start_elev and calculate slope
-                            self.start_elev = FragIDdata.allFragIDs[FragID].maxsmoothelev
+                            self.start_elev = FragIDdata.allFragIDs[FragID].NHDPlus_elev_max
                             self.slope = (self.start_elev - self.end_elev) / self.upstream_dist
                             if self.slope < 0:
                                 self.slope = 0
@@ -1902,16 +1911,20 @@ class ElevsFromContours:
             cellnum = int(row.cellnum)
 
             # loop through FragIDs in comid, if cellnum matches, get contour elevation and distance
-            for FragID in FragIDdata.COMID_orderedFragID[comid]:
-                if FragIDdata.allFragIDs[FragID].cellnum == cellnum:
+            try:
+                for FragID in FragIDdata.COMID_orderedFragID[comid]:
+                    if FragIDdata.allFragIDs[FragID].cellnum == cellnum:
 
-                    # multiple contours in a FragID are appended to a list
-                    # up and downstream slopes from an intersected FragID are calculated using
-                    # respective max and min intersected contour values
-                    FragIDdata.allFragIDs[FragID].contour_elev.append(float(row.ContourEle))
-                    FragIDdata.allFragIDs[FragID].contour_elev_distance.append(float(row.fmp))
+                        # multiple contours in a FragID are appended to a list
+                        # up and downstream slopes from an intersected FragID are calculated using
+                        # respective max and min intersected contour values
+                        FragIDdata.allFragIDs[FragID].contour_elev.append(float(row.ContourEle))
+                        FragIDdata.allFragIDs[FragID].contour_elev_distance.append(float(row.fmp))
 
-                    self.elevs_edited.append(FragID)
+                        self.elevs_edited.append(FragID)
+            # a key error means that the COMID was removed earlier in the SFR setup process
+            except KeyError:
+                continue
 
         # build list of FragIDs that do not intersect any contours
         for FragID in FragIDdata.allFragIDs.keys():
@@ -1944,7 +1957,8 @@ class ElevsFromContours:
         for comid in FragIDdata.COMID_orderedFragID.keys():
             knt += 1
             print comid
-            print "comid number %s" % (knt)
+            if self.verbose:
+                print "comid number %s" % (knt)
             from_comid = COMIDdata.allcomids[comid].from_comid
             to_comid = COMIDdata.allcomids[comid].to_comid
             self.current_comid = comid
@@ -1968,20 +1982,26 @@ class ElevsFromContours:
             # If comid is outlet, place "contour" elevation from NHD at end
             # (and upstream interpolation will start from there)
             if COMIDdata.allcomids[comid].to_comid[0] == 0:
-                print "outlet!"
+                if self.verbose:
+                    print "outlet!"
                 outlet = True
             try:
                 COMIDdata.allcomids[COMIDdata.allcomids[comid].to_comid[0]]
+                # additional test to see if COMID listed in FragIDdata
+                # if not, is in the list of COMIDs that were flagged earlier as having multiple starts/ends
+                FragIDdata.COMID_orderedFragID[to_comid[0]]
             except KeyError:
-                print "outlet!"
+                if self.verbose:
+                    print "outlet!"
                 outlet = True
             if outlet:
-                self.end_elev = FragIDdata.allFragIDs[self.end_FragID].minsmoothelev
+                self.end_elev = FragIDdata.allFragIDs[self.end_FragID].NHDPlus_elev_min
                 self.downstream_contour_comid = comid
 
             # Go downstream to find downstream contour in pair
             if not outlet:
-                print "looking downstream for first contour"
+                if self.verbose:
+                    print "looking downstream for first contour"
                 self.downstream = True
                 self.in_current_comid = False
                 self.reachlist = FragIDdata.COMID_orderedFragID[to_comid[0]]
@@ -1997,7 +2017,8 @@ class ElevsFromContours:
                         self.reachlist = FragIDdata.COMID_orderedFragID[downcomid]
 
             # Go upstream to find upstream contour in pair; add distance from downstream
-            print "looking upstream for second contour"
+            if self.verbose:
+                print "looking upstream for second contour"
             self.upstream_dist += self.downstream_dist
             self.upstream = True
             self.interp = True
@@ -2012,12 +2033,14 @@ class ElevsFromContours:
                 # if no slope yet, get_dist_slope ran to upstream end of comid without finding contour
                 # break out of while loop to move to next comid
                 if self.slope == -9999:
-                    print "upstream contour not found in this comid, moving to next"
+                    if self.verbose:
+                        print "upstream contour not found in this comid, moving to next"
                     break
 
                 # otherwise, currently an even number of contours in current comid (an upstream contour was found);
                 # interpolate between before moving to next
-                print "interpolating within comid..."
+                if self.verbose:
+                    print "interpolating within comid..."
                 # self.start_FragID was updated to current upstream contour by get_dist_slope
                 # self.end_FragID was updated to next contour downstream by get_dist_slope
                 self.interpolate_elevs(FragIDdata, self.start_FragID, self.end_FragID)
@@ -2041,7 +2064,8 @@ class ElevsFromContours:
 
             # Next upstream contour not in current comid, go to (upstream) from_comid
             if self.interp and self.slope == -9999:
-                print "looking in upstream comids..."
+                if self.verbose:
+                    print "looking in upstream comids..."
                 slopes = []
 
                 # loop through comids in from_comid
@@ -2074,7 +2098,8 @@ class ElevsFromContours:
                             # need something here that handles missing keys for
                             # streams that originate outside of grid
                             upcomids = COMIDdata.allcomids[upid].from_comid
-                            print "looking further upstream in %s" %(upcomids)
+                            if self.verbose:
+                                print "looking further upstream in %s" %(upcomids)
 
                     # append slope to list of slopes
                     slopes.append(self.slope)
@@ -2116,6 +2141,7 @@ class ElevsFromDEM:
         self.up_increment = 1.0
         self.end_interp_report = "end_interp_report.txt"
         self.adjusted_elev = -9999
+        self.verbose = True # prints interpolation information to screen for debugging/troubleshooting
 
 
     def DEM_elevs_by_cellnum(self, SFRData, SFROperations):
@@ -2173,7 +2199,8 @@ class ElevsFromDEM:
 
         # calculate elevs
         for i in range(len(reachlist))[start_reach: end_reach]:
-            if i > start_reach:
+            #if i > start_reach:
+            if reachlist[i] != reachlist[0]:
                 FragIDdata.allFragIDs[reachlist[i]].smoothed_DEM_elev_max = \
                 FragIDdata.allFragIDs[reachlist[i-1]].smoothed_DEM_elev_min
 
@@ -2185,7 +2212,8 @@ class ElevsFromDEM:
             FragIDdata.allFragIDs[reachlist[i]].slope = slope
 
             self.ofp.write('{0}\n'.format(FragIDdata.allFragIDs[reachlist[i]].smoothed_DEM_elev_min))
-            print "Reach {0}, max_elev: {1}, min_elev: {2}".format(i,
+            if self.verbose:
+                print "Reach {0}, max_elev: {1}, min_elev: {2}".format(i,
             FragIDdata.allFragIDs[reachlist[i]].smoothed_DEM_elev_max, FragIDdata.allFragIDs[reachlist[i]].smoothed_DEM_elev_min)
 
 
@@ -2211,10 +2239,11 @@ class ElevsFromDEM:
             self.ind_current_minimum = 0
 
             # set segment end elevations to NHD:
-            FragIDdata.allFragIDs[FragIDs[0]].smoothed_DEM_elev_max = FragIDdata.allFragIDs[FragIDs[0]].maxsmoothelev
-            FragIDdata.allFragIDs[FragIDs[-1]].smoothed_DEM_elev_min = FragIDdata.allFragIDs[FragIDs[-1]].minsmoothelev
+            FragIDdata.allFragIDs[FragIDs[0]].smoothed_DEM_elev_max = FragIDdata.allFragIDs[FragIDs[0]].NHDPlus_elev_max
+            FragIDdata.allFragIDs[FragIDs[-1]].smoothed_DEM_elev_min = FragIDdata.allFragIDs[FragIDs[-1]].NHDPlus_elev_min
 
-            print "start_elev: {0}, end_elev {1}".format(FragIDdata.allFragIDs[FragIDs[0]].smoothed_DEM_elev_max,
+            if self.verbose:
+                print "start_elev: {0}, end_elev {1}".format(FragIDdata.allFragIDs[FragIDs[0]].smoothed_DEM_elev_max,
                                                          FragIDdata.allFragIDs[FragIDs[-1]].smoothed_DEM_elev_min)
             # for segments with only end reaches
             if len(FragIDs) < 2: # no interior points; keep ending elevations
@@ -2314,7 +2343,7 @@ class ElevsFromDEM:
                 else:
                     continue
 
-                if FragIDdata.allFragIDs[FragIDs[i]].smoothed_DEM_elev_max:
+                if self.verbose and FragIDdata.allFragIDs[FragIDs[i]].smoothed_DEM_elev_max:
                     print "Reach {0}, max_elev: {1}, min_elev: {2}".format(i-1, FragIDdata.allFragIDs[FragIDs[i-1]].smoothed_DEM_elev_max,
                                                                        FragIDdata.allFragIDs[FragIDs[i-1]].smoothed_DEM_elev_min)
 

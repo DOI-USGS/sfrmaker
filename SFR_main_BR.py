@@ -9,12 +9,14 @@ SFRdata = SFRc.SFRInput(infile)
 
 SFRpre = SFRc.SFRpreproc(SFRdata)
 
+SFRops = SFRc.SFROperations(SFRdata)
+'''
 if SFRdata.preproc:
     print 'Running preprocessing routine'
 
-    SFRpre.clip_and_join_attributes()
+    SFRpre.clip_and_join_attributes(SFRops)
 
-SFRops = SFRc.SFROperations(SFRdata)
+
 
 #SFRops.assign_layers(SFRdata)
 
@@ -61,15 +63,21 @@ COMIDdata = a['COMIDdata']
 FragIDdata = a['FragIDdata']
 SFRops = a['SFRops']
 LevelPathdata = a['LevelPathdata']
+CELLdata = a['CELLdata']
 
+SFRpre.intersect_contours(SFRdata) # this needs to be in the example Main!
+ContourElevs = SFRc.ElevsFromContours(SFRdata)
+ContourElevs.get_contour_intersections(FragIDdata, COMIDdata)
+ContourElevs.assign_elevations_to_FragID(FragIDdata, COMIDdata)
+
+SFRpre.intersect_DEM(SFRdata) # this needs to be in the example Main!
 DEMelevs = SFRc.ElevsFromDEM()
 DEMelevs.DEM_elevs_by_FragID(SFRdata, SFRops)
-
 DEMelevs.connect_downhill(FragIDdata)
 
-SFRp = sfr_plots.plot_segments(SFRdata, COMIDdata)
+SFRp = sfr_plots.plot_elevation_profiles(SFRdata, COMIDdata)
 SFRp.read_DIS()
-SFRp.get_segment_plotting_info(FragIDdata)
+SFRp.get_comid_plotting_info(FragIDdata)
 SFRp.plot_profiles('elevs_from_contours.pdf')
 
 saveme ={'COMIDdata' : COMIDdata,
@@ -78,7 +86,7 @@ saveme ={'COMIDdata' : COMIDdata,
          'CELLdata' : CELLdata}
 SFRc.savetmp(saveme)
 
-'''
+
 loadme = ['COMIDdata', 'CELLdata', 'FragIDdata', 'LevelPathdata']
 
 instuff = SFRc.loadtmp(loadme)
@@ -96,8 +104,7 @@ SFRops.reach_ordering(instuff['COMIDdata'],
                       instuff['LevelPathdata'])
 SFRpre.intersect_contours(SFRdata)
 Segmentdata = SFRc.SFRSegmentsAll()
-ContourElevs = SFRc.ElevsFromContours(SFRdata)
-ContourElevs.get_contour_intersections(instuff['FragIDdata'], instuff['COMIDdata'])
+
 Segmentdata.divide_at_confluences(instuff['LevelPathdata'], instuff['FragIDdata'],
                                   instuff['COMIDdata'], instuff['CELLdata'], SFRdata)
 Segmentdata.accumulate_same_levelpathID(instuff['LevelPathdata'], instuff['COMIDdata'],

@@ -20,8 +20,8 @@ class plot_elevation_profiles:
         self.seg_elev_fromDEM_dict = dict()
         self.L1top_elev_dict = dict()
         self.profiles = [self.L1top_elev_dict, self.seg_elev_fromNHD_dict, self.seg_elev_fromContours_dict, self.seg_elev_fromDEM_dict]
-        self.profile_names = ['model top', 'streambed elevations from NHDPlus', 'streambed elevations interpolated from topographic contours',
-                               'smoothed streambed elevations sampled from DEM']
+        self.profile_names = ['model top', 'NHDPlus', 'topographic contours',
+                               'DEM']
 
 
     def read_DIS(self):
@@ -62,6 +62,7 @@ class plot_elevation_profiles:
                 L1top_top_elevs.append(self.elevs_by_cellnum[cellnum])
 
             self.seg_dist_dict[seg] = distances
+            self.seg_elev_fromNHD_dict[seg] = elevs_fromNHD
             self.seg_elev_fromContours_dict[seg] = elevs_fromContours
             self.seg_elev_fromDEM_dict[seg] = elevs_fromDEM
             self.L1top_elev_dict[seg] = L1top_top_elevs
@@ -135,7 +136,7 @@ class plot_elevation_profiles:
 
             handles, labels = ax1.get_legend_handles_labels()
             ax1.legend(handles, labels, loc='best')
-            ax1.set_title('COMID ' + str(seg))
+            ax1.set_title('Streambed profile for COMID ' + str(seg))
             plt.xlabel('distance along COMID (ft.)')
             ax1.set_ylabel('Elevation (ft)')
 
