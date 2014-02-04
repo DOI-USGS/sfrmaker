@@ -103,9 +103,11 @@ class plot_elevation_profiles:
             return seg_list
 
         pdf = PdfPages(pdffile)
-        print "saving plots of selected segments to " + pdffile
+        print "\nsaving plots of selected COMIDs to " + pdffile
+        knt = 0
         for seg in self.segs2plot:
-            print seg
+            knt += 1
+            print "\rCOMID: {0} ({1} of {2})".format(seg, knt, len(self.segs2plot)),
             # reshape distances and elevations to plot actual cell elevations
             seg_distances = reshape_seglist(self.seg_dist_dict[seg], True)
             profiles2plot = []

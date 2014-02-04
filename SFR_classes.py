@@ -1275,7 +1275,7 @@ class SFRpreproc:
     def intersect_contours(self, SFRdata):
         # GIS preprocessing to intersect topographic contours with river_explode.shp
 
-        print "Intersecting NHD flowlines with elevation contours..."
+        print "\nIntersecting NHD flowlines with elevation contours..."
         # create set of points where elevation contours intersect the streams
         arcpy.Intersect_analysis([SFRdata.ELEVcontours, SFRdata.intersect], SFRdata.Contours_intersect, "ALL", "", "POINT")
 
@@ -1301,7 +1301,7 @@ class SFRpreproc:
     def intersect_DEM(self, SFRdata):
         # GIS preprocessing to intersect DEM with river_explode.shp
 
-        print "Intersecting NHD flowline fragments with DEM..."
+        print "\nIntersecting NHD flowline fragments with DEM..."
         # convert end vertices of river_explode Fragments to points
         arcpy.FeatureVerticesToPoints_management(SFRdata.intersect, SFRdata.intersect_points)
 
@@ -1743,7 +1743,7 @@ class ElevsFromContours:
         self.elevs_edited = []
         self.in_between_contours = []
         self.comids_with_no_contour_intersects = []
-        self.verbose = True # prints interpolation information to screen for debugging/troubleshooting
+        self.verbose = False # prints interpolation information to screen for debugging/troubleshooting
 
     def interpolate_elevs(self, FragIDdata, start_fid, end_fid):
         # interpolate max/min elevation values for each FragID between start and end fids
@@ -1797,6 +1797,7 @@ class ElevsFromContours:
                             COMIDdata.allcomids[COMIDdata.allcomids[comid].to_comid[0]]
                             # additional test to see if COMID listed in FragIDdata
                             # if not, is in the list of COMIDs that were flagged earlier as having multiple starts/ends
+                            # or the stream leaves the grid
                             FragIDdata.COMID_orderedFragID[COMIDdata.allcomids[comid].to_comid[0]]
                         # at outlet; assign downstream elev using NHD
                         except KeyError:
@@ -1819,7 +1820,7 @@ class ElevsFromContours:
                 if self.upstream:
 
                     # most upstream reach in comid, check for headwaters or edge of grid
-                    # if from_comid is 0, headwater; or, if no from_comid, stream originates outside of grid
+                    # if from_comid is 999999, headwater; or, if no from_comid, stream originates outside of grid
                     # in both cases, use NHD to set end elevation, unless slope is negative, then set slope to 0
                     if FragID == FragIDdata.COMID_orderedFragID[comid][0]:
 
@@ -1830,7 +1831,7 @@ class ElevsFromContours:
                         for upid in COMIDdata.allcomids[comid].from_comid:
                             try:
                                 COMIDdata.allcomids[upid]
-                                if upid == 0:
+                                if upid == 999999:
                                     headwater = True
                                 else:
                                     # if an upstream segment is encountered that isn't a headwater,
@@ -1905,7 +1906,7 @@ class ElevsFromContours:
         # loop through rows in contours intersect table
         distances = arcpy.SearchCursor(self.intersect_dist_table)
 
-        print "getting elevations from topographic contour intersections..."
+        print "getting elevations at topographic contour intersections..."
         for row in distances:
             comid = int(row.COMID)
             cellnum = int(row.cellnum)
@@ -1956,7 +1957,7 @@ class ElevsFromContours:
         knt = 0
         for comid in FragIDdata.COMID_orderedFragID.keys():
             knt += 1
-            print comid
+            print "\rCOMID: {0} ({1} of {2})".format(comid, knt, len(FragIDdata.COMID_orderedFragID.keys())),
             if self.verbose:
                 print "comid number %s" % (knt)
             from_comid = COMIDdata.allcomids[comid].from_comid
@@ -1989,6 +1990,7 @@ class ElevsFromContours:
                 COMIDdata.allcomids[COMIDdata.allcomids[comid].to_comid[0]]
                 # additional test to see if COMID listed in FragIDdata
                 # if not, is in the list of COMIDs that were flagged earlier as having multiple starts/ends
+                # or the stream leaves the grid (to_comid ==[999999])
                 FragIDdata.COMID_orderedFragID[to_comid[0]]
             except KeyError:
                 if self.verbose:
@@ -2118,7 +2120,7 @@ class ElevsFromContours:
                 # so that any subsequent interpolation from upstream will stop here
                 # (avoids problems with multiple interpolations through confluence)
 
-                FragIDdata.allFragIDs[self.start_FragID].contour_elev = FragIDdata.allFragIDs[self.start_FragID].interpolated_contour_elev_max
+                FragIDdata.allFragIDs[self.start_FragID].contour_elev = [FragIDdata.allFragIDs[self.start_FragID].interpolated_contour_elev_max]
                 FragIDdata.allFragIDs[self.start_FragID].contour_elev_distance = [0]
                 self.elevs_edited.append(self.start_FragID)
 
@@ -2129,6 +2131,7 @@ class ElevsFromContours:
                 FragIDdata.allFragIDs[FragID].interpolated_contour_slope = \
                 (FragIDdata.allFragIDs[FragID].interpolated_contour_elev_max - FragIDdata.allFragIDs[FragID].interpolated_contour_elev_min) / \
                 FragIDdata.allFragIDs[FragID].lengthft
+        print "\n"
 
 
 class ElevsFromDEM:
@@ -2141,7 +2144,7 @@ class ElevsFromDEM:
         self.up_increment = 1.0
         self.end_interp_report = "end_interp_report.txt"
         self.adjusted_elev = -9999
-        self.verbose = True # prints interpolation information to screen for debugging/troubleshooting
+        self.verbose = False # prints interpolation information to screen for debugging/troubleshooting
 
 
     def DEM_elevs_by_cellnum(self, SFRData, SFROperations):
@@ -2229,11 +2232,10 @@ class ElevsFromDEM:
         print "smoothing DEM elevations along streams... "
         self.ofp = open(self.end_interp_report, 'w')
 
+        knt = 0
         for comid in FragIDdata.COMID_orderedFragID.keys():
-            print comid
-
-            if comid == 1815273:
-                j=2
+            knt += 1
+            print "\rCOMID: {0} ({1} of {2})".format(comid, knt, len(FragIDdata.COMID_orderedFragID.keys())),
 
             FragIDs = FragIDdata.COMID_orderedFragID[comid]
             self.ind_current_minimum = 0
@@ -2289,7 +2291,6 @@ class ElevsFromDEM:
                     else:
                         self.adjusted_elev = 0.5 * (FragIDdata.allFragIDs[FragIDs[self.ind_current_minimum]].smoothed_DEM_elev_max + end)
 
-                    print "streamtop below segment end elevation,see output file {0} ".format(self.end_interp_report)
                     self.ofp.write("Streambed top at COMID {0} reach {1} is {2}, segment end elevation is {3}\n"
                                    "Readjusting to {4}\n".format(comid, i, FragIDdata.allFragIDs[FragIDs[i-1]].DEM_elev_min,
                                                                  end, self.adjusted_elev))
@@ -2354,8 +2355,7 @@ class ElevsFromDEM:
                 FragIDdata.allFragIDs[FragID].smoothed_DEM_slope = \
                 (FragIDdata.allFragIDs[FragID].smoothed_DEM_elev_max - FragIDdata.allFragIDs[FragID].smoothed_DEM_elev_min) /\
                 FragIDdata.allFragIDs[FragID].lengthft
-
-
+        print "\n"
         self.ofp.close()
 
 class SFRoutput:

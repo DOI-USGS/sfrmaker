@@ -55,7 +55,7 @@ saveme ={'SFRdata':  SFRdata, 'COMIDdata': COMIDdata, 'FragIDdata': FragIDdata,
               'SFRops': SFRops, 'LevelPathdata' : LevelPathdata, 'CELLdata' : CELLdata}
 
 SFRc.savetmp(saveme)
-'''
+
 a = SFRc.loadtmp(['SFRdata', 'CELLdata', 'COMIDdata', 'FragIDdata', 'SFRops', 'LevelPathdata'])
 
 SFRdata = a['SFRdata']
@@ -85,24 +85,17 @@ saveme ={'COMIDdata' : COMIDdata,
          'LevelPathdata' : LevelPathdata,
          'CELLdata' : CELLdata}
 SFRc.savetmp(saveme)
-
+'''
 
 loadme = ['COMIDdata', 'CELLdata', 'FragIDdata', 'LevelPathdata']
 
 instuff = SFRc.loadtmp(loadme)
 
 
-
-
-
-
-
-
-
 SFRops.reach_ordering(instuff['COMIDdata'],
                       instuff['FragIDdata'],
                       instuff['LevelPathdata'])
-SFRpre.intersect_contours(SFRdata)
+
 Segmentdata = SFRc.SFRSegmentsAll()
 
 Segmentdata.divide_at_confluences(instuff['LevelPathdata'], instuff['FragIDdata'],
