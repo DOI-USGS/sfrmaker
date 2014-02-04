@@ -8,18 +8,19 @@ from matplotlib.backends.backend_pdf import PdfPages
 
 
 
-class plot_segments:
+class plot_elevation_profiles:
     # takes information from classes in SFR_classes.py and formats for plotting
     def __init__(self, SFRdata, COMIDdata):
         self.segs2plot = sorted(COMIDdata.allcomids.keys())[::20]
         self.SFRdata = SFRdata
         self.elevs_by_cellnum = dict()
         self.seg_dist_dict = dict()
-        self.seg_elev_dict = dict()
+        self.seg_elev_fromNHD_dict = dict()
+        self.seg_elev_fromContours_dict = dict()
         self.seg_elev_fromDEM_dict = dict()
         self.L1top_elev_dict = dict()
-        self.profiles = [self.L1top_elev_dict, self.seg_elev_dict, self.seg_elev_fromDEM_dict]
-        self.profile_names = ['model top', 'streambed elevations interpolated from topographic contours',
+        self.profiles = [self.L1top_elev_dict, self.seg_elev_fromNHD_dict, self.seg_elev_fromContours_dict, self.seg_elev_fromDEM_dict]
+        self.profile_names = ['model top', 'streambed elevations from NHDPlus', 'streambed elevations interpolated from topographic contours',
                                'smoothed streambed elevations sampled from DEM']
 
 
@@ -39,26 +40,29 @@ class plot_segments:
                 self.elevs_by_cellnum[cellnum] = self.layer_elevs[0, r, c]
 
 
-    def get_segment_plotting_info(self, FragIDdata):
+    def get_comid_plotting_info(self, FragIDdata):
 
         for seg in self.segs2plot:
             distances = []
-            elevs = []
+            elevs_fromNHD = []
+            elevs_fromContours = []
             elevs_fromDEM = []
             L1top_top_elevs = []
             dist = 0
             for fid in FragIDdata.COMID_orderedFragID[seg]:
                 dist += FragIDdata.allFragIDs[fid].lengthft
                 distances.append(dist)
-                mean_elev = 0.5 * (FragIDdata.allFragIDs[fid].interpolated_contour_elev_max + FragIDdata.allFragIDs[fid].interpolated_contour_elev_min)
+                mean_elev_fromNHD = 0.5 * (FragIDdata.allFragIDs[fid].NHDPlus_elev_max + FragIDdata.allFragIDs[fid].NHDPlus_elev_min)
+                mean_elev_fromContours = 0.5 * (FragIDdata.allFragIDs[fid].interpolated_contour_elev_max + FragIDdata.allFragIDs[fid].interpolated_contour_elev_min)
                 mean_elev_fromDEM = 0.5 * (FragIDdata.allFragIDs[fid].smoothed_DEM_elev_max + FragIDdata.allFragIDs[fid].smoothed_DEM_elev_min)
-                elevs.append(mean_elev)
+                elevs_fromNHD.append(mean_elev_fromNHD)
+                elevs_fromContours.append(mean_elev_fromContours)
                 elevs_fromDEM.append(mean_elev_fromDEM)
                 cellnum = FragIDdata.allFragIDs[fid].cellnum
                 L1top_top_elevs.append(self.elevs_by_cellnum[cellnum])
 
             self.seg_dist_dict[seg] = distances
-            self.seg_elev_dict[seg] = elevs
+            self.seg_elev_fromContours_dict[seg] = elevs_fromContours
             self.seg_elev_fromDEM_dict[seg] = elevs_fromDEM
             self.L1top_elev_dict[seg] = L1top_top_elevs
 
@@ -148,7 +152,7 @@ class plot_segments:
                 ax3.plot(self.seg_dist_dict[seg], reachlengths, 'b', label='reach length')
                 ax3.set_ylabel('reach length (ft)')
                 handles, labels = ax2.get_legend_handles_labels()
-                ax2.legend(handles, labels)
+                ax2.legend(handles, labels, fontsize=6)
                 ax3.legend(loc=0)
             pdf.savefig(fig)
         pdf.close()

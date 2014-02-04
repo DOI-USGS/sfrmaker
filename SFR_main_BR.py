@@ -7,19 +7,19 @@ infile = 'SFR_input_BR.xml'
 
 SFRdata = SFRc.SFRInput(infile)
 
-'''
+
 if SFRdata.preproc:
     print 'Running preprocessing routine'
     SFRpre = SFRc.SFRpreproc(SFRdata)
 
     #SFRpre.clip_and_join_attributes()
-'''
+
 SFRops = SFRc.SFROperations(SFRdata)
 
 
 
 SFRops.intersect()
-'''
+
 FragIDdata = SFRc.FragIDPropsAll()
 
 FragIDdata.populate(SFRdata)
@@ -68,16 +68,16 @@ FragIDdata = a['FragIDdata']
 SFRops = a['SFRops']
 Contour_elevs = a['ContourElevs']
 LevelPathdata = a['LevelPathdata']
-
+'''
 DEMelevs = SFRc.ElevsFromDEM()
 DEMelevs.DEM_elevs_by_FragID(SFRdata, SFRops)
 
-Contour_elevs.assign_elevations_to_FragID(FragIDdata, COMIDdata)
+ContourElevs.assign_elevations_to_FragID(FragIDdata, COMIDdata)
 DEMelevs.connect_downhill(FragIDdata)
 
-SFRp = sfr_plots.plot_segments(SFRdata, COMIDdata)
+SFRp = sfr_plots.plot_elevation_profiles(SFRdata, COMIDdata)
 SFRp.read_DIS()
-SFRp.get_segment_plotting_info(FragIDdata)
+SFRp.get_comid_plotting_info(FragIDdata)
 SFRp.plot_profiles('elevs_from_contours.pdf')
 
 saveme ={'COMIDdata' : COMIDdata,
