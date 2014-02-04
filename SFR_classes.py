@@ -1913,10 +1913,10 @@ class ElevsFromContours:
 
                     self.elevs_edited.append(FragID)
 
-            # build list of FragIDs that do not intersect any contours
-            for FragID in FragIDdata.allFragIDs.keys():
-                if FragID not in self.elevs_edited:
-                    self.in_between_contours.append(FragID)
+        # build list of FragIDs that do not intersect any contours
+        for FragID in FragIDdata.allFragIDs.keys():
+            if FragID not in self.elevs_edited:
+                self.in_between_contours.append(FragID)
         '''
         # faster way with python
         distances = np.genfromtxt(self.intersect_dist_table, names=True, delimiter=',', dtype=None)
