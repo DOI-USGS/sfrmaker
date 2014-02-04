@@ -670,8 +670,10 @@ class SFRSegmentsAll:
     levelpathIDs and establish the final SFR segments
     """
     def __init__(self):
-        self.allSegs = dict()              #dictionary of segment objects keyed by final segment number
-        self.confluences = defaultdict(list)    #dictionary of lists keyed by levelpathID
+        self.allSegs = dict()              # dictionary of segment objects keyed by final segment number
+        self.confluences = defaultdict(list)    # dictionary of lists keyed by levelpathID
+        self.segment_levelpaths = dict()
+        self.levelpaths_segments = dict()
 
     def divide_at_confluences(self, LevelPathdata, FragIDdata, COMIDdata, CELLdata, SFRdata):
         #establish provisional segment numbers from downstream (decending)
@@ -813,6 +815,35 @@ class SFRSegmentsAll:
                     self.allSegs[subseg[labl]].outseg=int(0)
                 '''
 
+        # go through the segments and make sure the outseg values are correct, based on being closest to the
+        # furthest upstream reach of the assumed outseg. If this is not correct, reassign the outseg
+
+        self.return_segs_levelpaths()
+        self.return_levelpaths_segs()
+
+        for seg in self.allSegs.iterkeys():
+            outseg = self.allSegs[seg].outseg
+
+            if outseg > 0 and outseg < 999999:
+                # find the levelpath ids for current seg and downseg
+                levelpathid_outseg = self.segment_levelpaths[outseg]
+                x_out = list()
+                y_out = list()
+                for clpid in self.levelpaths_segments[levelpathid_outseg]:
+                    x_out.append(self.allSegs[clpid].startreach_xy[0])
+                    y_out.append(self.allSegs[clpid].startreach_xy[1])
+                x_out = np.array(x_out)
+                y_out = np.array(y_out)
+                x, y = self.allSegs[seg].endreach_xy
+                dist = np.sqrt((x-x_out)**2 + (y-y_out)**2)
+                minloc = np.squeeze(np.where(dist == np.min(dist)))
+                if self.allSegs[seg].outseg != self.levelpaths_segments[levelpathid_outseg][minloc]:
+                    print 'Changing outseg from {0:d} to {1:d}'.format(
+                        self.allSegs[seg].outseg,
+                        self.levelpaths_segments[levelpathid_outseg][minloc]
+                    )
+                self.allSegs[seg].outseg = self.levelpaths_segments[levelpathid_outseg][minloc]
+
         #make a list of what segments are connected to each using outseg information
         #also load in other segment information from SFRdata (XML file information)
         for seg in self.allSegs.iterkeys():
@@ -824,6 +855,22 @@ class SFRSegmentsAll:
             self.allSegs[seg].runoff = SFRdata.runoff
             self.allSegs[seg].roughch = SFRdata.roughch
             self.allSegs[seg].icalc = SFRdata.icalc
+
+    def return_segs_levelpaths(self):
+        # return a dictionary, keyed by segment, of levelpathIDs
+        for cseg in self.allSegs:
+            self.segment_levelpaths[cseg] = self.allSegs[cseg].levelpathID
+
+    def return_levelpaths_segs(self):
+        all_lpids = list()
+        for cseg in self.allSegs:
+            all_lpids.append(self.allSegs[cseg].levelpathID)
+        all_lpids = list(set(all_lpids))
+        self.levelpaths_segments = {clpid: [] for clpid in all_lpids}
+        # return a dictionary, keyed by segment, of levelpathIDs
+        for cseg in self.allSegs:
+            self.levelpaths_segments[self.allSegs[cseg].levelpathID].append(cseg)
+
 
     def accumulate_same_levelpathID(self, LevelPathdata, COMIDdata, FragIDdata, SFRdata, CELLdata):
         """
@@ -2415,8 +2462,8 @@ class SFRoutput:
 
     def build_SFR_shapefile(self, SFRSegsAll):
         print 'building a shapefile of final SFR segments and reaches'
-        path=os.getcwd()
-        arcpy.env.workspace=path
+        path = os.getcwd()
+        arcpy.env.workspace = path
         outshapefile = self.indat.GISSHP
         rivcells = self.indat.CELLS_DISS
         if arcpy.Exists(outshapefile):
@@ -2424,15 +2471,15 @@ class SFRoutput:
 
         #add fields including outseg for checking, note could have multiple
         #lines for the same cellnum.
-        arcpy.CreateFeatureclass_management(path,outshapefile,"POLYGON",rivcells)
-        arcpy.AddField_management(outshapefile,"CELLNUM","LONG")
-        arcpy.AddField_management(outshapefile,"ROW","LONG")
-        arcpy.AddField_management(outshapefile,"COLUMN","LONG")
-        arcpy.AddField_management(outshapefile,"LAYER","LONG")
-        arcpy.AddField_management(outshapefile,"SEGMENT","LONG")
-        arcpy.AddField_management(outshapefile,"REACH","LONG")
-        arcpy.AddField_management(outshapefile,"OUTSEG","LONG")
-        arcpy.AddField_management(outshapefile,"LEVELPATH","LONG")
+        arcpy.CreateFeatureclass_management(path, outshapefile, "POLYGON", rivcells)
+        arcpy.AddField_management(outshapefile, "CELLNUM", "LONG")
+        arcpy.AddField_management(outshapefile, "ROW", "LONG")
+        arcpy.AddField_management(outshapefile, "COLUMN", "LONG")
+        arcpy.AddField_management(outshapefile, "LAYER", "LONG")
+        arcpy.AddField_management(outshapefile, "SEGMENT", "LONG")
+        arcpy.AddField_management(outshapefile, "REACH", "LONG")
+        arcpy.AddField_management(outshapefile, "OUTSEG", "LONG")
+        arcpy.AddField_management(outshapefile, "LEVELPATH", "LONG")
         newrows = arcpy.InsertCursor(outshapefile)
         shapeName = arcpy.Describe(rivcells).shapeFieldName
 
@@ -2468,7 +2515,7 @@ def widthcorrelation(arbolate):
     # x=arbolate sum of stream upstream of the COMID in meters
     #NHDPlus has arbolate sum in kilometers.
     #print a table with reachcode, order, estimated width, Fcode
-    estwidth = 0.1193*math.pow(1000*arbolate,0.5032)
+    estwidth = 0.1193*math.pow(1000*arbolate, 0.5032)
     return estwidth
 
 """
