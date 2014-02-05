@@ -10,11 +10,11 @@ SFRdata = SFRc.SFRInput(infile)
 SFRpre = SFRc.SFRpreproc(SFRdata)
 
 SFRops = SFRc.SFROperations(SFRdata)
-'''
+
 if SFRdata.preproc:
     print 'Running preprocessing routine'
 
-    SFRpre.clip_and_join_attributes(SFRops)
+    #SFRpre.clip_and_join_attributes(SFRops)
 
 
 
@@ -50,7 +50,7 @@ LevelPathdata.return_cutoffs(FragIDdata, CELLdata, SFRdata)
 
 
 
-
+'''
 saveme ={'SFRdata':  SFRdata, 'COMIDdata': COMIDdata, 'FragIDdata': FragIDdata,
               'SFRops': SFRops, 'LevelPathdata' : LevelPathdata, 'CELLdata' : CELLdata}
 
@@ -64,7 +64,7 @@ FragIDdata = a['FragIDdata']
 SFRops = a['SFRops']
 LevelPathdata = a['LevelPathdata']
 CELLdata = a['CELLdata']
-
+'''
 SFRpre.intersect_contours(SFRdata) # this needs to be in the example Main!
 ContourElevs = SFRc.ElevsFromContours(SFRdata)
 ContourElevs.get_contour_intersections(FragIDdata, COMIDdata)
@@ -79,29 +79,32 @@ SFRp = sfr_plots.plot_elevation_profiles(SFRdata, COMIDdata)
 SFRp.read_DIS()
 SFRp.get_comid_plotting_info(FragIDdata)
 SFRp.plot_profiles('elevs_from_contours.pdf')
-
+'''
 saveme ={'COMIDdata' : COMIDdata,
          'FragIDdata' : FragIDdata,
          'LevelPathdata' : LevelPathdata,
-         'CELLdata' : CELLdata}
+         'CELLdata' : CELLdata, 'SFRdata':  SFRdata,}
 SFRc.savetmp(saveme)
+
+
+a = SFRc.loadtmp['SFRdata', 'COMIDdata', 'CELLdata', 'FragIDdata', 'LevelPathdata']
+
+COMIDdata = a['COMIDdata']
+FragIDdata = a['FragIDdata']
+LevelPathdata = a['LevelPathdata']
+CELLdata = a['CELLdata']
+SFRdata = a['SFRdata']
 '''
-
-loadme = ['COMIDdata', 'CELLdata', 'FragIDdata', 'LevelPathdata']
-
-instuff = SFRc.loadtmp(loadme)
-
-
-SFRops.reach_ordering(instuff['COMIDdata'],
-                      instuff['FragIDdata'],
-                      instuff['LevelPathdata'])
+SFRops.reach_ordering(COMIDdata,
+                      FragIDdata,
+                      LevelPathdata)
 
 Segmentdata = SFRc.SFRSegmentsAll()
 
-Segmentdata.divide_at_confluences(instuff['LevelPathdata'], instuff['FragIDdata'],
-                                  instuff['COMIDdata'], instuff['CELLdata'], SFRdata)
-Segmentdata.accumulate_same_levelpathID(instuff['LevelPathdata'], instuff['COMIDdata'],
-                                        instuff['FragIDdata'], SFRdata, instuff['CELLdata'])
+Segmentdata.divide_at_confluences(LevelPathdata, FragIDdata,
+                                  COMIDdata, CELLdata, SFRdata)
+Segmentdata.accumulate_same_levelpathID(LevelPathdata, COMIDdata,
+                                        FragIDdata, SFRdata, CELLdata)
 
 #make some output
 

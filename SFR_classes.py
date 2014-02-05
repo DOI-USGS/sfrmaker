@@ -1442,6 +1442,13 @@ class SFROperations:
             ofp.write('#' * 16 + '\n')
             ofp.close()
 
+        # ATL: COMIDs with multiple ends and those with cut off ends
+        # (i.e., listed in fix_com_IDs.txt and boundary_manual_fix_issues.txt)
+        # appear to be already removed in SFRdata.intersect (i.e. river_explode).
+        # Remove these reatures by clipping SFRdata.Flowlines to SFRdata.intersect
+        # output to SFRdata.NHD (instead of simply copying SFRdata.Flowlines, as below)
+        #arcpy.Clip_analysis(self.SFRdata.Flowlines, self.SFRdata.intersect, self.SFRdata.NHD)
+
         #create a new working NHD shapefile incorporating new values just found
 
         print "Creating new shapefile {0:s}".format(self.SFRdata.NHD)
@@ -2072,7 +2079,8 @@ class ElevsFromContours:
 
                 # loop through comids in from_comid
                 for upcomid in from_comid:
-                    print upcomid
+                    if self.verbose:
+                        print upcomid
                     self.interp = True  # self.interp might be false from another upcomid in from_comid list
 
                     # look in subsequent from_comids until upstream contour is found
@@ -2537,7 +2545,7 @@ class SFRoutput:
                 localcell = reachdict[rch].cellnum
                 layer = int(9999)           #flag to remind us to link layer here..
                 query = "CELLNUM={0}".format(localcell)
-                poly = arcpy.SearchCursor(rivcells,query)
+                poly = arcpy.SearchCursor(rivcells, query)
                 # skips if poly is empty, should only go through it once
                 for entry in poly:
                     newvals = newrows.newRow()
