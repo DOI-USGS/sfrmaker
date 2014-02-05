@@ -889,7 +889,7 @@ class SFRSegmentsAll:
             slopeattr = 'DEM_slope'
         elif elevflag == 'smoothed_DEM':
             elevattr = 'smoothed_DEM_elev_mean'
-            slopeattr = 'smooth_DEM_slope'
+            slopeattr = 'smoothed_DEM_slope'
         elif elevflag == 'elevation_contours':
             elevattr = 'interpolated_contour_elev_mean'
             slopeattr = 'interpolated_contour_slope'
@@ -2234,6 +2234,14 @@ class ElevsFromDEM:
             (FragIDdata.allFragIDs[FragIDs[reach-1]].smoothed_DEM_elev_max - self.adjusted_elev) / \
             FragIDdata.allFragIDs[FragIDs[reach-1]].lengthft
 
+    def assign_mean_elevation(self, comid, FragIDdata):
+        # assign mean elevation and slope for each FragID
+        for FragID in FragIDdata.COMID_orderedFragID[comid]:
+            FragIDdata.allFragIDs[FragID].smoothed_DEM_elev_mean = 0.5 * \
+            (FragIDdata.allFragIDs[FragID].smoothed_DEM_elev_max + FragIDdata.allFragIDs[FragID].smoothed_DEM_elev_min)
+            FragIDdata.allFragIDs[FragID].smoothed_DEM_slope = \
+            (FragIDdata.allFragIDs[FragID].smoothed_DEM_elev_max - FragIDdata.allFragIDs[FragID].smoothed_DEM_elev_min) /\
+            FragIDdata.allFragIDs[FragID].lengthft
 
     def connect_downhill(self, FragIDdata):
 
@@ -2256,7 +2264,8 @@ class ElevsFromDEM:
                 print "start_elev: {0}, end_elev {1}".format(FragIDdata.allFragIDs[FragIDs[0]].smoothed_DEM_elev_max,
                                                          FragIDdata.allFragIDs[FragIDs[-1]].smoothed_DEM_elev_min)
             # for segments with only end reaches
-            if len(FragIDs) < 2: # no interior points; keep ending elevations
+            if len(FragIDs) < 2: # no interior points; keep ending elevations and assign mean
+                self.assign_mean_elevation(comid, FragIDdata)
                 continue
             end = FragIDdata.allFragIDs[FragIDs[-1]].smoothed_DEM_elev_min
 
@@ -2355,14 +2364,9 @@ class ElevsFromDEM:
                 if self.verbose and FragIDdata.allFragIDs[FragIDs[i]].smoothed_DEM_elev_max:
                     print "Reach {0}, max_elev: {1}, min_elev: {2}".format(i-1, FragIDdata.allFragIDs[FragIDs[i-1]].smoothed_DEM_elev_max,
                                                                        FragIDdata.allFragIDs[FragIDs[i-1]].smoothed_DEM_elev_min)
+            # use min and max smoothed elevations to assign means
+            self.assign_mean_elevation(comid, FragIDdata)
 
-            # assign mean elevation and slope for each FragID
-            for FragID in FragIDdata.COMID_orderedFragID[comid]:
-                FragIDdata.allFragIDs[FragID].smoothed_DEM_elev_mean = 0.5 * \
-                (FragIDdata.allFragIDs[FragID].smoothed_DEM_elev_max + FragIDdata.allFragIDs[FragID].smoothed_DEM_elev_min)
-                FragIDdata.allFragIDs[FragID].smoothed_DEM_slope = \
-                (FragIDdata.allFragIDs[FragID].smoothed_DEM_elev_max - FragIDdata.allFragIDs[FragID].smoothed_DEM_elev_min) /\
-                FragIDdata.allFragIDs[FragID].lengthft
         print "\n"
         self.ofp.close()
 
