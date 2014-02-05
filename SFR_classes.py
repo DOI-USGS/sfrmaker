@@ -838,12 +838,12 @@ class SFRSegmentsAll:
                 dist = np.sqrt((x-x_out)**2 + (y-y_out)**2)
                 minloc = np.squeeze(np.where(dist == np.min(dist)))
                 if self.allSegs[seg].outseg != self.levelpaths_segments[levelpathid_outseg][minloc]:
-                    print 'Changing outseg from {0:d} to {1:d}'.format(
+                    print '\rChanging outseg from {0:d} to {1:d}'.format(
                         self.allSegs[seg].outseg,
                         self.levelpaths_segments[levelpathid_outseg][minloc]
-                    )
+                    ),
                 self.allSegs[seg].outseg = self.levelpaths_segments[levelpathid_outseg][minloc]
-
+        print "\n"
         #make a list of what segments are connected to each using outseg information
         #also load in other segment information from SFRdata (XML file information)
         for seg in self.allSegs.iterkeys():
@@ -941,39 +941,39 @@ class SFRSegmentsAll:
             '''
             for localcell in self.allSegs[segment].seg_cells:
                 rch = rch + 1        #seg_cells attribute is ordered...
-                tt=0.
-                ww=0.
-                el=0.
-                ws=0.
+                tt = 0.
+                ww = 0.
+                el = 0.
+                ws = 0.
                 #loop over fids and combine/assign to reach if levelpathID matches
                 #the levelpath ID for the segment of interest; other levelpathIDs will
                 #be combined and assigned during their segment - doesn't subdivide
                 #at confluences...
-                knt=0
+                knt = 0
                 for cFragID in FragIDdata.cellnum_FragID[localcell]:
                     ccomid = FragIDdata.allFragIDs[cFragID].comid
                     clpID = COMIDdata.allcomids[ccomid].levelpathID
                     if clpID == seglpid:
-                        knt=knt+1
+                        knt = knt+1
                         tt = tt + FragIDdata.allFragIDs[cFragID].lengthft
-                        ww = ww + COMIDdata.allcomids[ccomid].est_width*FragIDdata.allFragIDs[cFragID].lengthft
-                        el = el + getattr(FragIDdata.allFragIDs[cFragID],elevattr)
-                        #ws = ws + getattr(FragIDdata.allFragIDs[cFragID],slopeattr)*FragIDdata.allFragIDs[cFragID].lengthft
+                        ww = ww + COMIDdata.allcomids[ccomid].est_width * FragIDdata.allFragIDs[cFragID].lengthft
+                        el = el + getattr(FragIDdata.allFragIDs[cFragID], elevattr)
+                        ws = ws + getattr(FragIDdata.allFragIDs[cFragID], slopeattr)*FragIDdata.allFragIDs[cFragID].lengthft
 
                 eff_length = tt
                 eff_slope = 99999.
-                if tt>0:
+                if tt > 0:
                     eff_width = ww/tt
-                    #eff_slope = ws/tt
+                    eff_slope = ws/tt
                 else:
                     eff_width = 99999.
-                    #eff_slope = 99999.
+                    eff_slope = 99999.
                 if knt > 0:
                     elevreach = el/knt
                 else:
                     elevreach = 99999.
-                self.allSegs[segment].seg_reaches[rch]=SFRReachProps(localcell,eff_width,eff_length,
-                                                            eff_slope,elevreach, SFRdata.bedthick,
+                self.allSegs[segment].seg_reaches[rch] = SFRReachProps(localcell, eff_length, eff_width,
+                                                            eff_slope, elevreach, SFRdata.bedthick,
                                                             SFRdata.bedK)
                 #if its a structured grid, add row and column to seg_reaches
                 #the if for unstructured will be added in the future
@@ -1645,8 +1645,9 @@ class SFROperations:
         BotcorPDF = "Corrected_Bottom_Elevations.pdf"  # PDF file showing original and corrected bottom elevations
         Layerinfo = "SFR_layer_assignments.txt"  # text file documenting how many reaches are in each layer as assigned
 
-        print "Read in model grid top elevations from {0:s}".format(SFRdata.MFdis)
-        topdata, i = disutil.read_nrow_ncol_vals(SFRdata.MFdis, NROW, NCOL, np.float, i)
+        print "\nRead in model grid top elevations from {0:s}".format(SFRdata.MFdis)
+        i = SFRdata.NLAY + 1 # ATL: is this always true?
+        topdata, i = disutil.read_nrow_ncol_vals(SFRdata.MFdis, SFRdata.NROW, SFRdata.NCOL, np.float, i)
         print "Read in model grid bottom layer elevations from {0:s}".format(SFRdata.MFdis)
         bots = np.zeros([SFRdata.NLAY, SFRdata.NROW, SFRdata.NCOL])
         for clay in np.arange(SFRdata.NLAY):
@@ -1654,7 +1655,7 @@ class SFROperations:
             bots[clay, :, :], i = disutil.read_nrow_ncol_vals(SFRdata.MFdis, SFRdata.NROW, SFRdata.NCOL, np.float, i)
         SFRinfo = np.genfromtxt(SFRdata.MAT1, delimiter=',', names=True, dtype=None)
 
-        print 'Now assiging stream cells to appropriate layers'
+        print '\nNow assiging stream cells to appropriate layers...'
         below_bottom = open('below_bot.csv', 'w')
         below_bottom.write('SFRbot,ModelBot,Land_surf,cellnum,segment\n')
         below_bot_adjust = defaultdict()  # list row,column locations where SFR goes below model bottom
@@ -1713,20 +1714,7 @@ class SFROperations:
             outpdf.close()
 
         # histogram of layer assignments
-        freq = np.histogram(list(New_Layers), range(NLAY + 2)[1:])
-
-        # write new SFRmat1 file
-        print "\nWriting output to %s..." %(SFRdata.MAT1)
-        ofp = open(SFRdata.MAT1,'w')
-        ofp.write(','.join(SFRinfo.dtype.names)+'\n')
-
-        SFRinfo['layer'] = New_Layers
-        for i in range(len(SFRinfo)):
-            line = list(SFRinfo[i])
-            line = ','.join(map(str, line))
-            ofp.write('{0:s}\n'.format(line))
-        ofp.close()
-
+        freq = np.histogram(list(New_Layers), range(SFRdata.NLAY + 2)[1:])
 
         # writeout info on Layer assignments
         ofp = open(Layerinfo, 'w')
@@ -1737,11 +1725,23 @@ class SFROperations:
             print '{0:d}\t\t{1:d}\n'.format(freq[1][i], freq[0][i])
         ofp.close()
 
-        if not Lowerbot:
+        # write new SFRmat1 file
+        print "Writing output to %s..." %(SFRdata.MAT1)
+        ofp = open(SFRdata.MAT1,'w')
+        ofp.write(','.join(SFRinfo.dtype.names)+'\n')
+
+        SFRinfo['layer'] = New_Layers
+        for i in range(len(SFRinfo)):
+            line = list(SFRinfo[i])
+            line = ','.join(map(str, line))
+            ofp.write('{0:s}\n'.format(line))
+        ofp.close()
+
+        if not SFRdata.Lowerbot:
             if nbelow > 0:
                 print "Warning {0:d} SFR streambed bottoms were below the model bottom. See below_bots.csv".format(
                     nbelow)
-        print "Done!"
+
 
 
 class ElevsFromContours:
@@ -2432,7 +2432,7 @@ class SFRoutput:
 
     def build_SFR_package(self):
 
-        print "Building new SFR package file..."
+        print "Building new SFR package file {0}...".format(self.indat.OUT)
         Mat1 = np.genfromtxt(self.indat.MAT1, delimiter=',', names=True, dtype=None)
         Mat2 = np.genfromtxt(self.indat.MAT2, names=True, delimiter=',', dtype=None)
 

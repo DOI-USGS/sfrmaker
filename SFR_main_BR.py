@@ -16,10 +16,6 @@ if SFRdata.preproc:
 
     #SFRpre.clip_and_join_attributes(SFRops)
 
-
-
-#SFRops.assign_layers(SFRdata)
-
 SFRops.intersect()
 
 FragIDdata = SFRc.FragIDPropsAll()
@@ -106,12 +102,14 @@ Segmentdata.divide_at_confluences(LevelPathdata, FragIDdata,
 Segmentdata.accumulate_same_levelpathID(LevelPathdata, COMIDdata,
                                         FragIDdata, SFRdata, CELLdata)
 
-#make some output
+# assign layers to SFR cells based on grid elevations
+SFRops.assign_layers(SFRdata)
 
+#make some output
 SFRoutput = SFRc.SFRoutput(SFRdata)
 SFRoutput.write_SFR_tables(Segmentdata)
 SFRoutput.build_SFR_package()
-SFRoutput.build_SFR_shapefile(Segmentdata)
-
+#SFRoutput.build_SFR_shapefile(Segmentdata)
+print "Done"
 
 i = 2
