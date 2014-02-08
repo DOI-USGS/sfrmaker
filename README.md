@@ -31,7 +31,7 @@ Some input and output are designed for the Groundwater Vistas GUI, but this is n
  
 
 ######2) DEM and/or topographic contours for area of model domain  
-* Available from the National Map Viewer and Download Platform: (http://viewer.nationalmap.gov/viewer/)  
+* Available from the National Map Viewer and Download Platform: <http://viewer.nationalmap.gov/viewer/>  
 	* In "Overlays" tab, select "Elevation Availability" to view available DEM resolutions  
 	* click "Download Data" link in upper right to download DEM(s)  
 	* select "elevation" and/or "contours" to download  
@@ -39,6 +39,7 @@ Some input and output are designed for the Groundwater Vistas GUI, but this is n
   `\\igsarmewfsapa\GISData\BaseData\Wisconsin\Statewide\Elevation\NED_2013_10m\NED_10m_DEM_WI_UP.gdb`
 
 **Notes:**  
+
 * If model domain area has multiple DEMs or elevation contour shapefiles, they need to be merged prior to setting up SFR. The merged DEM should be in the same coordinate system as the model.
 
 ######3) Model grid information
@@ -57,16 +58,16 @@ Some input and output are designed for the Groundwater Vistas GUI, but this is n
 
 ### Workflow:
   
-1) Setup XML input file (\<InputFiles> section) to point to the above input datasets  
+1) **Setup XML input file** (\<InputFiles> section) to point to the above input datasets  
 	* check settings in \<GlobalSettings> section; make sure that \<preproc> is set to **True**  
-2) Make sure that "infile" variable in **SFR_main.py** points to the XML input file  
+2) Make sure that the "infile" variable in **SFR_main.py** points to the XML input file  
 3) **Run SFR_main.py** by typing *python SFR_main.py* at the command prompt  
 4) If a "manual intervention" message is encountered in screen output,  
 
-* check the following files:  
+* **check the following files:  **
 	* **fix_com_IDs.txt:** Lists stream segments that have multiple ends and starts; usually these are 		streams that are broken into mulitple parts by the grid boundary. 
 	* **boundary_manual_fix_issues.txt:** Lists stream segments that don't have any connections to other 		segments.  
-* edit the offending segments (COMIDs) in the shapefile specified under \<IntermediateFiles>\<intersect> in the XML input file (usually these means deleting the parts of multi-part COMIDs that are isolated by the grid boundary, and possibly deleting any unconnected segments).  
+* **edit the offending segments** (COMIDs) in the shapefile specified under \<IntermediateFiles>\<intersect> in the XML input file (usually this means deleting the parts of multi-part COMIDs that are isolated by the grid boundary, and possibly deleting any unconnected segments).  
   
-5) set \<preproc> in the XML input file to False (meaning the existing \<intersect> file will be read in lieu of the preprocessing operations). Then rerun SFR_main.py.  
+5) set \<preproc> in the XML input file to False (meaning the existing \<intersect> shapefile will be read in lieu of the preprocessing operations). Then **rerun SFR_main.py**.  
 6) Once the reach and segment information tables have been written, they can be subsequently edited, and an SFR package file rebuilt by running the **Assign_layers.py** script. Since Assign_layers also reads the MODFLOW Discretizaiton file, it can aslo re-assign layering for SFR cells following any modifications to the grid elevations.	
