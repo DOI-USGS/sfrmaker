@@ -2483,7 +2483,7 @@ class SFRoutput:
             if slope <= self.indat.minimum_slope:  # one last check for negative or zero slopes
                 slope = self.indat.minimum_slope
             if self.indat.tpl:
-                bedK = '~SFRc'
+                bedK = '~SFRc~'
             else:
                 bedK = '{0:e}'.format(Mat1['bed_K'][i])
             ofp.write('{0:d} {1:d} {2:d} {3:d} {4:d} {5:e} {6:e} {7:e} {8:e} {9:s}\n'.format(
