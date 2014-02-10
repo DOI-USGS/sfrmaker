@@ -4,8 +4,8 @@
         <sfr_file>BadRiver.sfr</sfr_file>
 </filenames>
 <orig_point>
-        <orig_seg>496</orig_seg>
-        <orig_reach>7</orig_reach>
+        <orig_seg>755</orig_seg>
+        <orig_reach>36</orig_reach>
 </orig_point>
 <flags>
         <make_shapefiles>True</make_shapefiles>

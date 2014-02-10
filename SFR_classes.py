@@ -823,12 +823,14 @@ class SFRSegmentsAll:
 
         for seg in self.allSegs.iterkeys():
             outseg = self.allSegs[seg].outseg
-
+            if seg == 892:
+                j=2
             if outseg > 0 and outseg < 999999:
                 # find the levelpath ids for current seg and downseg
                 levelpathid_outseg = self.segment_levelpaths[outseg]
                 x_out = list()
                 y_out = list()
+
                 for clpid in self.levelpaths_segments[levelpathid_outseg]:
                     x_out.append(self.allSegs[clpid].startreach_xy[0])
                     y_out.append(self.allSegs[clpid].startreach_xy[1])
@@ -837,12 +839,15 @@ class SFRSegmentsAll:
                 x, y = self.allSegs[seg].endreach_xy
                 dist = np.sqrt((x-x_out)**2 + (y-y_out)**2)
                 minloc = np.squeeze(np.where(dist == np.min(dist)))
+                # if closest segment is the current segment, choose next closest (to prevent circular routing!)
+                if self.levelpaths_segments[levelpathid_outseg][minloc] == seg:
+                    minloc = np.argsort(dist)[1]
+                # if current outseg is already the closest, keep it
                 if self.allSegs[seg].outseg != self.levelpaths_segments[levelpathid_outseg][minloc]:
-                    print '\rChanging outseg from {0:d} to {1:d}'.format(
+                    print 'Changing outseg from {0:d} to {1:d}'.format(
                         self.allSegs[seg].outseg,
-                        self.levelpaths_segments[levelpathid_outseg][minloc]
-                    ),
-                self.allSegs[seg].outseg = self.levelpaths_segments[levelpathid_outseg][minloc]
+                        self.levelpaths_segments[levelpathid_outseg][minloc])
+                    self.allSegs[seg].outseg = self.levelpaths_segments[levelpathid_outseg][minloc]
         print "\n"
         #make a list of what segments are connected to each using outseg information
         #also load in other segment information from SFRdata (XML file information)
@@ -2522,6 +2527,7 @@ class SFRoutput:
 
     def build_SFR_shapefile(self, SFRSegsAll):
         print 'building a shapefile of final SFR segments and reaches'
+        Mat1 = np.genfromtxt(self.indat.MAT1, delimiter=',', names=True, dtype=None)
         path = os.getcwd()
         arcpy.env.workspace = path
         outshapefile = self.indat.GISSHP
@@ -2547,7 +2553,11 @@ class SFRoutput:
             reachdict = SFRSegsAll.allSegs[seg].seg_reaches
             for rch in reachdict.iterkeys():
                 localcell = reachdict[rch].cellnum
-                layer = int(9999)           #flag to remind us to link layer here..
+
+                # get layer from Mat 1
+                Mat1_ind = np.where((Mat1['segment'] == seg) & (Mat1['reach'] == rch))[0][0]
+                layer = Mat1['layer'][Mat1_ind]
+
                 query = "CELLNUM={0}".format(localcell)
                 poly = arcpy.SearchCursor(rivcells, query)
                 # skips if poly is empty, should only go through it once
