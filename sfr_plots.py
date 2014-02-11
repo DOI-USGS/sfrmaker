@@ -1,9 +1,13 @@
 # program to plot SFR segment profiles
 
+import os
 import numpy as np
 import discomb_utilities as disutil
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
+from collections import defaultdict
+import arcpy
+import SFR_arcpy
 
 
 
@@ -160,3 +164,65 @@ class plot_elevation_profiles:
             pdf.savefig(fig)
         pdf.close()
         plt.close('all')
+
+
+class plot_streamflows:
+    # plots simulated flows over the SFR network
+    def __init__(self, DISfile, streams_shp, SFR_out):
+        self.streams_shp = streams_shp
+        self.SFR_out = SFR_out
+        self.flow_by_cellnum = dict()
+        self.seg_rch_by_cellnum = dict()
+        self.DISfile = DISfile
+        self.outpath = os.path.split(SFR_out)[0]
+        if len(self.outpath) == 0:
+            self.outpath = os.getcwd()
+
+    def join_SFR_out2streams(self):
+
+        # get model info
+        try:
+            DX, DY, NLAY, NROW, NCOL, i = disutil.read_meta_data(self.DISfile)
+        except:
+            raise IOError("Cannot read MODFLOW DIS file {0}".format(self.DISfile))
+
+        print "aggregating flow information by cellnum..."
+        indata = np.genfromtxt(self.SFR_out, skiprows=8, dtype=None)
+        for line in indata:
+            r, c = line[1], line[2]
+            seg_rch = "{0} {1}; ".format(line[3], line[4])
+            flow = 0.5 * (line[5] + line[7])
+            cellnum = (r-1)*NCOL + c
+
+            try:
+                existingflow = self.flow_by_cellnum[cellnum]
+                seg_rch_info = self.seg_rch_by_cellnum[cellnum]
+            except KeyError:
+                existingflow = 0
+                seg_rch_info = 'segs  rchs: '
+
+            self.flow_by_cellnum[cellnum] = existingflow + flow
+            self.seg_rch_by_cellnum[cellnum] = seg_rch_info + seg_rch
+
+        # write to temporary output file
+        ofp = open('temp.csv','w')
+        ofp.write('cellnum,row,column,seg_reach,flow\n')
+        for cn in self.flow_by_cellnum.keys():
+            ofp.write('{0},{1},{2},"{3}",{4:.6e}\n'.format(cn, 1, 1, self.seg_rch_by_cellnum[cn], self.flow_by_cellnum[cn]))
+        ofp.close()
+
+        # make feature/table layers
+        arcpy.env.workspace = self.outpath
+        arcpy.env.overwriteOutput = True
+        arcpy.CopyFeatures_management(self.streams_shp, self.streams_shp[:-4]+'_backup.shp')
+        arcpy.MakeFeatureLayer_management(self.streams_shp[:-4]+'_backup.shp', "streams")
+        arcpy.CopyRows_management('temp.csv', os.path.join(self.outpath, 'temp.dbf'))
+
+
+        # drop all fields except for cellnum from stream linework
+        Fields = arcpy.ListFields("streams")
+        Fields = [f.name for f in Fields if f.name not in ["FID", "Shape", "cellnum"]]
+        arcpy.DeleteField_management("streams", Fields)
+
+        outfile = os.path.join(self.outpath, "{0}.shp".format(self.SFR_out[:-4]))
+        SFR_arcpy.general_join(outfile, "streams", "cellnum", "temp.dbf", "cellnum", keep_common=True)
