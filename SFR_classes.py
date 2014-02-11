@@ -40,6 +40,7 @@ def loadtmp(savedict):
 '''
 end debugging functions
 '''
+
 class SFRInput:
     """
     the SFRInput class holds all data from the XML-based input file
@@ -148,7 +149,7 @@ class SFRInput:
 
         # conversion for vertical length units between DEM and model
         try:
-            self.DEM_z_conversion = float(inpars.findall('.//z_conversion')[0].text)
+            self.DEM_z_conversion = float(inpars.findall('.//DEM_z_conversion')[0].text)
         except:
             self.DEM_z_conversion = 1.0  # default value used if not in the input file
 
@@ -158,6 +159,11 @@ class SFRInput:
             self.cutoff = float(inpars.finall('.//cutoff')[0].text)
         except:
             self.cutoff = 0.0
+
+        try:
+            self.profile_plot_interval = int(inpars.finall('.//profile_plot_interval')[0].text)
+        except:
+            self.profile_plot_interval = 20
 
         #read the Fcode-Fstring table and save it into a dictionary, Fstring
         descrips = arcpy.SearchCursor(self.FTab)
@@ -1748,7 +1754,6 @@ class SFROperations:
                     nbelow)
 
 
-
 class ElevsFromContours:
     def __init__(self, SFRdata):
         self.intersect_dist_table = SFRdata.Contours_intersect_distances
@@ -2201,7 +2206,7 @@ class ElevsFromDEM:
         # append all DEM elevations sampled along each fragment to a dictionary
         for point in Frag_vertices:
             FragID = point.getValue(SFROperations.joinnames["fragid"])
-            elev = point.getValue(SFROperations.joinnames["dem_elev"])
+            elev = point.getValue(SFROperations.joinnames["dem_elev"]) * SFRdata.DEM_z_conversion
             self.ElevsbyFragID[FragID].append(elev)
 
 

@@ -71,10 +71,10 @@ DEMelevs = SFRc.ElevsFromDEM()
 DEMelevs.DEM_elevs_by_FragID(SFRdata, SFRops)
 DEMelevs.connect_downhill(FragIDdata)
 
-SFRp = sfr_plots.plot_elevation_profiles(SFRdata, COMIDdata)
+SFRp = sfr_plots.plot_elevation_profiles(SFRdata)
 SFRp.read_DIS()
-SFRp.get_comid_plotting_info(FragIDdata)
-SFRp.plot_profiles('elevs_from_contours.pdf')
+SFRp.get_comid_plotting_info(FragIDdata, COMIDdata)
+SFRp.plot_profiles('Elevation_method_comparison.pdf')
 '''
 saveme ={'COMIDdata' : COMIDdata,
          'FragIDdata' : FragIDdata,
@@ -101,6 +101,10 @@ Segmentdata.divide_at_confluences(LevelPathdata, FragIDdata,
                                   COMIDdata, CELLdata, SFRdata)
 Segmentdata.accumulate_same_levelpathID(LevelPathdata, COMIDdata,
                                         FragIDdata, SFRdata, CELLdata)
+
+# plot SFR segment profiles
+SFRp.get_segment_plotting_info(Segmentdata)
+SFRp.plot_profiles('Segment_profiles.pdf')
 
 #make some output
 SFRoutput = SFRc.SFRoutput(SFRdata)

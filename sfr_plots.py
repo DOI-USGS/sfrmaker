@@ -10,41 +10,41 @@ import arcpy
 import SFR_arcpy
 
 
-
-
 class plot_elevation_profiles:
     # takes information from classes in SFR_classes.py and formats for plotting
-    def __init__(self, SFRdata, COMIDdata):
-        self.segs2plot = sorted(COMIDdata.allcomids.keys())[::20]
+    def __init__(self, SFRdata):
+
         self.SFRdata = SFRdata
         self.elevs_by_cellnum = dict()
-        self.seg_dist_dict = dict()
-        self.seg_elev_fromNHD_dict = dict()
-        self.seg_elev_fromContours_dict = dict()
-        self.seg_elev_fromDEM_dict = dict()
-        self.L1top_elev_dict = dict()
-        self.profiles = [self.L1top_elev_dict, self.seg_elev_fromNHD_dict, self.seg_elev_fromContours_dict, self.seg_elev_fromDEM_dict]
-        self.profile_names = ['model top', 'NHDPlus', 'topographic contours',
-                               'DEM']
 
 
     def read_DIS(self):
-        DX, DY, NLAY, NROW, NCOL, i = disutil.read_meta_data(self.SFRdata.MFdis)
+        DX, DY, NLAY, NROW, self.NCOL, i = disutil.read_meta_data(self.SFRdata.MFdis)
 
         # get layer tops/bottoms
-        self.layer_elevs = np.zeros((NLAY+1, NROW, NCOL))
+        self.layer_elevs = np.zeros((NLAY+1, NROW, self.NCOL))
         for c in range(NLAY + 1):
-            tmp, i = disutil.read_nrow_ncol_vals(self.SFRdata.MFdis, NROW, NCOL, 'float', i)
+            tmp, i = disutil.read_nrow_ncol_vals(self.SFRdata.MFdis, NROW, self.NCOL, 'float', i)
             self.layer_elevs[c, :, :] = tmp
 
         # make dictionary of model top elevations by cellnum
-        for c in range(NCOL):
+        for c in range(self.NCOL):
             for r in range(NROW):
-                cellnum = r*NCOL + c + 1
+                cellnum = r*self.NCOL + c + 1
                 self.elevs_by_cellnum[cellnum] = self.layer_elevs[0, r, c]
 
 
-    def get_comid_plotting_info(self, FragIDdata):
+    def get_comid_plotting_info(self, FragIDdata, COMIDdata):
+
+        self.segs2plot = sorted(COMIDdata.allcomids.keys())[::self.SFRdata.profile_plot_interval]
+        self.seg_dist_dict = dict()
+        self.L1top_elev_dict = dict()
+        self.seg_elev_fromNHD_dict = dict()
+        self.seg_elev_fromContours_dict = dict()
+        self.seg_elev_fromDEM_dict = dict()
+        self.profiles = [self.L1top_elev_dict, self.seg_elev_fromNHD_dict, self.seg_elev_fromContours_dict, self.seg_elev_fromDEM_dict]
+        self.profile_names = ['model top', 'NHDPlus', 'topographic contours',
+                               'DEM']
 
         for seg in self.segs2plot:
             distances = []
@@ -71,6 +71,37 @@ class plot_elevation_profiles:
             self.seg_elev_fromDEM_dict[seg] = elevs_fromDEM
             self.L1top_elev_dict[seg] = L1top_top_elevs
 
+
+    def get_segment_plotting_info(self, SFRSegsAll):
+
+        seglist = sorted(list(SFRSegsAll.allSegs.keys()))
+        self.segs2plot = seglist[::self.SFRdata.profile_plot_interval]
+        self.seg_dist_dict = dict()
+        self.L1top_elev_dict = dict()
+        self.seg_elevs_dict = dict()
+        self.profiles = [self.L1top_elev_dict, self.seg_elevs_dict]
+        self.profile_names = ['model top', 'streambed top']
+
+        for cseg in seglist:
+            reachlist = sorted(SFRSegsAll.allSegs[cseg].seg_reaches)
+            curr_reaches = SFRSegsAll.allSegs[cseg].seg_reaches
+
+            distances = []
+            L1top_top_elevs = []
+            elevs = []
+            dist = 0
+            for creach in reachlist:
+                dist += curr_reaches[creach].eff_length
+                distances.append(dist)
+                elev = curr_reaches[creach].elevreach
+                r, c = curr_reaches[creach].row, curr_reaches[creach].column
+                cellnum = (r - 1) * self.NCOL + c
+                L1top_top_elevs.append(self.elevs_by_cellnum[cellnum])
+                elevs.append(elev)
+
+            self.seg_dist_dict[cseg] = distances
+            self.L1top_elev_dict[cseg] = L1top_top_elevs
+            self.seg_elevs_dict[cseg] = elevs
 
 
     def plot_profiles(self, pdffile, **kwargs):
