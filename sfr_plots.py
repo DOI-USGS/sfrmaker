@@ -204,6 +204,8 @@ class plot_streamflows:
         self.SFR_out = SFR_out
         self.flow_by_cellnum = dict()
         self.seg_rch_by_cellnum = dict()
+        self.loss_by_cellnum = dict()
+        self.state_by_cellnum = dict()
         self.DISfile = DISfile
         self.outpath = os.path.split(SFR_out)[0]
         if len(self.outpath) == 0:
@@ -221,9 +223,10 @@ class plot_streamflows:
         indata = np.genfromtxt(self.SFR_out, skiprows=8, dtype=None)
         for line in indata:
             r, c = line[1], line[2]
+            cellnum = (r-1)*NCOL + c
             seg_rch = "{0} {1}; ".format(line[3], line[4])
             flow = 0.5 * (line[5] + line[7])
-            cellnum = (r-1)*NCOL + c
+            loss = float(line[6])
 
             try:
                 existingflow = self.flow_by_cellnum[cellnum]
@@ -232,14 +235,26 @@ class plot_streamflows:
                 existingflow = 0
                 seg_rch_info = 'segs  rchs: '
 
+            # determine state
+            if loss > 0:
+                state = 'loosing'
+            elif loss < 0:
+                state = 'gaining'
+            else:
+                state = 'dry'
+
             self.flow_by_cellnum[cellnum] = existingflow + flow
             self.seg_rch_by_cellnum[cellnum] = seg_rch_info + seg_rch
+            self.loss_by_cellnum[cellnum] = loss
+            self.state_by_cellnum[cellnum] = state
 
         # write to temporary output file
-        ofp = open('temp.csv','w')
-        ofp.write('cellnum,row,column,seg_reach,flow\n')
+        ofp = open('temp.csv', 'w')
+        ofp.write('cellnum,row,column,seg_reach,flow,loss,state\n')
         for cn in self.flow_by_cellnum.keys():
-            ofp.write('{0},{1},{2},"{3}",{4:.6e}\n'.format(cn, 1, 1, self.seg_rch_by_cellnum[cn], self.flow_by_cellnum[cn]))
+            ofp.write('{0},{1},{2},"{3}",{4:.6e},{5},{6}\n'.format(cn, 1, 1, self.seg_rch_by_cellnum[cn],
+                                                                   self.flow_by_cellnum[cn], self.loss_by_cellnum[cn],
+                                                                   self.state_by_cellnum[cn]))
         ofp.close()
 
         # make feature/table layers
