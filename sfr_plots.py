@@ -137,12 +137,19 @@ class plot_elevation_profiles:
                 seg_list = seg_list[:-1] # trim last, since last seg distances denotes end of last reach
             return seg_list
 
+        # set name for plotting COMIDs (NHD) or segments (post-NHD)
+        try:
+            self.seg_elevs_dict
+            streamunit = "segment"
+        except:
+            streamunit = "COMID"
+
         pdf = PdfPages(pdffile)
-        print "\nsaving plots of selected COMIDs to " + pdffile
+        print "\nsaving plots of selected {0}s to {1}".format(streamunit, pdffile)
         knt = 0
         for seg in self.segs2plot:
             knt += 1
-            print "\rCOMID: {0} ({1} of {2})".format(seg, knt, len(self.segs2plot)),
+            print "\r{0}: {1} ({2} of {3})".format(streamunit, seg, knt, len(self.segs2plot)),
             # reshape distances and elevations to plot actual cell elevations
             seg_distances = reshape_seglist(self.seg_dist_dict[seg], True)
             profiles2plot = []
@@ -173,8 +180,8 @@ class plot_elevation_profiles:
 
             handles, labels = ax1.get_legend_handles_labels()
             ax1.legend(handles, labels, loc='best')
-            ax1.set_title('Streambed profile for COMID ' + str(seg))
-            plt.xlabel('distance along COMID (ft.)')
+            ax1.set_title('Streambed profile for {0} {1}'.format(streamunit, seg))
+            plt.xlabel('distance along {0} (ft.)'.format(streamunit))
             ax1.set_ylabel('Elevation (ft)')
 
             # adjust limits to make all profiles visible
