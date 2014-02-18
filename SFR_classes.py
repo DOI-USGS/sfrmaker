@@ -125,6 +125,9 @@ class SFRInput:
         self.GISSHP = inpars.findall('.//GISSHP')[0].text
         self.elevflag = inpars.findall('.//elevflag')[0].text
 
+        self.calculated_DEM_elevs = False
+        self.calculated_contour_elevs = False
+
         # read in model information
         self.DX, self.DY, self.NLAY, self.NROW, self.NCOL, i = disutil.read_meta_data(self.MFdis)
 
@@ -1284,6 +1287,10 @@ class SFRpreproc:
         self.ofp.close()
 
     def intersect_contours(self, SFRdata):
+
+        # set flag for plotting indicating that this was run for contours
+        SFRdata.calculated_contour_elevs = True
+
         # GIS preprocessing to intersect topographic contours with river_explode.shp
 
         print "\nIntersecting NHD flowlines with elevation contours..."
@@ -1310,6 +1317,10 @@ class SFRpreproc:
                                 SFRdata.Contours_intersect_distances, "Route POINT fmp", "", "", "", "", "M_DIRECTON")
 
     def intersect_DEM(self, SFRdata):
+
+        # set flag for plotting indicating that this was run for DEM
+        SFRdata.calculated_DEM_elevs = True
+
         # GIS preprocessing to intersect DEM with river_explode.shp
 
         print "\nIntersecting NHD flowline fragments with DEM..."
@@ -1443,7 +1454,8 @@ class SFROperations:
                     if manual_intervention == 1:
                         ofp = open('boundary_manual_fix_issues.txt', 'w')
                         ofp.write('The following COMIDs identify streams that need manual attention.\n')
-                        ofp.write('Fix in the files {0:s} and river_explode.shp. Then rerun intersect.py\n'.format(self.SFRdata.Flowlines))
+                        ofp.write('Fix in the files {0:s} and river_explode.shp. '
+                                  'Then rerun main script without preprocessing\n'.format(self.SFRdata.Flowlines))
                         ofp.write('#' * 16 + '\n')
                     print 'both ends are cut off for comid {0:d}\n'.format(comid)
                     ofp.write('both ends are cut off for comid {0:d}\n'.format(comid))
@@ -1595,7 +1607,7 @@ class SFROperations:
             print 'Some cells have multiple COMIDs entering and/or leaving.\n See file "fix_comids.txt"'
             outfile.write('#' * 30 + '\nSummary of COMIDS to fix:\n' +
                           'Delete these COMIDs from river_explode.shp, \n' +
-                          'then run CleanupRiverCells.py and rerun Assign_and_Route.py\n')
+                          'then run CleanupRiverCells.py Then rerun main script without preprocessing\n')
             [outfile.write(line) for line in fix_comids_summary]
             outfile.close()
         del row

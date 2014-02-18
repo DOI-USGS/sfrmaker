@@ -34,7 +34,7 @@ class plot_elevation_profiles:
                 self.elevs_by_cellnum[cellnum] = self.layer_elevs[0, r, c]
 
 
-    def get_comid_plotting_info(self, FragIDdata, COMIDdata):
+    def get_comid_plotting_info(self, FragIDdata, COMIDdata, SFRdata):
 
         self.segs2plot = sorted(COMIDdata.allcomids.keys())[::self.SFRdata.profile_plot_interval]
         self.seg_dist_dict = dict()
@@ -42,9 +42,15 @@ class plot_elevation_profiles:
         self.seg_elev_fromNHD_dict = dict()
         self.seg_elev_fromContours_dict = dict()
         self.seg_elev_fromDEM_dict = dict()
-        self.profiles = [self.L1top_elev_dict, self.seg_elev_fromNHD_dict, self.seg_elev_fromContours_dict, self.seg_elev_fromDEM_dict]
-        self.profile_names = ['model top', 'NHDPlus', 'topographic contours',
-                               'DEM']
+        self.profiles = [self.L1top_elev_dict, self.seg_elev_fromNHD_dict]
+        self.profile_names = ['model top', 'NHDPlus']
+
+        if SFRdata.calculated_contour_elevs:
+            self.profiles.append(self.seg_elev_fromContours_dict)
+            self.profile_names.append('topographic contours')
+        if SFRdata.calculated_DEM_elevs:
+            self.profiles.append(self.seg_elev_fromDEM_dict)
+            self.profile_names.append('DEM')
 
         for seg in self.segs2plot:
             distances = []
@@ -56,19 +62,28 @@ class plot_elevation_profiles:
             for fid in FragIDdata.COMID_orderedFragID[seg]:
                 dist += FragIDdata.allFragIDs[fid].lengthft
                 distances.append(dist)
-                mean_elev_fromNHD = 0.5 * (FragIDdata.allFragIDs[fid].NHDPlus_elev_max + FragIDdata.allFragIDs[fid].NHDPlus_elev_min)
-                mean_elev_fromContours = 0.5 * (FragIDdata.allFragIDs[fid].interpolated_contour_elev_max + FragIDdata.allFragIDs[fid].interpolated_contour_elev_min)
-                mean_elev_fromDEM = 0.5 * (FragIDdata.allFragIDs[fid].smoothed_DEM_elev_max + FragIDdata.allFragIDs[fid].smoothed_DEM_elev_min)
+                mean_elev_fromNHD = 0.5 * (FragIDdata.allFragIDs[fid].NHDPlus_elev_max +
+                                               FragIDdata.allFragIDs[fid].NHDPlus_elev_min)
+                if SFRdata.calculated_contour_elevs:
+                    mean_elev_fromContours = 0.5 * (FragIDdata.allFragIDs[fid].interpolated_contour_elev_max +
+                                                FragIDdata.allFragIDs[fid].interpolated_contour_elev_min)
+                if SFRdata.calculated_DEM_elevs:
+                    mean_elev_fromDEM = 0.5 * (FragIDdata.allFragIDs[fid].smoothed_DEM_elev_max +
+                                           FragIDdata.allFragIDs[fid].smoothed_DEM_elev_min)
                 elevs_fromNHD.append(mean_elev_fromNHD)
-                elevs_fromContours.append(mean_elev_fromContours)
-                elevs_fromDEM.append(mean_elev_fromDEM)
+                if SFRdata.calculated_contour_elevs:
+                    elevs_fromContours.append(mean_elev_fromContours)
+                if SFRdata.calculated_DEM_elevs:
+                    elevs_fromDEM.append(mean_elev_fromDEM)
                 cellnum = FragIDdata.allFragIDs[fid].cellnum
                 L1top_top_elevs.append(self.elevs_by_cellnum[cellnum])
 
             self.seg_dist_dict[seg] = distances
             self.seg_elev_fromNHD_dict[seg] = elevs_fromNHD
-            self.seg_elev_fromContours_dict[seg] = elevs_fromContours
-            self.seg_elev_fromDEM_dict[seg] = elevs_fromDEM
+            if SFRdata.calculated_contour_elevs:
+                self.seg_elev_fromContours_dict[seg] = elevs_fromContours
+            if SFRdata.calculated_DEM_elevs:
+                self.seg_elev_fromDEM_dict[seg] = elevs_fromDEM
             self.L1top_elev_dict[seg] = L1top_top_elevs
 
 
