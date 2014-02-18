@@ -61,23 +61,20 @@ SFRops = a['SFRops']
 LevelPathdata = a['LevelPathdata']
 CELLdata = a['CELLdata']
 '''
-# Get streambed elevation information from topographic contours
 SFRpre.intersect_contours(SFRdata) # this needs to be in the example Main!
 ContourElevs = SFRc.ElevsFromContours(SFRdata)
 ContourElevs.get_contour_intersections(FragIDdata, COMIDdata)
 ContourElevs.assign_elevations_to_FragID(FragIDdata, COMIDdata)
 
-# Get streambed elevation information from DEM
 SFRpre.intersect_DEM(SFRdata) # this needs to be in the example Main!
 DEMelevs = SFRc.ElevsFromDEM()
 DEMelevs.DEM_elevs_by_FragID(SFRdata, SFRops)
 DEMelevs.connect_downhill(FragIDdata)
 
-# Comparison plots of streambed elevations (by COMID) for different elevation methods
-SFRp = sfr_plots.plot_elevation_profiles(SFRdata)
+SFRp = sfr_plots.plot_elevation_profiles(SFRdata, COMIDdata)
 SFRp.read_DIS()
-SFRp.get_comid_plotting_info(FragIDdata, COMIDdata)
-SFRp.plot_profiles('Elevation_method_comparison.pdf')
+SFRp.get_comid_plotting_info(FragIDdata)
+SFRp.plot_profiles('elevs_from_contours.pdf')
 '''
 saveme ={'COMIDdata' : COMIDdata,
          'FragIDdata' : FragIDdata,
@@ -105,14 +102,12 @@ Segmentdata.divide_at_confluences(LevelPathdata, FragIDdata,
 Segmentdata.accumulate_same_levelpathID(LevelPathdata, COMIDdata,
                                         FragIDdata, SFRdata, CELLdata)
 
-# plot SFR segment profiles
-SFRp.get_segment_plotting_info(Segmentdata)
-SFRp.plot_profiles('Segment_profiles.pdf')
+# assign layers to SFR cells based on grid elevations
+SFRops.assign_layers(SFRdata)
 
 #make some output
 SFRoutput = SFRc.SFRoutput(SFRdata)
 SFRoutput.write_SFR_tables(Segmentdata)
-SFRops.assign_layers(SFRdata)
 SFRoutput.build_SFR_package()
 #SFRoutput.build_SFR_shapefile(Segmentdata)
 print "Done"

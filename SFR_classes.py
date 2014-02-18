@@ -40,7 +40,6 @@ def loadtmp(savedict):
 '''
 end debugging functions
 '''
-
 class SFRInput:
     """
     the SFRInput class holds all data from the XML-based input file
@@ -149,7 +148,7 @@ class SFRInput:
 
         # conversion for vertical length units between DEM and model
         try:
-            self.DEM_z_conversion = float(inpars.findall('.//DEM_z_conversion')[0].text)
+            self.DEM_z_conversion = float(inpars.findall('.//z_conversion')[0].text)
         except:
             self.DEM_z_conversion = 1.0  # default value used if not in the input file
 
@@ -159,11 +158,6 @@ class SFRInput:
             self.cutoff = float(inpars.finall('.//cutoff')[0].text)
         except:
             self.cutoff = 0.0
-
-        try:
-            self.profile_plot_interval = int(inpars.finall('.//profile_plot_interval')[0].text)
-        except:
-            self.profile_plot_interval = 20
 
         #read the Fcode-Fstring table and save it into a dictionary, Fstring
         descrips = arcpy.SearchCursor(self.FTab)
@@ -829,14 +823,12 @@ class SFRSegmentsAll:
 
         for seg in self.allSegs.iterkeys():
             outseg = self.allSegs[seg].outseg
-            if seg == 892:
-                j=2
+
             if outseg > 0 and outseg < 999999:
                 # find the levelpath ids for current seg and downseg
                 levelpathid_outseg = self.segment_levelpaths[outseg]
                 x_out = list()
                 y_out = list()
-
                 for clpid in self.levelpaths_segments[levelpathid_outseg]:
                     x_out.append(self.allSegs[clpid].startreach_xy[0])
                     y_out.append(self.allSegs[clpid].startreach_xy[1])
@@ -845,15 +837,12 @@ class SFRSegmentsAll:
                 x, y = self.allSegs[seg].endreach_xy
                 dist = np.sqrt((x-x_out)**2 + (y-y_out)**2)
                 minloc = np.squeeze(np.where(dist == np.min(dist)))
-                # if closest segment is the current segment, choose next closest (to prevent circular routing!)
-                if self.levelpaths_segments[levelpathid_outseg][minloc] == seg:
-                    minloc = np.argsort(dist)[1]
-                # if current outseg is already the closest, keep it
                 if self.allSegs[seg].outseg != self.levelpaths_segments[levelpathid_outseg][minloc]:
-                    print 'Changing outseg from {0:d} to {1:d}'.format(
+                    print '\rChanging outseg from {0:d} to {1:d}'.format(
                         self.allSegs[seg].outseg,
-                        self.levelpaths_segments[levelpathid_outseg][minloc])
-                    self.allSegs[seg].outseg = self.levelpaths_segments[levelpathid_outseg][minloc]
+                        self.levelpaths_segments[levelpathid_outseg][minloc]
+                    ),
+                self.allSegs[seg].outseg = self.levelpaths_segments[levelpathid_outseg][minloc]
         print "\n"
         #make a list of what segments are connected to each using outseg information
         #also load in other segment information from SFRdata (XML file information)
@@ -1754,6 +1743,7 @@ class SFROperations:
                     nbelow)
 
 
+
 class ElevsFromContours:
     def __init__(self, SFRdata):
         self.intersect_dist_table = SFRdata.Contours_intersect_distances
@@ -2206,7 +2196,7 @@ class ElevsFromDEM:
         # append all DEM elevations sampled along each fragment to a dictionary
         for point in Frag_vertices:
             FragID = point.getValue(SFROperations.joinnames["fragid"])
-            elev = point.getValue(SFROperations.joinnames["dem_elev"]) * SFRdata.DEM_z_conversion
+            elev = point.getValue(SFROperations.joinnames["dem_elev"])
             self.ElevsbyFragID[FragID].append(elev)
 
 
@@ -2488,7 +2478,7 @@ class SFRoutput:
             if slope <= self.indat.minimum_slope:  # one last check for negative or zero slopes
                 slope = self.indat.minimum_slope
             if self.indat.tpl:
-                bedK = '~SFRc~'
+                bedK = '~SFRc'
             else:
                 bedK = '{0:e}'.format(Mat1['bed_K'][i])
             ofp.write('{0:d} {1:d} {2:d} {3:d} {4:d} {5:e} {6:e} {7:e} {8:e} {9:s}\n'.format(
@@ -2532,7 +2522,6 @@ class SFRoutput:
 
     def build_SFR_shapefile(self, SFRSegsAll):
         print 'building a shapefile of final SFR segments and reaches'
-        Mat1 = np.genfromtxt(self.indat.MAT1, delimiter=',', names=True, dtype=None)
         path = os.getcwd()
         arcpy.env.workspace = path
         outshapefile = self.indat.GISSHP
@@ -2558,11 +2547,7 @@ class SFRoutput:
             reachdict = SFRSegsAll.allSegs[seg].seg_reaches
             for rch in reachdict.iterkeys():
                 localcell = reachdict[rch].cellnum
-
-                # get layer from Mat 1
-                Mat1_ind = np.where((Mat1['segment'] == seg) & (Mat1['reach'] == rch))[0][0]
-                layer = Mat1['layer'][Mat1_ind]
-
+                layer = int(9999)           #flag to remind us to link layer here..
                 query = "CELLNUM={0}".format(localcell)
                 poly = arcpy.SearchCursor(rivcells, query)
                 # skips if poly is empty, should only go through it once

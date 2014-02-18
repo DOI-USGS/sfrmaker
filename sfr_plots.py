@@ -1,50 +1,46 @@
 # program to plot SFR segment profiles
 
-import os
 import numpy as np
 import discomb_utilities as disutil
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
-from collections import defaultdict
-import arcpy
-import SFR_arcpy
+
+
 
 
 class plot_elevation_profiles:
     # takes information from classes in SFR_classes.py and formats for plotting
-    def __init__(self, SFRdata):
-
+    def __init__(self, SFRdata, COMIDdata):
+        self.segs2plot = sorted(COMIDdata.allcomids.keys())[::20]
         self.SFRdata = SFRdata
         self.elevs_by_cellnum = dict()
-
-
-    def read_DIS(self):
-        DX, DY, NLAY, NROW, self.NCOL, i = disutil.read_meta_data(self.SFRdata.MFdis)
-
-        # get layer tops/bottoms
-        self.layer_elevs = np.zeros((NLAY+1, NROW, self.NCOL))
-        for c in range(NLAY + 1):
-            tmp, i = disutil.read_nrow_ncol_vals(self.SFRdata.MFdis, NROW, self.NCOL, 'float', i)
-            self.layer_elevs[c, :, :] = tmp
-
-        # make dictionary of model top elevations by cellnum
-        for c in range(self.NCOL):
-            for r in range(NROW):
-                cellnum = r*self.NCOL + c + 1
-                self.elevs_by_cellnum[cellnum] = self.layer_elevs[0, r, c]
-
-
-    def get_comid_plotting_info(self, FragIDdata, COMIDdata):
-
-        self.segs2plot = sorted(COMIDdata.allcomids.keys())[::self.SFRdata.profile_plot_interval]
         self.seg_dist_dict = dict()
-        self.L1top_elev_dict = dict()
         self.seg_elev_fromNHD_dict = dict()
         self.seg_elev_fromContours_dict = dict()
         self.seg_elev_fromDEM_dict = dict()
+        self.L1top_elev_dict = dict()
         self.profiles = [self.L1top_elev_dict, self.seg_elev_fromNHD_dict, self.seg_elev_fromContours_dict, self.seg_elev_fromDEM_dict]
         self.profile_names = ['model top', 'NHDPlus', 'topographic contours',
                                'DEM']
+
+
+    def read_DIS(self):
+        DX, DY, NLAY, NROW, NCOL, i = disutil.read_meta_data(self.SFRdata.MFdis)
+
+        # get layer tops/bottoms
+        self.layer_elevs = np.zeros((NLAY+1, NROW, NCOL))
+        for c in range(NLAY + 1):
+            tmp, i = disutil.read_nrow_ncol_vals(self.SFRdata.MFdis, NROW, NCOL, 'float', i)
+            self.layer_elevs[c, :, :] = tmp
+
+        # make dictionary of model top elevations by cellnum
+        for c in range(NCOL):
+            for r in range(NROW):
+                cellnum = r*NCOL + c + 1
+                self.elevs_by_cellnum[cellnum] = self.layer_elevs[0, r, c]
+
+
+    def get_comid_plotting_info(self, FragIDdata):
 
         for seg in self.segs2plot:
             distances = []
@@ -71,37 +67,6 @@ class plot_elevation_profiles:
             self.seg_elev_fromDEM_dict[seg] = elevs_fromDEM
             self.L1top_elev_dict[seg] = L1top_top_elevs
 
-
-    def get_segment_plotting_info(self, SFRSegsAll):
-
-        seglist = sorted(list(SFRSegsAll.allSegs.keys()))
-        self.segs2plot = seglist[::self.SFRdata.profile_plot_interval]
-        self.seg_dist_dict = dict()
-        self.L1top_elev_dict = dict()
-        self.seg_elevs_dict = dict()
-        self.profiles = [self.L1top_elev_dict, self.seg_elevs_dict]
-        self.profile_names = ['model top', 'streambed top']
-
-        for cseg in seglist:
-            reachlist = sorted(SFRSegsAll.allSegs[cseg].seg_reaches)
-            curr_reaches = SFRSegsAll.allSegs[cseg].seg_reaches
-
-            distances = []
-            L1top_top_elevs = []
-            elevs = []
-            dist = 0
-            for creach in reachlist:
-                dist += curr_reaches[creach].eff_length
-                distances.append(dist)
-                elev = curr_reaches[creach].elevreach
-                r, c = curr_reaches[creach].row, curr_reaches[creach].column
-                cellnum = (r - 1) * self.NCOL + c
-                L1top_top_elevs.append(self.elevs_by_cellnum[cellnum])
-                elevs.append(elev)
-
-            self.seg_dist_dict[cseg] = distances
-            self.L1top_elev_dict[cseg] = L1top_top_elevs
-            self.seg_elevs_dict[cseg] = elevs
 
 
     def plot_profiles(self, pdffile, **kwargs):
@@ -137,19 +102,12 @@ class plot_elevation_profiles:
                 seg_list = seg_list[:-1] # trim last, since last seg distances denotes end of last reach
             return seg_list
 
-        # set name for plotting COMIDs (NHD) or segments (post-NHD)
-        try:
-            self.seg_elevs_dict
-            streamunit = "segment"
-        except:
-            streamunit = "COMID"
-
         pdf = PdfPages(pdffile)
-        print "\nsaving plots of selected {0}s to {1}".format(streamunit, pdffile)
+        print "\nsaving plots of selected COMIDs to " + pdffile
         knt = 0
         for seg in self.segs2plot:
             knt += 1
-            print "\r{0}: {1} ({2} of {3})".format(streamunit, seg, knt, len(self.segs2plot)),
+            print "\rCOMID: {0} ({1} of {2})".format(seg, knt, len(self.segs2plot)),
             # reshape distances and elevations to plot actual cell elevations
             seg_distances = reshape_seglist(self.seg_dist_dict[seg], True)
             profiles2plot = []
@@ -180,8 +138,8 @@ class plot_elevation_profiles:
 
             handles, labels = ax1.get_legend_handles_labels()
             ax1.legend(handles, labels, loc='best')
-            ax1.set_title('Streambed profile for {0} {1}'.format(streamunit, seg))
-            plt.xlabel('distance along {0} (ft.)'.format(streamunit))
+            ax1.set_title('Streambed profile for COMID ' + str(seg))
+            plt.xlabel('distance along COMID (ft.)')
             ax1.set_ylabel('Elevation (ft)')
 
             # adjust limits to make all profiles visible
@@ -202,80 +160,3 @@ class plot_elevation_profiles:
             pdf.savefig(fig)
         pdf.close()
         plt.close('all')
-
-
-class plot_streamflows:
-    # plots simulated flows over the SFR network
-    def __init__(self, DISfile, streams_shp, SFR_out):
-        self.streams_shp = streams_shp
-        self.SFR_out = SFR_out
-        self.flow_by_cellnum = dict()
-        self.seg_rch_by_cellnum = dict()
-        self.loss_by_cellnum = dict()
-        self.state_by_cellnum = dict()
-        self.DISfile = DISfile
-        self.outpath = os.path.split(SFR_out)[0]
-        if len(self.outpath) == 0:
-            self.outpath = os.getcwd()
-
-    def join_SFR_out2streams(self):
-
-        # get model info
-        try:
-            DX, DY, NLAY, NROW, NCOL, i = disutil.read_meta_data(self.DISfile)
-        except:
-            raise IOError("Cannot read MODFLOW DIS file {0}".format(self.DISfile))
-
-        print "aggregating flow information by cellnum..."
-        indata = np.genfromtxt(self.SFR_out, skiprows=8, dtype=None)
-        for line in indata:
-            r, c = line[1], line[2]
-            cellnum = (r-1)*NCOL + c
-            seg_rch = "{0} {1}; ".format(line[3], line[4])
-            flow = 0.5 * (line[5] + line[7])
-            loss = float(line[6])
-
-            try:
-                existingflow = self.flow_by_cellnum[cellnum]
-                seg_rch_info = self.seg_rch_by_cellnum[cellnum]
-            except KeyError:
-                existingflow = 0
-                seg_rch_info = 'segs  rchs: '
-
-            # determine state
-            if loss > 0:
-                state = 'loosing'
-            elif loss < 0:
-                state = 'gaining'
-            else:
-                state = 'dry'
-
-            self.flow_by_cellnum[cellnum] = existingflow + flow
-            self.seg_rch_by_cellnum[cellnum] = seg_rch_info + seg_rch
-            self.loss_by_cellnum[cellnum] = loss
-            self.state_by_cellnum[cellnum] = state
-
-        # write to temporary output file
-        ofp = open('temp.csv', 'w')
-        ofp.write('cellnum,row,column,seg_reach,flow,loss,state\n')
-        for cn in self.flow_by_cellnum.keys():
-            ofp.write('{0},{1},{2},"{3}",{4:.6e},{5},{6}\n'.format(cn, 1, 1, self.seg_rch_by_cellnum[cn],
-                                                                   self.flow_by_cellnum[cn], self.loss_by_cellnum[cn],
-                                                                   self.state_by_cellnum[cn]))
-        ofp.close()
-
-        # make feature/table layers
-        arcpy.env.workspace = self.outpath
-        arcpy.env.overwriteOutput = True
-        arcpy.CopyFeatures_management(self.streams_shp, self.streams_shp[:-4]+'_backup.shp')
-        arcpy.MakeFeatureLayer_management(self.streams_shp[:-4]+'_backup.shp', "streams")
-        arcpy.CopyRows_management('temp.csv', os.path.join(self.outpath, 'temp.dbf'))
-
-
-        # drop all fields except for cellnum from stream linework
-        Fields = arcpy.ListFields("streams")
-        Fields = [f.name for f in Fields if f.name not in ["FID", "Shape", "cellnum"]]
-        arcpy.DeleteField_management("streams", Fields)
-
-        outfile = os.path.join(self.outpath, "{0}.shp".format(self.SFR_out[:-4]))
-        SFR_arcpy.general_join(outfile, "streams", "cellnum", "temp.dbf", "cellnum", keep_common=True)
