@@ -1,173 +1,96 @@
 SFR
-===
-Set of programs for automating the construction of the MODFLOW Streamflow-Routing Package, using NHD Plus v2 and a digital elevation model (DEM).
-NHDPlus datasets are available at: http://www.horizon-systems.com/NHDPlus/NHDPlusV2_data.php
+==
+Set of programs for automating the construction of the MODFLOW Streamflow-Routing Package, using NHD Plus v2
 
 
-#### Dependencies:
+## Dependencies:
 
 In addition to standard Python modules, ESRI Arcpy is needed.
 Some input and output are designed for the Groundwater Vistas GUI, but this is not necessarily required
 
-#### Input requirements:
+## Input requirements:
 
-* Polygon shapefile export of model grid (e.g. as exported by Groundwater Vistas)
-* rows x columns ascii matrix of model TOP elevations (e.g. as exported by Groundwater Vistas)
-* Shapefile polygon of model domain (merged polygon of gridcells)
-* A DEM for model area, doesn't need to be clipped
-* PlusflowVAA database from NHDPlus v2 --> PlusFlowlineVAA.dbf from NHDPlusV21\_XX\_YY\_NHDPlusAttributes\_03.7z
-* Elevslope database from NHDPlus v2 --> elevslope.dbf from NHDPlusV21\_XX\_YY\_NHDPlusAttributes\_03.7z
-* NHDFlowline shapefile from NHDPlus v2
-* Flowlines='Flowlines.shp' # from NHDPlus
-* PlusFlow database from NHDPlus v2 --> PlusFlow.dbf from NHDPlusV21\_XX\_YY\_NHDPlusAttributes\_03.7z
-* NHDFcode database from NHDPlus v2
+#####1) NHDPlus v2 hydrography datasets  
+ * Available at <http://www.horizon-systems.com/NHDPlus/NHDPlusV2_data.php>
+ * Archives needed/relevant files:
+ 	* **NHDPlusV21_XX_YY_NHDSnapshot_**.7z**   
+ 		* NHDFcode.dbf  
+ 		* NHDFlowline.dbf, .prj, .shp, .shx  
+ 	* **NHDPlusV21\_XX\_YY\_NHDPlusAttributes\_**.7z**  
+ 		* elevslope.dbf  
+		* PlusFlow.dbf  
+		* PlusFlowlineVAA.dbf
+  
 
-NOTE: XX is Drainage Area ID and YY is VPU (vector processing unit) in the above (see NHDPlus website for details).
+**Notes:**  
 
-#### Outputs:
+* XX is Drainage Area ID (e.g., GL for Great Lakes) and YY is the Vector Processing Unit (VPU; e.g. 04) in the  above (see NHDPlus website for details).  
+* If model domain encompases multiple Drainage Areas, need to merge NHD datasets prior to running this script (e.g. in ArcMap, using the Merge tool under *ArcToolbox>Data Management>General>Merge*)  
+* The NHDFlowline shapefile should be reprojected into the same coordinate system of the model, if necessary. In ArcMap this can be done under *ArcToolbox>Data Management>Projections and Transformations*.
+* **Edit the NHD datasets at your own risk!!** Editing may corrupt routing or other information, greatly complicating automated setup of an SFR package. NHD elevation units should be left as is (cm).
+ 
 
-* SFR package file*
-* Text file with reach information (r,c,l,elevation, width, slope, etc.) for importing SFR package into Groundwater Vistas
-* Text file with segment/routing data (e.g. icalc, outseg, iupseg, etc.), for copying and pasting into Groundwater Vistas
+#####2) DEM and/or topographic contours for area of model domain  
+* Available from the National Map Viewer and Download Platform: <http://viewer.nationalmap.gov/viewer/>  
+	* In "Overlays" tab, select "Elevation Availability" to view available DEM resolutions  
+	* click "Download Data" link in upper right to download DEM(s)  
+	* select "elevation" and/or "contours" to download  
+* Internal WIWSC source for DEMs in Wisconsin:  
+  `\\igsarmewfsapa\GISData\BaseData\Wisconsin\Statewide\Elevation\NED_2013_10m\NED_10m_DEM_WI_UP.gdb`
 
-#### Notes:
+**Notes:**  
 
-* currently the SFR package file is create prior to final elevation corrections with fix_w_dem.py. Until this is fixed, SFR package input should be manually created from the Groundwater Vistas input tables.
-Note:
-* All shps should be in (same) model coordinate units (e.g. ft.)
-* If model domain contains a major divide, need to merge relevant NHD datasets (e.g. 04 and 07) prior to running this script
+* If model domain area has multiple DEMs or elevation contour shapefiles, they need to be merged prior to setting up SFR. The merged DEM should be in the same coordinate system as the model.
 
+#####3) Model grid information
+* polygon shapefile export of model grid (in same coordinate system as Flowlines and DEM)
+* polygon shapefile of model domain (can be created by dissolving the grid shapefile using *Geoprocessing>dissolve* in the ArcToolbox)
+* discretization file for model
 
-### Workflow for building SFR input:
+  
+## Outputs:
 
-##### 0) run computeZonal.py
-	
-     Inputs:
-     Polygon shapefile export of model grid (e.g. as exported by Groundwater Vistas)
-     A DEM for model area, doesn't need to be clipped
-     
-##### 1) run SFR_preproc.py
-(see Steps 1-9 in Howard Reeves' SFR notes)
-
-     Inputs: 
-     Shapefile of model grid cells with model top elevations (from computeZonal.py above)
-     Shapefile polygon of model domain (merged polygon of gridcells)
-     PlusflowVAA database from NHDPlus v2
-     Elevslope database from NHDPlus v2
-     original NHDFlowline shapefile from NHDPlus v2
-     NHDFlowline shapefile clipped to model grid * this can be taken out if code is added to perform the clipping
-     
-     Outputs:
-     river_explode.shp (lines)
-	 river_cells.shp
-     river_cells_dissolve.shp (grid cells (SFR reaches) that contain NHD segment elevations and channel location information (start and end xy; reach length in cell))
+* SFR package file
+* Text file table with reach information (r,c,l,elevation, width, slope, etc.) 
+* Text file table with segment/routing data (e.g. icalc, outseg, iupseg, etc.)
 
 
 
-##### 2) run intersect.py
+## Workflow:
+  
+1) **Setup XML input file** (\<InputFiles> section) to point to the above input datasets  
+  
+* check settings in \<GlobalSettings> section; make sure that \<preproc> is set to **True**  
 
-     Inputs:
-          - <casename>.in
-          - <Flowlines_unclipped>.shp
-          - <MFdomain>.shp
-          - <Flowlines>.shp
-          
-     Outputs:
-          - <NHD>.shp
-          - boundaryClipsRouting.txt
-          - boundary_manual_fix_issues.txt (if manual intervention required)
+2) Make sure that the "infile" variable in **SFR_main.py** points to the XML input file  
 
-Look at boundary\_manual\_fix\_issues.txt output file and find COMIDs that leave and reenter the domain. Fix them in Flowlines (from input file) and in river\_explode.py (if necessary).
+3) **Run SFR_main.py** by typing *python SFR_main.py* at the command prompt  
 
-Once runs through with no manual fix messages, move on.
+4) If a "manual intervention" message is encountered in screen output,  
 
-##### 2a) run CleanupRiverCells.py,
-which trims down the river cells shapefiles to reflect the deletiosn that were made in the previous step deleting COMIDs from river_explode.shp
-This also makes a backup copy of fix\_comids.txt --> fix\_comids\_backup.txt which can be used to inspect the results of rerunning AssignRiverElev.py
+* **check the following files:  **
+	* **fix_com_IDs.txt:** Lists stream segments that have multiple ends and starts; usually these are 		streams that are broken into mulitple parts by the grid boundary. 
+	* **boundary_manual_fix_issues.txt:** Lists stream segments that don't have any connections to other 		segments.  
+* **edit the offending segments** (COMIDs) in the shapefile specified under \<IntermediateFiles>\<intersect> in the XML input file (usually this means deleting the parts of multi-part COMIDs that are isolated by the grid boundary, and possibly deleting any unconnected segments).  
+  
+5) set \<preproc> in the XML input file to False (meaning the existing \<intersect> shapefile will be read in lieu of the preprocessing operations). Then **rerun SFR_main.py**.  
 
-##### 2b) rerun intersect.py
-Only if there were COMID repair issues on the previous run. 
+6) Once the reach and segment information tables have been written, they can be subsequently edited, and an SFR package file rebuilt by running the **Assign_layers.py** script. Since Assign_layers also reads the MODFLOW Discretizaiton file, it can aslo re-assign layering for SFR cells following any modifications to the grid elevations.
+ 
 
-##### 3) run Assign_and_Route.py
-This works through the COMID definitions along with model cell boundaries to both assign COMIDs to model cells and assign elevations based on those COMID segments. Also handles the routing from NHDplus as much as possible.
+## Visualizating the results:
 
-Once this runs with no manual fixes, move to step 4. Otherwise handle COMIDs listed in fix\_comids.txt
+#####Plotting streambed profiles
+SFR_main_EXAMPLE.py has examples for producing comparison plots of streambed profiles for the different elevation methods (NHDPlus, DEM, and topographic contours), and also for plotting profiles of the final streambed elevations (segments and reaches have been created). Both of these methods need to be run in the MAIN program, in an order similar to that shown in the example MAIN file.
 
-##### 3a) run CleanupRiverCells.py
-If fix\_comids.txt indicated necessary manual fixes, follow direction in that file then run CleanupRiverCells.py
+#####Visualizing routing
+SFR_routing_checker.py can be run independently of the MAIN program to visualize routing. Simply edit the SFR_routing_checker.XML input file, and run by typing *python SFR_routing_checker.py SFR_routing_checker.XML* at the command prompt. Requires an SFR package file, and a grid spec. (SPC) file (written by GWV). Works best with \<all_layers> set to False. To visualize shapefile output in ArcMap, after importing, under Properties>Symbology choose categories and click "Add all values".
 
-##### 3b) rerun Assign_and_Route.py
+#####Visualizing streamflow and aquifer interactions  
+Edit the plot_SFR_flows.py example. Requires a MODFLOW DIS file, an "exploded" stream linework file that has stream fragments by model cell number (i.e. \<intersect> in the XML input file, or similar), and an SFR package output file (i.e. "*streamflow.dat"). Produces a shapefile of the same name as the SFR output file.
 
+To view in Arc, after importing, under Properties>Symbology, click Import and choose:
 
-##### 4) run Finalize\_SFR\_revised\_OCT.py
-Creates the actual SFR file with elevations and routing
-     
-##### 5) run Fix\_w\_DEM.py
-	- runs Fix\_segment\_ends.py to adjust segment end elevations to match model TOP as closely as possible (minus an adjustable incising parameter)
-	- checks for backward routing in segment ends
-	- adjust segment interior reaches to model TOP, as long as they are monotonically downhill and don't go below segment end
-	- uses linear interpolation otherwise
-	- generates PDF files showing comparative statistics for SFR vs. model top before and after
-	- generates PDF files with comparative plots of SFR before and after, with model top, also 50 worst floating and incised segments
-	- can also generate a plot of segments that go below the model bottom, but need to run Assign_Layers.py first to get below_bot.csv
-	
-	
-	Dependencies:
-		-STOP_compare.py (generates columns of model top elev, SFR streambed top, and their differece, indexed by segment)
-		-Fix_segment_ends.py  (Adjusts segment end elevations within the constraints of up/down segment min/max elevations)
-		-Plot_segment_profiles.py  (Has generic code to plot SFR segments with land surface or any other elevation)
-		-pandas (non-standard module of Python- used to quickly sort 50 biggest floating and incised reaches; this could probably be done by numpy)
-		
-	Inputs:
-		- GWVmat1 (from SFR_utilities.py)
-		- GWVmat2 (from SFR_utilties.py)
-		- ascii array of model top elevations
-		- ascii multi-layer array of model bottom elevations
-	
-	Outputs:
-		- GWVmat1
-		- GWVmat2
-		- selected_segments.pdf (profile plots of selected segments compared to land surface)
-		- PDF files showing profiles of most floating and most incised segments
-		- PDF files showing cumulative distribution of landsurface/streambed elevation differences and summary statistics before and after
-		- fix_routing_report='Fix_routing_report.txt' # records which segments were given new outsegs by Fix_routing
-		- fix_ends_report='Fixed_segment_ends.csv' # records changes made to segment end elevations
-		- fix_ends_errors='Fix_segment_ends_errors.txt' # records instances where segments were left with backwards routing
-		- end_interp_report='fix_w_DEM_interps.txt' # file recording adjustments made using up/dn_increments
-		- error_report='fix_w_DEM_errors.txt' # file for reporting 0 slope errors, etc.
-		- STOP_comp_SFR_utilities='STOP_compare_SFR_utilities.csv'# from STOP_compare.py
-		- STOP_comp_fixwDEM='STOP_compare_fix_w_DEM.csv' # from STOP_compare.py
-
-	###### NOTE: there are also a number of hard-coded settings for fix_w_DEM that are listed with descriptions under the #Settings comment in the source code
-		- in particular,
-			- when Fix_ends is True, functions in Fix_segment_ends.py will be run, which try to reduce floating and incision of segment end elevations relative to the land surface
-			- when Fix_routing is True, functions in Fix_segment_ends.py will search within a specified radius for nearby SFR cells, and reroute to the nearby cell with the lowest starting elevation. This can help with problems at confluences, where two streams come together and route into eachother before routing downstream.
-			- These two features are run before the main body of fix_w_DEM, which attemps to correct interior reaches within the segment
-			- It's not clear if Fix_ends and Fix_routing are always worth using. Best to run without, and then look over the results (saving the summary PDFs to different file names). And then run with these features turned on to see if there is any improvement.
-		- At the start, Fix_w_DEM saves original copies of Mat1 and Mat2, with "_old" appended to the name. If rerunning, need to restore the old versions first (won't save output otherwise)
-		
-##### 6) run Assign_Layers.py
-	Using the stream bottom elevations, assigns layers to all of the SFR cells
-	If for some reason stream bottoms go below the model bottom, will post a warning, and write all of the violations to output.
-	If lowering the model bottom correct the violations is reasonable, then can rerun the program with Lowerbot=True; this will adjust the model bottom elevations to accomodate the SFR cells
-	Also, there may have been some segments after fix_w_DEM that weren't handled properly. In the Columbia Co. model, many of these were headwaters that were in NHD incorrectly (i.e., connecting across a saddle to the wrong valley, etc.)
-	If these segments are deleted, the segment numbering is no long continuous, and MODFLOW won't run.
-	Assign_Layers will adjust the segment numbering accordingly, to maintain continuity.
-
-	Inputs:
-		- rows x columns text matrix of bottom elevations for all layers (either exported from GW Vistas, or generated seperate from DIS file)
-		- rows x columns text matrix of model top elevations
-		- GWVmat1 from above
-		- GWVmat2 from above
-	Outputs:
-		- MODFLOW SFR package file
-		- revised GWVmat1 file with layers assigned
-		- revised GWVmat2 file with updated segment numbers (if segment renumbering was necessary)
-		- 'SFR_layer_assignments.txt' (summarizes number of reaches assigned to each layer)
-		- 'Model_bottom_adjustments.pdf' PDF images of model bottom before and after adjustments
-		- 'below_bot.csv' - records all stream bottoms that go below the model bottom, with corresponding layer elevation info
-
-
-	
-
-
+* **SFR_flow_symbology.lyr** to plot flow by line thickness
+* **SFR_interactions_symbology.lyr** to plot gaining, loosing, and dry segments by color
+* **SFR_interactions_graduated_symbology.lyr** to plot stream/aquifer interactions as graduated colors (i.e. dark blue for largest gains, gray for dry, red for largest losses)

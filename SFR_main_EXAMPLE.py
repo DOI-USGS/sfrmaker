@@ -3,7 +3,7 @@ __author__ = 'Fienen, Reeves, Leaf - USGS'
 import SFR_classes as SFRc
 import sfr_plots
 
-infile = 'SFR_input_NACP.xml'
+infile = 'EXAMPLE.xml'
 
 SFRdata = SFRc.SFRInput(infile)
 
@@ -13,9 +13,9 @@ SFRops = SFRc.SFROperations(SFRdata)
 
 if SFRdata.preproc:
     print 'Running preprocessing routine'
+
     SFRpre.clip_and_join_attributes(SFRops)
 
-print 'runnning intersect'
 SFRops.intersect()
 
 FragIDdata = SFRc.FragIDPropsAll()
@@ -44,31 +44,14 @@ FragIDdata.return_cellnum_LevelPathID(LevelPathdata)
 
 LevelPathdata.return_cutoffs(FragIDdata, CELLdata, SFRdata)
 
-
-
-'''
-saveme ={'SFRdata':  SFRdata, 'COMIDdata': COMIDdata, 'FragIDdata': FragIDdata,
-              'SFRops': SFRops, 'LevelPathdata' : LevelPathdata, 'CELLdata' : CELLdata}
-
-SFRc.savetmp(saveme)
-
-a = SFRc.loadtmp(['SFRdata', 'CELLdata', 'COMIDdata', 'FragIDdata', 'SFRops', 'LevelPathdata'])
-
-SFRdata = a['SFRdata']
-COMIDdata = a['COMIDdata']
-FragIDdata = a['FragIDdata']
-SFRops = a['SFRops']
-LevelPathdata = a['LevelPathdata']
-CELLdata = a['CELLdata']
-
 # Get streambed elevation information from topographic contours
 SFRpre.intersect_contours(SFRdata) # this needs to be in the example Main!
 ContourElevs = SFRc.ElevsFromContours(SFRdata)
 ContourElevs.get_contour_intersections(FragIDdata, COMIDdata)
 ContourElevs.assign_elevations_to_FragID(FragIDdata, COMIDdata)
-'''
+
 # Get streambed elevation information from DEM
-SFRpre.intersect_DEM(SFRdata)  # this needs to be in the example Main!
+SFRpre.intersect_DEM(SFRdata) # this needs to be in the example Main!
 DEMelevs = SFRc.ElevsFromDEM()
 DEMelevs.DEM_elevs_by_FragID(SFRdata, SFRops)
 DEMelevs.connect_downhill(FragIDdata)
@@ -76,24 +59,10 @@ DEMelevs.connect_downhill(FragIDdata)
 # Comparison plots of streambed elevations (by COMID) for different elevation methods
 SFRp = sfr_plots.plot_elevation_profiles(SFRdata)
 SFRp.read_DIS()
-SFRp.get_comid_plotting_info(FragIDdata, COMIDdata, SFRdata)
+SFRp.get_comid_plotting_info(FragIDdata, COMIDdata)
 SFRp.plot_profiles('Elevation_method_comparison.pdf')
-'''
-saveme ={'COMIDdata' : COMIDdata,
-         'FragIDdata' : FragIDdata,
-         'LevelPathdata' : LevelPathdata,
-         'CELLdata' : CELLdata, 'SFRdata':  SFRdata,}
-SFRc.savetmp(saveme)
 
-
-a = SFRc.loadtmp['SFRdata', 'COMIDdata', 'CELLdata', 'FragIDdata', 'LevelPathdata']
-
-COMIDdata = a['COMIDdata']
-FragIDdata = a['FragIDdata']
-LevelPathdata = a['LevelPathdata']
-CELLdata = a['CELLdata']
-SFRdata = a['SFRdata']
-'''
+# COMMENT
 SFRops.reach_ordering(COMIDdata,
                       FragIDdata,
                       LevelPathdata)
@@ -105,11 +74,11 @@ Segmentdata.divide_at_confluences(LevelPathdata, FragIDdata,
 Segmentdata.accumulate_same_levelpathID(LevelPathdata, COMIDdata,
                                         FragIDdata, SFRdata, CELLdata)
 
-# plot SFR segment profiles
+# Plot SFR segment profiles with final elevations
 SFRp.get_segment_plotting_info(Segmentdata)
 SFRp.plot_profiles('Segment_profiles.pdf')
 
-#make some output
+# Write Ouput
 SFRoutput = SFRc.SFRoutput(SFRdata)
 SFRoutput.write_SFR_tables(Segmentdata)
 SFRops.assign_layers(SFRdata)
