@@ -8,7 +8,7 @@ infile = 'SFR_input.xml'
 SFRdata = SFRc.SFRInput(infile)
 
 SFRops = SFRc.SFROperations(SFRdata)
-'''
+
 if SFRdata.preproc:
     print 'Running preprocessing routine'
     SFRpre = SFRc.SFRpreproc(SFRdata)
@@ -31,11 +31,11 @@ SFRops.make_rivers_table(FragIDdata)
 FragIDdata.populate_elevations(SFRdata)
 
 COMIDdata = SFRc.COMIDPropsAll()
-'''
+
 CELLdata = SFRc.CellPropsAll()
 
 CELLdata.populate_cells(SFRdata)
-'''
+
 LevelPathdata = SFRc.LevelPathIDpropsAll()
 
 COMIDdata.populate_routing(SFRdata, FragIDdata, LevelPathdata, CELLdata)
@@ -47,7 +47,7 @@ FragIDdata.return_cellnum_LevelPathID(LevelPathdata)
 LevelPathdata.return_cutoffs(FragIDdata, CELLdata, SFRdata)
 
 SFRops.reach_ordering(COMIDdata, FragIDdata, LevelPathdata)
-
+'''
 SFRpre.intersect_contours(SFRdata)
 ContourElevs = SFRc.ElevsFromContours(SFRdata)
 ContourElevs.get_contour_intersections(FragIDdata, COMIDdata)
@@ -73,7 +73,7 @@ saveme ={'COMIDdata' : COMIDdata,
          'LevelPathdata' : LevelPathdata,
          'CELLdata' : CELLdata}
 SFRc.savetmp(saveme)
-'''
+
 
 loadme = ['COMIDdata', 'FragIDdata', 'LevelPathdata']
 instuff = SFRc.loadtmp(loadme)
@@ -81,7 +81,7 @@ instuff = SFRc.loadtmp(loadme)
 LevelPathdata = instuff['LevelPathdata']
 FragIDdata = instuff['FragIDdata']
 COMIDdata = instuff['COMIDdata']
-
+'''
 Segmentdata = SFRc.SFRSegmentsAll()
 Segmentdata.divide_at_confluences(LevelPathdata, FragIDdata, COMIDdata, CELLdata, SFRdata)
 Segmentdata.accumulate_same_levelpathID(LevelPathdata, COMIDdata, FragIDdata, SFRdata, CELLdata)
