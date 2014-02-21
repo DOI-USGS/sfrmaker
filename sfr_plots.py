@@ -215,6 +215,7 @@ class plot_elevation_profiles:
                 ax2.legend(handles, labels, fontsize=6)
                 ax3.legend(loc=0)
             pdf.savefig(fig)
+            plt.close(fig)
         pdf.close()
         plt.close('all')
 
