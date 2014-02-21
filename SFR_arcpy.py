@@ -32,7 +32,7 @@ def general_join(target_name, target_lay, joinfield1, joined, joinfield2, keep_c
     # save back down the results
     if arcpy.Exists('tmpjunkus.shp'):
         print 'Removing old version of tmpjunkus.shp'
-        print 'This is a holding temporary file to save down %s' %target_name
+        print u'This is a holding temporary file to save down {0:s}'.format(target_name)
         print 'tmpjunkus.shp will be deleted'
         arcpy.Delete_management('tmpjunkus.shp')
     arcpy.CopyFeatures_management(target_lay, 'tmpjunkus.shp')

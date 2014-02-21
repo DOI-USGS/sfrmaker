@@ -21,8 +21,7 @@ def read_nrow_ncol_vals(infile,NROW,NCOL,DTYPE,i):
             TMP.extend(indat[i].strip().split())
         else:
             contflag = False
-    poo = len(TMP)
-    TMP = np.array(TMP,dtype=DTYPE).reshape(NROW,NCOL)    
+    TMP = np.array(TMP,dtype=DTYPE).reshape(NROW,NCOL)
     return TMP, i
 
 def read_meta_data(infile):
