@@ -1720,10 +1720,10 @@ class SFROperations:
             c = SFRinfo['column'][i]
             STOP = SFRinfo['top_streambed'][i]
             cellbottoms = list(bots[:, r-1, c-1])
+            SFRbot = STOP - SFRdata.bedthick - SFRdata.buff
             for b in range(SFRdata.NLAY):
-                SFRbot = STOP - SFRdata.bedthick - SFRdata.buff
                 if SFRbot < cellbottoms[b]:
-                    if b+1 > SFRdata.NLAY:
+                    if b+1 >= SFRdata.NLAY:
                         print 'Streambottom elevation={0:f}, Model bottom={1:f} at ' \
                               'row {2:d}, column {3:d}, cellnum {4:d}'.format(
                               SFRbot, cellbottoms[-1], r, c, (r-1)*SFRdata.NCOL + c)

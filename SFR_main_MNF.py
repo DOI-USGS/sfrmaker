@@ -14,10 +14,10 @@ SFRops = SFRc.SFROperations(SFRdata)
 if SFRdata.preproc:
     print 'Running preprocessing routine'
     SFRpre.clip_and_join_attributes(SFRops)
-
+'''
 print 'runnning intersect'
 SFRops.intersect()
-
+'''
 FragIDdata = SFRc.FragIDPropsAll()
 
 FragIDdata.populate(SFRdata)
@@ -71,12 +71,12 @@ DEMelevs = SFRc.ElevsFromDEM()
 DEMelevs.DEM_elevs_by_FragID(SFRdata, SFRops)
 DEMelevs.connect_downhill(FragIDdata)
 
-
+'''
 # Comparison plots of streambed elevations (by COMID) for different elevation methods
 SFRp = sfr_plots.plot_elevation_profiles(SFRdata)
 SFRp.read_DIS()
 
-'''
+
 
 
 SFRp.get_comid_plotting_info(FragIDdata, COMIDdata, SFRdata)
@@ -124,10 +124,10 @@ Segmentdata.accumulate_same_levelpathID(LevelPathdata, COMIDdata,
                                         FragIDdata, SFRdata, CELLdata)
 
 # plot SFR segment profiles
-
+'''
 SFRp.get_segment_plotting_info(Segmentdata)
 SFRp.plot_profiles('Segment_profiles.pdf')
-
+'''
 #make some output
 SFRoutput = SFRc.SFRoutput(SFRdata)
 SFRoutput.write_SFR_tables(Segmentdata)

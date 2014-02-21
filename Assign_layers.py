@@ -4,7 +4,7 @@ __author__ = 'Fienen, Reeves, Leaf - USGS'
 import SFR_classes as SFRc
 #import sfr_plots
 
-infile = 'SFR_input_BR.xml'
+infile = 'SFR_input_NACP.xml'
 
 SFRdata = SFRc.SFRInput(infile)
 
