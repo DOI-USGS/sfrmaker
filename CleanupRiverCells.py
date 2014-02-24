@@ -7,7 +7,7 @@ import os, shutil
 # Global Input file for SFR utilities (see also for input instructions)
 import SFR_classes as SFRc
 
-infile = 'SFR_input_NACP.xml'
+infile = 'SFR_input_LPR.xml'
 
 SFRdata = SFRc.SFRInput(infile)
 

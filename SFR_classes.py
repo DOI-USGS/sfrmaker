@@ -786,7 +786,10 @@ class SFRSegmentsAll:
                 else:
                     nextlevelpath = LevelPathdata.allids[clevelpathid].down_levelpathID
                     if nextlevelpath in provSFRseg and nextlevelpath > 0:
-                        nextlabl = subconfl[provSFRseg[nextlevelpath]][0]
+                        try:
+                            nextlabl = subconfl[provSFRseg[nextlevelpath]][0]
+                        except:
+                            nextlabl = 999999
 
                 if nextlevelpath == 0:
                     outseg = 0
