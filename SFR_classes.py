@@ -768,6 +768,8 @@ class SFRSegmentsAll:
         for clevelpathid, iseg in provSFRseg.iteritems():
             for i in range(0, len(subconfl[iseg])):
                 labl = subconfl[iseg][i]
+                if subseg[labl] == 16:
+                    print 'here I am'
                 self.allSegs[subseg[labl]] = SFRSegmentProps()
                 self.allSegs[subseg[labl]].seg_cells = subordered_cells[labl]
                 self.allSegs[subseg[labl]].startreach_xy = CELLdata.centroids[
@@ -889,12 +891,28 @@ class SFRSegmentsAll:
         for seg in self.allSegs.iterkeys():
             outseg = self.allSegs[seg].outseg
             if outseg > 0 and outseg < 999999:
-                self.allSegs[outseg].inseg.append(seg)
+                #if outseg is > 0 and not 999999, check that the first reach
+                #of the outseg is within a tolerance of the last reach of seg
+                #problems occured in NACP model when downstream portions of
+                #esturary streams were cut from the model and tributaries were
+                #mistakenly routed back up to the remaining headwater.  If the
+                #cell that seg is routed to is too far away, set the outseg to zero (boundary).
+                npoutpt = np.array(self.allSegs[seg].endreach_xy)
+                npinpt = np.array(self.allSegs[outseg].startreach_xy)
+                dist = np.sqrt((npoutpt[0]-npinpt[0])**2 + (npoutpt[1]-npinpt[1])**2)
+                tol = CELLdata.allcells[self.allSegs[seg].seg_cells[-1]].sidelength* np.sqrt(2)* 2
+                if dist > tol:
+                    self.allSegs[seg].outseg = 0
+                else:
+                    self.allSegs[outseg].inseg.append(seg)
             self.allSegs[seg].etsw = SFRdata.etsw
             self.allSegs[seg].pptsw = SFRdata.pptsw
             self.allSegs[seg].runoff = SFRdata.runoff
             self.allSegs[seg].roughch = SFRdata.roughch
             self.allSegs[seg].icalc = SFRdata.icalc
+
+
+
 
             # finally shift cases where routing is to 999999 AND cells is on the boundary
             # to make outseg = 0 (outlet)
