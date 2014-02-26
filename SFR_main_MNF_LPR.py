@@ -3,7 +3,7 @@ __author__ = 'Fienen, Reeves, Leaf - USGS'
 import SFR_classes as SFRc
 import sfr_plots
 
-infile = 'SFR_input_NACP.xml'
+infile = 'SFR_input_LPR.xml'
 
 SFRdata = SFRc.SFRInput(infile)
 
@@ -14,10 +14,10 @@ SFRops = SFRc.SFROperations(SFRdata)
 if SFRdata.preproc:
     print 'Running preprocessing routine'
     SFRpre.clip_and_join_attributes(SFRops)
-'''
+
 print 'runnning intersect'
 SFRops.intersect()
-'''
+
 FragIDdata = SFRc.FragIDPropsAll()
 
 FragIDdata.populate(SFRdata)
@@ -56,13 +56,13 @@ FragIDdata = a['FragIDdata']
 SFRops = a['SFRops']
 LevelPathdata = a['LevelPathdata']
 CELLdata = a['CELLdata']
-
+'''
 # Get streambed elevation information from topographic contours
 SFRpre.intersect_contours(SFRdata) # this needs to be in the example Main!
 ContourElevs = SFRc.ElevsFromContours(SFRdata)
 ContourElevs.get_contour_intersections(FragIDdata, COMIDdata)
 ContourElevs.assign_elevations_to_FragID(FragIDdata, COMIDdata)
-'''
+
 
 
 # Get streambed elevation information from DEM
@@ -71,7 +71,7 @@ DEMelevs = SFRc.ElevsFromDEM()
 DEMelevs.DEM_elevs_by_FragID(SFRdata, SFRops)
 DEMelevs.connect_downhill(FragIDdata)
 
-'''
+
 # Comparison plots of streambed elevations (by COMID) for different elevation methods
 SFRp = sfr_plots.plot_elevation_profiles(SFRdata)
 SFRp.read_DIS()
@@ -81,6 +81,7 @@ SFRp.read_DIS()
 
 SFRp.get_comid_plotting_info(FragIDdata, COMIDdata, SFRdata)
 SFRp.plot_profiles('Elevation_method_comparison.pdf')
+'''
 saveme ={'COMIDdata' : COMIDdata,
          'FragIDdata' : FragIDdata,
          'LevelPathdata' : LevelPathdata,
@@ -124,10 +125,10 @@ Segmentdata.accumulate_same_levelpathID(LevelPathdata, COMIDdata,
                                         FragIDdata, SFRdata, CELLdata)
 
 # plot SFR segment profiles
-'''
+
 SFRp.get_segment_plotting_info(Segmentdata)
 SFRp.plot_profiles('Segment_profiles.pdf')
-'''
+
 #make some output
 SFRoutput = SFRc.SFRoutput(SFRdata)
 SFRoutput.write_SFR_tables(Segmentdata)
@@ -136,5 +137,3 @@ SFRoutput.build_SFR_shapefile(Segmentdata)
 SFRops.assign_layers(SFRdata)
 
 print "Done"
-
-i = 2

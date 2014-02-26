@@ -36,7 +36,7 @@ class plot_elevation_profiles:
 
     def get_comid_plotting_info(self, FragIDdata, COMIDdata, SFRdata):
 
-        self.segs2plot = sorted(COMIDdata.allcomids.keys())[::self.SFRdata.profile_plot_interval]
+        self.segs2plot = sorted(FragIDdata.COMID_orderedFragID.keys())[::self.SFRdata.profile_plot_interval]
         self.seg_dist_dict = dict()
         self.L1top_elev_dict = dict()
         self.seg_elev_fromNHD_dict = dict()
@@ -215,6 +215,7 @@ class plot_elevation_profiles:
                 ax2.legend(handles, labels, fontsize=6)
                 ax3.legend(loc=0)
             pdf.savefig(fig)
+            plt.close(fig)
         pdf.close()
         plt.close('all')
 

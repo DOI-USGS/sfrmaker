@@ -159,12 +159,12 @@ class SFRInput:
         #cutoff to check stream length in cell against fraction of cell dimension
         #if the stream length is less than cutoff*side length, the piece of stream is dropped
         try:
-            self.cutoff = float(inpars.finall('.//cutoff')[0].text)
+            self.cutoff = float(inpars.findall('.//cutoff')[0].text)
         except:
             self.cutoff = 0.0
 
         try:
-            self.profile_plot_interval = int(inpars.finall('.//profile_plot_interval')[0].text)
+            self.profile_plot_interval = int(inpars.findall('.//profile_plot_interval')[0].text)
         except:
             self.profile_plot_interval = 20
 
@@ -685,7 +685,7 @@ class SFRSegmentsAll:
         self.levelpaths_segments = dict()
 
     def divide_at_confluences(self, LevelPathdata, FragIDdata, COMIDdata, CELLdata, SFRdata):
-        #establish provisional segment numbers from downstream (decending)
+        #establish provisional segment numbers from downstream (descending)
         #list of levelpathIDs
         provSFRseg = dict()
         for i, lpID in enumerate(LevelPathdata.level_ordered):
@@ -786,7 +786,10 @@ class SFRSegmentsAll:
                 else:
                     nextlevelpath = LevelPathdata.allids[clevelpathid].down_levelpathID
                     if nextlevelpath in provSFRseg and nextlevelpath > 0:
-                        nextlabl = subconfl[provSFRseg[nextlevelpath]][0]
+                        try:
+                            nextlabl = subconfl[provSFRseg[nextlevelpath]][0]
+                        except:
+                            nextlabl = 999999
 
                 if nextlevelpath == 0:
                     outseg = 0
@@ -795,34 +798,33 @@ class SFRSegmentsAll:
                 else:
                     outseg = subseg[nextlabl]
 
+                # now check for circular routing (typically happens when only one reach in a segment)subseg[labl]
+                # this repeats much of the logic of the preceding 10 or so lines
+                if subseg[labl] == outseg:
+                    circular_condition = True
+                    circular_test_counter = 0
+                    circ_thresh = 10  # number of iterations of circular test loop below
+                    while circular_condition and circular_test_counter < circ_thresh:
+                        circular_test_counter += 1
+                        if nextlevelpath > 0:
+                            nextlevelpath = LevelPathdata.allids[nextlevelpath].down_levelpathID
+                            if nextlevelpath in provSFRseg and nextlevelpath > 0:
+                                nextlabl = subconfl[provSFRseg[nextlevelpath]][0]
+                            else:
+                                nextlabl = 999999
+
+                        if nextlevelpath == 0:
+                            outseg = 0
+                        elif nextlabl == 999999:
+                            outseg = 999999
+                        else:
+                            outseg = subseg[nextlabl]
+                        if subseg[labl] != outseg:
+                            circular_condition = False
+                    if circular_condition == True and circular_test_counter >= circ_thresh:
+                        outseg = 999999
+
                 self.allSegs[subseg[labl]].outseg = outseg
-
-                '''
-                if outseg > 0:
-                    if outseg in subconfl:
-                        foundout=False
-                        for dnlabl in subconfl[outseg]:
-                            #see if the beginning of an outsegment matches the end of the current segment
-                            #or if the cell connected to the end of the current segment is the beginning
-                            #of a segment (no overlap, end of current segment is connected to beginning of
-                            #next segment in an adjacent cell)
-                            overlapcell=subordered_cells[dnlabl][0]
-                            if overlapcell==lastcell:
-                                self.allSegs[subseg[labl]].outseg=subseg[dnlabl]
-                                foundout=True
-                            if not foundout:
-                                for nxtdwnstream in set(CELLdata.allcells[lastcell].fromCell):
-                                    if nxtdwnstream == overlapcell:
-                                        self.allSegs[subseg[labl]].outseg=subseg[dnlabl]
-                                        foundout=True
-
-                        if not foundout:
-                            self.allSegs[subseg[labl]].outseg=int(999999)
-                    else:
-                        self.allSegs[subseg[labl]].outseg=int(0)
-                else:
-                    self.allSegs[subseg[labl]].outseg=int(0)
-                '''
 
         # go through the segments and make sure the outseg values are correct, based on being closest to the
         # furthest upstream reach of the assumed outseg. If this is not correct, reassign the outseg
@@ -832,8 +834,6 @@ class SFRSegmentsAll:
 
         for seg in self.allSegs.iterkeys():
             outseg = self.allSegs[seg].outseg
-            if seg == 892:
-                j=2
             if outseg > 0 and outseg < 999999:
                 # find the levelpath ids for current seg and downseg
                 levelpathid_outseg = self.segment_levelpaths[outseg]
@@ -858,8 +858,34 @@ class SFRSegmentsAll:
                         self.levelpaths_segments[levelpathid_outseg][minloc])
                     self.allSegs[seg].outseg = self.levelpaths_segments[levelpathid_outseg][minloc]
         print "\n"
+
+        # make a correction to find outsegs equal to 999999 that should really be 0
+        # in other words, find cells that are on the model boundary
+
+        # first find which cells border the model boundary
+        arcpy.SpatialJoin_analysis(SFRdata.CELLS_DISS,
+                                   SFRdata.MFdomain[:-4] + "_outline.shp",
+                                   "boundary_cells",
+                                   "JOIN_ONE_TO_MANY",
+                                   "KEEP_COMMON",
+                                   "BOUNDARY_TOUCHES")
+        arcpy.MakeFeatureLayer_management("boundary_cells.shp", "boundary_cells")
+
+        SFR_arcpy.general_join("boundary_cells2.shp",
+                               "boundary_cells",
+                               "TARGET_FID",
+                               SFRdata.CELLS_DISS,
+                               "FID")
+
+        # make a list of the cellnums for the border cells
+        self.boundary_cellnums = list()
+        with arcpy.da.SearchCursor("boundary_cells2.shp", 'cellnum') as cells:
+            for cell in cells:
+                self.boundary_cellnums.append(int(cell[0]))
+
         #make a list of what segments are connected to each using outseg information
         #also load in other segment information from SFRdata (XML file information)
+
         for seg in self.allSegs.iterkeys():
             outseg = self.allSegs[seg].outseg
             if outseg > 0 and outseg < 999999:
@@ -869,6 +895,12 @@ class SFRSegmentsAll:
             self.allSegs[seg].runoff = SFRdata.runoff
             self.allSegs[seg].roughch = SFRdata.roughch
             self.allSegs[seg].icalc = SFRdata.icalc
+
+            # finally shift cases where routing is to 999999 AND cells is on the boundary
+            # to make outseg = 0 (outlet)
+            if outseg == 999999:
+                if self.allSegs[seg].seg_cells[-1] in self.boundary_cellnums:
+                    self.allSegs[seg].outseg = 0
 
     def return_segs_levelpaths(self):
         # return a dictionary, keyed by segment, of levelpathIDs
@@ -897,7 +929,7 @@ class SFRSegmentsAll:
         #use flag from SFRdata to determine which elevation to use
         #for the reaches
 
-        elevflag=SFRdata.elevflag
+        elevflag = SFRdata.elevflag
         if elevflag == 'DEM':
             elevattr = 'DEM_elev_mean'
             slopeattr = 'DEM_slope'
@@ -954,7 +986,7 @@ class SFRSegmentsAll:
                         CHK.write("\n")
             '''
             for localcell in self.allSegs[segment].seg_cells:
-                rch = rch + 1        #seg_cells attribute is ordered...
+                rch += 1        #seg_cells attribute is ordered...
                 tt = 0.
                 ww = 0.
                 el = 0.
@@ -969,10 +1001,10 @@ class SFRSegmentsAll:
                     clpID = COMIDdata.allcomids[ccomid].levelpathID
                     if clpID == seglpid:
                         knt = knt+1
-                        tt = tt + FragIDdata.allFragIDs[cFragID].lengthft
-                        ww = ww + COMIDdata.allcomids[ccomid].est_width * FragIDdata.allFragIDs[cFragID].lengthft
-                        el = el + getattr(FragIDdata.allFragIDs[cFragID], elevattr)
-                        ws = ws + getattr(FragIDdata.allFragIDs[cFragID], slopeattr)*FragIDdata.allFragIDs[cFragID].lengthft
+                        tt += FragIDdata.allFragIDs[cFragID].lengthft
+                        ww += COMIDdata.allcomids[ccomid].est_width * FragIDdata.allFragIDs[cFragID].lengthft
+                        el += getattr(FragIDdata.allFragIDs[cFragID], elevattr)
+                        ws += getattr(FragIDdata.allFragIDs[cFragID], slopeattr)*FragIDdata.allFragIDs[cFragID].lengthft
 
                 eff_length = tt
                 eff_slope = 99999.
@@ -1016,6 +1048,9 @@ class SFRpreproc:
         arcpy.Clip_analysis(indat.Flowlines_unclipped,
                             indat.MFdomain,
                             indat.Flowlines)
+
+        print "Make a lines only version of the model domain outline..."
+        arcpy.FeatureToLine_management(indat.MFdomain, indat.MFdomain[:-4] + '_outline.shp')
 
         print "joining PlusflowVAA and Elevslope tables to NHD Flowlines..."
         # copy original tables and import copies
@@ -1667,9 +1702,8 @@ class SFROperations:
 
         BotcorPDF = "Corrected_Bottom_Elevations.pdf"  # PDF file showing original and corrected bottom elevations
         Layerinfo = "SFR_layer_assignments.txt"  # text file documenting how many reaches are in each layer as assigned
-
+        DX, DY, NLAY, NROW, self.NCOL, i = disutil.read_meta_data(self.SFRdata.MFdis)
         print "\nRead in model grid top elevations from {0:s}".format(SFRdata.MFdis)
-        i = SFRdata.NLAY + 1 # ATL: is this always true?
         topdata, i = disutil.read_nrow_ncol_vals(SFRdata.MFdis, SFRdata.NROW, SFRdata.NCOL, np.float, i)
         print "Read in model grid bottom layer elevations from {0:s}".format(SFRdata.MFdis)
         bots = np.zeros([SFRdata.NLAY, SFRdata.NROW, SFRdata.NCOL])
@@ -1689,10 +1723,10 @@ class SFROperations:
             c = SFRinfo['column'][i]
             STOP = SFRinfo['top_streambed'][i]
             cellbottoms = list(bots[:, r-1, c-1])
+            SFRbot = STOP - SFRdata.bedthick - SFRdata.buff
             for b in range(SFRdata.NLAY):
-                SFRbot = STOP - SFRdata.bedthick - SFRdata.buff
                 if SFRbot < cellbottoms[b]:
-                    if b+1 > SFRdata.NLAY:
+                    if b+1 >= SFRdata.NLAY:
                         print 'Streambottom elevation={0:f}, Model bottom={1:f} at ' \
                               'row {2:d}, column {3:d}, cellnum {4:d}'.format(
                               SFRbot, cellbottoms[-1], r, c, (r-1)*SFRdata.NCOL + c)

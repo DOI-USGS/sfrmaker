@@ -10,7 +10,7 @@ Notes on SFR input:
     <!-- computeZonal: 
     True if DEM needs to be sampled for model grid (takes a long time to run);
     False assumes that model grid shp already contains elevations -->
-    <compute_zonal>False</compute_zonal>
+    <compute_zonal>True</compute_zonal>
     <!-- reach_cutoff: 
     minimum reach length to retain following explosion of NHD segments to river cells -->
     <reach_cutoff>1.0</reach_cutoff>
@@ -26,6 +26,7 @@ Notes on SFR input:
     <preproc>False</preproc>
     <!-- flag for TPL file -->
     <tpl>False</tpl>
+    <DEM_z_conversion>30.48</DEM_z_conversion>
 
 </GlobalSettings>
 <InputFiles>
