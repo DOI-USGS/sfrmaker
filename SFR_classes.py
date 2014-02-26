@@ -1718,6 +1718,7 @@ class SFROperations:
         below_bot_adjust = defaultdict()  # list row,column locations where SFR goes below model bottom
         nbelow = 0
         New_Layers = []
+        ofp_bottom_warnings = open('bottom_warnings.dat', 'w')
         for i in range(len(SFRinfo)):
             r = SFRinfo['row'][i]
             c = SFRinfo['column'][i]
@@ -1727,10 +1728,13 @@ class SFROperations:
             for b in range(SFRdata.NLAY):
                 if SFRbot < cellbottoms[b]:
                     if b+1 >= SFRdata.NLAY:
-                        print 'Streambottom elevation={0:f}, Model bottom={1:f} at ' \
+                        warnstring1 = 'Streambottom elevation={0:f}, Model bottom={1:f} at ' \
                               'row {2:d}, column {3:d}, cellnum {4:d}'.format(
                               SFRbot, cellbottoms[-1], r, c, (r-1)*SFRdata.NCOL + c)
-                        print 'Land surface is {0:f}'.format(topdata[r-1, c-1])
+                        warnstring2 = 'Land surface is {0:f}'.format(topdata[r-1, c-1])
+                        ofp_bottom_warnings.write(warnstring1  + warnstring2 + '\n')
+                        print warnstring1
+                        print warnstring2
                         below_bottom.write('{0:f},{1:f},{2:f},{3:d},{4:d}\n'.format(
                             SFRbot, cellbottoms[-1], topdata[r-1, c-1], (r-1)*SFRdata.NCOL+c, SFRinfo['segment'][i]))
                         below_bot_adjust[(r-1, c-1)] = cellbottoms[-1] - SFRbot  # diff between SFR bottom and model bot
@@ -1739,6 +1743,7 @@ class SFROperations:
                 else:
                     New_Layers.append(b+1)
                     break
+        ofp_bottom_warnings.close()
         below_bottom.close()
         New_Layers = np.array(New_Layers)
         bots_orig = bots[-1, :, :].copy()  # keep a copy of non-changed bottom elevations for plotting
