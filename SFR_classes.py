@@ -120,7 +120,6 @@ class SFRInput:
         self.Hc1fact = float(inpars.findall('.//Hc1fact')[0].text)
         self.Hc2fact = float(inpars.findall('.//Hc2fact')[0].text)
         self.stream_depth = float(inpars.findall('.//stream_depth')[0].text)
-        self.minimum_slope = float(inpars.findall('.//minimum_slope')[0].text)
         self.roughness_coeff = float(inpars.findall('.//roughness_coeff')[0].text)
         self.GISSHP = inpars.findall('.//GISSHP')[0].text
         self.elevflag = inpars.findall('.//elevflag')[0].text
@@ -143,6 +142,10 @@ class SFRInput:
             self.eps = float(inpars.findall('.//eps')[0].text)
         except:
             self.eps = 1.0000001e-02  # default value used if not in the input file
+        try:
+            self.min_elev = float(inpars.findall('.//minimum_elevation')[0].text)
+        except:
+            self.min_elev = -999999.0  # default value used if not in the input file
 
         # conversion for vertical length units between NHDPlus v2. (usually cm) and model
         try:

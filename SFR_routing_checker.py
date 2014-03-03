@@ -221,15 +221,15 @@ if make_shapefiles:
     else:
         pshape_all=shapefile.Writer(shapefile.POINT)
         pshape_all.field('SFR_status')
-        pshape_all.field('segment')
-        pshape_all.field('reach')
+        pshape_all.field('segment', 'N')
+        pshape_all.field('reach', 'N')
         for clay in np.arange(nlays):
             print 'making shapefile for layer %d' %(clay+1)
             if make_all_layers:
                 pshape = shapefile.Writer(shapefile.POINT) 
                 pshape.field('SFR_status')
-                pshape.field('segment')
-                pshape.field('reach')
+                pshape.field('segment', 'N')
+                pshape.field('reach', 'N')
             
             inds = np.where(plotting[clay,:,:]>0)
             for cind,r in enumerate(inds[0]):
