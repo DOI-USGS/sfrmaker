@@ -45,6 +45,8 @@ for i in np.arange(len(SFRinfo)):
 maxCloc = dict()
 maxWloc = dict()
 for ccell in rcl:
+    if ccell == (92,82,3):
+        print 'ginger'
     if len(rcl_segreach_lookup[ccell]) > 1:
         #  more than one segment/reach in this cell. let's consolidate!
         #  first read in the important information and then
@@ -66,6 +68,8 @@ for ccell in rcl:
             if csr == maxWloc[ccell]:
                 condprops[maxWloc[ccell]].newk = (condprops[maxWloc[ccell]].thick * totcond)/maxwid
                 condprops[maxWloc[ccell]].newthick = condprops[maxWloc[ccell]].thick
+                condprops[maxWloc[ccell]].newleng = 1.0
+
             else:
                 condprops[csr].newk = SFRdata.bedKmin
                 condprops[csr].newthick = 1.0
