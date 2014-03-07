@@ -2527,6 +2527,8 @@ class SFRoutput:
         if self.indat.tpl:
             SFRoutfile = '_'.join(self.indat.OUT.split('.'))+'.tpl'
         else:
+            #  MNF note ---> commenting this out for now to allow for variable conductance values
+            '''
             # if building an SFR package (after PEST has written it)
             # read in PEST-adjusted value for streambed conductance, SFRoutfile must exist
             if os.path.isfile(SFRoutfile):
@@ -2534,6 +2536,7 @@ class SFRoutput:
                 if len(SFRinputdata) > 0:  #in case the file is empty...
                     Cond = float(SFRinputdata[3].strip().split()[-1])
                     Mat1['bed_K'] = np.ones(len(Mat1))*Cond
+            '''
         nreaches = len(Mat1)
         nseg = np.max(Mat1['segment'])
         ofp = open(SFRoutfile, 'w')
