@@ -120,7 +120,6 @@ class SFRInput:
         self.Hc1fact = float(inpars.findall('.//Hc1fact')[0].text)
         self.Hc2fact = float(inpars.findall('.//Hc2fact')[0].text)
         self.stream_depth = float(inpars.findall('.//stream_depth')[0].text)
-        self.minimum_slope = float(inpars.findall('.//minimum_slope')[0].text)
         self.roughness_coeff = float(inpars.findall('.//roughness_coeff')[0].text)
         self.GISSHP = inpars.findall('.//GISSHP')[0].text
         self.elevflag = inpars.findall('.//elevflag')[0].text
@@ -143,6 +142,10 @@ class SFRInput:
             self.eps = float(inpars.findall('.//eps')[0].text)
         except:
             self.eps = 1.0000001e-02  # default value used if not in the input file
+        try:
+            self.min_elev = float(inpars.findall('.//minimum_elevation')[0].text)
+        except:
+            self.min_elev = -999999.0  # default value used if not in the input file
 
         # conversion for vertical length units between NHDPlus v2. (usually cm) and model
         try:
@@ -2524,6 +2527,8 @@ class SFRoutput:
         if self.indat.tpl:
             SFRoutfile = '_'.join(self.indat.OUT.split('.'))+'.tpl'
         else:
+            #  MNF note ---> commenting this out for now to allow for variable conductance values
+            '''
             # if building an SFR package (after PEST has written it)
             # read in PEST-adjusted value for streambed conductance, SFRoutfile must exist
             if os.path.isfile(SFRoutfile):
@@ -2531,6 +2536,7 @@ class SFRoutput:
                 if len(SFRinputdata) > 0:  #in case the file is empty...
                     Cond = float(SFRinputdata[3].strip().split()[-1])
                     Mat1['bed_K'] = np.ones(len(Mat1))*Cond
+            '''
         nreaches = len(Mat1)
         nseg = np.max(Mat1['segment'])
         ofp = open(SFRoutfile, 'w')
