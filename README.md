@@ -53,11 +53,11 @@ Some input and output are designed for the Groundwater Vistas GUI, but this is n
   
 ## Workflow for building SFR input:
   
-1) **Setup XML input file** (\<InputFiles> section) to point to the above input datasets  
+1) **Setup XML input file** (see EXAMPLE.XML in \<InputFiles> section) to point to the above input datasets  
   
 * check settings in \<GlobalSettings> section; make sure that \<preproc> is set to **True**  
 
-2) Make sure that the "infile" variable in **SFR_main.py** points to the XML input file  
+2) Make sure that the "infile" variable in **SFR_main.py** (see SFR_main_EXAMPLE.py) points to the XML input file  
 
 3) **Run SFR_main.py** by typing *python SFR_main.py* at the command prompt  
 
