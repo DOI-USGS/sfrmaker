@@ -10,16 +10,16 @@ Some input and output are designed for the Groundwater Vistas GUI, but this is n
 
 ## Input requirements:
 
-#####1) NHDPlus v2 hydrography datasets  
- * Available at <http://www.horizon-systems.com/NHDPlus/NHDPlusV2_data.php>
- * Archives needed/relevant files:
- 	* **NHDPlusV21_XX_YY_NHDSnapshot_**.7z**   
- 		* NHDFcode.dbf  
- 		* NHDFlowline.dbf, .prj, .shp, .shx  
- 	* **NHDPlusV21\_XX\_YY\_NHDPlusAttributes\_**.7z**  
- 		* elevslope.dbf  
-		* PlusFlow.dbf  
+1) NHD Plus v2 hydrography datasets:
+	* Available at http://www.horizon-systems.com/NHDPlus/NHDPlusV2_data.php
+	* NHDPlusV21_SR_**_NHDSnapshot_**.7z
+		* NHDFcode.dbf
+		* NHDFlowline.dbf, .prj, .shp, .shx
+	* NHDPlusV21_SR_**_NHDPlusAttributes_**.7z
+		* elevslope.dbf
+		* PlusFlow.dbf
 		* PlusFlowlineVAA.dbf
+
 	* If model domain contains a major divide (i.e. multiple HUC2 hydrologic regions), need to merge relevant NHD datasets (e.g. 04 and 07) prior to running this script
  
 
@@ -39,9 +39,9 @@ Note: If model domain area has multiple DEMs or elevation contour shapefiles, th
 
 Download elevation contour data from the National Map
 		
-  
 
-**Notes:**  
+     
+     Outputs:
 * XX is Drainage Area ID (e.g., GL for Great Lakes) and YY is the Vector Processing Unit (VPU; e.g. 04) in the  above (see NHDPlus website for details).  
 * If model domain encompases multiple Drainage Areas, need to merge NHD datasets prior to running this script (e.g. in ArcMap, using the Merge tool under *ArcToolbox>Data Management>General>Merge*)  
 * The NHDFlowline shapefile should be reprojected into the same coordinate system of the model, if necessary. In ArcMap this can be done under *ArcToolbox>Data Management>Projections and Transformations*.
