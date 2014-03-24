@@ -21,27 +21,9 @@ Some input and output are designed for the Groundwater Vistas GUI, but this is n
 		* PlusFlow.dbf  
 		* PlusFlowlineVAA.dbf
 	* If model domain contains a major divide (i.e. multiple HUC2 hydrologic regions), need to merge relevant NHD datasets (e.g. 04 and 07) prior to running this script
- 
-
-2) DEM and/or topographic contours for area of model domain:
-	* Available from the National Map Viewer and Download Platform: (http://viewer.nationalmap.gov/viewer/)
-	* In "Overlays" tab, select "Elevation Availability" to view available DEM resolutions
-	* click "Download Data" link in upper right to download DEM(s)
-	* selected "elevation" and/or "contours" to download
-	
-	* Internal WIWSC source for DEMs in Wisconsin: 		\\igsarmewfsapa\GISData\BaseData\Wisconsin\Statewide\Elevation\NED_2013_10m\NED_10m_DEM_WI_UP.gdb
-
-Note: If model domain area has multiple DEMs or elevation contour shapefiles, they need to be merged prior to setting up SFR.
-
-3) Model grid information:
-	* polygon shapefile export of model grid
-	* discretization file for model
-
-Download elevation contour data from the National Map
-		
-  
 
 **Notes:**  
+
 * XX is Drainage Area ID (e.g., GL for Great Lakes) and YY is the Vector Processing Unit (VPU; e.g. 04) in the  above (see NHDPlus website for details).  
 * If model domain encompases multiple Drainage Areas, need to merge NHD datasets prior to running this script (e.g. in ArcMap, using the Merge tool under *ArcToolbox>Data Management>General>Merge*)  
 * The NHDFlowline shapefile should be reprojected into the same coordinate system of the model, if necessary. In ArcMap this can be done under *ArcToolbox>Data Management>Projections and Transformations*.
@@ -53,7 +35,8 @@ Download elevation contour data from the National Map
 	* click "Download Data" link in upper right to download DEM(s)  
 	* select "elevation" and/or "contours" to download  
 * Internal WIWSC source for DEMs in Wisconsin:  
-  `\\igsarmewfsapa\GISData\BaseData\Wisconsin\Statewide\Elevation\NED_2013_10m\NED_10m_DEM_WI_UP.gdb`
+  `\\igsarmewfsapa\GISData\BaseData\Wisconsin\Statewide\Elevation\NED_2013_10m\NED_10m_DEM_WI_UP.gdb`  
+  
 **Notes:**  
 
 * If model domain area has multiple DEMs or elevation contour shapefiles, they need to be merged prior to setting up SFR. The merged DEM should be in the same coordinate system as the model.
@@ -65,8 +48,10 @@ Download elevation contour data from the National Map
 ## Outputs:
 * SFR package file
 * Text file table with reach information (r,c,l,elevation, width, slope, etc.) 
-* Text file table with segment/routing data (e.g. icalc, outseg, iupseg, etc.)
-## Workflow:
+* Text file table with segment/routing data (e.g. icalc, outseg, iupseg, etc.)  
+  
+  
+## Workflow for building SFR input:
   
 1) **Setup XML input file** (\<InputFiles> section) to point to the above input datasets  
   
@@ -94,7 +79,8 @@ SFR_routing_checker.py can be run independently of the MAIN program to visualize
 
 #####Visualizing streamflow and aquifer interactions  
 Edit the plot_SFR_flows.py example. Requires a MODFLOW DIS file, an "exploded" stream linework file that has stream fragments by model cell number (i.e. \<intersect> in the XML input file, or similar), and an SFR package output file (i.e. "*streamflow.dat"). Produces a shapefile of the same name as the SFR output file.
-To view in Arc, after importing, under Properties>Symbology, click Import and choose:
+To view in Arc, after importing, under Properties>Symbology, click Import and choose:  
+
 * **SFR_flow_symbology.lyr** to plot flow by line thickness
 * **SFR_interactions_symbology.lyr** to plot gaining, loosing, and dry segments by color
 * **SFR_interactions_graduated_symbology.lyr** to plot stream/aquifer interactions as graduated colors (i.e. dark blue for largest gains, gray for dry, red for largest losses)
