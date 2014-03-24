@@ -42,7 +42,7 @@ def general_join(target_name, target_lay, joinfield1, joined, joinfield2, keep_c
     arcpy.Rename_management('tmpjunkus.shp',target_name)
 
 
-def compute_zonal(nrows, ncolumns, delxy, z_conversion_factor, MFgrid, DEM):
+def compute_zonal(nrows, ncolumns, delxy, z_conversion_factor, MFgrid, DEM, custom_outfile=None):
 
     # Settings
     output_path = MFgrid.split('\\')[:1]
@@ -71,4 +71,8 @@ def compute_zonal(nrows, ncolumns, delxy, z_conversion_factor, MFgrid, DEM):
 
     print "joining elevations back to model grid cells..."
     arcpy.MakeFeatureLayer_management(MFgrid, "MFgrid")
-    general_join(os.path.join(output_path, MFgrid[:-4]+'_elevs.shp'), "MFgrid", "node", os.path.join(output_path, "demzstats.dbf"), "VALUE", True)
+    if custom_outfile:
+        outputshapefile = os.path.join(output_path, MFgrid[:-4] + '_' + DEM + '.shp')
+    else:
+        outputshapefile = os.path.join(output_path, MFgrid[:-4]+'_elevs.shp')
+    general_join(outputshapefile, "MFgrid", "node", os.path.join(output_path, "demzstats.dbf"), "VALUE", True)

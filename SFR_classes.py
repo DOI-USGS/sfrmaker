@@ -771,8 +771,6 @@ class SFRSegmentsAll:
         for clevelpathid, iseg in provSFRseg.iteritems():
             for i in range(0, len(subconfl[iseg])):
                 labl = subconfl[iseg][i]
-                if subseg[labl] == 16:
-                    print 'here I am'
                 self.allSegs[subseg[labl]] = SFRSegmentProps()
                 self.allSegs[subseg[labl]].seg_cells = subordered_cells[labl]
                 self.allSegs[subseg[labl]].startreach_xy = CELLdata.centroids[
@@ -1516,7 +1514,7 @@ class SFROperations:
                     print 'both ends are cut off for comid {0:d}\n'.format(comid)
                     ofp.write('both ends are cut off for comid {0:d}\n'.format(comid))
                     print 'need to fix it manually'
-        del intersects, stream, clip, clippedstream
+        del intersects, stream
         if manual_intervention:
             ofp.write('#' * 16 + '\n')
             ofp.close()
@@ -1771,12 +1769,12 @@ class SFROperations:
 
         # create a new array of bottom elevations with dimensions like topdata
         if SFRdata.Lowerbot:
-            print "\n\nAdjusting model bottom to accomdate SFR cells that were below bottom"
+            print "\n\nAdjusting model bottom to accommodate SFR cells that were below bottom"
             print "see {0:s}\n".format(BotcorPDF)
             for r in range(SFRdata.NROW):
                 for c in range(SFRdata.NCOL):
                     if (r, c) in below_bot_adjust.keys():
-                        bots[r, c] -= below_bot_adjust[(r, c)]
+                        bots[-1, r, c] -= below_bot_adjust[(r, c)]
 
             outarray = 'SFR_Adjusted_bottom_layer.dat'
 
