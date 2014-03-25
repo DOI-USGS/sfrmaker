@@ -39,7 +39,8 @@ Some input and output are designed for the Groundwater Vistas GUI, but this is n
   
 **Notes:**  
 
-* If model domain area has multiple DEMs or elevation contour shapefiles, they need to be merged prior to setting up SFR. The merged DEM should be in the same coordinate system as the model.
+* If model domain area has multiple DEMs or elevation contour shapefiles, they need to be merged prior to setting up SFR. The merged DEM should be in the same coordinate system as the model.  
+
 #####3) Model grid information
 * polygon shapefile export of model grid (in same coordinate system as Flowlines and DEM)
 * polygon shapefile of model domain (can be created by dissolving the grid shapefile using *Geoprocessing>dissolve* in the ArcToolbox)
