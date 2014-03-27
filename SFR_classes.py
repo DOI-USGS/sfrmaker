@@ -171,6 +171,11 @@ class SFRInput:
         except:
             self.profile_plot_interval = 20
 
+        try:
+            self.elev_comp = inpars.findall('.//Compare_elevation_methods')[0].text
+        except:
+            self.elev_comp = False
+
         #read the Fcode-Fstring table and save it into a dictionary, Fstring
         descrips = arcpy.SearchCursor(self.FTab)
         self.Fstring = dict()

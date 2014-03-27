@@ -45,16 +45,18 @@ FragIDdata.return_cellnum_LevelPathID(LevelPathdata)
 LevelPathdata.return_cutoffs(FragIDdata, CELLdata, SFRdata)
 
 # Get streambed elevation information from topographic contours
-SFRpre.intersect_contours(SFRdata) # this needs to be in the example Main!
-ContourElevs = SFRc.ElevsFromContours(SFRdata)
-ContourElevs.get_contour_intersections(FragIDdata, COMIDdata)
-ContourElevs.assign_elevations_to_FragID(FragIDdata, COMIDdata)
+if SFRdata.elevflag == 'elevation_contours' or SFRdata.elev_comp:
+    SFRpre.intersect_contours(SFRdata) # this needs to be in the example Main!
+    ContourElevs = SFRc.ElevsFromContours(SFRdata)
+    ContourElevs.get_contour_intersections(FragIDdata, COMIDdata)
+    ContourElevs.assign_elevations_to_FragID(FragIDdata, COMIDdata)
 
 # Get streambed elevation information from DEM
-SFRpre.intersect_DEM(SFRdata) # this needs to be in the example Main!
-DEMelevs = SFRc.ElevsFromDEM()
-DEMelevs.DEM_elevs_by_FragID(SFRdata, SFRops)
-DEMelevs.connect_downhill(FragIDdata)
+if SFRdata.elevflag == 'smoothed_DEM' or SFRdata.elev_comp:
+    SFRpre.intersect_DEM(SFRdata) # this needs to be in the example Main!
+    DEMelevs = SFRc.ElevsFromDEM()
+    DEMelevs.DEM_elevs_by_FragID(SFRdata, SFRops)
+    DEMelevs.connect_downhill(FragIDdata)
 
 # Comparison plots of streambed elevations (by COMID) for different elevation methods
 SFRp = sfr_plots.plot_elevation_profiles(SFRdata)

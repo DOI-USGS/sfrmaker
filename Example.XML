@@ -30,6 +30,10 @@ Notes on SFR input:
     a flag for choosing the streambed elevation source
     options: (NHDPlus, elevation_contours, smoothed_DEM) -->
     <elevflag>elevation_contours</elevflag>
+    <!-- Compare_elevation_methods:
+    Include other elevation methods in comparison plots, beside what is selected for elevflag
+    (requires both DEMs and Topographic contours for input-->
+    <Compare_elevation_methods>False</Compare_elevation_methods>
 </GlobalSettings>
 <InputFiles>
     <!-- MFgrid: polygon shapefile export of grid from Groundwater Vistas -->
@@ -54,7 +58,8 @@ Notes on SFR input:
     <!-- FTab: from NHDPlus -->
     <FTab>FCodes.dbf</FTab>  
     <!-- ELEVcontours: from National Map -->
-    <ELEVcontours>D:\ATLData\BadRiver\BCs\elevation_from_contours\contours_NAD27_wsp_ft.shp</ELEVcontours>    
+    <ELEVcontours>D:\ATLData\BadRiver\BCs\elevation_from_contours\contours_NAD27_wsp_ft.shp</ELEVcontours>
+
 </InputFiles>
 
 <IntermediateFiles>
