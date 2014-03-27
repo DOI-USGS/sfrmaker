@@ -13,7 +13,9 @@ C:\ArcGIS\Desktop10.1\arcpy
 C:\ArcGIS\Desktop10.1\bin64  
 C:\ArcGIS\Desktop10.1\ArcToolbox\Script
 ```
-Note: The second line may be "bin" for 32 bit or "bin64" for 64 bit
+Notes:  
+The second line may be "bin" for 32 bit or "bin64" for 64 bit.
+If you are using ArcMap 10.0 or 10.2, "Desktop10.1" in the above path needs to be modified accordingly.
 
 2) Place this file in your python path where all your site-packages are installed. For example, for users of the Enthought Canopy Distribution, the file would need to be placed at:
 `C:\Users\<username>\AppData\Local\Enthought\Canopy\User\Lib\site-packages\`
