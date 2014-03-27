@@ -2676,7 +2676,7 @@ class InputFileMissing(Exception):
     def __init__(self, infile):
         self.infile = infile
     def __str__(self):
-        return('\n\nCould not open or parse input file {0}\n'.format(self.infile))
+        return('\n\nCould not open or parse input file {0}.\nCheck for errors in XML formatting.'.format(self.infile))
 
 class BadElevChoice(Exception):
     def __init__(self, choice):
