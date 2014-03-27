@@ -2450,6 +2450,7 @@ class ElevsFromDEM:
         print "\n"
         self.ofp.close()
 
+
 class SFRoutput:
     """
     Class with methods to write the output both for external processors (e.g. GWV)

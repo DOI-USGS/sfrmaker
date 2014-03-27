@@ -7,10 +7,6 @@ Notes on SFR input:
     Put in paths to input/output files as-is (i.e. no double \\), surrounded by single quotes
 -->
 <GlobalSettings>
-    <!-- computeZonal: 
-    True if DEM needs to be sampled for model grid (takes a long time to run);
-    False assumes that model grid shp already contains elevations -->
-    <compute_zonal>False</compute_zonal>
     <!-- reach_cutoff: 
     minimum reach length to retain following explosion of NHD segments to river cells -->
     <reach_cutoff>1.0</reach_cutoff>
@@ -18,7 +14,9 @@ Notes on SFR input:
     elevation difference to assign same value to all cells
     so that check does not get messed up by rounding floats -->
     <eps>1.0e-02</eps>
-
+    <!-- DEM_z_conversion:
+    multiplier to convert DEM units to ft. (default is 1.0) -->
+    <DEM_z_conversion>1.0</DEM_z_conversion>
     <!-- rfact:
     a factor within which start(x,y) and end(x,y) can be found -->
     <rfact>0.95</rfact>
