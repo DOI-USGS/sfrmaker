@@ -172,7 +172,8 @@ class SFRInput:
             self.profile_plot_interval = 20
 
         try:
-            self.elev_comp = inpars.findall('.//Compare_elevation_methods')[0].text
+            self.elev_comp = self.tf2flag(inpars.findall('.//Compare_elevation_methods')[0].text)
+
         except:
             self.elev_comp = False
 
@@ -1053,6 +1054,7 @@ class SFRSegmentsAll:
 
 
         #CHK.close()
+
 
 class SFRpreproc:
     def __init__(self, SFRdata):
@@ -2042,6 +2044,7 @@ class ElevsFromContours:
 
                     self.elevs_edited.append(FragID)
         '''
+
 
     def assign_elevations_to_FragID(self, FragIDdata, COMIDdata):
 
