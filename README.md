@@ -57,7 +57,7 @@ If you are using ArcMap 10.0 or 10.2, "Desktop10.1" in the above path needs to b
 
 #####3) Model grid information
 * polygon shapefile export of model grid (in same coordinate system as Flowlines and DEM)
-* polygon shapefile of model domain (can be created by dissolving the grid shapefile using *Geoprocessing>dissolve* in the ArcToolbox)
+* polygon shapefile of model domain (can be created by dissolving the grid shapefile using *Geoprocessing>dissolve* in the ArcToolbox). **Note:** this polygon (it must be a shapefile polygon, not a line) defines the area where streams are represented by SFR within the model. If SFR in only a subset (i.e. nearfield) area of the model is desired, then this polygon is not the same as the model boundary.
 * discretization file for model
   
 ## Outputs:
@@ -71,8 +71,9 @@ If you are using ArcMap 10.0 or 10.2, "Desktop10.1" in the above path needs to b
 1) **Setup XML input file** (see EXAMPLE.XML in \<InputFiles> section) to point to the above input datasets  
   
 * check settings in \<GlobalSettings> section; make sure that \<preproc> is set to **True**  
+* select an elevation method under \<elevflag
 
-2) Make sure that the "infile" variable in **SFR_main.py** (see SFR_main_EXAMPLE.py) points to the XML input file  
+2) Make sure that the "infile" variable in **SFR_main.py** (see SFR_main_EXAMPLE.py) points to the XML input file. Also make sure that the calls to classes are entered correctly.
 
 3) **Run SFR_main.py** by typing *python SFR_main.py* at the command prompt  
 
