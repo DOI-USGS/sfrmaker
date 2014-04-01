@@ -1635,7 +1635,7 @@ class SFROperations:
                     orderedFragID.append(end_has_start[orderedFragID[i-1]])
                 except KeyError:
                     raise(MissingFragID('end_has_start', orderedFragID[i-1], FragIDdata.allFragIDs[orderedFragID[i-1]].comid))
-                
+
             if orderedFragID[-1] != endingFragID[0]:       #  don't repeat the last entry FragID...
                 orderedFragID.append(endingFragID[0])
             #total length read through lengthkm didn't always match up

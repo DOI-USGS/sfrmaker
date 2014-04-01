@@ -61,7 +61,7 @@ if SFRdata.elevflag == 'smoothed_DEM' or SFRdata.elev_comp:
 # Comparison plots of streambed elevations (by COMID) for different elevation methods
 SFRp = sfr_plots.plot_elevation_profiles(SFRdata)
 SFRp.read_DIS()
-SFRp.get_comid_plotting_info(FragIDdata, COMIDdata)
+SFRp.get_comid_plotting_info(FragIDdata, COMIDdata, SFRdata)
 SFRp.plot_profiles('Elevation_method_comparison.pdf')
 
 # COMMENT
