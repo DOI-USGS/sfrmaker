@@ -57,7 +57,7 @@ If you are using ArcMap 10.0 or 10.2, "Desktop10.1" in the above path needs to b
 
 #####3) Model grid information
 * polygon shapefile export of model grid (in same coordinate system as Flowlines and DEM)
-* polygon shapefile of model domain (can be created by dissolving the grid shapefile using *Geoprocessing>dissolve* in the ArcToolbox). Note: this polygon (it must be a shapefile polygon, not a line) defines the area where streams are represented by SFR within the model. If SFR in only a subset (i.e. nearfield) area of the model is desired, then this polygon is not the same as the model boundary.
+* polygon shapefile of model domain (can be created by dissolving the grid shapefile using *Geoprocessing>dissolve* in the ArcToolbox). **Note:** this polygon (it must be a shapefile polygon, not a line) defines the area where streams are represented by SFR within the model. If SFR in only a subset (i.e. nearfield) area of the model is desired, then this polygon is not the same as the model boundary.
 * discretization file for model
   
 ## Outputs:
