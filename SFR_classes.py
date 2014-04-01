@@ -1423,8 +1423,9 @@ class SFROperations:
         merge the NHDplus information with the model grid
         this was originally the intersect.py script
         """
-        # bring data in as layers
-        #set workspace
+        # check to make sure that preprocessing has been run
+        if not os.path.isfile(self.SFRdata.intersect):
+            raise NoPreProcessing
 
 
         #convert to layers
@@ -1630,7 +1631,11 @@ class SFROperations:
             orderedFragID = []
             orderedFragID.append(startingFragID[0])
             for i in range(1, len(end_has_start)):
-                orderedFragID.append(end_has_start[orderedFragID[i-1]])
+                try:
+                    orderedFragID.append(end_has_start[orderedFragID[i-1]])
+                except KeyError:
+                    raise(MissingFragID('end_has_start', orderedFragID[i-1], FragIDdata.allFragIDs[orderedFragID[i-1]].comid))
+                
             if orderedFragID[-1] != endingFragID[0]:       #  don't repeat the last entry FragID...
                 orderedFragID.append(endingFragID[0])
             #total length read through lengthkm didn't always match up
@@ -2686,8 +2691,25 @@ class InputFileMissing(Exception):
     def __str__(self):
         return('\n\nCould not open or parse input file {0}.\nCheck for errors in XML formatting.'.format(self.infile))
 
+class NoPreProcessing(Exception):
+    def __init__(self, infile):
+        self.infile = infile
+    def __str__(self):
+        return('\n\nCannot find intermediate (output) files from pre-processing routine. '
+               'Make sure that <preproc> is set to True in input XML file and try again.')
+
 class BadElevChoice(Exception):
     def __init__(self, choice):
         self.choice = choice
     def __str__(self):
         return('\n\nElevation Choice in XML is not allowable {0}\n'.format(self.choice))
+
+class MissingFragID(Exception):
+    def __init__(self, container, FragID, COMID):
+        self.container = container
+        self.FragID = FragID
+        self.COMID = COMID
+
+    def __str__(self):
+        return('\n\nFragID {0} not in {1}. This FragID belongs to COMID {2}. '
+               'Check NHD input; this COMID may need to be deleted or edited'.format(self.FragID, self.container, self.COMID))
