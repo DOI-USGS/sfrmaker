@@ -98,7 +98,7 @@ SFR_main_EXAMPLE.py has examples for producing comparison plots of streambed pro
 SFR_routing_checker.py can be run independently of the MAIN program to visualize routing. Simply edit the SFR_routing_checker.XML input file, and run by typing *python SFR_routing_checker.py SFR_routing_checker.XML* at the command prompt. Requires an SFR package file, and a grid spec. (SPC) file (written by GWV). Works best with \<all_layers> set to False. To visualize shapefile output in ArcMap, after importing, under Properties>Symbology choose categories and click "Add all values".
 
 #####Visualizing streamflow and aquifer interactions  
-Edit the plot_SFR_flows.py example. Requires a MODFLOW DIS file, an "exploded" stream linework file that has stream fragments by model cell number (i.e. \<intersect> in the XML input file, or similar), and an SFR package output file (i.e. "*streamflow.dat"). Produces a shapefile of the same name as the SFR output file.
+Edit the plot_SFR_flows.py example. Requires a MODFLOW DIS file, an "exploded" stream linework file that has stream fragments by model cell number (i.e. \<intersect> in the XML input file, or similar), and an SFR package output textfile (i.e. "*streamflow.dat"; this is the same file discussed in the "Obtaining SFR output" section above). Produces a shapefile of the same name as the SFR output file.
 To view in Arc, after importing, under Properties>Symbology, click Import and choose:  
 
 * **SFR_flow_symbology.lyr** to plot flow by line thickness
