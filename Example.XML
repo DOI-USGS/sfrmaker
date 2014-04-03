@@ -116,6 +116,7 @@ is desired
 	<isuzn>1</isuzn>
 	<nsfrsets>30</nsfrsets>
 	<istcb1>50</istcb1>
+	<!-- istcb2: Controls output of SFR package results to text file. -->
 	<istcb2>66</istcb2>
 	<isfropt>1</isfropt>
 	<bedK>5.0</bedK>
