@@ -857,6 +857,8 @@ class SFRSegmentsAll:
                 x, y = self.allSegs[seg].endreach_xy
                 dist = np.sqrt((x-x_out)**2 + (y-y_out)**2)
                 minloc = np.squeeze(np.where(dist == np.min(dist)))
+                if minloc.ndim > 0: # Only apply the following to 1-d or greater arrays
+                    minloc = minloc[0] # If 2 segs have same dist, just chose the first one to prevend error...may need to test this
                 # if closest segment is the current segment, choose next closest (to prevent circular routing!)
                 if self.levelpaths_segments[levelpathid_outseg][minloc] == seg:
                     minloc = np.argsort(dist)[1]
@@ -1028,8 +1030,13 @@ class SFRSegmentsAll:
                         knt = knt+1
                         tt += FragIDdata.allFragIDs[cFragID].lengthft
                         ww += COMIDdata.allcomids[ccomid].est_width * FragIDdata.allFragIDs[cFragID].lengthft
-                        el += getattr(FragIDdata.allFragIDs[cFragID], elevattr)
-                        ws += getattr(FragIDdata.allFragIDs[cFragID], slopeattr)*FragIDdata.allFragIDs[cFragID].lengthft
+                        try: #To handle segments that were not attributed from the DEM --> short-term workaround
+                            el += getattr(FragIDdata.allFragIDs[cFragID], elevattr)
+                            ws += getattr(FragIDdata.allFragIDs[cFragID], slopeattr)*FragIDdata.allFragIDs[cFragID].lengthft
+                        except TypeError:
+                            el += 9999
+                            ws += 9999
+
 
                 eff_length = tt
                 eff_slope = 99999.
