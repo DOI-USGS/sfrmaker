@@ -167,6 +167,11 @@ class SFRInput:
             self.cutoff = 0.0
 
         try:
+            self.distanceTol = float(inpars.findall('.//distanceTol')[0].text)
+        except:
+            self.distanceTol = 3*np.min(self.DX)
+
+        try:
             self.profile_plot_interval = int(inpars.findall('.//profile_plot_interval')[0].text)
         except:
             self.profile_plot_interval = 20
@@ -305,7 +310,7 @@ class LevelPathIDpropsAll:
             for FragID in self.levelpath_FragID[lpID]:
                 reachlength=FragIDdata.allFragIDs[FragID].lengthft
                 cellnum = FragIDdata.allFragIDs[FragID].cellnum
-                if reachlength < CELLdata.allcells[cellnum].sidelength*SFRdata.cutoff:
+                if reachlength < np.min(SFRdata.DX)*SFRdata.cutoff:
                     rmlist.append(FragID)
             #if any were too short remove from levelpath list of FragIDs
             newlist = [FragID for FragID in self.levelpath_FragID[lpID] if FragID not in rmlist]
@@ -857,6 +862,10 @@ class SFRSegmentsAll:
                 x, y = self.allSegs[seg].endreach_xy
                 dist = np.sqrt((x-x_out)**2 + (y-y_out)**2)
                 minloc = np.squeeze(np.where(dist == np.min(dist)))
+                if len(np.atleast_1d(minloc)) == 1:
+                    xxxx = 5
+                if minloc.ndim > 0: # Only apply the following to 1-d or greater arrays
+                    minloc = minloc[0] # If 2 segs have same dist, just chose the first one to prevend error...may need to test this
                 # if closest segment is the current segment, choose next closest (to prevent circular routing!)
                 if self.levelpaths_segments[levelpathid_outseg][minloc] == seg:
                     minloc = np.argsort(dist)[1]
@@ -872,6 +881,8 @@ class SFRSegmentsAll:
         # in other words, find cells that are on the model boundary
 
         # first find which cells border the model boundary
+        if arcpy.Exists('boundary_cells.shp'):
+            arcpy.Delete_management('boundary_cells.shp')
         arcpy.SpatialJoin_analysis(SFRdata.CELLS_DISS,
                                    SFRdata.MFdomain[:-4] + "_outline.shp",
                                    "boundary_cells",
@@ -907,8 +918,8 @@ class SFRSegmentsAll:
                 npoutpt = np.array(self.allSegs[seg].endreach_xy)
                 npinpt = np.array(self.allSegs[outseg].startreach_xy)
                 dist = np.sqrt((npoutpt[0]-npinpt[0])**2 + (npoutpt[1]-npinpt[1])**2)
-                tol = CELLdata.allcells[self.allSegs[seg].seg_cells[-1]].sidelength* np.sqrt(2)* 2
-                if dist > tol:
+         #       tol = CELLdata.allcells[self.allSegs[seg].seg_cells[-1]].sidelength* np.sqrt(2)* 2
+                if dist > SFRdata.distanceTol:
                     self.allSegs[seg].outseg = 0
                 else:
                     self.allSegs[outseg].inseg.append(seg)
@@ -1028,8 +1039,13 @@ class SFRSegmentsAll:
                         knt = knt+1
                         tt += FragIDdata.allFragIDs[cFragID].lengthft
                         ww += COMIDdata.allcomids[ccomid].est_width * FragIDdata.allFragIDs[cFragID].lengthft
-                        el += getattr(FragIDdata.allFragIDs[cFragID], elevattr)
-                        ws += getattr(FragIDdata.allFragIDs[cFragID], slopeattr)*FragIDdata.allFragIDs[cFragID].lengthft
+                        try: #To handle segments that were not attributed from the DEM --> short-term workaround
+                            el += getattr(FragIDdata.allFragIDs[cFragID], elevattr)
+                            ws += getattr(FragIDdata.allFragIDs[cFragID], slopeattr)*FragIDdata.allFragIDs[cFragID].lengthft
+                        except TypeError:
+                            el += 9999
+                            ws += 9999
+
 
                 eff_length = tt
                 eff_slope = 99999.
