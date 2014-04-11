@@ -1799,9 +1799,10 @@ class SFROperations:
         if SFRdata.Lowerbot:
             print "\n\nAdjusting model bottom to accommodate SFR cells that were below bottom"
             print "see {0:s}\n".format(BotcorPDF)
+            below_bot_adjust_tuples = below_bot_adjust.iterkeys()
             for r in range(SFRdata.NROW):
                 for c in range(SFRdata.NCOL):
-                    if (r, c) in below_bot_adjust.keys():
+                    if (r, c) in below_bot_adjust_tuples:
                         bots[-1, r, c] -= below_bot_adjust[(r, c)]
 
             outarray = 'SFR_Adjusted_bottom_layer.dat'
