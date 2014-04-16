@@ -53,8 +53,15 @@ class SFRInput:
 
         inpars = inpardat.getroot()
 
-        self.compute_zonal = self.tf2flag(inpars.findall('.//compute_zonal')[0].text)
+        self.working_dir = inpars.findall('.//working_dir')[0].text
+        if not os.path.exists(self.working_dir):
+            os.makedirs(self.working_dir)
+        # note: compute_zonal is not needed, except for by the DEM_elevs_by_cellnum method,
+        # which has been more or less replaced by DEM_elevs_by_FragID
+        #self.compute_zonal = self.tf2flag(inpars.findall('.//compute_zonal')[0].text)
         self.preproc = self.tf2flag(inpars.findall('.//preproc')[0].text)
+        if not self.preproc:
+            print "Running without pre-processing (preproc set to False)\n"
         self.reach_cutoff = float(inpars.findall('.//reach_cutoff')[0].text)
         self.rfact = float(inpars.findall('.//rfact')[0].text)
         self.Lowerbot = self.tf2flag(inpars.findall('.//Lowerbot')[0].text)
@@ -177,10 +184,17 @@ class SFRInput:
             self.profile_plot_interval = 20
 
         try:
-            self.elev_comp = self.tf2flag(inpars.findall('.//Compare_elevation_methods')[0].text)
+            self.elev_comp = self.tf2flag(inpars.findall('.//compare_elevation_methods')[0].text)
 
         except:
             self.elev_comp = False
+
+        # if no node attribute is specified, will default to "old way," where it looks for a "cellnum" column,
+        # tests if it has unique values, otherwise attempts to make one from row and column columns
+        try:
+            self.node_attribute = inpars.findall('.//node_attribute')[0].text
+        except:
+            self.node_attribute = False
 
         #read the Fcode-Fstring table and save it into a dictionary, Fstring
         descrips = arcpy.SearchCursor(self.FTab)
@@ -192,7 +206,8 @@ class SFRInput:
         del descrips
 
         # initialize the arcpy environment
-        arcpy.env.workspace = os.getcwd()
+        #arcpy.env.workspace = os.getcwd()
+        arcpy.env.workspace = self.working_dir
         arcpy.env.overwriteOutput = True
         arcpy.env.qualifiedFieldNames = False
         # Check out any necessary arcpy licenses
@@ -352,17 +367,24 @@ class CellPropsAll:
         #less than sidelength * the input 'cutoff', also get row and column
         #for each cellnumber
 
-        with arcpy.da.SearchCursor(SFRdata.CELLS, ['SHAPE@XY', 'delx', 'dely', 'CELLNUM', 'row', 'column']) as cells:
 
-            for cell in cells:
-                cellnum = int(cell[3])
-                dx = float(cell[1])
-                dy = float(cell[2])
-                centroid = cell[0]
-                minside = min([dx, dy])
-                row = int(cell[4])
-                column = int(cell[5])
-                self.allcells[cellnum] = CellProps(dx, dy, centroid, minside, row, column)
+        cells = arcpy.da.SearchCursor(SFRdata.CELLS, ['SHAPE@XY', 'delx', 'dely', SFRdata.node_attribute, 'row', 'column'])
+
+        try:
+            cells.fields
+        except RuntimeError:
+            print "At least one of the attribute names in {} is invalid. If grid is structured, the attributes " \
+                  "containing row and column information should be called 'row' and 'column' respectively.".format(SFRdata.MFgrid)
+        for cell in cells:
+            cellnum = int(cell[3])
+            dx = float(cell[1])
+            dy = float(cell[2])
+            centroid = cell[0]
+            minside = min([dx, dy])
+            row = int(cell[4])
+            column = int(cell[5])
+            self.allcells[cellnum] = CellProps(dx, dy, centroid, minside, row, column)
+
 
     def return_centroids(self):
         # returns a dictionary, keyed by cellnum, with cell centroids
@@ -383,11 +405,20 @@ class COMIDPropsAll:
         print ('Reading in routing information from {0:s}'.format(SFRdata.FLOW))
         # open the SFRdata.FLOW file as read-only (using SearchCursor)
 
-        CLIP = np.loadtxt('boundaryClipsRouting.txt', skiprows=1, delimiter=',', dtype=int)
+        CLIP = np.loadtxt(os.path.join(SFRdata.working_dir, 'boundaryClipsRouting.txt'), skiprows=1, delimiter=',', dtype=int)
 
+        if len(CLIP) == 0:
+            print "Warning! boundaryClipsRouting.txt is empty. This implies that there are no NHD streams crossing" \
+                "the boundary of the SFR area specified by ()".format(SFRdata.MFdomain)
+            CLIP = np.zeros((1, 2))
         for ccomid in FragIDdata.allcomids:
             self.allcomids[ccomid] = COMIDprops()
 
+        # if there are no boundary clips to route, skip it (IndexError happens otherwise)
+        knt = 0
+        ncomids = len(FragIDdata.allcomids)
+        nfragIDs = len(FragIDdata.allFragIDs)
+        print "this may take awhile..."
         with arcpy.da.SearchCursor(SFRdata.FLOW, ("FROMCOMID", "TOCOMID")) as cursor:
             for crow in cursor:
                 if int(crow[0]) in FragIDdata.allcomids:
@@ -395,27 +426,34 @@ class COMIDPropsAll:
                         self.allcomids[crow[0]].to_comid.append(999999)
                     else:
                         self.allcomids[crow[0]].to_comid.append(int(crow[1]))
+
                 if int(crow[1]) in FragIDdata.allcomids:
                     if crow[1] in CLIP[:, 1]:
                         self.allcomids[crow[1]].from_comid.append(999999)
                     else:
                         self.allcomids[crow[1]].from_comid.append(int(crow[0]))
+
         del crow, cursor
+
+        print ('\nReading in routing information from {0:s}'.format(SFRdata.PlusflowVAA))
         comidseen = list()
         with arcpy.da.SearchCursor(SFRdata.PlusflowVAA,
                                    ("ComID", "Hydroseq", "uphydroseq", "dnhydroseq",
                                    "ReachCode","StreamOrde","ArbolateSu","Fcode", "levelpathI")) as cursor:
+            knt = 0
             for crow in cursor:
                 comid = int(crow[0])
-                hydrosequence = int(crow[1])
-                uphydrosequence = int(crow[2])
-                downhydrosequence = int(crow[3])
-                reachcode = crow[4]
-                stream_order = int(crow[5])
-                arbolate_sum = float(crow[6])
-                Fcode = int(crow[7])
-                levelpathid = int(crow[8])
+
                 if int(comid) in FragIDdata.allcomids:
+                    # moved these assignments here so they aren't done unless comid in allcomids
+                    hydrosequence = int(crow[1])
+                    uphydrosequence = int(crow[2])
+                    downhydrosequence = int(crow[3])
+                    reachcode = crow[4]
+                    stream_order = int(crow[5])
+                    arbolate_sum = float(crow[6])
+                    Fcode = int(crow[7])
+                    levelpathid = int(crow[8])
                     self.allcomids[crow[0]].hydrosequence = hydrosequence
                     self.allcomids[crow[0]].uphydrosequence = uphydrosequence
                     self.allcomids[crow[0]].downhydrosequence = downhydrosequence
@@ -428,6 +466,8 @@ class COMIDPropsAll:
                     #estimate the width
                     self.allcomids[crow[0]].est_width = widthcorrelation(arbolate_sum)
                     comidseen.append(comid)
+                    knt += 1
+                    print "\r{:d}%".format(100 * knt / ncomids),
 
             # find unique levelpathIDs
             LevelPathdata.level_ordered = sorted(list(set(LevelPathdata.level_ordered)), reverse=True)
@@ -440,6 +480,7 @@ class COMIDPropsAll:
             # assign levelpathID routing
         del crow, cursor
 
+        knt = 0
         with arcpy.da.SearchCursor(SFRdata.PlusflowVAA,
                                    ("ComID", "LevelPathI", "DnLevelPat")) as cursor:
             for crow in cursor:
@@ -449,9 +490,13 @@ class COMIDPropsAll:
                 if levelpathid in LevelPathdata.level_ordered:
                     if downlevelpathid != levelpathid:
                         LevelPathdata.allids[levelpathid].down_levelpathID = downlevelpathid
+                    ### KLUDGE for Missori River
+                    if levelpathid == 550000017:
+                        LevelPathdata.allids[levelpathid].down_levelpathID = downlevelpathid
                     if comid in FragIDdata.comid_FragID:
                         LevelPathdata.levelpath_FragID[levelpathid].extend(FragIDdata.comid_FragID[comid])
-
+                        knt += 1
+                    print "\r{:d}%".format(100 * knt / ncomids),
 
         comid_missing = list(set(FragIDdata.allcomids).difference(comidseen))
         if len(comid_missing) > 0:
@@ -706,13 +751,14 @@ class SFRSegmentsAll:
             provSFRseg[lpID] = i+1
 
         CELLdata.return_centroids()
-
+        LP_check_log = open(os.path.join(SFRdata.working_dir, 'LevelPath_check_log.txt'), 'w')
         print 'finding confluences for provisional SFR segments'
         for clevelpathid in LevelPathdata.level_ordered:
             nextlevelpath = LevelPathdata.allids[clevelpathid].down_levelpathID
             cellist = LevelPathdata.allids[clevelpathid].ordered_cellnums
             if len(cellist) == 0:
                 print 'check levelpathID {0}, no cells are assigned'.format(clevelpathid)
+                LP_check_log.write('check {}, no cells are assigned\n'.format(clevelpathid))
             else:
                 if nextlevelpath == 0:
                     outseg = 0
@@ -746,6 +792,7 @@ class SFRSegmentsAll:
                     self.confluences[outid].append(confl)
                 if confl == -1:
                     print 'check downstream connection for levelpathID {0}'.format(clevelpathid)
+                    LP_check_log.write('check {}, possible issue with downstream connection\n'.format(clevelpathid))
                 #put it in downstream order with no repeats
                 self.confluences[clevelpathid]=[cell for cell in LevelPathdata.allids[clevelpathid].ordered_cellnums \
                     if cell in set(self.confluences[clevelpathid])]
@@ -899,7 +946,8 @@ class SFRSegmentsAll:
 
         # make a list of the cellnums for the border cells
         self.boundary_cellnums = list()
-        with arcpy.da.SearchCursor("boundary_cells2.shp", 'cellnum') as cells:
+        #with arcpy.da.SearchCursor("boundary_cells2.shp", 'cellnum') as cells:
+        with arcpy.da.SearchCursor("boundary_cells2.shp", SFRdata.node_attribute) as cells:
             for cell in cells:
                 self.boundary_cellnums.append(int(cell[0]))
 
@@ -918,7 +966,7 @@ class SFRSegmentsAll:
                 npoutpt = np.array(self.allSegs[seg].endreach_xy)
                 npinpt = np.array(self.allSegs[outseg].startreach_xy)
                 dist = np.sqrt((npoutpt[0]-npinpt[0])**2 + (npoutpt[1]-npinpt[1])**2)
-         #       tol = CELLdata.allcells[self.allSegs[seg].seg_cells[-1]].sidelength* np.sqrt(2)* 2
+                #tol = CELLdata.allcells[self.allSegs[seg].seg_cells[-1]].sidelength* np.sqrt(2)* 2
                 if dist > SFRdata.distanceTol:
                     self.allSegs[seg].outseg = 0
                 else:
@@ -1077,7 +1125,7 @@ class SFRpreproc:
         self.indata = SFRdata
         ts = time.time()
         st_time = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
-        self.ofp = open('SFR_preproc.log', 'w')
+        self.ofp = open(os.path.join(self.indata.working_dir, 'SFR_preproc.log'), 'w')
         self.ofp.write('SFR_preproc log.')
         self.ofp.write('\n' + '#' * 25 + '\nStart Time: {0:s}\n'.format(st_time) + '#' * 25 + '\n')
 
@@ -1120,7 +1168,7 @@ class SFRpreproc:
         fields2keep = [x.lower() for x in fields2keep]
         self.ofp.write('Joining {0:s} with {1:s}: fields kept:\n'.format(indat.Elevslope, indat.Flowlines))
         self.ofp.write('%s\n' % ('\n'.join(fields2keep)))
-        print "\nkeeping: %s fields; deleting the rest" % ('\n'.join(fields2keep))
+        print "\nkeeping: %s fields;\ndeleting the rest:" % (' '.join(fields2keep))
         Join = True  # whether or not PlusflowVAA and Elevslope need to be joined
         for table in ["PlusflowVAA", "Elevslope"]:
             fields2delete = []
@@ -1137,7 +1185,7 @@ class SFRpreproc:
                     continue
                 else:
                     fields2delete.append(field.name)
-                    print field.name
+                    print "\r{} ".format(field.name),
             if len(fields2delete) > 0:
                 arcpy.DeleteField_management(table, fields2delete)
         # Join PlusflowVAA and Elevslope to Flowlines
@@ -1180,7 +1228,8 @@ class SFRpreproc:
         zerocount = 0
         tcount = 0
         for segments in FLtable:
-            if segments.getValue(SFRoperations.joinnames['MaxEl']) == 0:
+            if segments.getValue(SFRoperations.joinnames['MaxEl']) == 0 or \
+                            segments.getValue(SFRoperations.joinnames['MaxEl']) == -9998:
                 print "%d no elevation data" % segments.getValue(SFRoperations.joinnames['comid'])
                 self.ofp.write("%d no elevation data\n" % segments.getValue(SFRoperations.joinnames['comid']))
                 FLtable.deleteRow(segments)
@@ -1195,39 +1244,40 @@ class SFRpreproc:
         # if there is a field with unique values, assume it's ok
         # otherwise delete the column if it already exists
         # NB --> only evaluating the first 100 rows...
-        print 'verifying that there is a "cellnum" field in {0:s}'.format(indat.MFgrid)
-        hascellnum = False
-        cellnumunique = 0
-        MFgridflds = arcpy.ListFields(indat.MFgrid)
-        for cfield in MFgridflds:
-            if cfield.name.lower() == 'cellnum':
-                hascellnum = True
-        if hascellnum:
-            # now check to see that there are unique values in cell
-            cursor = arcpy.SearchCursor(indat.MFgrid)
-            cellvals = []
-            crows = 0
-            for row in cursor:
-                if crows > 100:
-                    break
-                else:
-                    crows += 1
-                    cellvals.append(row.getValue('cellnum'))
-            cellnumunique = len(set(cellvals))
-            del cellvals
-            del row
-            del cursor
+        if not indat.node_attribute:
+            print 'verifying that there is a "cellnum" field in {0:s}'.format(indat.MFgrid)
+            hascellnum = False
+            cellnumunique = 0
+            MFgridflds = arcpy.ListFields(indat.MFgrid)
+            for cfield in MFgridflds:
+                if cfield.name.lower() == 'cellnum':
+                    hascellnum = True
+            if hascellnum:
+                # now check to see that there are unique values in cell
+                cursor = arcpy.SearchCursor(indat.MFgrid)
+                cellvals = []
+                crows = 0
+                for row in cursor:
+                    if crows > 100:
+                        break
+                    else:
+                        crows += 1
+                        cellvals.append(row.getValue('cellnum'))
+                cellnumunique = len(set(cellvals))
+                del cellvals
+                del row
+                del cursor
 
-        if cellnumunique > 1:
-            print '"cellnum" field in place with unique values in {0:s}'.format(indat.MFgrid)
-        else:
-            for fld in arcpy.ListFields(indat.MFgrid):
-                if fld == 'cellnum':
-                    arcpy.DeleteField_management(indat.MFgrid, 'cellnum')
-            arcpy.AddField_management(indat.MFgrid, 'cellnum', 'LONG')
-            calcexpression = '((!row!-1)*{0:d}) + !column!'.format(indat.NCOL)
-            arcpy.CalculateField_management(indat.MFgrid, 'cellnum', calcexpression, 'PYTHON')
-            print 'updated "cellnum" field in {0:s}'.format(indat.MFgrid)
+            if cellnumunique > 1:
+                print '"cellnum" field in place with unique values in {0:s}'.format(indat.MFgrid)
+            else:
+                for fld in arcpy.ListFields(indat.MFgrid):
+                    if fld == 'cellnum':
+                        arcpy.DeleteField_management(indat.MFgrid, 'cellnum')
+                arcpy.AddField_management(indat.MFgrid, 'cellnum', 'LONG')
+                calcexpression = '((!row!-1)*{0:d}) + !column!'.format(indat.NCOL)
+                arcpy.CalculateField_management(indat.MFgrid, 'cellnum', calcexpression, 'PYTHON')
+                print 'updated "cellnum" field in {0:s}'.format(indat.MFgrid)
 
 
 
@@ -1248,12 +1298,13 @@ class SFRpreproc:
  #       arcpy.CalculateField_management(indat.CELLS, "CELLNUM", "!node!", "PYTHON")
 
         print "Dissolving river cells on cell number to isolate unique cells...\n"
-        SFRoperations.getfield(indat.CELLS, "cellnum", "cellnum")
-        arcpy.Dissolve_management(indat.CELLS, indat.CELLS_DISS, SFRoperations.joinnames['cellnum'])
+        #SFRoperations.getfield(indat.CELLS, "cellnum", "cellnum")
+        SFRoperations.getfield(indat.CELLS, indat.node_attribute, indat.node_attribute)
+        arcpy.Dissolve_management(indat.CELLS, indat.CELLS_DISS, SFRoperations.joinnames[indat.node_attribute])
 
         print "Exploding NHD segments to grid cells using Intersect and Multipart to Singlepart..."
-        arcpy.Intersect_analysis([indat.CELLS_DISS, "Flowlines"], "tmp_intersect.shp")
-        arcpy.MultipartToSinglepart_management("tmp_intersect.shp", indat.intersect)
+        arcpy.Intersect_analysis([indat.CELLS_DISS, "Flowlines"], os.path.join(indat.working_dir, "tmp_intersect.shp"))
+        arcpy.MultipartToSinglepart_management(os.path.join(indat.working_dir, "tmp_intersect.shp"), indat.intersect)
         print "\n"
         print "Adding in stream geometry"
         #set up list and dictionary for fields, types, and associated commands
@@ -1280,7 +1331,8 @@ class SFRpreproc:
         self.ofp.write('\n' + 25*'#' + '\nRemoving reaches with lengths less than or equal to %s...\n' % indat.reach_cutoff)
         print "\nRemoving reaches with lengths less than or equal to %s..." % indat.reach_cutoff
         SFRoperations.getfield(indat.intersect, "comid", "comid")
-        SFRoperations.getfield(indat.intersect, "cellnum", "cellnum")
+        #SFRoperations.getfield(indat.intersect, "cellnum", "cellnum")
+        SFRoperations.getfield(indat.intersect, indat.node_attribute, indat.node_attribute)
         SFRoperations.getfield(indat.intersect, "lengthft", "Length")
         table = arcpy.UpdateCursor(indat.intersect)
         count = 0
@@ -1324,7 +1376,7 @@ class SFRpreproc:
 
         # remove cellnums with no elevation information from river_explode
         self.ofp.write('\n' + 25*'#' + '\nRemoving nodes with no elevation information from river_explode\n')
-        print 'Removing nodes with no elevation information from river_explode'
+        print '\nRemoving nodes with no elevation information from river_explode'
         SFRoperations.getfield(indat.CELLS_DISS, "cellnum", "cellnum")
         table = arcpy.UpdateCursor(indat.CELLS_DISS)
         count = 0
@@ -1334,7 +1386,7 @@ class SFRpreproc:
                 self.ofp.write('%d\n' % (cells.getValue(SFRoperations.joinnames["cellnum"])))
                 table.deleteRow(cells)
                 count += 1
-        print "removed %s cells\n" % (count)
+        print "\nremoved %s cells\n" % (count)
         self.ofp.write("removed %s cells" % (count))
 
         print "removing any remaining disconnected reaches..."
@@ -1400,7 +1452,7 @@ class SFRpreproc:
 
         # GIS preprocessing to intersect DEM with river_explode.shp
 
-        print "\nIntersecting NHD flowline fragments with DEM..."
+        print "\n\nIntersecting NHD flowline fragments with DEM..."
         # convert end vertices of river_explode Fragments to points
         arcpy.FeatureVerticesToPoints_management(SFRdata.intersect, SFRdata.intersect_points)
 
@@ -1449,20 +1501,20 @@ class SFROperations:
         arcpy.MakeFeatureLayer_management(self.SFRdata.MFdomain, 'grid_lyr')
         print "selecting streams that cross model grid boundary..."
         arcpy.SelectLayerByLocation_management('nhd_lyr', 'CROSSED_BY_THE_OUTLINE_OF', 'grid_lyr')
-        arcpy.CopyFeatures_management('nhd_lyr', 'intersect.shp')
+        arcpy.CopyFeatures_management('nhd_lyr', os.path.join(self.SFRdata.working_dir, 'intersect.shp'))
 
         #copy the model NHD streams to a temp shapefile, find the ends that match
         #the streams that were clipped by the boundary and update the lengthKm,
         #minsmoothelev, maxsmoothelev in the MODLNHD
-        if arcpy.Exists('temp.shp'):
+        if arcpy.Exists(os.path.join(self.SFRdata.working_dir, 'temp.shp')):
             print 'first removing old version of temp.shp'
-            arcpy.Delete_management('temp.shp')
-        arcpy.CopyFeatures_management(self.SFRdata.Flowlines, 'temp.shp')
+            arcpy.Delete_management(os.path.join(self.SFRdata.working_dir, 'temp.shp'))
+        arcpy.CopyFeatures_management(self.SFRdata.Flowlines, os.path.join(self.SFRdata.working_dir, 'temp.shp'))
 
         #add fields for start, end, and length to the temp and intersect
         #shapefiles  (use LENKM as field name because temp already has LENGHTKM)
         print "adding fields for start, end and length..."
-        shapelist = ('temp.shp', 'intersect.shp')
+        shapelist = (os.path.join(self.SFRdata.working_dir, 'temp.shp'), os.path.join(self.SFRdata.working_dir, 'intersect.shp'))
         for shp in shapelist:
             arcpy.AddField_management(shp, 'STARTX', 'DOUBLE')
             arcpy.AddField_management(shp, 'STARTY', 'DOUBLE')
@@ -1491,8 +1543,9 @@ class SFROperations:
         eps = self.SFRdata.eps
         # make a list of COMIDs that are found for later reference
         comidlist = []
-        intersects = arcpy.SearchCursor('intersect.shp')
+        intersects = arcpy.SearchCursor(os.path.join(self.SFRdata.working_dir, 'intersect.shp'))
         manual_intervention = 0
+        cutoff_comids = []
         for stream in intersects:
             comid = int(stream.COMID)
             query = "COMID = {0:d}".format(comid)
@@ -1530,14 +1583,20 @@ class SFROperations:
                 else:
                     manual_intervention += 1
                     if manual_intervention == 1:
-                        ofp = open('boundary_manual_fix_issues.txt', 'w')
+                        ofp = open(os.path.join(self.SFRdata.working_dir, 'boundary_manual_fix_issues.txt'), 'w')
                         ofp.write('The following COMIDs identify streams that need manual attention.\n')
                         ofp.write('Fix in the files {0:s} and river_explode.shp. '
                                   'Then rerun main script without preprocessing\n'.format(self.SFRdata.Flowlines))
                         ofp.write('#' * 16 + '\n')
-                    print 'both ends are cut off for comid {0:d}\n'.format(comid)
+                    cutoff_comids.append(comid)
                     ofp.write('both ends are cut off for comid {0:d}\n'.format(comid))
-                    print 'need to fix it manually'
+        if len(cutoff_comids) > 0:
+            print 'The following COMIDs have both ends cutoff:'
+            ofp.write('The following COMIDs have both ends cutoff:\n')
+            for comid in cutoff_comids:
+                print comid
+                ofp.write('{}\n'.format(comid))
+
         del intersects, stream
         if manual_intervention:
             ofp.write('#' * 16 + '\n')
@@ -1546,13 +1605,13 @@ class SFROperations:
         # ATL: COMIDs with multiple ends and those with cut off ends
         # (i.e., listed in fix_com_IDs.txt and boundary_manual_fix_issues.txt)
         # appear to be already removed in SFRdata.intersect (i.e. river_explode).
-        # Remove these reatures by clipping SFRdata.Flowlines to SFRdata.intersect
+        # Remove these features by clipping SFRdata.Flowlines to SFRdata.intersect
         # output to SFRdata.NHD (instead of simply copying SFRdata.Flowlines, as below)
         #arcpy.Clip_analysis(self.SFRdata.Flowlines, self.SFRdata.intersect, self.SFRdata.NHD)
 
         #create a new working NHD shapefile incorporating new values just found
 
-        print "Creating new shapefile {0:s}".format(self.SFRdata.NHD)
+        print "\nCreating new shapefile {0:s}".format(self.SFRdata.NHD)
         arcpy.CopyFeatures_management(self.SFRdata.Flowlines, self.SFRdata.NHD)
         intersects = arcpy.UpdateCursor(self.SFRdata.NHD)
         for stream in intersects:
@@ -1565,8 +1624,8 @@ class SFROperations:
         del stream, intersects
 
         # finally, save out the routing information
-        print "Saving routing information to {0:s}".format('boundaryClipsRouting.txt')
-        ofp = open('boundaryClipsRouting.txt', 'w')
+        print "Saving routing information to {0:s}".format(os.path.join(self.SFRdata.working_dir, 'boundaryClipsRouting.txt'))
+        ofp = open(os.path.join(self.SFRdata.working_dir, 'boundaryClipsRouting.txt'), 'w')
         ofp.write("FROMCOMID,TOCOMID\n")
         for currcomid in self.newCOMIDdata:
             if self.newCOMIDdata[currcomid].inout == 'IN':
@@ -1575,17 +1634,17 @@ class SFROperations:
                 ofp.write("{0:d},99999\n".format(self.newCOMIDdata[currcomid].comid))
         ofp.close()
         if manual_intervention:
-            print 'Some manual intervention required:\n' \
-                  'See boundary_manual_fix_issues.txt for details'
+            print '\nSome manual intervention required:\n' \
+                  'See "{}" for details'.format(os.path.join(self.SFRdata.working_dir, 'boundary_manual_fix_issues.txt'))
 
     def make_rivers_table(self, FragIDdata):
         """
         from assign_and_route -->
         """
-        print "Setting up the elevation table --> {0:s}".format(self.SFRdata.rivers_table)
+        print "\nSetting up the elevation table --> {0:s}".format(self.SFRdata.rivers_table)
         if arcpy.Exists(self.SFRdata.rivers_table):
             arcpy.Delete_management(self.SFRdata.rivers_table)
-        arcpy.CreateTable_management(os.getcwd(), self.SFRdata.rivers_table)
+        arcpy.CreateTable_management(self.SFRdata.working_dir, os.path.split(self.SFRdata.rivers_table)[-1])
         arcpy.AddField_management(self.SFRdata.rivers_table, "OLDFragID", "LONG")
         arcpy.AddField_management(self.SFRdata.rivers_table, "CELLNUM", "LONG")
         arcpy.AddField_management(self.SFRdata.rivers_table, "ELEVMAX", "DOUBLE")
@@ -1634,7 +1693,7 @@ class SFROperations:
                     numend += 1
             if numstart != 1 or numend != 1:
                 if not fixcomids_flag:
-                    outfile = open("fix_com_IDs.txt", 'w')
+                    outfile = open(os.path.join(self.SFRdata.working_dir, "fix_com_IDs.txt"), 'w')
                     fixcomids_flag = True
                 outfile.write("numstart =" + str(numstart) + " \n")
                 outfile.write("numend = " + str(numend) + " \n")
@@ -1686,7 +1745,8 @@ class SFROperations:
                 rows.insertRow(row)
         # write out the summary of comids to fix, then close the outfile
         if len(fix_comids_summary) > 0:
-            print 'Some cells have multiple COMIDs entering and/or leaving.\n See file "fix_comids.txt"'
+            print '\nSome cells have multiple COMIDs entering and/or leaving.\nSee file "{}"'.format(
+                os.path.join(self.SFRdata.working_dir, 'fix_com_IDs.txt'))
             outfile.write('#' * 30 + '\nSummary of COMIDS to fix:\n' +
                           'Delete these COMIDs from river_explode.shp, \n' +
                           'then run CleanupRiverCells.py Then rerun main script without preprocessing\n')
@@ -1747,8 +1807,8 @@ class SFROperations:
         from Assign_Layers.py --> uses model layer information to assign SFR cells to proper layers
         """
 
-        BotcorPDF = "Corrected_Bottom_Elevations.pdf"  # PDF file showing original and corrected bottom elevations
-        Layerinfo = "SFR_layer_assignments.txt"  # text file documenting how many reaches are in each layer as assigned
+        BotcorPDF = os.path.join(SFRdata.working_dir, "Corrected_Bottom_Elevations.pdf")  # PDF file showing original and corrected bottom elevations
+        Layerinfo = os.path.join(SFRdata.working_dir, "SFR_layer_assignments.txt")  # text file documenting how many reaches are in each layer as assigned
         DX, DY, NLAY, NROW, self.NCOL, i = disutil.read_meta_data(self.SFRdata.MFdis)
         print "\nRead in model grid top elevations from {0:s}".format(SFRdata.MFdis)
         topdata, i = disutil.read_nrow_ncol_vals(SFRdata.MFdis, SFRdata.NROW, SFRdata.NCOL, np.float, i)
@@ -1760,12 +1820,12 @@ class SFROperations:
         SFRinfo = np.genfromtxt(SFRdata.MAT1, delimiter=',', names=True, dtype=None)
 
         print '\nNow assiging stream cells to appropriate layers...'
-        below_bottom = open('below_bot.csv', 'w')
+        below_bottom = open(os.path.join(SFRdata.working_dir, 'below_bot.csv'), 'w')
         below_bottom.write('SFRbot,ModelBot,Land_surf,cellnum,segment\n')
         below_bot_adjust = defaultdict()  # list row,column locations where SFR goes below model bottom
         nbelow = 0
         New_Layers = []
-        ofp_bottom_warnings = open('bottom_warnings.dat', 'w')
+        ofp_bottom_warnings = open(os.path.join(SFRdata.working_dir, 'bottom_warnings.dat'), 'w')
         for i in range(len(SFRinfo)):
             r = SFRinfo['row'][i]
             c = SFRinfo['column'][i]
@@ -1793,19 +1853,25 @@ class SFROperations:
         ofp_bottom_warnings.close()
         below_bottom.close()
         New_Layers = np.array(New_Layers)
-        bots_orig = bots[-1, :, :].copy()  # keep a copy of non-changed bottom elevations for plotting
+        bots_orig = bots[-1, :, :].copy() # keep a copy of non-changed bottom elevations for plotting
 
         # create a new array of bottom elevations with dimensions like topdata
         if SFRdata.Lowerbot:
             print "\n\nAdjusting model bottom to accommodate SFR cells that were below bottom"
             print "see {0:s}\n".format(BotcorPDF)
-            below_bot_adjust_tuples = below_bot_adjust.iterkeys()
+            below_bot_adjust_tuples = below_bot_adjust.keys()
+            for (r, c) in below_bot_adjust_tuples:
+                bots[-1, r, c] -= below_bot_adjust[(r, c)]
+
+            '''
             for r in range(SFRdata.NROW):
                 for c in range(SFRdata.NCOL):
+                    if r == 142 and c == 63:
+                        j=2
                     if (r, c) in below_bot_adjust_tuples:
                         bots[-1, r, c] -= below_bot_adjust[(r, c)]
-
-            outarray = 'SFR_Adjusted_bottom_layer.dat'
+            '''
+            outarray = os.path.join(SFRdata.working_dir, 'SFR_Adjusted_bottom_layer.dat')
 
             with file(outarray, 'w') as outfile:
                 for slice_2d in bots:
@@ -1814,12 +1880,13 @@ class SFROperations:
 
             # show bottom before and after corrections
             outpdf = PdfPages(BotcorPDF)
-            befaft = ['before', 'after']
-            for i, mat in enumerate([bots_orig, bots[-1, :, :]]):
+            befaft = ['before adjustment', 'after adjustment', 'adjustments']
+            diff = bots_orig - bots[-1, :, :]
+            for i, mat in enumerate([bots_orig, bots[-1, :, :], diff]):
                 plt.figure()
                 plt.imshow(mat)
                 plt.colorbar()
-                plt.title('Bottom of model {0:s} adjustment'.format(befaft[i]))
+                plt.title('Bottom of model {0:s}'.format(befaft[i]))
                 outpdf.savefig()
             outpdf.close()
 
@@ -2637,8 +2704,9 @@ class SFRoutput:
     def build_SFR_shapefile(self, SFRSegsAll):
         print 'building a shapefile of final SFR segments and reaches'
         Mat1 = np.genfromtxt(self.indat.MAT1, delimiter=',', names=True, dtype=None)
-        path = os.getcwd()
-        arcpy.env.workspace = path
+        #path = os.getcwd()
+        #arcpy.env.workspace = path
+        arcpy.env.workspace = self.working_dir
         outshapefile = self.indat.GISSHP
         rivcells = self.indat.CELLS_DISS
         if arcpy.Exists(outshapefile):
@@ -2646,7 +2714,7 @@ class SFRoutput:
 
         #add fields including outseg for checking, note could have multiple
         #lines for the same cellnum.
-        arcpy.CreateFeatureclass_management(path, outshapefile, "POLYGON", rivcells)
+        arcpy.CreateFeatureclass_management(self.working_dir, outshapefile, "POLYGON", rivcells)
         arcpy.AddField_management(outshapefile, "CELLNUM", "LONG")
         arcpy.AddField_management(outshapefile, "ROW", "LONG")
         arcpy.AddField_management(outshapefile, "COLUMN", "LONG")
@@ -2685,6 +2753,82 @@ class SFRoutput:
                     newrows.insertRow(newvals)
 
         del newvals, newrows
+
+    def buildSFRshapefile2(self):
+
+        try:
+            from fiona import collection
+            from shapely.geometry import shape, mapping
+            import pandas as pd
+        except:
+            print "Need these modules for class buildSFRshapefile2: pandas\nfiona\nshapely\n"
+            quit()
+
+        print "reading {0} and {1} into pandas DataFrames...".format(self.indat.MAT1, self.indat.MAT2)
+        Mat1 = pd.read_csv(self.indat.MAT1)
+
+        # calculate column of cellnums for Mat1; index by cellnum
+        Mat1[self.indat.node_attribute] = (Mat1['row'] - 1) * self.indat.NCOL + Mat1['column']
+        Mat1[self.indat.node_attribute] = Mat1[self.indat.node_attribute].astype('int64')
+        Mat1 = Mat1.set_index([Mat1[self.indat.node_attribute], Mat1.index])
+        Mat2 = pd.read_csv(self.indat.MAT2)
+        Mat2.index = Mat2['segment']
+        Mat2upsegs = pd.Series(Mat2['segment'].values, index=Mat2['outseg']).to_dict()
+        print "making shapefile of SFR network using {}...".format(self.indat.CELLS_DISS)
+        knt = 0
+        nSFRcells = len(Mat1)
+        with collection(self.indat.CELLS_DISS, "r") as input:
+            # schema = input.schema.copy()
+            schema = {'geometry': 'Polygon',
+                      'properties': {'cellnum': 'int',
+                                     'row': 'int',
+                                     'column': 'int',
+                                     'layer': 'int',
+                                     'segment': 'int',
+                                     'reach': 'int',
+                                     'outseg': 'int',
+                                     'upseg': 'int',
+                                     'sb_elev': 'float',
+                                     'modeltop': 'float'}}
+
+            with collection(self.indat.GISSHP, "w", "ESRI Shapefile", schema) as output:
+                for node in input:
+                    cellnum = node['properties'][self.indat.node_attribute]
+
+                    # handle cells that were subsequently deleted after creation of input shapefile
+                    try:
+                        Mat1.ix[cellnum]
+
+                    except:
+                        continue
+
+                    print "\r{:d}%".format(100 * knt / nSFRcells),
+                    # iterate over multi-index (allows for multiple reaches in one cell)
+                    for uniquereach in Mat1.ix[cellnum].index:
+                        knt += 1
+                        segment = Mat1.ix[(cellnum, uniquereach), 'segment']
+                        # handle headwaters (no upseg)
+                        try:
+                            Mat2upsegs[segment]
+                        except KeyError:
+                            Mat2upsegs[segment] = 0
+
+                        # shapefiles are incompatible with int64. ARGH!
+                        output.write({'properties': {
+                                         'cellnum': Mat1.ix[(cellnum, uniquereach), 'cellnum'].astype('int32'),
+                                         'row': Mat1.ix[(cellnum, uniquereach), 'row'].astype('int32'),
+                                         'column': Mat1.ix[(cellnum, uniquereach), 'column'].astype('int32'),
+                                         'layer': Mat1.ix[(cellnum, uniquereach), 'layer'].astype('int32'),
+                                         'segment': segment.astype('int32'),
+                                         'reach': Mat1.ix[(cellnum, uniquereach), 'reach'].astype('int32'),
+                                         'outseg': Mat2.ix[segment, 'outseg'].astype('int32'),
+                                         'upseg': np.int32(Mat2upsegs[segment]),
+                                         'sb_elev': Mat1.ix[(cellnum, uniquereach), 'top_streambed'],
+                                         'modeltop': 99.99},
+                                      'geometry': mapping(shape(node['geometry']))})
+
+        # copy over prj file
+        shutil.copyfile("{}.prj".format(self.indat.CELLS_DISS[:-4]), "{}.prj".format(self.indat.GISSHP[:-4]))
 
 
 

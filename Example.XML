@@ -22,7 +22,7 @@ Notes on SFR input:
     <rfact>0.95</rfact>
 	<!-- preproc:
     a factor within which start(x,y) and end(x,y) can be found -->
-    <preproc>False</preproc>
+    <preproc>True</preproc>
     <!-- tpl:
     a flag for writing out a PEST tpl file instead of SFR package file -->
     <tpl>True</tpl>

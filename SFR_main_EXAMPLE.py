@@ -3,7 +3,7 @@ __author__ = 'Fienen, Reeves, Leaf - USGS'
 import SFR_classes as SFRc
 import sfr_plots
 
-infile = 'EXAMPLE.xml'
+infile = 'Example.xml'
 
 SFRdata = SFRc.SFRInput(infile)
 

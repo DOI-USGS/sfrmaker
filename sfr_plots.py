@@ -34,9 +34,11 @@ class plot_elevation_profiles:
                 self.elevs_by_cellnum[cellnum] = self.layer_elevs[0, r, c]
 
 
-    def get_comid_plotting_info(self, FragIDdata, COMIDdata, SFRdata):
+    def get_comid_plotting_info(self, FragIDdata, COMIDdata, SFRdata, interval=False):
 
-        self.segs2plot = sorted(FragIDdata.COMID_orderedFragID.keys())[::self.SFRdata.profile_plot_interval]
+        if not interval:
+            interval = SFRdata.profile_plot_interval
+        self.segs2plot = sorted(FragIDdata.COMID_orderedFragID.keys())[::interval]
         self.seg_dist_dict = dict()
         self.L1top_elev_dict = dict()
         self.seg_elev_fromNHD_dict = dict()
@@ -87,8 +89,10 @@ class plot_elevation_profiles:
             self.L1top_elev_dict[seg] = L1top_top_elevs
 
 
-    def get_segment_plotting_info(self, SFRSegsAll):
+    def get_segment_plotting_info(self, SFRSegsAll, interval=False):
 
+        if not interval:
+            interval = self.SFRdata.profile_plot_interval
         seglist = sorted(list(SFRSegsAll.allSegs.keys()))
         self.segs2plot = seglist[::self.SFRdata.profile_plot_interval]
         self.seg_dist_dict = dict()
@@ -117,6 +121,38 @@ class plot_elevation_profiles:
             self.seg_dist_dict[cseg] = distances
             self.L1top_elev_dict[cseg] = L1top_top_elevs
             self.seg_elevs_dict[cseg] = elevs
+
+    def check4elevation_issues(self, FragIDdata, COMIDdata, SFRdata, SFRSegsAll):
+        print "\n\nChecking for 'floating' streambed elevations..."
+
+        # function to build dictionaries of elevations for each segment/COMID and write to output
+        def output_elevation_comparison(SFRdata, outfile, header):
+            print "Checking by {}".format(header.split(",")[0])
+            ofp = open(os.path.join(SFRdata.working_dir, outfile), 'w')
+            ofp.write(header)
+            for seg in self.segs2plot:
+                tops = self.L1top_elev_dict[seg]
+                streambed_elevs = self.seg_elevs_dict[seg]
+                for i in range(len(tops)):
+                    ofp.write('{0},{1},{2},{3}\n'.format(seg, i+1, tops[i], streambed_elevs[i]))
+
+        # check elevations against model top by COMID
+        outfile = 'streambed_model_top_comparison.txt'
+        header = 'COMID,fragment,streambedtop,modeltop\n'
+        self.get_comid_plotting_info(FragIDdata, COMIDdata, SFRdata, interval=1)
+        if SFRdata.calculated_contour_elevs:
+            self.seg_elevs_dict = self.seg_elev_fromContours_dict
+        if SFRdata.calculated_DEM_elevs:
+            self.seg_elevs_dict = self.seg_elev_fromDEM_dict
+        else:
+            self.seg_elevs_dict = self.seg_elev_fromNHD_dict
+        output_elevation_comparison(SFRdata, outfile, header)
+
+        # check elevations against model top by segment
+        outfile = 'streambed_model_top_comparison.txt'
+        header = 'COMID,fragment,streambedtop,modeltop\n'
+        self.get_segment_plotting_info(SFRSegsAll, interval=1)
+        output_elevation_comparison(SFRdata, outfile, header)
 
 
     def plot_profiles(self, pdffile, **kwargs):
