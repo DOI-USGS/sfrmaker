@@ -56,7 +56,8 @@ If you are using ArcMap 10.0 or 10.2, "Desktop10.1" in the above path needs to b
 * If model domain area has multiple DEMs or elevation contour shapefiles, they need to be merged prior to setting up SFR. The merged DEM should be in the same coordinate system as the model.  
 
 #####3) Model grid information
-* polygon shapefile export of model grid (in same coordinate system as Flowlines and DEM)
+* polygon shapefile export of model grid (in same coordinate system as Flowlines and DEM)  
+* row and column information must be supplied as attributes to the shapefile, named "row" and "column" respectively  
 * polygon shapefile of model domain (can be created by dissolving the grid shapefile using *Geoprocessing>dissolve* in the ArcToolbox). **Note:** this polygon (it must be a shapefile polygon, not a line) defines the area where streams are represented by SFR within the model. If SFR in only a subset (i.e. nearfield) area of the model is desired, then this polygon is not the same as the model boundary.
 * discretization file for model
   
