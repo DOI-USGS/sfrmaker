@@ -72,8 +72,8 @@ class SFRInput:
         self.MFdomain = inpars.findall('.//MFdomain')[0].text
         self.MFdis = inpars.findall('.//MFdis')[0].text
         self.DEM = inpars.findall('.//DEM')[0].text
-        self.intersect = inpars.findall('.//intersect')[0].text
-        self.intersect_points = inpars.findall('.//intersect_points')[0].text
+        self.intersect = self.add_path(inpars.findall('.//intersect')[0].text)
+        self.intersect_points = self.add_path(inpars.findall('.//intersect_points')[0].text)
         self.rivers_table = inpars.findall('.//rivers_table')[0].text
         self.PlusflowVAA = inpars.findall('.//PlusflowVAA')[0].text
         self.Elevslope = inpars.findall('.//Elevslope')[0].text
@@ -81,21 +81,21 @@ class SFRInput:
         self.arcpy_path = inpars.findall('.//arcpy_path')[0].text
         self.FLOW = inpars.findall('.//FLOW')[0].text
         self.FTab = inpars.findall('.//FTab')[0].text
-        self.Flowlines = inpars.findall('.//Flowlines')[0].text
-        self.ELEV = inpars.findall('.//ELEV')[0].text
-        self.CELLS = inpars.findall('.//CELLS')[0].text
-        self.CELLS_DISS = inpars.findall('.//CELLS_DISS')[0].text
-        self.NHD = inpars.findall('.//NHD')[0].text
-        self.OUT = inpars.findall('.//OUT')[0].text
-        self.MAT1 = inpars.findall('.//MAT1')[0].text
-        self.MAT2 = inpars.findall('.//MAT2')[0].text
-        self.WIDTH = inpars.findall('.//WIDTH')[0].text
-        self.MULT = inpars.findall('.//MULT')[0].text
+        self.Flowlines = self.add_path(inpars.findall('.//Flowlines')[0].text)
+        self.ELEV = self.add_path(inpars.findall('.//ELEV')[0].text)
+        self.CELLS = self.add_path(inpars.findall('.//CELLS')[0].text)
+        self.CELLS_DISS = self.add_path(inpars.findall('.//CELLS_DISS')[0].text)
+        self.NHD = self.add_path(inpars.findall('.//NHD')[0].text)
+        self.OUT = self.add_path(inpars.findall('.//OUT')[0].text)
+        self.MAT1 = self.add_path(inpars.findall('.//MAT1')[0].text)
+        self.MAT2 = self.add_path(inpars.findall('.//MAT2')[0].text)
+        self.WIDTH = self.add_path(inpars.findall('.//WIDTH')[0].text)
+        self.MULT = self.add_path(inpars.findall('.//MULT')[0].text)
         self.ELEVcontours = inpars.findall('.//ELEVcontours')[0].text
-        self.Routes = inpars.findall('.//Routes')[0].text
-        self.Contours_intersect = inpars.findall('.//Contours_intersect')[0].text
-        self.Contours_intersect_distances = inpars.findall('.//Contours_intersect_distances')[0].text
-        self.RCH = inpars.findall('.//RCH')[0].text
+        self.Routes = self.add_path(inpars.findall('.//Routes')[0].text)
+        self.Contours_intersect = self.add_path(inpars.findall('.//Contours_intersect')[0].text)
+        self.Contours_intersect_distances = self.add_path(inpars.findall('.//Contours_intersect_distances')[0].text)
+        self.RCH = self.add_path(inpars.findall('.//RCH')[0].text)
         self.nsfrpar = int(inpars.findall('.//nsfrpar')[0].text)
         self.nparseg = int(inpars.findall('.//nparseg')[0].text)
         self.const = float(inpars.findall('.//const')[0].text)
@@ -128,7 +128,7 @@ class SFRInput:
         self.Hc2fact = float(inpars.findall('.//Hc2fact')[0].text)
         self.stream_depth = float(inpars.findall('.//stream_depth')[0].text)
         self.roughness_coeff = float(inpars.findall('.//roughness_coeff')[0].text)
-        self.GISSHP = inpars.findall('.//GISSHP')[0].text
+        self.GISSHP = self.add_path(inpars.findall('.//GISSHP')[0].text)
         self.elevflag = inpars.findall('.//elevflag')[0].text
 
         self.calculated_DEM_elevs = False
@@ -194,7 +194,7 @@ class SFRInput:
         try:
             self.node_attribute = inpars.findall('.//node_attribute')[0].text
         except:
-            self.node_attribute = False
+            self.node_attribute = 'cellnum'
 
         #read the Fcode-Fstring table and save it into a dictionary, Fstring
         descrips = arcpy.SearchCursor(self.FTab)
@@ -219,6 +219,17 @@ class SFRInput:
             return True
         else:
             return False
+
+    def add_path(self, infile):
+
+        # if there is no path in front of the input file, add one
+        if len(os.path.split(infile)[0]) == 0:
+            fullpath = os.path.join(self.working_dir, infile)
+
+        # otherwise, leave the path as is
+        else:
+            fullpath = infile
+        return fullpath
 
 
 class FragIDprops(object):
@@ -1250,7 +1261,7 @@ class SFRpreproc:
             cellnumunique = 0
             MFgridflds = arcpy.ListFields(indat.MFgrid)
             for cfield in MFgridflds:
-                if cfield.name.lower() == 'cellnum':
+                if cfield.name.lower() == indat.node_attribute:
                     hascellnum = True
             if hascellnum:
                 # now check to see that there are unique values in cell
@@ -1262,7 +1273,7 @@ class SFRpreproc:
                         break
                     else:
                         crows += 1
-                        cellvals.append(row.getValue('cellnum'))
+                        cellvals.append(row.getValue(indat.node_attribute))
                 cellnumunique = len(set(cellvals))
                 del cellvals
                 del row
@@ -1272,11 +1283,11 @@ class SFRpreproc:
                 print '"cellnum" field in place with unique values in {0:s}'.format(indat.MFgrid)
             else:
                 for fld in arcpy.ListFields(indat.MFgrid):
-                    if fld == 'cellnum':
-                        arcpy.DeleteField_management(indat.MFgrid, 'cellnum')
-                arcpy.AddField_management(indat.MFgrid, 'cellnum', 'LONG')
+                    if fld == indat.node_attribute:
+                        arcpy.DeleteField_management(indat.MFgrid, indat.node_attribute)
+                arcpy.AddField_management(indat.MFgrid, indat.node_attribute, 'LONG')
                 calcexpression = '((!row!-1)*{0:d}) + !column!'.format(indat.NCOL)
-                arcpy.CalculateField_management(indat.MFgrid, 'cellnum', calcexpression, 'PYTHON')
+                arcpy.CalculateField_management(indat.MFgrid, indat.node_attribute, calcexpression, 'PYTHON')
                 print 'updated "cellnum" field in {0:s}'.format(indat.MFgrid)
 
 
@@ -1339,11 +1350,11 @@ class SFRpreproc:
         for reaches in table:
             if reaches.getValue(SFRoperations.joinnames["Length"]) <= indat.reach_cutoff:
                 print "segment: %d, cell: %s, length: %s" % (reaches.getValue(SFRoperations.joinnames["comid"]),
-                                                            reaches.getValue(SFRoperations.joinnames["cellnum"]),
+                                                            reaches.getValue(SFRoperations.joinnames[indat.node_attribute]),
                                                             reaches.getValue(SFRoperations.joinnames["Length"]))
                 self.ofp.write("segment: %d, cell: %s, length: %s\n"
                           %(reaches.getValue(SFRoperations.joinnames["comid"]),
-                            reaches.getValue(SFRoperations.joinnames["cellnum"]),
+                            reaches.getValue(SFRoperations.joinnames[indat.node_attribute]),
                             reaches.getValue(SFRoperations.joinnames["Length"])))
                 table.deleteRow(reaches)
                 count += 1
@@ -1355,17 +1366,17 @@ class SFRpreproc:
         arcpy.MakeFeatureLayer_management(indat.CELLS_DISS, "river_cells_dissolve")
         arcpy.MakeFeatureLayer_management(indat.intersect, "river_explode")
         arcpy.AddJoin_management("river_cells_dissolve",
-                                 "cellnum",
+                                 indat.node_attribute,
                                  "river_explode",
-                                 "cellnum",
+                                 indat.node_attribute,
                                  "KEEP_ALL")  # this might not work as-in in stand-alone mode
-        SFRoperations.getfield("river_cells_dissolve", "cellnum", "cellnum")
+        SFRoperations.getfield("river_cells_dissolve", indat.node_attribute, indat.node_attribute)
         SFRoperations.getfield("river_cells_dissolve", "maxelevsmo", "maxelevsmo")
         table = arcpy.SearchCursor("river_cells_dissolve")
         nodes2delete = []
         for row in table:
             if row.isNull(SFRoperations.joinnames["maxelevsmo"]):
-                nodes2delete.append(row.getValue(SFRoperations.joinnames["cellnum"]))
+                nodes2delete.append(row.getValue(SFRoperations.joinnames[indat.node_attribute]))
         # this RemoveJoin operation was causing an arcpy error (000800: The value is not a member of | river_explode)
         # and may not be necessary
         #arcpy.RemoveJoin_management("river_cells_dissolve", "river_explode")
@@ -1377,13 +1388,13 @@ class SFRpreproc:
         # remove cellnums with no elevation information from river_explode
         self.ofp.write('\n' + 25*'#' + '\nRemoving nodes with no elevation information from river_explode\n')
         print '\nRemoving nodes with no elevation information from river_explode'
-        SFRoperations.getfield(indat.CELLS_DISS, "cellnum", "cellnum")
+        SFRoperations.getfield(indat.CELLS_DISS, indat.node_attribute, indat.node_attribute)
         table = arcpy.UpdateCursor(indat.CELLS_DISS)
         count = 0
         for cells in table:
-            if cells.getValue(SFRoperations.joinnames["cellnum"]) in nodes2delete:
-                print "%d" % (cells.getValue(SFRoperations.joinnames["cellnum"]))
-                self.ofp.write('%d\n' % (cells.getValue(SFRoperations.joinnames["cellnum"])))
+            if cells.getValue(SFRoperations.joinnames[indat.node_attribute]) in nodes2delete:
+                print "%d" % (cells.getValue(SFRoperations.joinnames[indat.node_attribute]))
+                self.ofp.write('%d\n' % (cells.getValue(SFRoperations.joinnames[indat.node_attribute])))
                 table.deleteRow(cells)
                 count += 1
         print "\nremoved %s cells\n" % (count)
@@ -1391,13 +1402,13 @@ class SFRpreproc:
 
         print "removing any remaining disconnected reaches..."
         self.ofp.write('\n' + 25*'#' + '\nremoving any remaining disconnected reaches...\n')
-        SFRoperations.getfield(indat.intersect, "cellnum", "cellnum")
+        SFRoperations.getfield(indat.intersect, indat.node_attribute, indat.node_attribute)
         table = arcpy.UpdateCursor(indat.intersect)
         count = 0
         for reaches in table:
-            if reaches.getValue(SFRoperations.joinnames["cellnum"]) in nodes2delete:
-                print "%d" % (reaches.getValue(SFRoperations.joinnames["cellnum"]))
-                self.ofp.write('%d\n' % (reaches.getValue(SFRoperations.joinnames["cellnum"])))
+            if reaches.getValue(SFRoperations.joinnames[indat.node_attribute]) in nodes2delete:
+                print "%d" % (reaches.getValue(SFRoperations.joinnames[indat.node_attribute]))
+                self.ofp.write('%d\n' % (reaches.getValue(SFRoperations.joinnames[indat.node_attribute])))
                 table.deleteRow(reaches)
                 count += 1
         if count > 0:
@@ -1646,7 +1657,7 @@ class SFROperations:
             arcpy.Delete_management(self.SFRdata.rivers_table)
         arcpy.CreateTable_management(self.SFRdata.working_dir, os.path.split(self.SFRdata.rivers_table)[-1])
         arcpy.AddField_management(self.SFRdata.rivers_table, "OLDFragID", "LONG")
-        arcpy.AddField_management(self.SFRdata.rivers_table, "CELLNUM", "LONG")
+        arcpy.AddField_management(self.SFRdata.rivers_table, self.SFRdata.node_attribute, "LONG")
         arcpy.AddField_management(self.SFRdata.rivers_table, "ELEVMAX", "DOUBLE")
         arcpy.AddField_management(self.SFRdata.rivers_table, "ELEVAVE", "DOUBLE")
         arcpy.AddField_management(self.SFRdata.rivers_table, "ELEVMIN", "DOUBLE")
@@ -2347,14 +2358,14 @@ class ElevsFromDEM:
             SFR_arcpy.compute_zonal(self.NROW, self.NCOL, self.DX, SFRData.DEM_z_conversion, SFRData.MFgrid, SFRData.DEM)
 
         # reference fields for cellnum and elevation, case-insensitive
-        SFROperations.getfield("MFgrid", "cellnum", "cellnum")
+        SFROperations.getfield("MFgrid", SFRData.node_attribute, SFRData.node_attribute)
         SFROperations.getfield("MFgrid", self.MFgrid_elev_field, self.MFgrid_elev_field.lower())
 
         # get elevations in each stream cell, from grid shapefile table
         MFgridtable = arcpy.SearchCursor(self.MFgrid)
         self.DEM_elevs_by_cellnum = dict()
         for row in MFgridtable:
-            cellnum = row.getValue(SFROperations.joinnames["cellnum"])
+            cellnum = row.getValue(SFROperations.joinnames[SFRData.node_attribute])
             self.DEM_elevs_by_cellnum[cellnum] = row.getValue(SFROperations.joinnames[self.MFgrid_elev_field.lower()])
 
 
@@ -2715,7 +2726,7 @@ class SFRoutput:
         #add fields including outseg for checking, note could have multiple
         #lines for the same cellnum.
         arcpy.CreateFeatureclass_management(self.working_dir, outshapefile, "POLYGON", rivcells)
-        arcpy.AddField_management(outshapefile, "CELLNUM", "LONG")
+        arcpy.AddField_management(outshapefile, self.indat.node_attribute, "LONG")
         arcpy.AddField_management(outshapefile, "ROW", "LONG")
         arcpy.AddField_management(outshapefile, "COLUMN", "LONG")
         arcpy.AddField_management(outshapefile, "LAYER", "LONG")
@@ -2780,7 +2791,7 @@ class SFRoutput:
         with collection(self.indat.CELLS_DISS, "r") as input:
             # schema = input.schema.copy()
             schema = {'geometry': 'Polygon',
-                      'properties': {'cellnum': 'int',
+                      'properties': {self.indat.node_attribute: 'int',
                                      'row': 'int',
                                      'column': 'int',
                                      'layer': 'int',
@@ -2815,7 +2826,7 @@ class SFRoutput:
 
                         # shapefiles are incompatible with int64. ARGH!
                         output.write({'properties': {
-                                         'cellnum': Mat1.ix[(cellnum, uniquereach), 'cellnum'].astype('int32'),
+                                         self.indat.node_attribute: Mat1.ix[(cellnum, uniquereach), self.indat.node_attribute].astype('int32'),
                                          'row': Mat1.ix[(cellnum, uniquereach), 'row'].astype('int32'),
                                          'column': Mat1.ix[(cellnum, uniquereach), 'column'].astype('int32'),
                                          'layer': Mat1.ix[(cellnum, uniquereach), 'layer'].astype('int32'),
