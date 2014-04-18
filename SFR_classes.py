@@ -152,6 +152,10 @@ class SFRInput:
             self.z_conversion = float(inpars.findall('.//z_conversion')[0].text)
         except:
             self.z_conversion = 1.0/(2.54 *12)  # default value used if not in the input file
+        try:
+            self.contour_conversion = float(inpars.findall('.//contour_conversion')[0].text)
+        except:
+            self.z_conversion = 1.0  # default value used if not in the input file
 
         # conversion for vertical length units between DEM and model
         try:
@@ -383,21 +387,25 @@ class COMIDPropsAll:
         print ('Reading in routing information from {0:s}'.format(SFRdata.FLOW))
         # open the SFRdata.FLOW file as read-only (using SearchCursor)
 
+        boundaryIssues = 0
         CLIP = np.loadtxt('boundaryClipsRouting.txt', skiprows=1, delimiter=',', dtype=int)
-
+        if len(CLIP) > 0:
+            boundaryIssues +=1
         for ccomid in FragIDdata.allcomids:
             self.allcomids[ccomid] = COMIDprops()
 
         with arcpy.da.SearchCursor(SFRdata.FLOW, ("FROMCOMID", "TOCOMID")) as cursor:
             for crow in cursor:
                 if int(crow[0]) in FragIDdata.allcomids:
-                    if (crow[0]) in CLIP[:, 0]:
-                        self.allcomids[crow[0]].to_comid.append(999999)
+                    if boundaryIssues > 0:
+                        if (crow[0]) in CLIP[:, 0]:
+                            self.allcomids[crow[0]].to_comid.append(999999)
                     else:
                         self.allcomids[crow[0]].to_comid.append(int(crow[1]))
                 if int(crow[1]) in FragIDdata.allcomids:
-                    if crow[1] in CLIP[:, 1]:
-                        self.allcomids[crow[1]].from_comid.append(999999)
+                    if boundaryIssues > 0:
+                        if crow[1] in CLIP[:, 1]:
+                            self.allcomids[crow[1]].from_comid.append(999999)
                     else:
                         self.allcomids[crow[1]].from_comid.append(int(crow[0]))
         del crow, cursor
@@ -1538,7 +1546,11 @@ class SFROperations:
                     print 'both ends are cut off for comid {0:d}\n'.format(comid)
                     ofp.write('both ends are cut off for comid {0:d}\n'.format(comid))
                     print 'need to fix it manually'
-        del intersects, stream
+        try:
+            del stream
+        except:
+            print 'No Streams cross the boundary of the model'
+        del intersects
         if manual_intervention:
             ofp.write('#' * 16 + '\n')
             ofp.close()
@@ -1861,7 +1873,7 @@ class ElevsFromContours:
         self.comids_with_no_contour_intersects = []
         self.verbose = False # prints interpolation information to screen for debugging/troubleshooting
 
-    def interpolate_elevs(self, FragIDdata, start_fid, end_fid):
+    def interpolate_elevs(self, FragIDdata, start_fid, end_fid, contour_conversion):
         # interpolate max/min elevation values for each FragID between start and end fids
 
         # first setup indexing
@@ -1875,13 +1887,16 @@ class ElevsFromContours:
         if end_fid == FragIDdata.COMID_orderedFragID[self.current_comid][-1]:
             # downstream contour was below current comid
             dist += self.downstream_dist
-            FragIDdata.allFragIDs[end_fid].interpolated_contour_elev_min = self.end_elev + self.slope * dist
+            FragIDdata.allFragIDs[end_fid].interpolated_contour_elev_min = \
+                (self.end_elev + self.slope * dist) * contour_conversion
             dist += FragIDdata.allFragIDs[end_fid].lengthft
-            FragIDdata.allFragIDs[end_fid].interpolated_contour_elev_max = self.end_elev + self.slope * dist
+            FragIDdata.allFragIDs[end_fid].interpolated_contour_elev_max = \
+                (self.end_elev + self.slope * dist) * contour_conversion
 
         else:
             dist = np.min(FragIDdata.allFragIDs[end_fid].contour_elev_distance)
-            FragIDdata.allFragIDs[end_fid].interpolated_contour_elev_max = self.end_elev + self.slope * dist
+            FragIDdata.allFragIDs[end_fid].interpolated_contour_elev_max = \
+                (self.end_elev + self.slope * dist) * contour_conversion
         if self.verbose:
             print 'fid:%s min/max elevs %s %s' % (end_fid, FragIDdata.allFragIDs[end_fid].interpolated_contour_elev_min, FragIDdata.allFragIDs[end_fid].interpolated_contour_elev_max)
 
@@ -2068,7 +2083,7 @@ class ElevsFromContours:
         '''
 
 
-    def assign_elevations_to_FragID(self, FragIDdata, COMIDdata):
+    def assign_elevations_to_FragID(self, FragIDdata, COMIDdata, contour_conversion):
 
         print "interpolating elevations to FragIDs..."
         knt = 0
@@ -2162,7 +2177,7 @@ class ElevsFromContours:
                     print "interpolating within comid..."
                 # self.start_FragID was updated to current upstream contour by get_dist_slope
                 # self.end_FragID was updated to next contour downstream by get_dist_slope
-                self.interpolate_elevs(FragIDdata, self.start_FragID, self.end_FragID)
+                self.interpolate_elevs(FragIDdata, self.start_FragID, self.end_FragID, contour_conversion)
 
                 # reset everything for next contour pair
                 # upstream_dist begins with remainder of end_FragID (upstream contour)
@@ -2232,13 +2247,14 @@ class ElevsFromContours:
                 # end_FragID is preserved from downstream elevation contour in pair
                 self.start_FragID = FragIDdata.COMID_orderedFragID[comid][0]
 
-                self.interpolate_elevs(FragIDdata, self.start_FragID, self.end_FragID)
+                self.interpolate_elevs(FragIDdata, self.start_FragID, self.end_FragID, contour_conversion)
 
                 # add "contour" elevation at first FragID downstream of confluence,
                 # so that any subsequent interpolation from upstream will stop here
                 # (avoids problems with multiple interpolations through confluence)
 
-                FragIDdata.allFragIDs[self.start_FragID].contour_elev = [FragIDdata.allFragIDs[self.start_FragID].interpolated_contour_elev_max]
+                FragIDdata.allFragIDs[self.start_FragID].contour_elev = \
+                    [FragIDdata.allFragIDs[self.start_FragID].interpolated_contour_elev_max]
                 FragIDdata.allFragIDs[self.start_FragID].contour_elev_distance = [0]
                 self.elevs_edited.append(self.start_FragID)
 
@@ -2276,7 +2292,8 @@ class ElevsFromDEM:
         # sample DEM with grid shapefile using ZonalStatisticsAsTable function in Arc
         # Note: as of 1/22/2014, this function requires a uniform grid
         Fields = [f.name.lower() for f in arcpy.ListFields("MFgrid")]
-        if self.MFgrid_elev_field.lower() not in Fields:
+        if self.MFgrid_elev_field.lower() not in Fields or SFRData.compute_zonal:
+            print 'Running Compute_zonal'
             SFR_arcpy.compute_zonal(self.NROW, self.NCOL, self.DX, SFRData.DEM_z_conversion, SFRData.MFgrid, SFRData.DEM)
 
         # reference fields for cellnum and elevation, case-insensitive
