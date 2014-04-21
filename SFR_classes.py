@@ -1000,7 +1000,7 @@ class SFRSegmentsAll:
             #and the first and last cell; see if either overlap
             #with the proceeding or next segment and then check to see
             #if the levelpathIDs are the same
-            '''
+            '''a
             firstcell = self.allSegs[segment].seg_cells[0]
             lastcell = self.allSegs[segment].seg_cells[-1]
             outseg = self.allSegs[segment].outseg
@@ -1796,7 +1796,7 @@ class SFROperations:
                         print warnstring2
                         below_bottom.write('{0:f},{1:f},{2:f},{3:d},{4:d}\n'.format(
                             SFRbot, cellbottoms[-1], topdata[r-1, c-1], (r-1)*SFRdata.NCOL+c, SFRinfo['segment'][i]))
-                        below_bot_adjust[(r-1, c-1)] = cellbottoms[-1] - SFRbot  # diff between SFR bottom and model bot
+                        below_bot_adjust[(r, c)] = cellbottoms[-1] - SFRbot  # diff between SFR bottom and model bot
                         nbelow += 1
                         New_Layers.append(b+1)
                 else:
@@ -1811,11 +1811,11 @@ class SFROperations:
         if SFRdata.Lowerbot:
             print "\n\nAdjusting model bottom to accommodate SFR cells that were below bottom"
             print "see {0:s}\n".format(BotcorPDF)
-            below_bot_adjust_tuples = below_bot_adjust.iterkeys()
+            below_bot_adjust_tuples = below_bot_adjust.keys()
             for r in range(SFRdata.NROW):
                 for c in range(SFRdata.NCOL):
                     if (r, c) in below_bot_adjust_tuples:
-                        bots[-1, r, c] -= below_bot_adjust[(r, c)]
+                        bots[-1, r-1, c-1] -= below_bot_adjust[(r, c)]
 
             outarray = 'SFR_Adjusted_bottom_layer.dat'
 
