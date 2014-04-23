@@ -213,6 +213,23 @@ class SFRInput:
         # Check out any necessary arcpy licenses
         arcpy.CheckOutExtension("spatial")
 
+        #check to make sure that the projections and base units for the
+        #three input shapefiles match: grid, domain outline, NHDPlus flowlines
+        spref = [arcpy.Describe(self.MFgrid).spatialReference,
+              arcpy.Describe(self.MFdomain).spatialReference,
+              arcpy.Describe(self.Flowlines_unclipped).spatialReference]
+
+        for i in range(0,3):
+            for j in range(i,3):
+                if i==j:
+                    next
+                if spref[i].name != spref[j].name:
+                    exit("Spatial reference mismatch, spref[i].name, spref[j].name")
+                if spref[i].linearUnitName != spref[j].linearUnitName:
+                    exit("Spatial reference mismatch, spref[i].linearUnitName, spref[j].linearUnitName")
+        print "\nprojections match for MFgrid, MFdomain, and Flowlines_unclipped"
+        print "project name is ", spref[0].name
+        print "linear unit = ", spref[0].linearUnitName, "\n\n"
     def tf2flag(self, intxt):
         # converts text written in XML file to True or False flag
         if intxt.lower() == 'true':
@@ -1318,6 +1335,12 @@ class SFRpreproc:
         arcpy.MultipartToSinglepart_management(os.path.join(indat.working_dir, "tmp_intersect.shp"), indat.intersect)
         print "\n"
         print "Adding in stream geometry"
+        spatialref = arcpy.Describe(indat.CELLS_DISS).spatialReference
+        if spatialref.name == "Unknown":
+            print "..unknown spatial reference for CELLS_DISS"
+        else:
+            print "..the spatial reference name for the CELLS_DISS shapefile is " + spatialref.name
+            print "..the base map units = " + spatialref.linearUnitName
         #set up list and dictionary for fields, types, and associated commands
         fields = ('X_start', 'Y_start', 'X_end', 'Y_end', 'LengthFt')
         types = {'X_start': 'DOUBLE',
