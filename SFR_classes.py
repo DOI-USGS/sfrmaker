@@ -224,11 +224,11 @@ class SFRInput:
                 if i==j:
                     next
                 if spref[i].name != spref[j].name:
-                    exit("Spatial reference mismatch, spref[i].name, spref[j].name")
+                    exit("Spatial reference mismatch, {0}, {1}".format(spref[i].name, spref[j].name))
                 if spref[i].linearUnitName != spref[j].linearUnitName:
-                    exit("Spatial reference mismatch, spref[i].linearUnitName, spref[j].linearUnitName")
+                    exit("Spatial reference mismatch, {0}, {1} ".format(spref[i].name, spref[j].name))
         print "\nprojections match for MFgrid, MFdomain, and Flowlines_unclipped"
-        print "project name is ", spref[0].name
+        print "projection name is ", spref[0].name
         print "linear unit = ", spref[0].linearUnitName, "\n\n"
     def tf2flag(self, intxt):
         # converts text written in XML file to True or False flag
