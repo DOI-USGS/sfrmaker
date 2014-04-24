@@ -294,4 +294,5 @@ class plot_streamflows:
         arcpy.DeleteField_management("streams", Fields)
 
         outfile = os.path.join(self.outpath, "{0}.shp".format(self.SFR_out[:-4]))
-        SFR_arcpy.general_join(outfile, "streams", "cellnum", "temp.dbf", "cellnum", keep_common=True)
+        #PFJ added os.path.join in order to call on the correct temp.dbf file
+        SFR_arcpy.general_join(outfile, "streams", "cellnum", os.path.join(self.outpath, "temp.dbf"), "cellnum", keep_common=True)

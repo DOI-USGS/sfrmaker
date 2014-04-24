@@ -1757,6 +1757,7 @@ class SFROperations:
         nbelow = 0
         New_Layers = []
         ofp_bottom_warnings = open('bottom_warnings.dat', 'w')
+
         for i in range(len(SFRinfo)):
             r = SFRinfo['row'][i]
             c = SFRinfo['column'][i]
@@ -1764,7 +1765,7 @@ class SFROperations:
             cellbottoms = list(bots[:, r-1, c-1])
             SFRbot = STOP - SFRdata.bedthick - SFRdata.buff
             for b in range(SFRdata.NLAY):
-                if SFRbot < cellbottoms[b]:
+                if SFRbot <= cellbottoms[b]:
                     if b+1 >= SFRdata.NLAY:
                         warnstring1 = 'Streambottom elevation={0:f}, Model bottom={1:f} at ' \
                               'row {2:d}, column {3:d}, cellnum {4:d}'.format(
@@ -1775,7 +1776,15 @@ class SFROperations:
                         print warnstring2
                         below_bottom.write('{0:f},{1:f},{2:f},{3:d},{4:d}\n'.format(
                             SFRbot, cellbottoms[-1], topdata[r-1, c-1], (r-1)*SFRdata.NCOL+c, SFRinfo['segment'][i]))
-                        below_bot_adjust[(r-1, c-1)] = cellbottoms[-1] - SFRbot  # diff between SFR bottom and model bot
+
+                        # account for cells with multiple SFR segments
+                        test_below_bot_adjust = cellbottoms[-1] - SFRbot  # diff between SFR bottom and model bot
+                        if (r, c) in below_bot_adjust: # has below_bot_adjust been assigned yet?
+                            if below_bot_adjust[(r, c)] < test_below_bot_adjust:  # if new value is larger, replace
+                                below_bot_adjust[(r, c)] = test_below_bot_adjust
+                        else:
+                            below_bot_adjust[(r, c)] = test_below_bot_adjust # if not previously assigned, assign now
+
                         nbelow += 1
                         New_Layers.append(b+1)
                 else:
@@ -1790,10 +1799,11 @@ class SFROperations:
         if SFRdata.Lowerbot:
             print "\n\nAdjusting model bottom to accommodate SFR cells that were below bottom"
             print "see {0:s}\n".format(BotcorPDF)
-            for r in range(SFRdata.NROW):
-                for c in range(SFRdata.NCOL):
-                    if (r, c) in below_bot_adjust.keys():
-                        bots[-1, r, c] -= below_bot_adjust[(r, c)]
+            below_bot_adjust_tuples = below_bot_adjust.keys()
+            for r in range(1, SFRdata.NROW + 1):
+                for c in range(1, SFRdata.NCOL + 1):
+                    if (r, c) in below_bot_adjust_tuples:
+                        bots[-1, r-1, c-1] -= below_bot_adjust[(r, c)]
 
             outarray = 'SFR_Adjusted_bottom_layer.dat'
 
