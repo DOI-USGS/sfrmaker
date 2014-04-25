@@ -213,6 +213,23 @@ class SFRInput:
         # Check out any necessary arcpy licenses
         arcpy.CheckOutExtension("spatial")
 
+        #check to make sure that the projections and base units for the
+        #three input shapefiles match: grid, domain outline, NHDPlus flowlines
+        spref = [arcpy.Describe(self.MFgrid).spatialReference,
+              arcpy.Describe(self.MFdomain).spatialReference,
+              arcpy.Describe(self.Flowlines_unclipped).spatialReference]
+
+        for i in range(0,3):
+            for j in range(i,3):
+                if i==j:
+                    next
+                if spref[i].name != spref[j].name:
+                    exit("Spatial reference mismatch, {0}, {1}".format(spref[i].name, spref[j].name))
+                if spref[i].linearUnitName != spref[j].linearUnitName:
+                    exit("Spatial reference mismatch, {0}, {1} ".format(spref[i].name, spref[j].name))
+        print "\nprojections match for MFgrid, MFdomain, and Flowlines_unclipped"
+        print "projection name is ", spref[0].name
+        print "linear unit = ", spref[0].linearUnitName, "\n\n"
     def tf2flag(self, intxt):
         # converts text written in XML file to True or False flag
         if intxt.lower() == 'true':
@@ -1255,40 +1272,39 @@ class SFRpreproc:
         # if there is a field with unique values, assume it's ok
         # otherwise delete the column if it already exists
         # NB --> only evaluating the first 100 rows...
-        if not indat.node_attribute:
-            print 'verifying that there is a "cellnum" field in {0:s}'.format(indat.MFgrid)
-            hascellnum = False
-            cellnumunique = 0
-            MFgridflds = arcpy.ListFields(indat.MFgrid)
-            for cfield in MFgridflds:
-                if cfield.name.lower() == indat.node_attribute:
-                    hascellnum = True
-            if hascellnum:
-                # now check to see that there are unique values in cell
-                cursor = arcpy.SearchCursor(indat.MFgrid)
-                cellvals = []
-                crows = 0
-                for row in cursor:
-                    if crows > 100:
-                        break
-                    else:
-                        crows += 1
-                        cellvals.append(row.getValue(indat.node_attribute))
-                cellnumunique = len(set(cellvals))
-                del cellvals
-                del row
-                del cursor
+        print 'verifying that there is a "cellnum" field in {0:s}'.format(indat.MFgrid)
+        hascellnum = False
+        cellnumunique = 0
+        MFgridflds = arcpy.ListFields(indat.MFgrid)
+        for cfield in MFgridflds:
+            if cfield.name.lower() == indat.node_attribute:
+                hascellnum = True
+        if hascellnum:
+            # now check to see that there are unique values in cell
+            cursor = arcpy.SearchCursor(indat.MFgrid)
+            cellvals = []
+            crows = 0
+            for row in cursor:
+                if crows > 100:
+                    break
+                else:
+                    crows += 1
+                    cellvals.append(row.getValue(indat.node_attribute))
+            cellnumunique = len(set(cellvals))
+            del cellvals
+            del row
+            del cursor
 
-            if cellnumunique > 1:
-                print '"cellnum" field in place with unique values in {0:s}'.format(indat.MFgrid)
-            else:
-                for fld in arcpy.ListFields(indat.MFgrid):
-                    if fld == indat.node_attribute:
-                        arcpy.DeleteField_management(indat.MFgrid, indat.node_attribute)
-                arcpy.AddField_management(indat.MFgrid, indat.node_attribute, 'LONG')
-                calcexpression = '((!row!-1)*{0:d}) + !column!'.format(indat.NCOL)
-                arcpy.CalculateField_management(indat.MFgrid, indat.node_attribute, calcexpression, 'PYTHON')
-                print 'updated "cellnum" field in {0:s}'.format(indat.MFgrid)
+        if cellnumunique > 1:
+            print '"cellnum" field in place with unique values in {0:s}'.format(indat.MFgrid)
+        else:
+            for fld in arcpy.ListFields(indat.MFgrid):
+                if fld == indat.node_attribute:
+                    arcpy.DeleteField_management(indat.MFgrid, indat.node_attribute)
+            arcpy.AddField_management(indat.MFgrid, indat.node_attribute, 'LONG')
+            calcexpression = '((!row!-1)*{0:d}) + !column!'.format(indat.NCOL)
+            arcpy.CalculateField_management(indat.MFgrid, indat.node_attribute, calcexpression, 'PYTHON')
+            print 'updated "cellnum" field in {0:s}'.format(indat.MFgrid)
 
 
 
@@ -1318,6 +1334,12 @@ class SFRpreproc:
         arcpy.MultipartToSinglepart_management(os.path.join(indat.working_dir, "tmp_intersect.shp"), indat.intersect)
         print "\n"
         print "Adding in stream geometry"
+        spatialref = arcpy.Describe(indat.CELLS_DISS).spatialReference
+        if spatialref.name == "Unknown":
+            print "..unknown spatial reference for CELLS_DISS"
+        else:
+            print "..the spatial reference name for the CELLS_DISS shapefile is " + spatialref.name
+            print "..the base map units = " + spatialref.linearUnitName
         #set up list and dictionary for fields, types, and associated commands
         fields = ('X_start', 'Y_start', 'X_end', 'Y_end', 'LengthFt')
         types = {'X_start': 'DOUBLE',
