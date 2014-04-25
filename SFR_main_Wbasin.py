@@ -120,8 +120,8 @@ SFRops.assign_layers(SFRdata)
 SFRoutput.build_SFR_package()
 
 # Make a shapefile of SFR cells with attribute information for visualisation in GIS
-#SFRoutput.build_SFR_shapefile(Segmentdata)
-SFRoutput.buildSFRshapefile2()
+SFRoutput.build_SFR_shapefile(Segmentdata)
+#SFRoutput.buildSFRshapefile2()
 print "\n\nDone!"
 
 i = 2
