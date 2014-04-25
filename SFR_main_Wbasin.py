@@ -86,13 +86,13 @@ saveme = {'COMIDdata': COMIDdata,
          'SFRdata':  SFRdata}
 SFRc.savetmp(saveme)
 
-a = SFRc.loadtmp['SFRdata', 'COMIDdata', 'CELLdata', 'FragIDdata', 'LevelPathdata']
+#a = SFRc.loadtmp['SFRdata', 'COMIDdata', 'CELLdata', 'FragIDdata', 'LevelPathdata']
 
-COMIDdata = a['COMIDdata']
-FragIDdata = a['FragIDdata']
-LevelPathdata = a['LevelPathdata']
-CELLdata = a['CELLdata']
-SFRdata = a['SFRdata']
+#COMIDdata = a['COMIDdata']
+#FragIDdata = a['FragIDdata']
+#LevelPathdata = a['LevelPathdata']
+#CELLdata = a['CELLdata']
+#SFRdata = a['SFRdata']
 
 
 # Build SFR package segments

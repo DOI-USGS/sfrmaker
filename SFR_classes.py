@@ -1272,40 +1272,39 @@ class SFRpreproc:
         # if there is a field with unique values, assume it's ok
         # otherwise delete the column if it already exists
         # NB --> only evaluating the first 100 rows...
-        if not indat.node_attribute:
-            print 'verifying that there is a "cellnum" field in {0:s}'.format(indat.MFgrid)
-            hascellnum = False
-            cellnumunique = 0
-            MFgridflds = arcpy.ListFields(indat.MFgrid)
-            for cfield in MFgridflds:
-                if cfield.name.lower() == indat.node_attribute:
-                    hascellnum = True
-            if hascellnum:
-                # now check to see that there are unique values in cell
-                cursor = arcpy.SearchCursor(indat.MFgrid)
-                cellvals = []
-                crows = 0
-                for row in cursor:
-                    if crows > 100:
-                        break
-                    else:
-                        crows += 1
-                        cellvals.append(row.getValue(indat.node_attribute))
-                cellnumunique = len(set(cellvals))
-                del cellvals
-                del row
-                del cursor
+        print 'verifying that there is a "cellnum" field in {0:s}'.format(indat.MFgrid)
+        hascellnum = False
+        cellnumunique = 0
+        MFgridflds = arcpy.ListFields(indat.MFgrid)
+        for cfield in MFgridflds:
+            if cfield.name.lower() == indat.node_attribute:
+                hascellnum = True
+        if hascellnum:
+            # now check to see that there are unique values in cell
+            cursor = arcpy.SearchCursor(indat.MFgrid)
+            cellvals = []
+            crows = 0
+            for row in cursor:
+                if crows > 100:
+                    break
+                else:
+                    crows += 1
+                    cellvals.append(row.getValue(indat.node_attribute))
+            cellnumunique = len(set(cellvals))
+            del cellvals
+            del row
+            del cursor
 
-            if cellnumunique > 1:
-                print '"cellnum" field in place with unique values in {0:s}'.format(indat.MFgrid)
-            else:
-                for fld in arcpy.ListFields(indat.MFgrid):
-                    if fld == indat.node_attribute:
-                        arcpy.DeleteField_management(indat.MFgrid, indat.node_attribute)
-                arcpy.AddField_management(indat.MFgrid, indat.node_attribute, 'LONG')
-                calcexpression = '((!row!-1)*{0:d}) + !column!'.format(indat.NCOL)
-                arcpy.CalculateField_management(indat.MFgrid, indat.node_attribute, calcexpression, 'PYTHON')
-                print 'updated "cellnum" field in {0:s}'.format(indat.MFgrid)
+        if cellnumunique > 1:
+            print '"cellnum" field in place with unique values in {0:s}'.format(indat.MFgrid)
+        else:
+            for fld in arcpy.ListFields(indat.MFgrid):
+                if fld == indat.node_attribute:
+                    arcpy.DeleteField_management(indat.MFgrid, indat.node_attribute)
+            arcpy.AddField_management(indat.MFgrid, indat.node_attribute, 'LONG')
+            calcexpression = '((!row!-1)*{0:d}) + !column!'.format(indat.NCOL)
+            arcpy.CalculateField_management(indat.MFgrid, indat.node_attribute, calcexpression, 'PYTHON')
+            print 'updated "cellnum" field in {0:s}'.format(indat.MFgrid)
 
 
 
