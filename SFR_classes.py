@@ -1776,14 +1776,13 @@ class SFROperations:
                         print warnstring2
                         below_bottom.write('{0:f},{1:f},{2:f},{3:d},{4:d}\n'.format(
                             SFRbot, cellbottoms[-1], topdata[r-1, c-1], (r-1)*SFRdata.NCOL+c, SFRinfo['segment'][i]))
-
-                        # account for cells with multiple SFR segments
-                        test_below_bot_adjust = cellbottoms[-1] - SFRbot  # diff between SFR bottom and model bot
-                        if (r, c) in below_bot_adjust: # has below_bot_adjust been assigned yet?
-                            if below_bot_adjust[(r, c)] < test_below_bot_adjust:  # if new value is larger, replace
-                                below_bot_adjust[(r, c)] = test_below_bot_adjust
+                        # account for the possibility that the adjustment may be smaller for an SFR element in the same
+                        # cell as defined earlier.
+                        if (r, c) in below_bot_adjust.keys(): # has below_bot_adjust been assigned yet?
+                            if (cellbottoms[-1] - SFRbot) > below_bot_adjust[(r, c)]:
+                                below_bot_adjust[(r, c)] = cellbottoms[-1] - SFRbot  # diff between SFR bottom and model bot
                         else:
-                            below_bot_adjust[(r, c)] = test_below_bot_adjust # if not previously assigned, assign now
+                            below_bot_adjust[(r, c)] = cellbottoms[-1] - SFRbot  # if not previously assigned, assign now
 
                         nbelow += 1
                         New_Layers.append(b+1)
