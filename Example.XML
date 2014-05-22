@@ -38,6 +38,8 @@ Notes on SFR input:
 <InputFiles>
     <!-- MFgrid: polygon shapefile export of grid from Groundwater Vistas -->
     <MFgrid>nacp_mg_cells_chk_node.shp</MFgrid>
+    <!-- node_attribute: name of attribute of grid shapefile that contains node numbers -->
+    <node_attribute>cellnum</node_attribute>
     <!-- MFdomain: outline of model grid -->
     <MFdomain>nacp_streams_area_ed_v4b.shp</MFdomain>    
     <!-- MFdis: discretization file -->

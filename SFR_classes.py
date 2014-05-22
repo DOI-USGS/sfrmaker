@@ -53,7 +53,11 @@ class SFRInput:
 
         inpars = inpardat.getroot()
 
-        self.working_dir = inpars.findall('.//working_dir')[0].text
+        try:
+            self.working_dir = inpars.findall('.//working_dir')[0].text
+        except IndexError:
+            self.working_dir = os.getcwd()
+
         if not os.path.exists(self.working_dir):
             os.makedirs(self.working_dir)
         # note: compute_zonal is not needed, except for by the DEM_elevs_by_cellnum method,
@@ -2645,7 +2649,7 @@ class SFRoutput:
                     Mat1['bed_K'] = np.ones(len(Mat1))*Cond
             '''
         nreaches = len(Mat1)
-        nseg = np.max(Mat1['segment'])
+        nseg = int(np.max(Mat1['segment']))
         ofp = open(SFRoutfile, 'w')
         if self.indat.tpl:
             ofp.write("ptf ~\n")
@@ -2677,8 +2681,8 @@ class SFRoutput:
                 Mat1['layer'][i],
                 Mat1['row'][i],
                 Mat1['column'][i],
-                Mat1['segment'][i],
-                Mat1['reach'][i],
+                int(Mat1['segment'][i]),
+                int(Mat1['reach'][i]),
                 Mat1['length_in_cell'][i],
                 Mat1['top_streambed'][i],
                 slope,
@@ -2779,8 +2783,8 @@ class SFRoutput:
         Mat1 = pd.read_csv(self.indat.MAT1)
 
         # calculate column of cellnums for Mat1; index by cellnum
-        Mat1[self.indat.node_attribute] = (Mat1['row'] - 1) * self.indat.NCOL + Mat1['column']
-        Mat1[self.indat.node_attribute] = Mat1[self.indat.node_attribute].astype('int64')
+        Mat1[self.indat.node_attribute] = Mat1.apply(lambda x: (x['row'] - 1) * self.indat.NCOL + x['column'], axis=1).astype('int32')
+        #Mat1[self.indat.node_attribute] = Mat1[self.indat.node_attribute]
         Mat1 = Mat1.set_index([Mat1[self.indat.node_attribute], Mat1.index])
         Mat2 = pd.read_csv(self.indat.MAT2)
         Mat2.index = Mat2['segment']
@@ -2805,34 +2809,37 @@ class SFRoutput:
             with collection(self.indat.GISSHP, "w", "ESRI Shapefile", schema) as output:
                 for node in input:
                     cellnum = node['properties'][self.indat.node_attribute]
-
+                    if cellnum == 381937:
+                        j=2
                     # handle cells that were subsequently deleted after creation of input shapefile
                     try:
                         Mat1.ix[cellnum]
 
-                    except:
+                    except KeyError:
                         continue
 
                     print "\r{:d}%".format(100 * knt / nSFRcells),
                     # iterate over multi-index (allows for multiple reaches in one cell)
                     for uniquereach in Mat1.ix[cellnum].index:
                         knt += 1
-                        segment = Mat1.ix[(cellnum, uniquereach), 'segment']
+                        segment = int(Mat1.ix[(cellnum, uniquereach), 'segment'])
+                        outseg = int(Mat2.ix[segment, 'outseg'])
                         # handle headwaters (no upseg)
                         try:
                             Mat2upsegs[segment]
                         except KeyError:
                             Mat2upsegs[segment] = 0
 
-                        # shapefiles are incompatible with int64. ARGH!
+                        # shapefiles are incompatible with int64.
+                        # but apparently they are compatible with float64 ARGH!
                         output.write({'properties': {
-                                         self.indat.node_attribute: Mat1.ix[(cellnum, uniquereach), self.indat.node_attribute].astype('int32'),
+                                         self.indat.node_attribute: Mat1.ix[(cellnum, uniquereach), self.indat.node_attribute],
                                          'row': Mat1.ix[(cellnum, uniquereach), 'row'].astype('int32'),
                                          'column': Mat1.ix[(cellnum, uniquereach), 'column'].astype('int32'),
                                          'layer': Mat1.ix[(cellnum, uniquereach), 'layer'].astype('int32'),
-                                         'segment': segment.astype('int32'),
+                                         'segment': int(segment),
                                          'reach': Mat1.ix[(cellnum, uniquereach), 'reach'].astype('int32'),
-                                         'outseg': Mat2.ix[segment, 'outseg'].astype('int32'),
+                                         'outseg': outseg,
                                          'upseg': np.int32(Mat2upsegs[segment]),
                                          'sb_elev': Mat1.ix[(cellnum, uniquereach), 'top_streambed'],
                                          'modeltop': 99.99},

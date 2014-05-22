@@ -258,7 +258,7 @@ class plot_elevation_profiles:
 
 class plot_streamflows:
     # plots simulated flows over the SFR network
-    def __init__(self, DISfile, streams_shp, SFR_out):
+    def __init__(self, DISfile, streams_shp, SFR_out, node_num_attribute):
         self.streams_shp = streams_shp
         self.SFR_out = SFR_out
         self.flow_by_cellnum = dict()
@@ -267,6 +267,7 @@ class plot_streamflows:
         self.state_by_cellnum = dict()
         self.DISfile = DISfile
         self.outpath = os.path.split(SFR_out)[0]
+        self.node_num_attribute = node_num_attribute
         if len(self.outpath) == 0:
             self.outpath = os.getcwd()
 
@@ -309,7 +310,7 @@ class plot_streamflows:
 
         # write to temporary output file
         ofp = open('temp.csv', 'w')
-        ofp.write('cellnum,row,column,seg_reach,flow,loss,state\n')
+        ofp.write('{},row,column,seg_reach,flow,loss,state\n'.format(self.node_num_attribute))
         for cn in self.flow_by_cellnum.keys():
             ofp.write('{0},{1},{2},"{3}",{4:.6e},{5},{6}\n'.format(cn, 1, 1, self.seg_rch_by_cellnum[cn],
                                                                    self.flow_by_cellnum[cn], self.loss_by_cellnum[cn],
@@ -326,8 +327,9 @@ class plot_streamflows:
 
         # drop all fields except for cellnum from stream linework
         Fields = arcpy.ListFields("streams")
-        Fields = [f.name for f in Fields if f.name not in ["FID", "Shape", "cellnum"]]
-        arcpy.DeleteField_management("streams", Fields)
+        Fields = [f.name for f in Fields if f.name not in ["FID", "Shape", self.node_num_attribute]]
+        if len(Fields) > 0:
+            arcpy.DeleteField_management("streams", Fields)
 
         outfile = os.path.join(self.outpath, "{0}.shp".format(self.SFR_out[:-4]))
-        SFR_arcpy.general_join(outfile, "streams", "cellnum", "temp.dbf", "cellnum", keep_common=True)
+        SFR_arcpy.general_join(outfile, "streams", self.node_num_attribute, "temp.dbf", self.node_num_attribute, keep_common=True)

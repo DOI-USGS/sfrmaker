@@ -46,7 +46,7 @@ def general_join(target_name, target_lay, joinfield1, joined, joinfield2, keep_c
 def compute_zonal(nrows, ncolumns, delxy, z_conversion_factor, MFgrid, DEM, custom_outfile=None):
 
     # Settings
-    output_path = MFgrid.split('\\')[:1]
+    output_path = os.path.split(MFgrid)[0]
     arcpy.env.workspace = output_path
     arcpy.env.overwriteOutput = True
     arcpy.env.qualifiedFieldNames = False
