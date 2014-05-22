@@ -4,7 +4,7 @@ __author__ = 'Fienen, Reeves, Leaf - USGS'
 import SFR_classes as SFRc
 #import sfr_plots
 
-infile = 'SFR_input_CHIP.xml'
+infile = 'SFR_input_BR.xml'
 
 SFRdata = SFRc.SFRInput(infile)
 
@@ -15,3 +15,4 @@ SFRops.assign_layers(SFRdata)
 
 SFRoutput = SFRc.SFRoutput(SFRdata)
 SFRoutput.build_SFR_package()
+SFRoutput.buildSFRshapefile2()

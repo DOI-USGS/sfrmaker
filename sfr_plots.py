@@ -34,9 +34,11 @@ class plot_elevation_profiles:
                 self.elevs_by_cellnum[cellnum] = self.layer_elevs[0, r, c]
 
 
-    def get_comid_plotting_info(self, FragIDdata, COMIDdata, SFRdata):
+    def get_comid_plotting_info(self, FragIDdata, COMIDdata, SFRdata, interval=False):
 
-        self.segs2plot = sorted(FragIDdata.COMID_orderedFragID.keys())[::self.SFRdata.profile_plot_interval]
+        if not interval:
+            interval = SFRdata.profile_plot_interval
+        self.segs2plot = sorted(FragIDdata.COMID_orderedFragID.keys())[::interval]
         self.seg_dist_dict = dict()
         self.L1top_elev_dict = dict()
         self.seg_elev_fromNHD_dict = dict()
@@ -87,8 +89,10 @@ class plot_elevation_profiles:
             self.L1top_elev_dict[seg] = L1top_top_elevs
 
 
-    def get_segment_plotting_info(self, SFRSegsAll):
+    def get_segment_plotting_info(self, SFRSegsAll, interval=False):
 
+        if not interval:
+            interval = self.SFRdata.profile_plot_interval
         seglist = sorted(list(SFRSegsAll.allSegs.keys()))
         self.segs2plot = seglist[::self.SFRdata.profile_plot_interval]
         self.seg_dist_dict = dict()
@@ -117,6 +121,38 @@ class plot_elevation_profiles:
             self.seg_dist_dict[cseg] = distances
             self.L1top_elev_dict[cseg] = L1top_top_elevs
             self.seg_elevs_dict[cseg] = elevs
+
+    def check4elevation_issues(self, FragIDdata, COMIDdata, SFRdata, SFRSegsAll):
+        print "\n\nChecking for 'floating' streambed elevations..."
+
+        # function to build dictionaries of elevations for each segment/COMID and write to output
+        def output_elevation_comparison(SFRdata, outfile, header):
+            print "Checking by {}".format(header.split(",")[0])
+            ofp = open(os.path.join(SFRdata.working_dir, outfile), 'w')
+            ofp.write(header)
+            for seg in self.segs2plot:
+                tops = self.L1top_elev_dict[seg]
+                streambed_elevs = self.seg_elevs_dict[seg]
+                for i in range(len(tops)):
+                    ofp.write('{0},{1},{2},{3}\n'.format(seg, i+1, tops[i], streambed_elevs[i]))
+
+        # check elevations against model top by COMID
+        outfile = 'streambed_model_top_comparison.txt'
+        header = 'COMID,fragment,streambedtop,modeltop\n'
+        self.get_comid_plotting_info(FragIDdata, COMIDdata, SFRdata, interval=1)
+        if SFRdata.calculated_contour_elevs:
+            self.seg_elevs_dict = self.seg_elev_fromContours_dict
+        if SFRdata.calculated_DEM_elevs:
+            self.seg_elevs_dict = self.seg_elev_fromDEM_dict
+        else:
+            self.seg_elevs_dict = self.seg_elev_fromNHD_dict
+        output_elevation_comparison(SFRdata, outfile, header)
+
+        # check elevations against model top by segment
+        outfile = 'streambed_model_top_comparison.txt'
+        header = 'COMID,fragment,streambedtop,modeltop\n'
+        self.get_segment_plotting_info(SFRSegsAll, interval=1)
+        output_elevation_comparison(SFRdata, outfile, header)
 
 
     def plot_profiles(self, pdffile, **kwargs):
@@ -222,7 +258,7 @@ class plot_elevation_profiles:
 
 class plot_streamflows:
     # plots simulated flows over the SFR network
-    def __init__(self, DISfile, streams_shp, SFR_out):
+    def __init__(self, DISfile, streams_shp, SFR_out, node_num_attribute):
         self.streams_shp = streams_shp
         self.SFR_out = SFR_out
         self.flow_by_cellnum = dict()
@@ -231,6 +267,7 @@ class plot_streamflows:
         self.state_by_cellnum = dict()
         self.DISfile = DISfile
         self.outpath = os.path.split(SFR_out)[0]
+        self.node_num_attribute = node_num_attribute
         if len(self.outpath) == 0:
             self.outpath = os.getcwd()
 
@@ -273,7 +310,7 @@ class plot_streamflows:
 
         # write to temporary output file
         ofp = open('temp.csv', 'w')
-        ofp.write('cellnum,row,column,seg_reach,flow,loss,state\n')
+        ofp.write('{},row,column,seg_reach,flow,loss,state\n'.format(self.node_num_attribute))
         for cn in self.flow_by_cellnum.keys():
             ofp.write('{0},{1},{2},"{3}",{4:.6e},{5},{6}\n'.format(cn, 1, 1, self.seg_rch_by_cellnum[cn],
                                                                    self.flow_by_cellnum[cn], self.loss_by_cellnum[cn],
@@ -290,9 +327,9 @@ class plot_streamflows:
 
         # drop all fields except for cellnum from stream linework
         Fields = arcpy.ListFields("streams")
-        Fields = [f.name for f in Fields if f.name not in ["FID", "Shape", "cellnum"]]
-        arcpy.DeleteField_management("streams", Fields)
+        Fields = [f.name for f in Fields if f.name not in ["FID", "Shape", self.node_num_attribute]]
+        if len(Fields) > 0:
+            arcpy.DeleteField_management("streams", Fields)
 
         outfile = os.path.join(self.outpath, "{0}.shp".format(self.SFR_out[:-4]))
-        #PFJ added os.path.join in order to call on the correct temp.dbf file
-        SFR_arcpy.general_join(outfile, "streams", "cellnum", os.path.join(self.outpath, "temp.dbf"), "cellnum", keep_common=True)
+        SFR_arcpy.general_join(outfile, "streams", self.node_num_attribute, "temp.dbf", self.node_num_attribute, keep_common=True)
