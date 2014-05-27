@@ -134,6 +134,7 @@ class SFRInput:
         self.roughness_coeff = float(inpars.findall('.//roughness_coeff')[0].text)
         self.GISSHP = self.add_path(inpars.findall('.//GISSHP')[0].text)
         self.elevflag = inpars.findall('.//elevflag')[0].text
+        self.plotflag = self.tf2flag(inpars.findall('.//plotflag')[0].text)
 
         self.calculated_DEM_elevs = False
         self.calculated_contour_elevs = False
@@ -193,12 +194,23 @@ class SFRInput:
         except:
             self.elev_comp = False
 
+        # PFJ: The exception assignment to a string when no field is present in the input XML file is problematic because
+        # it causes the code to skip the checking analysis near line 1265, where 'cellnum' had previously been generated.
+        # I've added a boolean assigment here, and added a "self.node_attribute = 'cellnum' " assigment around line 1295.
+        # Of course, now I had to add a check for a newly generated cellnum field in the shapefile (following try/except)
+
         # if no node attribute is specified, will default to "old way," where it looks for a "cellnum" column,
         # tests if it has unique values, otherwise attempts to make one from row and column columns
         try:
             self.node_attribute = inpars.findall('.//node_attribute')[0].text
         except:
-            self.node_attribute = 'cellnum'
+            self.node_attribute = False
+        # PFJ: now need to add a test to see if 'cellnum' has been added to self.MFgrid from a prior run with preproc
+        fields = arcpy.ListFields(self.MFgrid)
+        for field in fields:
+            if str(field.name) == "cellnum":
+                self.node_attribute = 'cellnum'
+
 
         #read the Fcode-Fstring table and save it into a dictionary, Fstring
         descrips = arcpy.SearchCursor(self.FTab)
@@ -924,6 +936,7 @@ class SFRSegmentsAll:
                 x, y = self.allSegs[seg].endreach_xy
                 dist = np.sqrt((x-x_out)**2 + (y-y_out)**2)
                 minloc = np.squeeze(np.where(dist == np.min(dist)))
+                # This if/assign does nothing, but provides a variable to watch for debugging
                 if len(np.atleast_1d(minloc)) == 1:
                     xxxx = 5
                 if minloc.ndim > 0: # Only apply the following to 1-d or greater arrays
@@ -1289,6 +1302,7 @@ class SFRpreproc:
                 for fld in arcpy.ListFields(indat.MFgrid):
                     if fld == indat.node_attribute:
                         arcpy.DeleteField_management(indat.MFgrid, indat.node_attribute)
+                indat.node_attribute = 'cellnum' # PFJ: specify field name as cellnum
                 arcpy.AddField_management(indat.MFgrid, indat.node_attribute, 'LONG')
                 calcexpression = '((!row!-1)*{0:d}) + !column!'.format(indat.NCOL)
                 arcpy.CalculateField_management(indat.MFgrid, indat.node_attribute, calcexpression, 'PYTHON')
@@ -1841,6 +1855,7 @@ class SFROperations:
         nbelow = 0
         New_Layers = []
         ofp_bottom_warnings = open(os.path.join(SFRdata.working_dir, 'bottom_warnings.dat'), 'w')
+
         for i in range(len(SFRinfo)):
             r = SFRinfo['row'][i]
             c = SFRinfo['column'][i]
@@ -1848,7 +1863,7 @@ class SFROperations:
             cellbottoms = list(bots[:, r-1, c-1])
             SFRbot = STOP - SFRdata.bedthick - SFRdata.buff
             for b in range(SFRdata.NLAY):
-                if SFRbot < cellbottoms[b]:
+                if SFRbot <= cellbottoms[b]:
                     if b+1 >= SFRdata.NLAY:
                         warnstring1 = 'Streambottom elevation={0:f}, Model bottom={1:f} at ' \
                               'row {2:d}, column {3:d}, cellnum {4:d}'.format(
@@ -1859,7 +1874,14 @@ class SFROperations:
                         print warnstring2
                         below_bottom.write('{0:f},{1:f},{2:f},{3:d},{4:d}\n'.format(
                             SFRbot, cellbottoms[-1], topdata[r-1, c-1], (r-1)*SFRdata.NCOL+c, SFRinfo['segment'][i]))
-                        below_bot_adjust[(r-1, c-1)] = cellbottoms[-1] - SFRbot  # diff between SFR bottom and model bot
+                        # account for the possibility that the adjustment may be smaller for an SFR element in the same
+                        # cell as defined earlier.
+                        if (r, c) in below_bot_adjust.keys(): # has below_bot_adjust been assigned yet?
+                            if (cellbottoms[-1] - SFRbot) > below_bot_adjust[(r, c)]:
+                                below_bot_adjust[(r, c)] = cellbottoms[-1] - SFRbot  # diff between SFR bottom and model bot
+                        else:
+                            below_bot_adjust[(r, c)] = cellbottoms[-1] - SFRbot  # if not previously assigned, assign now
+
                         nbelow += 1
                         New_Layers.append(b+1)
                 else:
@@ -1875,17 +1897,16 @@ class SFROperations:
             print "\n\nAdjusting model bottom to accommodate SFR cells that were below bottom"
             print "see {0:s}\n".format(BotcorPDF)
             below_bot_adjust_tuples = below_bot_adjust.keys()
-            for (r, c) in below_bot_adjust_tuples:
-                bots[-1, r, c] -= below_bot_adjust[(r, c)]
 
-            '''
-            for r in range(SFRdata.NROW):
-                for c in range(SFRdata.NCOL):
-                    if r == 142 and c == 63:
-                        j=2
+            #for (r, c) in below_bot_adjust_tuples:
+            #    bots[-1, r, c] -= below_bot_adjust[(r, c)]
+
+            # PFJ:  This for loop was generated by MNF to improve indexing to py and MF arrays.
+            for r in range(1, SFRdata.NROW + 1):
+                for c in range(1, SFRdata.NCOL + 1):
                     if (r, c) in below_bot_adjust_tuples:
-                        bots[-1, r, c] -= below_bot_adjust[(r, c)]
-            '''
+                        bots[-1, r-1, c-1] -= below_bot_adjust[(r, c)]
+
             outarray = os.path.join(SFRdata.working_dir, 'SFR_Adjusted_bottom_layer.dat')
 
             with file(outarray, 'w') as outfile:
