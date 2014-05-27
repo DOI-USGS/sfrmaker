@@ -59,10 +59,11 @@ if SFRdata.elevflag == 'smoothed_DEM' or SFRdata.elev_comp:
     DEMelevs.connect_downhill(FragIDdata)
 
 # Comparison plots of streambed elevations (by COMID) for different elevation methods
-SFRp = sfr_plots.plot_elevation_profiles(SFRdata)
-SFRp.read_DIS()
-SFRp.get_comid_plotting_info(FragIDdata, COMIDdata, SFRdata)
-SFRp.plot_profiles('Elevation_method_comparison.pdf')
+if SFRdata.plotflag == True:
+    SFRp = sfr_plots.plot_elevation_profiles(SFRdata)
+    SFRp.read_DIS()
+    SFRp.get_comid_plotting_info(FragIDdata, COMIDdata, SFRdata)
+    SFRp.plot_profiles('Elevation_method_comparison.pdf')
 
 # COMMENT
 SFRops.reach_ordering(COMIDdata,
@@ -77,8 +78,9 @@ Segmentdata.accumulate_same_levelpathID(LevelPathdata, COMIDdata,
                                         FragIDdata, SFRdata, CELLdata)
 
 # Plot SFR segment profiles with final elevations
-SFRp.get_segment_plotting_info(Segmentdata)
-SFRp.plot_profiles('Segment_profiles.pdf')
+if SFRdata.plotflag == True:
+    SFRp.get_segment_plotting_info(Segmentdata)
+    SFRp.plot_profiles('Segment_profiles.pdf')
 
 # Write Ouput
 SFRoutput = SFRc.SFRoutput(SFRdata)

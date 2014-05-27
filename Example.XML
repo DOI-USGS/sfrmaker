@@ -48,6 +48,9 @@ Notes on SFR input:
     Include other elevation methods in comparison plots, beside what is selected for elevflag
     (requires both DEMs and Topographic contours for input-->
     <Compare_elevation_methods>False</Compare_elevation_methods>
+    <!-- plotflag:
+    If false, turns ALL plotting to PDFs off (both elevation method comparison plots, and final segment elevation plots) -->
+    <plotflag>True</plotflag>
 </GlobalSettings>
 <InputFiles>
     <!-- MFgrid: polygon shapefile export of grid from Groundwater Vistas -->
