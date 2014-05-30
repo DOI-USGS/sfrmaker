@@ -21,7 +21,21 @@ Notes on SFR input:
     a factor within which start(x,y) and end(x,y) can be found -->
     <rfact>0.95</rfact>
 	<!-- preproc:
-    a factor within which start(x,y) and end(x,y) can be found -->
+    ATL 5/30/2014 (Howard feel free to make corrections if any of this is incorrect):
+    A distance to look between start(x) and end(x), and start(y) and end(y) of consecutive reaches.
+    If both the x coordinates are within rfact of each other, AND the y coordinates are within rfact of each other, the two
+    reaches are considered routed. If either of these tests fails, then the COMID has multiple starts/ends, which are printed
+    to fix_com_IDs.txt.
+    Note: when NHD linework is exploded on the model grid, all fragments < reach_cutoff are dropped, creating gaps that could
+    be <= reach_cutoff. rfact should therefore be roughly equal to reach_cutoff, for cases in which the missing
+    fragment is a straight line between the start/end points of the two adjacent fragments, which is close to parallel with
+    one of the coordinate axis.-->
+    <distanceTol>None</distanceTol>
+    <!-- distanceTol:
+    ATL 5/30/2014 (Howard feel free to make corrections if any of this is incorrect):
+    Distance tolerance for routing between segments. A recommended setting is a few multiples of the cell spacing. If the next
+    downstream segment is more than this distance away, the segment is treated as an outlet (outseg = 0).
+    This helps prevent unwanted routing for segments that aren't outlets in NHD, but are outlets in the model. -->
     <preproc>True</preproc>
     <!-- tpl:
     a flag for writing out a PEST tpl file instead of SFR package file -->
@@ -34,6 +48,9 @@ Notes on SFR input:
     Include other elevation methods in comparison plots, beside what is selected for elevflag
     (requires both DEMs and Topographic contours for input-->
     <Compare_elevation_methods>False</Compare_elevation_methods>
+    <!-- plotflag:
+    If false, turns ALL plotting to PDFs off (both elevation method comparison plots, and final segment elevation plots) -->
+    <plotflag>True</plotflag>
 </GlobalSettings>
 <InputFiles>
     <!-- MFgrid: polygon shapefile export of grid from Groundwater Vistas -->
