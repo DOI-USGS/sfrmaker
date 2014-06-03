@@ -133,7 +133,7 @@ class SFRInput:
         self.stream_depth = float(inpars.findall('.//stream_depth')[0].text)
         self.GISSHP = self.add_path(inpars.findall('.//GISSHP')[0].text)
         self.elevflag = inpars.findall('.//elevflag')[0].text
-        self.plotflag = self.tf2flag(inpars.findall('.//plotflag')[0].text)
+
 
         self.calculated_DEM_elevs = False
         self.calculated_contour_elevs = False
@@ -148,7 +148,10 @@ class SFRInput:
                 shutil.copyfile(self.MAT1, MAT1backup)
             except IOError:
                 print "Tried to make a backup copy of {0} but got an error.".format(self.MAT1)
-
+        try:
+            self.plotflag = self.tf2flag(inpars.findall('.//plotflag')[0].text)
+        except:
+            self.plotflag = True
         try:
             self.eps = float(inpars.findall('.//eps')[0].text)
         except:
