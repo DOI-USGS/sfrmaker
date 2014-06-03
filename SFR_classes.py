@@ -131,7 +131,6 @@ class SFRInput:
         self.Hc1fact = float(inpars.findall('.//Hc1fact')[0].text)
         self.Hc2fact = float(inpars.findall('.//Hc2fact')[0].text)
         self.stream_depth = float(inpars.findall('.//stream_depth')[0].text)
-        self.roughness_coeff = float(inpars.findall('.//roughness_coeff')[0].text)
         self.GISSHP = self.add_path(inpars.findall('.//GISSHP')[0].text)
         self.elevflag = inpars.findall('.//elevflag')[0].text
         self.plotflag = self.tf2flag(inpars.findall('.//plotflag')[0].text)
@@ -2623,7 +2622,7 @@ class SFRoutput:
                     indat.bedK,
                     indat.bedthick,
                     curr_reaches[creach].eff_slope,
-                    indat.roughness_coeff)
+                    indat.roughch)
                 printstring = ',{0:.4e},{1:.4e},{2:d},{3:d},{4:.4e},{5:.4e},{6:.4e},{7:.4e},{8:.4e},{9:.4e}\n'.format(
                     *mixedlist)
                 mat1out.write(printstring)
@@ -2718,7 +2717,7 @@ class SFRoutput:
                 self.indat.icalc,
                 Mat2['outseg'][i],
                 Mat2['flow'][i],
-                self.indat.roughness_coeff
+                self.indat.roughch
                 ))
 
             #need to add the input of modify_segment_widths

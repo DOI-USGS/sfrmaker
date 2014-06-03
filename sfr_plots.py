@@ -264,7 +264,10 @@ class plot_streamflows:
         self.flow_by_cellnum = dict()
         self.seg_rch_by_cellnum = dict()
         self.loss_by_cellnum = dict()
+        self.overland_by_cellnum = dict()
         self.state_by_cellnum = dict()
+        self.stage_by_cellnum = dict()
+        self.depth_by_cellnum = dict()
         self.DISfile = DISfile
         self.outpath = os.path.split(SFR_out)[0]
         self.node_num_attribute = node_num_attribute
@@ -287,6 +290,9 @@ class plot_streamflows:
             seg_rch = "{0} {1}; ".format(line[3], line[4])
             flow = 0.5 * (line[5] + line[7])
             loss = float(line[6])
+            overland = float(line[8])
+            stage = float(line[11])
+            depth = float(line[12])
 
             try:
                 existingflow = self.flow_by_cellnum[cellnum]
@@ -307,14 +313,22 @@ class plot_streamflows:
             self.seg_rch_by_cellnum[cellnum] = seg_rch_info + seg_rch
             self.loss_by_cellnum[cellnum] = loss
             self.state_by_cellnum[cellnum] = state
+            self.overland_by_cellnum[cellnum] = overland
+            self.stage_by_cellnum[cellnum] = stage
+            self.depth_by_cellnum[cellnum] = depth
 
         # write to temporary output file
         ofp = open('temp.csv', 'w')
-        ofp.write('{},row,column,seg_reach,flow,loss,state\n'.format(self.node_num_attribute))
+        ofp.write('{},row,column,seg_reach,flow,loss,overland,state,stage,depth\n'.format(self.node_num_attribute))
         for cn in self.flow_by_cellnum.keys():
-            ofp.write('{0},{1},{2},"{3}",{4:.6e},{5},{6}\n'.format(cn, 1, 1, self.seg_rch_by_cellnum[cn],
-                                                                   self.flow_by_cellnum[cn], self.loss_by_cellnum[cn],
-                                                                   self.state_by_cellnum[cn]))
+            ofp.write('{0},{1},{2},"{3}",{4:.6e},{5},{6},{7},{8},{9}\n'.format(cn, 1, 1,
+                                                                   self.seg_rch_by_cellnum[cn],
+                                                                   self.flow_by_cellnum[cn],
+                                                                   self.loss_by_cellnum[cn],
+                                                                   self.overland_by_cellnum[cn],
+                                                                   self.state_by_cellnum[cn],
+                                                                   self.stage_by_cellnum[cn],
+                                                                   self.depth_by_cellnum[cn]))
         ofp.close()
 
         # make feature/table layers
