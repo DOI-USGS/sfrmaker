@@ -166,7 +166,6 @@ is desired
 	<buff>1.0</buff>
 	<!-- Lowerbot: If True, lowers the model bottom where SFR cells drop below it -->
 	<Lowerbot>False</Lowerbot>
-	<roughness_coeff>0.37</roughness_coeff>
 </SFR_parameters>
 
 </SFR_input>
