@@ -87,7 +87,7 @@ SFRoutput = SFRc.SFRoutput(SFRdata)
 SFRoutput.write_SFR_tables(Segmentdata)
 SFRops.assign_layers(SFRdata)
 SFRoutput.build_SFR_package()
-#SFRoutput.build_SFR_shapefile(Segmentdata)
+SFRoutput.buildSFRshapefile2()
 print "Done"
 
 i = 2
