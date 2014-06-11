@@ -7,6 +7,9 @@ Notes on SFR input:
     Put in paths to input/output files as-is (i.e. no double \\), surrounded by single quotes
 -->
 <GlobalSettings>
+    <!-- working_dir:
+    full path to working folder where intermediate and output will be generated. -->
+    <working_dir>None</working_dir>
     <!-- reach_cutoff: 
     minimum reach length to retain following explosion of NHD segments to river cells -->
     <reach_cutoff>1.0</reach_cutoff>
@@ -80,14 +83,20 @@ Notes on SFR input:
     <ELEVcontours>D:\ATLData\BadRiver\BCs\elevation_from_contours\contours_NAD27_wsp_ft.shp</ELEVcontours>
 
 </InputFiles>
-
-<IntermediateFiles>
-    <!-- Flowlines: clipped to active area -->
-    <Flowlines>flowlines_clipped.shp</Flowlines> 
-    <!-- ELEV: clipped to active area -->
-    <ELEV>river_w_elevations.shp</ELEV> 
+<!-- InputFiles_without_preprocessing:
+In addition to the files above, these files (created during the preprocessing routine) are needed for input
+ if the program is run without the Preprocessing routine (preproc set to False)-->
+<InputFiles_without_preprocessing>
+    <!-- Flowlines: clipped to active area.  -->
+    <Flowlines>Flowline_clip_FWPvert.shp</Flowlines>
     <!-- intersect:  flowlines intersected with the grid-->
     <intersect>river_explode.shp</intersect>
+</InputFiles_without_preprocessing>
+<!-- IntermediateFiles:
+These files are created by the program, to exchange information between routines-->
+<IntermediateFiles>
+    <!-- ELEV: clipped to active area -->
+    <ELEV>river_w_elevations.shp</ELEV>
     <!-- intersect_points: end vertices of "intersect" fragments as points-->
     <intersect_points>river_explode_points.shp</intersect_points>
     <!-- rivers_table:  -->

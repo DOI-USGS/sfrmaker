@@ -55,11 +55,13 @@ class SFRInput:
 
         try:
             self.working_dir = inpars.findall('.//working_dir')[0].text
-        except IndexError:
+            os.path.isdir(self.working_dir)
+        except:
             self.working_dir = os.getcwd()
 
         if not os.path.exists(self.working_dir):
             os.makedirs(self.working_dir)
+        os.chdir(self.working_dir)
         # note: compute_zonal is not needed, except for by the DEM_elevs_by_cellnum method,
         # which has been more or less replaced by DEM_elevs_by_FragID
         #self.compute_zonal = self.tf2flag(inpars.findall('.//compute_zonal')[0].text)
@@ -138,9 +140,16 @@ class SFRInput:
         self.calculated_DEM_elevs = False
         self.calculated_contour_elevs = False
 
+        # initialize the arcpy environment
+        #arcpy.env.workspace = os.getcwd()
+        arcpy.env.workspace = self.working_dir
+        arcpy.env.overwriteOutput = True
+        arcpy.env.qualifiedFieldNames = False
+        # Check out any necessary arcpy licenses
+        arcpy.CheckOutExtension("spatial")
+
         # read in model information
         self.DX, self.DY, self.NLAY, self.NROW, self.NCOL, i = disutil.read_meta_data(self.MFdis)
-
         # make backup copy of MAT 1, if it exists
         MAT1backup = "{0}_backup".format(self.MAT1)
         if os.path.isfile(self.MAT1):
@@ -183,7 +192,7 @@ class SFRInput:
         try:
             self.distanceTol = float(inpars.findall('.//distanceTol')[0].text)
         except:
-            self.distanceTol = 3*np.min(self.DX)
+            self.distanceTol = 10*np.min(self.DX[1:] - self.DX[:-1]) # get spacings, then take the minimum
 
         try:
             self.profile_plot_interval = int(inpars.findall('.//profile_plot_interval')[0].text)
@@ -207,11 +216,11 @@ class SFRInput:
             self.node_attribute = inpars.findall('.//node_attribute')[0].text
         except:
             self.node_attribute = False
-        # PFJ: now need to add a test to see if 'cellnum' has been added to self.MFgrid from a prior run with preproc
-        fields = arcpy.ListFields(self.MFgrid)
-        for field in fields:
-            if str(field.name) == "cellnum":
-                self.node_attribute = 'cellnum'
+            # PFJ: now need to add a test to see if 'cellnum' has been added to self.MFgrid from a prior run with preproc
+            fields = arcpy.ListFields(self.MFgrid)
+            for field in fields:
+                if str(field.name) == "cellnum":
+                    self.node_attribute = 'cellnum'
 
 
         #read the Fcode-Fstring table and save it into a dictionary, Fstring
@@ -222,14 +231,6 @@ class SFRInput:
             if not Fcodevalue in self.Fstring:
                 self.Fstring[Fcodevalue]=description.Descriptio
         del descrips
-
-        # initialize the arcpy environment
-        #arcpy.env.workspace = os.getcwd()
-        arcpy.env.workspace = self.working_dir
-        arcpy.env.overwriteOutput = True
-        arcpy.env.qualifiedFieldNames = False
-        # Check out any necessary arcpy licenses
-        arcpy.CheckOutExtension("spatial")
 
     def tf2flag(self, intxt):
         # converts text written in XML file to True or False flag
@@ -890,6 +891,8 @@ class SFRSegmentsAll:
 
                 # now check for circular routing (typically happens when only one reach in a segment)subseg[labl]
                 # this repeats much of the logic of the preceding 10 or so lines
+                if outseg == 8689 or subseg[labl] == 8688:
+                    j=2
                 if subseg[labl] == outseg:
                     circular_condition = True
                     circular_test_counter = 0
@@ -925,12 +928,49 @@ class SFRSegmentsAll:
         for seg in self.allSegs.iterkeys():
             outseg = self.allSegs[seg].outseg
             if outseg > 0 and outseg < 999999:
-                # find the levelpath ids for current seg and downseg
-                levelpathid_outseg = self.segment_levelpaths[outseg]
+
+                '''
+                ATL 6/10/2014: changed this routine so that the level paths of the next three consecutive downsegs are included.
+                Only looking down 1 segment is potentially problematic where multiple segments come together.
+                For example, upstream of a confluence, one trib may route into another before routing to below the confluence
+                if the trib that is routed into is the last segment in its levelpath, then no downstream segments will
+                be included in the search for the closest downstream reach 1. This will produce a large distance to the
+                next starting reach, which will cause the connection to fail the "distanceTol" test below, resulting in
+                an outseg = 0 (and a break in the routing).
+                '''
+
+                # find the levelpath ids for current seg and next three downsegs
+                # get unique list of levelpaths for ndownsegs2search levels of downstream segments
+                outseg_levelpathid_list = []
+                ndownsegs2search = 3
+                for i in range(ndownsegs2search):
+                    outseg_levelpathid_list.append(self.segment_levelpaths[outseg])
+                    # stop if an outlet or boundary stream is encountered
+                    if self.allSegs[outseg].outseg > 0 and self.allSegs[outseg].outseg < 999999:
+                        outseg = self.allSegs[outseg].outseg
+                    else:
+                        break
+                outseg_levelpathid_list = list(set(outseg_levelpathid_list)) # cull to unique levelpaths
+
+                # now list all segments that are in the levelpaths listed in levelpathid_outseg_list
+                downsegments_list = []
+                for levelpath in outseg_levelpathid_list:
+                    downsegments_list = downsegments_list + self.levelpaths_segments[levelpath]
+                if seg == 8966 or seg == 8965:
+                    j=2
+                downsegments_list = [s for s in downsegments_list if s != seg] # exclude current segment from list
+
+                # exclude any segments from list that route to current segment
+                downsegments_list = [s for s in downsegments_list if self.allSegs[s].outseg != seg]
+
+                #levelpathid_outseg = self.segment_levelpaths[outseg]
+
                 x_out = list()
                 y_out = list()
+                #for clpid in self.levelpaths_segments[levelpathid_outseg]:
 
-                for clpid in self.levelpaths_segments[levelpathid_outseg]:
+                # now build list of all of the starting (reach 1) coordinates of all of the downsegments
+                for clpid in downsegments_list:
                     x_out.append(self.allSegs[clpid].startreach_xy[0])
                     y_out.append(self.allSegs[clpid].startreach_xy[1])
                 x_out = np.array(x_out)
@@ -942,15 +982,19 @@ class SFRSegmentsAll:
                     xxxx = 5
                 if minloc.ndim > 0: # Only apply the following to 1-d or greater arrays
                     minloc = minloc[0] # If 2 segs have same dist, just chose the first one to prevend error...may need to test this
+                '''
+                this code should no longer be needed, since the current segment is excluded before computing distances
                 # if closest segment is the current segment, choose next closest (to prevent circular routing!)
                 if self.levelpaths_segments[levelpathid_outseg][minloc] == seg:
                     minloc = np.argsort(dist)[1]
+                '''
                 # if current outseg is already the closest, keep it
-                if self.allSegs[seg].outseg != self.levelpaths_segments[levelpathid_outseg][minloc]:
+                #if self.allSegs[seg].outseg != self.levelpaths_segments[levelpathid_outseg][minloc]:
+                if self.allSegs[seg].outseg != downsegments_list[minloc]:
                     print 'Changing outseg from {0:d} to {1:d}'.format(
                         self.allSegs[seg].outseg,
-                        self.levelpaths_segments[levelpathid_outseg][minloc])
-                    self.allSegs[seg].outseg = self.levelpaths_segments[levelpathid_outseg][minloc]
+                        downsegments_list[minloc])
+                    self.allSegs[seg].outseg = downsegments_list[minloc]
         print "\n"
 
         # make a correction to find outsegs equal to 999999 that should really be 0
@@ -959,6 +1003,10 @@ class SFRSegmentsAll:
         # first find which cells border the model boundary
         if arcpy.Exists('boundary_cells.shp'):
             arcpy.Delete_management('boundary_cells.shp')
+        # the '_outline.shp' file below is generated in preprocessing, may not be present if the code is run without preproc
+        if not os.path.isfile(SFRdata.MFdomain[:-4] + "_outline.shp"):
+            arcpy.FeatureToLine_management(SFRdata.MFdomain, SFRdata.MFdomain[:-4] + '_outline.shp')
+
         arcpy.SpatialJoin_analysis(SFRdata.CELLS_DISS,
                                    SFRdata.MFdomain[:-4] + "_outline.shp",
                                    "boundary_cells",
@@ -982,7 +1030,9 @@ class SFRSegmentsAll:
 
         #make a list of what segments are connected to each using outseg information
         #also load in other segment information from SFRdata (XML file information)
-
+        circular_routing_warning = open('Circular_routing_warnings.txt', 'w')
+        circular_routing_warning.write('Check these connections for possible circular routing:\n')
+        circular_routing_warning.write('segment, original_outseg, adjusted_outseg, explanation\n')
         for seg in self.allSegs.iterkeys():
             outseg = self.allSegs[seg].outseg
             if outseg > 0 and outseg < 999999:
@@ -999,6 +1049,29 @@ class SFRSegmentsAll:
                 if dist > SFRdata.distanceTol:
                     self.allSegs[seg].outseg = 0
                 else:
+                    '''
+                    # test for circular routing between two segments
+                    # (check to see if the current segment is already the outseg for its outseg)
+                    this really should be done in the code above that evaluates consecutive downstream levelpath IDs
+                    to find the closest reach 1 to route to.
+                    '''
+                    if seg == self.allSegs[outseg].outseg:
+                        # get index of outseg in levelpath:
+                        LP = self.allSegs[outseg].levelpathID
+                        '''
+                        ind = self.levelpaths_segments[LP].index(outseg)
+                        # if index is not the last in Levelpath, reset outseg of outseg to next segment
+                        # (this may be too simple-minded of a fix!)
+                        if ind < len(self.levelpaths_segments[LP]):
+                            new_outseg = self.levelpaths_segments[LP][ind+1]
+                            self.allSegs[outseg].outseg = new_outseg
+                            explanation = 'next segment in levelpath assigned as new_outseg'
+                            self.allSegs[new_outseg].inseg.append(seg)
+                        else:
+                            new_outseg = seg
+                            explanation = 'outseg is last in levelpath, routing should go to next levelpath'
+                        circular_routing_warning.write('{0},{1},{2},{3}\n'.format(seg, outseg, new_outseg, explanation))
+                        '''
                     self.allSegs[outseg].inseg.append(seg)
             self.allSegs[seg].etsw = SFRdata.etsw
             self.allSegs[seg].pptsw = SFRdata.pptsw
@@ -1850,6 +1923,7 @@ class SFROperations:
         SFRinfo = np.genfromtxt(SFRdata.MAT1, delimiter=',', names=True, dtype=None)
 
         print '\nNow assiging stream cells to appropriate layers...'
+        bots_orig = bots[-1, :, :].copy() # keep a copy of non-changed bottom elevations for plotting
         below_bottom = open(os.path.join(SFRdata.working_dir, 'below_bot.csv'), 'w')
         below_bottom.write('SFRbot,ModelBot,Land_surf,cellnum,segment\n')
         below_bot_adjust = defaultdict()  # list row,column locations where SFR goes below model bottom
@@ -1875,6 +1949,10 @@ class SFROperations:
                         below_bottom.write('{0:f},{1:f},{2:f},{3:d},{4:d}\n'.format(
                             SFRbot, cellbottoms[-1], topdata[r-1, c-1], (r-1)*SFRdata.NCOL+c, SFRinfo['segment'][i]))
                         below_bot_adjust[(r-1, c-1)] = cellbottoms[-1] - SFRbot  # diff between SFR bottom and model bot
+                        # fix the bottoms in this loop instead of below
+                        # not only saving a loop, but more importantly, only looping through SFR cells
+                        if SFRdata.Lowerbot:
+                            bots[-1, r-1, c-1] -= cellbottoms[-1] - SFRbot
                         nbelow += 1
                         New_Layers.append(b+1)
                 else:
@@ -1883,8 +1961,10 @@ class SFROperations:
         ofp_bottom_warnings.close()
         below_bottom.close()
         New_Layers = np.array(New_Layers)
-        bots_orig = bots[-1, :, :].copy() # keep a copy of non-changed bottom elevations for plotting
 
+        '''
+        ATL 6/9/2014: Looping thru all of the rows and columns is really inefficient.
+        I recommend we adjusted the bottoms in the loop above.
         # create a new array of bottom elevations with dimensions like topdata
         if SFRdata.Lowerbot:
             print "\n\nAdjusting model bottom to accommodate SFR cells that were below bottom"
@@ -1899,7 +1979,7 @@ class SFROperations:
                     if (r, c) in below_bot_adjust_tuples:
                         bots[-1, r-1, c-1] -= below_bot_adjust[(r, c)]
 
-            '''
+
             for r in range(SFRdata.NROW):
                 for c in range(SFRdata.NCOL):
                     if r == 142 and c == 63:
@@ -1907,6 +1987,7 @@ class SFROperations:
                     if (r, c) in below_bot_adjust_tuples:
                         bots[-1, r, c] -= below_bot_adjust[(r, c)]
             '''
+        if SFRdata.Lowerbot:
             outarray = os.path.join(SFRdata.working_dir, 'SFR_Adjusted_bottom_layer.dat')
 
             with file(outarray, 'w') as outfile:
