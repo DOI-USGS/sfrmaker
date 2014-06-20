@@ -335,24 +335,30 @@ class plot_streamflows:
         arcpy.env.workspace = self.outpath
         arcpy.env.overwriteOutput = True
         arcpy.CopyFeatures_management(self.streams_shp, self.streams_shp[:-4]+'_backup.shp')
-        #tempstream = self.streams_shp[:-4]+'_backup.shp'
         arcpy.MakeFeatureLayer_management(self.streams_shp[:-4]+'_backup.shp', "streams")
-        #arcpy.MakeFeatureLayer_management(self.streams_shp[:-4]+'_backup.shp', tempstream)
         arcpy.CopyRows_management('temp.csv', os.path.join(self.outpath, 'temp.dbf'))
 
 
         # drop all fields except for cellnum from stream linework
         Fields = arcpy.ListFields("streams")
-        #Fields = arcpy.ListFields(tempstream)
         Fields = [f.name for f in Fields if f.name not in ["FID", "Shape", self.node_num_attribute]]
         if len(Fields) > 0:
             arcpy.DeleteField_management("streams", Fields)
-            #arcpy.DeleteField_management(tempstream, Fields)
+
+        '''
+        Fields = arcpy.ListFields("streams") # repopulate so can evaluate in debug mode
+
+        # index "cellnum" to speed-up join and possibly fix error associated with join.  This didn't work.
+        arcpy.AddIndex_management("streams", self.node_num_attribute, "cellID")
+        # Iterate through the list of indexes
+        indexes = arcpy.ListIndexes("streams")
+        for index in indexes:
+            # Print index properties
+            print("Name: {0}".format(index.name))
+            print("\tType            : {0}".format(index.isAscending))
+            print("\tScale           : {0}".format(index.isUnique))
+            print("\tNumber of fields: {0}".format(len(index.fields)))
+        '''
 
         outfile = os.path.join(self.outpath, "{0}.shp".format(self.SFR_out[:-4]))
-        #create an index table -- needed for large datasets
-        # arcpy.CheckOutExtension("Foundation")
-        # arcpy.CreateIndexTable_production("streams",self.node_num_attribute;)
-        # arcpy.CheckInExtension("Foundation")
-        #SFR_arcpy.general_join(outfile, tempstream, self.node_num_attribute, "temp.dbf", self.node_num_attribute, keep_common=True)
         SFR_arcpy.general_join(outfile, "streams", self.node_num_attribute, "temp.dbf", self.node_num_attribute, keep_common=True)
