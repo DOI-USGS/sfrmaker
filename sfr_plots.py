@@ -6,8 +6,13 @@ import discomb_utilities as disutil
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 from collections import defaultdict
-import arcpy
-import SFR_arcpy
+
+import sys
+sys.path.append('../../GIS_utils')
+try:
+    import GISops
+except:
+    print 'GIS_utils.GISops not found!'
 
 
 class plot_elevation_profiles:
@@ -274,7 +279,7 @@ class plot_streamflows:
         if len(self.outpath) == 0:
             self.outpath = os.getcwd()
 
-    def join_SFR_out2streams(self):
+    def join_SFR_out2streams(self, use_arcpy=True):
 
         # get model info
         try:
@@ -282,7 +287,7 @@ class plot_streamflows:
         except:
             raise IOError("Cannot read MODFLOW DIS file {0}".format(self.DISfile))
 
-        print "aggregating flow information by cellnum..."
+        print "\naggregating flow information by cellnum..."
         indata = np.genfromtxt(self.SFR_out, skiprows=8, dtype=None)
         for line in indata:
             r, c = line[1], line[2]
@@ -318,7 +323,7 @@ class plot_streamflows:
             self.depth_by_cellnum[cellnum] = depth
 
         # write to temporary output file
-        ofp = open('temp.csv', 'w')
+        ofp = open(os.path.join(self.outpath, 'temp.csv'), 'w')
         ofp.write('{},row,column,seg_reach,flow,loss,overland,state,stage,depth\n'.format(self.node_num_attribute))
         for cn in self.flow_by_cellnum.keys():
             ofp.write('{0},{1},{2},"{3}",{4:.6e},{5},{6},{7},{8},{9}\n'.format(cn, 1, 1,
@@ -331,19 +336,29 @@ class plot_streamflows:
                                                                    self.depth_by_cellnum[cn]))
         ofp.close()
 
-        # make feature/table layers
-        arcpy.env.workspace = self.outpath
-        arcpy.env.overwriteOutput = True
-        arcpy.CopyFeatures_management(self.streams_shp, self.streams_shp[:-4]+'_backup.shp')
-        arcpy.MakeFeatureLayer_management(self.streams_shp[:-4]+'_backup.shp', "streams")
-        arcpy.CopyRows_management('temp.csv', os.path.join(self.outpath, 'temp.dbf'))
-
-
-        # drop all fields except for cellnum from stream linework
-        Fields = arcpy.ListFields("streams")
-        Fields = [f.name for f in Fields if f.name not in ["FID", "Shape", self.node_num_attribute]]
-        if len(Fields) > 0:
-            arcpy.DeleteField_management("streams", Fields)
-
         outfile = os.path.join(self.outpath, "{0}.shp".format(self.SFR_out[:-4]))
-        SFR_arcpy.general_join(outfile, "streams", self.node_num_attribute, "temp.dbf", self.node_num_attribute, keep_common=True)
+        if use_arcpy:
+            try:
+                import arcpy
+                import SFR_arcpy
+            except:
+                print 'module arcpy not found!'
+
+            # make feature/table layers
+            arcpy.env.workspace = self.outpath
+            arcpy.env.overwriteOutput = True
+            arcpy.CopyFeatures_management(self.streams_shp, self.streams_shp[:-4]+'_backup.shp')
+            arcpy.MakeFeatureLayer_management(self.streams_shp[:-4]+'_backup.shp', "streams")
+            arcpy.CopyRows_management(os.path.join(self.outpath, 'temp.csv'), os.path.join(self.outpath, 'temp.dbf'))
+
+
+            # drop all fields except for cellnum from stream linework
+            Fields = arcpy.ListFields("streams")
+            Fields = [f.name for f in Fields if f.name not in ["FID", "Shape", self.node_num_attribute]]
+            if len(Fields) > 0:
+                arcpy.DeleteField_management("streams", Fields)
+
+            SFR_arcpy.general_join(outfile, "streams", self.node_num_attribute, "temp.dbf", self.node_num_attribute, keep_common=True)
+
+        else:
+            GISops.join_csv2shp(self.streams_shp, self.node_num_attribute, os.path.join(self.outpath, 'temp.csv'), self.node_num_attribute, outfile, how='inner')
