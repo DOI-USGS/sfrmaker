@@ -8,8 +8,7 @@ from matplotlib.backends.backend_pdf import PdfPages
 from collections import defaultdict
 
 import sys
-sys.path.append('..\..\GIS_utils')
-pprint(sys.path)
+sys.path.append('..\GIS_utils')
 
 try:
     import GISops
