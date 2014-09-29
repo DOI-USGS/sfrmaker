@@ -7,12 +7,7 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 from collections import defaultdict
 
-import sys
-sys.path.append('../../GIS_utils')
-try:
-    import GISops
-except:
-    print 'GIS_utils.GISops not found!'
+
 
 
 class plot_elevation_profiles:
@@ -21,6 +16,10 @@ class plot_elevation_profiles:
 
         self.SFRdata = SFRdata
         self.elevs_by_cellnum = dict()
+
+        # read in the DIS file for structured grids
+        if self.SFRdata.gridtype == 'structured':
+            self.read_DIS()
 
 
     def read_DIS(self):
@@ -361,4 +360,10 @@ class plot_streamflows:
             SFR_arcpy.general_join(outfile, "streams", self.node_num_attribute, "temp.dbf", self.node_num_attribute, keep_common=True)
 
         else:
+            import sys
+            sys.path.append('../../GIS_utils')
+            try:
+                import GISops
+            except:
+                print 'GIS_utils.GISops not found!'
             GISops.join_csv2shp(self.streams_shp, self.node_num_attribute, os.path.join(self.outpath, 'temp.csv'), self.node_num_attribute, outfile, how='inner')

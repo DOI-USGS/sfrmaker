@@ -53,14 +53,18 @@ class SFRInput:
 
         inpars = inpardat.getroot()
 
+        # setup the working directory (default to current directory)
         try:
             self.working_dir = inpars.findall('.//working_dir')[0].text
-            os.path.isdir(self.working_dir)
+            if not os.path.exists(self.working_dir):
+                os.makedirs(self.working_dir)
         except:
             self.working_dir = os.getcwd()
 
-        if not os.path.exists(self.working_dir):
-            os.makedirs(self.working_dir)
+        # setup a temp directory for temp files
+        if not os.path.exists(os.path.join(self.working_dir, 'temp')):
+            os.makedirs(os.path.join(self.working_dir, 'temp'))
+
         os.chdir(self.working_dir)
         # note: compute_zonal is not needed, except for by the DEM_elevs_by_cellnum method,
         # which has been more or less replaced by DEM_elevs_by_FragID
@@ -147,6 +151,12 @@ class SFRInput:
         arcpy.env.qualifiedFieldNames = False
         # Check out any necessary arcpy licenses
         arcpy.CheckOutExtension("spatial")
+
+        # read in grid type
+        try:
+            self.gridtype = inpars.findall('.//grid_type')[0].text
+        except:
+            self.gridtype = 'structured'
 
         # read in model information
         self.DX, self.DY, self.NLAY, self.NROW, self.NCOL, i = disutil.read_meta_data(self.MFdis)
@@ -437,10 +447,16 @@ class COMIDPropsAll:
 
         CLIP = np.loadtxt(os.path.join(SFRdata.working_dir, 'boundaryClipsRouting.txt'), skiprows=1, delimiter=',', dtype=int)
 
+        # no streams cross the model active area boundary
         if len(CLIP) == 0:
             print "Warning! boundaryClipsRouting.txt is empty. This implies that there are no NHD streams crossing" \
                 "the boundary of the SFR area specified by ()".format(SFRdata.MFdomain)
             CLIP = np.zeros((1, 2))
+
+        # edge case where there is only one stream that intersects the model active area boundary
+        elif len(np.shape(CLIP)) == 1:
+            CLIP = np.expand_dims(CLIP, axis=0)
+
         for ccomid in FragIDdata.allcomids:
             self.allcomids[ccomid] = COMIDprops()
 
@@ -774,6 +790,7 @@ class SFRSegmentsAll:
         self.levelpaths_segments = dict()
 
     def divide_at_confluences(self, LevelPathdata, FragIDdata, COMIDdata, CELLdata, SFRdata):
+
         #establish provisional segment numbers from downstream (descending)
         #list of levelpathIDs
         provSFRseg = dict()
@@ -1406,8 +1423,8 @@ class SFRpreproc:
         arcpy.Dissolve_management(indat.CELLS, indat.CELLS_DISS, SFRoperations.joinnames[indat.node_attribute])
 
         print "Exploding NHD segments to grid cells using Intersect and Multipart to Singlepart..."
-        arcpy.Intersect_analysis([indat.CELLS_DISS, "Flowlines"], os.path.join(indat.working_dir, "tmp_intersect.shp"))
-        arcpy.MultipartToSinglepart_management(os.path.join(indat.working_dir, "tmp_intersect.shp"), indat.intersect)
+        arcpy.Intersect_analysis([indat.CELLS_DISS, "Flowlines"], os.path.join(indat.working_dir, "temp/tmp_intersect.shp"))
+        arcpy.MultipartToSinglepart_management(os.path.join(indat.working_dir, "temp/tmp_intersect.shp"), indat.intersect)
         print "\n"
         print "Adding in stream geometry"
         #set up list and dictionary for fields, types, and associated commands
@@ -1604,20 +1621,20 @@ class SFROperations:
         arcpy.MakeFeatureLayer_management(self.SFRdata.MFdomain, 'grid_lyr')
         print "selecting streams that cross model grid boundary..."
         arcpy.SelectLayerByLocation_management('nhd_lyr', 'CROSSED_BY_THE_OUTLINE_OF', 'grid_lyr')
-        arcpy.CopyFeatures_management('nhd_lyr', os.path.join(self.SFRdata.working_dir, 'intersect.shp'))
+        arcpy.CopyFeatures_management('nhd_lyr', os.path.join('temp/intersect.shp'))
 
         #copy the model NHD streams to a temp shapefile, find the ends that match
         #the streams that were clipped by the boundary and update the lengthKm,
         #minsmoothelev, maxsmoothelev in the MODLNHD
-        if arcpy.Exists(os.path.join(self.SFRdata.working_dir, 'temp.shp')):
+        if arcpy.Exists('temp/temp.shp'):
             print 'first removing old version of temp.shp'
-            arcpy.Delete_management(os.path.join(self.SFRdata.working_dir, 'temp.shp'))
-        arcpy.CopyFeatures_management(self.SFRdata.Flowlines, os.path.join(self.SFRdata.working_dir, 'temp.shp'))
+            arcpy.Delete_management('temp/temp.shp')
+        arcpy.CopyFeatures_management(self.SFRdata.Flowlines, 'temp/temp.shp')
 
         #add fields for start, end, and length to the temp and intersect
         #shapefiles  (use LENKM as field name because temp already has LENGHTKM)
         print "adding fields for start, end and length..."
-        shapelist = (os.path.join(self.SFRdata.working_dir, 'temp.shp'), os.path.join(self.SFRdata.working_dir, 'intersect.shp'))
+        shapelist = ('temp/temp.shp', 'temp/intersect.shp')
         for shp in shapelist:
             arcpy.AddField_management(shp, 'STARTX', 'DOUBLE')
             arcpy.AddField_management(shp, 'STARTY', 'DOUBLE')
@@ -1646,7 +1663,7 @@ class SFROperations:
         eps = self.SFRdata.eps
         # make a list of COMIDs that are found for later reference
         comidlist = []
-        intersects = arcpy.SearchCursor(os.path.join(self.SFRdata.working_dir, 'intersect.shp'))
+        intersects = arcpy.SearchCursor('temp/intersect.shp')
         manual_intervention = 0
         cutoff_comids = []
         for stream in intersects:
@@ -1657,7 +1674,7 @@ class SFROperations:
             endx = stream.ENDX
             endy = stream.ENDY
             lenkm = stream.LENKM
-            clippedstream = arcpy.SearchCursor('temp.shp', query)
+            clippedstream = arcpy.SearchCursor('temp/temp.shp', query)
             for clip in clippedstream:
                 clstx = clip.STARTX
                 clsty = clip.STARTY
@@ -1747,7 +1764,7 @@ class SFROperations:
         print "\nSetting up the elevation table --> {0:s}".format(self.SFRdata.rivers_table)
         if arcpy.Exists(self.SFRdata.rivers_table):
             arcpy.Delete_management(self.SFRdata.rivers_table)
-        arcpy.CreateTable_management(self.SFRdata.working_dir, os.path.split(self.SFRdata.rivers_table)[-1])
+        arcpy.CreateTable_management(os.path.split(self.SFRdata.rivers_table)[0], os.path.split(self.SFRdata.rivers_table)[-1])
         arcpy.AddField_management(self.SFRdata.rivers_table, "OLDFragID", "LONG")
         arcpy.AddField_management(self.SFRdata.rivers_table, self.SFRdata.node_attribute, "LONG")
         arcpy.AddField_management(self.SFRdata.rivers_table, "ELEVMAX", "DOUBLE")
