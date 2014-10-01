@@ -2909,6 +2909,7 @@ class SFRoutput:
         Mat2.index = Mat2['segment']
         Mat2upsegs = pd.Series(Mat2['segment'].values, index=Mat2['outseg']).to_dict()
         print "making shapefile of SFR network using {}...".format(self.indat.CELLS_DISS)
+        print "writing {}...".format(self.indat.GISSHP)
         knt = 0
         nSFRcells = len(Mat1)
         with collection(self.indat.CELLS_DISS, "r") as input:

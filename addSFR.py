@@ -16,27 +16,13 @@ import smooth_streambed as sm
 from collections import defaultdict
 
 # input files
-MFgrid = 'D:/ATLData/LittlePlover/input/LPRgrid.shp'
+MFgrid = 'D:/ATLData/LittlePlover/grid/LPRgrid_atl.shp'
 MFdomain = 'D:/ATLData/LittlePlover/input/LPR_model_nearfield_revised_line.shp' # must be a single part line
-MFgrid_node_attribute = 'cellnum' # name of attribute field containing node numbers
+MFgrid_node_attribute = 'node' # name of attribute field containing node numbers
 DEM = 'D:/ATLData/LittlePlover/input/DEM10mwtm_ft'
 stream_linework = ['D:/ATLData/LittlePlover/input/LPR_ditches.shp',
                    'D:/ATLData/LittlePlover/input/canal_flowlines.shp',
                    'D:/ATLData/LittlePlover/input/flowlines_clipped_mk.shp'] # already clipped to model grid and lake superior
-
-existing_SFR_linework = 'D:/ATLData/LittlePlover/intermediate/river_explode.shp' # (must be broken up by cell and contain cellnum)
-existing_sfr_shp = 'D:/ATLData/LittlePlover/SFRfinal_riv_cellinfo.shp'
-existing_sfr_node_attribute = 'cellnum' # name of attribute field containing node numbers (also applies to existing linework)
-existing_sfr_elevation_attribute = 'sb_elev'
-Mat1file = 'D:/ATLData/LittlePlover/SFRmat1.txt'
-Mat2file = 'D:/ATLData/LittlePlover/SFRmat2.txt'
-DISfile = 'D:/ATLData/LittlePlover/input/LPR_Mod_refined30m.dis'
-
-# read in SFR tables
-Mat1 = pd.read_csv(Mat1file)
-Mat2 = pd.read_csv(Mat2file)
-nsegments = int(np.max(Mat1['segment']))
-nreaches = len(Mat1['segment'])
 
 # settings
 from_scratch = True # True/False: whether a new SFR dataset is being created (instead of adding to existing data)
@@ -48,9 +34,28 @@ width_in_cell = 5 # constant width for all new SFR reaches
 bed_slope = 1e-4
 
 # pull generic settings from Mat1
-bed_K = np.mean(Mat1['bed_K'])
-bed_thickness = np.min(Mat1['bed_thickness'])
-bed_roughness = np.mean(Mat1['bed_roughness'])
+bed_K = 1
+bed_thickness = 3
+bed_roughness = 0.037
+
+
+existing_SFR_linework = None # (must be broken up by cell and contain cellnum)
+existing_sfr_shp = None
+existing_sfr_node_attribute = None # name of attribute field containing node numbers (also applies to existing linework)
+existing_sfr_elevation_attribute = None
+Mat1file = None
+Mat2file = None
+DISfile = 'D:/ATLData/LittlePlover/input/LPR_Mod_refined30m.dis'
+nreaches = 0
+
+if not from_scratch:
+    # read in SFR tables
+    Mat1 = pd.read_csv(Mat1file)
+    Mat2 = pd.read_csv(Mat2file)
+    nsegments = int(np.max(Mat1['segment']))
+    nreaches = len(Mat1['segment'])
+
+
 
 # intermediate files
 stream_cells = 'D:/ATLData/LittlePlover/added_streams/new_stream_cells.shp'
@@ -59,8 +64,8 @@ stream_fragments = 'D:/ATLData/LittlePlover/added_streams/new_streams_fragments.
 stream_fragments_points = 'D:/ATLData/LittlePlover/added_streams/new_streams_fragments_points.shp'
 
 # output files
-Mat1_updated = 'D:/ATLData/LittlePlover/Mat1_with_new_streams.csv'
-Mat2_updated = 'D:/ATLData/LittlePlover/Mat2_with_new_streams.csv'
+Mat1_updated = 'D:/ATLData/LittlePlover/Mat1.csv'
+Mat2_updated = 'D:/ATLData/LittlePlover/Mat2.csv'
 stream_cells_updated = 'D:/ATLData/LittlePlover/SFR_cells_with_new_streams.shp'
 SFR_linework_updated = 'D:/ATLData/LittlePlover/SFR_lines_with_new_streams.shp'
 
@@ -141,8 +146,10 @@ if not isinstance(stream_linework, basestring):
     for lw in stream_linework:
         print lw
     merged_linework = os.path.join(os.path.split(stream_linework[0])[0], 'input_linework.shp')
-    arcpy.Merge_management(stream_linework, merged_linework)
+    arcpy.Merge_management(stream_linework, 'temp.shp')
+    arcpy.Dissolve_management('temp.shp', merged_linework) # remove overlapping features
     stream_linework = merged_linework
+    arcpy.Delete_management('temp.shp')
 
 arcpy.SpatialJoin_analysis(MFgrid, stream_linework,
                            stream_cells,
@@ -154,16 +161,19 @@ arcpy.Dissolve_management(stream_cells, stream_cells_dissolve, MFgrid_node_attri
 
 print "Exploding new stream linework to grid cells using Intersect and Multipart to Singlepart..."
 arcpy.Intersect_analysis([stream_cells_dissolve, stream_linework], "tmp_intersect.shp")
-#arcpy.MultipartToSinglepart_management("tmp_intersect.shp", stream_fragments)
 arcpy.MultipartToSinglepart_management("tmp_intersect.shp", stream_fragments)
 
-print "Removing linework that overlaps with existing SFR cells..."
+# make a new feature layer from exploded shape file
 arcpy.MakeFeatureLayer_management(stream_fragments, 'stream_fragments')
-arcpy.MakeFeatureLayer_management(existing_sfr_shp, 'existing_sfr_cells')
-# use "WITHIN"; "INTERSECT" was also deleting fragments that touched existing cells
-arcpy.SelectLayerByLocation_management('stream_fragments', "INTERSECT", 'existing_sfr_cells', "", "NEW_SELECTION")
-arcpy.DeleteFeatures_management('stream_fragments')
-#arcpy.CopyFeatures_management('stream_fragments', stream_fragments) # save layer to shapefile
+
+if not from_scratch:
+    print "Removing linework that overlaps with existing SFR cells..."
+    arcpy.MakeFeatureLayer_management(existing_sfr_shp, 'existing_sfr_cells')
+    # use "WITHIN"; "INTERSECT" was also deleting fragments that touched existing cells
+    arcpy.SelectLayerByLocation_management('stream_fragments', "INTERSECT", 'existing_sfr_cells', "", "NEW_SELECTION")
+    arcpy.DeleteFeatures_management('stream_fragments')
+    #arcpy.CopyFeatures_management('stream_fragments', stream_fragments) # save layer to shapefile
+
 
 print "Adding in stream geometry..."
 #set up list and dictionary for fields, types, and associated commands
@@ -202,10 +212,12 @@ for reaches in table:
 print "\nremoved %s reaches with lengths <= %s\n" % (count, reach_cutoff)
 ofp.write("removed %s reaches with lengths <= %s\n" % (count, reach_cutoff))
 
+
 # create a unique ID for each new stream fragment using FID and number of existing reaches
 arcpy.AddField_management('stream_fragments', "FragID", "LONG")
 arcpy.CalculateField_management('stream_fragments', "FragID", "!FID! + {0:d}".format(nreaches), "PYTHON")
 #arcpy.CopyFeatures_management('stream_fragments', stream_fragments) # save layer to shapefile
+
 
 print "creating pandas DataFrame of new SFR cell information..."
 
@@ -225,8 +237,9 @@ for line in stream_fragments_shp:
 new_streamcells_df = pd.DataFrame.from_dict(new_streamcells, orient='index')
 new_streamcells_df.index = new_streamcells_df['FragID']
 
+
 print "\nestablishing segments"
-tol = 1.0
+tol = reach_cutoff/np.sqrt(2) # tol below considers x and y distances individually (not the diagonal)
 new_streamcells_df['Segment'] = np.zeros((len(new_streamcells_df)))
 new_streamcells_df['Reach'] = np.zeros((len(new_streamcells_df)))
 
@@ -239,16 +252,37 @@ else:
     last_existing_seg = 0
 
 n_newcells = len(new_streamcells_df)
+
+# make vectors of start and end locations for segments
+# not sure if this is faster than simply indexing/slicing in pandas or not
+xstarts, ystarts = new_streamcells_df['X_start'].values, new_streamcells_df['Y_start'].values
+xends, yends = new_streamcells_df['X_end'].values, new_streamcells_df['Y_end'].values
+
+assignedFragIDs = [] # keep track of frag IDs that have already been considered to minimize tests with np.where
+
 for FragID in new_streamcells_df.index:
+    '''
+    This loop is pretty slow!, probably not ideal for large stream networks (>100 segments)
+    '''
+    if FragID == 1221:
+        j=2
+    # ignore fragments that have already been assigned to segments
+    if FragID in assignedFragIDs:
+        continue
+
     # check if there is anything upstream
-    up = np.where((np.abs(new_streamcells_df['X_end'] - new_streamcells_df.ix[FragID, 'X_start']) < tol ) &
-                    (np.abs(new_streamcells_df['Y_end'] - new_streamcells_df.ix[FragID, 'Y_start']) < tol))[0]
+    xstart, ystart = new_streamcells_df.ix[FragID, ['X_start', 'Y_start']].values
+
+    up = np.where((np.abs(xends - xstart) < tol ) & (np.abs(yends - ystart) < tol))[0]
+
+    # test for upstream divergence (if one is found, make a new segment)
+    up_div = np.where((np.abs(xstarts - xstart) < tol ) & (np.abs(ystarts - ystart) < tol))[0]
 
     # if there is nothing upstream, or if the current fragment is at a confluence, record segment and then look downstream
     # this will likely result in segment numbers increasing downstream!
     at_end = False
     reach = 1
-    if len(up) == 0 or len(up) > 1:
+    if len(up) == 0 or len(up) > 1 or len(up_div) > 1:
         seg += 1
         print "\r{:d}".format(seg),
         #print "\nsegment: {}, reaches:".format(seg),
@@ -278,6 +312,7 @@ for FragID in new_streamcells_df.index:
             if len(down_of_down) == 0:
                 new_streamcells_df.ix[down, 'Segment'] = seg
                 new_streamcells_df.ix[down, 'Reach'] = reach
+                assignedFragIDs.append(down) # record fragments that were already assigned to segments
                 #print "{} ".format(reach),
                 at_end = True
                 break
@@ -286,9 +321,9 @@ for FragID in new_streamcells_df.index:
             else:
                 new_streamcells_df.ix[down, 'Segment'] = seg
                 new_streamcells_df.ix[down, 'Reach'] = reach
+                assignedFragIDs.append(down)
                 FragID = down
                 #print "{} ".format(reach),
-
     else:
         continue
 new_streamcells_df.to_csv('out_segments.csv')
@@ -315,6 +350,7 @@ for seg in new_segs:
                     (np.abs(new_streamcells_df['Y_start'] - data.iloc[-1]['Y_end']) < tol))[0]
 
     if len(out) > 0:
+
         out_idx = new_streamcells_df.index[out][0]
         new_streamcells_df.Outseg[new_streamcells_df['Segment'] == seg] = new_streamcells_df.ix[out_idx, "Segment"]
 
@@ -351,11 +387,11 @@ for seg in new_segs:
 # for now, leave in unrouted segments
 
 print "\nassigning elevations from DEM..."
-
+'''
 print "Intersecting \n{} \nfragments with \n{}...".format(stream_fragments, DEM)
 # convert end vertices of river_explode Fragments to points
 arcpy.FeatureVerticesToPoints_management(stream_fragments, stream_fragments_points)
-
+'''
 # add FragID field identifying unique river_explode segments if one doesn't exist
 arcpy.MakeFeatureLayer_management(stream_fragments, "river_explode")
 Fields = [f.name.lower() for f in arcpy.ListFields("river_explode")]
@@ -448,7 +484,7 @@ topdata, i = disutil.read_nrow_ncol_vals(DISfile, NROW, NCOL, np.float, i)
 
 print "creating new Mat 1..."
 # lookup row column from node number
-X, Y = np.meshgrid(np.arange(NROW), np.arange(NCOL))
+X, Y = np.meshgrid(np.arange(1, NCOL+1), np.arange(1, NROW+1))
 cr = np.vstack([X.ravel(), Y.ravel()])
 
 Mat1_new_dict = {}
@@ -462,8 +498,8 @@ for cell in new_streamcells_df.index:
         seg, reach = int(new_streamcells_df.ix[cell, 'Segment']), int(new_streamcells_df.ix[cell, 'Reach'])
         sbtop = elevations_sm[seg][reach-1]
 
-        reach_props = {'row': r + 1,
-                       'column': c + 1,
+        reach_props = {'row': r,
+                       'column': c,
                        'layer': 1,
                        'stage': sbtop + 1,
                        'top_streambed': sbtop,
@@ -518,7 +554,7 @@ if not from_scratch:
     Mat2 = Mat2.append(Mat2_new)
     Mat2.to_csv(Mat2_updated, index=False)
 else:
-    Mat2.to_csv(Mat2_updated, index=False)
+    Mat2_new.to_csv(Mat2_updated, index=False)
 
 # if adding to existing SFR dataset, combine new info with existing
 # otherwise it is easier just to run buildSFRshapefile2 with new Mat 1 and Mat2
@@ -572,6 +608,7 @@ if not from_scratch:
 
 
     ofp.close()
+
     print "Done"
 
 

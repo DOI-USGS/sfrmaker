@@ -5,7 +5,12 @@ import numpy as np
 import discomb_utilities as disutil
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
-from collections import defaultdict
+import shutil
+
+
+import fiona
+from shapely.geometry import Polygon, mapping
+import pandas as pd
 
 
 
@@ -23,19 +28,78 @@ class plot_elevation_profiles:
 
 
     def read_DIS(self):
-        DX, DY, NLAY, NROW, self.NCOL, i = disutil.read_meta_data(self.SFRdata.MFdis)
+        DX, DY, NLAY, self.NROW, self.NCOL, i = disutil.read_meta_data(self.SFRdata.MFdis)
 
         # get layer tops/bottoms
-        self.layer_elevs = np.zeros((NLAY+1, NROW, self.NCOL))
+        self.layer_elevs = np.zeros((NLAY+1, self.NROW, self.NCOL))
         for c in range(NLAY + 1):
-            tmp, i = disutil.read_nrow_ncol_vals(self.SFRdata.MFdis, NROW, self.NCOL, 'float', i)
+            tmp, i = disutil.read_nrow_ncol_vals(self.SFRdata.MFdis, self.NROW, self.NCOL, 'float', i)
             self.layer_elevs[c, :, :] = tmp
 
         # make dictionary of model top elevations by cellnum
         for c in range(self.NCOL):
-            for r in range(NROW):
+            for r in range(self.NROW):
                 cellnum = r*self.NCOL + c + 1
                 self.elevs_by_cellnum[cellnum] = self.layer_elevs[0, r, c]
+
+
+    # function to reshape distances and elevations to plot actual cell elevations (flat tops)
+    def cells2vertices(self, elevations, distance=False):
+        if distance:
+            reshaped = [0]
+        else:
+            reshaped = []
+        for i in range(len(elevations)):
+            reshaped.append(elevations[i])
+            reshaped.append(elevations[i])
+        if distance:
+            reshaped = reshaped[:-1] # trim last, since last seg distances denotes end of last reach
+        return reshaped
+
+
+    def plot_Mat1_profiles(self, outpdf='Segment_profiles.pdf', interval=1, units='ft'):
+
+        print 'plotting SFR segment profiles from Mat1...'
+        try:
+            import pandas as pd
+        except:
+            raise Exception("Requires pandas module, which doesn't seem to be installed")
+
+        m1 = pd.read_csv(self.SFRdata.MAT1)
+
+        # assign node numbers if they aren't in Mat1
+        try:
+            m1[self.SFRdata.node_attribute]
+        except:
+            m1[self.SFRdata.node_attribute] = (self.NCOL * (m1['row'] - 1) + m1['column']).astype('int')
+
+        # add model top elevations to dictionary using node numbers
+        m1['model_top'] = [self.elevs_by_cellnum[c] for c in m1[self.SFRdata.node_attribute]]
+
+        segs2plot = sorted(np.unique(m1['segment']))[::interval]
+
+        pdf = PdfPages(outpdf)
+        for seg in segs2plot:
+            print '\r{}'.format(seg),
+            df = m1[m1['segment'] == seg].sort('reach')
+            df['distance'] = np.cumsum(df['length_in_cell'])
+
+            dist = self.cells2vertices(df['distance'].tolist(), distance=True)
+            sbtops = self.cells2vertices(df['top_streambed'].tolist())
+            modeltops = self.cells2vertices(df['model_top'].tolist())
+
+            fig = plt.figure()
+            ax = fig.add_subplot(111)
+            plt.plot(dist, modeltops, label='Model top')
+            plt.plot(dist, sbtops, label='Streambed top')
+            ax.set_xlabel('Distance along SFR segment')
+            ax.set_ylabel('Elevation, {}'.format(units))
+            ax.set_title('SFR segment {}'.format(seg))
+            ax.set_ylim(int(np.floor(ax.get_ylim()[0])), int(np.ceil(ax.get_ylim()[1])))
+            plt.legend()
+            pdf.savefig()
+            plt.close()
+        pdf.close()
 
 
     def get_comid_plotting_info(self, FragIDdata, COMIDdata, SFRdata, interval=False):
@@ -306,12 +370,14 @@ class plot_streamflows:
                 seg_rch_info = 'segs  rchs: '
 
             # determine state
-            if loss > 0:
+            if flow == 0:
+                state = 'dry'
+            elif loss > 0:
                 state = 'loosing'
             elif loss < 0:
                 state = 'gaining'
             else:
-                state = 'dry'
+                print 'Stream reach in cell {} has flow, but no interaction with aquifer.'.format(cellnum)
 
             self.flow_by_cellnum[cellnum] = existingflow + flow
             self.seg_rch_by_cellnum[cellnum] = seg_rch_info + seg_rch
@@ -367,3 +433,126 @@ class plot_streamflows:
             except:
                 print 'GIS_utils.GISops not found!'
             GISops.join_csv2shp(self.streams_shp, self.node_num_attribute, os.path.join(self.outpath, 'temp.csv'), self.node_num_attribute, outfile, how='inner')
+
+
+class SFRshapefile:
+    '''
+    Allow for a shapefile to be constructed independent of other shapefiles or main SFR program
+    (for usg, will need to bring in another file with node geometric information)
+    '''
+
+    def __init__(self, SFRdata, xll=0, yll=0, mult=1, prj=None):
+
+        self.SFRdata = SFRdata
+        self.xll = xll
+        self.yll = yll
+        self.mult = mult # convert model units to GIS units
+        self.outshape = self.SFRdata.GISSHP
+        self.elevs_by_cellnum = {}
+        self.prj = prj
+
+        # read in Mat 1 and 2
+        self.m1 = pd.read_csv(self.SFRdata.MAT1).sort(['segment', 'reach'])
+        self.m2 = pd.read_csv(self.SFRdata.MAT2)
+        self.m2.index = self.m2.segment
+        self.upsegs = pd.Series(self.m2.segment, index=self.m2.outseg).to_dict()
+        self.nSFRcells = len(self.m1)
+
+        # read information for structured grids
+        if self.SFRdata.gridtype == 'structured':
+            self.read_DIS()
+
+            # add cell geometries to Mat1
+            self.m1['geometry'] = [self.cell_geometry_from_rc(self.m1.ix[i, 'row'], self.m1.ix[i, 'column'])
+                                   for i in self.m1.index]
+
+            # add node numbers to Mat1
+            self.m1[self.SFRdata.node_attribute] = (self.NCOL * (self.m1['row'] - 1) + self.m1['column']).astype('int')
+
+        # add model tops to Mat1
+        self.m1['model_top'] = [self.elevs_by_cellnum[c] for c in self.m1[self.SFRdata.node_attribute]]
+
+
+    def read_DIS(self):
+        self.DX, self.DY, self.NLAY, self.NROW, self.NCOL, i = disutil.read_meta_data(self.SFRdata.MFdis)
+
+        self.DX *= self.mult
+        self.DY = (self.DY * self.mult)[::-1]
+        self.delx = np.append(np.diff(self.DX), np.diff(self.DX)[-1]) # add another spacing on because the vector doesn't include distal edge of grid
+        self.dely = np.append(np.diff(self.DY), np.diff(self.DY)[-1])
+
+        # get layer tops/bottoms
+        self.layer_elevs = np.zeros((self.NLAY+1, self.NROW, self.NCOL))
+        for c in range(self.NLAY + 1):
+            tmp, i = disutil.read_nrow_ncol_vals(self.SFRdata.MFdis, self.NROW, self.NCOL, 'float', i)
+            self.layer_elevs[c, :, :] = tmp
+
+        # make dictionary of model top elevations by cellnum
+        for c in range(self.NCOL):
+            for r in range(self.NROW):
+                cellnum = r*self.NCOL + c + 1
+                self.elevs_by_cellnum[cellnum] = self.layer_elevs[0, r, c]
+
+
+    def cell_geometry_from_rc(self, r, c):
+
+        # calculate vertices for parent cell
+        x0 = self.DX[c-1] + self.xll
+        x1 = x0 + self.delx[c-1]
+        y0 = self.DY[r-1] + self.yll
+        y1 = y0 - self.dely[r-1]
+
+        return Polygon([(x0, y0), (x1, y0), (x1, y1), (x0, y1), (x0, y0)])
+
+
+    def build(self):
+        '''
+        Build the shapefile
+        '''
+
+        schema = {'geometry': 'Polygon',
+                      'properties': {self.SFRdata.node_attribute: 'int',
+                                     'row': 'int',
+                                     'column': 'int',
+                                     'layer': 'int',
+                                     'segment': 'int',
+                                     'reach': 'int',
+                                     'outseg': 'int',
+                                     'upseg': 'int',
+                                     'sb_elev': 'float',
+                                     'modeltop': 'float'}}
+
+        with fiona.collection(self.SFRdata.GISSHP, "w", "ESRI Shapefile", schema) as output:
+
+            knt = 0
+            for i in range(self.nSFRcells):
+
+                print "\r{:d}%".format(100 * knt / self.nSFRcells),
+                knt += 1
+
+                segment = int(self.m1.ix[i, 'segment'])
+                outseg = int(self.m2.ix[segment, 'outseg'])
+
+                # handle headwaters (no upseg)
+                try:
+                    self.upsegs[segment]
+                except KeyError:
+                    self.upsegs[segment] = 0
+
+                # shapefiles are incompatible with int64.
+                # but apparently they are compatible with float64 ARGH!
+                output.write({'properties': {
+                                             self.SFRdata.node_attribute: self.m1.ix[i, self.SFRdata.node_attribute],
+                                             'row': self.m1.ix[i, 'row'].astype('int32'),
+                                             'column': self.m1.ix[i, 'column'].astype('int32'),
+                                             'layer': self.m1.ix[i, 'layer'].astype('int32'),
+                                             'segment': int(segment),
+                                             'reach': self.m1.ix[i, 'reach'].astype('int32'),
+                                             'outseg': outseg,
+                                             'upseg': np.int32(self.upsegs[segment]),
+                                             'sb_elev': self.m1.ix[i, 'top_streambed'],
+                                             'modeltop': self.m1.ix[i, 'model_top']},
+                              'geometry': mapping(self.m1.ix[i, 'geometry'])})
+
+        if self.prj:
+            shutil.copyfile(self.prj, self.SFRdata.GISSHP[:-4] + '.prj')
