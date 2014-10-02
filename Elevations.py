@@ -7,14 +7,21 @@ import numpy as np
 import pandas as pd
 import discomb_utilities as disutil
 
+
+
+
+
+
+
 class SFRdata(object):
 
-    def __init__(self, Mat1, Mat2, landsurface, nrow=2, ncol=2, node_column=None):
+    def __init__(self, Mat1, Mat2, landsurface=None, nrow=2, ncol=2, node_column=None):
 
+        # read Mats 1 and 2
         self.m1 = pd.read_csv(Mat1).sort(['segment', 'reach'])
         self.m2 = pd.read_csv(Mat2).sort('segment')
         self.m2.index = self.m2.segment
-        self.landsurface = np.fromfile(landsurface, sep=' ') # array of elevations to use (sorted by cellnumber)
+
         self.nrow = nrow
         self.ncol = ncol
 
@@ -27,8 +34,11 @@ class SFRdata(object):
         else:
             self.node_column = node_column
 
-        # assign land surface elevations based on node number
-        self.m1['landsurface'] = [self.landsurface[c] for c in self.m1[node_column]]
+        if landsurface:
+            self.landsurface = np.fromfile(landsurface, sep=' ') # array of elevations to use (sorted by cellnumber)
+
+            # assign land surface elevations based on node number
+            self.m1['landsurface'] = [self.landsurface[c] for c in self.m1[node_column]]
 
         # assign upstream segments to Mat2
         self.m2['upsegs'] = [self.m2.segment[self.m2.outseg == s].tolist() for s in self.segments]
@@ -40,69 +50,18 @@ class SFRdata(object):
                              'Fix manually in Mat2 before continuing'.format(', '.join(map(str, c))))
 
 
-class smooth(SFRdata):
-
-    def check4backwards(self):
+    def map_outsegs(self):
         '''
-        check for segments where the constraining elevations (in up/downstream segments) are against routing dir
-        tests up to max elevation of upstream segment and min elevation of downstream segment
-        a more general approach would expand the search until a higher elevation was encountered upstream,
-        or until a headwater or outlet was encountered.
+        from Mat2, returns dataframe of all downstream segments (will not work with circular routing!)
         '''
-
-        # assign constraining (upstream min, downstream max) elevations to each segment in Mat2
-        self.m2['upstreamMin'] = [np.min([self.seg_maxmin[useg-1][1] for useg in self.m2.ix[s, 'upsegs']])
-                                  if len(self.m2.ix[s, 'upsegs']) > 0
-                                  else self.seg_maxmin[s-1][0] for s in self.m2.index]
-        self.m2['upstreamMax'] = [np.min([self.seg_maxmin[useg-1][0] for useg in self.m2.ix[s, 'upsegs']])
-                                  if len(self.m2.ix[s, 'upsegs']) > 0
-                                  else self.seg_maxmin[s-1][0] for s in self.m2.index]
-
-        self.m2['downstreamMax'] = [self.seg_maxmin[s-1][0] for s in self.m2.outseg]
-        self.m2['downstreamMin'] = [self.seg_maxmin[s-1][1] for s in self.m2.outseg]
-
-
-
-
-
-
-        # set the maximum (starting) elevation in all segments to the upstream minimum
-        self.seg_maxmin = np.array([(self.m2.upstreamMin.values[s-1], self.seg_maxmin[s-1][1]) for s in self.segments])
-
-        # check for higher minimum elevations in each segment
-        bw = dict([(i, maxmin) for i, maxmin in enumerate(self.seg_maxmin) if maxmin[0] < maxmin[1]])
-
-        # assign any violating minimum elevations to downstream max, check again
-        if len(bw) > 0:
-            bw_inds = bw.keys()
-            #self.lower_downstream(bw_inds, )
-
-
-        # identify segments where the upstream min is less than the downstream max
-        bw_inds1 = np.where((self.m2.upstreamMin.values - self.m2.downstreamMax.values) < 0)[0]
-
-        # set the maximum (starting) elevation in these segments to the upstream minimum
-        self.seg_maxmin[bw_inds1] = [(self.m2.upstreamMin.values[b], self.seg_maxmin[b][1]) for b in bw_inds1]
-
-        # if first level (immediately adjoining ends up up/down segments) is backwards, check next level
-        # (if min in downstream segment is > min in upstream segment)
-        if len(bw_inds1) > 0:
-            bw_inds2 = np.where((self.m2.upstreamMin.values - self.m2.downstreamMin.values) < 0)[0]
-
-
-
-    def get_outsegs(self):
-        '''
-        returns dataframe of all downstream segments (will not work with circular routing!)
-        '''
-        outsegs = pd.DataFrame(self.m2.outseg)
-        max_outseg = np.max(outsegs[outsegs.columns[-1]])
+        self.outsegs = pd.DataFrame(self.m2.outseg)
+        max_outseg = np.max(self.outsegs[self.outsegs.columns[-1]])
         knt = 2
         nsegs = len(self.m2)
         while max_outseg > 0:
-            outsegs['outseg{}'.format(knt)] = [self.m2.outseg[s] if s > 0 else 0 for s in outsegs[outsegs.columns[-1]]]
-            max_outseg = np.max(outsegs[outsegs.columns[-1]])
-            print max_outseg
+            self.outsegs['outseg{}'.format(knt)] = [self.m2.outseg[s] if s > 0 else 0
+                                                    for s in self.outsegs[self.outsegs.columns[-1]]]
+            max_outseg = np.max(self.outsegs[self.outsegs.columns[-1]])
             if max_outseg == 0:
                 break
             knt +=1
@@ -110,27 +69,127 @@ class smooth(SFRdata):
                 print 'Circular routing encountered in segment {}'.format(max_outseg)
                 break
 
-        return outsegs
 
 
-    def lower_downstream(self, bw_inds, downstream):
-        self.seg_maxmin[bw_inds] = np.array([(self.seg_maxmin[i][0], downstream[i]) for i in bw_inds])
+class smooth(SFRdata):
 
+    def segment_ends(self):
+        '''
+        check for segments where the constraining elevations (in up/downstream segments) are against routing dir
+        tests up to max elevation of upstream segment and min elevation of downstream segment
+        a more general approach would expand the search until a higher elevation was encountered upstream,
+        or until a headwater or outlet was encountered.
+        '''
 
-    def fix_backwards(self):
-
-        # determine min and max elevations for each segment
+        # set initial max / min elevations for segments based on max and min land surface elevations along each segment
         self.seg_maxmin = np.array([(np.max(self.m1.landsurface[self.m1.segment == s]),
                       np.min(self.m1.landsurface[self.m1.segment == s])) for s in self.segments])
 
-        # check if there are any min elevations in upstream segments that are below max elevations in downstream segments
-        bw = self.check4backwards()
+        # determine constraining upstream min elevations for each segment in Mat2
+        upstreamMin = np.array([np.min([self.seg_maxmin[useg-1][1] for useg in self.m2.ix[s, 'upsegs']])
+                                  if len(self.m2.ix[s, 'upsegs']) > 0
+                                  else self.seg_maxmin[s-1][0] for s in self.m2.index])
 
-        #if len(bw) > 0:
+        # if the upstream minimum elevation is lower than the max elevation in the segment,
+        # reset the max to the upstream minimum
+        self.seg_maxmin = np.array([(upstreamMin[s-1], self.seg_maxmin[s-1][1])
+                                    if upstreamMin[s-1] < self.seg_maxmin[s-1][0]
+                                    else self.seg_maxmin[s-1] for s in self.segments])
+
+        # check for higher minimum elevations in each segment
+        bw = dict([(i, maxmin) for i, maxmin in enumerate(self.seg_maxmin) if maxmin[0] < maxmin[1]])
 
 
+        if len(bw) > 0:
 
-    def smoothDownstream(self):
+            self.map_outsegs() # creates dataframe of all outsegs for each segment
+
+            self.fix_backwards_ends(bw) # iterate through the mapped outsegs, replacing minimum elevations until there are no violations
+
+
+        # populate Mat2 dataframe with bounding elevations for upstream and downstream segments, so they can be checked
+        self.m2['upstreamMin'] = [np.min([self.seg_maxmin[useg-1][1] for useg in self.m2.ix[s, 'upsegs']])
+                                  if len(self.m2.ix[s, 'upsegs']) > 0
+                                  else self.seg_maxmin[s-1][0] for s in self.m2.index]
+        self.m2['upstreamMax'] = [np.min([self.seg_maxmin[useg-1][0] for useg in self.m2.ix[s, 'upsegs']])
+                                  if len(self.m2.ix[s, 'upsegs']) > 0
+                                  else self.seg_maxmin[s-1][0] for s in self.m2.index]
+        self.m2['Max'] = self.seg_maxmin[:, 0]
+        self.m2['Min'] = self.seg_maxmin[:, 1]
+        self.m2['downstreamMax'] = [self.seg_maxmin[s-1][0] for s in self.m2.outseg]
+        self.m2['downstreamMin'] = [self.seg_maxmin[s-1][1] for s in self.m2.outseg]
+
+
+    def replace_downstream(self, bw, level, ind):
+        '''
+        replace minimum elevations in segments with either the max or min elevation in downstream segment
+        bw = dict with keys that are indices of segements to modify
+        level = column of outsegs to reference in outsegs table
+        ind = 0 (replace with downstream max elev) or 1 (min elev)
+        get downstream max elevations for level from outsegs at that level (for segments with backwards elevs)
+        '''
+        # make list of downstream elevations (max or min, depending on ind)
+        # if segment is an outlet, use minimum elevation of segment
+        downstream_elevs = [self.seg_maxmin[self.outsegs.ix[s, level] - 1][ind]
+                            if self.outsegs.ix[s, level] > 0
+                            else np.min(self.seg_maxmin[s-1]) for s in self.segments]
+
+        # assign any violating minimum elevations to downstream elevs from above
+        bw_inds = bw.keys()
+        #print 'segment {}: {}, downseg: {}'.format(bw_inds[0]+1, self.seg_maxmin[bw_inds[0]], downstream_elevs[bw_inds[0]])
+        self.seg_maxmin[bw_inds] = np.array([(self.seg_maxmin[i][0], downstream_elevs[i]) for i in bw_inds])
+        for i in bw_inds:
+            print 'segment {}: {}, downseg: {}'.format(i+1, self.seg_maxmin[i], downstream_elevs[i])
+
+
+    def replace_upstream(self):
+        '''
+        replace maximum elevations in segments with minimum elevations in upstream segments,
+        in segments where the max is above the upstream minimum
+        '''
+        # make list of min upstream elevations
+        # if segment is a headwater, use maximum elevation of segment
+        upstreamMin = np.array([np.min([self.seg_maxmin[useg-1] for useg in self.m2.ix[s, 'upsegs']])
+                       if len(self.m2.ix[s, 'upsegs']) > 0
+                       else self.seg_maxmin[s-1][0] for s in self.segments])
+
+        # if the upstream minimum elevation is lower than the max elevation in the segment,
+        # reset the max to the upstream minimum
+        self.seg_maxmin = np.array([(upstreamMin[s-1], self.seg_maxmin[s-1][1])
+                                    if upstreamMin[s-1] < self.seg_maxmin[s-1][0]
+                                    else self.seg_maxmin[s-1] for s in self.segments])
+
+
+    def fix_backwards_ends(self, bw):
+
+        for level in self.outsegs.columns:
+            print 'segment 48: {}, {}'.format(self.seg_maxmin[47][0], self.seg_maxmin[47][1])
+            print 'segment 50: {}, {}'.format(self.seg_maxmin[49][0], self.seg_maxmin[49][1])
+            # replace minimum elevations in backwards segments with downstream maximums
+            self.replace_downstream(bw, level, 0)
+
+            # check for higher minimum elevations in each segment
+            bw = dict([(i, maxmin) for i, maxmin in enumerate(self.seg_maxmin) if maxmin[0] < maxmin[1]])
+
+            # if still backwards elevations, try using downstream min elevations
+            if len(bw) > 0:
+
+                # replace minimum elevations in backwards segments with downstream minimums
+                self.replace_downstream(bw, level, 1)
+
+            # in segments where the max elevation is higher than the upstream minimum,
+            # replace max elev with upstream minimum
+            self.replace_upstream()
+
+            # check again for higher minimum elevations in each segment
+            bw = dict([(i, maxmin) for i, maxmin in enumerate(self.seg_maxmin) if maxmin[0] < maxmin[1]])
+
+            # stop if there are no longer any backwards segments, otherwise continue
+            if len(bw) == 0:
+                break
+
+
+    def segment_interiors(self):
 
         for seg in self.segments:
 
