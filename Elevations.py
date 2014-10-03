@@ -6,6 +6,8 @@ Smooth streambed elevations outside of the context of the objects in SFR classes
 import numpy as np
 import pandas as pd
 import discomb_utilities as disutil
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_pdf import PdfPages
 
 
 class SFRdata(object):
@@ -30,6 +32,7 @@ class SFRdata(object):
             self.node_column = 'node'
             self.gridtype = 'structured'
             self.m1[self.node_column] = (self.ncol * (self.m1['row'] - 1) + self.m1['column']).astype('int')
+            self.read_DIS(self.MFdis)
         else:
             self.node_column = node_column
 
@@ -328,6 +331,77 @@ class smooth(SFRdata):
 
 class Outsegs(SFRdata):
 
-    def plot_outsegs(self):
-        
+    def plot_outsegs(self, outpdf='complete_profiles.pdf', units='ft', add_profiles={}):
+
+        # make a dataframe of all outsegs
         self.map_outsegs()
+
+        # list of lists of connected segments
+        seglists = [[p]+[s for s in self.outsegs.ix[p, :] if s > 0] for p in self.outsegs.index]
+
+        # add model top elevations to dictionary using node numbers
+        self.m1['model_top'] = [self.elevs_by_cellnum[c] for c in self.m1[self.node_attribute]]
+
+        pdf = PdfPages(outpdf)
+        for l in seglists:
+
+            if len(l) > 1:
+
+                cdist = []
+                cdist_end = 0
+                cdist_ends = []
+                sbtop = []
+                modeltop = []
+                self.elevs = {}
+
+                for p in add_profiles.iterkeys():
+                    self.elevs[p] = []
+
+                # make each profile from its segments
+                for s in l:
+
+                    # make a view of the Mat 1 dataframe that only includes the segment
+                    df = self.m1[self.m1.segment == s].sort('reach')
+
+                    # calculate cumulative distances at cell centers
+                    cdist += (np.cumsum(df['length_in_cell']) - 0.5 * df['length_in_cell'] + cdist_end).tolist()
+
+                    cdist_end += np.sum(df['length_in_cell']) # add length of segment to total
+                    print cdist_end
+                    cdist_ends.append(cdist_end) # record distances at segment boundaries
+
+                    # streambed tops
+                    sbtop += df['top_streambed'].tolist()
+
+                    # model tops
+                    modeltop += df['model_top'].tolist()
+
+                    for p in add_profiles.iterkeys():
+                        #elevs = self.cells2vertices(df[add_profiles[p]].tolist())
+                        self.elevs[p] += df[add_profiles[p]].tolist()
+
+                # plot the profile
+                fig = plt.figure()
+                ax = fig.add_subplot(111)
+                plt.plot(cdist, modeltop, label='Model top', lw=0.5)
+                plt.plot(cdist, sbtop, label='Streambed top')
+
+                # add any additional profiles
+                for p in add_profiles.iterkeys():
+                    print len(cdist)
+                    print len(self.elevs[p])
+                    plt.plot(cdist, self.elevs[p], label=p, lw=0.5)
+
+                for x in cdist_ends[1:]:
+                    plt.axvline(x, c='0.25', lw=0.5)
+                ax.set_xlabel('Distance along SFR segment')
+                ax.set_ylabel('Elevation, {}'.format(units))
+                title = 'SFR profile for segments:'
+                for s in l:
+                    title += ' {:.0f}'.format(s)
+                ax.set_title(title)
+                ax.set_ylim(int(np.floor(ax.get_ylim()[0])), int(np.ceil(ax.get_ylim()[1])))
+                plt.legend(loc='best')
+                pdf.savefig()
+                plt.close()
+        pdf.close()

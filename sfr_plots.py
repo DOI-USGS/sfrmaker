@@ -58,7 +58,7 @@ class plot_elevation_profiles:
         return reshaped
 
 
-    def plot_Mat1_profiles(self, outpdf='Segment_profiles.pdf', interval=1, units='ft', add_profiles=None):
+    def plot_Mat1_profiles(self, outpdf='Segment_profiles.pdf', interval=1, units='ft', add_profiles={}):
         '''
         Plot elevation profiles from Mat1
         default is to plot streambed top with model top;
@@ -92,7 +92,7 @@ class plot_elevation_profiles:
         for seg in segs2plot:
             print '\r{}'.format(seg),
             df = m1[m1['segment'] == seg].sort('reach')
-            df['distance'] = np.cumsum(df['length_in_cell'])
+            df['distance'] = np.cumsum(df['length_in_cell']) - 0.5 * df['length_in_cell'].values
             '''
             dist = self.cells2vertices(df['distance'].tolist(), distance=True)
             sbtops = self.cells2vertices(df['top_streambed'].tolist())
@@ -121,6 +121,7 @@ class plot_elevation_profiles:
             plt.close()
         pdf.close()
         print 'Done, saved to {}'.format(outpdf)
+
 
 
     def get_comid_plotting_info(self, FragIDdata, COMIDdata, SFRdata, interval=False):
