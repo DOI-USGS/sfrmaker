@@ -10,32 +10,36 @@ import discomb_utilities as disutil
 
 class SFRdata(object):
 
-    def __init__(self, Mat1, Mat2, landsurface=None, nrow=2, ncol=2, node_column=None):
+    def __init__(self, Mat1, Mat2, landsurface=None, nrow=2, ncol=2, node_column=False, MFdis=None):
 
         # read Mats 1 and 2
-        self.Mat1 = Mat1
-        self.Mat2 = Mat2
+        self.MAT1 = Mat1
+        self.MAT2 = Mat2
         self.m1 = pd.read_csv(Mat1).sort(['segment', 'reach'])
         self.m2 = pd.read_csv(Mat2).sort('segment')
         self.m2.index = self.m2.segment
 
         self.nrow = nrow
         self.ncol = ncol
+        self.MFdis = MFdis
 
         self.segments = sorted(np.unique(self.m1.segment))
 
         # node numbers for cells with SFR
         if not node_column:
             self.node_column = 'node'
-            self.m1[node_column] = (self.ncol * (self.m1['row'] - 1) + self.m1['column']).astype('int')
+            self.gridtype = 'structured'
+            self.m1[self.node_column] = (self.ncol * (self.m1['row'] - 1) + self.m1['column']).astype('int')
         else:
             self.node_column = node_column
+
+        self.node_attribute = self.node_column # compatibility with sfr_plots and sfr_classes
 
         if landsurface:
             self.landsurface = np.fromfile(landsurface, sep=' ') # array of elevations to use (sorted by cellnumber)
 
             # assign land surface elevations based on node number
-            self.m1['landsurface'] = [self.landsurface[c] for c in self.m1[node_column]]
+            self.m1['landsurface'] = [self.landsurface[n] for n in self.m1[self.node_column]]
 
         # assign upstream segments to Mat2
         self.m2['upsegs'] = [self.m2.segment[self.m2.outseg == s].tolist() for s in self.segments]
@@ -45,6 +49,25 @@ class SFRdata(object):
         if len(c) > 0:
             raise ValueError('Warning! Circular routing in segments {}.\n'
                              'Fix manually in Mat2 before continuing'.format(', '.join(map(str, c))))
+
+
+    def read_DIS(self, MFdis):
+
+
+        DX, DY, NLAY, self.NROW, self.NCOL, i = disutil.read_meta_data(MFdis)
+
+        # get layer tops/bottoms
+        self.layer_elevs = np.zeros((NLAY+1, self.NROW, self.NCOL))
+        for c in range(NLAY + 1):
+            tmp, i = disutil.read_nrow_ncol_vals(MFdis, self.NROW, self.NCOL, 'float', i)
+            self.layer_elevs[c, :, :] = tmp
+
+        # make dictionary of model top elevations by cellnum
+        self.elevs_by_cellnum = {}
+        for c in range(self.NCOL):
+            for r in range(self.NROW):
+                cellnum = r*self.NCOL + c + 1
+                self.elevs_by_cellnum[cellnum] = self.layer_elevs[0, r, c]
 
 
     def map_outsegs(self):
@@ -110,7 +133,7 @@ class smooth(SFRdata):
         print 'segment ends smoothing finished in {} iterations.\n' \
               'segment ends saved to {}\n' \
               'See {} for report.'\
-            .format(self.smoothing_iterations, self.Mat2[:-4] + '_elevs.csv', report_file)
+            .format(self.smoothing_iterations, self.MAT2[:-4] + '_elevs.csv', report_file)
 
         # populate Mat2 dataframe with bounding elevations for upstream and downstream segments, so they can be checked
         self.m2['upstreamMin'] = [np.min([self.seg_maxmin[useg-1][1] for useg in self.m2.ix[s, 'upsegs']])
@@ -130,7 +153,7 @@ class smooth(SFRdata):
 
         # save new copy of Mat2 with segment end elevations
         self.m2 = self.m2.drop(['upstreamMax', 'upstreamMin', 'downstreamMax', 'downstreamMin', 'upsegs'], axis=1)
-        self.m2.to_csv(self.Mat2[:-4] + '_elevs.csv', index=False)
+        self.m2.to_csv(self.MAT2[:-4] + '_elevs.csv', index=False)
 
 
     def replace_downstream(self, bw, level, ind):
@@ -262,6 +285,7 @@ class smooth(SFRdata):
             start, end = self.m2.ix[seg, ['Max', 'Min']]
             if start == end:
                 self.sm = [start] * len(self.elevs)
+                self.m1.loc[self.m1.segment == seg, 'top_streambed'] = self.sm
                 continue
             else:
                 self.sm = [start]
@@ -297,6 +321,6 @@ class smooth(SFRdata):
             self.m1.loc[self.m1.segment == seg, 'top_streambed'] = self.sm
 
         # save updated Mat1
-        self.m1.to_csv(self.Mat2[:-4] + '_elevs.csv', index=False)
+        self.m1.to_csv(self.MAT1[:-4] + '_elevs.csv', index=False)
         self.ofp.close()
-        print 'Done, updated Mat1 saved to see {} for report.'.format(report_file)
+        print 'Done, updated Mat1 saved to {}.\nsee {} for report.'.format(self.MAT1[:-4] + '_elevs.csv', report_file)

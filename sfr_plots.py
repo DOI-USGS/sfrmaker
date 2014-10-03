@@ -20,6 +20,7 @@ class plot_elevation_profiles:
     def __init__(self, SFRdata):
 
         self.SFRdata = SFRdata
+
         self.elevs_by_cellnum = dict()
 
         # read in the DIS file for structured grids
@@ -57,9 +58,18 @@ class plot_elevation_profiles:
         return reshaped
 
 
-    def plot_Mat1_profiles(self, outpdf='Segment_profiles.pdf', interval=1, units='ft'):
+    def plot_Mat1_profiles(self, outpdf='Segment_profiles.pdf', interval=1, units='ft', add_profiles=None):
+        '''
+        Plot elevation profiles from Mat1
+        default is to plot streambed top with model top;
+        additional profiles can be added with 'add_profiles' argument (they must be added to Mat1 first as additional columns)
 
-        print 'plotting SFR segment profiles from Mat1...'
+        outpdf: filename for multipage PDF
+        interval: plot every <interval> segments
+        units: (string) for plot lables
+        add_profiles: (dict) {<profile name>: <Mat 1 column name>}
+        '''
+        print 'plotting SFR segment profiles from {}...'.format(self.SFRdata.MAT1)
         try:
             import pandas as pd
         except:
@@ -83,15 +93,25 @@ class plot_elevation_profiles:
             print '\r{}'.format(seg),
             df = m1[m1['segment'] == seg].sort('reach')
             df['distance'] = np.cumsum(df['length_in_cell'])
-
+            '''
             dist = self.cells2vertices(df['distance'].tolist(), distance=True)
             sbtops = self.cells2vertices(df['top_streambed'].tolist())
             modeltops = self.cells2vertices(df['model_top'].tolist())
+            '''
+            dist = df['distance']
+            sbtops = df['top_streambed']
+            modeltops = df['model_top']
 
             fig = plt.figure()
             ax = fig.add_subplot(111)
-            plt.plot(dist, modeltops, label='Model top')
-            plt.plot(dist, sbtops, label='Streambed top')
+            plt.plot(dist, modeltops, label='Model top', lw=0.5)
+            plt.plot(dist, sbtops, label='Streambed top', lw=0.5)
+
+            for p in add_profiles.iterkeys():
+                #elevs = self.cells2vertices(df[add_profiles[p]].tolist())
+                elevs = df[add_profiles[p]]
+                plt.plot(dist, elevs, label=p, lw=0.5)
+
             ax.set_xlabel('Distance along SFR segment')
             ax.set_ylabel('Elevation, {}'.format(units))
             ax.set_title('SFR segment {}'.format(seg))
@@ -100,6 +120,7 @@ class plot_elevation_profiles:
             pdf.savefig()
             plt.close()
         pdf.close()
+        print 'Done, saved to {}'.format(outpdf)
 
 
     def get_comid_plotting_info(self, FragIDdata, COMIDdata, SFRdata, interval=False):
