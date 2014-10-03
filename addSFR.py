@@ -20,9 +20,11 @@ MFgrid = 'D:/ATLData/LittlePlover/grid/LPRgrid_atl.shp'
 MFdomain = 'D:/ATLData/LittlePlover/input/LPR_model_nearfield_revised_line.shp' # must be a single part line
 MFgrid_node_attribute = 'node' # name of attribute field containing node numbers
 DEM = 'D:/ATLData/LittlePlover/input/DEM10mwtm_ft'
+
+# if specifying multiple features to merge, they must not overlap!
 stream_linework = ['D:/ATLData/LittlePlover/input/LPR_ditches.shp',
                    'D:/ATLData/LittlePlover/input/canal_flowlines.shp',
-                   'D:/ATLData/LittlePlover/input/flowlines_clipped_mk.shp'] # already clipped to model grid and lake superior
+                   'D:/ATLData/LittlePlover/input/flowlines_clipped_mk.shp']
 
 # settings
 from_scratch = True # True/False: whether a new SFR dataset is being created (instead of adding to existing data)
@@ -58,16 +60,16 @@ if not from_scratch:
 
 
 # intermediate files
-stream_cells = 'D:/ATLData/LittlePlover/added_streams/new_stream_cells.shp'
-stream_cells_dissolve = 'D:/ATLData/LittlePlover/added_streams/new_stream_cells_dissolve.shp'
-stream_fragments = 'D:/ATLData/LittlePlover/added_streams/new_streams_fragments.shp'
-stream_fragments_points = 'D:/ATLData/LittlePlover/added_streams/new_streams_fragments_points.shp'
+stream_cells = 'D:/ATLData/LittlePlover/intermediate/new_stream_cells.shp'
+stream_cells_dissolve = 'D:/ATLData/LittlePlover/intermediate/new_stream_cells_dissolve.shp'
+stream_fragments = 'D:/ATLData/LittlePlover/intermediate/new_streams_fragments.shp'
+stream_fragments_points = 'D:/ATLData/LittlePlover/intermediate/new_streams_fragments_points.shp'
 
 # output files
-Mat1_updated = 'D:/ATLData/LittlePlover/Mat1.csv'
-Mat2_updated = 'D:/ATLData/LittlePlover/Mat2.csv'
-stream_cells_updated = 'D:/ATLData/LittlePlover/SFR_cells_with_new_streams.shp'
-SFR_linework_updated = 'D:/ATLData/LittlePlover/SFR_lines_with_new_streams.shp'
+Mat1_updated = 'D:/ATLData/LittlePlover/SFRoutput/Mat1.csv'
+Mat2_updated = 'D:/ATLData/LittlePlover/SFRoutput/Mat2.csv'
+stream_cells_updated = 'D:/ATLData/LittlePlover/SFRoutput/SFR_cells.shp'
+SFR_linework_updated = 'D:/ATLData/LittlePlover/SFRoutput/SFR_lines.shp'
 
 
 def shp2df(shp):
@@ -146,10 +148,8 @@ if not isinstance(stream_linework, basestring):
     for lw in stream_linework:
         print lw
     merged_linework = os.path.join(os.path.split(stream_linework[0])[0], 'input_linework.shp')
-    arcpy.Merge_management(stream_linework, 'temp.shp')
-    arcpy.Dissolve_management('temp.shp', merged_linework) # remove overlapping features
+    arcpy.Merge_management(stream_linework, merged_linework)
     stream_linework = merged_linework
-    arcpy.Delete_management('temp.shp')
 
 arcpy.SpatialJoin_analysis(MFgrid, stream_linework,
                            stream_cells,
@@ -386,18 +386,22 @@ for seg in new_segs:
 
 # for now, leave in unrouted segments
 
-print "\nassigning elevations from DEM..."
-'''
-print "Intersecting \n{} \nfragments with \n{}...".format(stream_fragments, DEM)
-# convert end vertices of river_explode Fragments to points
-arcpy.FeatureVerticesToPoints_management(stream_fragments, stream_fragments_points)
-'''
 # add FragID field identifying unique river_explode segments if one doesn't exist
 arcpy.MakeFeatureLayer_management(stream_fragments, "river_explode")
 Fields = [f.name.lower() for f in arcpy.ListFields("river_explode")]
 if "fragid" not in Fields:
     arcpy.AddField_management(stream_fragments, "FragID", "LONG")
     arcpy.CalculateField_management(stream_fragments, "FragID", "!FID!", "PYTHON")
+'''
+This elevations section no longer needed, since Elevations.py can assign elevations using Mat1 and 2
+
+print "\nassigning elevations from DEM..."
+
+print "Intersecting \n{} \nfragments with \n{}...".format(stream_fragments, DEM)
+# convert end vertices of river_explode Fragments to points
+arcpy.FeatureVerticesToPoints_management(stream_fragments, stream_fragments_points)
+
+
 
 # extract DEM values at locations of points
 arcpy.sa.ExtractMultiValuesToPoints(stream_fragments_points, [[DEM, "DEM_elev"]])
@@ -477,12 +481,12 @@ for seg in new_segs:
 # smooth interior elevations
 elevations_sm, slopes = sm.connect_downhill(new_segs, lengths, raw_elevations, min_max_elevations, ofp)
 elevations_sm = raw_elevations
-
+'''
 # read in elevations from dis file
 DX, DY, NLAY, NROW, NCOL, i = disutil.read_meta_data(DISfile)
 topdata, i = disutil.read_nrow_ncol_vals(DISfile, NROW, NCOL, np.float, i)
 
-print "creating new Mat 1..."
+print "writing ()...".format(Mat1_updated)
 # lookup row column from node number
 X, Y = np.meshgrid(np.arange(1, NCOL+1), np.arange(1, NROW+1))
 cr = np.vstack([X.ravel(), Y.ravel()])
@@ -496,7 +500,10 @@ for cell in new_streamcells_df.index:
 
         #sbtop = topdata[r, c] # get streambed top from model top
         seg, reach = int(new_streamcells_df.ix[cell, 'Segment']), int(new_streamcells_df.ix[cell, 'Reach'])
-        sbtop = elevations_sm[seg][reach-1]
+        #sbtop = elevations_sm[seg][reach-1]
+        #slope = slopes[seg][reach-1]
+        sbtop = 0
+        slope = 0
 
         reach_props = {'row': r,
                        'column': c,
@@ -509,7 +516,7 @@ for cell in new_streamcells_df.index:
                        'length_in_cell': new_streamcells_df.ix[cell, 'LengthFt'],
                        'bed_K': bed_K,
                        'bed_thickness': bed_thickness,
-                       'bed_slope': slopes[seg][reach-1],
+                       'bed_slope': slope,
                        'bed_roughness': bed_roughness}
         Mat1_new_dict[new_streamcells_df.ix[cell, 'FragID']] = reach_props
 
@@ -522,7 +529,7 @@ if not from_scratch:
 else:
     Mat1_new.to_csv(Mat1_updated, index=False)
 
-print "creating new Mat 2..."
+print "writing {}...".format(Mat2_updated)
 new_streamcells_df.to_csv('out_segments.csv')
 
 Mat2_new_dict = {}
@@ -548,6 +555,8 @@ for seg in new_segs:
                      'bwdth': 0}
 
         Mat2_new_dict[seg] = seg_props
+    else:
+        j=2
 Mat2_new = pd.DataFrame.from_dict(Mat2_new_dict, orient='index')
 if not from_scratch:
     Mat2.index = Mat2.index + 1 # get rid of zero-indexing

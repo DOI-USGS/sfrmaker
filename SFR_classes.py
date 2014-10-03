@@ -2746,15 +2746,16 @@ class SFRoutput:
         mat1out.close()
         mat2out.close()
 
-    def build_SFR_package(self):
+    def build_SFR_package(self, SFRoutfile=None, tpl=False):
 
         print "Building new SFR package file {0}...".format(self.indat.OUT)
         Mat1 = np.genfromtxt(self.indat.MAT1, delimiter=',', names=True, dtype=None)
         Mat2 = np.genfromtxt(self.indat.MAT2, names=True, delimiter=',', dtype=None)
 
-        SFRoutfile = self.indat.OUT
+        if not SFRoutfile:
+            SFRoutfile = self.indat.OUT
 
-        if self.indat.tpl:
+        if not tpl and self.indat.tpl:
             SFRoutfile = '_'.join(self.indat.OUT.split('.'))+'.tpl'
         else:
             #  MNF note ---> commenting this out for now to allow for variable conductance values
