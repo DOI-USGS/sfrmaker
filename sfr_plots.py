@@ -462,13 +462,18 @@ class SFRshapefile:
     (for usg, will need to bring in another file with node geometric information)
     '''
 
-    def __init__(self, SFRdata, xll=0, yll=0, mult=1, prj=None):
+    def __init__(self, SFRdata, xll=0, yll=0, mult=1, outshp=None, prj=None):
 
         self.SFRdata = SFRdata
         self.xll = xll
         self.yll = yll
         self.mult = mult # convert model units to GIS units
-        self.outshape = self.SFRdata.GISSHP
+
+        if not outshp:
+            self.outshp = self.SFRdata.GISSHP
+        else:
+            self.outshp = outshp
+
         self.elevs_by_cellnum = {}
         self.prj = prj
 
@@ -543,7 +548,7 @@ class SFRshapefile:
                                      'sb_elev': 'float',
                                      'modeltop': 'float'}}
 
-        with fiona.collection(self.SFRdata.GISSHP, "w", "ESRI Shapefile", schema) as output:
+        with fiona.collection(self.outshp, "w", "ESRI Shapefile", schema) as output:
 
             knt = 0
             for i in range(self.nSFRcells):
@@ -562,8 +567,9 @@ class SFRshapefile:
 
                 # shapefiles are incompatible with int64.
                 # but apparently they are compatible with float64 ARGH!
-                output.write({'properties': {
-                                             self.SFRdata.node_attribute: self.m1.ix[i, self.SFRdata.node_attribute],
+                '''
+                output.write({'properties': {self.SFRdata.node_attribute:
+                                                 self.m1.ix[i, self.SFRdata.node_attribute].astype('int32'),
                                              'row': self.m1.ix[i, 'row'].astype('int32'),
                                              'column': self.m1.ix[i, 'column'].astype('int32'),
                                              'layer': self.m1.ix[i, 'layer'].astype('int32'),
@@ -574,6 +580,21 @@ class SFRshapefile:
                                              'sb_elev': self.m1.ix[i, 'top_streambed'],
                                              'modeltop': self.m1.ix[i, 'model_top']},
                               'geometry': mapping(self.m1.ix[i, 'geometry'])})
+                '''
+
+                # python int() worked on Mac, whereas .astype('int32') or np.int32() failed
+                output.write({'properties': {self.SFRdata.node_attribute:
+                                                 int(self.m1.ix[i, self.SFRdata.node_attribute]),
+                                             'row': int(self.m1.ix[i, 'row']),
+                                             'column': int(self.m1.ix[i, 'column']),
+                                             'layer': int(self.m1.ix[i, 'layer']),
+                                             'segment': segment,
+                                             'reach': int(self.m1.ix[i, 'reach']),
+                                             'outseg': outseg,
+                                             'upseg': int(self.upsegs[segment]),
+                                             'sb_elev': self.m1.ix[i, 'top_streambed'],
+                                             'modeltop': self.m1.ix[i, 'model_top']},
+                              'geometry': mapping(self.m1.ix[i, 'geometry'])})
 
         if self.prj:
-            shutil.copyfile(self.prj, self.SFRdata.GISSHP[:-4] + '.prj')
+            shutil.copyfile(self.prj, self.outshp[:-4] + '.prj')

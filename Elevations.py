@@ -39,7 +39,7 @@ class SFRdata(object):
             self.landsurface = np.fromfile(landsurface, sep=' ') # array of elevations to use (sorted by cellnumber)
 
             # assign land surface elevations based on node number
-            self.m1['landsurface'] = [self.landsurface[n] for n in self.m1[self.node_column]]
+            self.m1['landsurface'] = [self.landsurface[n-1] for n in self.m1[self.node_column]]
 
         # assign upstream segments to Mat2
         self.m2['upsegs'] = [self.m2.segment[self.m2.outseg == s].tolist() for s in self.segments]
@@ -324,3 +324,10 @@ class smooth(SFRdata):
         self.m1.to_csv(self.MAT1[:-4] + '_elevs.csv', index=False)
         self.ofp.close()
         print 'Done, updated Mat1 saved to {}.\nsee {} for report.'.format(self.MAT1[:-4] + '_elevs.csv', report_file)
+
+
+class Outsegs(SFRdata):
+
+    def plot_outsegs(self):
+        
+        self.map_outsegs()
