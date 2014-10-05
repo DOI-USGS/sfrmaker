@@ -367,7 +367,7 @@ class Outsegs(SFRdata):
                     cdist += (np.cumsum(df['length_in_cell']) - 0.5 * df['length_in_cell'] + cdist_end).tolist()
 
                     cdist_end += np.sum(df['length_in_cell']) # add length of segment to total
-                    print cdist_end
+                    #print cdist_end
                     cdist_ends.append(cdist_end) # record distances at segment boundaries
 
                     # streambed tops
@@ -388,8 +388,8 @@ class Outsegs(SFRdata):
 
                 # add any additional profiles
                 for p in add_profiles.iterkeys():
-                    print len(cdist)
-                    print len(self.elevs[p])
+                    #print len(cdist)
+                    #print len(self.elevs[p])
                     plt.plot(cdist, self.elevs[p], label=p, lw=0.5)
 
                 for x in cdist_ends[1:]:
