@@ -1,9 +1,10 @@
 __author__ = 'aleaf'
 
 import sys
-sys.path.append('../GIS_utils')
+#sys.path.append('../GIS_utils')
+sys.path.append('D:/ATLData/Documents/GitHub/GIS_utils')
 import GISio
-#import arcpy
+
 import pandas as pd
 import numpy as np
 import os
@@ -16,17 +17,19 @@ import shutil
 from collections import defaultdict
 
 # input files
-MFgrid = '../../LittlePlover/grid/LPRgrid_atl.shp'
-MFdomain = '../../LittlePlover/input/LPR_model_nearfield_revised_line.shp' # must be a single part line
+path = 'D:/ATLData' # path to prepend input files below (for switching between PC an Mac)
+MFgrid = path + '/LittlePlover/grid/LPRgrid_atl.shp'
+MFdomain = path + '/LittlePlover/input/LPR_model_nearfield_revised_line.shp' # must be a single part line
 MFgrid_node_attribute = 'node' # name of attribute field containing node numbers
-DEM = '../../LittlePlover/input/DEM10mwtm_ft'
+DEM = path + '/LittlePlover/input/DEM10mwtm_ft'
 
 # if specifying multiple features to merge, they must not overlap!
-stream_linework = ['../../LittlePlover/input/LPR_ditches.shp',
-                   '../../LittlePlover/input/canal_flowlines.shp',
-                   '../../LittlePlover/input/flowlines_clipped_mk.shp']
+stream_linework = [path + '/LittlePlover/input/LPR_ditches.shp',
+                   path + '/LittlePlover/input/canal_flowlines.shp',
+                   path + '/LittlePlover/input/flowlines_clipped_mk.shp']
 
 # settings
+preproc = True # whether or not to run preprocessing routine
 from_scratch = True # True/False: whether a new SFR dataset is being created (instead of adding to existing data)
 DEM_z_conversion_factor = 1
 reach_cutoff = 1.0 # model units
@@ -47,7 +50,7 @@ existing_sfr_node_attribute = None # name of attribute field containing node num
 existing_sfr_elevation_attribute = None
 Mat1file = None
 Mat2file = None
-DISfile = '../../LittlePlover/input/LPR_Mod_refined30m.dis'
+DISfile = path + '/LittlePlover/input/LPR_Mod_refined30m.dis'
 nreaches = 0
 
 if not from_scratch:
@@ -60,16 +63,16 @@ if not from_scratch:
 
 
 # intermediate files
-stream_cells = '../../LittlePlover/intermediate/new_stream_cells.shp'
-stream_cells_dissolve = '../../LittlePlover/intermediate/new_stream_cells_dissolve.shp'
-stream_fragments = '../../LittlePlover/intermediate/new_streams_fragments.shp'
-stream_fragments_points = '../../LittlePlover/intermediate/new_streams_fragments_points.shp'
+stream_cells = path + '/LittlePlover/intermediate/new_stream_cells.shp'
+stream_cells_dissolve = path + '/LittlePlover/intermediate/new_stream_cells_dissolve.shp'
+stream_fragments = path + '/LittlePlover/intermediate/new_streams_fragments.shp'
+stream_fragments_points = path + '/LittlePlover/intermediate/new_streams_fragments_points.shp'
 
 # output files
-Mat1_updated = '../../LittlePlover/SFRoutput/Mat1.csv'
-Mat2_updated = '../../LittlePlover/SFRoutput/Mat2.csv'
-stream_cells_updated = '../../LittlePlover/SFRoutput/SFR_cells.shp'
-SFR_linework_updated = '../../LittlePlover/SFRoutput/SFR_lines.shp'
+Mat1_updated = path + '/LittlePlover/SFRoutput/Mat1.csv'
+Mat2_updated = path + '/LittlePlover/SFRoutput/Mat2.csv'
+stream_cells_updated = path + '/LittlePlover/SFRoutput/SFR_cells.shp'
+SFR_linework_updated = path + '/LittlePlover/SFRoutput/SFR_lines.shp'
 
 
 def shp2df(shp):
@@ -133,6 +136,9 @@ ofp = open('addSFR.log', 'w')
 ofp.write('Log file for adding streams to SFR network\n\n')
 
 def preprocessing(stream_linework):
+
+    import arcpy
+
     # initialize the arcpy environment
     arcpy.env.workspace = os.getcwd()
     arcpy.env.overwriteOutput = True
@@ -220,6 +226,8 @@ def preprocessing(stream_linework):
     arcpy.CalculateField_management('stream_fragments', "FragID", "!FID! + {0:d}".format(nreaches), "PYTHON")
     #arcpy.CopyFeatures_management('stream_fragments', stream_fragments) # save layer to shapefile
 
+if preproc:
+    preprocessing(stream_linework)
 
 print "creating dataframe of new SFR cell information..."
 
