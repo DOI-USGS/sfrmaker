@@ -368,7 +368,7 @@ for FragID in new_streamcells_df.index:
 print 'establishing more segments by subdividing at confluences involving interior reaches...'
 new_streamcells_df['Outseg'] = np.zeros((len(new_streamcells_df)))
 
-segments = np.unique(new_streamcells_df.Segment)
+segments = np.unique(new_streamcells_df.Segment).astype(int)
 nsegs = np.max(segments)
 for seg in segments:
 
@@ -378,10 +378,12 @@ for seg in segments:
 
     # find closest segment, excluding current
     othersegs = new_streamcells_df.ix[new_streamcells_df.Segment != seg]
-    out = np.argmin(np.sqrt((othersegs['X_start'] - xend)**2 +
+
+    # apparently when working with a dataframe that is a view on another dataframe (and not a copy)
+    # np.argmin will return the index number of the larger dataframe (not the position within the view)
+    out_idx = np.argmin(np.sqrt((othersegs['X_start'] - xend)**2 +
                             (othersegs['Y_start'] - yend)**2))
 
-    out_idx = othersegs.index[out]
     outreach = new_streamcells_df.ix[out_idx, 'Reach']
 
     dist = np.sqrt((new_streamcells_df.ix[out_idx, 'X_start'] - xend)**2 +
@@ -401,7 +403,7 @@ for seg in segments:
             new_streamcells_df.Segment[(new_streamcells_df['Segment'] == outsegnum) &
                                        (new_streamcells_df['Reach'] < outreach)] = nsegs + 1
             nsegs += 1
-            print nsegs[-1]
+            print nsegs
 
             # renumber subsequent reaches in outseg by subtracting (outreach - 1)
             new_streamcells_df.Reach[(new_streamcells_df['Segment'] == outsegnum) &

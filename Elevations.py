@@ -12,7 +12,7 @@ from matplotlib.backends.backend_pdf import PdfPages
 
 class SFRdata(object):
 
-    def __init__(self, Mat1, Mat2, landsurface=None, nrow=2, ncol=2, node_column=False, MFdis=None):
+    def __init__(self, Mat1, Mat2, landsurface=None, nrow=2, ncol=2, node_column=False, MFdis=None, to_meters_mult=0.3048):
 
         # read Mats 1 and 2
         self.MAT1 = Mat1
@@ -24,6 +24,7 @@ class SFRdata(object):
         self.nrow = nrow
         self.ncol = ncol
         self.MFdis = MFdis
+        self.to_m = to_meters_mult # multiplier to convert model units to meters (used for width estimation)
 
         self.segments = sorted(np.unique(self.m1.segment))
 
@@ -57,11 +58,11 @@ class SFRdata(object):
     def read_DIS(self, MFdis):
 
 
-        DX, DY, NLAY, self.NROW, self.NCOL, i = disutil.read_meta_data(MFdis)
+        self.DX, self.DY, self.NLAY, self.NROW, self.NCOL, i = disutil.read_meta_data(MFdis)
 
         # get layer tops/bottoms
-        self.layer_elevs = np.zeros((NLAY+1, self.NROW, self.NCOL))
-        for c in range(NLAY + 1):
+        self.layer_elevs = np.zeros((self.NLAY+1, self.NROW, self.NCOL))
+        for c in range(self.NLAY + 1):
             tmp, i = disutil.read_nrow_ncol_vals(MFdis, self.NROW, self.NCOL, 'float', i)
             self.layer_elevs[c, :, :] = tmp
 
@@ -323,10 +324,135 @@ class smooth(SFRdata):
             # update Mat1 with smoothed streambed tops
             self.m1.loc[self.m1.segment == seg, 'top_streambed'] = self.sm
 
+        # assign slopes to Mat 1 based on the smoothed elevations
+        self.calculate_slopes()
+
         # save updated Mat1
         self.m1.to_csv(self.MAT1[:-4] + '_elevs.csv', index=False)
         self.ofp.close()
         print 'Done, updated Mat1 saved to {}.\nsee {} for report.'.format(self.MAT1[:-4] + '_elevs.csv', report_file)
+
+
+    def calculate_slopes(self):
+        '''
+        assign a slope value for each stream cell based on streambed elevations
+        this method is run at the end of smooth_segment_interiors, after the interior elevations have been assigned
+        '''
+        print 'calculating slopes...'
+        for s in self.segments:
+
+            # calculate the right-hand elevation differences (not perfect, but easy)
+            diffs = self.m1[self.m1.segment == s].top_streambed.diff()[1:].tolist()
+
+            if len(diffs) > 0:
+                diffs.append(diffs[-1]) # use the left-hand difference for the last reach
+
+            # edge case where segment only has 1 reach
+            else:
+                diffs = self.m2.Min[s] - self.m2.Max[s]
+
+            # divide by length in cell; reverse sign so downstream = positive (as in SFR package)
+            slopes = diffs / self.m1[self.m1.segment == s].length_in_cell * -1
+
+            # assign to Mat1
+            self.m1.loc[self.m1.segment == s, 'bed_slope'] = slopes
+
+
+class Widths:
+
+    def __init__(self, Mat1, Mat2, to_km=0.0003048, Mat2_out=None):
+
+        self.m1 = pd.read_csv(Mat1).sort(['segment', 'reach'])
+        self.m2 = pd.read_csv(Mat2).sort('segment')
+        self.m2.index = self.m2.segment
+        self.segments = sorted(np.unique(self.m1.segment))
+        self.to_km = to_km # multiplier from model units to km
+        self.Mat1_out = Mat1
+        self.Mat2_out = Mat2_out
+
+    def widthcorrelation(self, arbolate):
+        #estimate widths, equation from Feinstein and others (Lake
+        #Michigan Basin model) width=0.1193*(x^0.5032)
+        # x=arbolate sum of stream upstream of the COMID in meters
+        #NHDPlus has arbolate sum in kilometers.
+        #print a table with reachcode, order, estimated width, Fcode
+        estwidth = 0.1193 * (1000 * arbolate) ** 0.5032
+        return estwidth
+
+
+    def map_upsegs(self):
+        '''
+        from Mat2, returns dataframe of all upstream segments (will not work with circular routing!)
+        '''
+        # make a list of adjacent upsegments keyed to outseg list in Mat2
+        upsegs = dict([(o, self.m2.segment[self.m2.outseg == o].tolist()) for o in np.unique(self.m2.outseg)])
+        self.outsegs = [k for k in upsegs.keys() if k > 0] # exclude 0, which is the outlet designator
+
+        # for each outseg key, for each upseg, check for more upsegs, append until headwaters has been reached
+        for outseg in self.outsegs:
+
+            up = True
+            upsegslist = upsegs[outseg]
+            while up:
+                added_upsegs = []
+                for us in upsegslist:
+                    if us in self.outsegs:
+                        added_upsegs += upsegs[us]
+                if len(added_upsegs) == 0:
+                    up = False
+                    break
+                else:
+                    upsegslist = added_upsegs
+                    upsegs[outseg] += added_upsegs
+
+        # the above algorithm is recursive, so lower order streams get duplicated many times
+        # use a set to get unique upsegs
+        self.upsegs = dict([(u, list(set(upsegs[u]))) for u in self.outsegs])
+
+
+    def estimate_from_arbolate(self):
+
+        print 'estimating stream widths...'
+
+        self.m2.in_arbolate = self.m2.in_arbolate.fillna(0) # replace any nan values with zeros
+
+        # map upsegments for each outlet segment
+        self.map_upsegs()
+
+        # compute starting arbolate sum values for all segments (sum lengths of all mapped upsegs)
+        asum_start = {}
+        for oseg in self.outsegs:
+            asum_start[oseg] = 0
+            for us in self.upsegs[oseg]:
+                # add the sum of all lengths for the upsegment
+                asum_start[oseg] += self.m1.ix[self.m1.segment == us, 'length_in_cell'].sum() * self.to_km
+
+                # add on any starting arbolate sum values from outside the model (will add zero if nothing was entered)
+                asum_start[oseg] += self.m2.in_arbolate[us]
+            #print 'outseg: {}, starting arbolate sum: {}'.format(oseg, asum_start[oseg])
+
+        # assign the starting arbolate sum values to Mat2
+        asum_starts = [asum_start[i] if i in self.outsegs
+                       else self.m2.ix[i, 'in_arbolate'] for i, r in self.m2.iterrows()]
+        self.m2['starting_arbolate'] = asum_starts
+
+        for s in self.segments:
+
+            segdata = self.m1[self.m1.segment == s] # shouldn't need to sort, as that was done in __init__
+
+            # compute arbolate sum at each reach, in km, including starting values from upstream segments
+            asums = segdata.length_in_cell.cumsum() * self.to_km + self.m2.ix[s, 'starting_arbolate']
+
+            # compute width, assign to Mat1
+            self.m1.loc[self.m1.segment == s, 'width_in_cell'] = [self.widthcorrelation(asum) for asum in asums]
+
+        self.m1.to_csv(self.Mat1_out, index=False)
+        print 'Done, updated Mat1 saved to {}.'.format(self.Mat1_out)
+
+        if self.Mat2_out:
+            self.m2.to_csv(self.Mat2_out, index=False)
+            print 'saved arbolate sum information to {}.'.format(self.Mat2_out)
+
 
 
 class Outsegs(SFRdata):
@@ -405,3 +531,38 @@ class Outsegs(SFRdata):
                 pdf.savefig()
                 plt.close()
         pdf.close()
+
+    def plot_routing(self, outpdf='routing.pdf'):
+
+        # make a dataframe of all outsegs
+        self.map_outsegs()
+
+        # create new column in Mat2 listing outlets associated with each segment
+        self.m2['Outlet'] = [r[r != 0][-1] if len(r[r != 0]) > 0
+                             else i for i, r in self.outsegs.iterrows()]
+
+        # assign the outlets to each reach listed in Mat1
+        self.m1['Outlet'] = [self.m2.ix[seg, 'Outlet'] for seg in self.m1.segment]
+
+        # make a matrix of the model grid, assign outlet values to SFR cells
+        self.watersheds = np.empty((self.nrow * self.ncol))
+        self.watersheds[:] = np.nan
+
+        for s in self.segments:
+
+            segdata = self.m1[self.m1.segment == s]
+            cns = segdata[self.node_column].values
+            self.watersheds[cns] = segdata.Outlet.values[0]
+
+        self.watersheds = np.reshape(self.watersheds, (self.nrow, self.ncol))
+
+        # now plot it up!
+        self.routingfig = plt.figure()
+        ax = self.routingfig.add_subplot(111)
+        plt.imshow(self.watersheds)
+        cb = plt.colorbar()
+        cb.set_label('Outlet segment')
+        plt.savefig(outpdf, dpi=300)
+
+        self.m1.to_csv(self.MAT1, index=False)
+        print 'Done, Mat1 updated with outlet information; saved to {}.'.format(self.MAT1)

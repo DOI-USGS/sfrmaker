@@ -546,8 +546,11 @@ class SFRshapefile:
                                      'reach': 'int',
                                      'outseg': 'int',
                                      'upseg': 'int',
+                                     'outlet': 'int',
                                      'sb_elev': 'float',
-                                     'modeltop': 'float'}}
+                                     'modeltop': 'float',
+                                     'sb_slope': 'float',
+                                     'width': 'float'}}
 
         with fiona.collection(self.outshp, "w", "ESRI Shapefile", schema) as output:
 
@@ -568,20 +571,6 @@ class SFRshapefile:
 
                 # shapefiles are incompatible with int64.
                 # but apparently they are compatible with float64 ARGH!
-                '''
-                output.write({'properties': {self.SFRdata.node_attribute:
-                                                 self.m1.ix[i, self.SFRdata.node_attribute].astype('int32'),
-                                             'row': self.m1.ix[i, 'row'].astype('int32'),
-                                             'column': self.m1.ix[i, 'column'].astype('int32'),
-                                             'layer': self.m1.ix[i, 'layer'].astype('int32'),
-                                             'segment': int(segment),
-                                             'reach': self.m1.ix[i, 'reach'].astype('int32'),
-                                             'outseg': outseg,
-                                             'upseg': np.int32(self.upsegs[segment]),
-                                             'sb_elev': self.m1.ix[i, 'top_streambed'],
-                                             'modeltop': self.m1.ix[i, 'model_top']},
-                              'geometry': mapping(self.m1.ix[i, 'geometry'])})
-                '''
 
                 # python int() worked on Mac, whereas .astype('int32') or np.int32() failed
                 output.write({'properties': {self.SFRdata.node_attribute:
@@ -593,8 +582,12 @@ class SFRshapefile:
                                              'reach': int(self.m1.ix[i, 'reach']),
                                              'outseg': outseg,
                                              'upseg': int(self.upsegs[segment]),
+                                             'outlet': int(self.m1.ix[i, 'Outlet']),
                                              'sb_elev': self.m1.ix[i, 'top_streambed'],
-                                             'modeltop': self.m1.ix[i, 'model_top']},
+                                             'modeltop': self.m1.ix[i, 'model_top'],
+                                             'sb_slope': self.m1.ix[i, 'bed_slope'],
+                                             'width': self.m1.ix[i, 'width_in_cell'],
+                },
                               'geometry': mapping(self.m1.ix[i, 'geometry'])})
 
         if self.prj:
