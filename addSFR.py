@@ -366,9 +366,9 @@ for FragID in new_streamcells_df.index:
 # but the main stem will not be subdivided.
 # Go through and look for connecting segments with a looser "routing" tolerance
 print 'establishing more segments by subdividing at confluences involving interior reaches...'
+new_streamcells_df['Outseg'] = np.zeros((len(new_streamcells_df)))
 
 segments = np.unique(new_streamcells_df.Segment)
-
 nsegs = np.max(segments)
 for seg in segments:
 
@@ -391,7 +391,7 @@ for seg in segments:
     if dist < routing_tol:
 
         # if it is, set it as the outseg of the current segment
-        outsegnum = new_streamcells_df.ix[out_idx, "Segment"][0]
+        outsegnum = new_streamcells_df.ix[out_idx, "Segment"]
         new_streamcells_df.Outseg[new_streamcells_df.Segment == seg] = new_streamcells_df.ix[out_idx, "Segment"]
 
         # now check if the closest reach is reach 1; if it isn't we need to break up that segment
@@ -413,9 +413,8 @@ new_streamcells_df.to_csv('out_segments.csv')
 new_streamcells_df = pd.read_csv('out_segments.csv')
 
 print "\nrouting new segments..."
-#tol = 1.0
+tol = 1.0
 new_segs = map(int, np.unique(new_streamcells_df[new_streamcells_df['Segment'] > 0].Segment))
-new_streamcells_df['Outseg'] = np.zeros((len(new_streamcells_df)))
 new_streamcells_df['Elevmin'] = np.zeros((len(new_streamcells_df)))
 new_streamcells_df['Elevmax'] = np.zeros((len(new_streamcells_df)))
 
