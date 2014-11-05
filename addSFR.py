@@ -381,7 +381,7 @@ for seg in segments:
     out = np.argmin(np.sqrt((othersegs['X_start'] - xend)**2 +
                             (othersegs['Y_start'] - yend)**2))
 
-    out_idx = othersegs.index[out][0]
+    out_idx = othersegs.index[out]
     outreach = new_streamcells_df.ix[out_idx, 'Reach']
 
     dist = np.sqrt((new_streamcells_df.ix[out_idx, 'X_start'] - xend)**2 +
