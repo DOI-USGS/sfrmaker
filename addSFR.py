@@ -26,7 +26,8 @@ DEM = path + '/LittlePlover/input/DEM10mwtm_ft'
 # if specifying multiple features to merge, they must not overlap!
 stream_linework = [path + '/LittlePlover/input/LPR_ditches.shp',
                    path + '/LittlePlover/input/canal_flowlines.shp',
-                   path + '/LittlePlover/input/flowlines_clipped_mk.shp']
+                   path + '/LittlePlover/input/flowlines_clipped_mk.shp',
+                   path + '/LittlePlover/input/hay_meadow_crk_etc.shp']
 
 # settings
 preproc = True # whether or not to run preprocessing routine
@@ -35,6 +36,7 @@ DEM_z_conversion_factor = 1
 reach_cutoff = 1.0 # model units
 max_distance_from_SFR = 2 * np.sqrt(2 * 100 ** 2) # max distance that new linework can be away from existing SFR cells
 max_distance_to_model_boundary = 650 # end points within this distance of model domain edge will be considered outlets
+routing_tol = 100 # search distance when looking for adjacent upstream / downstream segment ends / starts for routing segments
 width_in_cell = 5 # constant width for all new SFR reaches
 bed_slope = 1e-4
 
@@ -355,12 +357,63 @@ for FragID in new_streamcells_df.index:
                 #print "{} ".format(reach),
     else:
         continue
+
+# segments were established in above loop based on confluences (where multiple line fragments shared same end or start)
+# and based on line fragment ends that were not touching other line fragments
+# however, with linework from multiple data sources, segment ends might not touch
+# for example, if a segment from one data source makes a "T" with a segment from another datasource, at a distance
+# greater than the tight tolerance used in establishing segment above, a separate segment will be made for the trib,
+# but the main stem will not be subdivided.
+# Go through and look for connecting segments with a looser "routing" tolerance
+print 'establishing more segments by subdividing at confluences involving interior reaches...'
+
+segments = np.unique(new_streamcells_df.Segment)
+
+nsegs = np.max(segments)
+for seg in segments:
+
+    # get info for just current segment, sort on reach, and then record end coordinates
+    df = new_streamcells_df[new_streamcells_df['Segment'] == seg].sort('Reach')
+    xend, yend = df.iloc[-1]['X_end'], df.iloc[-1]['Y_end']
+
+    # find closest segment, excluding current
+    othersegs = new_streamcells_df.ix[new_streamcells_df.Segment != seg]
+    out = np.argmin(np.sqrt((othersegs['X_start'] - xend)**2 +
+                            (othersegs['Y_start'] - yend)**2))
+
+    out_idx = othersegs.index[out][0]
+    outreach = new_streamcells_df.ix[out_idx, 'Reach']
+
+    dist = np.sqrt((new_streamcells_df.ix[out_idx, 'X_start'] - xend)**2 +
+                   (new_streamcells_df.ix[out_idx, 'Y_start'] - yend)**2)
+
+    # check if the closest segment is within the routing tolerance
+    if dist < routing_tol:
+
+        # if it is, set it as the outseg of the current segment
+        outsegnum = new_streamcells_df.ix[out_idx, "Segment"][0]
+        new_streamcells_df.Outseg[new_streamcells_df.Segment == seg] = new_streamcells_df.ix[out_idx, "Segment"]
+
+        # now check if the closest reach is reach 1; if it isn't we need to break up that segment
+        if outreach != 1:
+
+            # assign new segment to reaches in the outseg upstream of the outreach
+            new_streamcells_df.Segment[(new_streamcells_df['Segment'] == outsegnum) &
+                                       (new_streamcells_df['Reach'] < outreach)] = nsegs + 1
+            nsegs += 1
+            print nsegs[-1]
+
+            # renumber subsequent reaches in outseg by subtracting (outreach - 1)
+            new_streamcells_df.Reach[(new_streamcells_df['Segment'] == outsegnum) &
+                                     (new_streamcells_df['Reach'] >= outreach)] -= (outreach - 1)
+
+
 new_streamcells_df.to_csv('out_segments.csv')
 
 new_streamcells_df = pd.read_csv('out_segments.csv')
 
 print "\nrouting new segments..."
-tol = 1.0
+#tol = 1.0
 new_segs = map(int, np.unique(new_streamcells_df[new_streamcells_df['Segment'] > 0].Segment))
 new_streamcells_df['Outseg'] = np.zeros((len(new_streamcells_df)))
 new_streamcells_df['Elevmin'] = np.zeros((len(new_streamcells_df)))
