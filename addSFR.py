@@ -17,7 +17,7 @@ import shutil
 from collections import defaultdict
 
 # input files
-path = 'D:/ATLData' # path to prepend input files below (for switching between PC and Mac)
+path = 'D:/ATLData' # path to prepend input files below (for switching between PC an Mac)
 MFgrid = path + '/LittlePlover/grid/LPRgrid_atl.shp'
 MFdomain = path + '/LittlePlover/input/LPR_model_nearfield_revised_line.shp' # must be a single part line
 MFgrid_node_attribute = 'node' # name of attribute field containing node numbers

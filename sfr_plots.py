@@ -6,14 +6,10 @@ import discomb_utilities as disutil
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 import shutil
-
-
 import fiona
 from shapely.geometry import Polygon, mapping
 import pandas as pd
-
-
-
+import flopy
 
 class plot_elevation_profiles:
     # takes information from classes in SFR_classes.py and formats for plotting
@@ -21,14 +17,18 @@ class plot_elevation_profiles:
 
         self.SFRdata = SFRdata
 
-        self.elevs_by_cellnum = dict()
+        # for now, keep old names for these
+        if self.SFRdata.gridtype == 'structured':
+            self.elevs_by_cellnum = SFRdata.elevs_by_cellnum
+            self.layer_elevs = SFRdata.elevs
 
         # read in the DIS file for structured grids
-        if self.SFRdata.gridtype == 'structured':
-            self.read_DIS()
+        #if self.SFRdata.gridtype == 'structured':
+        #self.read_DIS()
 
-
-    def read_DIS(self):
+        '''
+        moved reading of DIS file to SFRData
+        def read_DIS(self):
         DX, DY, NLAY, self.NROW, self.NCOL, i = disutil.read_meta_data(self.SFRdata.MFdis)
 
         # get layer tops/bottoms
@@ -42,6 +42,7 @@ class plot_elevation_profiles:
             for r in range(self.NROW):
                 cellnum = r*self.NCOL + c + 1
                 self.elevs_by_cellnum[cellnum] = self.layer_elevs[0, r, c]
+        '''
 
 
     # function to reshape distances and elevations to plot actual cell elevations (flat tops)
@@ -81,7 +82,7 @@ class plot_elevation_profiles:
         try:
             m1[self.SFRdata.node_attribute]
         except:
-            m1[self.SFRdata.node_attribute] = (self.NCOL * (m1['row'] - 1) + m1['column']).astype('int')
+            m1[self.SFRdata.node_attribute] = (self.SFRdata.dis.ncol * (m1['row'] - 1) + m1['column']).astype('int')
 
         # add model top elevations to dictionary using node numbers
         m1['model_top'] = [self.elevs_by_cellnum[c] for c in m1[self.SFRdata.node_attribute]]
@@ -204,7 +205,7 @@ class plot_elevation_profiles:
                 distances.append(dist)
                 elev = curr_reaches[creach].elevreach
                 r, c = curr_reaches[creach].row, curr_reaches[creach].column
-                cellnum = (r - 1) * self.NCOL + c
+                cellnum = (r - 1) * self.SFRdata.dis.ncol + c
                 L1top_top_elevs.append(self.elevs_by_cellnum[cellnum])
                 elevs.append(elev)
 
@@ -461,44 +462,83 @@ class SFRshapefile:
     '''
     Allow for a shapefile to be constructed independent of other shapefiles or main SFR program
     (for usg, will need to bring in another file with node geometric information)
+    
+    Need to modify so that shapefile can be built without making SFRdata object
+    And so that DIS is read in using flopy!
     '''
 
-    def __init__(self, SFRdata, xll=0, yll=0, mult=1, outshp=None, prj=None):
+    def __init__(self, SFRdata=None, Mat1=None, Mat2=None, node_attribute='node',
+                 xll=0, yll=0, mult=1,
+                 mfpath=None, mfnam=None, mfdis=None,
+                 outshp=None, prj=None):
 
         self.SFRdata = SFRdata
+        if SFRdata is None:
+            self.Mat1 = Mat1
+            self.Mat2 = Mat2
+            self.mfpath = mfpath
+            self.mfnam = os.path.join(mfpath, mfnam)
+            self.mfdis = os.path.join(mfpath, mfdis)
+            self.read_dis2()
+            
+        else:
+            self.Mat1 = SFRdata.MAT1
+            self.Mat2 = SFRdata.MAT2
+            self.mfpath = SFRdata.mfpath
+            self.mfnam = os.path.join(mfpath, SFRdata.mfnam)
+            self.mfdis = os.path.join(mfpath, SFRdata.MFdis)
+            self.dis = SFRdata.dis
+            self.elevs_by_cellnum = SFRdata.elevs_by_cellnum
+            self.node_attribute = SFRdata.node_attribute
+            
         self.xll = xll
         self.yll = yll
         self.mult = mult # convert model units to GIS units
 
         if not outshp:
-            self.outshp = self.SFRdata.GISSHP
+            self.outshp = '{}_SFR.shp'.format(os.path.split(self.mfnam)[-1])
         else:
             self.outshp = outshp
 
-        self.elevs_by_cellnum = {}
         self.prj = prj
 
         # read in Mat 1 and 2
-        self.m1 = pd.read_csv(self.SFRdata.MAT1).sort(['segment', 'reach'])
-        self.m2 = pd.read_csv(self.SFRdata.MAT2)
+        self.m1 = pd.read_csv(self.Mat1).sort(['segment', 'reach'])
+        self.m2 = pd.read_csv(self.Mat2)
         self.m2.index = self.m2.segment
         self.upsegs = pd.Series(self.m2.segment, index=self.m2.outseg).to_dict()
         self.nSFRcells = len(self.m1)
 
-        # read information for structured grids
-        if self.SFRdata.gridtype == 'structured':
-            self.read_DIS()
+        # for now conform to disutil output
+        self.DX = np.append(np.array([0]), np.cumsum(self.dis.delr))
+        self.DY = np.append(np.array([0]), np.cumsum(self.dis.delc))[::-1]
 
-            # add cell geometries to Mat1
-            self.m1['geometry'] = [self.cell_geometry_from_rc(self.m1.ix[i, 'row'], self.m1.ix[i, 'column'])
-                                   for i in self.m1.index]
+        # add node numbers to Mat1
+        self.m1[self.node_attribute] = (self.dis.ncol * (self.m1['row'] - 1) + self.m1['column']).astype('int')
 
-            # add node numbers to Mat1
-            self.m1[self.SFRdata.node_attribute] = (self.NCOL * (self.m1['row'] - 1) + self.m1['column']).astype('int')
+        # add cell geometries to Mat1
+        self.cell_geometries = {}
+        self.get_cell_geometries()
+        self.m1['geometry'] = [self.cell_geometries[c] for c in self.m1[self.node_attribute]]
 
         # add model tops to Mat1
-        self.m1['model_top'] = [self.elevs_by_cellnum[c] for c in self.m1[self.SFRdata.node_attribute]]
+        self.m1['model_top'] = [self.elevs_by_cellnum[c] for c in self.m1[self.node_attribute]]
 
+    def read_dis2(self):
+        """read in model grid information using flopy
+        """
+        self.m = flopy.modflow.Modflow(model_ws=self.mfpath)
+        self.nf = flopy.utils.mfreadnam.parsenamefile(self.mfnam, {})
+        self.dis = flopy.modflow.ModflowDis.load(self.mfdis, self.m, self.nf)
+        self.elevs = np.zeros((self.dis.nlay + 1, self.dis.nrow, self.dis.ncol))
+        self.elevs[0, :, :] = self.dis.top.array
+        self.elevs[1:, :, :] = self.dis.botm.array
+
+        # make dictionary of model top elevations by cellnum
+        for c in range(self.dis.ncol):
+            for r in range(self.dis.nrow):
+                cellnum = r * self.dis.ncol + c + 1
+                self.elevs_by_cellnum[cellnum] = self.elevs[0, r, c]
 
     def read_DIS(self):
         self.DX, self.DY, self.NLAY, self.NROW, self.NCOL, i = disutil.read_meta_data(self.SFRdata.MFdis)
@@ -520,25 +560,39 @@ class SFRshapefile:
                 cellnum = r*self.NCOL + c + 1
                 self.elevs_by_cellnum[cellnum] = self.layer_elevs[0, r, c]
 
+    def get_cell_geometries(self):
 
-    def cell_geometry_from_rc(self, r, c):
+        self.centroids = self.dis.get_node_coordinates()
 
-        # calculate vertices for parent cell
-        x0 = self.DX[c-1] + self.xll
-        x1 = x0 + self.delx[c-1]
-        y0 = self.DY[r-1] + self.yll
-        y1 = y0 - self.dely[r-1]
+        for i, r in self.m1.iterrows():
+            r, c = r.row - 1, r.column - 1
+            cn = r * self.dis.ncol + c + 1
+            cx, cy = self.centroids[1][c] + self.xll, self.centroids[0][r] + self.yll
+            dx, dy = self.dis.delr[c], self.dis.delc[r] # this is confusing, may be a bug in flopy
 
-        return Polygon([(x0, y0), (x1, y0), (x1, y1), (x0, y1), (x0, y0)])
+            # calculate vertices for parent cell
+            x0 = cx - 0.5 * dx
+            x1 = cx + 0.5 * dx
+            y0 = cy - 0.5 * dy
+            y1 = cy + 0.5 * dy
+
+            self.cell_geometries[cn] = Polygon([(x0, y0), (x1, y0), (x1, y1), (x0, y1), (x0, y0)])
 
 
     def build(self):
         '''
         Build the shapefile
         '''
+        # in case outlets haven't been computed
+
+        try:
+            self.m1.Outlet
+        except:
+            self.m1['Outlet'] = [0] * len(self.m1)
+
 
         schema = {'geometry': 'Polygon',
-                      'properties': {self.SFRdata.node_attribute: 'int',
+                      'properties': {self.node_attribute: 'int',
                                      'row': 'int',
                                      'column': 'int',
                                      'layer': 'int',
@@ -573,8 +627,8 @@ class SFRshapefile:
                 # but apparently they are compatible with float64 ARGH!
 
                 # python int() worked on Mac, whereas .astype('int32') or np.int32() failed
-                output.write({'properties': {self.SFRdata.node_attribute:
-                                                 int(self.m1.ix[i, self.SFRdata.node_attribute]),
+                output.write({'properties': {self.node_attribute:
+                                                 int(self.m1.ix[i, self.node_attribute]),
                                              'row': int(self.m1.ix[i, 'row']),
                                              'column': int(self.m1.ix[i, 'column']),
                                              'layer': int(self.m1.ix[i, 'layer']),
