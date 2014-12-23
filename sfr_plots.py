@@ -10,6 +10,7 @@ import fiona
 from shapely.geometry import Polygon, mapping
 import pandas as pd
 import flopy
+import GISops
 
 class plot_elevation_profiles:
     # takes information from classes in SFR_classes.py and formats for plotting
@@ -374,12 +375,20 @@ class plot_streamflows:
             raise IOError("Cannot read MODFLOW DIS file {0}".format(self.DISfile))
 
         print "\naggregating flow information by cellnum..."
-        indata = np.genfromtxt(self.SFR_out, skiprows=8, dtype=None)
-        for line in indata:
-            r, c = line[1], line[2]
+        indata = open(self.SFR_out).readlines()
+        for line in indata[8:]:
+        
+            line = line.strip().split()
+            
+            # Kludge! terminates with blank line (only reads stress per. 1)
+            # need to add support for transient.
+            if len(line) == 0:
+                break
+
+            r, c = int(line[1]), int(line[2])
             cellnum = (r-1)*NCOL + c
             seg_rch = "{0} {1}; ".format(line[3], line[4])
-            flow = 0.5 * (line[5] + line[7])
+            flow = 0.5 * (float(line[5]) + float(line[7]))
             loss = float(line[6])
             overland = float(line[8])
             stage = float(line[11])
@@ -456,7 +465,6 @@ class plot_streamflows:
             except:
                 print 'GIS_utils.GISops not found!'
             GISops.join_csv2shp(self.streams_shp, self.node_num_attribute, os.path.join(self.outpath, 'temp.csv'), self.node_num_attribute, outfile, how='inner')
-
 
 class SFRshapefile:
     '''
