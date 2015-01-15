@@ -14,7 +14,8 @@ import flopy
 class SFRdata(object):
 
     def __init__(self, Mat1, Mat2, landsurface=None, node_column=False,
-                 mfpath=None, mfnam=None, mfdis=None, to_meters_mult=0.3048):
+                 mfpath=None, mfnam=None, mfdis=None, to_meters_mult=0.3048,
+                 minimum_slope=1e-4):
 
         # read Mats 1 and 2
         self.MAT1 = Mat1
@@ -27,6 +28,7 @@ class SFRdata(object):
         self.mfnam = os.path.join(self.mfpath, mfnam)
         self.mfdis = os.path.join(self.mfpath, mfdis)
         self.to_m = to_meters_mult # multiplier to convert model units to meters (used for width estimation)
+        self.minimum_slope = minimum_slope
 
         self.segments = sorted(np.unique(self.m1.segment))
 
@@ -65,7 +67,20 @@ class SFRdata(object):
         self.dis = flopy.modflow.ModflowDis.load(self.mfdis, self.m, self.nf)
         self.elevs = np.zeros((self.dis.nlay + 1, self.dis.nrow, self.dis.ncol))
         self.elevs[0, :, :] = self.dis.top.array
-        self.elevs[1:, :, :] = self.dis.botm.array
+        self.elevs[0, :, :] = self.dis.top.array
+
+        # check if there Quasi-3D confining beds
+        if np.sum(self.dis.laycbd.array) > 0:
+            print 'Quasi-3D layering found, skipping confining beds...'
+            layer_ind = 0
+            for l, laycbd in enumerate(self.dis.laycbd.array):
+                self.elevs[l + 1, :, :] = self.dis.botm.array[layer_ind, :, :]
+                if laycbd == 1:
+                    print '\tbetween layers {} and {}'.format(l+1, l+2)
+                    layer_ind += 1
+                layer_ind += 1
+        else:
+            self.elevs[1:, :, :] = self.dis.botm.array
 
         # make dictionary of model top elevations by cellnum
         for c in range(self.dis.ncol):
@@ -113,6 +128,8 @@ class SFRdata(object):
 
 
 class smooth(SFRdata):
+
+    smoothing_iterations = 0
 
     def smooth_segment_ends(self, report_file='smooth_segment_ends.txt'):
         '''
@@ -374,6 +391,10 @@ class smooth(SFRdata):
 
             # assign to Mat1
             self.m1.loc[self.m1.segment == s, 'bed_slope'] = slopes
+        
+        # enforce minimum slope
+        ns = [s if s > self.minimum_slope else self.minimum_slope for s in self.m1.bed_slope.tolist()]
+        self.m1['bed_slope'] = ns
 
 
 class Widths:

@@ -47,16 +47,21 @@ class SFRInput:
     the SFRInput class holds all data from the XML-based input file
     """
     def __init__(self, infile):
+
+        '''
         try:
             inpardat = ET.parse(infile)
         except:
             raise(InputFileMissing(infile))
-
+        '''
+        inpardat = ET.parse(infile)
         inpars = inpardat.getroot()
 
         # setup the working directory (default to current directory)
         try:
             self.working_dir = inpars.findall('.//working_dir')[0].text
+            if self.working_dir == 'None':
+                self.working_dir = os.getcwd()
             if not os.path.exists(self.working_dir):
                 os.makedirs(self.working_dir)
         except:
@@ -173,7 +178,19 @@ class SFRInput:
             self.dis = flopy.modflow.ModflowDis.load(os.path.join(self.mfpath, self.MFdis), self.m, self.nf)
             self.elevs = np.zeros((self.dis.nlay + 1, self.dis.nrow, self.dis.ncol))
             self.elevs[0, :, :] = self.dis.top.array
-            self.elevs[1:, :, :] = self.dis.botm.array
+
+            # check if there Quasi-3D confining beds
+            if np.sum(self.dis.laycbd.array) > 0:
+                print 'Quasi-3D layering found, skipping confining beds...'
+                layer_ind = 0
+                for l, laycbd in enumerate(self.dis.laycbd.array):
+                    self.elevs[l + 1, :, :] = self.dis.botm.array[layer_ind, :, :]
+                    if laycbd == 1:
+                        print '\tbetween layers {} and {}'.format(l+1, l+2)
+                        layer_ind += 1
+                    layer_ind += 1
+            else:
+                self.elevs[1:, :, :] = self.dis.botm.array
 
             # make dictionary of model top elevations by cellnum
             for c in range(self.dis.ncol):
@@ -727,7 +744,7 @@ class FragIDPropsAll:
                 float(seg.MAXELEVSMO)*SFRdata.z_conversion,  # UNIT CONVERSION
                 float(seg.MINELEVSMO)*SFRdata.z_conversion,  # UNIT CONVERSION
                 float(seg.LengthFt),
-                seg.cellnum,
+                seg.getValue(SFRdata.node_attribute),
                 list(), list(), None, None, None, None, None, None, None, None,
                 None, None, None, None, None, None, None, None)
 
@@ -1886,7 +1903,7 @@ class SFROperations:
 
                 row = rows.newRow()
                 row.OLDFragID = orderedFragID[i]
-                row.CELLNUM = FragIDdata.allFragIDs[orderedFragID[i]].cellnum
+                row.setValue(self.SFRdata.node_attribute, FragIDdata.allFragIDs[orderedFragID[i]].cellnum)
                 row.ELEVMAX = maxcellrivelev
                 row.ELEVAVE = avecellrivelev
                 row.ELEVMIN = mincellrivelev
