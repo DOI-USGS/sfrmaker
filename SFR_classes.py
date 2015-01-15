@@ -15,6 +15,7 @@ from collections import defaultdict
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 import shutil
+import flopy
 
 '''
 debugging functions
@@ -46,16 +47,21 @@ class SFRInput:
     the SFRInput class holds all data from the XML-based input file
     """
     def __init__(self, infile):
+
+        '''
         try:
             inpardat = ET.parse(infile)
         except:
             raise(InputFileMissing(infile))
-
+        '''
+        inpardat = ET.parse(infile)
         inpars = inpardat.getroot()
 
         # setup the working directory (default to current directory)
         try:
             self.working_dir = inpars.findall('.//working_dir')[0].text
+            if self.working_dir == 'None':
+                self.working_dir = os.getcwd()
             if not os.path.exists(self.working_dir):
                 os.makedirs(self.working_dir)
         except:
@@ -80,7 +86,6 @@ class SFRInput:
         self.tpl = self.tf2flag(inpars.findall('.//tpl')[0].text)
         self.MFgrid = inpars.findall('.//MFgrid')[0].text
         self.MFdomain = inpars.findall('.//MFdomain')[0].text
-        self.MFdis = inpars.findall('.//MFdis')[0].text
         self.DEM = inpars.findall('.//DEM')[0].text
         self.intersect = self.add_path(inpars.findall('.//intersect')[0].text)
         self.intersect_points = self.add_path(inpars.findall('.//intersect_points')[0].text)
@@ -88,7 +93,6 @@ class SFRInput:
         self.PlusflowVAA = inpars.findall('.//PlusflowVAA')[0].text
         self.Elevslope = inpars.findall('.//Elevslope')[0].text
         self.Flowlines_unclipped = inpars.findall('.//Flowlines_unclipped')[0].text
-        self.arcpy_path = inpars.findall('.//arcpy_path')[0].text
         self.FLOW = inpars.findall('.//FLOW')[0].text
         self.FTab = inpars.findall('.//FTab')[0].text
         self.Flowlines = self.add_path(inpars.findall('.//Flowlines')[0].text)
@@ -140,6 +144,14 @@ class SFRInput:
         self.GISSHP = self.add_path(inpars.findall('.//GISSHP')[0].text)
         self.elevflag = inpars.findall('.//elevflag')[0].text
 
+        # make sure that MFdis file is consistent with modflow path if supplied
+        # or, if modflow path isn't supplied, use mfdis as-is
+        try:
+            self.mfpath = inpars.findall('.//modflow_path')[0].text
+            self.mfnam  = os.path.split(inpars.findall('.//modflow_namfile')[0].text)[-1]
+            self.MFdis = os.path.split(inpars.findall('.//MFdis')[0].text)[-1]
+        except:
+            self.MFdis = inpars.findall('.//MFdis')[0].text
 
         self.calculated_DEM_elevs = False
         self.calculated_contour_elevs = False
@@ -153,13 +165,42 @@ class SFRInput:
         arcpy.CheckOutExtension("spatial")
 
         # read in grid type
+        self.elevs_by_cellnum = {} # dictionary of model top elevations (used by structured or usg)
         try:
             self.gridtype = inpars.findall('.//grid_type')[0].text
         except:
             self.gridtype = 'structured'
 
+        if self.gridtype == 'structured':
+            # read in model grid information using flopy
+            self.m = flopy.modflow.Modflow(model_ws=self.mfpath)
+            self.nf = flopy.utils.mfreadnam.parsenamefile(os.path.join(self.mfpath, self.mfnam), {})
+            self.dis = flopy.modflow.ModflowDis.load(os.path.join(self.mfpath, self.MFdis), self.m, self.nf)
+            self.elevs = np.zeros((self.dis.nlay + 1, self.dis.nrow, self.dis.ncol))
+            self.elevs[0, :, :] = self.dis.top.array
+
+            # check if there Quasi-3D confining beds
+            if np.sum(self.dis.laycbd.array) > 0:
+                print 'Quasi-3D layering found, skipping confining beds...'
+                layer_ind = 0
+                for l, laycbd in enumerate(self.dis.laycbd.array):
+                    self.elevs[l + 1, :, :] = self.dis.botm.array[layer_ind, :, :]
+                    if laycbd == 1:
+                        print '\tbetween layers {} and {}'.format(l+1, l+2)
+                        layer_ind += 1
+                    layer_ind += 1
+            else:
+                self.elevs[1:, :, :] = self.dis.botm.array
+
+            # make dictionary of model top elevations by cellnum
+            for c in range(self.dis.ncol):
+                for r in range(self.dis.nrow):
+                    cellnum = r * self.dis.ncol + c + 1
+                    self.elevs_by_cellnum[cellnum] = self.elevs[0, r, c]
+
         # read in model information
-        self.DX, self.DY, self.NLAY, self.NROW, self.NCOL, i = disutil.read_meta_data(self.MFdis)
+        #self.DX, self.DY, self.NLAY, self.NROW, self.NCOL, i = disutil.read_meta_data(self.MFdis)
+
         # make backup copy of MAT 1, if it exists
         MAT1backup = "{0}_backup".format(self.MAT1)
         if os.path.isfile(self.MAT1):
@@ -195,14 +236,14 @@ class SFRInput:
         #cutoff to check stream length in cell against fraction of cell dimension
         #if the stream length is less than cutoff*side length, the piece of stream is dropped
         try:
-            self.cutoff = float(inpars.findall('.//cutoff')[0].text)
+            self.cutoff = np.min(self.dis.delr) * float(inpars.findall('.//cutoff')[0].text)
         except:
             self.cutoff = 0.0
 
         try:
             self.distanceTol = float(inpars.findall('.//distanceTol')[0].text)
         except:
-            self.distanceTol = 10*np.min(self.DX[1:] - self.DX[:-1]) # get spacings, then take the minimum
+            self.distanceTol = 10*np.min(self.dis.delc) # get spacings, then take the minimum
 
         try:
             self.profile_plot_interval = int(inpars.findall('.//profile_plot_interval')[0].text)
@@ -365,7 +406,7 @@ class LevelPathIDpropsAll:
             for FragID in self.levelpath_FragID[lpID]:
                 reachlength=FragIDdata.allFragIDs[FragID].lengthft
                 cellnum = FragIDdata.allFragIDs[FragID].cellnum
-                if reachlength < np.min(SFRdata.DX)*SFRdata.cutoff:
+                if reachlength < SFRdata.cutoff:
                     rmlist.append(FragID)
             #if any were too short remove from levelpath list of FragIDs
             newlist = [FragID for FragID in self.levelpath_FragID[lpID] if FragID not in rmlist]
@@ -703,7 +744,7 @@ class FragIDPropsAll:
                 float(seg.MAXELEVSMO)*SFRdata.z_conversion,  # UNIT CONVERSION
                 float(seg.MINELEVSMO)*SFRdata.z_conversion,  # UNIT CONVERSION
                 float(seg.LengthFt),
-                seg.cellnum,
+                seg.getValue(SFRdata.node_attribute),
                 list(), list(), None, None, None, None, None, None, None, None,
                 None, None, None, None, None, None, None, None)
 
@@ -1764,7 +1805,11 @@ class SFROperations:
         print "\nSetting up the elevation table --> {0:s}".format(self.SFRdata.rivers_table)
         if arcpy.Exists(self.SFRdata.rivers_table):
             arcpy.Delete_management(self.SFRdata.rivers_table)
-        arcpy.CreateTable_management(os.path.split(self.SFRdata.rivers_table)[0], os.path.split(self.SFRdata.rivers_table)[-1])
+        # arguments to CreateTable_management are (out_path, out_name)
+        # where out_path is an ArcSDE, file, or personal geodatabase or workspace
+        # in which the output table will be created
+        # and out_name is the file name for the table
+        arcpy.CreateTable_management(arcpy.env.workspace, self.SFRdata.rivers_table)
         arcpy.AddField_management(self.SFRdata.rivers_table, "OLDFragID", "LONG")
         arcpy.AddField_management(self.SFRdata.rivers_table, self.SFRdata.node_attribute, "LONG")
         arcpy.AddField_management(self.SFRdata.rivers_table, "ELEVMAX", "DOUBLE")
@@ -1858,7 +1903,7 @@ class SFROperations:
 
                 row = rows.newRow()
                 row.OLDFragID = orderedFragID[i]
-                row.CELLNUM = FragIDdata.allFragIDs[orderedFragID[i]].cellnum
+                row.setValue(self.SFRdata.node_attribute, FragIDdata.allFragIDs[orderedFragID[i]].cellnum)
                 row.ELEVMAX = maxcellrivelev
                 row.ELEVAVE = avecellrivelev
                 row.ELEVMIN = mincellrivelev
@@ -1929,14 +1974,13 @@ class SFROperations:
 
         BotcorPDF = os.path.join(SFRdata.working_dir, "Corrected_Bottom_Elevations.pdf")  # PDF file showing original and corrected bottom elevations
         Layerinfo = os.path.join(SFRdata.working_dir, "SFR_layer_assignments.txt")  # text file documenting how many reaches are in each layer as assigned
-        DX, DY, NLAY, NROW, self.NCOL, i = disutil.read_meta_data(self.SFRdata.MFdis)
-        print "\nRead in model grid top elevations from {0:s}".format(SFRdata.MFdis)
-        topdata, i = disutil.read_nrow_ncol_vals(SFRdata.MFdis, SFRdata.NROW, SFRdata.NCOL, np.float, i)
-        print "Read in model grid bottom layer elevations from {0:s}".format(SFRdata.MFdis)
-        bots = np.zeros([SFRdata.NLAY, SFRdata.NROW, SFRdata.NCOL])
-        for clay in np.arange(SFRdata.NLAY):
-            print 'reading layer {0:d}'.format(clay+1)
-            bots[clay, :, :], i = disutil.read_nrow_ncol_vals(SFRdata.MFdis, SFRdata.NROW, SFRdata.NCOL, np.float, i)
+
+        # flopy dis object read in upon init of SFRdata
+        topdata = SFRdata.dis.top.array
+        bots = SFRdata.dis.botm.array
+        ncol = SFRdata.dis.ncol
+        nlay = SFRdata.dis.nlay
+
         SFRinfo = np.genfromtxt(SFRdata.MAT1, delimiter=',', names=True, dtype=None)
 
         print '\nNow assiging stream cells to appropriate layers...'
@@ -1953,18 +1997,18 @@ class SFROperations:
             STOP = SFRinfo['top_streambed'][i]
             cellbottoms = list(bots[:, r-1, c-1])
             SFRbot = STOP - SFRdata.bedthick - SFRdata.buff
-            for b in range(SFRdata.NLAY):
+            for b in range(nlay):
                 if SFRbot < cellbottoms[b]:
-                    if b+1 >= SFRdata.NLAY:
+                    if b+1 >= nlay:
                         warnstring1 = 'Streambottom elevation={0:f}, Model bottom={1:f} at ' \
                               'row {2:d}, column {3:d}, cellnum {4:d}'.format(
-                              SFRbot, cellbottoms[-1], r, c, (r-1)*SFRdata.NCOL + c)
+                              SFRbot, cellbottoms[-1], r, c, (r-1)*ncol + c)
                         warnstring2 = 'Land surface is {0:f}'.format(topdata[r-1, c-1])
                         ofp_bottom_warnings.write(warnstring1  + warnstring2 + '\n')
                         print warnstring1
                         print warnstring2
                         below_bottom.write('{0:f},{1:f},{2:f},{3:d},{4:d}\n'.format(
-                            SFRbot, cellbottoms[-1], topdata[r-1, c-1], (r-1)*SFRdata.NCOL+c, SFRinfo['segment'][i]))
+                            SFRbot, cellbottoms[-1], topdata[r-1, c-1], (r-1)*ncol + c, SFRinfo['segment'][i]))
                         below_bot_adjust[(r-1, c-1)] = cellbottoms[-1] - SFRbot  # diff between SFR bottom and model bot
                         # fix the bottoms in this loop instead of below
                         # not only saving a loop, but more importantly, only looping through SFR cells
@@ -1979,31 +2023,6 @@ class SFROperations:
         below_bottom.close()
         New_Layers = np.array(New_Layers)
 
-        '''
-        ATL 6/9/2014: Looping thru all of the rows and columns is really inefficient.
-        I recommend we adjusted the bottoms in the loop above.
-        # create a new array of bottom elevations with dimensions like topdata
-        if SFRdata.Lowerbot:
-            print "\n\nAdjusting model bottom to accommodate SFR cells that were below bottom"
-            print "see {0:s}\n".format(BotcorPDF)
-            below_bot_adjust_tuples = below_bot_adjust.keys()
-            #for (r, c) in below_bot_adjust_tuples:
-            #    bots[-1, r, c] -= below_bot_adjust[(r, c)]
-
-            # PFJ:  This for loop was generated by MNF to improve indexing to py and MF arrays.
-            for r in range(1, SFRdata.NROW + 1):
-                for c in range(1, SFRdata.NCOL + 1):
-                    if (r, c) in below_bot_adjust_tuples:
-                        bots[-1, r-1, c-1] -= below_bot_adjust[(r, c)]
-
-
-            for r in range(SFRdata.NROW):
-                for c in range(SFRdata.NCOL):
-                    if r == 142 and c == 63:
-                        j=2
-                    if (r, c) in below_bot_adjust_tuples:
-                        bots[-1, r, c] -= below_bot_adjust[(r, c)]
-            '''
         if SFRdata.Lowerbot:
             outarray = os.path.join(SFRdata.working_dir, 'SFR_Adjusted_bottom_layer.dat')
 
@@ -2025,13 +2044,13 @@ class SFROperations:
             outpdf.close()
 
         # histogram of layer assignments
-        freq = np.histogram(list(New_Layers), range(SFRdata.NLAY + 2)[1:])
+        freq = np.histogram(list(New_Layers), range(nlay+ 2)[1:])
 
         # writeout info on Layer assignments
         ofp = open(Layerinfo, 'w')
         ofp.write('Layer\t\tNumber of assigned reaches\n')
         print '\nLayer assignments:'
-        for i in range(SFRdata.NLAY):
+        for i in range(nlay):
             ofp.write('{0:d}\t\t{1:d}\n'.format(freq[1][i], freq[0][i]))
             print '{0:d}\t\t{1:d}\n'.format(freq[1][i], freq[0][i])
         ofp.close()
@@ -2465,8 +2484,8 @@ class ElevsFromDEM:
         self.adjusted_elev = -9999
         self.verbose = False # prints interpolation information to screen for debugging/troubleshooting
 
-
-    def DEM_elevs_by_cellnum(self, SFRData, SFROperations):
+        '''
+        def DEM_elevs_by_cellnum(self, SFRData, SFROperations):
 
         # makes dictionary of DEM elevations by cellnum, using table for grid shapefile (column: cellnum)
         # i.e. DEM elevations are at the grid scale
@@ -2490,7 +2509,7 @@ class ElevsFromDEM:
         for row in MFgridtable:
             cellnum = row.getValue(SFROperations.joinnames[SFRData.node_attribute])
             self.DEM_elevs_by_cellnum[cellnum] = row.getValue(SFROperations.joinnames[self.MFgrid_elev_field.lower()])
-
+        '''
 
     def DEM_elevs_by_FragID(self, SFRdata, SFROperations):
 
@@ -2835,6 +2854,7 @@ class SFRoutput:
                     ofp.write('{0:e}\n'.format(seginfo['width_in_cell'][0]))
                     ofp.write('{0:e}\n'.format(seginfo['width_in_cell'][-1]))
         ofp.close()
+        print 'Done'
 
     def build_SFR_shapefile(self, SFRSegsAll):
         print 'building a shapefile of final SFR segments and reaches'

@@ -10,6 +10,12 @@ Notes on SFR input:
     <!-- working_dir:
     full path to working folder where intermediate and output will be generated. -->
     <working_dir>None</working_dir>
+    <!-- modflow_path:
+    path to MODFLOW input files (dis, nam, etc.; used by flopy) -->
+    <modflow_path>../model/ozarkgwmod/3-Input/A-calibration</modflow_path>
+    <!-- modflow_namfile:
+    modeflow name file (used by flopy) -->
+    <modflow_namfile>ozark.nam</modflow_namfile>
     <!-- reach_cutoff: 
     minimum reach length to retain following explosion of NHD segments to river cells -->
     <reach_cutoff>1.0</reach_cutoff>
@@ -72,9 +78,7 @@ Notes on SFR input:
     <Elevslope>elevslope_merged.dbf</Elevslope>  
     <!-- Flowlines_unclipped: 
         original flowlines covering model area (not clipped to grid) -->
-    <Flowlines_unclipped>flowlines_3plus_edjp_v2.shp</Flowlines_unclipped>    
-    <!-- arcpy_path: for calling arcpy scripts externally using os.system -->
-    <arcpy_path>C:\python27\ArcGIS10.1\python</arcpy_path>      
+    <Flowlines_unclipped>flowlines_3plus_edjp_v2.shp</Flowlines_unclipped>          
     <!-- FLOW: from NHDPlus -->
     <FLOW>PlusFlow.dbf</FLOW>
     <!-- FTab: from NHDPlus -->
@@ -93,7 +97,9 @@ In addition to the files above, these files (created during the preprocessing ro
     <intersect>river_explode.shp</intersect>
 </InputFiles_without_preprocessing>
 <!-- IntermediateFiles:
-These files are created by the program, to exchange information between routines-->
+These files are created by the program, to exchange information between routines
+Intermediate files should be entered without a path; they will all be saved to <working_dir>
+-->
 <IntermediateFiles>
     <!-- ELEV: clipped to active area -->
     <ELEV>river_w_elevations.shp</ELEV>
@@ -169,8 +175,6 @@ is desired
 	<Hc2fact>1.0</Hc2fact>
 	<stream_depth>3.0</stream_depth>
     <minimum_slope>1e-4</minimum_slope>
-	<!-- minimum_slope: value to be assigned to seemingly zero-sloped reaches -->
-	<minimum_slope>1.0e-06</minimum_slope>
 	<!-- buff:  Buffer so if STOP - thick - buff < bottom of cell, move to layer below-->
 	<buff>1.0</buff>
 	<!-- Lowerbot: If True, lowers the model bottom where SFR cells drop below it -->
@@ -178,3 +182,9 @@ is desired
 </SFR_parameters>
 
 </SFR_input>
+<Depreciated>
+<!-- These variables are no longer used -->
+    <!-- arcpy_path: for calling arcpy scripts externally using os.system 
+    ATL: as of 12/16/2014, this variable isn't used anywhere in SFR_classes-->
+    <arcpy_path>C:\python27\ArcGIS10.1\python</arcpy_path>
+</Depreciated>

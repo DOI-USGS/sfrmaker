@@ -3,16 +3,19 @@ __author__ = 'aleaf'
 Smooth streambed elevations outside of the context of the objects in SFR classes
 (works off of information in Mat1 and Mat2; generates updated versions of these files
 '''
+import os
 import numpy as np
 import pandas as pd
 import discomb_utilities as disutil
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
-
+import flopy
 
 class SFRdata(object):
 
-    def __init__(self, Mat1, Mat2, landsurface=None, nrow=2, ncol=2, node_column=False, MFdis=None, to_meters_mult=0.3048):
+    def __init__(self, Mat1, Mat2, landsurface=None, node_column=False,
+                 mfpath=None, mfnam=None, mfdis=None, to_meters_mult=0.3048,
+                 minimum_slope=1e-4):
 
         # read Mats 1 and 2
         self.MAT1 = Mat1
@@ -21,19 +24,21 @@ class SFRdata(object):
         self.m2 = pd.read_csv(Mat2).sort('segment')
         self.m2.index = self.m2.segment
 
-        self.nrow = nrow
-        self.ncol = ncol
-        self.MFdis = MFdis
+        self.mfpath = mfpath
+        self.mfnam = os.path.join(self.mfpath, mfnam)
+        self.mfdis = os.path.join(self.mfpath, mfdis)
         self.to_m = to_meters_mult # multiplier to convert model units to meters (used for width estimation)
+        self.minimum_slope = minimum_slope
 
         self.segments = sorted(np.unique(self.m1.segment))
 
         # node numbers for cells with SFR
+        self.elevs_by_cellnum = {}
         if not node_column:
             self.node_column = 'node'
             self.gridtype = 'structured'
-            self.m1[self.node_column] = (self.ncol * (self.m1['row'] - 1) + self.m1['column']).astype('int')
-            self.read_DIS(self.MFdis)
+            self.read_dis2(self.mfdis)
+            self.m1[self.node_column] = (self.dis.ncol * (self.m1['row'] - 1) + self.m1['column']).astype('int')
         else:
             self.node_column = node_column
 
@@ -54,10 +59,38 @@ class SFRdata(object):
             raise ValueError('Warning! Circular routing in segments {}.\n'
                              'Fix manually in Mat2 before continuing'.format(', '.join(map(str, c))))
 
+    def read_dis2(self, mfdis):
+        """read in model grid information using flopy
+        """
+        self.m = flopy.modflow.Modflow(model_ws=self.mfpath)
+        self.nf = flopy.utils.mfreadnam.parsenamefile(self.mfnam, {})
+        self.dis = flopy.modflow.ModflowDis.load(self.mfdis, self.m, self.nf)
+        self.elevs = np.zeros((self.dis.nlay + 1, self.dis.nrow, self.dis.ncol))
+        self.elevs[0, :, :] = self.dis.top.array
+        self.elevs[0, :, :] = self.dis.top.array
+
+        # check if there Quasi-3D confining beds
+        if np.sum(self.dis.laycbd.array) > 0:
+            print 'Quasi-3D layering found, skipping confining beds...'
+            layer_ind = 0
+            for l, laycbd in enumerate(self.dis.laycbd.array):
+                self.elevs[l + 1, :, :] = self.dis.botm.array[layer_ind, :, :]
+                if laycbd == 1:
+                    print '\tbetween layers {} and {}'.format(l+1, l+2)
+                    layer_ind += 1
+                layer_ind += 1
+        else:
+            self.elevs[1:, :, :] = self.dis.botm.array
+
+        # make dictionary of model top elevations by cellnum
+        for c in range(self.dis.ncol):
+            for r in range(self.dis.nrow):
+                cellnum = r * self.dis.ncol + c + 1
+                self.elevs_by_cellnum[cellnum] = self.elevs[0, r, c]
 
     def read_DIS(self, MFdis):
-
-
+        """read discretisation file using disutil
+        """
         self.DX, self.DY, self.NLAY, self.NROW, self.NCOL, i = disutil.read_meta_data(MFdis)
 
         # get layer tops/bottoms
@@ -83,7 +116,7 @@ class SFRdata(object):
         knt = 2
         nsegs = len(self.m2)
         while max_outseg > 0:
-            self.outsegs['outseg{}'.format(knt)] = [self.m2.outseg[s] if s > 0 else 0
+            self.outsegs['outseg{}'.format(knt)] = [self.m2.outseg[s] if s > 0 and s < 999999 else 0
                                                     for s in self.outsegs[self.outsegs.columns[-1]]]
             max_outseg = np.max(self.outsegs[self.outsegs.columns[-1]])
             if max_outseg == 0:
@@ -95,6 +128,8 @@ class SFRdata(object):
 
 
 class smooth(SFRdata):
+
+    smoothing_iterations = 0
 
     def smooth_segment_ends(self, report_file='smooth_segment_ends.txt'):
         '''
@@ -356,6 +391,10 @@ class smooth(SFRdata):
 
             # assign to Mat1
             self.m1.loc[self.m1.segment == s, 'bed_slope'] = slopes
+        
+        # enforce minimum slope
+        ns = [s if s > self.minimum_slope else self.minimum_slope for s in self.m1.bed_slope.tolist()]
+        self.m1['bed_slope'] = ns
 
 
 class Widths:
@@ -458,24 +497,35 @@ class Widths:
 class Outsegs(SFRdata):
 
     def plot_outsegs(self, outpdf='complete_profiles.pdf', units='ft', add_profiles={}):
-
+        print "plotting segment sequences..."
         # make a dataframe of all outsegs
         self.map_outsegs()
 
         # list of lists of connected segments
         seglists = [[p]+[s for s in self.outsegs.ix[p, :] if s > 0] for p in self.outsegs.index]
 
+        # reduce seglists down to unique sets of segments
+        unique_lists = []
+        for l in seglists:
+            # find all lists for which the current list is a subset
+            overlap = np.where([set(l).issubset(set(ll)) for ll in seglists])
+            # length 1 means that there are no other lists for which the current is a subset
+            if len(overlap[0]) == 1:
+                unique_lists.append(l)
+            else:
+                continue
+
         # add model top elevations to dictionary using node numbers
         self.m1['model_top'] = [self.elevs_by_cellnum[c] for c in self.m1[self.node_attribute]]
 
         pdf = PdfPages(outpdf)
-        for l in seglists:
-
+        for l in unique_lists:
+            print l
             if len(l) > 1:
 
                 cdist = []
                 cdist_end = 0
-                cdist_ends = []
+                cdist_ends = [0]
                 sbtop = []
                 modeltop = []
                 self.elevs = {}
@@ -485,7 +535,6 @@ class Outsegs(SFRdata):
 
                 # make each profile from its segments
                 for s in l:
-
                     # make a view of the Mat 1 dataframe that only includes the segment
                     df = self.m1[self.m1.segment == s].sort('reach')
 
@@ -518,16 +567,23 @@ class Outsegs(SFRdata):
                     #print len(self.elevs[p])
                     plt.plot(cdist, self.elevs[p], label=p, lw=0.5)
 
-                for x in cdist_ends[1:]:
+                # add in lines marking segment starts/ends
+                # add in annotations labeling each segment
+                for i, x in enumerate(cdist_ends[1:]):
                     plt.axvline(x, c='0.25', lw=0.5)
-                ax.set_xlabel('Distance along SFR segment')
+
+                    tx = 0.5 * (cdist_ends[i] + cdist_ends[i-1])
+                    ty = ax.get_ylim()[0] + 0.9 * (ax.get_ylim()[1] - ax.get_ylim()[0])
+                    ax.text(tx, ty, str(l[i-1]), ha='center', fontsize=8)
+
+                ax.set_xlabel('Distance along SFR path')
                 ax.set_ylabel('Elevation, {}'.format(units))
-                title = 'SFR profile for segments:'
+                title = 'SFR profile for segments:\n'
                 for s in l:
                     title += ' {:.0f}'.format(s)
-                ax.set_title(title)
+                ax.set_title(title, fontsize=10, fontweight='bold', loc='left')
                 ax.set_ylim(int(np.floor(ax.get_ylim()[0])), int(np.ceil(ax.get_ylim()[1])))
-                plt.legend(loc='best')
+                plt.legend(loc='best', fontsize=10)
                 pdf.savefig()
                 plt.close()
         pdf.close()
@@ -545,7 +601,7 @@ class Outsegs(SFRdata):
         self.m1['Outlet'] = [self.m2.ix[seg, 'Outlet'] for seg in self.m1.segment]
 
         # make a matrix of the model grid, assign outlet values to SFR cells
-        self.watersheds = np.empty((self.nrow * self.ncol))
+        self.watersheds = np.empty((self.dis.nrow * self.dis.ncol))
         self.watersheds[:] = np.nan
 
         for s in self.segments:
@@ -554,9 +610,10 @@ class Outsegs(SFRdata):
             cns = segdata[self.node_column].values
             self.watersheds[cns] = segdata.Outlet.values[0]
 
-        self.watersheds = np.reshape(self.watersheds, (self.nrow, self.ncol))
+        self.watersheds = np.reshape(self.watersheds, (self.dis.nrow, self.dis.ncol))
 
         # now plot it up!
+        self.watersheds[self.watersheds == 999999] = np.nan # screen out 999999 values
         self.routingfig = plt.figure()
         ax = self.routingfig.add_subplot(111)
         plt.imshow(self.watersheds)
