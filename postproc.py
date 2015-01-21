@@ -33,9 +33,22 @@ class SFRdata(object):
             # is this the right kind of error?
             raise AssertionError("Please specify either Mat1 and Mat2 files or an SFR package file.")
 
-        self.mfpath = mfpath
-        self.mfnam = os.path.join(self.mfpath, mfnam)
-        self.mfdis = os.path.join(self.mfpath, mfdis)
+        if mfpath is not None:
+            self.mfpath = mfpath
+            self.mfnam = os.path.join(self.mfpath, mfnam)
+            self.mfdis = os.path.join(self.mfpath, mfdis)
+
+            # node numbers for cells with SFR
+            if not node_column:
+                self.node_column = 'node'
+                self.gridtype = 'structured'
+                self.read_dis2(self.mfdis)
+                self.m1[self.node_column] = (self.dis.ncol * (self.m1['row'] - 1) + self.m1['column']).astype('int')
+            else:
+                self.node_column = node_column
+
+        self.node_attribute = node_column # compatibility with sfr_plots and sfr_classes
+
         self.to_m = to_meters_mult # multiplier to convert model units to meters (used for width estimation)
         self.minimum_slope = minimum_slope
 
@@ -43,17 +56,7 @@ class SFRdata(object):
         self.Mat1_out = Mat1
         self.Mat2_out = Mat2_out
 
-        # node numbers for cells with SFR
         self.elevs_by_cellnum = {}
-        if not node_column:
-            self.node_column = 'node'
-            self.gridtype = 'structured'
-            self.read_dis2(self.mfdis)
-            self.m1[self.node_column] = (self.dis.ncol * (self.m1['row'] - 1) + self.m1['column']).astype('int')
-        else:
-            self.node_column = node_column
-
-        self.node_attribute = self.node_column # compatibility with sfr_plots and sfr_classes
 
         # assign upstream segments to Mat2
         self.m2['upsegs'] = [self.m2.segment[self.m2.outseg == s].tolist() for s in self.segments]
