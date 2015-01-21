@@ -1,7 +1,6 @@
 __author__ = 'aleaf'
 '''
-Smooth streambed elevations outside of the context of the objects in SFR classes
-(works off of information in Mat1 and Mat2; generates updated versions of these files
+
 '''
 import os
 import numpy as np
@@ -13,16 +12,26 @@ import flopy
 
 class SFRdata(object):
 
-    def __init__(self, Mat1, Mat2, landsurface=None, node_column=False,
+    def __init__(self, Mat1=None, Mat2=None, sfr=None, node_column=False,
                  mfpath=None, mfnam=None, mfdis=None, to_meters_mult=0.3048,
+                 Mat2_out=None,
                  minimum_slope=1e-4):
+        """
+        Base class for SFR information in Mat1 and Mat2, or SFR package
 
-        # read Mats 1 and 2
-        self.MAT1 = Mat1
-        self.MAT2 = Mat2
-        self.m1 = pd.read_csv(Mat1).sort(['segment', 'reach'])
-        self.m2 = pd.read_csv(Mat2).sort('segment')
-        self.m2.index = self.m2.segment
+        """
+        if Mat1 is not None:
+            # read Mats 1 and 2
+            self.MAT1 = Mat1
+            self.MAT2 = Mat2
+            self.m1 = pd.read_csv(Mat1).sort(['segment', 'reach'])
+            self.m2 = pd.read_csv(Mat2).sort('segment')
+            self.m2.index = self.m2.segment
+        elif sfr is not None:
+            self.read_sfr_package()
+        else:
+            # is this the right kind of error?
+            raise AssertionError("Please specify either Mat1 and Mat2 files or an SFR package file.")
 
         self.mfpath = mfpath
         self.mfnam = os.path.join(self.mfpath, mfnam)
@@ -31,6 +40,8 @@ class SFRdata(object):
         self.minimum_slope = minimum_slope
 
         self.segments = sorted(np.unique(self.m1.segment))
+        self.Mat1_out = Mat1
+        self.Mat2_out = Mat2_out
 
         # node numbers for cells with SFR
         self.elevs_by_cellnum = {}
@@ -44,12 +55,6 @@ class SFRdata(object):
 
         self.node_attribute = self.node_column # compatibility with sfr_plots and sfr_classes
 
-        if landsurface:
-            self.landsurface = np.fromfile(landsurface, sep=' ') # array of elevations to use (sorted by cellnumber)
-
-            # assign land surface elevations based on node number
-            self.m1['landsurface'] = [self.landsurface[n-1] for n in self.m1[self.node_column]]
-
         # assign upstream segments to Mat2
         self.m2['upsegs'] = [self.m2.segment[self.m2.outseg == s].tolist() for s in self.segments]
 
@@ -58,6 +63,11 @@ class SFRdata(object):
         if len(c) > 0:
             raise ValueError('Warning! Circular routing in segments {}.\n'
                              'Fix manually in Mat2 before continuing'.format(', '.join(map(str, c))))
+
+    def read_sfr_package(self):
+        """method to read in SFR file
+        """
+        pass
 
     def read_dis2(self, mfdis):
         """read in model grid information using flopy
@@ -106,7 +116,6 @@ class SFRdata(object):
                 cellnum = r*self.NCOL + c + 1
                 self.elevs_by_cellnum[cellnum] = self.layer_elevs[0, r, c]
 
-
     def map_outsegs(self):
         '''
         from Mat2, returns dataframe of all downstream segments (will not work with circular routing!)
@@ -126,10 +135,89 @@ class SFRdata(object):
                 print 'Circular routing encountered in segment {}'.format(max_outseg)
                 break
 
+    def consolidate_conductance(self, bedKmin=1e-8):
+        """For model cells with multiple SFR reaches, shift all conductance to widest reach,
+        by adjusting the length, and setting the lengths in all smaller collocated reaches to 1,
+        and the K-values in these to bedKmin
 
-class smooth(SFRdata):
+        Parameters
+        ----------
 
-    smoothing_iterations = 0
+        bedKmin : float
+            Hydraulic conductivity value to use for collocated SFR reaches in a model cell that are not the dominant
+            (widest) reach. This is used to effectively set conductance in these reaches to 0, to avoid circulation
+            of water between the collocated reaches.
+
+        Returns
+        -------
+            Modifies the SFR Mat1 table dataframe attribute of the SFRdata object. A new SFR package file can be
+            written from this table.
+
+        Notes
+        -----
+            See the ConsolidateConductance notebook in the Notebooks folder.
+        """
+        # Calculate SFR conductance for each reach
+        def cond(X):
+            c = X['bed_K'] * X['width_in_cell'] * X['length_in_cell'] / X['bed_thickness']
+            return c
+
+        self.m1['Cond'] = self.m1.apply(cond, axis=1)
+
+        shared_cells = np.unique(self.m1.ix[self.m1.node.duplicated(), 'node'])
+
+        # make a new column that designates whether a reach is dominant in each cell
+        # dominant reaches include those not collocated with other reaches, and the longest collocated reach
+        self.m1['Dominant'] = [True] * len(self.m1)
+
+        for c in shared_cells:
+
+            # select the collocated reaches for this cell
+            df = self.m1[self.m1.node == c].sort('width_in_cell', ascending=False)
+
+            # set all of these reaches except the largest to not Dominant
+            self.m1.loc[df.index[1:], 'Dominant'] = False
+
+        # Sum up the conductances for all of the collocated reaches
+        # returns a series of conductance sums by model cell, put these into a new column in Mat1
+        Cond_sums = self.m1[['node', 'Cond']].groupby('node').agg('sum').Cond
+        self.m1['Cond_sum'] = [Cond_sums[c] for c in self.m1.node]
+
+        # Calculate a new length for widest reaches, set length in secondary collocated reaches to 1
+        # also set the K values in the secondary cells to bedKmin
+        self.m1['old_length_in_cell'] = self.m1.length_in_cell
+
+        def consolidate_lengths(X):
+            if X['Dominant']:
+                lnew = X['Cond_sum'] * X['bed_thickness'] / (X['bed_K'] * X['width_in_cell'])
+            else:
+                lnew = 1.0
+            return lnew
+
+        self.m1['length_in_cell'] = self.m1.apply(consolidate_lengths, axis=1)
+        self.m1['bed_K'] = [r['bed_K'] if r['Dominant'] else bedKmin for i, r in self.m1.iterrows()]
+
+
+class Elevations(SFRdata):
+
+    def __init__(self, Mat1=None, Mat2=None, sfr=None, node_column=False,
+                 mfpath=None, mfnam=None, mfdis=None, to_meters_mult=0.3048,
+                 minimum_slope=1e-4, landsurface=None, smoothing_iterations=0):
+        """
+        Smooth streambed elevations outside of the context of the objects in SFR classes
+        (works off of information in Mat1 and Mat2; generates updated versions of these files
+        """
+        SFRdata.__init__(self, Mat1=Mat1, Mat2=Mat2, sfr=sfr, node_column=node_column,
+                 mfpath=mfpath, mfnam=mfnam, mfdis=mfdis, to_meters_mult=to_meters_mult,
+                 minimum_slope=minimum_slope)
+
+        if landsurface:
+            self.landsurface = np.fromfile(landsurface, sep=' ') # array of elevations to use (sorted by cellnumber)
+
+            # assign land surface elevations based on node number
+            self.m1['landsurface'] = [self.landsurface[n-1] for n in self.m1[self.node_column]]
+
+        self.smoothing_iterations = smoothing_iterations
 
     def smooth_segment_ends(self, report_file='smooth_segment_ends.txt'):
         '''
@@ -399,15 +487,11 @@ class smooth(SFRdata):
 
 class Widths:
 
-    def __init__(self, Mat1, Mat2, to_km=0.0003048, Mat2_out=None):
+    def __init__(self, Mat1=None, Mat2=None, sfr=None, to_km=0.0003048, Mat2_out=None):
 
-        self.m1 = pd.read_csv(Mat1).sort(['segment', 'reach'])
-        self.m2 = pd.read_csv(Mat2).sort('segment')
-        self.m2.index = self.m2.segment
-        self.segments = sorted(np.unique(self.m1.segment))
+        SFRdata.__init__(self, Mat1=Mat1, Mat2=Mat2, sfr=sfr, to_meters_mult=to_km*1000, Mat2_out=Mat2_out)
+
         self.to_km = to_km # multiplier from model units to km
-        self.Mat1_out = Mat1
-        self.Mat2_out = Mat2_out
 
     def widthcorrelation(self, arbolate):
         #estimate widths, equation from Feinstein and others (Lake
@@ -491,7 +575,6 @@ class Widths:
         if self.Mat2_out:
             self.m2.to_csv(self.Mat2_out, index=False)
             print 'saved arbolate sum information to {}.'.format(self.Mat2_out)
-
 
 
 class Outsegs(SFRdata):
