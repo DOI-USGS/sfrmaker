@@ -22,16 +22,23 @@ class SFRdata(object):
         """
         if Mat1 is not None:
             # read Mats 1 and 2
-            self.MAT1 = Mat1
-            self.MAT2 = Mat2
-            self.m1 = pd.read_csv(Mat1).sort(['segment', 'reach'])
-            self.m2 = pd.read_csv(Mat2).sort('segment')
+            # allow the dataframes to be passed directly instead of reading them in from csvs
+            if isinstance(Mat1, pd.DataFrame):
+                self.m1 = Mat1
+                self.m2 = Mat2
+            else:
+                self.MAT1 = Mat1
+                self.MAT2 = Mat2
+                self.m1 = pd.read_csv(Mat1).sort(['segment', 'reach'])
+                self.m2 = pd.read_csv(Mat2).sort('segment')
             self.m2.index = self.m2.segment
         elif sfr is not None:
             self.read_sfr_package()
         else:
             # is this the right kind of error?
             raise AssertionError("Please specify either Mat1 and Mat2 files or an SFR package file.")
+
+        self.elevs_by_cellnum = {} # dictionary to store the model top elevation by cellnumber
 
         if mfpath is not None:
             self.mfpath = mfpath
@@ -55,8 +62,6 @@ class SFRdata(object):
         self.segments = sorted(np.unique(self.m1.segment))
         self.Mat1_out = Mat1
         self.Mat2_out = Mat2_out
-
-        self.elevs_by_cellnum = {}
 
         # assign upstream segments to Mat2
         self.m2['upsegs'] = [self.m2.segment[self.m2.outseg == s].tolist() for s in self.segments]
@@ -487,6 +492,69 @@ class Elevations(SFRdata):
         ns = [s if s > self.minimum_slope else self.minimum_slope for s in self.m1.bed_slope.tolist()]
         self.m1['bed_slope'] = ns
 
+
+    def reset_model_top_2streambed(self, minimum_thickness=1,
+                                   outdisfile=None, outsummary=None):
+        """Make the model top elevation consistent with the SFR streambed elevations;
+        Adjust other layers downward (this puts all SFR cells in layer1)
+
+        Parameters
+        ----------
+        minimum_thickness : float
+            Minimum layer thickness to enforce when adjusting underlying layers to accommodate
+            changes to the model top
+
+        outdisfile : string
+            Name for new MODFLOW discretization file
+
+        outsummary : string (optional)
+            If specified, will save a summary (in SFR Mat1 style format)
+            of adjustments made to the model top
+
+        """
+        if outdisfile is None:
+            outdisfile = self.mfdis[:-4] + '_adjusted_to_streambed.dis'
+
+        # output file summarizing adjustments made to model top
+        if outsummary is None:
+            outsummary = self.mfdis[:-4] + '_adjustments_to_model_top.csv'
+
+        # make a vector of highest streambed values for each cell containing SFR (for collocated SFR cells)
+        self.m1['highest_top'] = self.m1.top_streambed
+
+        shared_cells = np.unique(self.m1.ix[self.m1.node.duplicated(), 'node'])
+        for c in shared_cells:
+
+            # select the collocated reaches for this cell
+            df = self.m1[self.m1.node == c].sort('top_streambed', ascending=False)
+
+            # set all of these reaches except the largest to not Dominant
+            self.m1.loc[df.index, 'highest_top'] = np.max(df.top_streambed)
+
+        # make a new model top array; assign highest streambed tops to it
+        newtop = self.dis.top.array.copy()
+        newtop[self.m1.row.values-1, self.m1.column.values-1] = self.m1.highest_top.values
+
+        # Now straighten out the other layers, removing any negative thicknesses
+        # do layer 1 first
+        newbots = self.dis.botm.array.copy()
+        conflicts = newbots[0, :, :] > newtop - minimum_thickness
+        newbots[0, conflicts] = newtop[conflicts] - minimum_thickness
+
+        for i in range(self.dis.nlay - 1):
+            conflicts = newbots[i+1, :, :] > (newbots[i, :, :] - 1)
+            newbots[i+1, conflicts] = newbots[i, conflicts] - minimum_thickness
+
+        # make a dataframe that shows the largest adjustments made to model top
+        adjustments = self.m1[self.m1.top_height > 0].sort(columns='top_height', ascending=False)
+        adjustments.to_csv(outsummary)
+
+        # write a new DIS file
+        # (see Aberdeen work)
+        new_m = flopy.modflow.mf.Modflow(modelname=outdisfile.split('.')[0])
+        newdis = flopy.modflow.ModflowDis(new_m, nlay=self.dis.nlay, nrow=self.dis.nrow, ncol=self.dis.ncol,
+                                          delr=self.dis.delr, delc=self.dis.delc, top=newtop, botm=newbots)
+        newdis.write_file()
 
 class Widths:
 
