@@ -2825,7 +2825,7 @@ class SFRoutput:
                 Mat1['length_in_cell'][i],
                 Mat1['top_streambed'][i],
                 slope,
-                self.indat.bedthick,
+                Mat1['bed_thickness'][i],
                 bedK))
 
         ofp.write('{0:d} 0 0 0\n'.format(nseg))
