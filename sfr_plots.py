@@ -405,7 +405,7 @@ class plot_streamflows:
             if flow == 0:
                 state = 'dry'
             elif loss > 0:
-                state = 'loosing'
+                state = 'losing'
             elif loss < 0:
                 state = 'gaining'
             else:
@@ -487,6 +487,7 @@ class SFRshapefile:
             self.mfpath = mfpath
             self.mfnam = os.path.join(mfpath, mfnam)
             self.mfdis = os.path.join(mfpath, mfdis)
+            self.elevs_by_cellnum = {}
             self.read_dis2()
             
         else:
@@ -511,9 +512,14 @@ class SFRshapefile:
         self.prj = prj
 
         # read in Mat 1 and 2
-        self.m1 = pd.read_csv(self.Mat1).sort(['segment', 'reach'])
-        self.m2 = pd.read_csv(self.Mat2)
-        self.m2.index = self.m2.segment
+        if isinstance(self.Mat1, pd.DataFrame):
+            self.m1 = self.Mat1
+            self.m2 = self.Mat2
+        else:
+            self.m1 = pd.read_csv(self.Mat1).sort(['segment', 'reach'])
+            self.m2 = pd.read_csv(self.Mat2)
+            self.m2.index = self.m2.segment
+
         self.upsegs = pd.Series(self.m2.segment, index=self.m2.outseg).to_dict()
         self.nSFRcells = len(self.m1)
 
@@ -522,7 +528,9 @@ class SFRshapefile:
         self.DY = np.append(np.array([0]), np.cumsum(self.dis.delc))[::-1]
 
         # add node numbers to Mat1
-        self.m1[self.node_attribute] = (self.dis.ncol * (self.m1['row'] - 1) + self.m1['column']).astype('int')
+        self.node_attribute = node_attribute
+        if self.node_attribute not in self.m1.columns:
+            self.m1[self.node_attribute] = (self.dis.ncol * (self.m1['row'] - 1) + self.m1['column']).astype('int')
 
         # add cell geometries to Mat1
         self.cell_geometries = {}
