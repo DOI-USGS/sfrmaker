@@ -11,6 +11,7 @@ from shapely.geometry import Polygon, LineString
 import flopy
 from sfr_plots import SFRshapefile
 import GISio
+import GISops
 
 
 # Functions
@@ -31,11 +32,18 @@ def header(infile):
 class SFRdata(object):
 
     def __init__(self, sfrobject=None, Mat1=None, Mat2=None, sfr=None, node_column=False,
-                 mfpath=None, mfnam=None, mfdis=None, landsurfacefile=None, to_meters_mult=0.3048,
-                 Mat2_out=None, xll=0.0, yll=0.0, prj=None,
+                 mfpath='', mfnam=None, mfdis=None, landsurfacefile=None, GIS_mult=0.3048, to_meters_mult=0.3048,
+                 Mat2_out=None, xll=0.0, yll=0.0, prj=None, proj4=None, epsg=None,
                  minimum_slope=1e-4, streamflow_file=None):
         """
         Base class for SFR information in Mat1 and Mat2, or SFR package
+
+
+        Parameters
+        ----------
+
+        GIS_mult : float
+            Multiplier to go from model units to GIS units
 
         """
         # if an sfr object is supplied, copy all of its attributes over
@@ -53,8 +61,10 @@ class SFRdata(object):
                 else:
                     self.Mat1 = Mat1
                     self.Mat2 = Mat2
-                    self.m1 = pd.read_csv(Mat1).sort(['segment', 'reach'])
-                    self.m2 = pd.read_csv(Mat2).sort('segment')
+                    self.m1 = pd.read_csv(Mat1)
+                    self.m2 = pd.read_csv(Mat2)
+                self.m1.sort(['segment', 'reach'], inplace=True)
+                self.m2.sort('segment', inplace=True)
                 self.m2.index = self.m2.segment
             elif sfr is not None:
                 self.read_sfr_package()
@@ -62,36 +72,51 @@ class SFRdata(object):
                 # is this the right kind of error?
                 raise AssertionError("Please specify either Mat1 and Mat2 files or an SFR package file.")
 
+            # Discretization
             self.elevs_by_cellnum = {} # dictionary to store the model top elevation by cellnumber
+            self.cell_geometries = {}
 
-            if mfpath is not None:
+            if mfdis is not None:
                 self.mfpath = mfpath
-                self.mfnam = os.path.join(self.mfpath, mfnam)
+                self.basename = mfdis[:-4]
+                if mfnam is None:
+                    mfnam = self.basename + '.nam'
                 self.mfdis = os.path.join(self.mfpath, mfdis)
+                self.mfnam = os.path.join(self.mfpath, mfnam)
 
                 # node numbers for cells with SFR
                 if not node_column:
                     self.node_column = 'node'
                     self.gridtype = 'structured'
                     self.read_dis2()
-                    self.m1[self.node_column] = (self.dis.ncol * (self.m1['row'] - 1) + self.m1['column']).astype('int')
+                    self.m1['node'] = (self.dis.ncol * (self.m1['row'] - 1) + self.m1['column']).astype('int')
                 else:
-                    self.node_column = node_column
+                    self.m1.rename(columns={node_column, 'node'}, inplace=True)
+                    self.node_column = 'node' # so that some code doesn't break for the time being
+            else:
+                self.basename = 'MF'
 
-            self.node_attribute = node_column # compatibility with sfr_plots and sfr_classes
+            self.node_attribute = 'node' # compatibility with sfr_plots and sfr_classes
 
             self.landsurfacefile = landsurfacefile
             self.landsurface = None
             self.xll = xll
             self.yll = yll
-            self.prj = prj # projection file
             self.to_m = to_meters_mult # multiplier to convert model units to meters (used for width estimation)
             self.to_km = self.to_m / 1000.0
+            self.GIS_mult = GIS_mult
             self.minimum_slope = minimum_slope
 
+            # coordinate projection of model grid
+            self.prj = prj # projection file
+            self.proj4 = proj4
+            self.epsg = epsg
+            if proj4 is None and prj is not None:
+                self.proj4 = GISio.get_proj4(prj)
+
             # streamflow file for plotting SFR results
-            if streamflow_file is None:
-                streamflow_file = self.mfnam[:-4] + '_streamflow.dat'
+            if mfnam is not None and streamflow_file is None:
+                streamflow_file = mfnam[:-4] + '_streamflow.dat'
             self.streamflow_file = streamflow_file
 
             self.segments = sorted(np.unique(self.m1.segment))
@@ -115,9 +140,14 @@ class SFRdata(object):
         """
         pass
 
-    def read_dis2(self):
+    def read_dis2(self, mfdis=None, mfnam=None):
         """read in model grid information using flopy
         """
+        if mfdis is not None:
+            self.mfdis = mfdis
+            self.mfnam = mfnam
+            self.mfpath = os.path.split(self.mfdis)[0]
+
         print self.mfdis
         self.m = flopy.modflow.Modflow(model_ws=self.mfpath)
         self.nf = flopy.utils.mfreadnam.parsenamefile(self.mfnam, {})
@@ -165,13 +195,16 @@ class SFRdata(object):
 
     def get_cell_geometries(self):
 
+        print 'computing cell geometries...'
         self.centroids = self.dis.get_node_coordinates()
+        self.get_cell_centroids()
 
-        for i, r in self.m1.iterrows():
-            r, c = r.row - 1, r.column - 1
+        for i, dfr in self.m1.iterrows():
+            r, c = dfr.row - 1, dfr.column - 1
             cn = r * self.dis.ncol + c + 1
-            cx, cy = self.centroids[1][c] + self.xll, self.centroids[0][r] + self.yll
-            dx, dy = self.dis.delr[c], self.dis.delc[r] # this is confusing, may be a bug in flopy
+            cx, cy = dfr.centroids
+            dx = self.dis.delr[c] * self.GIS_mult
+            dy = self.dis.delc[r] * self.GIS_mult  # this is confusing, may be a bug in flopy
 
             # calculate vertices for parent cell
             x0 = cx - 0.5 * dx
@@ -182,13 +215,17 @@ class SFRdata(object):
             self.cell_geometries[cn] = Polygon([(x0, y0), (x1, y0), (x1, y1), (x0, y1), (x0, y0)])
 
     def get_cell_centroids(self):
+        """Adds column of cell centroids coordinates (tuples) to Mat1,
+        from flopy DIS object.
+        """
 
         self.centroids = self.dis.get_node_coordinates()
 
         centroids = []
         for i, r in self.m1.iterrows():
             r, c = r.row - 1, r.column - 1
-            cx, cy = self.centroids[1][c] + self.xll, self.centroids[0][r] + self.yll
+            cx = self.centroids[1][c] * self.GIS_mult + self.xll
+            cy = self.centroids[0][r] * self.GIS_mult + self.yll
             centroids.append((cx, cy))
 
         self.m1['centroids'] = centroids
@@ -392,13 +429,58 @@ class SFRdata(object):
         self.Widths.estimate_from_arbolate()
         self.__dict__ = self.Widths.__dict__.copy()
 
-    def build_shapefile(self, xll=0.0, yll=0.0, outshp=None, prj=None):
+    def renumber_sfr_cells_from_polygons(self, intersect_df=None, intersect_shapefile=None, intersect_prj=None,
+                                         sfr_shapefile=None,
+                                         node_attribute=None, GIS_mult=None):
+        """
+        Subdivides SFR segments where they intersect polygon features supplied in a dataframe or a shapefile.
+        Contiguous sequences of SFR reaches (within a segment)
+        Parameters
+        ----------
+        intersect_df : DataFrame
+            Contains a 'geometry' column of shapely polygon objects that intersect SFR cells. Contiguous sequences
+            of SFR reaches intersecting a polygon will be made into new segments.
+        :param intersect_shapefile:
+        :param sfr_shapefile:
+        :param node_attribute:
+        :param GIS_mult:
+        :return:
+        """
+        '''
+        self.Spatial = Spatial(sfrobject=self)
+        dfi = self.Spatial.intersect_with_SFR_cells(intersect_df=intersect_df, intersect_shapefile=intersect_shapefile,
+                                                    intersect_prj=intersect_prj,
+                                                    sfr_shapefile=sfr_shapefile,
+                                                    node_attribute=node_attribute, GIS_mult=GIS_mult)
 
+        '''
+        sfr_cells = pd.read_csv('waterbodies_intersected.csv').sfr_cells.tolist()
+        sfrc = []
+        for c in sfr_cells:
+            try:
+                sfrc.append(map(int, c.replace('[','').replace(']','').split(',')))
+            except:
+                sfrc.append([])
+
+        self.Segments = Segments(sfrobject=self)
+        #self.Segments.renumber_SFR_cells(dfi['sfr_cells'].tolist())
+        self.Segments.renumber_SFR_cells(sfrc)
+        self.__dict__ = self.Segments.__dict__.copy()
+
+    def write_shapefile(self, xll=0.0, yll=0.0, outshp='SFR.shp', prj=None):
+
+        if 'geometry' in self.m1.columns:
+            GISio.df2shp(self.m1, shpname=outshp, epsg=self.epsg, proj4=self.proj4, prj=self.prj)
+        else:
+            print 'No cell geometries found. Please add discretization information using read_dis2(), ' \
+            'and then compute cell geometries by running get_cell_geometries().'
+        '''
         self.SFRshapefile = SFRshapefile(Mat1=self.m1, Mat2=self.m2, xll=xll, yll=yll,
                                 mfpath=self.mfpath, mfnam=os.path.split(self.mfnam)[-1],
                                 mfdis=os.path.split(self.mfdis)[-1],
                                 outshp=outshp, prj=prj)
         self.SFRshapefile.build()
+        '''
 
     def write_streamflow_shapefile(self, streamflow_file=None, lines_shapefile=None, node_col=None):
 
@@ -1132,3 +1214,251 @@ class Streamflow(SFRdata):
             df['geometry'] = geom
 
         GISio.df2shp(df, streamflow_shp, prj=prj)
+
+
+class Segments(SFRdata):
+
+    def __init__(self, sfrobject=None, Mat1=None, Mat2=None, sfr=None):
+
+        SFRdata.__init__(self, sfrobject=sfrobject, Mat1=Mat1, Mat2=Mat2, sfr=sfr)
+
+    def index_downstream_reaches(self):
+        """Get index of downstream reach for each SFR reach in Mat
+        """
+        print "indexing downstream reaches..."
+        '''
+        # list outsegs for each reach in m1
+        outsegs = [int(self.m2.outseg[self.m2.segment == s]) for s in self.m1.segment]
+
+        # list index of outseg reach 1 for each reach in m1
+        outseg_reach1_inds = [self.m1[(self.m1.segment == o) & (self.m1.reach == 1)].index[0]
+                       if o != 0 and o != 999999
+                       else -999999 for o in outsegs]
+
+        # downstream reach is next lowest index if segment is same, otherwise reach 1 of outseg
+        # (m1 is sorted by segment and then reach)
+        self.m1['downreach_ind'] = [i-1 if i > 1 and self.m1.segment[i-1] == self.m1.segment[i]
+                                    else outseg_reach1_inds[i] for i, r in enumerate(self.m1.reach)]
+        '''
+        m1index = self.m1.index.values
+        m2segments = self.m2.segment.values
+        m2outsegs = self.m2.outseg.values
+        segments = self.m1.segment.values
+        reaches = self.m1.reach.values
+        downreach_ind = []
+        for i, seg in enumerate(segments):
+
+            # if downstream reach is in current seg and not on reach index 0
+            if i > 1 and segments[i-1] == seg:
+                downreach_ind.append(i - 1)
+            # otherwise, find the index of the first reach of the outseg
+            else:
+                outseg = int(m2outsegs[m2segments == seg])
+                if outseg != 0 and outseg != 999999:
+                    outseg_reach1_inds = m1index[(segments == outseg) & (reaches == 1)]
+                else:
+                    outseg_reach1_inds = -999999
+
+                downreach_ind.append(outseg_reach1_inds)
+
+        self.m1['downreach_ind'] = downreach_ind
+
+    def renumber_SFR_cells(self, sfr_cells_list):
+        """Renumbers the segments and reaches for a list of SFR cells, or a list containing lists of SFR cells.
+        Each list of SFR cells must be contiguous.
+
+        Parameters
+        ----------
+        sfr_cells_list : list
+            List of model cells (by cell or node number) containing SFR reaches to rename. Can be a list of lists.
+
+        Returns
+        -------
+        Updates segment and reach information in Mat1 and Mat2 dataframes
+        """
+
+        if not isinstance(sfr_cells_list[0], list):
+            sfr_cells_list = [sfr_cells_list]
+
+        def renumber(seg, old_reaches):
+
+            # correct any offset in first reach
+            reach1 = np.min(old_reaches)
+            old_reaches -= reach1 - 1
+
+            new_reaches = old_reaches
+            new_segments = np.array([seg])
+
+            reach1 = 1
+            gaps = np.diff(old_reaches)
+            for i, diff in enumerate(gaps):
+                if diff > 1:
+                    reach1 = old_reaches[i+1]
+                    seg +=1
+
+                new_reaches[i+1] -= reach1 - 1
+                new_segments = np.append(new_segments, seg)
+
+            return new_segments, new_reaches
+
+        self.index_downstream_reaches()
+
+        # for each intersect feature, create new SFR segments and renumber their reaches
+        self.m1['old_segment'] = self.m1.segment
+        self.m1['old_reach'] = self.m1.reach
+
+        print 'Adding new SFR segments and renumbering reaches...'
+        nfeatures = len(sfr_cells_list)
+        for i, new_seg_nodes in enumerate(sfr_cells_list):
+            print '\r{:.0f}%'.format(100 * i/nfeatures),
+            # skip entries that are empty (e.g. waterbodies that don't intersect SFR)
+            if len(new_seg_nodes) == 0:
+                continue
+
+            old_segments = np.unique(self.m1.ix[self.m1.node.isin(new_seg_nodes), 'segment'])
+
+            # iterate through each segment intersecting the feature
+            # This code is slow; could probably be greatly sped up by "removing the dots"
+            for seg in old_segments:
+
+                #print '{}\t-->\t'.format(seg),
+                # reaches that do not intersect the polygon feature
+                inds1 = (~self.m1['node'].isin(new_seg_nodes)) & (self.m1.segment == seg)
+
+                # reaches that intersect the polygon feature
+                inds2 = self.m1['node'].isin(new_seg_nodes) & (self.m1.segment == seg)
+
+                # renumber the reaches
+                newsegs = []
+                for i, inds in enumerate([inds1, inds2]):
+
+                    firstnewseg = np.max(self.m1.segment) + 1
+                    old_reaches = self.m1.reach[inds].values
+
+                    # in case the whole segment is in the waterbody, continue
+                    # (no reaches are in inds1)
+                    if len(old_reaches) == 0:
+                        continue
+
+                    # renumber these
+                    # the segments start at nseg, and then nseg + 1
+                    new_segments_inds, new_reaches = renumber(firstnewseg + 0, old_reaches)
+
+                    #print old_reaches
+                    self.m1.loc[inds, 'segment'] = new_segments_inds
+                    self.m1.loc[inds, 'reach'] = new_reaches
+                    newsegs = list(set(newsegs + list(new_segments_inds)))
+
+                # renumber the last new segment to the previous segment number
+                # (can't have gaps in segment numbering; kind of clunky, but allows
+                # the renumbering algorithm to be general
+                lastnewseg = np.max(newsegs)
+                self.m1.loc[self.m1.segment == lastnewseg, 'segment'] = seg
+                newsegs.remove(lastnewseg)
+
+                # update routing
+                for newseg in newsegs:
+                    #print '{} '.format(newseg),
+
+                    # get the outseg via the index of the next downstream reach 1
+                    lastreach = np.max(self.m1.reach[self.m1.segment == newseg])
+                    downreach_ind = self.m1.ix[(self.m1.segment == newseg) & (self.m1.reach == lastreach), 'downreach_ind'].values[0]
+                    if downreach_ind == -999999:
+                        outseg = 0
+                    else:
+                        outseg = int(self.m1.ix[downreach_ind, 'segment'])
+
+                    self.m2.loc[newseg, :] = self.m2.ix[seg, :] # copy all Mat2 info from old seg
+                    self.m2.loc[newseg, ['outseg', 'segment']] = outseg, newseg # update to new segment and outsegment numbers
+        print '\nDone'
+
+class Spatial(SFRdata):
+
+    def __init__(self, sfrobject=None, Mat1=None, Mat2=None, sfr=None, xll=0.0, yll=0.0,
+                 GIS_mult=0.3048, prj=None, proj4=None, epsg=None):
+
+        SFRdata.__init__(self, sfrobject=sfrobject, Mat1=Mat1, Mat2=Mat2, sfr=sfr, xll=xll, yll=yll,
+                         GIS_mult=GIS_mult, prj=prj, proj4=proj4, epsg=epsg)
+
+    def intersect_with_SFR_cells(self, intersect_df=None, intersect_shapefile=None, intersect_prj=None,
+                                 sfr_shapefile=None,
+                                 node_attribute=None, GIS_mult=None):
+
+        if GIS_mult is not None:
+            self.GIS_mult = GIS_mult
+
+        # get geometries for SFR cells
+        if sfr_shapefile is None:
+
+            self.get_cell_geometries()
+
+            self.m1['geometry'] = [self.cell_geometries[n] for n in self.m1.node]
+            if self.proj4 is None:
+                print 'No coordinate projection supplied for SFR cells.'
+
+        else:
+            df = GISio.shp2df(sfr_shapefile, geometry=True)
+            df.sort(['segment', 'reach'], inplace=True)
+
+            # check to make sure that SFR shapefile indexing is consistent with Mat1
+            diff = np.max(self.m1.reach.values - df.reach.values)
+
+            if diff == 0:
+                self.m1['geometry'] = df.geometry.tolist()
+            else:
+                raise IndexError('Segments and reaches in SFR shapefile are not consistent with Mat1')
+
+            self.proj4 = GISio.get_proj4(sfr_shapefile)
+
+        # read in intersect feature(s)
+        if intersect_df is None and intersect_shapefile is not None:
+            dfi = GISio.shp2df(intersect_shapefile, geometry=True)
+            intersect_name = intersect_shapefile
+        elif isinstance(intersect_df, pd.DataFrame):
+            dfi = intersect_df
+            intersect_name = 'intersect_df'
+        else:
+            raise ValueError("No intersect feature supplied!")
+        print 'Intersecting features in {} with SFR cells'.format(intersect_name)
+
+        # reproject intersect features into coordinate system of model grid (SFR cells)
+        if self.proj4 is not None:
+            if intersect_shapefile is not None:
+                intersect_proj4 = GISio.get_proj4(intersect_shapefile)
+            elif intersect_prj is not None:
+                intersect_proj4 = GISio.get_proj4(intersect_prj)
+
+            print 'Reprojecting from:\n{}\nto:\n{}\n...'.format(intersect_proj4, self.proj4)
+            dfi['geometry'] = GISops.projectdf(dfi, intersect_proj4, self.proj4)
+        else:
+            print 'SFR cells are assumed to be in same coordinate system as {}.'.format(intersect_name)
+
+        # limit intersect features to those within bounding box for SFR network
+        # note that because this uses cell centroids,
+        # it may miss intersect features that only nick the outside of the grid
+        print 'Discarding features outside of SFR network bounding box...'
+        geom = self.m1.geometry.tolist()
+        xmin, ymin = np.min([p.centroid.xy[0] for p in geom]), np.min([p.centroid.xy[1] for p in geom])
+        xmax, ymax = np.max([p.centroid.xy[0] for p in geom]), np.max([p.centroid.xy[1] for p in geom])
+        bbox = Polygon([(xmin, ymin), (xmin, ymax), (xmax, ymax), (xmax, ymin)])
+        dfi = dfi.ix[[f.intersects(bbox) for f in dfi.geometry], :].copy()
+
+        if len(dfi) == 0:
+            print 'No intersections between SFR cells and intersect features! Check coordinate projections ' \
+                  'and that model origin is in GIS coordinate units.'
+
+        print 'Listing SFR cell intersections for remaining features...'
+        sfr_geom = self.m1.geometry.tolist()
+        sfr_nodes = self.m1.node.tolist()
+        poly_geom = dfi.geometry.tolist()
+        try:
+            import rtree
+            intersections = GISops.intersect_rtree(sfr_geom, poly_geom)
+        except:
+            print 'Rtree not found. Features will be intersected without spatial indexing ' \
+                  '(may take an hour or more for very large problems).'
+            intersections = GISops.intersect_brute_force(sfr_geom, poly_geom)
+
+        dfi['sfr_cells'] = [[sfr_nodes[i] for i in p] for p in intersections]
+        dfi.to_csv('waterbodies_intersected.csv')
+        return dfi
