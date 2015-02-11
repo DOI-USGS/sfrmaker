@@ -69,7 +69,7 @@ class SFRdata(object):
                     self.outpath = os.path.split(Mat1)[0]
                 self.m1.sort(['segment', 'reach'], inplace=True)
                 self.m2.sort('segment', inplace=True)
-                self.m2.index = self.m2.segment
+                self.m2.index = map(int, self.m2.segment.values)
             elif sfr is not None:
                 self.read_sfr_package()
             else:
@@ -256,7 +256,7 @@ class SFRdata(object):
         self.outsegs = outsegsmap
 
     def map_confluences2(self):
-
+        '''
         cf = {}
         for c in self.shared_cells:
 
@@ -287,20 +287,44 @@ class SFRdata(object):
 
         # make a dataframe of the confluences
         self.confluences = pd.DataFrame.from_dict(cf, orient='index')
+        '''
 
     def map_confluences(self):
-        confluences = self.m2.ix[np.array([len(u) for u in self.m2.upsegs]) > 0, ['segment', 'upsegs']].copy()
+
+        # if min/max elevations not in Mat2, compute from Mat1
+        if 'Max' not in self.m2.columns:
+            print 'Setting initial segment min/max elevations from Mat1...'
+            top_streambed = self.m1.top_streambed.values
+            m1segments = self.m1.segment.values
+            m2segments = self.m2.segment.values
+            self.m2['Max'] = [np.max(top_streambed[m1segments == s]) for s in m2segments]
+            self.m2['Min'] = [np.min(top_streambed[m1segments == s]) for s in m2segments]
+        m2upsegs = self.m2.upsegs.tolist()
+
+        # setup dataframe of confluences
+        # confluences are where segments have upsegs (no upsegs means the reach 1 is a headwater)
+        confluences = self.m2.ix[np.array([len(u) for u in m2upsegs]) > 0, ['segment', 'upsegs']].copy()
         confluences['node'] = [0] * len(confluences)
         confluences['elev'] = [0] * len(confluences)
+        nconfluences = len(confluences)
+        print 'Mapping {} confluences and updating segment min/max elevations in Mat2...'.format(nconfluences)
         for i, r in confluences.iterrows():
-
-            # get node/cellnum for downstream segment reach 1
+            # get node/cellnum for downstream segment reach 1 (this is where the confluence is located)
             node = self.m1.ix[(self.m1.segment == i) & (self.m1.reach == 1), 'node']
             confluences.loc[i, 'node'] = node.values[0]
 
+            # include land surface and top of streambed columns to ensure that minimums are found
+            # (e.g. if land surface was updated and top_streambed wasn't)
+            elevation_columns = ['top_streambed', 'landsurface']
+            for c in elevation_columns:
+                if c not in self.m1.columns:
+                    elevation_columns.remove(c)
+            if len(elevation_columns) == 0:
+                raise IndexError("top_streambed and landsurface columns not found in Mat1!")
+
             # confluence elevation is the minimum of the ending segments minimums, starting segments maximums
-            endsmin = np.min(self.m1.ix[self.m1.segment.isin(r.upsegs), ['top_streambed', 'landsurface']].values)
-            startmax = np.max(self.m1.ix[i, ['top_streambed', 'landsurface']].values)
+            endsmin = np.min(self.m1.ix[self.m1.segment.isin(r.upsegs), elevation_columns].values)
+            startmax = np.max(self.m1.ix[self.m1.segment == i, elevation_columns].values)
             cfelev = np.min([endsmin, startmax])
             confluences.loc[i, 'elev'] = cfelev
 
@@ -309,6 +333,7 @@ class SFRdata(object):
             self.m2.loc[i, 'Max'] = cfelev
 
         self.confluences = confluences
+        print 'Done, see confluences attribute.'
 
     def consolidate_conductance(self, bedKmin=1e-8):
         """For model cells with multiple SFR reaches, shift all conductance to widest reach,
@@ -608,6 +633,7 @@ class SFRdata(object):
 
         ofp.close()
         print 'Done'
+
 
 class Elevations(SFRdata):
 
@@ -1521,6 +1547,7 @@ class Segments(SFRdata):
         self.m2 = m2
 
         print '\nDone'
+
 
 class Spatial(SFRdata):
 
