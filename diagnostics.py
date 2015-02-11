@@ -43,10 +43,43 @@ class diagnostics(SFRdata):
         self.map_outsegs()
         print 'passed.'
 
-    def check_overlapping(self):
+    def check_overlapping(self, tol=1e-6):
         """checks for multiple SFR reaches in one cell; and whether more than one reach has Cond > 0
         """
-        print 'Overlapping reaches check not implemented yet.'
+        print 'Checking for model cells with multiple non-zero SFR conductances...'
+
+        m1 = self.m1.copy()
+        m1nodes = m1.node.values
+        # Calculate SFR conductance for each reach
+        def cond(X):
+            c = X['bed_K'] * X['width_in_cell'] * X['length_in_cell'] / X['bed_thickness']
+            return c
+
+        m1['Cond'] = m1.apply(cond, axis=1)
+
+        nodes_with_multiple_conductance = []
+        for c in self.shared_cells:
+
+            # select the collocated reaches for this cell
+            df = m1[m1nodes == c].sort('Cond', ascending=False)
+            cnd = df.Cond.values
+
+            if cnd[1] / cnd[0] > tol:
+                nodes_with_multiple_conductance.append(c)
+
+        if len(nodes_with_multiple_conductance) > 0:
+            print '{} model cells with multiple non-zero SFR conductances found. ' \
+                  'This may lead to circular routing between collocated reaches. ' \
+                  '\nSee collocated_reaches.csv.' \
+                  '\nRun consolidate_conductance() to establish a dominant reach in each SFR cell ' \
+                  '(sets remaining reaches to zero-conductance).'.format(len(nodes_with_multiple_conductance))
+
+            df = m1.ix[np.in1d(m1nodes, nodes_with_multiple_conductance),
+                       ['node', 'segment', 'reach', 'length_in_cell', 'width_in_cell', 'bed_K', 'Cond']]
+            df.sort('node', inplace=True)
+            df.to_csv('collocated_reaches.csv', index=False)
+        else:
+            print 'passed.'
 
     def check_elevations(self):
         """checks that elevations decrease monotonically downstream
@@ -60,13 +93,13 @@ class diagnostics(SFRdata):
         # reach 1s may have positive differences due to other segment in previous index
         if pos_diffs.reach.max() > 1:
             bad_elevs = pos_diffs[pos_diffs.reach > 1]
-            print 'Found {} instances of bad elevations found, see {}'.format(len(bad_elevs), outfile)
+            print 'Found {} instances of bad elevations, see {}'.format(len(bad_elevs), outfile)
             bad_elevs.sort('sb_rise', ascending=False, inplace=True)
             bad_elevs.to_csv(os.path.join(self.outpath, outfile))
         else:
             print 'passed.'
 
-        print '\nChecking Mat1 for segments with reach 1 higher than last reach ...'
+        print 'Checking Mat1 for segments with reach 1 higher than last reach ...'
         top_streambed = self.m1.top_streambed.values
         m1segments = self.m1.segment.values
         m1reaches = self.m1.reach.values
@@ -84,7 +117,7 @@ class diagnostics(SFRdata):
             print 'passed.'
 
 
-        print '\nChecking for MODFLOW altitude errors...'
+        print 'Checking for MODFLOW altitude errors...'
         if self.elevs is None:
             print 'Model elevations not found. Please run read_dis2() with the model DIS file.'
             return

@@ -502,11 +502,17 @@ class SFRdata(object):
         #self.Segments.renumber_SFR_cells(sfrc)
         self.__dict__ = self.Segments.__dict__.copy()
 
+    def renumber_sfr_cells_from_nodes(self, nodes_list):
+        self.Segments = Segments(sfrobject=self)
+        self.Segments.renumber_SFR_cells(nodes_list)
+        self.__dict__ = self.Segments.__dict__.copy()
+
     def run_diagnostics(self):
         from diagnostics import *
         self.diagnostics = diagnostics(sfrobject=self)
         self.diagnostics.check_numbering()
         self.diagnostics.check_routing()
+        self.diagnostics.check_overlapping()
         self.diagnostics.check_elevations()
 
     def write_shapefile(self, xll=0.0, yll=0.0, outshp='SFR.shp', prj=None):
