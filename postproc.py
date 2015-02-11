@@ -48,6 +48,9 @@ class SFRdata(object):
         """
         # if an sfr object is supplied, copy all of its attributes over
         # need to clean up the init method!!
+        self.outpath = ''
+        self.elevs = None
+
         if sfrobject is not None:
             self.__dict__ = sfrobject.__dict__.copy()
 
@@ -63,6 +66,7 @@ class SFRdata(object):
                     self.Mat2 = Mat2
                     self.m1 = pd.read_csv(Mat1)
                     self.m2 = pd.read_csv(Mat2)
+                    self.outpath = os.path.split(Mat1)[0]
                 self.m1.sort(['segment', 'reach'], inplace=True)
                 self.m2.sort('segment', inplace=True)
                 self.m2.index = self.m2.segment
@@ -234,20 +238,22 @@ class SFRdata(object):
         '''
         from Mat2, returns dataframe of all downstream segments (will not work with circular routing!)
         '''
-        self.outsegs = pd.DataFrame(self.m2.outseg)
-        max_outseg = np.max(self.outsegs[self.outsegs.columns[-1]])
+        outsegsmap = pd.DataFrame(self.m2.outseg)
+        outsegs = self.m2.outseg
+        max_outseg = np.max(outsegsmap[outsegsmap.columns[-1]])
         knt = 2
         nsegs = len(self.m2)
         while max_outseg > 0:
-            self.outsegs['outseg{}'.format(knt)] = [self.m2.outseg[s] if s > 0 and s < 999999 else 0
-                                                    for s in self.outsegs[self.outsegs.columns[-1]]]
-            max_outseg = np.max(self.outsegs[self.outsegs.columns[-1]])
+            outsegsmap['outseg{}'.format(knt)] = [outsegs[s] if s > 0 and s < 999999 else 0
+                                                    for s in outsegsmap[outsegsmap.columns[-1]]]
+            max_outseg = np.max(outsegsmap[outsegsmap.columns[-1]].values)
             if max_outseg == 0:
                 break
             knt +=1
-            if knt > nsegs:
+            if knt > 1000:
                 print 'Circular routing encountered in segment {}'.format(max_outseg)
                 break
+        self.outsegs = outsegsmap
 
     def map_confluences2(self):
 
@@ -366,23 +372,27 @@ class SFRdata(object):
         self.m1['length_in_cell'] = self.m1.apply(consolidate_lengths, axis=1)
         self.m1['bed_K'] = [r['bed_K'] if r['Dominant'] else bedKmin for i, r in self.m1.iterrows()]
 
-    def smooth_segment_ends(self, report_file='smooth_segment_ends.txt'):
+    def smooth_segment_ends(self, landsurfacefile=None, landsurface_column=None,
+                            report_file='smooth_segment_ends.txt'):
         if hasattr(self, 'Elevations'):
             self.Elevations.smooth_segment_ends(report_file=report_file)
         else:
-            self.Elevations = Elevations(sfrobject=self)
+            self.Elevations = Elevations(sfrobject=self, landsurfacefile=landsurfacefile,
+                                         landsurface_column=landsurface_column)
             self.Elevations.smooth_segment_ends(report_file=report_file)
-        self.__dict__ = self.Elevations.__dict__.copy()
+        self.m2 = self.Elevations.m2
 
-    def smooth_interior_elevations(self, landsurface=None, report_file='smooth_segment_interiors.txt'):
+    def smooth_interior_elevations(self, landsurfacefile=None, landsurface_column=None,
+                                   report_file='smooth_segment_interiors.txt'):
         """Allow elevations smoothing to be run on SFRdata instance (Composition)
         """
         if hasattr(self, 'Elevations'):
             self.Elevations.smooth_segment_interiors(report_file=report_file)
         else:
-            self.Elevations = Elevations(sfrobject=self)
+            self.Elevations = Elevations(sfrobject=self, landsurfacefile=landsurfacefile,
+                                         landsurface_column=landsurface_column)
             self.Elevations.smooth_segment_interiors(report_file=report_file)
-        self.__dict__ = self.Elevations.__dict__.copy()
+        self.m1 = self.Elevations.m1
 
     def reset_model_top_2streambed(self, minimum_thickness=1, outdisfile=None, outsummary=None):
         if hasattr(self, 'Elevations'):
@@ -446,7 +456,7 @@ class SFRdata(object):
         :param GIS_mult:
         :return:
         """
-        '''
+
         self.Spatial = Spatial(sfrobject=self)
         dfi = self.Spatial.intersect_with_SFR_cells(intersect_df=intersect_df, intersect_shapefile=intersect_shapefile,
                                                     intersect_prj=intersect_prj,
@@ -461,11 +471,18 @@ class SFRdata(object):
                 sfrc.append(map(int, c.replace('[','').replace(']','').split(',')))
             except:
                 sfrc.append([])
-
+        '''
         self.Segments = Segments(sfrobject=self)
-        #self.Segments.renumber_SFR_cells(dfi['sfr_cells'].tolist())
-        self.Segments.renumber_SFR_cells(sfrc)
+        self.Segments.renumber_SFR_cells(dfi['sfr_cells'].tolist())
+        #self.Segments.renumber_SFR_cells(sfrc)
         self.__dict__ = self.Segments.__dict__.copy()
+
+    def run_diagnostics(self):
+        from diagnostics import *
+        self.diagnostics = diagnostics(sfrobject=self)
+        self.diagnostics.check_numbering()
+        self.diagnostics.check_routing()
+        self.diagnostics.check_elevations()
 
     def write_shapefile(self, xll=0.0, yll=0.0, outshp='SFR.shp', prj=None):
 
@@ -491,12 +508,112 @@ class SFRdata(object):
         self.Streamflow.read_streamflow_file(streamflow_file=streamflow_file)
         self.Streamflow.write_streamflow_shp(lines_shapefile=lines_shapefile, node_col=node_col)
 
+    def write_tables(self, basename='SFR'):
+        m1, m2 = self.m1, self.m2
+        for col in ['geometry', 'centroids']:
+            if col in m1.columns:
+                m1.drop(col, axis=1, inplace=True)
+
+        for col in ['upsegs']:
+            if col in m2.columns:
+                m2.drop(col, axis=1, inplace=True)
+
+        m1.to_csv('{}mat1.csv'.format(basename), index=False)
+        m2.to_csv('{}mat2.csv'.format(basename), index=False)
+
+    def write_sfr_package(self, basename='SFR', tpl=False,
+                          minimum_slope=1e-4,
+                          bedKmin=1e-6,
+                          nsfrpar=0,
+                          nparseg=0,
+                          const=128390.4,
+                          dleak=0.001,
+                          istcb1=50,
+                          istcb2=66,
+                          isfropt=1,
+                          nstrail=10,
+                          isuzn=1,
+                          nsfrsets=30,
+                          global_stream_depth=1):
+
+        m1, m2 = self.m1, self.m2
+
+        if tpl:
+            ext = '.tpl'
+        else:
+            ext = '.sfr'
+        outfile = basename + ext
+
+        print 'writing {}'.format(outfile)
+        ofp = open(outfile, 'w')
+
+        nreaches = len(m1)
+        nseg = len(m2)
+
+        if tpl:
+            ofp.write("ptf ~\n")
+        ofp.write("#SFRpackage file generated by SFRmaker\n")
+        ofp.write('{0:d} {1:d} {2:d} {3:d} {4:e} {5:e} {6:d} {7:d} {8:d} {9:d} {10:d} {11:d}\n'.format(
+            -1*nreaches,
+            nseg,
+            nsfrpar,
+            nparseg,
+            const,
+            dleak,
+            istcb1,
+            istcb2,
+            isfropt,
+            nstrail,
+            isuzn,
+            nsfrsets
+        ))
+
+        for i, r in m1.iterrows():
+
+            slope = r.bed_slope if r.bed_slope > minimum_slope else minimum_slope
+            bedK = '~SFRc~' if tpl and r.bed_K > bedKmin else '{:e}'.format(r.bed_K)
+
+            ofp.write('{0:.0f} {1:.0f} {2:.0f} {3:.0f} {4:.0f} {5:e} {6:e} {7:e} {8:e} {9:s}\n'.format(
+                r.layer,
+                r.row,
+                r.column,
+                r.segment,
+                r.reach,
+                r.length_in_cell,
+                r.top_streambed,
+                slope,
+                r.bed_thickness,
+                bedK))
+
+        ofp.write('{0:.0f} 0 0 0\n'.format(nseg))
+        for i, r in m2.iterrows():
+            ofp.write('{0:.0f} {1:.0f} {2:.0f} 0 {3:e} 0.0 0.0 0.0 {4:e}\n'.format(
+                r.segment,
+                r.icalc,
+                r.outseg,
+                r.flow,
+                r.roughch
+                ))
+
+            width = m1.ix[m1.segment == r.segment, 'width_in_cell'].values
+            if width[0] > 0 and r.icalc == 1:
+                ofp.write('{0:e}\n'.format(width[0]))
+                ofp.write('{0:e}\n'.format(width[-1]))
+            elif r.icalc == 0:
+                ofp.write('{0:e} {1:e}\n'.format(width[0], global_stream_depth))
+                ofp.write('{0:e} {1:e}\n'.format(width[-1], global_stream_depth))
+            else:
+                print 'icalc values >1 not supported.'
+                return
+
+        ofp.close()
+        print 'Done'
 
 class Elevations(SFRdata):
 
     def __init__(self, sfrobject=None, Mat1=None, Mat2=None, sfr=None, node_column=False,
                  mfpath=None, mfnam=None, mfdis=None, to_meters_mult=0.3048,
-                 minimum_slope=1e-4, landsurfacefile=None, smoothing_iterations=0):
+                 minimum_slope=1e-4, landsurfacefile=None, landsurface_column=None, smoothing_iterations=0):
         """
         Smooth streambed elevations outside of the context of the objects in SFR classes
         (works off of information in Mat1 and Mat2; generates updated versions of these files
@@ -508,8 +625,13 @@ class Elevations(SFRdata):
         if self.landsurfacefile and self.landsurface is None:
             self.landsurface = np.fromfile(self.landsurfacefile, sep=' ') # array of elevations to use (sorted by cellnumber)
 
+            print 'assigning elevations in {} to landsurface column in Mat1...'.format(landsurfacefile)
             # assign land surface elevations based on node number
             self.m1['landsurface'] = [self.landsurface[n-1] for n in self.m1[self.node_column]]
+
+        elif not landsurfacefile and landsurface_column is not None:
+            print 'assigning elevations in Mat1 {} column to landsurface column...'.format(landsurface_column)
+            self.m1['landsurface'] = self.m1[landsurface_column]
 
         self.smoothing_iterations = smoothing_iterations
 
@@ -518,6 +640,7 @@ class Elevations(SFRdata):
         smooth segment end elevations so that they decrease monotonically down the stream network
         '''
 
+        self.m2 = self.m2.replace(999999, 0)
         print '\nSmoothing segment ends...\n'
         # open a file to report a summary of the elevation adjustments
         self.ofp = open(report_file, 'w')
@@ -687,13 +810,17 @@ class Elevations(SFRdata):
         self.ofp = open(report_file, 'w')
         self.ofp.write('segment, reach, land_surface, minelev, dist, slope, sb_elev\n')
 
+        try:
+            self.m2['Max'], self.m2['Min']
+            m2minmax = True
+        except:
+            m2minmax = False
+            print "Max, Min elevation columns not found in Mat2" \
+                  "Run smooth_segment_ends() first."
+            return
+
         for seg in self.segments:
             self.seg = seg
-
-            try:
-                max, min = self.m2['Max'], self.m2['Min']
-            except:
-                raise IndexError("Max, Min elevation columns not found in Mat2. Call smooth_segment_ends method first")
 
             # make a view of the Mat 1 dataframe that only includes the segment
             df = self.m1[self.m1.segment == seg].sort('reach')
@@ -701,8 +828,9 @@ class Elevations(SFRdata):
             # start with land surface elevations along segment
             self.elevs = df.landsurface.values
 
-            # get start and end elevations from Mat2; if they are equal, continue
             start, end = self.m2.ix[seg, ['Max', 'Min']]
+
+            # get start and end elevations from Mat2; if they are equal, continue
             if start == end:
                 self.sm = [start] * len(self.elevs)
                 self.m1.loc[self.m1.segment == seg, 'top_streambed'] = self.sm
@@ -974,7 +1102,7 @@ class Widths(SFRdata):
 class Outsegs(SFRdata):
 
     def plot_outsegs(self, outpdf='complete_profiles.pdf', units='ft', add_profiles={}):
-        print "plotting segment sequences..."
+        print "listing unique segment sequences..."
         # make a dataframe of all outsegs
         self.map_outsegs()
 
@@ -1245,23 +1373,23 @@ class Segments(SFRdata):
         m2outsegs = self.m2.outseg.values
         segments = self.m1.segment.values
         reaches = self.m1.reach.values
-        downreach_ind = []
+        downreach_inds = []
         for i, seg in enumerate(segments):
 
             # if downstream reach is in current seg and not on reach index 0
             if i > 1 and segments[i-1] == seg:
-                downreach_ind.append(i - 1)
+                downreach_inds.append(i - 1)
             # otherwise, find the index of the first reach of the outseg
             else:
                 outseg = int(m2outsegs[m2segments == seg])
                 if outseg != 0 and outseg != 999999:
-                    outseg_reach1_inds = m1index[(segments == outseg) & (reaches == 1)]
+                    outseg_reach1_ind = m1index[(segments == outseg) & (reaches == 1)][0]
                 else:
-                    outseg_reach1_inds = -999999
+                    outseg_reach1_ind = -999999
 
-                downreach_ind.append(outseg_reach1_inds)
+                downreach_inds.append(outseg_reach1_ind)
 
-        self.m1['downreach_ind'] = downreach_ind
+        self.m1['downreach_ind'] = downreach_inds
 
     def renumber_SFR_cells(self, sfr_cells_list):
         """Renumbers the segments and reaches for a list of SFR cells, or a list containing lists of SFR cells.
@@ -1307,7 +1435,14 @@ class Segments(SFRdata):
         self.m1['old_segment'] = self.m1.segment
         self.m1['old_reach'] = self.m1.reach
 
-        print 'Adding new SFR segments and renumbering reaches...'
+        # create local variables to speed up loops
+        m1segments = self.m1.segment.values
+        m1reaches = self.m1.reach.values
+        m1nodes = self.m1.node
+        downreach_inds = self.m1.downreach_ind.values
+        m2 = self.m2
+
+        print 'Adding new SFR segments and renumbering reaches... (may be slow for large datasets)'
         nfeatures = len(sfr_cells_list)
         for i, new_seg_nodes in enumerate(sfr_cells_list):
             print '\r{:.0f}%'.format(100 * i/nfeatures),
@@ -1315,7 +1450,8 @@ class Segments(SFRdata):
             if len(new_seg_nodes) == 0:
                 continue
 
-            old_segments = np.unique(self.m1.ix[self.m1.node.isin(new_seg_nodes), 'segment'])
+            old_segments = np.unique(m1segments[np.in1d(m1nodes, new_seg_nodes)])
+            #old_segments = np.unique(self.m1.ix[self.m1.node.isin(new_seg_nodes), 'segment'])
 
             # iterate through each segment intersecting the feature
             # This code is slow; could probably be greatly sped up by "removing the dots"
@@ -1323,17 +1459,19 @@ class Segments(SFRdata):
 
                 #print '{}\t-->\t'.format(seg),
                 # reaches that do not intersect the polygon feature
-                inds1 = (~self.m1['node'].isin(new_seg_nodes)) & (self.m1.segment == seg)
+                inds1 = (~np.in1d(m1nodes, new_seg_nodes) & (m1segments == seg))
+                #inds1 = ((~self.m1['node'].isin(new_seg_nodes)) & (m1segments == seg)).values
 
                 # reaches that intersect the polygon feature
-                inds2 = self.m1['node'].isin(new_seg_nodes) & (self.m1.segment == seg)
+                inds2 = (np.in1d(m1nodes, new_seg_nodes) & (m1segments == seg))
+                #inds2 = (self.m1['node'].isin(new_seg_nodes) & (m1segments == seg)).values
 
                 # renumber the reaches
                 newsegs = []
                 for i, inds in enumerate([inds1, inds2]):
 
-                    firstnewseg = np.max(self.m1.segment) + 1
-                    old_reaches = self.m1.reach[inds].values
+                    firstnewseg = np.max(m1segments) + 1
+                    old_reaches = m1reaches[inds]
 
                     # in case the whole segment is in the waterbody, continue
                     # (no reaches are in inds1)
@@ -1345,15 +1483,18 @@ class Segments(SFRdata):
                     new_segments_inds, new_reaches = renumber(firstnewseg + 0, old_reaches)
 
                     #print old_reaches
-                    self.m1.loc[inds, 'segment'] = new_segments_inds
-                    self.m1.loc[inds, 'reach'] = new_reaches
+                    m1segments[inds] = new_segments_inds
+                    m1reaches[inds] = new_reaches
+                    #self.m1.loc[inds, 'segment'] = new_segments_inds
+                    #self.m1.loc[inds, 'reach'] = new_reaches
                     newsegs = list(set(newsegs + list(new_segments_inds)))
 
                 # renumber the last new segment to the previous segment number
                 # (can't have gaps in segment numbering; kind of clunky, but allows
                 # the renumbering algorithm to be general
                 lastnewseg = np.max(newsegs)
-                self.m1.loc[self.m1.segment == lastnewseg, 'segment'] = seg
+                m1segments[m1segments == lastnewseg] = seg
+                #self.m1.loc[self.m1.segment == lastnewseg, 'segment'] = seg
                 newsegs.remove(lastnewseg)
 
                 # update routing
@@ -1361,15 +1502,24 @@ class Segments(SFRdata):
                     #print '{} '.format(newseg),
 
                     # get the outseg via the index of the next downstream reach 1
-                    lastreach = np.max(self.m1.reach[self.m1.segment == newseg])
-                    downreach_ind = self.m1.ix[(self.m1.segment == newseg) & (self.m1.reach == lastreach), 'downreach_ind'].values[0]
-                    if downreach_ind == -999999:
+                    outseg_lastreach_ind = downreach_inds[(m1segments == newseg) & (m1reaches == 1)][0]
+                    #lastreach = np.max(m1reaches[m1segments == newseg])
+                    #downreach_ind = downreach_inds[(m1segments == newseg) & (m1reaches == outseg_last_reach)][0]
+                    #downreach_ind = downreach_inds[(m1segments == newseg) & (m1reaches == lastreach)][0]
+                    #downreach_ind = self.m1.ix[(m1segments == newseg) & (m1reaches == lastreach), 'downreach_ind'].values[0]
+                    if outseg_lastreach_ind == -999999:
                         outseg = 0
                     else:
-                        outseg = int(self.m1.ix[downreach_ind, 'segment'])
+                        outseg = m1segments[outseg_lastreach_ind]
+                        #outseg = int(self.m1.ix[downreach_ind, 'segment'])
 
-                    self.m2.loc[newseg, :] = self.m2.ix[seg, :] # copy all Mat2 info from old seg
-                    self.m2.loc[newseg, ['outseg', 'segment']] = outseg, newseg # update to new segment and outsegment numbers
+                    m2.loc[newseg, :] = m2.ix[seg, :] # copy all Mat2 info from old seg
+                    m2.loc[newseg, ['outseg', 'segment']] = outseg, newseg # update to new segment and outsegment numbers
+
+        self.m1['segment'] = m1segments
+        self.m1['reach'] = m1reaches
+        self.m2 = m2
+
         print '\nDone'
 
 class Spatial(SFRdata):
