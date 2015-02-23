@@ -508,7 +508,7 @@ class SFRdata(object):
         self.__dict__ = self.Segments.__dict__.copy()
 
     def run_diagnostics(self):
-        from diagnostics import *
+        from diagnostics import diagnostics
         self.diagnostics = diagnostics(sfrobject=self)
         self.diagnostics.check_numbering()
         self.diagnostics.check_routing()
@@ -1013,7 +1013,7 @@ class Elevations(SFRdata):
         """Update landsurface elevations for SFR cells from nearby field measurements
         """
         # read field measurements into a dataframe
-        df = GISio.shp2df(shpfile, geometry=True)
+        df = GISio.shp2df(shpfile)
 
         self.get_cell_centroids()
 
@@ -1337,7 +1337,7 @@ class Streamflow(SFRdata):
 
         # if a shapefile is provided, get the geometries from there (by node)
         if lines_shapefile is not None:
-            df_lines = GISio.shp2df(lines_shapefile, index=node_col, geometry=True)
+            df_lines = GISio.shp2df(lines_shapefile, index=node_col)
             prj = lines_shapefile[:-4] + '.prj'
 
             # first assign geometries for model cells with only 1 SFR reach
