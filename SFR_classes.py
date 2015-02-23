@@ -173,8 +173,8 @@ class SFRInput:
 
         if self.gridtype == 'structured':
             # read in model grid information using flopy
-            self.m = flopy.modflow.Modflow(model_ws=self.mfpath)
-            self.nf = flopy.utils.mfreadnam.parsenamefile(os.path.join(self.mfpath, self.mfnam), {})
+            self.m = flopy.modflow.Modflow(model_ws=self.mfpath)  # PFJ - this bombs if mfpath isn't supplied.
+            self.nf = flopy.utils.mfreadnam.parsenamefile(os.path.join(self.mfpath, self.mfnam), {}) # PFJ - bombs w/o mfnam
             self.dis = flopy.modflow.ModflowDis.load(os.path.join(self.mfpath, self.MFdis), self.m, self.nf)
             self.elevs = np.zeros((self.dis.nlay + 1, self.dis.nrow, self.dis.ncol))
             self.elevs[0, :, :] = self.dis.top.array
