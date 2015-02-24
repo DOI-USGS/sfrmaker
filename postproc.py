@@ -508,7 +508,7 @@ class SFRdata(object):
         self.__dict__ = self.Segments.__dict__.copy()
 
     def run_diagnostics(self):
-        from diagnostics import *
+        from diagnostics import diagnostics
         self.diagnostics = diagnostics(sfrobject=self)
         self.diagnostics.check_numbering()
         self.diagnostics.check_routing()
@@ -1013,7 +1013,7 @@ class Elevations(SFRdata):
         """Update landsurface elevations for SFR cells from nearby field measurements
         """
         # read field measurements into a dataframe
-        df = GISio.shp2df(shpfile, geometry=True)
+        df = GISio.shp2df(shpfile)
 
         self.get_cell_centroids()
 
@@ -1328,16 +1328,16 @@ class Streamflow(SFRdata):
 
         # join in node column from mat1
         # make list of model node numbers for each reach in the streamflow file; add to streamflow dataframe
-        nodes = [self.m1.ix[(self.m1.segment == r.segment) & (self.m1.reach == r.reach), self.node_column].values[0]
+        nodes = [self.m1.ix[(self.m1.segment == r.segment) & (self.m1.reach == r.reach), node_col].values[0]
                  for i, r in df.iterrows()]
         lengths = [self.m1.ix[(self.m1.segment == r.segment) & (self.m1.reach == r.reach), 'length_in_cell'].values[0]
                  for i, r in df.iterrows()]
-        df[self.node_column] = nodes
+        df[node_col] = nodes
         df['length'] = lengths
 
         # if a shapefile is provided, get the geometries from there (by node)
         if lines_shapefile is not None:
-            df_lines = GISio.shp2df(lines_shapefile, index=node_col, geometry=True)
+            df_lines = GISio.shp2df(lines_shapefile, index=node_col)
             prj = lines_shapefile[:-4] + '.prj'
 
             # first assign geometries for model cells with only 1 SFR reach
@@ -1353,7 +1353,7 @@ class Streamflow(SFRdata):
                 reaches['length'] = [g.length for g in reaches.geometry]
 
                 # streamflow results for that model cell
-                dfs = df.ix[df[self.node_column] == n]
+                dfs = df.ix[df[node_col] == n]
                 # this inner loop may be somewhat inefficient,
                 # but the number of collocated reaches is small enough for it not to matter
                 for i, r in reaches.iterrows():
