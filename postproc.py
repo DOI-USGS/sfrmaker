@@ -217,6 +217,7 @@ class SFRdata(object):
             y1 = cy + 0.5 * dy
 
             self.cell_geometries[cn] = Polygon([(x0, y0), (x1, y0), (x1, y1), (x0, y1), (x0, y0)])
+        self.m1['geometry'] = [self.cell_geometries[cn] for cn in self.m1.node]
 
     def get_cell_centroids(self):
         """Adds column of cell centroids coordinates (tuples) to Mat1,
