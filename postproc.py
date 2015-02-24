@@ -541,7 +541,7 @@ class SFRdata(object):
         self.Streamflow.write_streamflow_shp(lines_shapefile=lines_shapefile, node_col=node_col)
 
     def write_tables(self, basename='SFR'):
-        m1, m2 = self.m1, self.m2
+        m1, m2 = self.m1.copy(), self.m2.copy()
         for col in ['geometry', 'centroids']:
             if col in m1.columns:
                 m1.drop(col, axis=1, inplace=True)
@@ -568,7 +568,7 @@ class SFRdata(object):
                           nsfrsets=30,
                           global_stream_depth=1):
 
-        m1, m2 = self.m1, self.m2
+        m1, m2 = self.m1.copy(), self.m2.copy()
 
         if tpl:
             ext = '.tpl'
