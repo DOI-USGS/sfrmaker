@@ -166,17 +166,16 @@ class diagnostics(SFRdata):
         else:
             print 'passed.'
 
-    def check_outlets(self, model_domain=None):
+    def check_outlets(self, model_domain=None, buffer=100):
 
         if model_domain is None:
-            print 'Please supply a shapefile of the model domain edge.'
+            print 'Need a shapefile of the model domain edge to check for interior outlets.'
             return
         else:
-            from shapely.geometry import LineString
             import GISio
 
             df = GISio.shp2df(model_domain)
-            domain = df.iloc[0].geometry
+            self.domain = df.iloc[0].geometry
 
         if 'geometry' not in self.m1.columns:
             try:
@@ -194,19 +193,20 @@ class diagnostics(SFRdata):
 
         outlets = np.unique(self.m1.Outlet.values)
         self.m1.sort(['segment', 'reach'], inplace=True)
-        outlet_nodes = [self.m1.ix[(self.m1.segment == o), 'node'][-1] for o in outlets]
-        outlet_geoms = [self.m1.ix[(self.m1.segment == o), 'node'][-1] for o in outlets]
+        outlet_nodes = [self.m1.ix[(self.m1.segment == o), 'node'].values[-1] for o in outlets]
+        outlet_geoms = [self.m1.ix[(self.m1.segment == o), 'geometry'].values[-1] for o in outlets]
 
-        interior_outlets = [n for i, n in enumerate(outlet_nodes) if outlet_geoms[i].within(domain)]
+        interior_outlets = [n for i, n in enumerate(outlet_nodes)
+                            if outlet_geoms[i].buffer(buffer).within(self.domain)]
 
         if len(interior_outlets) > 0:
-            print 'Interior outlets found at:\n'
+            print 'Interior outlets found at the following nodes:\n'
             for i in interior_outlets:
                 print '{} '.format(i),
         else:
             # make sure that at least 1 SFR cell is inside the domain
             for g in self.m1.geometry:
-                if g.within(domain):
+                if g.within(self.domain):
                     print 'passed.'
                     break
                 else:
