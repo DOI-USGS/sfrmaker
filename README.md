@@ -1,4 +1,4 @@
-SFR
+SFRmaker
 ==
 Set of programs for automating the construction of the MODFLOW Streamflow-Routing Package, using NHD Plus v2
 
