@@ -98,6 +98,9 @@ class SFRdata(object):
                     self.m1.rename(columns={node_column, 'node'}, inplace=True)
                     self.node_column = 'node' # so that some code doesn't break for the time being
             else:
+                self.mfpath = ''
+                self.mfnam = None
+                self.mfdis = None
                 self.basename = 'MF'
 
             self.node_attribute = 'node' # compatibility with sfr_plots and sfr_classes
@@ -256,85 +259,28 @@ class SFRdata(object):
                 break
         self.outsegs = outsegsmap
 
-    def map_confluences2(self):
-        '''
-        cf = {}
-        for c in self.shared_cells:
+        # create new column in Mat2 listing outlets associated with each segment
+        self.m2['Outlet'] = [r[r != 0][-1] if len(r[r != 0]) > 0
+                             else i for i, r in self.outsegs.iterrows()]
 
-            # select the collocated reaches for this cell
-            df = self.m1[self.m1.node == c]
+        # assign the outlets to each reach listed in Mat1
+        self.m1['Outlet'] = [self.m2.ix[seg, 'Outlet'] for seg in self.m1.segment]
 
-            # confluence involves more than one segment
-            if len(set(df.segment)) > 1:
+    def map_confluences(self, landsurfacefile=None, landsurface_column=None):
 
-                # identify ends and start(s)
-                ends = [r.segment for i, r in df.iterrows() if r.reach != 1]
-                starts = [r.segment for i, r in df.iterrows() if r.reach == 1]
+        if landsurfacefile is None and self.landsurfacefile is not None:
+            landsurfacefile = self.landsurfacefile
 
-                # confluence elevation is the minimum of the ending segments minimums, starting segments maximums
-                endsmin = np.min(self.m1.ix[self.m1.segment.isin(ends), ['top_streambed', 'landsurface']].values)
-                if len(starts) > 0:
-                    startmax = np.max(self.m1.ix[self.m1.segment.isin(starts), ['top_streambed', 'landsurface']].values)
-                else:
-                    startmax = endsmin
-                cfelev = np.min([endsmin, startmax])
+        if hasattr(self, 'Elevations'):
+            self.Elevations.map_confluences()
+        else:
+            self.Elevations = Elevations(sfrobject=self, landsurfacefile=landsurfacefile,
+                                         landsurface_column=landsurface_column)
+            self.Elevations.map_confluences()
 
-                # update confluence dictionary
-                cf[c] = {'elev': cfelev, 'segments': ends + starts}
-
-                # update Mat2
-                self.m2.loc[ends, 'Min'] = cfelev
-                self.m2.loc[starts, 'Max'] = cfelev
-
-        # make a dataframe of the confluences
-        self.confluences = pd.DataFrame.from_dict(cf, orient='index')
-        '''
-
-    def map_confluences(self):
-
-        # if min/max elevations not in Mat2, compute from Mat1
-        if 'Max' not in self.m2.columns:
-            print 'Setting initial segment min/max elevations from Mat1...'
-            top_streambed = self.m1.top_streambed.values
-            m1segments = self.m1.segment.values
-            m2segments = self.m2.segment.values
-            self.m2['Max'] = [np.max(top_streambed[m1segments == s]) for s in m2segments]
-            self.m2['Min'] = [np.min(top_streambed[m1segments == s]) for s in m2segments]
-        m2upsegs = self.m2.upsegs.tolist()
-
-        # setup dataframe of confluences
-        # confluences are where segments have upsegs (no upsegs means the reach 1 is a headwater)
-        confluences = self.m2.ix[np.array([len(u) for u in m2upsegs]) > 0, ['segment', 'upsegs']].copy()
-        confluences['node'] = [0] * len(confluences)
-        confluences['elev'] = [0] * len(confluences)
-        nconfluences = len(confluences)
-        print 'Mapping {} confluences and updating segment min/max elevations in Mat2...'.format(nconfluences)
-        for i, r in confluences.iterrows():
-            # get node/cellnum for downstream segment reach 1 (this is where the confluence is located)
-            node = self.m1.ix[(self.m1.segment == i) & (self.m1.reach == 1), 'node']
-            confluences.loc[i, 'node'] = node.values[0]
-
-            # include land surface and top of streambed columns to ensure that minimums are found
-            # (e.g. if land surface was updated and top_streambed wasn't)
-            elevation_columns = ['top_streambed', 'landsurface']
-            for c in elevation_columns:
-                if c not in self.m1.columns:
-                    elevation_columns.remove(c)
-            if len(elevation_columns) == 0:
-                raise IndexError("top_streambed and landsurface columns not found in Mat1!")
-
-            # confluence elevation is the minimum of the ending segments minimums, starting segments maximums
-            endsmin = np.min(self.m1.ix[self.m1.segment.isin(r.upsegs), elevation_columns].values)
-            startmax = np.max(self.m1.ix[self.m1.segment == i, elevation_columns].values)
-            cfelev = np.min([endsmin, startmax])
-            confluences.loc[i, 'elev'] = cfelev
-
-            # update Mat2
-            self.m2.loc[r.upsegs, 'Min'] = cfelev
-            self.m2.loc[i, 'Max'] = cfelev
-
-        self.confluences = confluences
-        print 'Done, see confluences attribute.'
+        self.m1 = self.Elevations.m1
+        self.m2 = self.Elevations.m2
+        self.confluences = self.Elevations.confluences
 
     def consolidate_conductance(self, bedKmin=1e-8):
         """For model cells with multiple SFR reaches, shift all conductance to widest reach,
@@ -508,28 +454,25 @@ class SFRdata(object):
         self.Segments.renumber_SFR_cells(nodes_list)
         self.__dict__ = self.Segments.__dict__.copy()
 
-    def run_diagnostics(self):
+    def run_diagnostics(self, model_domain=None):
         from diagnostics import diagnostics
         self.diagnostics = diagnostics(sfrobject=self)
         self.diagnostics.check_numbering()
         self.diagnostics.check_routing()
         self.diagnostics.check_overlapping()
         self.diagnostics.check_elevations()
+        self.diagnostics.check_outlets(model_domain=model_domain)
 
-    def write_shapefile(self, xll=0.0, yll=0.0, outshp='SFR.shp', prj=None):
+    def write_shapefile(self, outshp='SFR.shp', xll=0.0, yll=0.0, prj=None):
 
         if 'geometry' in self.m1.columns:
             GISio.df2shp(self.m1, shpname=outshp, epsg=self.epsg, proj4=self.proj4, prj=self.prj)
         else:
-            print 'No cell geometries found. Please add discretization information using read_dis2(), ' \
-            'and then compute cell geometries by running get_cell_geometries().'
-        '''
-        self.SFRshapefile = SFRshapefile(Mat1=self.m1, Mat2=self.m2, xll=xll, yll=yll,
-                                mfpath=self.mfpath, mfnam=os.path.split(self.mfnam)[-1],
-                                mfdis=os.path.split(self.mfdis)[-1],
-                                outshp=outshp, prj=prj)
-        self.SFRshapefile.build()
-        '''
+            try:
+                self.get_cell_geometries()
+            except:
+                print 'No cell geometries found. Please add discretization information using read_dis2(), ' \
+                'and then compute cell geometries by running get_cell_geometries().'
 
     def write_streamflow_shapefile(self, streamflow_file=None, lines_shapefile=None, node_col=None):
 
@@ -541,7 +484,7 @@ class SFRdata(object):
         self.Streamflow.write_streamflow_shp(lines_shapefile=lines_shapefile, node_col=node_col)
 
     def write_tables(self, basename='SFR'):
-        m1, m2 = self.m1, self.m2
+        m1, m2 = self.m1.copy(), self.m2.copy()
         for col in ['geometry', 'centroids']:
             if col in m1.columns:
                 m1.drop(col, axis=1, inplace=True)
@@ -552,6 +495,7 @@ class SFRdata(object):
 
         m1.to_csv('{}mat1.csv'.format(basename), index=False)
         m2.to_csv('{}mat2.csv'.format(basename), index=False)
+        print 'Mat1 and 2 saved to {fname}mat1.csv and {fname}mat2.csv'.format(fname=basename)
 
     def write_sfr_package(self, basename='SFR', tpl=False,
                           minimum_slope=1e-4,
@@ -568,7 +512,7 @@ class SFRdata(object):
                           nsfrsets=30,
                           global_stream_depth=1):
 
-        m1, m2 = self.m1, self.m2
+        m1, m2 = self.m1.copy(), self.m2.copy()
 
         if tpl:
             ext = '.tpl'
@@ -661,6 +605,7 @@ class Elevations(SFRdata):
             print 'assigning elevations in {} to landsurface column in Mat1...'.format(landsurfacefile)
             # assign land surface elevations based on node number
             self.m1['landsurface'] = [self.landsurface[n-1] for n in self.m1[self.node_column]]
+            self.m1['top_streambed'] = self.m1['landsurface'] # might consider getting rid of landsurface column and only working with top_streambed
 
         elif not landsurfacefile and landsurface_column is not None:
             print 'assigning elevations in Mat1 {} column to landsurface column...'.format(landsurface_column)
@@ -672,7 +617,7 @@ class Elevations(SFRdata):
         '''
         smooth segment end elevations so that they decrease monotonically down the stream network
         '''
-
+        '''
         self.m2 = self.m2.replace(999999, 0)
         print '\nSmoothing segment ends...\n'
         # open a file to report a summary of the elevation adjustments
@@ -731,7 +676,7 @@ class Elevations(SFRdata):
         # save new copy of Mat2 with segment end elevations
         self.m2 = self.m2.drop(['upstreamMax', 'upstreamMin', 'downstreamMax', 'downstreamMin', 'upsegs'], axis=1)
         self.m2.to_csv(self.Mat2[:-4] + '_elevs.csv', index=False)
-
+        '''
 
     def replace_downstream(self, bw, level, ind):
         '''
@@ -814,7 +759,7 @@ class Elevations(SFRdata):
         dS = change in streambed top over interpolation distance
         '''
         dx = self.cdist[istart] - self.cdist[istop]
-        dS = self.minelev - self.elevs[istop]
+        dS = self.minelev - self.segelevs[istop]
 
         dist = 0
 
@@ -829,7 +774,7 @@ class Elevations(SFRdata):
             self.sm.append(self.minelev - dist * slope)
 
             self.ofp.write('{:.0f},{:.0f},{:.2f},{:.2f},{:.2f},{:.2e},{:.2f}\n'
-                           .format(self.seg, i, self.elevs[i-1], self.minelev, dist, slope, self.sm[-1]))
+                           .format(self.seg, i, self.segelevs[i-1], self.minelev, dist, slope, self.sm[-1]))
 
         # reset the minimum elevation to current
         self.minelev = self.sm[-1]
@@ -859,18 +804,18 @@ class Elevations(SFRdata):
             df = self.m1[self.m1.segment == seg].sort('reach')
 
             # start with land surface elevations along segment
-            self.elevs = df.landsurface.values
+            self.segelevs = df.landsurface.values
 
             start, end = self.m2.ix[seg, ['Max', 'Min']]
 
             # get start and end elevations from Mat2; if they are equal, continue
             if start == end:
-                self.sm = [start] * len(self.elevs)
+                self.sm = [start] * len(self.segelevs)
                 self.m1.loc[self.m1.segment == seg, 'top_streambed'] = self.sm
                 continue
             else:
                 self.sm = [start]
-                self.elevs[-1] = end
+                self.segelevs[-1] = end
 
             # calculate cumulative distances at cell centers
             lengths = df.length_in_cell.values
@@ -878,20 +823,22 @@ class Elevations(SFRdata):
 
             self.minelev = start
             minloc = 0
-            nreaches = len(self.elevs)
+            nreaches = len(self.segelevs)
 
             for i in range(nreaches)[1:]:
 
                 # if the current elevation is equal to or below the minimum
-                if self.elevs[i] <= self.minelev:
+                if self.segelevs[i] <= self.minelev:
 
                     # if the current elevation is above the end, interpolate from previous minimum to current
-                    if self.elevs[i] >= end:
+                    # only interpolate to current reach if it is below the previous minimum
+                    # (that is, do not allow flat stretches unless the segment minimum elevation is reached)
+                    if self.minelev > self.segelevs[i] >= end:
                         self.interpolate(minloc, i)
                         minloc = i
 
                     # otherwise if it is below the end, interpolate from previous minimum to end
-                    elif self.elevs[i] <= end:
+                    elif self.segelevs[i] <= end:
                         self.interpolate(minloc, nreaches-1)
                         break
                 else:
@@ -966,7 +913,7 @@ class Elevations(SFRdata):
         # make sure that streambed thickness is less than minimum_thickness,
         # otherwise there is potential for MODFLOW altitude errors
         # (with streambed top == model top, the streambed bottom will be below the layer 1 bottom)
-        if np.min(self.m1.bed_thickness > minimum_thickness):
+        if np.min(self.m1.bed_thickness >= minimum_thickness):
             self.m1.bed_thickness = 0.9 * minimum_thickness
 
         # make a vector of highest streambed values for each cell containing SFR (for collocated SFR cells)
@@ -1003,10 +950,20 @@ class Elevations(SFRdata):
         # update the model top in Mat1
         self.m1['model_top'] = self.m1.lowest_top
 
+        # update the elevs array
+        self.elevs[0, :, :] = newtop
+        self.elevs[1:, :, :] = newbots
+
+        # update the layer in Mat1 to 1 for all SFR cells
+        self.m1['layer'] = 1
+
         # write a new DIS file
-        new_m = flopy.modflow.mf.Modflow(modelname=outdisfile.split('.')[0])
+        new_m = flopy.modflow.mf.Modflow(model_ws=os.path.split(outdisfile)[0],
+                                         modelname=os.path.split(outdisfile)[1][:-4])
         newdis = flopy.modflow.ModflowDis(new_m, nlay=self.dis.nlay, nrow=self.dis.nrow, ncol=self.dis.ncol,
                                           delr=self.dis.delr, delc=self.dis.delc, top=newtop, botm=newbots)
+
+        self.mfdis = outdisfile
         newdis.write_file()
 
 
@@ -1038,6 +995,65 @@ class Elevations(SFRdata):
                 segment = self.m1.loc[mat1_ind, 'segment']
                 if 'Min' in self.m2.columns and df.iloc[i][elevs_field] < self.m2.ix[segment, 'Min']:
                     self.m2.loc[segment, 'Min'] = df.iloc[i][elevs_field]
+
+    def map_confluences(self):
+
+        # if min/max elevations not in Mat2, compute from Mat1
+        if 'Max' not in self.m2.columns:
+            print 'Setting initial segment min/max elevations from Mat1...'
+            top_streambed = self.m1.top_streambed.values
+            m1segments = self.m1.segment.values
+            m2segments = self.m2.segment.values
+            self.m2['Max'] = [np.max(top_streambed[m1segments == s]) for s in m2segments]
+            self.m2['Min'] = [np.min(top_streambed[m1segments == s]) for s in m2segments]
+        m2upsegs = self.m2.upsegs.tolist()
+
+        # setup dataframe of confluences
+        # confluences are where segments have upsegs (no upsegs means the reach 1 is a headwater)
+        confluences = self.m2.ix[np.array([len(u) for u in m2upsegs]) > 0, ['segment', 'upsegs']].copy()
+        confluences['node'] = [0] * len(confluences)
+        confluences['elev'] = [0] * len(confluences)
+        nconfluences = len(confluences)
+        print 'Mapping {} confluences and updating segment min/max elevations in Mat2...'.format(nconfluences)
+        for i, r in confluences.iterrows():
+            # get node/cellnum for downstream segment reach 1 (this is where the confluence is located)
+            node = self.m1.ix[(self.m1.segment == i) & (self.m1.reach == 1), 'node']
+            confluences.loc[i, 'node'] = node.values[0]
+
+            # include land surface and top of streambed columns to ensure that minimums are found
+            # (e.g. if land surface was updated and top_streambed wasn't)
+            elevation_columns = ['top_streambed', 'landsurface']
+            for c in elevation_columns:
+                if c not in self.m1.columns:
+                    elevation_columns.remove(c)
+            if len(elevation_columns) == 0:
+                raise IndexError("top_streambed and landsurface columns not found in Mat1!")
+
+            # confluence elevation is the minimum of the ending segments minimums, starting segments maximums
+            endsmin = np.min(self.m1.ix[self.m1.segment.isin(r.upsegs), elevation_columns].values)
+            startmax = np.max(self.m1.ix[self.m1.segment == i, elevation_columns].values)
+            cfelev = np.min([endsmin, startmax])
+            confluences.loc[i, 'elev'] = cfelev
+
+            # update Mat2
+            self.m2.loc[r.upsegs, 'Min'] = cfelev
+            self.m2.loc[i, 'Max'] = cfelev
+
+        # check for Mins that are higher than maxes
+        #diffs = np.ravel(np.diff(self.m2[['Min', 'Max']].values))
+
+        # Go through again and make sure that Mins are all <= Maxes
+        for i, r in confluences.iterrows():
+            endsmin = np.min(self.m2.ix[self.m2.segment.isin(r.upsegs), ['Min', 'Max']].values)
+            startmax = np.max(self.m2.ix[self.m2.segment==i, ['Min', 'Max']].values)
+            cfelev = np.min([endsmin, startmax])
+            confluences.loc[i, 'elev'] = cfelev
+
+            self.m2.loc[r.upsegs, 'Min'] = cfelev
+            self.m2.loc[i, 'Max'] = cfelev
+
+        self.confluences = confluences
+        print 'Done, see confluences attribute.'
 
 
 class Widths(SFRdata):
@@ -1159,18 +1175,16 @@ class Outsegs(SFRdata):
 
         pdf = PdfPages(outpdf)
         for l in unique_lists:
-            print l
             if len(l) > 1:
-
                 cdist = []
                 cdist_end = 0
                 cdist_ends = [0]
                 sbtop = []
                 modeltop = []
-                self.elevs = {}
+                self.profile_elevs = {}
 
                 for p in add_profiles.iterkeys():
-                    self.elevs[p] = []
+                    self.profile_elevs[p] = []
 
                 # make each profile from its segments
                 for s in l:
@@ -1192,7 +1206,7 @@ class Outsegs(SFRdata):
 
                     for p in add_profiles.iterkeys():
                         #elevs = self.cells2vertices(df[add_profiles[p]].tolist())
-                        self.elevs[p] += df[add_profiles[p]].tolist()
+                        self.profile_elevs[p] += df[add_profiles[p]].tolist()
 
                 # plot the profile
                 fig = plt.figure()
@@ -1204,7 +1218,7 @@ class Outsegs(SFRdata):
                 for p in add_profiles.iterkeys():
                     #print len(cdist)
                     #print len(self.elevs[p])
-                    plt.plot(cdist, self.elevs[p], label=p, lw=0.5)
+                    plt.plot(cdist, self.profile_elevs[p], label=p, lw=0.5)
 
                 # add in lines marking segment starts/ends
                 # add in annotations labeling each segment
@@ -1232,13 +1246,6 @@ class Outsegs(SFRdata):
         # make a dataframe of all outsegs
         self.map_outsegs()
 
-        # create new column in Mat2 listing outlets associated with each segment
-        self.m2['Outlet'] = [r[r != 0][-1] if len(r[r != 0]) > 0
-                             else i for i, r in self.outsegs.iterrows()]
-
-        # assign the outlets to each reach listed in Mat1
-        self.m1['Outlet'] = [self.m2.ix[seg, 'Outlet'] for seg in self.m1.segment]
-
         # make a matrix of the model grid, assign outlet values to SFR cells
         self.watersheds = np.empty((self.dis.nrow * self.dis.ncol))
         self.watersheds[:] = np.nan
@@ -1262,7 +1269,6 @@ class Outsegs(SFRdata):
 
         self.m1.to_csv(self.Mat1, index=False)
         print 'Done, Mat1 updated with outlet information; saved to {}.'.format(self.Mat1)
-
 
 class Streamflow(SFRdata):
 

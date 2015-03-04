@@ -155,3 +155,66 @@ class diagnostics(SFRdata):
             return
         print 'passed.'
 
+    def check_minimum_slope(self):
+
+        print 'Checking to make sure that minimum slope was honored...'
+        if self.m1.bed_slope.min() != self.minimum_slope:
+            loc = self.m1.iloc[np.argmin(self.m1.bed_slope.values)][['segment', 'reach']]
+            print '{:.1e} was specified as a minimum slope, but slope of {:.1e} found at ' \
+                  'segment {}, reach {}'.format(loc.segment, loc.reach)
+            return
+        else:
+            print 'passed.'
+
+    def check_outlets(self, model_domain=None, buffer=100):
+
+        if model_domain is None:
+            print 'Need a shapefile of the model domain edge to check for interior outlets.'
+            return
+        else:
+            import GISio
+
+            df = GISio.shp2df(model_domain)
+            self.domain = df.iloc[0].geometry
+
+        if 'geometry' not in self.m1.columns:
+            try:
+                self.get_cell_geometries()
+            except:
+                print "No geometry column in attribute m1; couldn't generate geometries from dis attribute.\n" \
+                      "Read in the DIS file by running read_dis2()."
+
+        if self.xll == 0 and self.yll == 0:
+            print 'Warning, model origin for SFR object is 0, 0.'
+
+        print 'Checking for breaks in routing (outlets) within the SFR network'
+        if 'Outlet' not in self.m1.columns:
+            self.map_outsegs()
+
+        outlets = np.unique(self.m1.Outlet.values)
+        self.m1.sort(['segment', 'reach'], inplace=True)
+        outlet_nodes = [self.m1.ix[(self.m1.segment == o), 'node'].values[-1] for o in outlets]
+        outlet_geoms = [self.m1.ix[(self.m1.segment == o), 'geometry'].values[-1] for o in outlets]
+
+        interior_outlets = [n for i, n in enumerate(outlet_nodes)
+                            if outlet_geoms[i].buffer(buffer).within(self.domain)]
+
+        if len(interior_outlets) > 0:
+            print 'Interior outlets found at the following nodes:\n'
+            for i in interior_outlets:
+                print '{} '.format(i),
+        else:
+            # make sure that at least 1 SFR cell is inside the domain
+            for g in self.m1.geometry:
+                if g.within(self.domain):
+                    print 'passed.'
+                    break
+                else:
+                    continue
+            print "No SFR cells were inside of the supplied domain! Check domain shapefile coordinates,\n" \
+                  "and that the correct model origin was supplied."
+
+
+
+
+
