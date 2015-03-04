@@ -1,6 +1,6 @@
 SFRmaker
 ==
-Set of programs for automating the construction of the MODFLOW Streamflow-Routing Package, using NHD Plus v2
+Python package to facilitate use of the streamflow-routing (SFR) package in MODFLOW.
 
 
 ## Dependencies:
