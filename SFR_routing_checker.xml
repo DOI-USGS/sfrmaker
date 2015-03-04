@@ -1,13 +1,28 @@
 <data>
 <filenames>
-        <spc_file>BadRiver.spc</spc_file>
-        <sfr_file>BadRiver.sfr</sfr_file>
+        <spc_file>D:\ATLData\SFR_testing\FWPvert_1000ft.spc</spc_file>
+        <sfr_file>D:\ATLData\SFR_testing\FWPvert_1000ft.SFR</sfr_file>
+        <!-- prj_file: *.prj file for specifying projection of output shapefile-->
+        <prj_file>D:\ATLData\SFR_testing\FWPvert_grid1000_UTMft.prj</prj_file>
+        <!-- prj_units_multiplier: factor used to convert model units to GIS units (in the PRJ file)-->
+        <prj_units_multiplier>1</prj_units_multiplier>
+        <!-- out_shp: output shapefile of routing-->
+        <out_shp>D:\ATLData\SFR_testing\SFR_routing_all.shp</out_shp>
 </filenames>
 <orig_point>
-        <orig_seg>916</orig_seg>
-        <orig_reach>3</orig_reach>
+        <orig_seg>9088</orig_seg>
+        <orig_reach>7</orig_reach>
 </orig_point>
 <flags>
+        <!-- plot_all_watersheds: if true, will record a category in the output shapefile
+        for each outlet (i.e. segment with outseg=0), allowing simultaneous plotting of all routing.
+        Note: currently this option is slow. Set to False to only plot orig_seg and orig_reach specified above-->
+        <plot_all_watersheds>True</plot_all_watersheds>
+        <!-- outlet_designators: outsegment numbers that designate outlets-->
+        <outlet_designators>
+            <designator>0</designator>
+            <designator>999999</designator>
+        </outlet_designators>
         <make_shapefiles>True</make_shapefiles>
         <make_pdffiles>True</make_pdffiles>
         <all_layers>False</all_layers>

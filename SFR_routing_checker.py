@@ -2,7 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import sys
 import xml.etree.ElementTree as ET
-
+import shutil
+import os
 
         
 
@@ -19,11 +20,12 @@ except:
 
     
 class model_rc_conversion:
-    def __init__(self,infile):
+    def __init__(self, infile, coords_mult):
         self.spcfile = infile
         self.activeriv = 1.0
         self.upstream_routed = 2.0
-        
+        self.mult = coords_mult
+
     def rc2world_coords(self,row,col):
         xoff = self.xoffset + np.sum(self.deltax[0:col])+self.deltax[0]/2.0
         yoff = self.yoffset - np.sum(self.deltay[0:row])-self.deltay[0]/2.0
@@ -33,7 +35,7 @@ class model_rc_conversion:
         yoff_to_rot = yoff - y_low_left
         cloc = np.array([[xoff_to_rot],[yoff_to_rot]])
         cloc_adj = np.dot(cloc.T,self.rot_matrix)[0]
-        return cloc_adj[0] + x_low_left,cloc_adj[1]+y_low_left
+        return cloc_adj[0] + x_low_left, cloc_adj[1]+y_low_left
         
     def spc_reader(self):
         # reads a PEST-compatible model.spc file
@@ -42,8 +44,8 @@ class model_rc_conversion:
         self.nrows = int(header[0])
         self.ncols = int(header[1])
         coords = indat.pop(0).strip().split()
-        self.xoffset = float(coords[0])
-        self.yoffset = float(coords[1])
+        self.xoffset = float(coords[0])*self.mult
+        self.yoffset = float(coords[1])*self.mult
         self.mod_rot_deg = float(coords[2])
         self.mod_rot_rad = np.pi*self.mod_rot_deg/180.0
         th = self.mod_rot_rad # quick shorthand to make the rotation matrix
@@ -73,8 +75,8 @@ class model_rc_conversion:
                     for cn in np.arange(mults):
                         spacing.extend([cval])
         spacing = np.array(spacing,dtype=float)
-        self.deltax = spacing[0:self.ncols]
-        self.deltay = spacing[self.ncols:]
+        self.deltax = spacing[0:self.ncols]*self.mult
+        self.deltay = spacing[self.ncols:]*self.mult
         
 def tf2flag(intxt):
     # converts text written in XML file to True or Fale flag
@@ -87,6 +89,7 @@ def tf2flag(intxt):
 # ######
 
 parfilename = sys.argv[1]
+#parfilename = 'SFR_routing_checker.xml'
 inpardat = ET.parse(parfilename)
 inpars = inpardat.getroot()    
 infile = inpars.findall('.//sfr_file')[0].text
@@ -99,15 +102,32 @@ make_PDFs = tf2flag(make_PDFs)
 make_all_layers = tf2flag(make_all_layers)
 origseg = int(inpars.findall('.//orig_seg')[0].text)
 origreach = int(inpars.findall('.//orig_reach')[0].text)
+prj_file = inpars.findall('.//prj_file')[0].text
+outpath = os.path.split(infile)[0]
 
+# look for output shapefile name, otherwise assign default
+try:
+    out_shp = inpars.findall('.//out_shp')[0].text
+    out_shp = out_shp.strip('.shp')
+except:
+    out_shp = os.path.join(outpath, 'Routing')
 
-print 'Calculating routing from seg: {0:d} reach: {1:d}'.format(origseg, origreach)
-model_spc_data= model_rc_conversion(modspecfile)
+# outsegment numbers that indicate an outlet
+try:
+    outlet_designators = [int(d.text.lower()) for d in inpars.findall('.//outlet_designators/designator')]
+except:
+    outlet_designators = [0]
+
+# settings
+plot_all_watersheds = tf2flag(inpars.findall('.//plot_all_watersheds')[0].text)
+model2_GIS_mult = float(inpars.findall('.//prj_units_multiplier')[0].text)
+
+model_spc_data= model_rc_conversion(modspecfile, model2_GIS_mult)
 
 # read in the model.spc file
 model_spc_data.spc_reader()
 
-x,y = model_spc_data.rc2world_coords(450,500)
+#x,y = model_spc_data.rc2world_coords(450,500)
 
 indat = open(infile,'r').readlines()
 
@@ -121,14 +141,14 @@ del indat
 numreaches = np.abs(int(indat2[0][0]))
 numsegs = np.abs(int(indat2[0][1]))
 reachdata = np.array(indat2[1:numreaches+1])[:,0:5].astype(int)
-np.savetxt('reachdata.dat',reachdata,fmt='%12d')
+np.savetxt(os.path.join(outpath, 'reachdata.dat'),reachdata,fmt='%12d')
 # kludgey reading of the bottom part of the SFR file for segments
 tmp = indat2[numreaches+2:]
 del indat2
 # only grab first stress period
 segdata = np.array(tmp[::3][0:numsegs])[:,0:3].astype(int)
 del tmp
-np.savetxt('segdata.dat',segdata,fmt='%12d')
+np.savetxt(os.path.join(outpath, 'segdata.dat'),segdata,fmt='%12d')
 
 nrows = np.max(reachdata[:,1])
 ncols = np.max(reachdata[:,2])
@@ -141,79 +161,25 @@ nlays = np.max(reachdata[:,0])
 # segment data columns are:
 # [0] segment  [1] icalc  [2] outseg (if outseg==0, routed out of model)
 
-
-
-startind = np.where((reachdata[:,3]==origseg) &
-                    (reachdata[:,4]==origreach))[0]
-starting_reach = startind[0]
-starting_seg = reachdata[starting_reach,3]
-
-# find all the upstream parents of our starting segment
-parents = np.zeros(0)
-livesegs  = [starting_seg]
-segcount = 0
-while 1 and segcount < numsegs:
-    segcount += 1
-    tmp = np.zeros(0)
-    for cseg in livesegs:
-        upinds = np.where(segdata[:,2]==cseg)[0]
-        circular = np.intersect1d(parents,segdata[upinds,0])
-        if len(circular) > 0:
-            print 'WARNING! -- possible circular routing!'
-        parents = np.append(parents,segdata[upinds,0])
-        tmp = np.append(tmp,segdata[upinds,0])
-    livesegs = tmp
-    if len(tmp) < 1:
-        break
-    del tmp
-if segcount == numsegs:
-    print 'WARNING! -- possible circular routing!'
-np.savetxt('parents.dat',parents,fmt='%12d')
-
-plotting = np.zeros((nlays,nrows,ncols))
-allsegs = np.zeros_like(plotting)
-allreaches = np.zeros_like(plotting)
-
-
-# first burn in all the streams
-for i in np.arange(nlays):
-    inds = np.where(reachdata[:,0]==i+1)
-    plotting[i,reachdata[inds,1]-1,reachdata[inds,2]-1] = model_spc_data.activeriv
-    for cind in inds:
-        allsegs[i,reachdata[cind,1]-1,reachdata[cind,2]-1] = reachdata[cind,3]
-        allreaches[i,reachdata[cind,1]-1,reachdata[cind,2]-1] = reachdata[cind,4]
-    # plot the upstream reaches within the current segment
-    
-    inds = np.where((reachdata[:,0]==i+1) & 
-                    (reachdata[:,3]==origseg) & 
-                    (reachdata[:,4]<origreach))[0]
-    plotting[i,reachdata[inds,1]-1,reachdata[inds,2]-1] = model_spc_data.upstream_routed
-    for cind in inds:
-        allsegs[i,reachdata[cind,1]-1,reachdata[cind,2]-1] = reachdata[cind,3]
-        allreaches[i,reachdata[cind,1]-1,reachdata[cind,2]-1] = reachdata[cind,4]
-
-# plot up all full segments upstream from the evaluated segment
-for cseg in parents:
-    inds = np.where(reachdata[:,3]==cseg)
-    tmp_reaches = np.atleast_2d(np.squeeze(reachdata[inds,:]))
-    for i in np.arange(nlays):
-        inds2 = np.where(tmp_reaches[:,0]==i+1)[0]
-        if len(inds2) > 0:
-            plotting[i,tmp_reaches[inds2,1]-1,tmp_reaches[inds2,2]-1] = model_spc_data.upstream_routed
-            for cind in inds2:
-                allsegs[i,reachdata[cind,1]-1,reachdata[cind,2]-1] = reachdata[cind,3]
-                allreaches[i,reachdata[cind,1]-1,reachdata[cind,2]-1] = reachdata[cind,4]
-            
-if make_PDFs:    
-    for i in np.arange(nlays):
-        plt.figure()
-        plt.hold=True
-        plt.imshow(plotting[i,:,:],interpolation='nearest',cmap="jet")
-        plt.xlabel('Columns')
-        plt.ylabel('Rows')
-        plt.title('Streams in Layer %d' %(i+1))
-        plt.colorbar()
-        plt.savefig('layer%d.pdf' %(i+1))
+'''
+ATL 6/10/2014:
+if plot_all_watersheds, build list of [segment, last reach] for each outlet in model
+otherwise, mimic original version of program by making a list of length 1,
+with the segment and reach specified in the input file
+'''
+if plot_all_watersheds:
+    # make list of outlets (segment, reach)
+    outlet_segs = np.array([], dtype='int')
+    for outlet_designator in outlet_designators:
+        #outlet_segs = np.copy(segdata[segdata[:, 2] == 0][:, 0])
+        outlet_segs = np.append(outlet_segs, np.copy(segdata[segdata[:, 2] == outlet_designator][:, 0]))
+    # get number of last reach for each outlet
+    outlets = []
+    for outlet_seg in outlet_segs:
+        outlet_reach = np.max(reachdata[reachdata[:, 3] == outlet_seg][:, 4])
+        outlets.append([outlet_seg, outlet_reach])
+else:
+    outlets = [[origseg, origreach]]
 
 if make_shapefiles:
     if shapefiles_imported == False:
@@ -223,35 +189,125 @@ if make_shapefiles:
         pshape_all.field('SFR_status')
         pshape_all.field('segment', 'N')
         pshape_all.field('reach', 'N')
+
+for watershed in range(len(outlets)):
+
+    origseg, origreach = outlets[watershed][0], outlets[watershed][1]
+
+    print 'Calculating routing from seg: {0:d} reach: {1:d}'.format(origseg, origreach)
+
+    startind = np.where((reachdata[:,3]==origseg) &
+                        (reachdata[:,4]==origreach))[0]
+    starting_reach = startind[0]
+    starting_seg = reachdata[starting_reach,3]
+
+    # find all the upstream parents of our starting segment
+    parents = np.zeros(0)
+    livesegs  = [starting_seg]
+    segcount = 0
+    while 1 and segcount < numsegs:
+        segcount += 1
+        tmp = np.zeros(0)
+        for cseg in livesegs:
+            upinds = np.where(segdata[:,2]==cseg)[0]
+            circular = np.intersect1d(parents,segdata[upinds,0])
+            if len(circular) > 0:
+                print 'WARNING! -- possible circular routing!'
+            parents = np.append(parents,segdata[upinds,0])
+            tmp = np.append(tmp,segdata[upinds,0])
+        livesegs = tmp
+        if len(tmp) < 1:
+            break
+        del tmp
+    if segcount == numsegs:
+        print 'WARNING! -- possible circular routing!'
+    np.savetxt(os.path.join(outpath, 'parents.dat'),parents,fmt='%12d')
+
+    plotting = np.zeros((nlays,nrows,ncols))
+    allsegs = np.zeros_like(plotting)
+    allreaches = np.zeros_like(plotting)
+
+
+    # first burn in all the streams
+    for i in np.arange(nlays):
+        inds = np.where(reachdata[:,0]==i+1)
+        plotting[i,reachdata[inds,1]-1,reachdata[inds,2]-1] = model_spc_data.activeriv
+        for cind in inds:
+            allsegs[i,reachdata[cind,1]-1,reachdata[cind,2]-1] = reachdata[cind,3]
+            allreaches[i,reachdata[cind,1]-1,reachdata[cind,2]-1] = reachdata[cind,4]
+        # plot the upstream reaches within the current segment
+
+        inds = np.where((reachdata[:,0]==i+1) &
+                        (reachdata[:,3]==origseg) &
+                        (reachdata[:,4]<origreach))[0]
+        plotting[i,reachdata[inds,1]-1,reachdata[inds,2]-1] = model_spc_data.upstream_routed
+        for cind in inds:
+            allsegs[i,reachdata[cind,1]-1,reachdata[cind,2]-1] = reachdata[cind,3]
+            allreaches[i,reachdata[cind,1]-1,reachdata[cind,2]-1] = reachdata[cind,4]
+
+    # plot up all full segments upstream from the evaluated segment
+    for cseg in parents:
+        inds = np.where(reachdata[:,3]==cseg)
+        tmp_reaches = np.atleast_2d(np.squeeze(reachdata[inds,:]))
+        for i in np.arange(nlays):
+            inds2 = np.where(tmp_reaches[:,0]==i+1)[0]
+            if len(inds2) > 0:
+                plotting[i,tmp_reaches[inds2,1]-1,tmp_reaches[inds2,2]-1] = model_spc_data.upstream_routed
+                for cind in inds2:
+                    allsegs[i,reachdata[cind,1]-1,reachdata[cind,2]-1] = reachdata[cind,3]
+                    allreaches[i,reachdata[cind,1]-1,reachdata[cind,2]-1] = reachdata[cind,4]
+
+    if make_PDFs and not plot_all_watersheds: # skip making the PDF files if plotting all watersheds
+        for i in np.arange(nlays):
+            plt.figure()
+            plt.hold=True
+            plt.imshow(plotting[i,:,:],interpolation='nearest',cmap="jet")
+            plt.xlabel('Columns')
+            plt.ylabel('Rows')
+            plt.title('Streams in Layer %d' %(i+1))
+            plt.colorbar()
+            plt.savefig(os.path.join(outpath, 'layer%d.pdf' %(i+1)))
+
+    if make_shapefiles:
         for clay in np.arange(nlays):
-            print 'making shapefile for layer %d' %(clay+1)
+
             if make_all_layers:
-                pshape = shapefile.Writer(shapefile.POINT) 
+                pshape = shapefile.Writer(shapefile.POINT)
                 pshape.field('SFR_status')
                 pshape.field('segment', 'N')
                 pshape.field('reach', 'N')
-            
+
             inds = np.where(plotting[clay,:,:]>0)
             for cind,r in enumerate(inds[0]):
                 c=inds[1][cind]
-                plotx,ploty = model_spc_data.rc2world_coords(r,c)
+                plotx,ploty = model_spc_data.rc2world_coords(r, c)
 #                plotx *= .3048
 #                ploty *= .3048
 
-                if make_all_layers:                
+                if make_all_layers and not plot_all_watersheds:
                     pshape.point(plotx,ploty)
-                pshape_all.point(plotx,ploty)
+                #pshape_all.point(plotx,ploty)
                 if plotting[clay,r,c]==2:
-                    if make_all_layers: 
+                    if make_all_layers and not plot_all_watersheds:
                         pshape.record('upstream',allsegs[clay,r,c],allreaches[clay,r,c])
-                    pshape_all.record('upstream',allsegs[clay,r,c],allreaches[clay,r,c])
-                    
-                elif plotting[clay,r,c]==1:
-                    if make_all_layers: 
+                    if not plot_all_watersheds:
+                        status = 'upstream'
+                    elif plot_all_watersheds:
+                        status = 'upstream{}'.format(watershed+1)
+                    pshape_all.record(status,allsegs[clay,r,c],allreaches[clay,r,c])
+                    pshape_all.point(plotx,ploty)
+                elif plotting[clay,r,c]==1 and not plot_all_watersheds:
+                    if make_all_layers and not plot_all_watersheds:
                         pshape.record('active',allsegs[clay,r,c],allreaches[clay,r,c])
                     pshape_all.record('active',allsegs[clay,r,c],allreaches[clay,r,c])
+                    pshape_all.point(plotx,ploty)
+                elif plotting[clay,r,c]==1 and plot_all_watersheds:
+                    continue
                 else:
                     print 'point should be empty!'
-            if make_all_layers: 
-                pshape.save('Layer%d' %(clay+1))
-        pshape_all.save('All_Layers')
+            if make_all_layers and not plot_all_watersheds:
+                pshape.save(out_shp[:-4]+'_Layer%d' %(clay+1))
+if make_shapefiles:
+    print 'making shapefile for layer %d' %(clay+1)
+    pshape_all.save(out_shp)
+    shutil.copy(prj_file, out_shp+'.prj')

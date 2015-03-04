@@ -56,7 +56,8 @@ If you are using ArcMap 10.0 or 10.2, "Desktop10.1" in the above path needs to b
 * If model domain area has multiple DEMs or elevation contour shapefiles, they need to be merged prior to setting up SFR. The merged DEM should be in the same coordinate system as the model.  
 
 #####3) Model grid information
-* polygon shapefile export of model grid (in same coordinate system as Flowlines and DEM)
+* polygon shapefile export of model grid (in same coordinate system as Flowlines and DEM)  
+* row and column information must be supplied as attributes to the shapefile, named "row" and "column" respectively  
 * polygon shapefile of model domain (can be created by dissolving the grid shapefile using *Geoprocessing>dissolve* in the ArcToolbox). **Note:** this polygon (it must be a shapefile polygon, not a line) defines the area where streams are represented by SFR within the model. If SFR in only a subset (i.e. nearfield) area of the model is desired, then this polygon is not the same as the model boundary.
 * discretization file for model
   
@@ -95,7 +96,7 @@ Prior to running your model, make sure that variable ISTCB2 in the SFR package f
 SFR_main_EXAMPLE.py has examples for producing comparison plots of streambed profiles for the different elevation methods (NHDPlus, DEM, and topographic contours), and also for plotting profiles of the final streambed elevations (segments and reaches have been created). Both of these methods need to be run in the MAIN program, in an order similar to that shown in the example MAIN file.  
 
 #####Visualizing routing
-SFR_routing_checker.py can be run independently of the MAIN program to visualize routing. Simply edit the SFR_routing_checker.XML input file, and run by typing *python SFR_routing_checker.py SFR_routing_checker.XML* at the command prompt. Requires an SFR package file, and a grid spec. (SPC) file (written by GWV). Works best with \<all_layers> set to False. To visualize shapefile output in ArcMap, after importing, under Properties>Symbology choose categories and click "Add all values".
+SFR_routing_checker.py can be run independently of the MAIN program to visualize routing. Simply edit the SFR_routing_checker.XML input file, and run by typing *python SFR_routing_checker.py SFR_routing_checker.XML* at the command prompt. Requires an SFR package file, and a grid spec. (SPC) file (written by GWV). To create a grid spec. file, in Groundwater Vistas, go to Model \> PEST \> Create Grid Spec. File. SFR_routing_checker works best with \<all_layers> set to False. To visualize shapefile output in ArcMap, after importing, under Properties>Symbology choose categories and click "Add all values".
 
 #####Visualizing streamflow and aquifer interactions  
 Edit the plot_SFR_flows.py example. Requires a MODFLOW DIS file, an "exploded" stream linework file that has stream fragments by model cell number (i.e. \<intersect> in the XML input file, or similar), and an SFR package output textfile (i.e. "*streamflow.dat"; this is the same file discussed in the "Obtaining SFR output" section above). Produces a shapefile of the same name as the SFR output file.

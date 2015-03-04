@@ -21,7 +21,8 @@ def general_join(target_name, target_lay, joinfield1, joined, joinfield2, keep_c
     
     # need the next line to make sure that column names join properly
     arcpy.env.qualifiedFieldNames = False
-    
+    path = os.path.dirname(target_name) # maintain path of target (same workspace)
+
     if keep_common:
         join_type = "KEEP_COMMON"
     else:
@@ -30,22 +31,22 @@ def general_join(target_name, target_lay, joinfield1, joined, joinfield2, keep_c
               joinfield2, target_lay, joinfield2, joined)
     arcpy.AddJoin_management(target_lay, joinfield1, joined, joinfield2, join_type)
     # save back down the results
-    if arcpy.Exists('tmpjunkus.shp'):
+    if arcpy.Exists(os.path.join(path,'tmpjunkus.shp')):
         print 'Removing old version of tmpjunkus.shp'
         print u'This is a holding temporary file to save down {0:s}'.format(target_name)
         print 'tmpjunkus.shp will be deleted'
-        arcpy.Delete_management('tmpjunkus.shp')
-    arcpy.CopyFeatures_management(target_lay, 'tmpjunkus.shp')
+        arcpy.Delete_management(os.path.join(path, 'tmpjunkus.shp'))
+    arcpy.CopyFeatures_management(target_lay, os.path.join(path, 'tmpjunkus.shp'))
     if arcpy.Exists(target_name):
-        print 'Removing old version of %s' %target_name
+        print 'Removing old version of %s' % target_name
         arcpy.Delete_management(target_name)
-    arcpy.Rename_management('tmpjunkus.shp',target_name)
+    arcpy.Rename_management(os.path.join(path, 'tmpjunkus.shp'), target_name)
 
 
-def compute_zonal(nrows, ncolumns, delxy, z_conversion_factor, MFgrid, DEM, custom_outfile=None):
+def compute_zonal(MFgrid, DEM, z_conversion_factor=1, outfile=None):
 
     # Settings
-    output_path = MFgrid.split('\\')[:1]
+    output_path = os.path.split(MFgrid)[0]
     arcpy.env.workspace = output_path
     arcpy.env.overwriteOutput = True
     arcpy.env.qualifiedFieldNames = False
@@ -55,24 +56,25 @@ def compute_zonal(nrows, ncolumns, delxy, z_conversion_factor, MFgrid, DEM, cust
 
     #arcpy.AddField_management(MFgrid,"cellnum","LONG") #isn't needed if there is a node column
     print "multipling DEM z-values by %s to convert units..." %(z_conversion_factor)
-    DEM2=arcpy.sa.Raster(DEM)*z_conversion_factor
+    DEM2 = arcpy.sa.Raster(DEM)*z_conversion_factor
 
     print "extracting model top elevations from DEM..."
     # create raster of gridcells based on node (cellnum)
     # run zonal statistics on DEM for each grid cell
     print "\tbuilding raster of model grid cells for sampling DEM..."
-    DEMres=arcpy.GetRasterProperties_management(DEM2, "CELLSIZEX")
-    DEMres=float(DEMres.getOutput(0)) # cell size of DEM in project units
+    DEMres = arcpy.GetRasterProperties_management(DEM2, "CELLSIZEX")
+    DEMres = float(DEMres.getOutput(0)) # cell size of DEM in project units
     arcpy.PolygonToRaster_conversion(MFgrid, "node", os.path.join(output_path, "MFgrid_raster"), "MAXIMUM_AREA", "node", DEMres)
+
     print "\tbuilding raster attribute table..."
     arcpy.BuildRasterAttributeTable_management(os.path.join(output_path, "MFgrid_raster"))
+
     print "\trunning zonal statistics... (this step will likely take several minutes or more)"
     arcpy.sa.ZonalStatisticsAsTable(os.path.join(output_path, "MFgrid_raster"), "VALUE", DEM2, os.path.join(output_path, "demzstats.dbf"), "DATA", "ALL")
 
     print "joining elevations back to model grid cells..."
     arcpy.MakeFeatureLayer_management(MFgrid, "MFgrid")
-    if custom_outfile:
-        outputshapefile = os.path.join(output_path, MFgrid[:-4] + '_' + DEM + '.shp')
-    else:
-        outputshapefile = os.path.join(output_path, MFgrid[:-4]+'_elevs.shp')
-    general_join(outputshapefile, "MFgrid", "node", os.path.join(output_path, "demzstats.dbf"), "VALUE", True)
+
+    if not outfile:
+        outfile = os.path.join(output_path, MFgrid[:-4]+'_elevs.shp')
+    general_join(outfile, "MFgrid", "node", os.path.join(output_path, "demzstats.dbf"), "VALUE", True)

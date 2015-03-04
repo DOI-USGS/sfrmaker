@@ -7,6 +7,15 @@ Notes on SFR input:
     Put in paths to input/output files as-is (i.e. no double \\), surrounded by single quotes
 -->
 <GlobalSettings>
+    <!-- working_dir:
+    full path to working folder where intermediate and output will be generated. -->
+    <working_dir>None</working_dir>
+    <!-- modflow_path:
+    path to MODFLOW input files (dis, nam, etc.; used by flopy) -->
+    <modflow_path>../model/ozarkgwmod/3-Input/A-calibration</modflow_path>
+    <!-- modflow_namfile:
+    modeflow name file (used by flopy) -->
+    <modflow_namfile>ozark.nam</modflow_namfile>
     <!-- reach_cutoff: 
     minimum reach length to retain following explosion of NHD segments to river cells -->
     <reach_cutoff>1.0</reach_cutoff>
@@ -21,8 +30,22 @@ Notes on SFR input:
     a factor within which start(x,y) and end(x,y) can be found -->
     <rfact>0.95</rfact>
 	<!-- preproc:
-    a factor within which start(x,y) and end(x,y) can be found -->
-    <preproc>False</preproc>
+    ATL 5/30/2014 (Howard feel free to make corrections if any of this is incorrect):
+    A distance to look between start(x) and end(x), and start(y) and end(y) of consecutive reaches.
+    If both the x coordinates are within rfact of each other, AND the y coordinates are within rfact of each other, the two
+    reaches are considered routed. If either of these tests fails, then the COMID has multiple starts/ends, which are printed
+    to fix_com_IDs.txt.
+    Note: when NHD linework is exploded on the model grid, all fragments < reach_cutoff are dropped, creating gaps that could
+    be <= reach_cutoff. rfact should therefore be roughly equal to reach_cutoff, for cases in which the missing
+    fragment is a straight line between the start/end points of the two adjacent fragments, which is close to parallel with
+    one of the coordinate axis.-->
+    <distanceTol>None</distanceTol>
+    <!-- distanceTol:
+    ATL 5/30/2014 (Howard feel free to make corrections if any of this is incorrect):
+    Distance tolerance for routing between segments. A recommended setting is a few multiples of the cell spacing. If the next
+    downstream segment is more than this distance away, the segment is treated as an outlet (outseg = 0).
+    This helps prevent unwanted routing for segments that aren't outlets in NHD, but are outlets in the model. -->
+    <preproc>True</preproc>
     <!-- tpl:
     a flag for writing out a PEST tpl file instead of SFR package file -->
     <tpl>True</tpl>
@@ -34,10 +57,15 @@ Notes on SFR input:
     Include other elevation methods in comparison plots, beside what is selected for elevflag
     (requires both DEMs and Topographic contours for input-->
     <Compare_elevation_methods>False</Compare_elevation_methods>
+    <!-- plotflag:
+    If false, turns ALL plotting to PDFs off (both elevation method comparison plots, and final segment elevation plots) -->
+    <plotflag>True</plotflag>
 </GlobalSettings>
 <InputFiles>
     <!-- MFgrid: polygon shapefile export of grid from Groundwater Vistas -->
     <MFgrid>nacp_mg_cells_chk_node.shp</MFgrid>
+    <!-- node_attribute: name of attribute of grid shapefile that contains node numbers -->
+    <node_attribute>cellnum</node_attribute>
     <!-- MFdomain: outline of model grid -->
     <MFdomain>nacp_streams_area_ed_v4b.shp</MFdomain>    
     <!-- MFdis: discretization file -->
@@ -50,9 +78,7 @@ Notes on SFR input:
     <Elevslope>elevslope_merged.dbf</Elevslope>  
     <!-- Flowlines_unclipped: 
         original flowlines covering model area (not clipped to grid) -->
-    <Flowlines_unclipped>flowlines_3plus_edjp_v2.shp</Flowlines_unclipped>    
-    <!-- arcpy_path: for calling arcpy scripts externally using os.system -->
-    <arcpy_path>C:\python27\ArcGIS10.1\python</arcpy_path>      
+    <Flowlines_unclipped>flowlines_3plus_edjp_v2.shp</Flowlines_unclipped>          
     <!-- FLOW: from NHDPlus -->
     <FLOW>PlusFlow.dbf</FLOW>
     <!-- FTab: from NHDPlus -->
@@ -61,14 +87,22 @@ Notes on SFR input:
     <ELEVcontours>D:\ATLData\BadRiver\BCs\elevation_from_contours\contours_NAD27_wsp_ft.shp</ELEVcontours>
 
 </InputFiles>
-
-<IntermediateFiles>
-    <!-- Flowlines: clipped to active area -->
-    <Flowlines>flowlines_clipped.shp</Flowlines> 
-    <!-- ELEV: clipped to active area -->
-    <ELEV>river_w_elevations.shp</ELEV> 
+<!-- InputFiles_without_preprocessing:
+In addition to the files above, these files (created during the preprocessing routine) are needed for input
+ if the program is run without the Preprocessing routine (preproc set to False)-->
+<InputFiles_without_preprocessing>
+    <!-- Flowlines: clipped to active area.  -->
+    <Flowlines>Flowline_clip_FWPvert.shp</Flowlines>
     <!-- intersect:  flowlines intersected with the grid-->
     <intersect>river_explode.shp</intersect>
+</InputFiles_without_preprocessing>
+<!-- IntermediateFiles:
+These files are created by the program, to exchange information between routines
+Intermediate files should be entered without a path; they will all be saved to <working_dir>
+-->
+<IntermediateFiles>
+    <!-- ELEV: clipped to active area -->
+    <ELEV>river_w_elevations.shp</ELEV>
     <!-- intersect_points: end vertices of "intersect" fragments as points-->
     <intersect_points>river_explode_points.shp</intersect_points>
     <!-- rivers_table:  -->
@@ -141,13 +175,16 @@ is desired
 	<Hc2fact>1.0</Hc2fact>
 	<stream_depth>3.0</stream_depth>
     <minimum_slope>1e-4</minimum_slope>
-	<!-- minimum_slope: value to be assigned to seemingly zero-sloped reaches -->
-	<minimum_slope>1.0e-06</minimum_slope>
 	<!-- buff:  Buffer so if STOP - thick - buff < bottom of cell, move to layer below-->
 	<buff>1.0</buff>
 	<!-- Lowerbot: If True, lowers the model bottom where SFR cells drop below it -->
 	<Lowerbot>False</Lowerbot>
-	<roughness_coeff>0.37</roughness_coeff>
 </SFR_parameters>
 
 </SFR_input>
+<Depreciated>
+<!-- These variables are no longer used -->
+    <!-- arcpy_path: for calling arcpy scripts externally using os.system 
+    ATL: as of 12/16/2014, this variable isn't used anywhere in SFR_classes-->
+    <arcpy_path>C:\python27\ArcGIS10.1\python</arcpy_path>
+</Depreciated>
