@@ -7,3 +7,11 @@ selected_segments.pdf
 .idea/*
 *.pyc
 .gitignore
+*.dbf
+*.shp
+*.shx
+*.sbn
+*.sbx
+*.shp.xml
+*.lock
+junk/*
