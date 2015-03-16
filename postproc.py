@@ -1335,7 +1335,7 @@ class Streamflow(SFRdata):
 
         # join in node column from mat1
         # make list of model node numbers for each reach in the streamflow file; add to streamflow dataframe
-        nodes = [self.m1.ix[(self.m1.segment == r.segment) & (self.m1.reach == r.reach), node_col].values[0]
+        nodes = [self.m1.ix[(self.m1.segment == r.segment) & (self.m1.reach == r.reach), self.node_attribute].values[0]
                  for i, r in df.iterrows()]
         lengths = [self.m1.ix[(self.m1.segment == r.segment) & (self.m1.reach == r.reach), 'length_in_cell'].values[0]
                  for i, r in df.iterrows()]
