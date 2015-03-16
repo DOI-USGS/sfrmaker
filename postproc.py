@@ -1339,7 +1339,7 @@ class Streamflow(SFRdata):
                  for i, r in df.iterrows()]
         lengths = [self.m1.ix[(self.m1.segment == r.segment) & (self.m1.reach == r.reach), 'length_in_cell'].values[0]
                  for i, r in df.iterrows()]
-        df[node_col] = nodes
+        df['node'] = nodes
         df['length'] = lengths
 
         # if a shapefile is provided, get the geometries from there (by node)
@@ -1353,14 +1353,14 @@ class Streamflow(SFRdata):
 
             # then assign geometries for model cells with multiple SFR reaches
             # use length to figure out which geometry goes with which reach
-            shared_cells = np.unique(df.ix[df.node.duplicated(), 'node'])
+            shared_cells = np.unique(df.ix[df.node.duplicated(), self.node_attribute])
             for n in shared_cells:
                 # make dataframe of all reaches within the model cell
-                reaches = pd.DataFrame(df_lines.ix[df_lines.node == n, 'geometry'].copy())
+                reaches = pd.DataFrame(df_lines.ix[df_lines[node_col] == n, 'geometry'].copy())
                 reaches['length'] = [g.length for g in reaches.geometry]
 
                 # streamflow results for that model cell
-                dfs = df.ix[df[node_col] == n]
+                dfs = df.ix[df[self.node_attribute] == n]
                 # this inner loop may be somewhat inefficient,
                 # but the number of collocated reaches is small enough for it not to matter
                 for i, r in reaches.iterrows():
