@@ -1587,7 +1587,7 @@ class Spatial(SFRdata):
                 print 'No coordinate projection supplied for SFR cells.'
 
         else:
-            df = GISio.shp2df(sfr_shapefile, geometry=True)
+            df = GISio.shp2df(sfr_shapefile)
             df.sort(['segment', 'reach'], inplace=True)
 
             # check to make sure that SFR shapefile indexing is consistent with Mat1
@@ -1602,7 +1602,7 @@ class Spatial(SFRdata):
 
         # read in intersect feature(s)
         if intersect_df is None and intersect_shapefile is not None:
-            dfi = GISio.shp2df(intersect_shapefile, geometry=True)
+            dfi = GISio.shp2df(intersect_shapefile)
             intersect_name = intersect_shapefile
         elif isinstance(intersect_df, pd.DataFrame):
             dfi = intersect_df
