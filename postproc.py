@@ -1347,6 +1347,9 @@ class Streamflow(SFRdata):
             df_lines = GISio.shp2df(lines_shapefile, index=node_col)
             prj = lines_shapefile[:-4] + '.prj'
 
+            if df_lines[node_col].dtype.name == 'object':
+                raise TypeError('Node number column of shapefile is not numeric!')
+
             # first assign geometries for model cells with only 1 SFR reach
             geom = [df_lines.ix[n, 'geometry'] for n in nodes]
             df['geometry'] = [g if not isinstance(g, pd.Series) else LineString() for g in geom]
