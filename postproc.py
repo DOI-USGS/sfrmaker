@@ -515,6 +515,14 @@ class SFRdata(object):
         """
         Method to write an SFR package file from the Mat 1 and 2 (m1 and m2) attributes
 
+        Parameters
+        ----------
+
+        iface: (int)
+            An optional keyword that indicates that an IFACE value will be read for each reach and
+            written to the budget file so that MODPATH can track particles to an exit face (or from an entry
+            face) of a stream cell.  If "IFACE" is found at the end of record 1c, then IFACE values are read
+            from the end of each item 2 record.
         """
 
         m1, m2 = self.m1.copy(), self.m2.copy()
