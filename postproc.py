@@ -1334,22 +1334,24 @@ class Streamflow(SFRdata):
         df = self.read_streamflow_file()
 
         # join in node column from mat1
-        # make list of model node numbers for each reach in the streamflow file; add to streamflow dataframe
-        nodes = [self.m1.ix[(self.m1.segment == r.segment) & (self.m1.reach == r.reach), self.node_attribute].values[0]
-                 for i, r in df.iterrows()]
-        lengths = [self.m1.ix[(self.m1.segment == r.segment) & (self.m1.reach == r.reach), 'length_in_cell'].values[0]
-                 for i, r in df.iterrows()]
-        df['node'] = nodes
-        df['length'] = lengths
+        # segments and reaches in SFR results and Mat1 must be identical! (and sorted)
+        if np.max(self.m1.reach - df.reach) != 0 or np.max(self.m1.segment - df.segment) != 0:
+            raise IndexError('Mismatch in segment and reach ordering between Mat1 and {}!\
+            \nCheck that segments and reaches in Mat1 are identical to those in the SFR output.')\
+                .format(self.streamflow_file)
+
+        df['node'] = self.m1[self.node_attribute]
+        df['length'] = self.m1.length_in_cell
 
         # if a shapefile is provided, get the geometries from there (by node)
         if lines_shapefile is not None:
-            df_lines = GISio.shp2df(lines_shapefile, index=node_col)
+            df_lines = GISio.shp2df(lines_shapefile)
             prj = lines_shapefile[:-4] + '.prj'
 
             # first assign geometries for model cells with only 1 SFR reach
-            geom = [df_lines.ix[n, 'geometry'] for n in nodes]
-            df['geometry'] = [g if not isinstance(g, pd.Series) else LineString() for g in geom]
+            df_lines_geoms = df_lines.geometry.values
+            geom_idx = [df_lines.index[df_lines.node == n] for n in df.node.values]
+            df['geometry'] = [df_lines_geoms[g[0]] if len(g) == 1 else LineString() for g in geom_idx]
 
             # then assign geometries for model cells with multiple SFR reaches
             # use length to figure out which geometry goes with which reach
@@ -1377,8 +1379,7 @@ class Streamflow(SFRdata):
             self.get_cell_geometries()
             df_lines = pd.DataFrame.from_dict({'geometry': self.cell_geometries}, orient='rows')
             prj = self.prj
-            geom = [df_lines.ix[n, 'geometry'] for n in nodes]
-            df['geometry'] = geom
+            df['geometry'] = [df_lines.geometry[n] for n in df.node.values]
 
         GISio.df2shp(df, streamflow_shp, prj=prj)
 
