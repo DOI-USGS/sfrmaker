@@ -1568,7 +1568,8 @@ class Segments(SFRdata):
                     #print '{} '.format(newseg),
 
                     # get the outseg via the index of the next downstream reach 1
-                    outseg_lastreach_ind = downreach_inds[(m1segments == newseg) & (m1reaches == 1)][0]
+                    lastreach = np.max(m1reaches[m1segments == newseg])
+                    outseg_lastreach_ind = downreach_inds[(m1segments == newseg) & (m1reaches == lastreach)][0]
                     #lastreach = np.max(m1reaches[m1segments == newseg])
                     #downreach_ind = downreach_inds[(m1segments == newseg) & (m1reaches == outseg_last_reach)][0]
                     #downreach_ind = downreach_inds[(m1segments == newseg) & (m1reaches == lastreach)][0]
