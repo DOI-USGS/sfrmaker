@@ -70,6 +70,9 @@ class SFRdata(object):
                 self.m1.sort(['segment', 'reach'], inplace=True)
                 self.m2.sort('segment', inplace=True)
                 self.m2.index = map(int, self.m2.segment.values)
+                if sum(np.unique(self.m1.segment) - self.m2.segment) != 0:
+                    raise IndexError("Segments in Mat1 and Mat2 are different!")
+
             elif sfr is not None:
                 self.read_sfr_package()
             else:
@@ -129,6 +132,9 @@ class SFRdata(object):
             self.segments = sorted(np.unique(self.m1.segment))
             self.Mat1_out = Mat1
             self.Mat2_out = Mat2_out
+
+            # create unique reach IDs from Mat1 index
+            self.m1['reachID'] = self.m1.index.values
 
             # assign upstream segments to Mat2
             self.m2['upsegs'] = [self.m2.segment[self.m2.outseg == s].tolist() for s in self.segments]
@@ -464,6 +470,12 @@ class SFRdata(object):
         self.diagnostics.check_outlets(model_domain=model_domain)
 
     def write_shapefile(self, outshp='SFR.shp', xll=0.0, yll=0.0, prj=None):
+
+        # add outseg and upseg information to Mat1
+        self.m2.sort('segment', inplace=True)
+        m1segments = self.m1.segment.values
+        self.m1['outseg'] = [int(self.m2.outseg[s]) for s in m1segments]
+        self.m1['upsegs'] = [' '.join(map(str, self.m2.upsegs[s])) for s in m1segments]
 
         if 'geometry' in self.m1.columns:
             GISio.df2shp(self.m1, shpname=outshp, epsg=self.epsg, proj4=self.proj4, prj=self.prj)
@@ -1434,28 +1446,35 @@ class Segments(SFRdata):
         self.m1['downreach_ind'] = [i-1 if i > 1 and self.m1.segment[i-1] == self.m1.segment[i]
                                     else outseg_reach1_inds[i] for i, r in enumerate(self.m1.reach)]
         '''
+        reachID = self.m1.reachID.values
         m1index = self.m1.index.values
         m2segments = self.m2.segment.values
         m2outsegs = self.m2.outseg.values
         segments = self.m1.segment.values
         reaches = self.m1.reach.values
         downreach_inds = []
-        for i, seg in enumerate(segments):
+        downreach = [] # use unique reach ID instead of index
+        for i, reach_seg in enumerate(segments):
 
             # if downstream reach is in current seg and not on reach index 0
-            if i > 1 and segments[i-1] == seg:
-                downreach_inds.append(i - 1)
+            lastreach = np.max(reaches[segments == reach_seg])
+            if i < len(segments) -1 and segments[i+1] == reach_seg:
+                downreach_inds.append(i + 1)
+                downreach.append(reachID[i + 1])
             # otherwise, find the index of the first reach of the outseg
             else:
-                outseg = int(m2outsegs[m2segments == seg])
+                outseg = int(m2outsegs[m2segments == reach_seg])
                 if outseg != 0 and outseg != 999999:
                     outseg_reach1_ind = m1index[(segments == outseg) & (reaches == 1)][0]
+                    outseg_reach1ID = reachID[outseg_reach1_ind]
                 else:
                     outseg_reach1_ind = -999999
-
+                    outseg_reach1ID = -999999
                 downreach_inds.append(outseg_reach1_ind)
+                downreach.append(outseg_reach1ID)
 
         self.m1['downreach_ind'] = downreach_inds
+        self.m1['downreachID'] = downreach
 
     def renumber_SFR_cells(self, sfr_cells_list):
         """Renumbers the segments and reaches for a list of SFR cells, or a list containing lists of SFR cells.
@@ -1502,6 +1521,8 @@ class Segments(SFRdata):
         self.m1['old_reach'] = self.m1.reach
 
         # create local variables to speed up loops
+        reachID = self.m1.reachID.values
+        downreachID = self.m1.downreachID.values
         m1segments = self.m1.segment.values
         m1reaches = self.m1.reach.values
         m1nodes = self.m1.node
@@ -1520,7 +1541,6 @@ class Segments(SFRdata):
             #old_segments = np.unique(self.m1.ix[self.m1.node.isin(new_seg_nodes), 'segment'])
 
             # iterate through each segment intersecting the feature
-            # This code is slow; could probably be greatly sped up by "removing the dots"
             for seg in old_segments:
 
                 #print '{}\t-->\t'.format(seg),
@@ -1533,7 +1553,7 @@ class Segments(SFRdata):
                 #inds2 = (self.m1['node'].isin(new_seg_nodes) & (m1segments == seg)).values
 
                 # renumber the reaches
-                newsegs = []
+                newsegs = [] # initialize empty list of newsegments
                 for i, inds in enumerate([inds1, inds2]):
 
                     firstnewseg = np.max(m1segments) + 1
@@ -1548,11 +1568,13 @@ class Segments(SFRdata):
                     # the segments start at nseg, and then nseg + 1
                     new_segments_inds, new_reaches = renumber(firstnewseg + 0, old_reaches)
 
-                    #print old_reaches
+                    # assign new segment and reach numbers to m1segments, m1 reaches
                     m1segments[inds] = new_segments_inds
                     m1reaches[inds] = new_reaches
                     #self.m1.loc[inds, 'segment'] = new_segments_inds
                     #self.m1.loc[inds, 'reach'] = new_reaches
+
+                    # add new segments for inds to list of all new segments subdividing the old segment
                     newsegs = list(set(newsegs + list(new_segments_inds)))
 
                 # renumber the last new segment to the previous segment number
@@ -1562,21 +1584,24 @@ class Segments(SFRdata):
                 m1segments[m1segments == lastnewseg] = seg
                 #self.m1.loc[self.m1.segment == lastnewseg, 'segment'] = seg
                 newsegs.remove(lastnewseg)
+                newsegs.append(seg)
 
                 # update routing
                 for newseg in newsegs:
                     #print '{} '.format(newseg),
 
                     # get the outseg via the index of the next downstream reach 1
-                    outseg_lastreach_ind = downreach_inds[(m1segments == newseg) & (m1reaches == 1)][0]
+                    lastreach_number = np.max(m1reaches[m1segments == newseg])
+                    downreach = downreachID[(m1segments == newseg) & (m1reaches == lastreach_number)][0]
+                    #outseg_lastreach_ind = downreach_inds[(m1segments == newseg) & (m1reaches == 1)][0]
                     #lastreach = np.max(m1reaches[m1segments == newseg])
                     #downreach_ind = downreach_inds[(m1segments == newseg) & (m1reaches == outseg_last_reach)][0]
                     #downreach_ind = downreach_inds[(m1segments == newseg) & (m1reaches == lastreach)][0]
                     #downreach_ind = self.m1.ix[(m1segments == newseg) & (m1reaches == lastreach), 'downreach_ind'].values[0]
-                    if outseg_lastreach_ind == -999999:
+                    if downreach == -999999:
                         outseg = 0
                     else:
-                        outseg = m1segments[outseg_lastreach_ind]
+                        outseg = m1segments[reachID == downreach]
                         #outseg = int(self.m1.ix[downreach_ind, 'segment'])
 
                     m2.loc[newseg, :] = m2.ix[seg, :] # copy all Mat2 info from old seg
@@ -1585,6 +1610,9 @@ class Segments(SFRdata):
         self.m1['segment'] = m1segments
         self.m1['reach'] = m1reaches
         self.m2 = m2
+
+        # update upseg references in Mat2
+        self.m2['upsegs'] = [self.m2.segment[self.m2.outseg == s].tolist() for s in self.m2.segment.values]
 
         print '\nDone'
 
@@ -1614,7 +1642,7 @@ class Spatial(SFRdata):
                 print 'No coordinate projection supplied for SFR cells.'
 
         else:
-            df = GISio.shp2df(sfr_shapefile, geometry=True)
+            df = GISio.shp2df(sfr_shapefile)
             df.sort(['segment', 'reach'], inplace=True)
 
             # check to make sure that SFR shapefile indexing is consistent with Mat1
@@ -1629,7 +1657,7 @@ class Spatial(SFRdata):
 
         # read in intersect feature(s)
         if intersect_df is None and intersect_shapefile is not None:
-            dfi = GISio.shp2df(intersect_shapefile, geometry=True)
+            dfi = GISio.shp2df(intersect_shapefile)
             intersect_name = intersect_shapefile
         elif isinstance(intersect_df, pd.DataFrame):
             dfi = intersect_df
