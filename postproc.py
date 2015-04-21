@@ -463,6 +463,76 @@ class SFRdata(object):
         self.diagnostics.check_elevations()
         self.diagnostics.check_outlets(model_domain=model_domain)
 
+    def segment_reach2linework_shapefile(self, lines_shapefile, new_lines_shapefile=None,
+                                         iterations=2):
+
+        print "Adding segment and reach information to linework shapefile..."
+        df = self.m1.copy()
+        df_lines = GISio.shp2df(lines_shapefile)
+        prj = lines_shapefile[:-4] + '.prj'
+        if new_lines_shapefile is None:
+            new_lines_shapefile = lines_shapefile[:-4] + '_seg_reach.shp'
+
+        df_lines_geoms = df_lines.geometry.values
+        geom_idx = [df_lines.index[df_lines.node == n] for n in df.node.values]
+        df['geometry'] = [df_lines_geoms[g[0]] if len(g) == 1 else LineString() for g in geom_idx]
+
+        node_col = 'node'
+        # then assign geometries for model cells with multiple SFR reaches
+        # use length to figure out which geometry goes with which reach
+        shared_cells = np.unique(df.ix[df.node.duplicated(), self.node_attribute])
+        non_collocated_geometries = df.geometry.tolist()
+        for i in range(iterations):
+            for n in shared_cells:
+                # make dataframe of all reaches within the model cell
+                reaches = pd.DataFrame(df_lines.ix[df_lines[node_col] == n, 'geometry'].copy())
+                reaches['length'] = [g.length for g in reaches.geometry]
+                #reaches.sort('length', inplace=True)
+
+                # streamflow results for that model cell
+                dfs = df.ix[df[self.node_attribute] == n]
+                #dfs.sort('length', inplace=True)
+
+                # for each collocated reach in reaches dataframe,
+                # this inner loop may be somewhat inefficient,
+                # but the number of collocated reaches is small enough for it not to matter
+                assigned = []
+                geoms_entirely_within_node = []
+                for rg in reaches.geometry:
+
+                    # get list of neighboring reach geometries that touch the current collocated geometry
+                    intersects_ind = df[np.array([rg.intersects(g) for g in df.geometry]) &
+                                        np.array([nd != n for nd in df.node])].index
+
+                    # handle collocated geometries that do not touch other segments
+                    if len(intersects_ind) == 0:
+                        geoms_entirely_within_node.append(rg)
+                        continue
+
+                    intersects_df = df.ix[intersects_ind]
+                    intersects_segments = intersects_df.segment.tolist()
+
+                    # get the index of the collocated reach that is closest to the intersecting reach number(s)
+                    # (handles cases where a segment meanders out of and then back into a cell)
+                    # only consider reaches that have the same segment as those intersected
+                    dfs_segment = dfs.ix[dfs.segment.isin(intersects_segments)]
+                    closest_reach_in_dfs_index = dfs_segment.index[np.argmin([np.sum(np.abs(r - intersects_df.reach))
+                                                                   for r in dfs_segment.reach])]
+
+                    # assign the the current collocated geometry to the collocated reach
+                    df.loc[closest_reach_in_dfs_index, 'geometry'] = rg
+                    assigned.append(closest_reach_in_dfs_index)
+
+                # in case there was a geometry entirely contained within the cell
+                # (hopefully there is only one)
+                if len(geoms_entirely_within_node) == 1:
+                    ind = dfs.index[~dfs.index.isin(assigned)][0]
+                    df.loc[ind, 'geometry'] = geoms_entirely_within_node[0]
+
+        new_lines_shpdf = df[['segment', 'reach', 'node', 'geometry']].sort(['segment', 'reach'])
+        GISio.df2shp(new_lines_shpdf, new_lines_shapefile, prj=prj)
+        return new_lines_shpdf
+
     def write_shapefile(self, outshp='SFR.shp', xll=0.0, yll=0.0, prj=None):
 
         if 'geometry' in self.m1.columns:
@@ -1374,6 +1444,20 @@ class Streamflow(SFRdata):
             if df_lines[node_col].dtype.name == 'object':
                 raise TypeError('Node number column of shapefile is not numeric!')
 
+            if 'segment' not in df_lines.columns:
+                print "segment and reach information not in linework shapefile!"
+                df_lines = self.segment_reach2linework_shapefile(lines_shapefile)
+
+            df_lines.sort(['segment', 'reach'], inplace=True)
+
+            # join in node column from mat1
+            # segments and reaches in SFR results and Mat1 must be identical! (and sorted)
+            if np.max(df_lines.reach - df.reach) != 0 or np.max(df_lines.segment - df.segment) != 0:
+                raise IndexError('Segments and reaches in {} are different than {}!'\
+                                 .format(lines_shapefile, self.streamflow_file))
+
+            df['geometry'] = df_lines.geometry
+            '''
             # first assign geometries for model cells with only 1 SFR reach
             df_lines_geoms = df_lines.geometry.values
             geom_idx = [df_lines.index[df_lines.node == n] for n in df.node.values]
@@ -1396,7 +1480,7 @@ class Streamflow(SFRdata):
                     ind = np.argmin(np.abs(dfs.length - r.length))
                     # assign the reach geometry to the streamflow results at that index
                     df.loc[ind, 'geometry'] = r.geometry
-
+            '''
         # otherwise get the geometries from the dis file and model origin
         # (right now this does not support rotated grids)
         # the geometries are for the model cells- collocated reaches will be represented by
