@@ -465,6 +465,38 @@ class SFRdata(object):
 
     def segment_reach2linework_shapefile(self, lines_shapefile, new_lines_shapefile=None,
                                          iterations=2):
+        """Assigns segment and reach information to a shapefile of SFR reach linework,
+        using intersections (coincident starts/ends) with neighboring SFR reaches in the case of
+        model cells that have multiple co-located SFR reaches. This approach is more difficult
+        in instances of multiple adjacent model cells, each with collocated SFR reaches, because
+        the segment and reach information for geometries in the neighboring cells is also unknown.
+        The method can overcome this by iterating. Right now the number of iterations is set to 2,
+        which appeared to work fine for a small to medium -sized SFR package with few instances of this
+        problem. But the method may not work, or more iterations may be required, for SFR packages in large
+        models with large cell sizes (and therefore likely an increased number of cells with multiple SFR reaches).
+
+        The best approach to this problem is to simply write a linework shapefile with segment and reach information
+        when Mat1 is written for the first time. This will be implemented soon.
+
+        Parameters
+        ----------
+        lines_shapefile: string
+            Path to shapefile of SFR linework exploded by cell (e.g. one linework geometry for each SFR reach).
+
+        new_lines_shapefile: string
+            Path to new linework shapefile that will be written
+
+        iterations: int
+            With each iteration, the method will loop through the model cells containing multiple SFR reaches,
+            and attempt to assign geometries using intersections with neighboring cells where the geometries
+            are associated with a segment and reach. On this first iteration, the only geometries that are known
+            are those associated with reaches that are not collocated. On subsequent iterations, reach geometries
+            in collocated cells are added.
+
+        Returns
+        -------
+        dataframe containing node number, segment, reach, and geometry for each SFR reach.
+        """
 
         print "Adding segment and reach information to linework shapefile..."
         df = self.m1.copy()
@@ -545,6 +577,20 @@ class SFRdata(object):
                 'and then compute cell geometries by running get_cell_geometries().'
 
     def write_streamflow_shapefile(self, streamflow_file=None, lines_shapefile=None, node_col=None):
+        """Write out SFR Package results from a MODFLOW run.
+
+        Parameters
+        ----------
+        streamflow_file: string
+            Text file (often <model name>_streamflow.dat) containing table of SFR results from a MODFLOW run.
+
+        lines_shapefile: string
+            Path to shapefile containing linework geometries for each SFR reach
+
+        node_col: string
+            Name of attribute field in lines_shapefile containing the model cell numbers for each SFR reach.
+
+        """
 
         if streamflow_file is not None:
             self.streamflow_file = streamflow_file
