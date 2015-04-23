@@ -39,14 +39,17 @@ class diagnostics(SFRdata):
     def check_routing(self):
         """checks for breaks in routing and does comprehensive check for circular routing
         """
-        print 'Checking for circular routing...'
-        self.map_outsegs()
-        print 'passed.'
+        print '\nChecking for circular routing...'
+        circular_routing = self.map_outsegs()
+        if circular_routing is not None:
+            print circular_routing
+        else:
+            print 'passed.'
 
     def check_overlapping(self, tol=1e-6):
         """checks for multiple SFR reaches in one cell; and whether more than one reach has Cond > 0
         """
-        print 'Checking for model cells with multiple non-zero SFR conductances...'
+        print '\nChecking for model cells with multiple non-zero SFR conductances...'
 
         m1 = self.m1.copy()
         m1nodes = m1.node.values
@@ -85,7 +88,7 @@ class diagnostics(SFRdata):
         """checks that elevations decrease monotonically downstream
         """
         outfile = 'elevation_increases.csv'
-        print 'Checking Mat1 for downstream rises in streambed elevation...'
+        print '\nChecking Mat1 for downstream rises in streambed elevation...'
         diffs = self.m1.top_streambed.diff()
         pos_diffs = self.m1.ix[diffs > 0, ['segment', 'reach', 'top_streambed']]
         pos_diffs['sb_rise'] = diffs[diffs > 0]
@@ -99,7 +102,7 @@ class diagnostics(SFRdata):
         else:
             print 'passed.'
 
-        print 'Checking Mat1 for segments with reach 1 higher than last reach ...'
+        print '\nChecking Mat1 for segments with reach 1 higher than last reach ...'
         top_streambed = self.m1.top_streambed.values
         m1segments = self.m1.segment.values
         m1reaches = self.m1.reach.values
@@ -117,7 +120,7 @@ class diagnostics(SFRdata):
             print 'passed.'
 
 
-        print 'Checking for MODFLOW altitude errors...'
+        print '\nChecking for MODFLOW altitude errors...'
         if self.elevs is None:
             print 'Model elevations not found. Please run read_dis2() with the model DIS file.'
             return
@@ -142,7 +145,7 @@ class diagnostics(SFRdata):
 
     def check_Mat2_min_max(self):
 
-        print 'Checking for segment minimum elevations > segment maximum elevations in Mat2...'
+        print '\nChecking for segment minimum elevations > segment maximum elevations in Mat2...'
         # compute differences in min and max elevations listed in Mat2
         diffs = np.ravel(np.diff(self.m2[['Min', 'Max']].values))
         df = self.m2.ix[diffs < 0, ['segment', 'Min', 'Max']]
@@ -157,7 +160,7 @@ class diagnostics(SFRdata):
 
     def check_minimum_slope(self):
 
-        print 'Checking to make sure that minimum slope was honored...'
+        print '\nChecking to make sure that minimum slope was honored...'
         if self.m1.bed_slope.min() != self.minimum_slope:
             loc = self.m1.iloc[np.argmin(self.m1.bed_slope.values)][['segment', 'reach']]
             print '{:.1e} was specified as a minimum slope, but slope of {:.1e} found at ' \
@@ -187,9 +190,15 @@ class diagnostics(SFRdata):
         if self.xll == 0 and self.yll == 0:
             print 'Warning, model origin for SFR object is 0, 0.'
 
-        print 'Checking for breaks in routing (outlets) within the SFR network'
+        print '\nChecking for breaks in routing (outlets) within the SFR network'
         if 'Outlet' not in self.m1.columns:
-            self.map_outsegs()
+            circular_routing = self.map_outsegs()
+            if circular_routing is not None:
+                print circular_routing
+                print '\nCannot evaluate interior outlets until circular routing is fixed.'
+                return
+            else:
+                pass
 
         outlets = np.unique(self.m1.Outlet.values)
         self.m1.sort(['segment', 'reach'], inplace=True)

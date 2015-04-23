@@ -32,17 +32,21 @@ def header(infile):
 class SFRdata(object):
 
     def __init__(self, sfrobject=None, Mat1=None, Mat2=None, sfr=None, node_column=False,
-                 mfpath='', mfnam=None, mfdis=None, landsurfacefile=None, GIS_mult=0.3048, to_meters_mult=0.3048,
+                 mfpath='', mfnam=None, mfdis=None, landsurfacefile=None, GIS_mult=1, to_meters_mult=0.3048,
                  Mat2_out=None, xll=0.0, yll=0.0, prj=None, proj4=None, epsg=None,
                  minimum_slope=1e-4, streamflow_file=None):
         """
-        Base class for SFR information in Mat1 and Mat2, or SFR package
-
+        base object class for SFR information in the SFRmaker postproc module.
 
         Parameters
         ----------
+        sfrobject: SFRdata instance
+            Instantiates SFRdata with attributes from another SFRdata instance
 
-        GIS_mult : float
+        Mat1: dataframe or filepath
+
+
+        GIS_mult: float
             Multiplier to go from model units to GIS units
 
         """
@@ -254,9 +258,33 @@ class SFRdata(object):
             if max_outseg == 0:
                 break
             knt +=1
-            if knt > 1000:
-                print 'Circular routing encountered in segment {}'.format(max_outseg)
-                break
+            if knt > 200:
+                # subset outsegs map to all rows outseg number > 0 at iteration 1000
+                circular_segs = outsegsmap[outsegsmap[outsegsmap.columns[-1]] > 0]
+
+                # only retain one instance of each outseg number at iteration 1000
+                circular_segs.drop_duplicates(subset=outsegsmap.columns[-1], inplace=True)
+
+                # cull the dataframe again to remove duplicate instances of routing circles
+                circles = []
+                duplicates = []
+                for i in circular_segs.index:
+                    repeat_start_ind = np.where(circular_segs.ix[i, :] ==
+                                                circular_segs.ix[i, circular_segs.columns[-1:]]
+                                                .values[0])[0][-2:][0]
+                    circular_seq = circular_segs.ix[i, circular_segs.columns[repeat_start_ind:]].tolist()
+
+                    if set(circular_seq) not in circles:
+                        circles.append(set(circular_seq))
+                    else:
+                        duplicates.append(i)
+                circular_segs.drop(duplicates, axis=0, inplace=True)
+
+                rf = 'Circular_routing_outsegs_table.csv'
+                circular_segs.to_csv(rf)
+                return '{} instances of circular routing encountered! See {} for details.'\
+                        .format(len(circular_segs), rf)
+
         self.outsegs = outsegsmap
 
         # create new column in Mat2 listing outlets associated with each segment
@@ -455,6 +483,18 @@ class SFRdata(object):
         self.__dict__ = self.Segments.__dict__.copy()
 
     def run_diagnostics(self, model_domain=None):
+        """Run diagnostic suite on Mat1 and Mat2, including:
+        * segment numbering
+        * circular routing
+        * collocated SFR reaches with non-zero conductances
+        * elevations that increase in downstream direction,
+          or that are inconsistent with layer tops/bottoms
+        * check for outlets to stream network that
+
+        Parameters:
+
+
+        """
         from diagnostics import diagnostics
         self.diagnostics = diagnostics(sfrobject=self)
         self.diagnostics.check_numbering()
@@ -565,16 +605,19 @@ class SFRdata(object):
         GISio.df2shp(new_lines_shpdf, new_lines_shapefile, prj=prj)
         return new_lines_shpdf
 
-    def write_shapefile(self, outshp='SFR.shp', xll=0.0, yll=0.0, prj=None):
+    def write_shapefile(self, outshp='SFR.shp', xll=None, yll=None, epsg=None, proj4=None, prj=None):
 
-        if 'geometry' in self.m1.columns:
-            GISio.df2shp(self.m1, shpname=outshp, epsg=self.epsg, proj4=self.proj4, prj=self.prj)
-        else:
+        for kwd in [xll, yll, epsg, proj4, prj]:
+            if kwd is not None:
+                self.__dict__[kwd] = kwd
+
+        if 'geometry' not in self.m1.columns:
             try:
                 self.get_cell_geometries()
             except:
                 print 'No cell geometries found. Please add discretization information using read_dis2(), ' \
                 'and then compute cell geometries by running get_cell_geometries().'
+        GISio.df2shp(self.m1, shpname=outshp, epsg=self.epsg, proj4=self.proj4, prj=self.prj)
 
     def write_streamflow_shapefile(self, streamflow_file=None, lines_shapefile=None, node_col=None):
         """Write out SFR Package results from a MODFLOW run.
@@ -1408,6 +1451,7 @@ class Outsegs(SFRdata):
 
         self.m1.to_csv(self.Mat1, index=False)
         print 'Done, Mat1 updated with outlet information; saved to {}.'.format(self.Mat1)
+
 
 class Streamflow(SFRdata):
 
