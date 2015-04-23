@@ -577,17 +577,22 @@ class SFRdata(object):
                                         np.array([nd != n for nd in df.node])].index
 
                     # handle collocated geometries that do not touch other segments
-                    if len(intersects_ind) == 0:
-                        geoms_entirely_within_node.append(rg)
-                        continue
+                    #if len(intersects_ind) == 0:
+                    #    geoms_entirely_within_node.append(rg)
+                    #    continue
 
                     intersects_df = df.ix[intersects_ind]
                     intersects_segments = intersects_df.segment.tolist()
+                    dfs_segment = dfs.ix[dfs.segment.isin(intersects_segments)]
+
+                    # handle collocated geometries that do not touch other segments
+                    if len(intersects_ind) == 0 or len(dfs_segment) == 0:
+                        geoms_entirely_within_node.append(rg)
+                        continue
 
                     # get the index of the collocated reach that is closest to the intersecting reach number(s)
                     # (handles cases where a segment meanders out of and then back into a cell)
                     # only consider reaches that have the same segment as those intersected
-                    dfs_segment = dfs.ix[dfs.segment.isin(intersects_segments)]
                     closest_reach_in_dfs_index = dfs_segment.index[np.argmin([np.sum(np.abs(r - intersects_df.reach))
                                                                    for r in dfs_segment.reach])]
 
