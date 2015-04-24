@@ -8,10 +8,9 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 from shapely.geometry import Polygon, LineString
+from rasterstats import zonal_stats
 import flopy
-from sfr_plots import SFRshapefile
-import GISio
-import GISops
+import GISio, GISops
 
 
 # Functions
@@ -32,7 +31,9 @@ def header(infile):
 class SFRdata(object):
 
     def __init__(self, sfrobject=None, Mat1=None, Mat2=None, sfr=None, node_column=False,
-                 mfpath='', mfnam=None, mfdis=None, landsurfacefile=None, GIS_mult=1, to_meters_mult=0.3048,
+                 mfpath='', mfnam=None, mfdis=None,
+                 dem=None, landsurfacefile=None, landsurface_column=None,
+                 GIS_mult=1, to_meters_mult=0.3048,
                  Mat2_out=None, xll=0.0, yll=0.0, prj=None, proj4=None, epsg=None,
                  minimum_slope=1e-4, streamflow_file=None):
         """
@@ -112,6 +113,7 @@ class SFRdata(object):
 
             self.node_attribute = 'node' # compatibility with sfr_plots and sfr_classes
 
+            self.dem = dem
             self.landsurfacefile = landsurfacefile
             self.landsurface = None
             self.xll = xll
@@ -300,7 +302,7 @@ class SFRdata(object):
         # assign the outlets to each reach listed in Mat1
         self.m1['Outlet'] = [self.m2.ix[seg, 'Outlet'] for seg in self.m1.segment]
 
-    def map_confluences(self, landsurfacefile=None, landsurface_column=None):
+    def map_confluences(self, dem=None, landsurfacefile=None, landsurface_column=None):
 
         if landsurfacefile is None and self.landsurfacefile is not None:
             landsurfacefile = self.landsurfacefile
@@ -308,7 +310,7 @@ class SFRdata(object):
         if hasattr(self, 'Elevations'):
             self.Elevations.map_confluences()
         else:
-            self.Elevations = Elevations(sfrobject=self, landsurfacefile=landsurfacefile,
+            self.Elevations = Elevations(sfrobject=self, dem=dem, landsurfacefile=landsurfacefile,
                                          landsurface_column=landsurface_column)
             self.Elevations.map_confluences()
 
@@ -338,6 +340,7 @@ class SFRdata(object):
         -----
             See the ConsolidateConductance notebook in the Notebooks folder.
         """
+        print 'Assigning total SFR conductance to dominant reach in cells with multiple reaches...'
         # Calculate SFR conductance for each reach
         def cond(X):
             c = X['bed_K'] * X['width_in_cell'] * X['length_in_cell'] / X['bed_thickness']
@@ -388,17 +391,37 @@ class SFRdata(object):
             self.Elevations.smooth_segment_ends(report_file=report_file)
         self.m2 = self.Elevations.m2
 
-    def smooth_interior_elevations(self, landsurfacefile=None, landsurface_column=None,
+    def smooth_interior_elevations(self, dem=None, landsurfacefile=None, landsurface_column=None,
                                    report_file='smooth_segment_interiors.txt'):
         """Allow elevations smoothing to be run on SFRdata instance (Composition)
         """
         if hasattr(self, 'Elevations'):
             self.Elevations.smooth_segment_interiors(report_file=report_file)
         else:
-            self.Elevations = Elevations(sfrobject=self, landsurfacefile=landsurfacefile,
+            self.Elevations = Elevations(sfrobject=self, dem=None, landsurfacefile=landsurfacefile,
                                          landsurface_column=landsurface_column)
             self.Elevations.smooth_segment_interiors(report_file=report_file)
         self.m1 = self.Elevations.m1
+
+    def reset_m1_streambed_top_from_dem(self, dem=None, stat='min'):
+        """
+        Parameters
+        ----------
+        stat: string
+            min (recommended), mean, or max
+
+        Returns
+        -------
+        zstats: Dataframe with dem min, max, mean and count for each model cell in Mat1
+        """
+        if 'geometry' not in self.m1.columns:
+            self.get_cell_geometries()
+        if dem is not None:
+            self.dem = dem
+        print 'computing zonal statistics...'
+        self.dem_zstats = pd.DataFrame(zonal_stats(self.m1.geometry, self.dem))
+        self.m1['top_streambed'] = self.dem_zstats['min']
+        print 'DEM {} elevations assigned to top_streambed column in m1'.format(stat)
 
     def reset_model_top_2streambed(self, minimum_thickness=1, outdisfile=None, outsummary=None):
         if hasattr(self, 'Elevations'):
@@ -791,16 +814,21 @@ class Elevations(SFRdata):
 
     def __init__(self, sfrobject=None, Mat1=None, Mat2=None, sfr=None, node_column=False,
                  mfpath=None, mfnam=None, mfdis=None, to_meters_mult=0.3048,
-                 minimum_slope=1e-4, landsurfacefile=None, landsurface_column=None, smoothing_iterations=0):
+                 minimum_slope=1e-4, dem=None, landsurfacefile=None, landsurface_column=None,
+                 smoothing_iterations=0):
         """
         Smooth streambed elevations outside of the context of the objects in SFR classes
         (works off of information in Mat1 and Mat2; generates updated versions of these files
         """
         SFRdata.__init__(self, sfrobject=sfrobject, Mat1=Mat1, Mat2=Mat2, sfr=sfr, node_column=node_column,
-                 mfpath=mfpath, mfnam=mfnam, mfdis=mfdis, landsurfacefile=landsurfacefile, to_meters_mult=to_meters_mult,
+                 mfpath=mfpath, mfnam=mfnam, mfdis=mfdis,
+                 dem=dem, landsurfacefile=landsurfacefile, to_meters_mult=to_meters_mult,
                  minimum_slope=minimum_slope)
 
-        if self.landsurfacefile and self.landsurface is None:
+        if self.dem:
+            pass
+
+        elif self.landsurfacefile and self.landsurface is None:
             self.landsurface = np.fromfile(self.landsurfacefile, sep=' ') # array of elevations to use (sorted by cellnumber)
 
             print 'assigning elevations in {} to landsurface column in Mat1...'.format(landsurfacefile)
@@ -813,6 +841,8 @@ class Elevations(SFRdata):
             self.m1['landsurface'] = self.m1[landsurface_column]
 
         self.smoothing_iterations = smoothing_iterations
+
+
 
     def smooth_segment_ends(self, report_file='smooth_segment_ends.txt'):
         '''
@@ -995,8 +1025,13 @@ class Elevations(SFRdata):
         except:
             m2minmax = False
             print "Max, Min elevation columns not found in Mat2" \
-                  "Run smooth_segment_ends() first."
+                  "Run map_confluences() first."
             return
+        if 'landsurface' not in self.m1.columns:
+            self.m1['landsurface'] = self.m1.top_streambed
+            print 'starting from elevations in m1.top_streambed'
+        else:
+            print 'starting from elevations in m1.landsurface'
 
         for seg in self.segments:
             self.seg = seg
