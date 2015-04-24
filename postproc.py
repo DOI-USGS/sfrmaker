@@ -539,6 +539,7 @@ class SFRdata(object):
         """
 
         print "Adding segment and reach information to linework shapefile..."
+        print "(may take quite a while for large models...)"
         df = self.m1.copy()
         df_lines = GISio.shp2df(lines_shapefile)
         prj = lines_shapefile[:-4] + '.prj'
@@ -554,8 +555,10 @@ class SFRdata(object):
         # use length to figure out which geometry goes with which reach
         shared_cells = np.unique(df.ix[df.node.duplicated(), self.node_attribute])
         non_collocated_geometries = df.geometry.tolist()
+        ni = iterations * len(shared_cells)
         for i in range(iterations):
             for n in shared_cells:
+                print '\r{:.0f}%%'.format(100* (i*n + n/ni)),
                 # make dataframe of all reaches within the model cell
                 reaches = pd.DataFrame(df_lines.ix[df_lines[node_col] == n, 'geometry'].copy())
                 reaches['length'] = [g.length for g in reaches.geometry]
@@ -606,9 +609,8 @@ class SFRdata(object):
                     ind = dfs.index[~dfs.index.isin(assigned)][0]
                     df.loc[ind, 'geometry'] = geoms_entirely_within_node[0]
 
-        new_lines_shpdf = df[['segment', 'reach', 'node', 'geometry']].sort(['segment', 'reach'])
-        GISio.df2shp(new_lines_shpdf, new_lines_shapefile, prj=prj)
-        return new_lines_shpdf
+        self.linework_geoms = df[['segment', 'reach', 'node', 'geometry']].sort(['segment', 'reach'])
+        GISio.df2shp(self.linework_geoms, new_lines_shapefile, prj=prj)
 
     def write_shapefile(self, outshp='SFR.shp', xll=None, yll=None, epsg=None, proj4=None, prj=None):
 
