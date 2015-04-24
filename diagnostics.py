@@ -8,6 +8,19 @@ from postproc import SFRdata
 
 
 class diagnostics(SFRdata):
+    """
+    Daniel Feinstein's top 10 SFR problems:
+    1) cell gaps btw adjacent reaches in a single segment
+    2) cell gaps btw routed segments. possibly because of re-entry problems at domain edge
+    3) adjacent reaches with STOP sloping the wrong way
+    4) routed segments with end/start sloping the wrong way
+    5) STOP>TOP1 violations, i.e.,floaters
+    6) STOP<<TOP1 violations, i.e., exaggerated incisions
+    7) segments that end within one diagonal cell distance from another segment, inviting linkage
+    8) circular routing of segments
+    9) multiple reaches with non-zero conductance in a single cell
+    10) reaches in inactive cells
+    """
 
     def __init__(self, sfrobject=None, Mat1=None, Mat2=None, sfr=None, node_column=None,
                      mfpath=None, mfnam=None, mfdis=None, outpath=os.getcwd()):
