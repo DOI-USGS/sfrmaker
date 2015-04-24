@@ -745,7 +745,7 @@ class SFRdata(object):
             slope = r.bed_slope if r.bed_slope > minimum_slope else minimum_slope
             bedK = '~SFRc~' if tpl and r.bed_K > bedKmin else '{:e}'.format(r.bed_K)
 
-            item2_record = '{0:.0f} {1:.0f} {2:.0f} {3:.0f} {4:.0f} {5:e} {6:e} {7:e} {8:e} {9:s}\n'.format(
+            item2_record = '{0:.0f} {1:.0f} {2:.0f} {3:.0f} {4:.0f} {5:e} {6:e} {7:e} {8:e} {9:s}'.format(
                 r.layer,
                 r.row,
                 r.column,
