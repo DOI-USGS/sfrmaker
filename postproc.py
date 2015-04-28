@@ -8,10 +8,9 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 from shapely.geometry import Polygon, LineString
+from rasterstats import zonal_stats
 import flopy
-from sfr_plots import SFRshapefile
-import GISio
-import GISops
+import GISio, GISops
 
 
 # Functions
@@ -32,17 +31,23 @@ def header(infile):
 class SFRdata(object):
 
     def __init__(self, sfrobject=None, Mat1=None, Mat2=None, sfr=None, node_column=False,
-                 mfpath='', mfnam=None, mfdis=None, landsurfacefile=None, GIS_mult=0.3048, to_meters_mult=0.3048,
+                 mfpath='', mfnam=None, mfdis=None,
+                 dem=None, landsurfacefile=None, landsurface_column=None,
+                 GIS_mult=1, to_meters_mult=0.3048,
                  Mat2_out=None, xll=0.0, yll=0.0, prj=None, proj4=None, epsg=None,
                  minimum_slope=1e-4, streamflow_file=None):
         """
-        Base class for SFR information in Mat1 and Mat2, or SFR package
-
+        base object class for SFR information in the SFRmaker postproc module.
 
         Parameters
         ----------
+        sfrobject: SFRdata instance
+            Instantiates SFRdata with attributes from another SFRdata instance
 
-        GIS_mult : float
+        Mat1: dataframe or filepath
+
+
+        GIS_mult: float
             Multiplier to go from model units to GIS units
 
         """
@@ -108,6 +113,7 @@ class SFRdata(object):
 
             self.node_attribute = 'node' # compatibility with sfr_plots and sfr_classes
 
+            self.dem = dem
             self.landsurfacefile = landsurfacefile
             self.landsurface = None
             self.xll = xll
@@ -260,9 +266,33 @@ class SFRdata(object):
             if max_outseg == 0:
                 break
             knt +=1
-            if knt > 1000:
-                print 'Circular routing encountered in segment {}'.format(max_outseg)
-                break
+            if knt > 200:
+                # subset outsegs map to all rows outseg number > 0 at iteration 1000
+                circular_segs = outsegsmap[outsegsmap[outsegsmap.columns[-1]] > 0]
+
+                # only retain one instance of each outseg number at iteration 1000
+                circular_segs.drop_duplicates(subset=outsegsmap.columns[-1], inplace=True)
+
+                # cull the dataframe again to remove duplicate instances of routing circles
+                circles = []
+                duplicates = []
+                for i in circular_segs.index:
+                    repeat_start_ind = np.where(circular_segs.ix[i, :] ==
+                                                circular_segs.ix[i, circular_segs.columns[-1:]]
+                                                .values[0])[0][-2:][0]
+                    circular_seq = circular_segs.ix[i, circular_segs.columns[repeat_start_ind:]].tolist()
+
+                    if set(circular_seq) not in circles:
+                        circles.append(set(circular_seq))
+                    else:
+                        duplicates.append(i)
+                circular_segs.drop(duplicates, axis=0, inplace=True)
+
+                rf = 'Circular_routing_outsegs_table.csv'
+                circular_segs.to_csv(rf)
+                return '{} instances of circular routing encountered! See {} for details.'\
+                        .format(len(circular_segs), rf)
+
         self.outsegs = outsegsmap
 
         # create new column in Mat2 listing outlets associated with each segment
@@ -272,7 +302,7 @@ class SFRdata(object):
         # assign the outlets to each reach listed in Mat1
         self.m1['Outlet'] = [self.m2.ix[seg, 'Outlet'] for seg in self.m1.segment]
 
-    def map_confluences(self, landsurfacefile=None, landsurface_column=None):
+    def map_confluences(self, dem=None, landsurfacefile=None, landsurface_column=None):
 
         if landsurfacefile is None and self.landsurfacefile is not None:
             landsurfacefile = self.landsurfacefile
@@ -280,7 +310,7 @@ class SFRdata(object):
         if hasattr(self, 'Elevations'):
             self.Elevations.map_confluences()
         else:
-            self.Elevations = Elevations(sfrobject=self, landsurfacefile=landsurfacefile,
+            self.Elevations = Elevations(sfrobject=self, dem=dem, landsurfacefile=landsurfacefile,
                                          landsurface_column=landsurface_column)
             self.Elevations.map_confluences()
 
@@ -310,6 +340,7 @@ class SFRdata(object):
         -----
             See the ConsolidateConductance notebook in the Notebooks folder.
         """
+        print 'Assigning total SFR conductance to dominant reach in cells with multiple reaches...'
         # Calculate SFR conductance for each reach
         def cond(X):
             c = X['bed_K'] * X['width_in_cell'] * X['length_in_cell'] / X['bed_thickness']
@@ -360,17 +391,37 @@ class SFRdata(object):
             self.Elevations.smooth_segment_ends(report_file=report_file)
         self.m2 = self.Elevations.m2
 
-    def smooth_interior_elevations(self, landsurfacefile=None, landsurface_column=None,
+    def smooth_interior_elevations(self, dem=None, landsurfacefile=None, landsurface_column=None,
                                    report_file='smooth_segment_interiors.txt'):
         """Allow elevations smoothing to be run on SFRdata instance (Composition)
         """
         if hasattr(self, 'Elevations'):
             self.Elevations.smooth_segment_interiors(report_file=report_file)
         else:
-            self.Elevations = Elevations(sfrobject=self, landsurfacefile=landsurfacefile,
+            self.Elevations = Elevations(sfrobject=self, dem=None, landsurfacefile=landsurfacefile,
                                          landsurface_column=landsurface_column)
             self.Elevations.smooth_segment_interiors(report_file=report_file)
         self.m1 = self.Elevations.m1
+
+    def reset_m1_streambed_top_from_dem(self, dem=None, stat='min'):
+        """
+        Parameters
+        ----------
+        stat: string
+            min (recommended), mean, or max
+
+        Returns
+        -------
+        zstats: Dataframe with dem min, max, mean and count for each model cell in Mat1
+        """
+        if 'geometry' not in self.m1.columns:
+            self.get_cell_geometries()
+        if dem is not None:
+            self.dem = dem
+        print 'computing zonal statistics...'
+        self.dem_zstats = pd.DataFrame(zonal_stats(self.m1.geometry, self.dem))
+        self.m1['top_streambed'] = self.dem_zstats['min']
+        print 'DEM {} elevations assigned to top_streambed column in m1'.format(stat)
 
     def reset_model_top_2streambed(self, minimum_thickness=1, outdisfile=None, outsummary=None):
         if hasattr(self, 'Elevations'):
@@ -461,6 +512,18 @@ class SFRdata(object):
         self.__dict__ = self.Segments.__dict__.copy()
 
     def run_diagnostics(self, model_domain=None):
+        """Run diagnostic suite on Mat1 and Mat2, including:
+        * segment numbering
+        * circular routing
+        * collocated SFR reaches with non-zero conductances
+        * elevations that increase in downstream direction,
+          or that are inconsistent with layer tops/bottoms
+        * check for outlets to stream network that
+
+        Parameters:
+
+
+        """
         from diagnostics import diagnostics
         self.diagnostics = diagnostics(sfrobject=self)
         self.diagnostics.check_numbering()
@@ -469,24 +532,150 @@ class SFRdata(object):
         self.diagnostics.check_elevations()
         self.diagnostics.check_outlets(model_domain=model_domain)
 
-    def write_shapefile(self, outshp='SFR.shp', xll=0.0, yll=0.0, prj=None):
+    def segment_reach2linework_shapefile(self, lines_shapefile, new_lines_shapefile=None,
+                                         iterations=2):
+        """Assigns segment and reach information to a shapefile of SFR reach linework,
+        using intersections (coincident starts/ends) with neighboring SFR reaches in the case of
+        model cells that have multiple co-located SFR reaches. This approach is more difficult
+        in instances of multiple adjacent model cells, each with collocated SFR reaches, because
+        the segment and reach information for geometries in the neighboring cells is also unknown.
+        The method can overcome this by iterating. Right now the number of iterations is set to 2,
+        which appeared to work fine for a small to medium -sized SFR package with few instances of this
+        problem. But the method may not work, or more iterations may be required, for SFR packages in large
+        models with large cell sizes (and therefore likely an increased number of cells with multiple SFR reaches).
 
-        # add outseg and upseg information to Mat1
-        self.m2.sort('segment', inplace=True)
-        m1segments = self.m1.segment.values
-        self.m1['outseg'] = [int(self.m2.outseg[s]) for s in m1segments]
-        self.m1['upsegs'] = [' '.join(map(str, self.m2.upsegs[s])) for s in m1segments]
+        The best approach to this problem is to simply write a linework shapefile with segment and reach information
+        when Mat1 is written for the first time. This will be implemented soon.
 
-        if 'geometry' in self.m1.columns:
-            GISio.df2shp(self.m1, shpname=outshp, epsg=self.epsg, proj4=self.proj4, prj=self.prj)
-        else:
+        Parameters
+        ----------
+        lines_shapefile: string
+            Path to shapefile of SFR linework exploded by cell (e.g. one linework geometry for each SFR reach).
+
+        new_lines_shapefile: string
+            Path to new linework shapefile that will be written
+
+        iterations: int
+            With each iteration, the method will loop through the model cells containing multiple SFR reaches,
+            and attempt to assign geometries using intersections with neighboring cells where the geometries
+            are associated with a segment and reach. On this first iteration, the only geometries that are known
+            are those associated with reaches that are not collocated. On subsequent iterations, reach geometries
+            in collocated cells are added.
+
+        Returns
+        -------
+        dataframe containing node number, segment, reach, and geometry for each SFR reach.
+
+        Notes
+        -----
+        This method is really slow for large models, and should be done only once if needed. Subsequently,
+        a revised linework shapefile with segment and reach information can be used.
+        """
+
+        print "Adding segment and reach information to linework shapefile..."
+        print "(may take hours for large models...)"
+        df = self.m1.copy()
+        df_lines = GISio.shp2df(lines_shapefile)
+        prj = lines_shapefile[:-4] + '.prj'
+        if new_lines_shapefile is None:
+            new_lines_shapefile = lines_shapefile[:-4] + '_seg_reach.shp'
+
+        df_lines_geoms = df_lines.geometry.values
+        geom_idx = [df_lines.index[df_lines.node == n] for n in df.node.values]
+        df['geometry'] = [df_lines_geoms[g[0]] if len(g) == 1 else LineString() for g in geom_idx]
+
+        node_col = 'node'
+        # then assign geometries for model cells with multiple SFR reaches
+        # use length to figure out which geometry goes with which reach
+        shared_cells = np.unique(df.ix[df.node.duplicated(), self.node_attribute])
+        non_collocated_geometries = df.geometry.tolist()
+        nsharedcells = len(shared_cells)
+        nj = iterations * nsharedcells
+        for i in range(iterations):
+            for j, n in enumerate(shared_cells):
+                print '\r{:.0f}%'.format(100 * ((i * nsharedcells + j)/nj)),
+                # make dataframe of all reaches within the model cell
+                reaches = pd.DataFrame(df_lines.ix[df_lines[node_col] == n, 'geometry'].copy())
+                reaches['length'] = [g.length for g in reaches.geometry]
+                #reaches.sort('length', inplace=True)
+
+                # streamflow results for that model cell
+                dfs = df.ix[df[self.node_attribute] == n]
+                #dfs.sort('length', inplace=True)
+
+                # for each collocated reach in reaches dataframe,
+                # this inner loop may be somewhat inefficient,
+                # but the number of collocated reaches is small enough for it not to matter
+                assigned = []
+                geoms_entirely_within_node = []
+                for rg in reaches.geometry:
+
+                    # get list of neighboring reach geometries that touch the current collocated geometry
+                    intersects_ind = df[np.array([rg.intersects(g) for g in df.geometry]) &
+                                        np.array([nd != n for nd in df.node])].index
+
+                    # handle collocated geometries that do not touch other segments
+                    #if len(intersects_ind) == 0:
+                    #    geoms_entirely_within_node.append(rg)
+                    #    continue
+
+                    intersects_df = df.ix[intersects_ind]
+                    intersects_segments = intersects_df.segment.tolist()
+                    dfs_segment = dfs.ix[dfs.segment.isin(intersects_segments)]
+
+                    # handle collocated geometries that do not touch other segments
+                    if len(intersects_ind) == 0 or len(dfs_segment) == 0:
+                        geoms_entirely_within_node.append(rg)
+                        continue
+
+                    # get the index of the collocated reach that is closest to the intersecting reach number(s)
+                    # (handles cases where a segment meanders out of and then back into a cell)
+                    # only consider reaches that have the same segment as those intersected
+                    closest_reach_in_dfs_index = dfs_segment.index[np.argmin([np.sum(np.abs(r - intersects_df.reach))
+                                                                   for r in dfs_segment.reach])]
+
+                    # assign the the current collocated geometry to the collocated reach
+                    df.loc[closest_reach_in_dfs_index, 'geometry'] = rg
+                    assigned.append(closest_reach_in_dfs_index)
+
+                # in case there was a geometry entirely contained within the cell
+                # (hopefully there is only one)
+                if len(geoms_entirely_within_node) == 1 and len(dfs.index[~dfs.index.isin(assigned)]) > 0:
+                    ind = dfs.index[~dfs.index.isin(assigned)][0]
+                    df.loc[ind, 'geometry'] = geoms_entirely_within_node[0]
+        print '\n'
+        self.linework_geoms = df[['segment', 'reach', 'node', 'geometry']].sort(['segment', 'reach'])
+        GISio.df2shp(self.linework_geoms, new_lines_shapefile, prj=prj)
+
+    def write_shapefile(self, outshp='SFR.shp', xll=None, yll=None, epsg=None, proj4=None, prj=None):
+
+        for kwd in [xll, yll, epsg, proj4, prj]:
+            if kwd is not None:
+                self.__dict__[kwd] = kwd
+
+        if 'geometry' not in self.m1.columns:
             try:
                 self.get_cell_geometries()
             except:
                 print 'No cell geometries found. Please add discretization information using read_dis2(), ' \
                 'and then compute cell geometries by running get_cell_geometries().'
+        GISio.df2shp(self.m1, shpname=outshp, epsg=self.epsg, proj4=self.proj4, prj=self.prj)
 
     def write_streamflow_shapefile(self, streamflow_file=None, lines_shapefile=None, node_col=None):
+        """Write out SFR Package results from a MODFLOW run.
+
+        Parameters
+        ----------
+        streamflow_file: string
+            Text file (often <model name>_streamflow.dat) containing table of SFR results from a MODFLOW run.
+
+        lines_shapefile: string
+            Path to shapefile containing linework geometries for each SFR reach
+
+        node_col: string
+            Name of attribute field in lines_shapefile containing the model cell numbers for each SFR reach.
+
+        """
 
         if streamflow_file is not None:
             self.streamflow_file = streamflow_file
@@ -625,16 +814,21 @@ class Elevations(SFRdata):
 
     def __init__(self, sfrobject=None, Mat1=None, Mat2=None, sfr=None, node_column=False,
                  mfpath=None, mfnam=None, mfdis=None, to_meters_mult=0.3048,
-                 minimum_slope=1e-4, landsurfacefile=None, landsurface_column=None, smoothing_iterations=0):
+                 minimum_slope=1e-4, dem=None, landsurfacefile=None, landsurface_column=None,
+                 smoothing_iterations=0):
         """
         Smooth streambed elevations outside of the context of the objects in SFR classes
         (works off of information in Mat1 and Mat2; generates updated versions of these files
         """
         SFRdata.__init__(self, sfrobject=sfrobject, Mat1=Mat1, Mat2=Mat2, sfr=sfr, node_column=node_column,
-                 mfpath=mfpath, mfnam=mfnam, mfdis=mfdis, landsurfacefile=landsurfacefile, to_meters_mult=to_meters_mult,
+                 mfpath=mfpath, mfnam=mfnam, mfdis=mfdis,
+                 dem=dem, landsurfacefile=landsurfacefile, to_meters_mult=to_meters_mult,
                  minimum_slope=minimum_slope)
 
-        if self.landsurfacefile and self.landsurface is None:
+        if self.dem:
+            pass
+
+        elif self.landsurfacefile and self.landsurface is None:
             self.landsurface = np.fromfile(self.landsurfacefile, sep=' ') # array of elevations to use (sorted by cellnumber)
 
             print 'assigning elevations in {} to landsurface column in Mat1...'.format(landsurfacefile)
@@ -647,6 +841,8 @@ class Elevations(SFRdata):
             self.m1['landsurface'] = self.m1[landsurface_column]
 
         self.smoothing_iterations = smoothing_iterations
+
+
 
     def smooth_segment_ends(self, report_file='smooth_segment_ends.txt'):
         '''
@@ -829,8 +1025,13 @@ class Elevations(SFRdata):
         except:
             m2minmax = False
             print "Max, Min elevation columns not found in Mat2" \
-                  "Run smooth_segment_ends() first."
+                  "Run map_confluences() first."
             return
+        if 'landsurface' not in self.m1.columns:
+            self.m1['landsurface'] = self.m1.top_streambed
+            print 'starting from elevations in m1.top_streambed'
+        else:
+            print 'starting from elevations in m1.landsurface'
 
         for seg in self.segments:
             self.seg = seg
@@ -1305,6 +1506,7 @@ class Outsegs(SFRdata):
         self.m1.to_csv(self.Mat1, index=False)
         print 'Done, Mat1 updated with outlet information; saved to {}.'.format(self.Mat1)
 
+
 class Streamflow(SFRdata):
 
     def __init__(self, sfrobject=None, Mat1=None, Mat2=None, sfr=None, streamflow_file=None):
@@ -1386,6 +1588,20 @@ class Streamflow(SFRdata):
             if df_lines[node_col].dtype.name == 'object':
                 raise TypeError('Node number column of shapefile is not numeric!')
 
+            if 'segment' not in df_lines.columns:
+                print "segment and reach information not in linework shapefile!"
+                df_lines = self.segment_reach2linework_shapefile(lines_shapefile)
+
+            df_lines.sort(['segment', 'reach'], inplace=True)
+
+            # join in node column from mat1
+            # segments and reaches in SFR results and Mat1 must be identical! (and sorted)
+            if np.max(df_lines.reach - df.reach) != 0 or np.max(df_lines.segment - df.segment) != 0:
+                raise IndexError('Segments and reaches in {} are different than {}!'\
+                                 .format(lines_shapefile, self.streamflow_file))
+
+            df['geometry'] = df_lines.geometry
+            '''
             # first assign geometries for model cells with only 1 SFR reach
             df_lines_geoms = df_lines.geometry.values
             geom_idx = [df_lines.index[df_lines.node == n] for n in df.node.values]
@@ -1408,7 +1624,7 @@ class Streamflow(SFRdata):
                     ind = np.argmin(np.abs(dfs.length - r.length))
                     # assign the reach geometry to the streamflow results at that index
                     df.loc[ind, 'geometry'] = r.geometry
-
+            '''
         # otherwise get the geometries from the dis file and model origin
         # (right now this does not support rotated grids)
         # the geometries are for the model cells- collocated reaches will be represented by
