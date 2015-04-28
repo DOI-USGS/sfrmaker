@@ -71,6 +71,11 @@ class SFRdata(object):
                     self.Mat2 = Mat2
                     self.m1 = pd.read_csv(Mat1)
                     self.m2 = pd.read_csv(Mat2)
+
+                    # blow away any geometry columns just in case they're there (will be read in as strings otherwise)
+                    for g in ['geometry', 'centroids']:
+                        if g in self.m1.columns:
+                            self.m1.drop(g, axis=1, inplace=True)
                     self.outpath = os.path.split(Mat1)[0]
                 self.m1.sort(['segment', 'reach'], inplace=True)
                 self.m2.sort('segment', inplace=True)
@@ -369,7 +374,7 @@ class SFRdata(object):
 
         # Calculate a new length for widest reaches, set length in secondary collocated reaches to 1
         # also set the K values in the secondary cells to bedKmin
-        self.m1['old_length_in_cell'] = self.m1.length_in_cell
+        self.m1['length'] = self.m1.length_in_cell
 
         def consolidate_lengths(X):
             if X['Dominant']:
@@ -420,7 +425,9 @@ class SFRdata(object):
             self.dem = dem
         print 'computing zonal statistics...'
         self.dem_zstats = pd.DataFrame(zonal_stats(self.m1.geometry, self.dem))
-        self.m1['top_streambed'] = self.dem_zstats['min']
+        self.m1['top_streambed'] = self.dem_zstats['min'].values
+        self.m1['landsurface'] = self.m1['top_streambed'].values
+        self.update_Mat2_elevations()
         print 'DEM {} elevations assigned to top_streambed column in m1'.format(stat)
 
     def reset_model_top_2streambed(self, minimum_thickness=1, outdisfile=None, outsummary=None):
@@ -646,6 +653,14 @@ class SFRdata(object):
         print '\n'
         self.linework_geoms = df[['segment', 'reach', 'node', 'geometry']].sort(['segment', 'reach'])
         GISio.df2shp(self.linework_geoms, new_lines_shapefile, prj=prj)
+
+    def update_Mat2_elevations(self):
+        print 'Updating min/max elevations in Mat2 from elevations in Mat1...'
+        top_streambed = self.m1.top_streambed.values
+        m1segments = self.m1.segment.values
+        m2segments = self.m2.segment.values
+        self.m2['Max'] = [np.max(top_streambed[m1segments == s]) for s in m2segments]
+        self.m2['Min'] = [np.min(top_streambed[m1segments == s]) for s in m2segments]
 
     def write_shapefile(self, outshp='SFR.shp', xll=None, yll=None, epsg=None, proj4=None, prj=None):
 
@@ -1087,9 +1102,9 @@ class Elevations(SFRdata):
         self.calculate_slopes()
 
         # save updated Mat1
-        self.m1.to_csv(self.Mat1[:-4] + '_elevs.csv', index=False)
+        #self.m1.to_csv(self.Mat1[:-4] + '_elevs.csv', index=False)
         self.ofp.close()
-        print 'Done, updated Mat1 saved to {}.\nsee {} for report.'.format(self.Mat1[:-4] + '_elevs.csv', report_file)
+        print 'Done, see {} for report.'.format(report_file)
 
 
     def calculate_slopes(self):
@@ -1199,6 +1214,8 @@ class Elevations(SFRdata):
         newdis = flopy.modflow.ModflowDis(new_m, nlay=self.dis.nlay, nrow=self.dis.nrow, ncol=self.dis.ncol,
                                           delr=self.dis.delr, delc=self.dis.delc, top=newtop, botm=newbots)
 
+        if isinstance(newdis.fn_path, list):
+            newdis.fn_path = newdis.fn_path[0]
         self.mfdis = outdisfile
         newdis.write_file()
 
@@ -1224,24 +1241,31 @@ class Elevations(SFRdata):
         for i, mat1_ind in enumerate(closest_SFRmat1_inds):
             print "closest Mat1 ind: {}".format(mat1_ind)
             print "distance: {}".format(closest_SFR_distances[i])
-            if closest_SFR_distances[i] <= distance_tol:
+            if closest_SFR_distances[i] <= distance_tol and \
+                        df.iloc[i][elevs_field] < np.min(self.m1.ix[mat1_ind, ['top_streambed', 'landsurface']]):
                 self.m1.loc[mat1_ind, 'landsurface'] = df.iloc[i][elevs_field]
+                self.m1.loc[mat1_ind, 'top_streambed'] = df.iloc[i][elevs_field]
 
+        self.update_Mat2_elevations()
+        '''
                 # reset the minimum elevation for the segment if the field elevation is lower
                 segment = self.m1.loc[mat1_ind, 'segment']
                 if 'Min' in self.m2.columns and df.iloc[i][elevs_field] < self.m2.ix[segment, 'Min']:
                     self.m2.loc[segment, 'Min'] = df.iloc[i][elevs_field]
+        '''
 
     def map_confluences(self):
 
         # if min/max elevations not in Mat2, compute from Mat1
         if 'Max' not in self.m2.columns:
-            print 'Setting initial segment min/max elevations from Mat1...'
+            '''min/max elevations from Mat1...'
             top_streambed = self.m1.top_streambed.values
             m1segments = self.m1.segment.values
             m2segments = self.m2.segment.values
             self.m2['Max'] = [np.max(top_streambed[m1segments == s]) for s in m2segments]
             self.m2['Min'] = [np.min(top_streambed[m1segments == s]) for s in m2segments]
+            '''
+            self.update_Mat2_elevations()
         m2upsegs = self.m2.upsegs.tolist()
 
         # setup dataframe of confluences
@@ -1266,8 +1290,10 @@ class Elevations(SFRdata):
                 raise IndexError("top_streambed and landsurface columns not found in Mat1!")
 
             # confluence elevation is the minimum of the ending segments minimums, starting segments maximums
-            endsmin = np.min(self.m1.ix[self.m1.segment.isin(r.upsegs), elevation_columns].values)
-            startmax = np.max(self.m1.ix[self.m1.segment == i, elevation_columns].values)
+            #endsmin = np.min(self.m1.ix[self.m1.segment.isin(r.upsegs), elevation_columns].values)
+            endsmin = np.min(self.m2.ix[self.m2.segment.isin(r.upsegs), 'Min'].values)
+            #startmax = np.max(self.m1.ix[self.m1.segment == i, elevation_columns].values)
+            startmax = np.max(self.m2.ix[self.m2.segment == i, 'Max'].values)
             cfelev = np.min([endsmin, startmax])
             confluences.loc[i, 'elev'] = cfelev
 
@@ -1376,9 +1402,8 @@ class Widths(SFRdata):
             # compute width, assign to Mat1
             self.m1.loc[self.m1.segment == s, 'width_in_cell'] = [self.widthcorrelation(asum) for asum in asums]
 
-        self.m1.to_csv(self.Mat1_out, index=False)
-        print 'Done, updated Mat1 saved to {}.'.format(self.Mat1_out)
-
+        #self.m1.to_csv(self.Mat1_out, index=False)
+        print 'Done'
         if self.Mat2_out:
             self.m2.to_csv(self.Mat2_out, index=False)
             print 'saved arbolate sum information to {}.'.format(self.Mat2_out)
@@ -1503,8 +1528,8 @@ class Outsegs(SFRdata):
         cb.set_label('Outlet segment')
         plt.savefig(outpdf, dpi=300)
 
-        self.m1.to_csv(self.Mat1, index=False)
-        print 'Done, Mat1 updated with outlet information; saved to {}.'.format(self.Mat1)
+        #self.m1.to_csv(self.Mat1, index=False)
+        print 'Done'
 
 
 class Streamflow(SFRdata):
