@@ -236,6 +236,38 @@ class diagnostics(SFRdata):
             print "No SFR cells were inside of the supplied domain! Check domain shapefile coordinates,\n" \
                   "and that the correct model origin was supplied."
 
+    def check_4gaps_in_routing(self, tol=0):
+
+        m1 = self.m1.copy()
+        m2 = self.m2.copy()
+        # get number of reaches for each segment
+        max_reach_numbers = [np.max(m1.reach[m1.segment == s]) for s in m2.segment]
+
+        # get cell centroids for last reach in each segment
+        end_centroids = [m1.geometry[(m1.segment == s) &
+                                         (m1.reach == max_reach_numbers[i])].values[0].centroid
+                         for i, s in enumerate(m2.segment.tolist())]
+
+        # get cell centroids for first reach in each segment
+        start_centroids = [m1.geometry[(m1.segment == s) &
+                                           (m1.reach == 1)].values[0].centroid
+                           for s in m2.segment]
+
+        # compute distances between end reach cell centroid, and cell centroid of outseg reach 1
+        distances = [end_centroids[i].distance(start_centroids[os-1]) if 0 < os < 999999 else 0
+             for i, os in enumerate(m2.outseg.astype(int))]
+
+        m2['routing_distance'] = distances
+
+        routing = m2.ix[m2.routing_distance > tol, ['segment', 'outseg', 'routing_distance']]\
+            .sort('routing_distance', ascending=False)
+
+        if len(routing) > 0:
+            reportfile = 'routing_gaps.csv'
+            print '{:.0f} gaps in routing greater than {} found. See {}'.format(len(routing), tol, reportfile)
+            routing.to_csv(reportfile, index=False)
+        else:
+            print 'passed.'
 
 
 
