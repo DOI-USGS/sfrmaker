@@ -150,6 +150,9 @@ class SFRdata(object):
             # assign upstream segments to Mat2
             self.m2['upsegs'] = [self.m2.segment[self.m2.outseg == s].tolist() for s in self.segments]
 
+            # assign outsegs to Mat1
+            self.m1['outseg'] = [self.m2.outseg[s] for s in self.m1.segment]
+
             # check for circular routing
             c = [s for s in self.m2.segment if s == self.m2.outseg[s]]
             if len(c) > 0:
@@ -539,10 +542,10 @@ class SFRdata(object):
         self.diagnostics.check_elevations()
         self.diagnostics.check_outlets(model_domain=model_domain)
         try:
-            tol = np.min(self.dis.delr) * 10
+            tol = np.min([np.min(self.dis.delr), np.min(self.dis.delc)])
         except:
             tol = 0
-        self.diagnostics.check_4gaps_in_routing(tol=np.min(self.dis.delr))
+        self.diagnostics.check_4gaps_in_routing(model_domain=model_domain, tol=tol)
 
     def segment_reach2linework_shapefile(self, lines_shapefile, new_lines_shapefile=None,
                                          iterations=2):
@@ -1871,6 +1874,9 @@ class Segments(SFRdata):
 
         # update upseg references in Mat2
         self.m2['upsegs'] = [self.m2.segment[self.m2.outseg == s].tolist() for s in self.m2.segment.values]
+
+        # update outseg references in Mat1
+        self.m1['outseg'] = [self.m2.outseg[s] for s in self.m1.segment]
 
         print '\nDone'
 
