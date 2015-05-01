@@ -2,7 +2,6 @@ __author__ = 'aleaf'
 
 import os
 import numpy as np
-import pandas as pd
 from postproc import SFRdata
 
 
