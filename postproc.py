@@ -150,6 +150,9 @@ class SFRdata(object):
             # assign upstream segments to Mat2
             self.m2['upsegs'] = [self.m2.segment[self.m2.outseg == s].tolist() for s in self.segments]
 
+            # assign outsegs to Mat1
+            self.m1['outseg'] = [self.m2.outseg[s] for s in self.m1.segment]
+
             # check for circular routing
             c = [s for s in self.m2.segment if s == self.m2.outseg[s]]
             if len(c) > 0:
@@ -255,7 +258,7 @@ class SFRdata(object):
 
         self.m1['centroids'] = centroids
 
-    def map_outsegs(self):
+    def map_outsegs(self, max_levels=500):
         '''
         from Mat2, returns dataframe of all downstream segments (will not work with circular routing!)
         '''
@@ -271,7 +274,7 @@ class SFRdata(object):
             if max_outseg == 0:
                 break
             knt +=1
-            if knt > 200:
+            if knt > max_levels:
                 # subset outsegs map to all rows outseg number > 0 at iteration 1000
                 circular_segs = outsegsmap[outsegsmap[outsegsmap.columns[-1]] > 0]
 
@@ -494,7 +497,7 @@ class SFRdata(object):
         """
 
         self.Spatial = Spatial(sfrobject=self)
-        dfi = self.Spatial.intersect_with_SFR_cells(intersect_df=intersect_df, intersect_shapefile=intersect_shapefile,
+        self._intersected = self.Spatial.intersect_with_SFR_cells(intersect_df=intersect_df, intersect_shapefile=intersect_shapefile,
                                                     intersect_prj=intersect_prj,
                                                     sfr_shapefile=sfr_shapefile,
                                                     node_attribute=node_attribute, GIS_mult=GIS_mult)
@@ -509,7 +512,7 @@ class SFRdata(object):
                 sfrc.append([])
         '''
         self.Segments = Segments(sfrobject=self)
-        self.Segments.renumber_SFR_cells(dfi['sfr_cells'].tolist())
+        self.Segments.renumber_SFR_cells(self._intersected['sfr_cells'].tolist())
         #self.Segments.renumber_SFR_cells(sfrc)
         self.__dict__ = self.Segments.__dict__.copy()
 
@@ -538,6 +541,11 @@ class SFRdata(object):
         self.diagnostics.check_overlapping()
         self.diagnostics.check_elevations()
         self.diagnostics.check_outlets(model_domain=model_domain)
+        try:
+            tol = np.min([np.min(self.dis.delr), np.min(self.dis.delc)])
+        except:
+            tol = 0
+        self.diagnostics.check_4gaps_in_routing(model_domain=model_domain, tol=tol)
 
     def segment_reach2linework_shapefile(self, lines_shapefile, new_lines_shapefile=None,
                                          iterations=2):
@@ -1826,11 +1834,12 @@ class Segments(SFRdata):
                 #self.m1.loc[self.m1.segment == lastnewseg, 'segment'] = seg
                 newsegs.remove(lastnewseg)
                 newsegs.append(seg)
+                #newsegs += m2.ix[seg, 'upsegs'] # include upsegs of the intersected segment, so that they reference the right outseg
 
                 # update routing
                 for newseg in newsegs:
                     #print '{} '.format(newseg),
-
+                    '''
                     # get the outseg via the index of the next downstream reach 1
                     lastreach_number = np.max(m1reaches[m1segments == newseg])
                     downreach = downreachID[(m1segments == newseg) & (m1reaches == lastreach_number)][0]
@@ -1842,11 +1851,22 @@ class Segments(SFRdata):
                     if downreach == -999999:
                         outseg = 0
                     else:
-                        outseg = m1segments[reachID == downreach]
+                        outseg = m1segments[reachID == downreach][0]
                         #outseg = int(self.m1.ix[downreach_ind, 'segment'])
-
+                    '''
                     m2.loc[newseg, :] = m2.ix[seg, :] # copy all Mat2 info from old seg
-                    m2.loc[newseg, ['outseg', 'segment']] = outseg, newseg # update to new segment and outsegment numbers
+                    #m2.loc[newseg, ['outseg', 'segment']] = outseg, newseg # update to new segment and outsegment numbers
+
+        print '\nupdating routing...'
+        m2.sort(inplace=True)
+        m2['segment'] = m2.index.values
+        lastreach_numbers = [np.max(m1reaches[m1segments == s])
+                             for s in m2.segment]
+        downreaches = [downreachID[(m1segments == s) & (m1reaches == lastreach_numbers[i])][0]
+                       for i, s in enumerate(m2.segment.tolist())]
+        outsegs = [m1segments[reachID == d][0] if d != -999999 else 0
+                   for d in downreaches]
+        m2['outseg'] = outsegs
 
         self.m1['segment'] = m1segments
         self.m1['reach'] = m1reaches
@@ -1854,6 +1874,9 @@ class Segments(SFRdata):
 
         # update upseg references in Mat2
         self.m2['upsegs'] = [self.m2.segment[self.m2.outseg == s].tolist() for s in self.m2.segment.values]
+
+        # update outseg references in Mat1
+        self.m1['outseg'] = [self.m2.outseg[s] for s in self.m1.segment]
 
         print '\nDone'
 

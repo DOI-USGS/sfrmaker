@@ -183,8 +183,11 @@ class diagnostics(SFRdata):
 
     def check_outlets(self, model_domain=None, buffer=100):
 
+        print "\nChecking for outlets in the model interior..."
         if model_domain is None:
-            print 'Need a shapefile of the model domain edge to check for interior outlets.'
+            print 'Need a shapefile of the model domain edge to check for interior outlets.\n' \
+                  '(rotated coordinate systems not supported; ' \
+                  'for rotated grids submit shapefile of unrotated domain in coordinates consistent with model cells.)'
             return
         else:
             import GISio
@@ -235,6 +238,81 @@ class diagnostics(SFRdata):
             print "No SFR cells were inside of the supplied domain! Check domain shapefile coordinates,\n" \
                   "and that the correct model origin was supplied."
 
+    def check_4gaps_in_routing(self, model_domain=None, tol=0):
+
+        print "\nChecking for gaps in routing between segments..."
+        if model_domain is None:
+            print 'No model_domain supplied. ' \
+                  'Routing gaps for segments intersecting model domain boundary will not be considered.\n' \
+                  '(rotated coordinate systems not supported; ' \
+                  'for rotated grids submit shapefile of unrotated domain in coordinates consistent with model cells.)'
+        else:
+            import GISio
+
+            df = GISio.shp2df(model_domain)
+            self.domain = df.iloc[0].geometry
+
+        if 'geometry' not in self.m1.columns:
+            try:
+                self.get_cell_geometries()
+            except:
+                print "No geometry column in attribute m1; couldn't generate geometries from dis attribute.\n" \
+                      "Geometries are needed to determine segment end locations."\
+                      "Read in the DIS file by running read_dis2()."
+
+        if self.xll == 0 and self.yll == 0:
+            print 'Warning, model origin for SFR object is 0, 0.'
+
+        m1 = self.m1.copy()
+        m2 = self.m2.copy()
+        # get number of reaches for each segment
+        max_reach_numbers = [np.max(m1.reach[m1.segment == s]) for s in m2.segment]
+
+        # get cell centroids for last reach in each segment
+        end_centroids = [m1.geometry[(m1.segment == s) &
+                                         (m1.reach == max_reach_numbers[i])].values[0].centroid
+                         for i, s in enumerate(m2.segment.tolist())]
+
+        # get cell centroids for first reach in each segment
+        start_centroids = [m1.geometry[(m1.segment == s) &
+                                           (m1.reach == 1)].values[0].centroid
+                           for s in m2.segment]
+
+        # compute distances between end reach cell centroid, and cell centroid of outseg reach 1
+        distances = [end_centroids[i].distance(start_centroids[os-1]) if 0 < os < 999999 else 0
+             for i, os in enumerate(m2.outseg.astype(int))]
+
+        m2['routing_distance'] = distances
+        m2['end_reach_geom'] = [m1.geometry[(m1.segment == s) &
+                                            (m1.reach == max_reach_numbers[i])].values[0]
+                                for i, s in enumerate(m2.segment.tolist())]
+
+        routing = m2.ix[m2.routing_distance > tol, ['segment', 'outseg', 'routing_distance', 'end_reach_geom']]\
+            .sort('routing_distance', ascending=False)
+
+        reportfile = 'routing_gaps.csv'
+        if model_domain is not None:
+
+            # identify routing gaps that do not occur along the model boundary
+            # (HWR code in sfr_classes may route segments along the model boundary to each other)
+            interior_gaps = [g.within(self.domain) for g in routing.end_reach_geom]
+            routing = routing[interior_gaps]
+
+            if len(routing) > 0:
+                print '{:.0f} gaps in routing greater than {} found that do not coincide with {}. See {}'.format(len(routing),
+                                                                                                                 tol,
+                                                                                                                 model_domain,
+                                                                                                                 reportfile)
+                routing.drop('end_reach_geom', axis=1).to_csv(reportfile, index=False)
+                return
+
+        if len(routing) > 0:
+            print '{:.0f} gaps in routing greater than {} found, ' \
+                  'but these may coincide with model domain boundary. See {}'.format(len(routing), tol, reportfile)
+            routing.drop('end_reach_geom', axis=1).to_csv(reportfile, index=False)
+            return
+
+        print 'passed.'
 
 
 
