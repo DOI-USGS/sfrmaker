@@ -1,12 +1,55 @@
 SFRmaker
 ==
-Python package to facilitate use of the streamflow-routing (SFR) package in MODFLOW.
+Python package to facilitate use of the streamflow-routing (SFR) package in MODFLOW. Currently, SFRmaker consists of three primary modules:  
+  
+####sfr_classes.py
+Intersects linework with model grid and develops routed segments and reaches from information in NHDPlus. Produces two tables, **Mat1** and **Mat2**, which contain SFR package information by reach and by segment, respectively. Also produces a shapefile of linework broken by the grid, which contains the stream geometries represented by the SFR reaches.
+
+####postproc.py
+Postproc operates on **Mat1** and **Mat2** as pandas dataframe attributes, to produce and visualize an SFR package. Includes methods to:  
+
+*  sample streambed top elevations from a DEM, and smooth them so they decrease monotonically downstream
+*  incorporate field measurements of streambed elevation
+*  visualize routing by outlet
+*  visualize stream profiles (sequences of SFR segments) from headwaters to outlet
+*  adjust SFR streambed conductance so that only one reach per cell has conductance
+*  adjust the MODFLOW discretization file so that the geometry of layer 1 is consistent with the SFR elevations
+*  read in SFR results from a MODFLOW run, allowing for interactive plotting of SFR stages and mass balance components.
+*  write shapefiles of the SFR package input and results
+*  write an SFR package file and updated versions of Mat1 and Mat2
+
+####diagnostics.py
+Contains methods to check for common SFR problems such as  
+
+* continuity in segment/reach numbering
+* circular routing, spatial gaps in routing, breaks in routing (outlets in the interior of the model)
+* multiple SFR conductances in a single cell (can lead to circular routing of water between SFR reaches)
+* elevations that rise in the downstream direction (either within a segment, or segment ends that rise)
+* slope values below the a user-defined minimum (can lead to artifically high stages)
+
 
 
 ## Dependencies:
 
-In addition to standard Python modules, ESRI Arcpy is required, and **must be added to the path of your main python distribution**. To do that:  
+SFRmaker runs in Python 2.7. The Anaconda Scientific Python Distribution (<https://store.continuum.io/cshop/anaconda/>) is available for free, and provides an easy way for managing python packages through its package manager **conda**. Additional dependencies are listed by module below:
+
+####sfr_classes  
+* **ESRI Arcpy**, which **must be added to the path of your main python distribution**. See instructions below.
+* **flopy**, available via **pip**, or at <https://github.com/modflowpy/flopy>
+
+####postproc  
+* **fiona**
+* **shapely** (fiona and shapely are available via **conda** or **pip**; instructions on installing pip and these packages are available here: <https://github.com/aleaf/LinesinkMaker/blob/master/README.md>, under **"Installing the required Python packages""**)
+* **rasterstats** (also available via **pip**, see <https://github.com/perrygeo/python-raster-stats> for more info)
+* **flopy**
+* **GIS_utils** (see <https://github.com/aleaf/GIS_utils>)
+
+
+
+
   
+
+####Adding Arcpy to the python path:  
 1) **Make a file called: Desktop10.pth**, with the following lines:
 ```
 C:\ArcGIS\Desktop10.1\arcpy  
