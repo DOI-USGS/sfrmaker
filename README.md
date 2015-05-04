@@ -1,12 +1,55 @@
 SFRmaker
 ==
-Python package to facilitate use of the streamflow-routing (SFR) package in MODFLOW.
+Python package to facilitate use of the streamflow-routing (SFR) package in MODFLOW. Currently, SFRmaker consists of three primary modules:  
+  
+####sfr_classes.py
+Intersects linework with model grid and develops routed segments and reaches from information in NHDPlus. Produces two tables, **Mat1** and **Mat2**, which contain SFR package information by reach and by segment, respectively. Also produces a shapefile of linework broken by the grid, which contains the stream geometries represented by the SFR reaches.
+
+####postproc.py
+Postproc operates on **Mat1** and **Mat2** as pandas dataframe attributes, to produce and visualize an SFR package. Includes methods to:  
+
+*  sample streambed top elevations from a DEM, and smooth them so they decrease monotonically downstream
+*  incorporate field measurements of streambed elevation
+*  visualize routing by outlet
+*  visualize stream profiles (sequences of SFR segments) from headwaters to outlet
+*  adjust SFR streambed conductance so that only one reach per cell has conductance
+*  adjust the MODFLOW discretization file so that the geometry of layer 1 is consistent with the SFR elevations
+*  read in SFR results from a MODFLOW run, allowing for interactive plotting of SFR stages and mass balance components.
+*  write shapefiles of the SFR package input and results
+*  write an SFR package file and updated versions of Mat1 and Mat2
+
+####diagnostics.py
+Contains methods to check for common SFR problems such as  
+
+* continuity in segment/reach numbering
+* circular routing, spatial gaps in routing, breaks in routing (outlets in the interior of the model)
+* multiple SFR conductances in a single cell (can lead to circular routing of water between SFR reaches)
+* elevations that rise in the downstream direction (either within a segment, or segment ends that rise)
+* slope values below the a user-defined minimum (can lead to artifically high stages)
+
 
 
 ## Dependencies:
 
-In addition to standard Python modules, ESRI Arcpy is required, and **must be added to the path of your main python distribution**. To do that:  
+SFRmaker runs in Python 2.7. The Anaconda Scientific Python Distribution (<https://store.continuum.io/cshop/anaconda/>) is available for free, and provides an easy way for managing python packages through its package manager **conda**. Additional dependencies are listed by module below:
+
+####sfr_classes  
+* **ESRI Arcpy**, which **must be added to the path of your main python distribution**. See instructions below.
+* **flopy**, available via **pip**, or at <https://github.com/modflowpy/flopy>
+
+####postproc  
+* **fiona**
+* **shapely** (fiona and shapely are available via **conda** or **pip**; instructions on installing pip and these packages are available here: <https://github.com/aleaf/LinesinkMaker/blob/master/README.md>, under **"Installing the required Python packages""**)
+* **rasterstats** (also available via **pip**, see <https://github.com/perrygeo/python-raster-stats> for more info)
+* **flopy**
+* **GIS_utils** (see <https://github.com/aleaf/GIS_utils>)
+
+
+
+
   
+
+####Adding Arcpy to the python path:  
 1) **Make a file called: Desktop10.pth**, with the following lines:
 ```
 C:\ArcGIS\Desktop10.1\arcpy  
@@ -22,7 +65,7 @@ If you are using ArcMap 10.0 or 10.2, "Desktop10.1" in the above path needs to b
 
 
 
-## Input requirements:
+## Input requirements for SFR_classes:
 
 #####1) NHDPlus v2 hydrography datasets  
  * Available at <http://www.horizon-systems.com/NHDPlus/NHDPlusV2_data.php>
@@ -63,11 +106,12 @@ If you are using ArcMap 10.0 or 10.2, "Desktop10.1" in the above path needs to b
   
 ## Outputs:
 * SFR package file
-* Text file table with reach information (r,c,l,elevation, width, slope, etc.) 
-* Text file table with segment/routing data (e.g. icalc, outseg, iupseg, etc.)  
+* **Mat1** (Text file table with reach information (r,c,l,elevation, width, slope, etc.))
+* **Mat2** (Text file table with segment/routing data (e.g. icalc, outseg, iupseg, etc.) ) 
   
   
 ## Workflow for building SFR input:
+####Run sfr_classes
   
 1) **Setup XML input file** (see EXAMPLE.XML in \<InputFiles> section) to point to the above input datasets  
   
@@ -85,22 +129,36 @@ If you are using ArcMap 10.0 or 10.2, "Desktop10.1" in the above path needs to b
 	* **boundary_manual_fix_issues.txt:** Lists stream segments that don't have any connections to other 		segments.  
 * **edit the offending segments** (COMIDs) in the shapefile specified under \<IntermediateFiles>\<intersect> in the XML input file (usually this means deleting the parts of multi-part COMIDs that are isolated by the grid boundary, and possibly deleting any unconnected segments).  
   
-5) set \<preproc> in the XML input file to False (meaning the existing \<intersect> shapefile will be read in lieu of the preprocessing operations). Then **rerun SFR_main.py**.  
-6) Once the reach and segment information tables have been written, they can be subsequently edited, and an SFR package file rebuilt by running the **Assign_layers.py** script. Since Assign_layers also reads the MODFLOW Discretizaiton file, it can aslo re-assign layering for SFR cells following any modifications to the grid elevations.
- 
+5) set \<preproc> in the XML input file to False (meaning the existing \<intersect> shapefile will be read in lieu of the preprocessing operations). Then **rerun SFR_main.py**.
+####Run postproc and diagnostics 
+1) Once the reach and segment information tables have been written, the methods in **postproc.py** can be run to address all of the issues listed under the **postproc** and **diagnostics** modules above. An example workflow for **postproc** is given here:  
+  
+<http://nbviewer.ipython.org/github/aleaf/SFRmaker/blob/master/Examples/Example_postproc_workflow.ipynb>  
+
+
 ## Visualizating the results:  
+
+
 #####Obtaining SFR output  
-Prior to running your model, make sure that variable ISTCB2 in the SFR package file (see SFR manual) is set to a positive unit number, which is also listed in the MODFLOW NAM file, in association with an ouput text file name. The value of this variable can be specified in the XML input file to these python scripts, but may be overwritten if a pre-processor GUI (i.e. GW Vistas) is used to generate MODFLOW input. The text file generated by this setting has information on streamflow and steam/aquifer exchange which is needed for the visualization tools below.  
+Prior to running your model, make sure that variable ISTCB2 in the SFR package file (see SFR manual) is set to a positive unit number, which is also listed in the MODFLOW NAM file, in association with an ouput text file name. The text file generated by this setting has information on streamflow and steam/aquifer exchange which is needed for the visualization tools below.  
 
 #####Plotting streambed profiles
-SFR_main_EXAMPLE.py has examples for producing comparison plots of streambed profiles for the different elevation methods (NHDPlus, DEM, and topographic contours), and also for plotting profiles of the final streambed elevations (segments and reaches have been created). Both of these methods need to be run in the MAIN program, in an order similar to that shown in the example MAIN file.  
+An example of reading in SFR results from the output text file is given here:
+<http://nbviewer.ipython.org/github/aleaf/SFRmaker/blob/master/Examples/SFR_results_visualization_example.ipynb>
+The example includes:  
+
+* using **SFRmaker** to read the SFR output, and write it to a shapefile
+* plotting profiles of streamflow, stream-aquifer interactions, and stage for a selected segment
+* reading in the MODFLOW dis file using **flopy**, and comparing grid cell elevations to profiles of stage  
+* using **flopy** to read SFR information from the MODFLOW cell-by-cell budget (**cbb**) file
 
 #####Visualizing routing
-SFR_routing_checker.py can be run independently of the MAIN program to visualize routing. Simply edit the SFR_routing_checker.XML input file, and run by typing *python SFR_routing_checker.py SFR_routing_checker.XML* at the command prompt. Requires an SFR package file, and a grid spec. (SPC) file (written by GWV). To create a grid spec. file, in Groundwater Vistas, go to Model \> PEST \> Create Grid Spec. File. SFR_routing_checker works best with \<all_layers> set to False. To visualize shapefile output in ArcMap, after importing, under Properties>Symbology choose categories and click "Add all values".
+Routing can be visualized in a shapefile, as produced in the first (postproc workflow) example above. SFR reaches in the shapefile are attributed by segment, reach, outseg, and outlet.
 
 #####Visualizing streamflow and aquifer interactions  
-Edit the plot_SFR_flows.py example. Requires a MODFLOW DIS file, an "exploded" stream linework file that has stream fragments by model cell number (i.e. \<intersect> in the XML input file, or similar), and an SFR package output textfile (i.e. "*streamflow.dat"; this is the same file discussed in the "Obtaining SFR output" section above). Produces a shapefile of the same name as the SFR output file.
-To view in Arc, after importing, under Properties>Symbology, click Import and choose:  
+The shapefile of SFR output (including streamflow, stream-aquifer interactions, etc.) can be visualized in Arcmap with the symbology contained in the layer files below (available in the **Symbology** folder).
+
+To view in Arc, after importing the shapefile, under Properties>Symbology, click Import and choose:  
 
 * **SFR_flow_symbology.lyr** to plot flow by line thickness
 * **SFR_interactions_symbology.lyr** to plot gaining, loosing, and dry segments by color
