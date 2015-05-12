@@ -304,7 +304,7 @@ class SFRdata(object):
         self.outsegs = outsegsmap
 
         # create new column in Mat2 listing outlets associated with each segment
-        self.m2['Outlet'] = [r[r != 0][-1] if len(r[r != 0]) > 0
+        self.m2['Outlet'] = [r[(r != 0) & (r != 999999)][-1] if len(r[(r != 0) & (r != 999999)]) > 0
                              else i for i, r in self.outsegs.iterrows()]
 
         # assign the outlets to each reach listed in Mat1
