@@ -7,7 +7,8 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
-from shapely.geometry import Polygon, LineString
+from shapely.geometry import Polygon, LineString, MultiLineString
+
 from rasterstats import zonal_stats
 import flopy
 import GISio, GISops
@@ -29,6 +30,20 @@ def header(infile):
 
 
 class SFRdata(object):
+
+    # dictionary to convert different variations on column names to internally consistent names
+    m1_column_names = {'length_in_cell': 'length',
+                       'width_in_cell': 'width',
+                       'top_streambed': 'sbtop',
+                       'bed_K': 'sbK',
+                       'bed_thickness': 'sbthick',
+                       'bed_slope': 'slope',
+                       'bed_roughness': 'roughness'}
+
+    # working on parser for column names
+    #Index([u'row', u'column', u'layer', u'stage', u'top_streambed', u'reach', u'segment', u'width_in_cell',
+    # u'length_in_cell', u'bed_K', u'bed_thickness', u'bed_slope',
+    # u'bed_roughness', u'node', u'reachID', u'outseg'], dtype='object')
 
     def __init__(self, sfrobject=None, Mat1=None, Mat2=None, sfr=None, node_column=False,
                  mfpath='', mfnam=None, mfdis=None,
@@ -158,6 +173,12 @@ class SFRdata(object):
             if len(c) > 0:
                 raise ValueError('Warning! Circular routing in segments {}.\n'
                                  'Fix manually in Mat2 before continuing'.format(', '.join(map(str, c))))
+
+    def parse_mat1_columns(self):
+
+        rename_columns = {c: newname for c, newname in self.m1_column_names.iteritems() if c in self.m1.columns}
+        self.m1.rename(columns=rename_columns, inplace=True)
+
     @ property
     def shared_cells(self):
         return np.unique(self.m1.ix[self.m1.node.duplicated(), 'node'])
@@ -351,7 +372,7 @@ class SFRdata(object):
         print 'Assigning total SFR conductance to dominant reach in cells with multiple reaches...'
         # Calculate SFR conductance for each reach
         def cond(X):
-            c = X['bed_K'] * X['width_in_cell'] * X['length_in_cell'] / X['bed_thickness']
+            c = X['sbK'] * X['width'] * X['length'] / X['sbthick']
             return c
 
         self.m1['Cond'] = self.m1.apply(cond, axis=1)
@@ -365,7 +386,7 @@ class SFRdata(object):
         for c in self.shared_cells:
 
             # select the collocated reaches for this cell
-            df = self.m1[self.m1.node == c].sort('width_in_cell', ascending=False)
+            df = self.m1[self.m1.node == c].sort('width', ascending=False)
 
             # set all of these reaches except the largest to not Dominant
             self.m1.loc[df.index[1:], 'Dominant'] = False
@@ -377,17 +398,17 @@ class SFRdata(object):
 
         # Calculate a new length for widest reaches, set length in secondary collocated reaches to 1
         # also set the K values in the secondary cells to bedKmin
-        self.m1['length'] = self.m1.length_in_cell
+        self.m1['length'] = self.m1.length
 
         def consolidate_lengths(X):
             if X['Dominant']:
-                lnew = X['Cond_sum'] * X['bed_thickness'] / (X['bed_K'] * X['width_in_cell'])
+                lnew = X['Cond_sum'] * X['sbthick'] / (X['sbK'] * X['width'])
             else:
                 lnew = 1.0
             return lnew
 
-        self.m1['length_in_cell'] = self.m1.apply(consolidate_lengths, axis=1)
-        self.m1['bed_K'] = [r['bed_K'] if r['Dominant'] else bedKmin for i, r in self.m1.iterrows()]
+        self.m1['SFRlength'] = self.m1.apply(consolidate_lengths, axis=1)
+        self.m1['sbK'] = [r['sbK'] if r['Dominant'] else bedKmin for i, r in self.m1.iterrows()]
 
     def smooth_segment_ends(self, landsurfacefile=None, landsurface_column=None,
                             report_file='smooth_segment_ends.txt'):
@@ -428,10 +449,10 @@ class SFRdata(object):
             self.dem = dem
         print 'computing zonal statistics...'
         self.dem_zstats = pd.DataFrame(zonal_stats(self.m1.geometry, self.dem))
-        self.m1['top_streambed'] = self.dem_zstats['min'].values
-        self.m1['landsurface'] = self.m1['top_streambed'].values
+        self.m1['sbtop'] = self.dem_zstats['min'].values
+        self.m1['landsurface'] = self.m1['sbtop'].values
         self.update_Mat2_elevations()
-        print 'DEM {} elevations assigned to top_streambed column in m1'.format(stat)
+        print 'DEM {} elevations assigned to sbtop column in m1'.format(stat)
 
     def reset_model_top_2streambed(self, minimum_thickness=1, outdisfile=None, outsummary=None):
         if hasattr(self, 'Elevations'):
@@ -547,7 +568,65 @@ class SFRdata(object):
             tol = 0
         self.diagnostics.check_4gaps_in_routing(model_domain=model_domain, tol=tol)
 
-    def segment_reach2linework_shapefile(self, lines_shapefile, new_lines_shapefile=None,
+    def segment_reach2linework_shapefile(self, lines_shapefile, new_lines_shapefile=None, node_col='node'):
+            """Assigns segment and reach information to a shapefile of SFR reach linework,
+            using reach lengths.
+
+            The best approach to this problem is to simply write a linework shapefile with segment and reach information
+            when Mat1 is written for the first time. This will be implemented soon.
+
+            Parameters
+            ----------
+            lines_shapefile: string
+                Path to shapefile of SFR linework exploded by cell (e.g. one linework geometry for each SFR reach).
+
+            new_lines_shapefile: string
+                Path to new linework shapefile that will be written
+
+            Returns
+            -------
+            dataframe containing node number, segment, reach, and geometry for each SFR reach.
+
+            Notes
+            -----
+            """
+            df = self.m1.copy()
+            df_lines = GISio.shp2df(lines_shapefile)
+            print "Adding segment and reach information to linework shapefile..."
+            # first assign geometries for model cells with only 1 SFR reach
+            df_lines_geoms = df_lines.geometry.values
+            geom_idx = [df_lines.index[df_lines.node == n] for n in df.node.values]
+            df['geometry'] = [df_lines_geoms[g[0]] if len(g) == 1
+                              else MultiLineString(df_lines_geoms[g].tolist())
+                              for g in geom_idx]
+
+            # then assign geometries for model cells with multiple SFR reaches
+            # use length to figure out which geometry goes with which reach
+            shared_cells = np.unique(df.ix[df.node.duplicated(), self.node_attribute])
+            for n in shared_cells:
+                # make dataframe of all reache geometries within the model cell
+                reaches = pd.DataFrame(df_lines.ix[df_lines[node_col] == n, 'geometry'].copy())
+                reaches['length'] = [g.length for g in reaches.geometry]
+
+                # SFR reaches in that model cell
+                dfs = df.ix[df[self.node_attribute] == n]
+                # if there are an equal number of reaches for the cell in m1, and in the linework geometry
+                # (i.e. the collocated reaches aren't consolidated)
+                if len(dfs) > 1:
+                    for i, r in reaches.iterrows():
+                        # index of SFR reaches with length closest to reach
+                        ind = np.argmin(np.abs(dfs.length - r.length))
+                        # assign the reach geometry to the streamflow results at that index
+                        df.loc[ind, 'geometry'] = r.geometry
+                # seems like Howard's code consolidates multiple reaches of the same segment
+                #else:
+                #    ind = dfs.index[0]
+                #    df.set_value(ind, 'geometry', MultiLineString(reaches.geometry.tolist()))
+            print '\n'
+            self.linework_geoms = df[['segment', 'reach', 'node', 'geometry']].sort(['segment', 'reach'])
+            GISio.df2shp(self.linework_geoms, new_lines_shapefile, prj=lines_shapefile[:-4] + '.prj')
+
+    def segment_reach2linework_shapefile2(self, lines_shapefile, new_lines_shapefile=None,
                                          iterations=2):
         """Assigns segment and reach information to a shapefile of SFR reach linework,
         using intersections (coincident starts/ends) with neighboring SFR reaches in the case of
@@ -664,11 +743,11 @@ class SFRdata(object):
 
     def update_Mat2_elevations(self):
         print 'Updating min/max elevations in Mat2 from elevations in Mat1...'
-        top_streambed = self.m1.top_streambed.values
+        sbtop = self.m1.sbtop.values
         m1segments = self.m1.segment.values
         m2segments = self.m2.segment.values
-        self.m2['Max'] = [np.max(top_streambed[m1segments == s]) for s in m2segments]
-        self.m2['Min'] = [np.min(top_streambed[m1segments == s]) for s in m2segments]
+        self.m2['Max'] = [np.max(sbtop[m1segments == s]) for s in m2segments]
+        self.m2['Min'] = [np.min(sbtop[m1segments == s]) for s in m2segments]
 
     def write_shapefile(self, outshp='SFR.shp', xll=None, yll=None, epsg=None, proj4=None, prj=None):
 
@@ -788,8 +867,8 @@ class SFRdata(object):
 
         for i, r in m1.iterrows():
 
-            slope = r.bed_slope if r.bed_slope > minimum_slope else minimum_slope
-            bedK = '~SFRc~' if tpl and r.bed_K > bedKmin else '{:e}'.format(r.bed_K)
+            slope = r.slope if r.slope > minimum_slope else minimum_slope
+            sbK = '~SFRc~' if tpl and r.sbK > bedKmin else '{:e}'.format(r.sbK)
 
             item2_record = '{0:.0f} {1:.0f} {2:.0f} {3:.0f} {4:.0f} {5:e} {6:e} {7:e} {8:e} {9:s}'.format(
                 r.layer,
@@ -797,11 +876,11 @@ class SFRdata(object):
                 r.column,
                 r.segment,
                 r.reach,
-                r.length_in_cell,
-                r.top_streambed,
+                r.SFRlength,
+                r.sbtop,
                 slope,
-                r.bed_thickness,
-                bedK)
+                r.sbthick,
+                sbK)
 
             if iface is not None:
                 item2_record += ' {:.0f}'.format(iface)
@@ -818,7 +897,7 @@ class SFRdata(object):
                 r.roughch
                 ))
 
-            width = m1.ix[m1.segment == r.segment, 'width_in_cell'].values
+            width = m1.ix[m1.segment == r.segment, 'width'].values
             if width[0] > 0 and r.icalc == 1:
                 ofp.write('{0:e}\n'.format(width[0]))
                 ofp.write('{0:e}\n'.format(width[-1]))
@@ -857,7 +936,7 @@ class Elevations(SFRdata):
             print 'assigning elevations in {} to landsurface column in Mat1...'.format(landsurfacefile)
             # assign land surface elevations based on node number
             self.m1['landsurface'] = [self.landsurface[n-1] for n in self.m1[self.node_column]]
-            self.m1['top_streambed'] = self.m1['landsurface'] # might consider getting rid of landsurface column and only working with top_streambed
+            self.m1['sbtop'] = self.m1['landsurface'] # might consider getting rid of landsurface column and only working with top_streambed
 
         elif not landsurfacefile and landsurface_column is not None:
             print 'assigning elevations in Mat1 {} column to landsurface column...'.format(landsurface_column)
@@ -1051,8 +1130,8 @@ class Elevations(SFRdata):
                   "Run map_confluences() first."
             return
         if 'landsurface' not in self.m1.columns:
-            self.m1['landsurface'] = self.m1.top_streambed
-            print 'starting from elevations in m1.top_streambed'
+            self.m1['landsurface'] = self.m1.sbtop
+            print 'starting from elevations in m1.sbtop'
         else:
             print 'starting from elevations in m1.landsurface'
 
@@ -1070,14 +1149,14 @@ class Elevations(SFRdata):
             # get start and end elevations from Mat2; if they are equal, continue
             if start == end:
                 self.sm = [start] * len(self.segelevs)
-                self.m1.loc[self.m1.segment == seg, 'top_streambed'] = self.sm
+                self.m1.loc[self.m1.segment == seg, 'sbtop'] = self.sm
                 continue
             else:
                 self.sm = [start]
                 self.segelevs[-1] = end
 
             # calculate cumulative distances at cell centers
-            lengths = df.length_in_cell.values
+            lengths = df.length.values
             self.cdist = np.cumsum(lengths) - 0.5 * lengths
 
             self.minelev = start
@@ -1104,7 +1183,7 @@ class Elevations(SFRdata):
                     continue
 
             # update Mat1 with smoothed streambed tops
-            self.m1.loc[self.m1.segment == seg, 'top_streambed'] = self.sm
+            self.m1.loc[self.m1.segment == seg, 'sbtop'] = self.sm
 
         # assign slopes to Mat 1 based on the smoothed elevations
         self.calculate_slopes()
@@ -1124,7 +1203,7 @@ class Elevations(SFRdata):
         for s in self.segments:
 
             # calculate the right-hand elevation differences (not perfect, but easy)
-            diffs = self.m1[self.m1.segment == s].top_streambed.diff()[1:].tolist()
+            diffs = self.m1[self.m1.segment == s].sbtop.diff()[1:].tolist()
 
             if len(diffs) > 0:
                 diffs.append(diffs[-1]) # use the left-hand difference for the last reach
@@ -1134,14 +1213,14 @@ class Elevations(SFRdata):
                 diffs = self.m2.Min[s] - self.m2.Max[s]
 
             # divide by length in cell; reverse sign so downstream = positive (as in SFR package)
-            slopes = diffs / self.m1[self.m1.segment == s].length_in_cell * -1
+            slopes = diffs / self.m1[self.m1.segment == s].length * -1
 
             # assign to Mat1
-            self.m1.loc[self.m1.segment == s, 'bed_slope'] = slopes
+            self.m1.loc[self.m1.segment == s, 'slope'] = slopes
         
         # enforce minimum slope
-        ns = [s if s > self.minimum_slope else self.minimum_slope for s in self.m1.bed_slope.tolist()]
-        self.m1['bed_slope'] = ns
+        ns = [s if s > self.minimum_slope else self.minimum_slope for s in self.m1.slope.tolist()]
+        self.m1['slope'] = ns
 
 
     def reset_model_top_2streambed(self, minimum_thickness=1, outdisfile=None, outsummary=None):
@@ -1172,20 +1251,20 @@ class Elevations(SFRdata):
         # make sure that streambed thickness is less than minimum_thickness,
         # otherwise there is potential for MODFLOW altitude errors
         # (with streambed top == model top, the streambed bottom will be below the layer 1 bottom)
-        if np.min(self.m1.bed_thickness >= minimum_thickness):
-            self.m1.bed_thickness = 0.9 * minimum_thickness
+        if np.min(self.m1.sbthick >= minimum_thickness):
+            self.m1.sbthick = 0.9 * minimum_thickness
 
         # make a vector of highest streambed values for each cell containing SFR (for collocated SFR cells)
-        self.m1['lowest_top'] = self.m1.top_streambed
+        self.m1['lowest_top'] = self.m1.sbtop
 
         #shared_cells = np.unique(self.m1.ix[self.m1.node.duplicated(), 'node'])
         for c in self.shared_cells:
 
             # select the collocated reaches for this cell
-            df = self.m1[self.m1.node == c].sort('top_streambed', ascending=False)
+            df = self.m1[self.m1.node == c].sort('sbtop', ascending=False)
 
             # make column of lowest streambed elevation in each cell with SFR
-            self.m1.loc[df.index, 'lowest_top'] = np.min(df.top_streambed)
+            self.m1.loc[df.index, 'lowest_top'] = np.min(df.sbtop)
 
         # make a new model top array; assign highest streambed tops to it
         newtop = self.dis.top.array.copy()
@@ -1202,7 +1281,7 @@ class Elevations(SFRdata):
             newbots[i+1, conflicts] = newbots[i, conflicts] - minimum_thickness
 
         # make a dataframe that shows the largest adjustments made to model top
-        self.m1['top_height'] = self.m1.model_top - self.m1.top_streambed
+        self.m1['top_height'] = self.m1.model_top - self.m1.sbtop
         adjustments = self.m1[self.m1.top_height > 0].sort(columns='top_height', ascending=False)
         adjustments.to_csv(outsummary)
 
@@ -1250,9 +1329,9 @@ class Elevations(SFRdata):
             print "closest Mat1 ind: {}".format(mat1_ind)
             print "distance: {}".format(closest_SFR_distances[i])
             if closest_SFR_distances[i] <= distance_tol and \
-                        df.iloc[i][elevs_field] < np.min(self.m1.ix[mat1_ind, ['top_streambed', 'landsurface']]):
+                        df.iloc[i][elevs_field] < np.min(self.m1.ix[mat1_ind, ['sbtop', 'landsurface']]):
                 self.m1.loc[mat1_ind, 'landsurface'] = df.iloc[i][elevs_field]
-                self.m1.loc[mat1_ind, 'top_streambed'] = df.iloc[i][elevs_field]
+                self.m1.loc[mat1_ind, 'sbtop'] = df.iloc[i][elevs_field]
 
         self.update_Mat2_elevations()
         '''
@@ -1290,12 +1369,12 @@ class Elevations(SFRdata):
 
             # include land surface and top of streambed columns to ensure that minimums are found
             # (e.g. if land surface was updated and top_streambed wasn't)
-            elevation_columns = ['top_streambed', 'landsurface']
+            elevation_columns = ['sbtop', 'landsurface']
             for c in elevation_columns:
                 if c not in self.m1.columns:
                     elevation_columns.remove(c)
             if len(elevation_columns) == 0:
-                raise IndexError("top_streambed and landsurface columns not found in Mat1!")
+                raise IndexError("sbtop and landsurface columns not found in Mat1!")
 
             # confluence elevation is the minimum of the ending segments minimums, starting segments maximums
             #endsmin = np.min(self.m1.ix[self.m1.segment.isin(r.upsegs), elevation_columns].values)
@@ -1389,7 +1468,7 @@ class Widths(SFRdata):
             asum_start[oseg] = 0
             for us in self.upsegs[oseg]:
                 # add the sum of all lengths for the upsegment
-                asum_start[oseg] += self.m1.ix[self.m1.segment == us, 'length_in_cell'].sum() * self.to_km
+                asum_start[oseg] += self.m1.ix[self.m1.segment == us, 'length'].sum() * self.to_km
 
                 # add on any starting arbolate sum values from outside the model (will add zero if nothing was entered)
                 asum_start[oseg] += self.m2.in_arbolate[us]
@@ -1405,10 +1484,10 @@ class Widths(SFRdata):
             segdata = self.m1[self.m1.segment == s] # shouldn't need to sort, as that was done in __init__
 
             # compute arbolate sum at each reach, in km, including starting values from upstream segments
-            asums = segdata.length_in_cell.cumsum() * self.to_km + self.m2.ix[s, 'starting_arbolate']
+            asums = segdata.length.cumsum() * self.to_km + self.m2.ix[s, 'starting_arbolate']
 
             # compute width, assign to Mat1
-            self.m1.loc[self.m1.segment == s, 'width_in_cell'] = [self.widthcorrelation(asum) for asum in asums]
+            self.m1.loc[self.m1.segment == s, 'width'] = [self.widthcorrelation(asum) for asum in asums]
 
         #self.m1.to_csv(self.Mat1_out, index=False)
         print 'Done'
@@ -1461,14 +1540,14 @@ class Outsegs(SFRdata):
                     df = self.m1[self.m1.segment == s].sort('reach')
 
                     # calculate cumulative distances at cell centers
-                    cdist += (np.cumsum(df['length_in_cell']) - 0.5 * df['length_in_cell'] + cdist_end).tolist()
+                    cdist += (np.cumsum(df['length']) - 0.5 * df['length'] + cdist_end).tolist()
 
-                    cdist_end += np.sum(df['length_in_cell']) # add length of segment to total
+                    cdist_end += np.sum(df['length']) # add length of segment to total
                     #print cdist_end
                     cdist_ends.append(cdist_end) # record distances at segment boundaries
 
                     # streambed tops
-                    sbtop += df['top_streambed'].tolist()
+                    sbtop += df['sbtop'].tolist()
 
                     # model tops
                     modeltop += df['model_top'].tolist()
@@ -1611,7 +1690,7 @@ class Streamflow(SFRdata):
                 .format(self.streamflow_file)
 
         df['node'] = self.m1[self.node_attribute]
-        df['length'] = self.m1.length_in_cell
+        df['length'] = self.m1.length
 
         # if a shapefile is provided, get the geometries from there (by node)
         if lines_shapefile is not None:
