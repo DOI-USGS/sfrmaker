@@ -98,6 +98,10 @@ class SFRdata(object):
                 if sum(np.unique(self.m1.segment) - self.m2.segment) != 0:
                     raise IndexError("Segments in Mat1 and Mat2 are different!")
 
+                # enforce consistent column names (maintaining compatibility with past SFRmaker versions)
+                self.parse_mat1_columns()
+
+
             elif sfr is not None:
                 self.read_sfr_package()
             else:
@@ -568,7 +572,8 @@ class SFRdata(object):
             tol = 0
         self.diagnostics.check_4gaps_in_routing(model_domain=model_domain, tol=tol)
 
-    def segment_reach2linework_shapefile(self, lines_shapefile, new_lines_shapefile=None, node_col='node'):
+    def segment_reach2linework_shapefile(self, lines_shapefile, new_lines_shapefile=None,
+                                         node_col='node'):
             """Assigns segment and reach information to a shapefile of SFR reach linework,
             using reach lengths.
 
@@ -590,14 +595,18 @@ class SFRdata(object):
             Notes
             -----
             """
+            if new_lines_shapefile is None:
+                new_lines_shapefile = lines_shapefile[:-4] + '_segreach.shp'
+
             df = self.m1.copy()
             df_lines = GISio.shp2df(lines_shapefile)
             print "Adding segment and reach information to linework shapefile..."
             # first assign geometries for model cells with only 1 SFR reach
             df_lines_geoms = df_lines.geometry.values
             geom_idx = [df_lines.index[df_lines.node == n] for n in df.node.values]
-            df['geometry'] = [df_lines_geoms[g[0]] if len(g) == 1
-                              else MultiLineString(df_lines_geoms[g].tolist())
+            df['geometry'] = [df_lines_geoms[g[0]] if len(g) == 1 else
+                              MultiLineString(df_lines_geoms[g].tolist()) if len(g) > 1
+                              else None
                               for g in geom_idx]
 
             # then assign geometries for model cells with multiple SFR reaches
