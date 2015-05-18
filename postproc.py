@@ -38,7 +38,8 @@ class SFRdata(object):
                        'bed_K': 'sbK',
                        'bed_thickness': 'sbthick',
                        'bed_slope': 'slope',
-                       'bed_roughness': 'roughness'}
+                       'bed_roughness': 'roughness',
+                       'cellnum': 'node'}
 
     # working on parser for column names
     #Index([u'row', u'column', u'layer', u'stage', u'top_streambed', u'reach', u'segment', u'width_in_cell',
@@ -599,11 +600,12 @@ class SFRdata(object):
                 new_lines_shapefile = lines_shapefile[:-4] + '_segreach.shp'
 
             df = self.m1.copy()
+
             df_lines = GISio.shp2df(lines_shapefile)
             print "Adding segment and reach information to linework shapefile..."
             # first assign geometries for model cells with only 1 SFR reach
             df_lines_geoms = df_lines.geometry.values
-            geom_idx = [df_lines.index[df_lines.node == n] for n in df.node.values]
+            geom_idx = [df_lines.index[df_lines[node_col] == n] for n in df.node.values]
             df['geometry'] = [df_lines_geoms[g[0]] if len(g) == 1 else
                               MultiLineString(df_lines_geoms[g].tolist()) if len(g) > 1
                               else None
@@ -634,6 +636,7 @@ class SFRdata(object):
             print '\n'
             self.linework_geoms = df[['segment', 'reach', 'node', 'geometry']].sort(['segment', 'reach'])
             GISio.df2shp(self.linework_geoms, new_lines_shapefile, prj=lines_shapefile[:-4] + '.prj')
+            return self.linework_geoms
 
     def segment_reach2linework_shapefile2(self, lines_shapefile, new_lines_shapefile=None,
                                          iterations=2):
@@ -772,7 +775,7 @@ class SFRdata(object):
                 'and then compute cell geometries by running get_cell_geometries().'
         GISio.df2shp(self.m1, shpname=outshp, epsg=self.epsg, proj4=self.proj4, prj=self.prj)
 
-    def write_streamflow_shapefile(self, streamflow_file=None, lines_shapefile=None, node_col=None):
+    def write_streamflow_shapefile(self, streamflow_file=None, lines_shapefile=None, node_col='node'):
         """Write out SFR Package results from a MODFLOW run.
 
         Parameters
@@ -1681,10 +1684,7 @@ class Streamflow(SFRdata):
 
         return pd.DataFrame.from_dict(sfrresults, orient='index')
 
-    def write_streamflow_shp(self, lines_shapefile=None, node_col=None):
-
-        if node_col is None:
-            node_col = self.node_column
+    def write_streamflow_shp(self, lines_shapefile=None, node_col='node'):
 
         streamflow_shp = self.streamflow_file[:-4] + '.shp'
 
@@ -1711,7 +1711,7 @@ class Streamflow(SFRdata):
 
             if 'segment' not in df_lines.columns:
                 print "segment and reach information not in linework shapefile!"
-                df_lines = self.segment_reach2linework_shapefile(lines_shapefile)
+                df_lines = self.segment_reach2linework_shapefile(lines_shapefile, node_col=node_col)
 
             df_lines.sort(['segment', 'reach'], inplace=True)
 
