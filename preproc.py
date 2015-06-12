@@ -2,18 +2,62 @@ __author__ = 'aleaf'
 
 import numpy as np
 import pandas as pd
-from shapely.geometry import Point
+import fiona
+from shapely.geometry import Point, Polygon, shape
 from GISio import shp2df, df2shp, get_proj4
-from GISops import projectdf, intersect_rtree
-
+from GISops import project, projectdf, build_rtree_index, intersect_rtree
+import GISops
 
 class NHDdata(object):
 
     def __init__(self, NHDFlowline, PlusFlowlineVAA, PlusFlow,
                  mf_grid=None, nrows=None, ncols=None,
-                 mfdis=None, xul=None, yul=None, rot=None,
-                 flowlines_proj4=None, mfgrid_proj4=None, mf_units_mult=1):
+                 mfdis=None, xul=None, yul=None, rot=0,
+                 model_domain=None,
+                 flowlines_proj4=None, mfgrid_proj4=None, domain_proj4=None,
+                 mf_units_mult=1):
+        """Class for working with information from NHDPlus v2.
+        See the user's guide for more information:
+        <http://www.horizon-systems.com/NHDPlus/NHDPlusV2_documentation.php#NHDPlusV2 User Guide>
 
+        Parameters
+        ==========
+        NHDFlowline : str, list of strings or dataframe
+            Shapefile, list of shapefiles, or dataframe defining SFR network;
+            assigned to the Flowline attribute.
+        PlusFlowlineVAA : str, list of strings or dataframe
+            DBF file, list of DBF files with NHDPlus attribute information;
+            assigned to PlusFlowlineVAA attribute.
+        PlusFlow : str, list of strings or dataframe
+            DBF file, list of DBF files with routing information;
+            assigned to PlusFlow attribute.
+        mf_grid : str or dataframe
+            MODFLOW grid
+        nrows : int
+            (structured grids) Number of model rows
+        ncols : int
+            (structured grids) Number of model columns
+        mfdis : str
+            MODFLOW discretization file (not yet supported for this class)
+        xul : float, optional
+            x offset of upper left corner of grid. Only needed if using mfdis instead of shapefile
+        yul : float, optional
+            y offset of upper left corner of grid. Only needed if using mfdis instead of shapefile
+        rot : float, optional (default 0)
+            Grid rotation; only needed if using mfdis instead of shapefile.
+        model_domain : str (shapefile) or shapely polygon, optional
+            Polygon defining area in which to create SFR cells.
+            Default is to create SFR at all intersections between the model grid and NHD flowlines.
+        flowlines_proj4 : str, optional
+            Proj4 string for coordinate system of NHDFlowlines.
+            Only needed if flowlines are supplied in a dataframe.
+        domain_proj4 : str, optional
+            Proj4 string for coordinate system of model_domain.
+            Only needed if model_domain is supplied as a polygon.
+        mf_units_mult : float
+            multiplier to convert MODFLOW units to coordinate system of gridcell geometries
+            and other GIS information
+        """
         self.Flowline = NHDFlowline
         self.PlusFlowlineVAA = PlusFlowlineVAA
 
@@ -25,6 +69,7 @@ class NHDdata(object):
                       'LevelPathI', 'StreamOrde']
 
         self.mf_grid = mf_grid
+        self.model_domain = model_domain
         self.nrows = nrows
         self.ncols = ncols
         self.mfdis = mfdis
@@ -35,6 +80,7 @@ class NHDdata(object):
 
         self.fl_proj4 = flowlines_proj4
         self.mf_grid_proj4 = mfgrid_proj4
+        self.domain_proj4 = domain_proj4
 
         print "Reading input..."
         # handle dataframes or shapefiles as arguments
@@ -47,15 +93,20 @@ class NHDdata(object):
                 self.__dict__[attr] = input
             else:
                 self.__dict__[attr] = shp2df(input)
+        if isinstance(model_domain, Polygon):
+            self.domain = model_domain
+        else:
+            self.domain = shape(fiona.open(model_domain).next()['geometry'])
+            self.domain_proj4 = get_proj4(model_domain)
 
         # get projections
         if self.mf_grid_proj4 is None and not isinstance(mf_grid, pd.DataFrame):
             self.mf_grid_proj4 = get_proj4(mf_grid)
         if self.fl_proj4 is None:
             if isinstance(NHDFlowline, list):
-                self.fl_proj4 = get_proj4(NHDFlowline[0][:-4])
+                self.fl_proj4 = get_proj4(NHDFlowline[0])
             elif not isinstance(NHDFlowline, pd.DataFrame):
-                self.fl_proj4 = get_proj4(NHDFlowline[:-4])
+                self.fl_proj4 = get_proj4(NHDFlowline)
 
         # set the indices
         for attr, index in {'fl': 'COMID', 'pfvaa': 'ComID'}.iteritems():
@@ -66,31 +117,33 @@ class NHDdata(object):
         if self.mf_grid_proj4.split('proj=')[1].split()[0].strip() == 'longlat':
             raise ProjectionError(self.mf_grid)
 
-        # reproject the NHD Flowlines to model grid if they aren't
+        # reproject the NHD Flowlines and model domain to model grid if they aren't
         # (prob a better way to check for same projection)
-        if not self.fl_proj4 == self.mf_grid_proj4 \
-            and not self.fl_proj4 is None \
-            and not self.mf_grid_proj4 is None:
-                print "reprojecting NHDFlowlines from\n{}\nto\n{}...".format(self.fl_proj4, self.mf_grid_proj4)
-                self.fl['geometry'] = projectdf(self.fl, self.fl_proj4, self.mf_grid_proj4)
-        else:
-            for prj in self.fl_proj4, self.mf_grid_proj4:
-                if prj is None:
-                    print "Warning, no projection information for {}!".format(prj)
+
+        if different_projections(self.fl_proj4, self.mf_grid_proj4):
+            print "reprojecting NHDFlowlines from\n{}\nto\n{}...".format(self.fl_proj4, self.mf_grid_proj4)
+            self.fl['geometry'] = projectdf(self.fl, self.fl_proj4, self.mf_grid_proj4)
+
+        if model_domain is not None \
+                and different_projections(self.domain_proj4, self.mf_grid_proj4):
+            print "reprojecting model domain from\n{}\nto\n{}...".format(self.domain_proj4, self.mf_grid_proj4)
+            self.domain = project(self.domain, self.domain_proj4, self.mf_grid_proj4)
 
     def list_updown_comids(self):
 
+        # setup local variables and cull plusflow table to comids in model
         comids = self.df.index.tolist()
-        dncomids = []
-        upcomids = []
-        for c in comids:
-            # set up/down comids that are not in the model domain to zero
-            dncomids.append([d if d in comids else 0 for d in
-                            self.pf.ix[self.pf.FROMCOMID == c, 'TOCOMID'].tolist()])
-            upcomids.append([u if u in comids else 0 for u in
-                             self.pf.ix[self.pf.TOCOMID == c, 'FROMCOMID'].tolist()])
-        self.df['upcomids'] = upcomids
-        self.df['dncomids'] = dncomids
+        pf = self.pf.ix[(self.pf.FROMCOMID.isin(comids)) |
+                        (self.pf.TOCOMID.isin(comids))].copy()
+
+        # set any remaining comids not in model to zero
+        # (outlets or inlets from outside model)
+        pf.loc[~pf.TOCOMID.isin(comids), 'TOCOMID'] = 0
+        pf.loc[~pf.FROMCOMID.isin(comids), 'FROMCOMID'] = 0
+        tocomid = pf.TOCOMID.values
+        fromcomid = pf.FROMCOMID.values
+        self.df['dncomids'] = [tocomid[fromcomid == c].tolist() for c in comids]
+        self.df['upcomids'] = [fromcomid[tocomid == c].tolist() for c in comids]
 
     def assign_segments(self):
 
@@ -125,14 +178,18 @@ class NHDdata(object):
 
         # create a working dataframe
         self.df = self.fl[self.fl_cols].join(self.pfvaa[self.pfvaa_cols], how='inner')
+
+        print '\nclipping flowlines to active area...'
+        inside = [g.intersects(self.domain) for g in self.df.geometry]
+        self.df = self.df.ix[inside].copy()
         self.df.sort('COMID', inplace=True)
-
-        print "intersecting NHDFlowlines with the model grid..."
-        grid_geoms = self.grid.geometry.tolist()
         flowline_geoms = self.df.geometry.tolist()
-        grid_intersections = intersect_rtree(grid_geoms, flowline_geoms)
+        grid_geoms = self.grid.geometry.tolist()
 
-        "setting up segments..."
+        print "intersecting flowlines with grid cells..."
+        grid_intersections = GISops.intersect_rtree(grid_geoms, flowline_geoms)
+
+        print "setting up segments..."
         self.list_updown_comids()
         self.assign_segments()
         fl_segments = self.df.segment.tolist()
@@ -140,15 +197,17 @@ class NHDdata(object):
 
         m1 = make_mat1(flowline_geoms, fl_segments, fl_comids, grid_intersections, grid_geoms)
 
+        length = np.array([g.length for g in m1.geometry]) * (1 / self.mf_units_mult)
         m1['width'] = [5] * len(m1)
         for s in self.df.segment:
-            asums = -0.001 * np.cumsum(m1.length[m1.segment == s][::-1])[::-1] + \
+            asums = -0.001 * np.cumsum(length[m1.segment == s][::-1])[::-1] + \
                     float(self.df.ix[self.df.segment == s, 'ArbolateSu'])
             m1.loc[m1.segment == s, 'width'] = [width_from_arbolate(a) for a in asums]
-        m1['length'] = np.array([g.length for g in m1.geometry]) * self.mf_units_mult
+
         m1['roughness'] = roughness
         m1['sbthick'] = streambed_thickness
         m1['sbK'] = streambedK
+        m1['sbtop'] = 0
 
         if self.nrows is not None:
             m1['row'] = np.floor(m1.node / self.ncols) + 1
@@ -175,9 +234,10 @@ class NHDdata(object):
         m2_cols = ['segment', 'icalc', 'outseg']
         if self.nrows is not None:
             m1_cols.insert(1, 'row')
+
         if self.ncols is not None:
             m1_cols.insert(2, 'column')
-        print "writing Mat1 to {0}{1}, Mat2 to {0}{2}".format('Mat1.csv', 'Mat2.csv')
+        print "writing Mat1 to {0}{1}, Mat2 to {0}{2}".format(basename, 'Mat1.csv', 'Mat2.csv')
         self.m1[m1_cols].to_csv(basename + 'Mat1.csv', index=False)
         self.m2[m2_cols].to_csv(basename + 'Mat2.csv', index=False)
 
@@ -236,6 +296,17 @@ def create_reaches(part, segment_nodes, grid_geoms):
             break
     return ordered_reach_geoms, ordered_node_numbers
 
+def different_projections(proj4, common_proj4):
+            if not proj4 == common_proj4 \
+                and not proj4 is None \
+                and not common_proj4 is None:
+                return True
+            else:
+                for prj in proj4, common_proj4:
+                    if prj is None:
+                        print "Warning, no projection information for {}!".format(prj)
+                return False
+
 def make_mat1(flowline_geoms, fl_segments, fl_comids, grid_intersections, grid_geoms):
 
     print "setting up reaches..."
@@ -274,7 +345,6 @@ def make_mat1(flowline_geoms, fl_segments, fl_comids, grid_intersections, grid_g
     print "setting up Mat1..."
     m1 = pd.DataFrame({'reach': reach, 'segment': segment, 'node': node,
                             'geometry': geometry, 'comid': comids})
-    m1['length'] = [g.length for g in m1.geometry]
     m1['reachID'] = np.arange(len(m1)) + 1
     return m1
 
