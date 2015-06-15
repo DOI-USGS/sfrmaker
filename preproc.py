@@ -169,6 +169,7 @@ class NHDdata(object):
 
         # make a column of outseg integers
         self.df['outseg'] = [d[0] for d in self.df.dnsegs]
+        self.df.sort('segment', inplace=True)
 
     def to_sfr(self, roughness=0.037, streambed_thickness=1, streambedK=1,
                icalc=1,
@@ -197,12 +198,14 @@ class NHDdata(object):
 
         m1 = make_mat1(flowline_geoms, fl_segments, fl_comids, grid_intersections, grid_geoms)
 
-        length = np.array([g.length for g in m1.geometry]) * (1 / self.mf_units_mult)
-        m1['width'] = [5] * len(m1)
-        for s in self.df.segment:
-            asums = -0.001 * np.cumsum(length[m1.segment == s][::-1])[::-1] + \
-                    float(self.df.ix[self.df.segment == s, 'ArbolateSu'])
-            m1.loc[m1.segment == s, 'width'] = [width_from_arbolate(a) for a in asums]
+        print "computing widths..."
+        m1['length'] = [g.length for g in m1.geometry]
+        lengths = m1[['segment', 'length']].copy()
+        groups = lengths.groupby('segment')
+        reach_asums = np.concatenate([np.cumsum(grp.length.values[::-1])[::-1] for s, grp in groups])
+        segment_asums = np.array([self.df.ArbolateSu.values[s-1] for s in m1.segment.values])
+        reach_asums = -0.001 * reach_asums + segment_asums
+        m1['width'] = width_from_arbolate(reach_asums)
 
         m1['roughness'] = roughness
         m1['sbthick'] = streambed_thickness
@@ -213,6 +216,7 @@ class NHDdata(object):
             m1['row'] = np.floor(m1.node / self.ncols) + 1
         if self.ncols is not None:
             m1['column'] = m1.node % self.ncols
+        m1['layer'] = 1
 
         self.m1 = m1
 
@@ -345,6 +349,7 @@ def make_mat1(flowline_geoms, fl_segments, fl_comids, grid_intersections, grid_g
     print "setting up Mat1..."
     m1 = pd.DataFrame({'reach': reach, 'segment': segment, 'node': node,
                             'geometry': geometry, 'comid': comids})
+    m1.sort(['segment', 'reach'], inplace=True)
     m1['reachID'] = np.arange(len(m1)) + 1
     return m1
 
