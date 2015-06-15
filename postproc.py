@@ -64,8 +64,8 @@ class SFRdata(object):
                 # read Mats 1 and 2
                 # allow the dataframes to be passed directly instead of reading them in from csvs
                 if isinstance(Mat1, pd.DataFrame):
-                    self.m1 = Mat1
-                    self.m2 = Mat2
+                    self.m1 = Mat1.copy()
+                    self.m2 = Mat2.copy()
                 else:
                     self.Mat1 = Mat1
                     self.Mat2 = Mat2
