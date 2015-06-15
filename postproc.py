@@ -48,7 +48,7 @@ class SFRdata(object):
 
     def __init__(self, sfrobject=None, Mat1=None, Mat2=None, sfr=None, node_column=False,
                  mfpath='', mfnam=None, mfdis=None,
-                 dem=None, landsurfacefile=None, landsurface_column=None,
+                 dem=None, dem_units_mult=1, landsurfacefile=None, landsurface_column=None,
                  GIS_mult=1, to_meters_mult=0.3048,
                  Mat2_out=None, xll=0.0, yll=0.0, prj=None, proj4=None, epsg=None,
                  minimum_slope=1e-4, streamflow_file=None):
@@ -80,8 +80,8 @@ class SFRdata(object):
                 # read Mats 1 and 2
                 # allow the dataframes to be passed directly instead of reading them in from csvs
                 if isinstance(Mat1, pd.DataFrame):
-                    self.m1 = Mat1
-                    self.m2 = Mat2
+                    self.m1 = Mat1.copy()
+                    self.m2 = Mat2.copy()
                 else:
                     self.Mat1 = Mat1
                     self.Mat2 = Mat2
@@ -139,6 +139,7 @@ class SFRdata(object):
             self.node_attribute = 'node' # compatibility with sfr_plots and sfr_classes
 
             self.dem = dem
+            self.dem_units_mult = dem_units_mult # convert dem elevation units to model units
             self.landsurfacefile = landsurfacefile
             self.landsurface = None
             self.xll = xll
@@ -437,11 +438,17 @@ class SFRdata(object):
             self.Elevations.smooth_segment_interiors(report_file=report_file)
         self.m1 = self.Elevations.m1
 
-    def reset_m1_streambed_top_from_dem(self, dem=None, stat='min'):
-        """
+    def reset_m1_streambed_top_from_dem(self, dem=None, dem_units_mult=None, stat='min'):
+        """Computes streambed top elevations via zonal statistics, using the
+        rasterstats package (https://github.com/perrygeo/python-raster-stats).
+
         Parameters
         ----------
-        stat: string
+        dem : Any raster data source supported by GDAL
+            Surface from which to sample elevation values.
+        dem_units_mult : float
+            Multiplier for converting the raster z units to the model z units
+        stat : string
             min (recommended), mean, or max
 
         Returns
@@ -452,6 +459,8 @@ class SFRdata(object):
             self.get_cell_geometries()
         if dem is not None:
             self.dem = dem
+        if dem_units_mult is not None:
+            self.dem_units_mult = dem_units_mult
         print 'computing zonal statistics...'
         self.dem_zstats = pd.DataFrame(zonal_stats(self.m1.geometry, self.dem))
         self.m1['sbtop'] = self.dem_zstats['min'].values
