@@ -11,7 +11,8 @@ import GISops
 class NHDdata(object):
 
     def __init__(self, NHDFlowline, PlusFlowlineVAA, PlusFlow,
-                 mf_grid=None, nrows=None, ncols=None,
+                 mf_grid=None, mf_grid_node_col=None,
+                 nrows=None, ncols=None,
                  mfdis=None, xul=None, yul=None, rot=0,
                  model_domain=None,
                  flowlines_proj4=None, mfgrid_proj4=None, domain_proj4=None,
@@ -32,7 +33,11 @@ class NHDdata(object):
             DBF file, list of DBF files with routing information;
             assigned to PlusFlow attribute.
         mf_grid : str or dataframe
-            MODFLOW grid
+            Shapefile or dataframe containing MODFLOW grid
+        mf_grid_node_col : str
+            Column in grid shapefile or dataframe with unique node numbers.
+            In case the grid isn't sorted!
+            (which will result in mixup if rows and columns are assigned later using the node numbers)
         nrows : int
             (structured grids) Number of model rows
         ncols : int
@@ -55,8 +60,7 @@ class NHDdata(object):
             Proj4 string for coordinate system of model_domain.
             Only needed if model_domain is supplied as a polygon.
         mf_units_mult : float
-            multiplier to convert MODFLOW units to coordinate system of gridcell geometries
-            and other GIS information
+            multiplier to convert GIS units to MODFLOW units
         """
         self.Flowline = NHDFlowline
         self.PlusFlowlineVAA = PlusFlowlineVAA
@@ -77,6 +81,8 @@ class NHDdata(object):
         self.yul = yul
         self.rot = rot
         self.mf_units_mult = mf_units_mult
+        self.GISunits = None
+        self.to_km = None # converts GIS units to km for arbolate sum
 
         self.fl_proj4 = flowlines_proj4
         self.mf_grid_proj4 = mfgrid_proj4
@@ -99,6 +105,12 @@ class NHDdata(object):
             self.domain = shape(fiona.open(model_domain).next()['geometry'])
             self.domain_proj4 = get_proj4(model_domain)
 
+        # sort and pair down the grid
+        if mf_grid_node_col is not None:
+            self.grid.sort(mf_grid_node_col, inplace=True)
+            self.grid.index = self.grid[mf_grid_node_col].values
+        self.grid = self.grid[['geometry']]
+
         # get projections
         if self.mf_grid_proj4 is None and not isinstance(mf_grid, pd.DataFrame):
             self.mf_grid_proj4 = get_proj4(mf_grid)
@@ -120,6 +132,11 @@ class NHDdata(object):
         # reproject the NHD Flowlines and model domain to model grid if they aren't
         # (prob a better way to check for same projection)
 
+        # set GIS units from modflow grid projection (used for arbolate sum computation)
+        # assumes either m or ft!
+        self.GISunits = parse_proj4_units(self.mf_grid_proj4)
+        self.to_km = [0.001 if self.GISunits == 'm' else 0.001/0.3048][0]
+
         if different_projections(self.fl_proj4, self.mf_grid_proj4):
             print "reprojecting NHDFlowlines from\n{}\nto\n{}...".format(self.fl_proj4, self.mf_grid_proj4)
             self.fl['geometry'] = projectdf(self.fl, self.fl_proj4, self.mf_grid_proj4)
@@ -129,6 +146,8 @@ class NHDdata(object):
             print "reprojecting model domain from\n{}\nto\n{}...".format(self.domain_proj4, self.mf_grid_proj4)
             self.domain = project(self.domain, self.domain_proj4, self.mf_grid_proj4)
 
+
+
     def list_updown_comids(self):
 
         # setup local variables and cull plusflow table to comids in model
@@ -136,9 +155,19 @@ class NHDdata(object):
         pf = self.pf.ix[(self.pf.FROMCOMID.isin(comids)) |
                         (self.pf.TOCOMID.isin(comids))].copy()
 
+        # subset PlusFlow entries for comids that are not in flowlines dataset
+        # comids may be missing because they are outside of the model
+        # or if the flowlines dataset was edited (resulting in breaks in the routing)
+        missing_tocomids = ~pf.TOCOMID.isin(comids) & (pf.TOCOMID != 0)
+        missing = pf.ix[missing_tocomids, ['FROMCOMID', 'TOCOMID']].copy()
+        # recursively crawl the PlusFlow table
+        # to try to find a downstream comid in the flowlines dataest
+        missing['nextCOMID'] = [find_next(tc, self.pf, comids) for tc in missing.TOCOMID]
+        pf.loc[missing_tocomids, 'TOCOMID'] = missing.nextCOMID
+
         # set any remaining comids not in model to zero
         # (outlets or inlets from outside model)
-        pf.loc[~pf.TOCOMID.isin(comids), 'TOCOMID'] = 0
+        #pf.loc[~pf.TOCOMID.isin(comids), 'TOCOMID'] = 0 (these should all be handled above)
         pf.loc[~pf.FROMCOMID.isin(comids), 'FROMCOMID'] = 0
         tocomid = pf.TOCOMID.values
         fromcomid = pf.FROMCOMID.values
@@ -151,12 +180,8 @@ class NHDdata(object):
         self.df.sort('COMID', inplace=True)
         self.df['segment'] = np.arange(len(self.df)) + 1
 
-        # assign upsegs and outsegs based on NHDPlus routing
-        self.df['upsegs'] = [[self.df.segment[c] if c !=0 else 0 for c in comids] for comids in self.df.upcomids]
-        self.df['dnsegs'] = [[self.df.segment[c] if c !=0 else 0 for c in comids] for comids in self.df.dncomids]
-
-        # reduce outsegs to 1 per segment
-        braids = self.df[np.array([len(d) for d in self.df.dnsegs]) > 1]
+        # reduce dncomids to 1 per segment
+        braids = self.df[np.array([len(d) for d in self.df.dncomids]) > 1]
         for i, r in braids.iterrows():
             # select the dncomid that has a matching levelpath
             matching_levelpaths = np.array(r.dncomids)[self.df.ix[self.df.COMID.isin(r.dncomids), 'LevelPathI'].values
@@ -165,7 +190,11 @@ class NHDdata(object):
             if len(matching_levelpaths) == 0:
                 matching_levelpaths = [r.dncomids[0]]
 
-            self.df.set_value(i, 'dnsegs', matching_levelpaths)
+            self.df.set_value(i, 'dncomids', matching_levelpaths)
+
+        # assign upsegs and outsegs based on NHDPlus routing
+        self.df['upsegs'] = [[self.df.segment[c] if c !=0 else 0 for c in comids] for comids in self.df.upcomids]
+        self.df['dnsegs'] = [[self.df.segment[c] if c !=0 else 0 for c in comids] for comids in self.df.dncomids]
 
         # make a column of outseg integers
         self.df['outseg'] = [d[0] for d in self.df.dnsegs]
@@ -199,13 +228,17 @@ class NHDdata(object):
         m1 = make_mat1(flowline_geoms, fl_segments, fl_comids, grid_intersections, grid_geoms)
 
         print "computing widths..."
-        m1['length'] = [g.length for g in m1.geometry]
+        m1['length'] = np.array([g.length for g in m1.geometry])
         lengths = m1[['segment', 'length']].copy()
         groups = lengths.groupby('segment')
         reach_asums = np.concatenate([np.cumsum(grp.length.values[::-1])[::-1] for s, grp in groups])
         segment_asums = np.array([self.df.ArbolateSu.values[s-1] for s in m1.segment.values])
-        reach_asums = -0.001 * reach_asums + segment_asums
-        m1['width'] = width_from_arbolate(reach_asums)
+        reach_asums = -1 * self.to_km * reach_asums + segment_asums # arbolate sums are computed in km
+        width = width_from_arbolate(reach_asums) # widths are returned in m
+        if self.GISunits != 'm':
+            width = width / 0.3048
+        m1['width'] = width * self.mf_units_mult
+        m1['length'] = m1.length * self.mf_units_mult
 
         m1['roughness'] = roughness
         m1['sbthick'] = streambed_thickness
@@ -215,7 +248,9 @@ class NHDdata(object):
         if self.nrows is not None:
             m1['row'] = np.floor(m1.node / self.ncols) + 1
         if self.ncols is not None:
-            m1['column'] = m1.node % self.ncols
+            column = m1.node.values % self.ncols
+            column[column == 0] = self.ncols # last column has remainder of 0
+            m1['column'] = column
         m1['layer'] = 1
 
         self.m1 = m1
@@ -301,15 +336,32 @@ def create_reaches(part, segment_nodes, grid_geoms):
     return ordered_reach_geoms, ordered_node_numbers
 
 def different_projections(proj4, common_proj4):
-            if not proj4 == common_proj4 \
-                and not proj4 is None \
-                and not common_proj4 is None:
-                return True
-            else:
-                for prj in proj4, common_proj4:
-                    if prj is None:
-                        print "Warning, no projection information for {}!".format(prj)
-                return False
+    if not proj4 == common_proj4 \
+        and not proj4 is None \
+        and not common_proj4 is None:
+        return True
+    else:
+        for prj in proj4, common_proj4:
+            if prj is None:
+                print "Warning, no projection information for {}!".format(prj)
+        return False
+
+def find_next(comid, pftable, comids, max_levels=10):
+    """Crawls the PlusFlow table to find the next downstream comid that
+    is in the set comids. Looks up subsequent downstream comids to a
+    maximum number of iterations, specified by max_levels (default 10).
+    """
+    pftable = pftable.copy()
+    nextocomid = [comid]
+    comids = set(comids)
+    for i in range(max_levels):
+        nextocomid = pftable.ix[pftable.FROMCOMID.isin(nextocomid), 'TOCOMID'].tolist()
+        if len(set(nextocomid).intersection(comids)) > 0:
+            # if more than one comid is found, simply take the first
+            # (often these will be in different levelpaths,
+            # so there is no way to determine a preferred routing path)
+            return list(set(nextocomid).intersection(comids))[0]
+    return 0
 
 def make_mat1(flowline_geoms, fl_segments, fl_comids, grid_intersections, grid_geoms):
 
@@ -353,6 +405,18 @@ def make_mat1(flowline_geoms, fl_segments, fl_comids, grid_intersections, grid_g
     m1['reachID'] = np.arange(len(m1)) + 1
     return m1
 
+def parse_proj4_units(proj4string):
+    """Determine units from proj4 string. Not tested extensively.
+    """
+    l = proj4string.split('+')
+    units = [i for i in l if 'units' in i]
+    if len(units) == 0:
+        return 'latlon'
+    elif 'm' in units:
+        return 'm'
+    else:
+        return 'ft'
+
 def width_from_arbolate(arbolate):
     """Estimate stream width in feet from arbolate sum in meters, using relationship
     described by Feinstein et al (2010), Appendix 2, p 266.
@@ -365,9 +429,9 @@ def width_from_arbolate(arbolate):
     Returns
     -------
     width: float
-        Estimated width in feet
+        Estimated width in meters (original formula returned width in ft)
     """
-    return 0.1193 * (1000 * arbolate) ** 0.5032
+    return 0.3048 * 0.1193 * (1000 * arbolate) ** 0.5032
 
 
 class ProjectionError(Exception):

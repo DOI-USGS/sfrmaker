@@ -41,6 +41,8 @@ class SFRdata(object):
                        'bed_roughness': 'roughness',
                        'cellnum': 'node'}
 
+    m1_integer_columns = {'row', 'column', 'layer', 'node', 'reachID',
+                          'comid', 'segment', 'reach', 'outseg', 'outlet'}
     # working on parser for column names
     #Index([u'row', u'column', u'layer', u'stage', u'top_streambed', u'reach', u'segment', u'width_in_cell',
     # u'length_in_cell', u'bed_K', u'bed_thickness', u'bed_slope',
@@ -102,6 +104,9 @@ class SFRdata(object):
                 # enforce consistent column names (maintaining compatibility with past SFRmaker versions)
                 self.parse_mat1_columns()
 
+                # enforce integer columns
+                int_cols = self.m1_integer_columns.intersection(set(self.m1.columns))
+                self.m1[list(int_cols)] = self.m1[list(int_cols)].astype(int)
 
             elif sfr is not None:
                 self.read_sfr_package()
@@ -130,6 +135,7 @@ class SFRdata(object):
                 else:
                     self.m1.rename(columns={node_column, 'node'}, inplace=True)
                     self.node_column = 'node' # so that some code doesn't break for the time being
+                self.m1['model_top'] = [self.elevs_by_cellnum[c] for c in self.m1.node]
             else:
                 self.mfpath = ''
                 self.mfnam = None
@@ -285,7 +291,7 @@ class SFRdata(object):
 
         self.m1['centroids'] = centroids
 
-    def map_outsegs(self, max_levels=500):
+    def map_outsegs(self, max_levels=1000):
         '''
         from Mat2, returns dataframe of all downstream segments (will not work with circular routing!)
         '''
@@ -325,8 +331,12 @@ class SFRdata(object):
 
                 rf = 'Circular_routing_outsegs_table.csv'
                 circular_segs.to_csv(rf)
-                return '{} instances of circular routing encountered! See {} for details.'\
-                        .format(len(circular_segs), rf)
+                return '{0} instances where an outlet was not found after {1} consecutive segments! ' \
+                       '\nThese may indicate circular routing, or if there are many segments' \
+                       '\n(~10,000 or more), some segment sequences may be longer than {1}.' \
+                       '\nIn that case, try re-running map_outsegs() and diagnostics with max_levels set higher.'\
+                       '\nSee {1} for details.'\
+                        .format(len(circular_segs), max_levels, rf)
 
         self.outsegs = outsegsmap
 
@@ -556,7 +566,8 @@ class SFRdata(object):
         self.Segments.renumber_SFR_cells(nodes_list)
         self.__dict__ = self.Segments.__dict__.copy()
 
-    def run_diagnostics(self, model_domain=None):
+    def run_diagnostics(self, max_routing_levels=1000, routing_distance_tol=None,
+                        model_domain=None, sfr_linework_shapefile=None):
         """Run diagnostic suite on Mat1 and Mat2, including:
         * segment numbering
         * circular routing
@@ -572,15 +583,13 @@ class SFRdata(object):
         from diagnostics import diagnostics
         self.diagnostics = diagnostics(sfrobject=self)
         self.diagnostics.check_numbering()
-        self.diagnostics.check_routing()
+        self.diagnostics.check_routing(max_levels=max_routing_levels)
         self.diagnostics.check_overlapping()
         self.diagnostics.check_elevations()
         self.diagnostics.check_outlets(model_domain=model_domain)
-        try:
-            tol = np.min([np.min(self.dis.delr), np.min(self.dis.delc)])
-        except:
-            tol = 0
-        self.diagnostics.check_4gaps_in_routing(model_domain=model_domain, tol=tol)
+        self.diagnostics.plot_routing()
+        self.diagnostics.check_4gaps_in_routing(model_domain=model_domain, tol=routing_distance_tol)
+        self.diagnostics.check_grid_intersection(sfr_linework_shapefile=sfr_linework_shapefile)
 
     def segment_reach2linework_shapefile(self, lines_shapefile, new_lines_shapefile=None,
                                          node_col='node'):
@@ -1316,7 +1325,6 @@ class Elevations(SFRdata):
         # update the layer in Mat1 to 1 for all SFR cells
         self.m1['layer'] = 1
 
-        # write a new DIS file
         new_m = flopy.modflow.mf.Modflow(model_ws=os.path.split(outdisfile)[0],
                                          modelname=os.path.split(outdisfile)[1][:-4])
         newdis = flopy.modflow.ModflowDis(new_m, nlay=self.dis.nlay, nrow=self.dis.nrow, ncol=self.dis.ncol,
@@ -1325,8 +1333,9 @@ class Elevations(SFRdata):
         if isinstance(newdis.fn_path, list):
             newdis.fn_path = newdis.fn_path[0]
         self.mfdis = outdisfile
+        print 'writing new discretization file {} using flopy...'.fromat(outdisfile)
         newdis.write_file()
-
+        print 'Done.'
 
     def incorporate_field_elevations(self, shpfile, elevs_field, distance_tol):
         """Update landsurface elevations for SFR cells from nearby field measurements
