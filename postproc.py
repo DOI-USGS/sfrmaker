@@ -170,6 +170,7 @@ class SFRdata(object):
             self.segments = sorted(np.unique(self.m1.segment))
             self.Mat1_out = Mat1
             self.Mat2_out = Mat2_out
+            self.outsegs = None # dataframe showing successive outsegs from headwaters (index) to outlets
 
             # create unique reach IDs from Mat1 index
             self.m1['reachID'] = self.m1.index.values
@@ -1333,7 +1334,7 @@ class Elevations(SFRdata):
         if isinstance(newdis.fn_path, list):
             newdis.fn_path = newdis.fn_path[0]
         self.mfdis = outdisfile
-        print 'writing new discretization file {} using flopy...'.fromat(outdisfile)
+        print 'writing new discretization file {} using flopy...'.format(outdisfile)
         newdis.write_file()
         print 'Done.'
 
@@ -1371,7 +1372,7 @@ class Elevations(SFRdata):
                     self.m2.loc[segment, 'Min'] = df.iloc[i][elevs_field]
         '''
 
-    def map_confluences(self):
+    def map_confluences_old(self):
 
         # if min/max elevations not in Mat2, compute from Mat1
         if 'Max' not in self.m2.columns:
@@ -1434,6 +1435,47 @@ class Elevations(SFRdata):
         self.confluences = confluences
         print 'Done, see confluences attribute.'
 
+    def map_confluences(self, dem=None, landsurfacefile=None, landsurface_column=None):
+
+        if 'Max' not in self.m2.columns:
+            #self.update_Mat2_elevations()
+            pass
+        m2 = self.m2.copy()
+
+        print "{} segments with min > max".format(len(m2.loc[(m2.Max - m2.Min) < 0, 'Min']))
+        diffs = np.diff(m2.ix[self.outsegs.ix[1].values[self.outsegs.ix[1].values != 0], 'Max'].values)
+        total_elevation_rise = np.sum(diffs[diffs > 0])
+        print(total_elevation_rise)
+        #m2Max = m2.Max.tolist()
+
+        segments = self.m1.groupby('segment')
+
+        # setup dataframe of confluences
+        # confluences are where segments have upsegs (no upsegs means the reach 1 is a headwater)
+        confluences_inds = np.array([False if len(u) == 0 else True for u in m2.upsegs])
+        confluences = m2.ix[confluences_inds, ['segment', 'upsegs', 'Max']].copy()
+        upsegs = confluences.upsegs.tolist()
+
+        # run this loop twice so that m2 can be updated and the minimum elevations taken again
+        for i in range(10):
+            elevs = m2.loc[confluences.segment.values, 'Max'].tolist()
+            elevs = [np.min([m2.Min[m2.segment.isin(u)].min(), elevs[i]]) for i, u in enumerate(upsegs)]
+            m2.loc[confluences.segment.values, 'Max'] = elevs
+            #for i, u in enumerate(upsegs):
+            #    m2.loc[m2.segment.isin(u), 'Min'] = elevs[i]
+            print "{} segments with min > max".format(len(m2.loc[(m2.Max - m2.Min) < 0, 'Min']))
+            m2.loc[(m2.Max - m2.Min) < 0, 'Min'] = m2.loc[(m2.Max - m2.Min) < 0, 'Max']
+            diffs = np.diff(m2.ix[self.outsegs.ix[1].values[self.outsegs.ix[1].values != 0], 'Max'].values)
+            total_elevation_rise = np.sum(diffs[diffs > 0])
+            print(total_elevation_rise)
+            if total_elevation_rise == 0:
+                break
+        confluences['elev'] = elevs
+
+        # get node number for each confluence by getting first node value for each segment dataframe group
+        # (mat1 was already sorted by segment)
+        confluences['node'] = np.array([g.node.values[0] for s, g in segments])[confluences.segment.values]
+        self.m2 = m2
 
 class Widths(SFRdata):
 
@@ -1531,11 +1573,12 @@ class Outsegs(SFRdata):
     def plot_outsegs(self, outpdf='complete_profiles.pdf', units='ft', add_profiles={}):
         print "listing unique segment sequences..."
         # make a dataframe of all outsegs
-        self.map_outsegs()
+        if self.outsegs is None:
+            self.map_outsegs()
 
         # list of lists of connected segments
         seglists = [[p]+[s for s in self.outsegs.ix[p, :] if s > 0] for p in self.outsegs.index]
-
+        '''
         # reduce seglists down to unique sets of segments
         unique_lists = []
         for l in seglists:
@@ -1546,7 +1589,7 @@ class Outsegs(SFRdata):
                 unique_lists.append(l)
             else:
                 continue
-
+        '''
         # add model top elevations to dictionary using node numbers
         if 'model_top' not in self.m1.columns:
             self.m1['model_top'] = [self.elevs_by_cellnum[c] for c in self.m1[self.node_column]]

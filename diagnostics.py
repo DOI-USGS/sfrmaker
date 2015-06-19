@@ -331,7 +331,7 @@ class diagnostics(SFRdata):
         if nmismatch > 0:
             reportfile = 'bad_intersections.csv'
             print "{} SFR reaches don't coincide with linework in {}!" \
-                  "see {}.".format(reportfile)
+                  "see {}.".format(nmismatch, sfr_linework_shapefile, reportfile)
             self.m1[~intersections].to_csv(reportfile, index=False)
         else:
             print 'passed.'
