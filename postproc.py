@@ -38,8 +38,11 @@ class SFRdata(object):
                        'bed_K': 'sbK',
                        'bed_thickness': 'sbthick',
                        'bed_slope': 'slope',
-                       'bed_roughness': 'roughness'}
+                       'bed_roughness': 'roughness',
+                       'cellnum': 'node'}
 
+    m1_integer_columns = {'row', 'column', 'layer', 'node', 'reachID',
+                          'comid', 'segment', 'reach', 'outseg', 'outlet'}
     # working on parser for column names
     #Index([u'row', u'column', u'layer', u'stage', u'top_streambed', u'reach', u'segment', u'width_in_cell',
     # u'length_in_cell', u'bed_K', u'bed_thickness', u'bed_slope',
@@ -47,7 +50,7 @@ class SFRdata(object):
 
     def __init__(self, sfrobject=None, Mat1=None, Mat2=None, sfr=None, node_column=False,
                  mfpath='', mfnam=None, mfdis=None,
-                 dem=None, landsurfacefile=None, landsurface_column=None,
+                 dem=None, dem_units_mult=1, landsurfacefile=None, landsurface_column=None,
                  GIS_mult=1, to_meters_mult=0.3048,
                  Mat2_out=None, xll=0.0, yll=0.0, prj=None, proj4=None, epsg=None,
                  minimum_slope=1e-4, streamflow_file=None):
@@ -79,8 +82,8 @@ class SFRdata(object):
                 # read Mats 1 and 2
                 # allow the dataframes to be passed directly instead of reading them in from csvs
                 if isinstance(Mat1, pd.DataFrame):
-                    self.m1 = Mat1
-                    self.m2 = Mat2
+                    self.m1 = Mat1.copy()
+                    self.m2 = Mat2.copy()
                 else:
                     self.Mat1 = Mat1
                     self.Mat2 = Mat2
@@ -101,6 +104,9 @@ class SFRdata(object):
                 # enforce consistent column names (maintaining compatibility with past SFRmaker versions)
                 self.parse_mat1_columns()
 
+                # enforce integer columns
+                int_cols = self.m1_integer_columns.intersection(set(self.m1.columns))
+                self.m1[list(int_cols)] = self.m1[list(int_cols)].astype(int)
 
             elif sfr is not None:
                 self.read_sfr_package()
@@ -129,6 +135,7 @@ class SFRdata(object):
                 else:
                     self.m1.rename(columns={node_column, 'node'}, inplace=True)
                     self.node_column = 'node' # so that some code doesn't break for the time being
+                self.m1['model_top'] = [self.elevs_by_cellnum[c] for c in self.m1.node]
             else:
                 self.mfpath = ''
                 self.mfnam = None
@@ -138,6 +145,7 @@ class SFRdata(object):
             self.node_attribute = 'node' # compatibility with sfr_plots and sfr_classes
 
             self.dem = dem
+            self.dem_units_mult = dem_units_mult # convert dem elevation units to model units
             self.landsurfacefile = landsurfacefile
             self.landsurface = None
             self.xll = xll
@@ -162,6 +170,7 @@ class SFRdata(object):
             self.segments = sorted(np.unique(self.m1.segment))
             self.Mat1_out = Mat1
             self.Mat2_out = Mat2_out
+            self.outsegs = None # dataframe showing successive outsegs from headwaters (index) to outlets
 
             # create unique reach IDs from Mat1 index
             self.m1['reachID'] = self.m1.index.values
@@ -283,7 +292,7 @@ class SFRdata(object):
 
         self.m1['centroids'] = centroids
 
-    def map_outsegs(self, max_levels=500):
+    def map_outsegs(self, max_levels=1000):
         '''
         from Mat2, returns dataframe of all downstream segments (will not work with circular routing!)
         '''
@@ -323,8 +332,12 @@ class SFRdata(object):
 
                 rf = 'Circular_routing_outsegs_table.csv'
                 circular_segs.to_csv(rf)
-                return '{} instances of circular routing encountered! See {} for details.'\
-                        .format(len(circular_segs), rf)
+                return '{0} instances where an outlet was not found after {1} consecutive segments! ' \
+                       '\nThese may indicate circular routing, or if there are many segments' \
+                       '\n(~10,000 or more), some segment sequences may be longer than {1}.' \
+                       '\nIn that case, try re-running map_outsegs() and diagnostics with max_levels set higher.'\
+                       '\nSee {1} for details.'\
+                        .format(len(circular_segs), max_levels, rf)
 
         self.outsegs = outsegsmap
 
@@ -436,11 +449,17 @@ class SFRdata(object):
             self.Elevations.smooth_segment_interiors(report_file=report_file)
         self.m1 = self.Elevations.m1
 
-    def reset_m1_streambed_top_from_dem(self, dem=None, stat='min'):
-        """
+    def reset_m1_streambed_top_from_dem(self, dem=None, dem_units_mult=None, stat='min'):
+        """Computes streambed top elevations via zonal statistics, using the
+        rasterstats package (https://github.com/perrygeo/python-raster-stats).
+
         Parameters
         ----------
-        stat: string
+        dem : Any raster data source supported by GDAL
+            Surface from which to sample elevation values.
+        dem_units_mult : float
+            Multiplier for converting the raster z units to the model z units
+        stat : string
             min (recommended), mean, or max
 
         Returns
@@ -451,6 +470,8 @@ class SFRdata(object):
             self.get_cell_geometries()
         if dem is not None:
             self.dem = dem
+        if dem_units_mult is not None:
+            self.dem_units_mult = dem_units_mult
         print 'computing zonal statistics...'
         self.dem_zstats = pd.DataFrame(zonal_stats(self.m1.geometry, self.dem))
         self.m1['sbtop'] = self.dem_zstats['min'].values
@@ -546,7 +567,8 @@ class SFRdata(object):
         self.Segments.renumber_SFR_cells(nodes_list)
         self.__dict__ = self.Segments.__dict__.copy()
 
-    def run_diagnostics(self, model_domain=None):
+    def run_diagnostics(self, max_routing_levels=1000, routing_distance_tol=None,
+                        model_domain=None, sfr_linework_shapefile=None):
         """Run diagnostic suite on Mat1 and Mat2, including:
         * segment numbering
         * circular routing
@@ -562,15 +584,13 @@ class SFRdata(object):
         from diagnostics import diagnostics
         self.diagnostics = diagnostics(sfrobject=self)
         self.diagnostics.check_numbering()
-        self.diagnostics.check_routing()
+        self.diagnostics.check_routing(max_levels=max_routing_levels)
         self.diagnostics.check_overlapping()
         self.diagnostics.check_elevations()
         self.diagnostics.check_outlets(model_domain=model_domain)
-        try:
-            tol = np.min([np.min(self.dis.delr), np.min(self.dis.delc)])
-        except:
-            tol = 0
-        self.diagnostics.check_4gaps_in_routing(model_domain=model_domain, tol=tol)
+        self.diagnostics.plot_routing()
+        self.diagnostics.check_4gaps_in_routing(model_domain=model_domain, tol=routing_distance_tol)
+        self.diagnostics.check_grid_intersection(sfr_linework_shapefile=sfr_linework_shapefile)
 
     def segment_reach2linework_shapefile(self, lines_shapefile, new_lines_shapefile=None,
                                          node_col='node'):
@@ -599,11 +619,12 @@ class SFRdata(object):
                 new_lines_shapefile = lines_shapefile[:-4] + '_segreach.shp'
 
             df = self.m1.copy()
+
             df_lines = GISio.shp2df(lines_shapefile)
             print "Adding segment and reach information to linework shapefile..."
             # first assign geometries for model cells with only 1 SFR reach
             df_lines_geoms = df_lines.geometry.values
-            geom_idx = [df_lines.index[df_lines.node == n] for n in df.node.values]
+            geom_idx = [df_lines.index[df_lines[node_col] == n] for n in df.node.values]
             df['geometry'] = [df_lines_geoms[g[0]] if len(g) == 1 else
                               MultiLineString(df_lines_geoms[g].tolist()) if len(g) > 1
                               else None
@@ -634,6 +655,7 @@ class SFRdata(object):
             print '\n'
             self.linework_geoms = df[['segment', 'reach', 'node', 'geometry']].sort(['segment', 'reach'])
             GISio.df2shp(self.linework_geoms, new_lines_shapefile, prj=lines_shapefile[:-4] + '.prj')
+            return self.linework_geoms
 
     def segment_reach2linework_shapefile2(self, lines_shapefile, new_lines_shapefile=None,
                                          iterations=2):
@@ -772,7 +794,7 @@ class SFRdata(object):
                 'and then compute cell geometries by running get_cell_geometries().'
         GISio.df2shp(self.m1, shpname=outshp, epsg=self.epsg, proj4=self.proj4, prj=self.prj)
 
-    def write_streamflow_shapefile(self, streamflow_file=None, lines_shapefile=None, node_col=None):
+    def write_streamflow_shapefile(self, streamflow_file=None, lines_shapefile=None, node_col='node'):
         """Write out SFR Package results from a MODFLOW run.
 
         Parameters
@@ -1304,7 +1326,6 @@ class Elevations(SFRdata):
         # update the layer in Mat1 to 1 for all SFR cells
         self.m1['layer'] = 1
 
-        # write a new DIS file
         new_m = flopy.modflow.mf.Modflow(model_ws=os.path.split(outdisfile)[0],
                                          modelname=os.path.split(outdisfile)[1][:-4])
         newdis = flopy.modflow.ModflowDis(new_m, nlay=self.dis.nlay, nrow=self.dis.nrow, ncol=self.dis.ncol,
@@ -1313,8 +1334,9 @@ class Elevations(SFRdata):
         if isinstance(newdis.fn_path, list):
             newdis.fn_path = newdis.fn_path[0]
         self.mfdis = outdisfile
+        print 'writing new discretization file {} using flopy...'.format(outdisfile)
         newdis.write_file()
-
+        print 'Done.'
 
     def incorporate_field_elevations(self, shpfile, elevs_field, distance_tol):
         """Update landsurface elevations for SFR cells from nearby field measurements
@@ -1350,7 +1372,7 @@ class Elevations(SFRdata):
                     self.m2.loc[segment, 'Min'] = df.iloc[i][elevs_field]
         '''
 
-    def map_confluences(self):
+    def map_confluences_old(self):
 
         # if min/max elevations not in Mat2, compute from Mat1
         if 'Max' not in self.m2.columns:
@@ -1413,6 +1435,47 @@ class Elevations(SFRdata):
         self.confluences = confluences
         print 'Done, see confluences attribute.'
 
+    def map_confluences(self, dem=None, landsurfacefile=None, landsurface_column=None):
+
+        if 'Max' not in self.m2.columns:
+            #self.update_Mat2_elevations()
+            pass
+        m2 = self.m2.copy()
+
+        print "{} segments with min > max".format(len(m2.loc[(m2.Max - m2.Min) < 0, 'Min']))
+        diffs = np.diff(m2.ix[self.outsegs.ix[1].values[self.outsegs.ix[1].values != 0], 'Max'].values)
+        total_elevation_rise = np.sum(diffs[diffs > 0])
+        print(total_elevation_rise)
+        #m2Max = m2.Max.tolist()
+
+        segments = self.m1.groupby('segment')
+
+        # setup dataframe of confluences
+        # confluences are where segments have upsegs (no upsegs means the reach 1 is a headwater)
+        confluences_inds = np.array([False if len(u) == 0 else True for u in m2.upsegs])
+        confluences = m2.ix[confluences_inds, ['segment', 'upsegs', 'Max']].copy()
+        upsegs = confluences.upsegs.tolist()
+
+        # run this loop twice so that m2 can be updated and the minimum elevations taken again
+        for i in range(10):
+            elevs = m2.loc[confluences.segment.values, 'Max'].tolist()
+            elevs = [np.min([m2.Min[m2.segment.isin(u)].min(), elevs[i]]) for i, u in enumerate(upsegs)]
+            m2.loc[confluences.segment.values, 'Max'] = elevs
+            #for i, u in enumerate(upsegs):
+            #    m2.loc[m2.segment.isin(u), 'Min'] = elevs[i]
+            print "{} segments with min > max".format(len(m2.loc[(m2.Max - m2.Min) < 0, 'Min']))
+            m2.loc[(m2.Max - m2.Min) < 0, 'Min'] = m2.loc[(m2.Max - m2.Min) < 0, 'Max']
+            diffs = np.diff(m2.ix[self.outsegs.ix[1].values[self.outsegs.ix[1].values != 0], 'Max'].values)
+            total_elevation_rise = np.sum(diffs[diffs > 0])
+            print(total_elevation_rise)
+            if total_elevation_rise == 0:
+                break
+        confluences['elev'] = elevs
+
+        # get node number for each confluence by getting first node value for each segment dataframe group
+        # (mat1 was already sorted by segment)
+        confluences['node'] = np.array([g.node.values[0] for s, g in segments])[confluences.segment.values]
+        self.m2 = m2
 
 class Widths(SFRdata):
 
@@ -1510,11 +1573,12 @@ class Outsegs(SFRdata):
     def plot_outsegs(self, outpdf='complete_profiles.pdf', units='ft', add_profiles={}):
         print "listing unique segment sequences..."
         # make a dataframe of all outsegs
-        self.map_outsegs()
+        if self.outsegs is None:
+            self.map_outsegs()
 
         # list of lists of connected segments
         seglists = [[p]+[s for s in self.outsegs.ix[p, :] if s > 0] for p in self.outsegs.index]
-
+        '''
         # reduce seglists down to unique sets of segments
         unique_lists = []
         for l in seglists:
@@ -1525,7 +1589,7 @@ class Outsegs(SFRdata):
                 unique_lists.append(l)
             else:
                 continue
-
+        '''
         # add model top elevations to dictionary using node numbers
         if 'model_top' not in self.m1.columns:
             self.m1['model_top'] = [self.elevs_by_cellnum[c] for c in self.m1[self.node_column]]
@@ -1681,10 +1745,7 @@ class Streamflow(SFRdata):
 
         return pd.DataFrame.from_dict(sfrresults, orient='index')
 
-    def write_streamflow_shp(self, lines_shapefile=None, node_col=None):
-
-        if node_col is None:
-            node_col = self.node_column
+    def write_streamflow_shp(self, lines_shapefile=None, node_col='node'):
 
         streamflow_shp = self.streamflow_file[:-4] + '.shp'
 
@@ -1711,7 +1772,7 @@ class Streamflow(SFRdata):
 
             if 'segment' not in df_lines.columns:
                 print "segment and reach information not in linework shapefile!"
-                df_lines = self.segment_reach2linework_shapefile(lines_shapefile)
+                df_lines = self.segment_reach2linework_shapefile(lines_shapefile, node_col=node_col)
 
             df_lines.sort(['segment', 'reach'], inplace=True)
 
