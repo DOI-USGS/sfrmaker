@@ -1308,7 +1308,7 @@ class Elevations(SFRdata):
         newbots[0, conflicts] = newtop[conflicts] - minimum_thickness
 
         for i in range(self.dis.nlay - 1):
-            conflicts = newbots[i+1, :, :] > (newbots[i, :, :] - 1)
+            conflicts = newbots[i+1, :, :] > (newbots[i, :, :] - minimum_thickness)
             newbots[i+1, conflicts] = newbots[i, conflicts] - minimum_thickness
 
         # make a dataframe that shows the largest adjustments made to model top
