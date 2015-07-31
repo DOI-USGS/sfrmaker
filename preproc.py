@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 import fiona
 from shapely.geometry import Point, Polygon, shape
+from shapely.ops import unary_union
 from GISio import shp2df, df2shp, get_proj4
 from GISops import project, projectdf, build_rtree_index, intersect_rtree
 import GISops
@@ -101,9 +102,12 @@ class NHDdata(object):
                 self.__dict__[attr] = shp2df(input)
         if isinstance(model_domain, Polygon):
             self.domain = model_domain
-        else:
+        elif isinstance(model_domain, str):
             self.domain = shape(fiona.open(model_domain).next()['geometry'])
             self.domain_proj4 = get_proj4(model_domain)
+        else:
+            #print 'setting model domain to extent of grid...'
+            #self.domain = unary_union(self.grid.geometry.tolist())
 
         # sort and pair down the grid
         if mf_grid_node_col is not None:
