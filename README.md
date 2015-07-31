@@ -1,6 +1,11 @@
 SFRmaker
-==
-Python package to facilitate use of the streamflow-routing (SFR) package in MODFLOW. Currently, SFRmaker consists of three primary modules:  
+=
+Python package to facilitate use of the streamflow-routing (SFR) package in MODFLOW.  
+###Disclaimer:
+This package is provided as-is, and is not an official USGS product. While the authors are continuing to refine and improve the code as time allows, the project remains unfunded and for now, largerly undocumented and somewhat held together by "chewing gum and duct tape." If used properly, the code can in most cases produce a robust, reproducable SFR package in a fraction of the time that would be required for manual construction in a GUI. Some diagnostic and visualization tools are included; however, **it is up to the modeler to check their own results for correctness, using their own tests if necessary.** Some methods in the code are better than others, some are dead-ends, and other methods were written for specific situations encountered in individual projects. In lieu of comprehensive documentation, the best approach is to follow the instructions outlined in this readme file, as well as the IPython Notebook examples linked to below.
+
+###Code structure
+Currently, SFRmaker consists of three primary modules:  
   
 ####sfr_classes.py
 Intersects linework with model grid and develops routed segments and reaches from information in NHDPlus. Produces two tables, **Mat1** and **Mat2**, which contain SFR package information by reach and by segment, respectively. Also produces a shapefile of linework broken by the grid, which contains the stream geometries represented by the SFR reaches.
@@ -29,12 +34,12 @@ Contains methods to check for common SFR problems such as
 
 
 
-## Dependencies:
+### Dependencies:
 
 SFRmaker runs in Python 2.7. The Anaconda Scientific Python Distribution (<https://store.continuum.io/cshop/anaconda/>) is available for free, and provides an easy way for managing python packages through its package manager **conda**. Additional dependencies are listed by module below:
 
-###sfr_classes  
-* ####ESRI Arcpy
+####sfr_classes  
+* #####ESRI Arcpy
 which **must be added to the path of your main python distribution**.
 
 	**Adding Arcpy to the python path**:  	
@@ -53,7 +58,7 @@ If you are using ArcMap 10.0 or 10.2, "Desktop10.1" in the above path needs to b
 	
 	`C:\Users\<username>\AppData\Local\Enthought\Canopy\User\Lib\site-packages\`
 	
-* ###flopy
+* ####flopy
 available via **pip**, or at <https://github.com/modflowpy/flopy> 
 
 ####postproc  
