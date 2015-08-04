@@ -46,13 +46,12 @@ which **must be added to the path of your main python distribution**.
 	1) **Make a file called: Desktop10.pth**, with the following lines:  
 
 	```
-	C:\ArcGIS\Desktop10.1\arcpy  
-	C:\ArcGIS\Desktop10.1\bin64  
-	C:\ArcGIS\Desktop10.1\ArcToolbox\Script
+	C:\ArcGIS\Desktop10.2\arcpy  
+	C:\ArcGIS\Desktop10.2\bin64  
+	C:\ArcGIS\Desktop10.2\ArcToolbox\Scripts
 	```
 Notes:  
-The second line may be "bin" for 32 bit or "bin64" for 64 bit.  
-If you are using ArcMap 10.0 or 10.2, "Desktop10.1" in the above path needs to be modified accordingly.
+These lines tell python where to find arcpy and its associated packages/libraries. The second line may be "bin" for 32 bit or "bin64" for 64 bit. If you are using ArcMap 10.0 or 10.1, "Desktop10.2" in the above path needs to be modified accordingly.
 
 	2) **Place this file where python can find it.** For Anaconda on Windows 7, this path should work:
 
