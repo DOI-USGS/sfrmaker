@@ -53,7 +53,7 @@ which **must be added to the path of your main python distribution**.
 Notes:  
 These lines tell python where to find arcpy and its associated packages/libraries. The second line may be "bin" for 32 bit or "bin64" for 64 bit. If you are using ArcMap 10.0 or 10.1, "Desktop10.2" in the above path needs to be modified accordingly.
 
-	2) **Place this file where python can find it.** For Anaconda on Windows 7, this path should work:
+	2) **Place this file where python can find it.** For Anaconda on Windows 7, this path should work (replacing ```aleaf``` with your username):
 
 		C:\Users\aleaf\AppData\Local\Continuum\Anaconda
 		
