@@ -54,9 +54,11 @@ Notes:
 The second line may be "bin" for 32 bit or "bin64" for 64 bit.  
 If you are using ArcMap 10.0 or 10.2, "Desktop10.1" in the above path needs to be modified accordingly.
 
-	2) **Place this file in your python path where all your site-packages are installed**. For example, for users of the Enthought Canopy 	Distribution, the file would need to be placed at:
-	
-	`C:\Users\<username>\AppData\Local\Enthought\Canopy\User\Lib\site-packages\`
+	2) **Place this file where python can find it.** For Anaconda on Windows 7, this path should work:
+
+		C:\Users\aleaf\AppData\Local\Continuum\Anaconda
+		
+	The **Lib** subfolder in this folder or the **site-packages** folder within Lib may also work. Python checks these folders by default when looking for modules; within these folders, it looks for files with the extension **.pth**, and checks for additional paths within those files (i.e., the arcpy paths listed above).
 	
 * ####flopy
 available via **pip**, or at <https://github.com/modflowpy/flopy> 
