@@ -65,7 +65,7 @@ available via **pip** (see instructions below), or at <https://github.com/modflo
 ####postproc  
 
 * #####Instructions for Windows users
- The postproc module depends on a collection of packages (**fiona, shapely, gdal, rasterio, rasterstats**, and **GIS_utils**) that provide python bindings to open source GIS libraries. **The best bet for Windows users** is to install the required packages from the Unofficial Windows Binaries for Python Extention Packages site:
+ The postproc module depends on a collection of packages (**fiona, shapely, gdal, pyproj, rasterio, rasterstats**, and **GIS_utils**) that provide python bindings to open source GIS libraries. **The best bet for Windows users** is to install the required packages from the Unofficial Windows Binaries for Python Extention Packages site:
  <http://www.lfd.uci.edu/~gohlke/pythonlibs/>  
  The binaries on this site generally include the underlying libraries. The general approach is to  
  
@@ -90,7 +90,8 @@ available via **pip** (see instructions below), or at <https://github.com/modflo
 	* **fiona** (<http://www.lfd.uci.edu/~gohlke/pythonlibs/#fiona>)
 	* **shapely** (<http://www.lfd.uci.edu/~gohlke/pythonlibs/#shapely>)
 	* **gdal** (<http://www.lfd.uci.edu/~gohlke/pythonlibs/#gdal>)
-	* **rasterio** (<http://www.lfd.uci.edu/~gohlke/pythonlibs/#rasterio>)  
+	* **rasterio** (<http://www.lfd.uci.edu/~gohlke/pythonlibs/#rasterio>)
+	* **pyrpoj** (<http://www.lfd.uci.edu/~gohlke/pythonlibs/#pyproj>)
 	
 
 	Once gdal, shapely and rasterio are installed, **rasterstats** can be installed using pip:
