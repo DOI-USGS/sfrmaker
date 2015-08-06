@@ -79,17 +79,19 @@ available via **pip** (see instructions below), or at <https://github.com/modflo
  	**2)** Then for each package, from the Unofficial Windows Binaries site above, download the appropriate binary for the python version and either 32 or 64 bit Windows, e.g.  
 ```GDAL‑1.11.2‑cp27‑none‑win_amd64.whl``` for Python 2.7 on 64-bit Windows  
 
+
 	**3)** Open a command prompt in your Downloads folder by right clicking on the folder and then selecting *Open command window here*. Use pip to install the *.whl* files. E.g., for the above gdal file  
 
 	```
 	>pip install GDAL‑1.11.2‑cp27‑none‑win_amd64.whl
 	```
-	Link to the whl files for each package are provided below:  
+	Links to the whl files for each package are provided below:  
 
 	* **fiona** (<http://www.lfd.uci.edu/~gohlke/pythonlibs/#fiona>)
 	* **shapely** (<http://www.lfd.uci.edu/~gohlke/pythonlibs/#shapely>)
 	* **gdal** (<http://www.lfd.uci.edu/~gohlke/pythonlibs/#gdal>)
-	* **rasterio** (<http://www.lfd.uci.edu/~gohlke/pythonlibs/#rasterio>)
+	* **rasterio** (<http://www.lfd.uci.edu/~gohlke/pythonlibs/#rasterio>)  
+	
 
 	Once gdal, shapely and rasterio are installed, **rasterstats** can be installed using pip:
 
