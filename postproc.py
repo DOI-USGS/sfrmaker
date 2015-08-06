@@ -1285,7 +1285,7 @@ class Elevations(SFRdata):
         if np.min(self.m1.sbthick >= minimum_thickness):
             self.m1.sbthick = 0.9 * minimum_thickness
 
-        # make a vector of highest streambed values for each cell containing SFR (for collocated SFR cells)
+        # make a vector of lowest streambed values for each cell containing SFR (for collocated SFR cells)
         self.m1['lowest_top'] = self.m1.sbtop
 
         #shared_cells = np.unique(self.m1.ix[self.m1.node.duplicated(), 'node'])
@@ -1297,7 +1297,7 @@ class Elevations(SFRdata):
             # make column of lowest streambed elevation in each cell with SFR
             self.m1.loc[df.index, 'lowest_top'] = np.min(df.sbtop)
 
-        # make a new model top array; assign highest streambed tops to it
+        # make a new model top array; assign lowest streambed tops to it
         newtop = self.dis.top.array.copy()
         newtop[self.m1.row.values-1, self.m1.column.values-1] = self.m1.lowest_top.values
 
@@ -1308,7 +1308,7 @@ class Elevations(SFRdata):
         newbots[0, conflicts] = newtop[conflicts] - minimum_thickness
 
         for i in range(self.dis.nlay - 1):
-            conflicts = newbots[i+1, :, :] > (newbots[i, :, :] - 1)
+            conflicts = newbots[i+1, :, :] > (newbots[i, :, :] - minimum_thickness)
             newbots[i+1, conflicts] = newbots[i, conflicts] - minimum_thickness
 
         # make a dataframe that shows the largest adjustments made to model top

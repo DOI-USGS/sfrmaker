@@ -1,6 +1,11 @@
 SFRmaker
-==
-Python package to facilitate use of the streamflow-routing (SFR) package in MODFLOW. Currently, SFRmaker consists of three primary modules:  
+=
+Python package to facilitate use of the streamflow-routing (SFR) package in MODFLOW.  
+###Disclaimer:
+This package is provided as-is, and is not an official USGS product. While the authors are continuing to refine and improve the code as time allows, the project remains unfunded and for now, largerly undocumented and somewhat held together by "chewing gum and duct tape." If used properly, the code can in most cases produce a robust, reproducable SFR package in a fraction of the time that would be required for manual construction in a GUI. Some diagnostic and visualization tools are included; however, **it is up to the modeler to check their own results for correctness, using their own tests if necessary.** Some methods in the code are better than others, some are dead-ends, and other methods were written for specific situations encountered in individual projects. In lieu of comprehensive documentation, the best approach is to follow the instructions outlined in this readme file, as well as the IPython Notebook examples linked to below.
+
+###Code structure
+Currently, SFRmaker consists of three primary modules:  
   
 ####sfr_classes.py
 Intersects linework with model grid and develops routed segments and reaches from information in NHDPlus. Produces two tables, **Mat1** and **Mat2**, which contain SFR package information by reach and by segment, respectively. Also produces a shapefile of linework broken by the grid, which contains the stream geometries represented by the SFR reaches.
@@ -29,45 +34,91 @@ Contains methods to check for common SFR problems such as
 
 
 
-## Dependencies:
+### Dependencies:
 
 SFRmaker runs in Python 2.7. The Anaconda Scientific Python Distribution (<https://store.continuum.io/cshop/anaconda/>) is available for free, and provides an easy way for managing python packages through its package manager **conda**. Additional dependencies are listed by module below:
 
 ####sfr_classes  
-* **ESRI Arcpy**, which **must be added to the path of your main python distribution**. See instructions below.
-* **flopy**, available via **pip**, or at <https://github.com/modflowpy/flopy>
+* #####ESRI Arcpy
+which **must be added to the path of your main python distribution**.
+
+	**Adding Arcpy to the python path**:  	
+	1) **Make a file called: Desktop10.pth**, with the following lines:  
+
+	```
+	C:\ArcGIS\Desktop10.2\arcpy  
+	C:\ArcGIS\Desktop10.2\bin64  
+	C:\ArcGIS\Desktop10.2\ArcToolbox\Scripts
+	```
+Notes:  
+These lines tell python where to find arcpy and its associated packages/libraries. The second line may be "bin" for 32 bit or "bin64" for 64 bit. If you are using ArcMap 10.0 or 10.1, "Desktop10.2" in the above path needs to be modified accordingly.
+
+	2) **Place this file where python can find it.** For Anaconda on Windows 7, this path should work (replacing ```aleaf``` with your username):
+
+		C:\Users\aleaf\AppData\Local\Continuum\Anaconda
+		
+	The **Lib** subfolder in this folder or the **site-packages** folder within Lib may also work. Python checks these folders by default when looking for modules; within these folders, it looks for files with the extension **.pth**, and checks for additional paths within those files (i.e., the arcpy paths listed above).
+	
+* ####flopy
+available via **pip** (see instructions below), or at <https://github.com/modflowpy/flopy> 
 
 ####postproc  
-* **fiona**
-* **shapely** (fiona and shapely are available via **conda** or **pip**; instructions on installing pip and these packages are available here: <https://github.com/aleaf/LinesinkMaker/blob/master/README.md>, under **"Installing the required Python packages""**)
-* **rasterstats** (also available via **pip**, see <https://github.com/perrygeo/python-raster-stats> for more info)
-* **flopy**
-* **GIS_utils** (see <https://github.com/aleaf/GIS_utils>)
+
+* #####Instructions for Windows users
+ The postproc module depends on a collection of packages (**fiona, shapely, gdal, pyproj, rasterio, rasterstats**, and **GIS_utils**) that provide python bindings to open source GIS libraries. **The best bet for Windows users** is to install the required packages from the Unofficial Windows Binaries for Python Extention Packages site:
+ <http://www.lfd.uci.edu/~gohlke/pythonlibs/>  
+ The binaries on this site generally include the underlying libraries. The general approach is to  
+ 
+ 
+ 	**1)** install **pip**; with the Anaconda Distribution, this can be installed using the **conda** package manager:  
+ 
+ ``` 
+>conda install pip
+```
+ 
+ 	**2)** Then for each package, from the Unofficial Windows Binaries site above, download the appropriate binary for the python version and either 32 or 64 bit Windows, e.g.  
+```GDAL‑1.11.2‑cp27‑none‑win_amd64.whl``` for Python 2.7 on 64-bit Windows  
+
+
+	**3)** Open a command prompt in your Downloads folder by right clicking on the folder and then selecting *Open command window here*. Use pip to install the *.whl* files. E.g., for the above gdal file  
+
+	```
+	>pip install GDAL‑1.11.2‑cp27‑none‑win_amd64.whl
+	```
+	Links to the whl files for each package are provided below:  
+
+	* **fiona** (<http://www.lfd.uci.edu/~gohlke/pythonlibs/#fiona>)
+	* **shapely** (<http://www.lfd.uci.edu/~gohlke/pythonlibs/#shapely>)
+	* **gdal** (<http://www.lfd.uci.edu/~gohlke/pythonlibs/#gdal>)
+	* **rasterio** (<http://www.lfd.uci.edu/~gohlke/pythonlibs/#rasterio>)
+	* **pyrpoj** (<http://www.lfd.uci.edu/~gohlke/pythonlibs/#pyproj>)
+	
+
+	Once gdal, shapely and rasterio are installed, **rasterstats** can be installed using pip:
+
+	```
+	>pip install rasterstats
+	```
+	see <https://github.com/perrygeo/python-raster-stats> for more info on rasterstats.
+
+	**GIS_utils** is just a collection of macros to facilitate basic GIS tasks. If SFRmaker ever gets made into a coherent package, 	GIS_utils will likely be integrated. In the meantime, it can be installed by running  
+
+	```
+	>pip install https://github.com/aleaf/GIS_utils/archive/master.zip
+	```
 
 
 
 
   
 
-####Adding Arcpy to the python path:  
-1) **Make a file called: Desktop10.pth**, with the following lines:
-```
-C:\ArcGIS\Desktop10.1\arcpy  
-C:\ArcGIS\Desktop10.1\bin64  
-C:\ArcGIS\Desktop10.1\ArcToolbox\Script
-```
-Notes:  
-The second line may be "bin" for 32 bit or "bin64" for 64 bit.  
-If you are using ArcMap 10.0 or 10.2, "Desktop10.1" in the above path needs to be modified accordingly.
-
-2) **Place this file in your python path where all your site-packages are installed**. For example, for users of the Enthought Canopy Distribution, the file would need to be placed at:
-`C:\Users\<username>\AppData\Local\Enthought\Canopy\User\Lib\site-packages\`
 
 
 
-## Input requirements for SFR_classes:
 
-#####1) NHDPlus v2 hydrography datasets  
+## Input data requirements
+
+#####1) NHDPlus v2 hydrography datasets    
  * Available at <http://www.horizon-systems.com/NHDPlus/NHDPlusV2_data.php>
  * Archives needed/relevant files:
  	* **NHDPlusV21_XX_YY_NHDSnapshot_**.7z**   
@@ -79,24 +130,26 @@ If you are using ArcMap 10.0 or 10.2, "Desktop10.1" in the above path needs to b
 		* PlusFlowlineVAA.dbf
 	* If model domain contains a major divide (i.e. multiple HUC2 hydrologic regions), need to merge relevant NHD datasets (e.g. 04 and 07) prior to running this script
 
-**Notes:**  
+	**Notes:**  
 
-* XX is Drainage Area ID (e.g., GL for Great Lakes) and YY is the Vector Processing Unit (VPU; e.g. 04) in the  above (see NHDPlus website for details).  
-* If model domain encompases multiple Drainage Areas, need to merge NHD datasets prior to running this script (e.g. in ArcMap, using the Merge tool under *ArcToolbox>Data Management>General>Merge*)  
-* The NHDFlowline shapefile should be reprojected into the same coordinate system of the model, if necessary. In ArcMap this can be done under *ArcToolbox>Data Management>Projections and Transformations*.
-* **Edit the NHD datasets at your own risk!!** Editing may corrupt routing or other information, greatly complicating automated setup of an SFR package. NHD elevation units should be left as is (cm).
+	* XX is Drainage Area ID (e.g., GL for Great Lakes) and YY is the Vector Processing Unit (VPU; e.g. 04) in the  above (see NHDPlus 	website for details).  
+	* If model domain encompases multiple Drainage Areas, need to merge NHD datasets prior to running this script (e.g. in ArcMap, using the Merge tool under *ArcToolbox>Data Management>General>Merge*)  
+	* The NHDFlowline shapefile should be reprojected into the same coordinate system of the model, if necessary. In ArcMap this can be done under *ArcToolbox>Data Management>Projections and Transformations*.
+	* **Edit the NHD datasets at your own risk!!** Editing may corrupt routing or other information, greatly complicating automated setup of an SFR package. NHD elevation units should be left as is (cm).
  
-#####2) DEM and/or topographic contours for area of model domain  
-* Available from the National Map Viewer and Download Platform: <http://viewer.nationalmap.gov/viewer/>  
-	* In "Overlays" tab, select "Elevation Availability" to view available DEM resolutions  
-	* click "Download Data" link in upper right to download DEM(s)  
-	* select "elevation" and/or "contours" to download  
-* Internal WIWSC source for DEMs in Wisconsin:  
-  `\\igsarmewfsapa\GISData\BaseData\Wisconsin\Statewide\Elevation\NED_2013_10m\NED_10m_DEM_WI_UP.gdb`  
-  
-**Notes:**  
+#####2) DEM  
+Used for deriving streambed top elevations for individual reaches (below the 100,000k scale of NHDPlus)  
+**Note:** SFRmaker doesn’t edit the DEM. The general approach is to sample elevations from the DEM and then smooth them so that they decrease in the downstream direction. See workflow instructions below.
 
-* If model domain area has multiple DEMs or elevation contour shapefiles, they need to be merged prior to setting up SFR. The merged DEM should be in the same coordinate system as the model.  
+* Available from the National Map Viewer and Download Platform: <http://viewer.nationalmap.gov/viewer/>  
+* In "Overlays" tab, select "Elevation Availability" to view available DEM resolutions  
+* click "Download Data" link in upper right to download DEM(s)  	
+* select "elevation" and/or "contours" to download  
+
+  
+	**Notes:**  
+	
+	If model domain area has multiple DEMs or elevation contour shapefiles, they need to be merged prior to setting up SFR. The merged 	DEM should be in the same coordinate system as the model.
 
 #####3) Model grid information
 * polygon shapefile export of model grid (in same coordinate system as Flowlines and DEM)  
@@ -110,13 +163,15 @@ If you are using ArcMap 10.0 or 10.2, "Desktop10.1" in the above path needs to b
 * **Mat2** (Text file table with segment/routing data (e.g. icalc, outseg, iupseg, etc.) ) 
   
   
-## Workflow for building SFR input:
+## Workflow for building SFR package:
+
 ####Run sfr_classes
+With the XML input file, the SFR_main.py script (calling the methods in sfr_classes) will produce two tables, **Mat1** and **Mat2**, with SFR reach and segment information.
   
 1) **Setup XML input file** (see EXAMPLE.XML in \<InputFiles> section) to point to the above input datasets  
   
 * check settings in \<GlobalSettings> section; make sure that \<preproc> is set to **True**  
-* select an elevation method under \<elevflag
+* Set \<elevflag> to NHDPlus (this will set segment end elevations from NHDPlus COMID min/max elevations in the **elevslope** table)
 
 2) Make sure that the "infile" variable in **SFR_main.py** (see SFR_main_EXAMPLE.py) points to the XML input file. Also make sure that the calls to classes are entered correctly.
 
@@ -130,11 +185,17 @@ If you are using ArcMap 10.0 or 10.2, "Desktop10.1" in the above path needs to b
 * **edit the offending segments** (COMIDs) in the shapefile specified under \<IntermediateFiles>\<intersect> in the XML input file (usually this means deleting the parts of multi-part COMIDs that are isolated by the grid boundary, and possibly deleting any unconnected segments).  
   
 5) set \<preproc> in the XML input file to False (meaning the existing \<intersect> shapefile will be read in lieu of the preprocessing operations). Then **rerun SFR_main.py**.
+
 ####Run postproc and diagnostics 
-1) Once the reach and segment information tables have been written, the methods in **postproc.py** can be run to address all of the issues listed under the **postproc** and **diagnostics** modules above. An example workflow for **postproc** is given here:  
+1) Once the reach and segment information tables (**Mat1** and **Mat2**) have been written, the methods in **postproc.py** can be run to address all of the issues listed under the **postproc** and **diagnostics** modules above. An example workflow for **postproc** is given here:  
   
 <http://nbviewer.ipython.org/github/aleaf/SFRmaker/blob/master/Examples/Example_postproc_workflow.ipynb>  
 
+Streambed top elevations are set by two methods in postproc.py:  
+* **reset_m1_streambed_top_from_dem()** will sample the minimum DEM elevation for each SFR reach, using zonal statistics.  
+* **smooth_segment_interiors()** will take the sampled minimum elevations, and enforce that they decrease in the downstream direction. The segment end elevations from NHDPlus are retained, ensuring that segment elevations do not rise from start to end. 
+
+As shown in the above example, it is a good idea to run the diagnostics module. This will perform a lot of checks to help avoid common problems with SFR setup.
 
 ## Visualizating the results:  
 

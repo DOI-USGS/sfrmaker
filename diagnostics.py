@@ -132,7 +132,9 @@ class diagnostics(SFRdata):
         else:
             print 'passed.'
 
-
+        '''
+        Need to add check for sb elevations above cell tops! (floating reaches)
+        '''
         print '\nChecking for MODFLOW altitude errors...'
         if self.elevs is None:
             print 'Model elevations not found. Please run read_dis2() with the model DIS file.'
