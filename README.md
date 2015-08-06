@@ -60,14 +60,47 @@ These lines tell python where to find arcpy and its associated packages/librarie
 	The **Lib** subfolder in this folder or the **site-packages** folder within Lib may also work. Python checks these folders by default when looking for modules; within these folders, it looks for files with the extension **.pth**, and checks for additional paths within those files (i.e., the arcpy paths listed above).
 	
 * ####flopy
-available via **pip**, or at <https://github.com/modflowpy/flopy> 
+available via **pip** (see instructions below), or at <https://github.com/modflowpy/flopy> 
 
-####postproc  
-* **fiona**
-* **shapely** (fiona and shapely are available via **conda** or **pip**; instructions on installing pip and these packages are available here: <https://github.com/aleaf/LinesinkMaker/blob/master/README.md>, under **"Installing the required Python packages""**)
-* **rasterstats** (also available via **pip**, see <https://github.com/perrygeo/python-raster-stats> for more info)
-* **flopy**
-* **GIS_utils** (see <https://github.com/aleaf/GIS_utils>)
+####postproc
+#####Instructions for Windows users
+ The postproc module depends on a collection of packages (**fiona, shapely, gdal, rasterio, rasterstats**, and **GIS_utils**) that provide python bindings to open source GIS libraries. **The best bet for Windows users** is to install the required packages from the Unofficial Windows Binaries for Python Extention Packages site:
+ <http://www.lfd.uci.edu/~gohlke/pythonlibs/>  
+ The binaries on this site generally include the underlying libraries. The general approach is to  
+ 
+ **1)** install **pip**; with the Anaconda Distribution, this can be installed using the **conda** package manager:  
+ 
+ ``` 
+>conda install pip
+```
+ 
+ **2)** Then for each package, from the Unofficial Windows Binaries site above, download the appropriate binary for the python version and either 32 or 64 bit Windows, e.g.  
+```GDAL‑1.11.2‑cp27‑none‑win_amd64.whl``` for Python 2.7 on 64-bit Windows  
+
+**3)** Open a command prompt in your Downloads folder by right clicking on the folder and then selecting *Open command window here*. Use pip to install the *.whl* files. E.g., for the above gdal file  
+
+```
+>pip install GDAL‑1.11.2‑cp27‑none‑win_amd64.whl
+```
+Link to the whl files for each package are provided below:  
+
+* **fiona** (<http://www.lfd.uci.edu/~gohlke/pythonlibs/#fiona>)
+* **shapely** (<http://www.lfd.uci.edu/~gohlke/pythonlibs/#shapely>)
+* **gdal** (<http://www.lfd.uci.edu/~gohlke/pythonlibs/#gdal>)
+* **rasterio** (<http://www.lfd.uci.edu/~gohlke/pythonlibs/#rasterio>)
+
+Once gdal, shapely and rasterio are installed, **rasterstats** can be installed using pip:
+
+```
+>pip install rasterstats
+```
+see <https://github.com/perrygeo/python-raster-stats> for more info on rasterstats.
+
+**GIS_utils** is just a collection of macros to facilitate basic GIS tasks. If SFRmaker ever gets made into a coherent package, GIS_utils will likely be integrated. In the meantime, it can be installed by running  
+
+```
+>pip install https://github.com/aleaf/GIS_utils/archive/master.zip
+```
 
 
 
