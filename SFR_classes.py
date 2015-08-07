@@ -7,7 +7,6 @@ import numpy as np
 import SFR_arcpy
 import time
 import datetime
-import discomb_utilities as disutil #  utility to read in a dis file
 import pickle
 import math
 import gzip
