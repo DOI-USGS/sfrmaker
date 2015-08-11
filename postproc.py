@@ -49,7 +49,7 @@ class SFRdata(object):
     # u'bed_roughness', u'node', u'reachID', u'outseg'], dtype='object')
 
     def __init__(self, sfrobject=None, Mat1=None, Mat2=None, sfr=None, node_column=False,
-                 mfpath='', mfnam=None, mfdis=None,
+                 mfpath='', mfnam=None, mfdis=None, mfgridshp=None, mfgridshp_node_col='node',
                  dem=None, dem_units_mult=1, landsurfacefile=None, landsurface_column=None,
                  GIS_mult=1, to_meters_mult=0.3048,
                  Mat2_out=None, xll=0.0, yll=0.0, prj=None, proj4=None, epsg=None,
@@ -135,12 +135,16 @@ class SFRdata(object):
                 else:
                     self.m1.rename(columns={node_column, 'node'}, inplace=True)
                     self.node_column = 'node' # so that some code doesn't break for the time being
+                return
                 self.m1['model_top'] = [self.elevs_by_cellnum[c] for c in self.m1.node]
             else:
                 self.mfpath = ''
                 self.mfnam = None
                 self.mfdis = None
                 self.basename = 'MF'
+
+            if mfgridshp is not None:
+                self._read_geoms_from_mfgridshp(mfgridshp, node_column=mfgridshp_node_col)
 
             self.node_attribute = 'node' # compatibility with sfr_plots and sfr_classes
 
@@ -254,42 +258,57 @@ class SFRdata(object):
                 cellnum = r*self.NCOL + c + 1
                 self.elevs_by_cellnum[cellnum] = self.layer_elevs[0, r, c]
 
-    def get_cell_geometries(self):
+    def _read_geoms_from_mfgridshp(self, mfgridshp, node_field=None, row_field=None, column_field=None):
 
-        print 'computing cell geometries...'
-        self.centroids = self.dis.get_node_coordinates()
-        self.get_cell_centroids()
+        df = GISio.shp2df(self.mfgridshp)
+        if node_field is None and row_field is not None and column_field is not None:
+            nrow, ncol = df[row_field].max(), df[column_field].max()
+            df['node'] = (ncol * (df[row_field] - 1) + df[column_field]).astype('int')
+            node_field = 'node_field'
+        self.m1.geometry = df.ix[df[node_field].isin(self.m1.node.tolist()), 'geometry'].tolist()
 
-        for i, dfr in self.m1.iterrows():
-            r, c = dfr.row - 1, dfr.column - 1
-            cn = r * self.dis.ncol + c + 1
-            cx, cy = dfr.centroids
-            dx = self.dis.delr[c] * self.GIS_mult
-            dy = self.dis.delc[r] * self.GIS_mult  # this is confusing, may be a bug in flopy
+    def get_cell_geometries(self, mfgridshp=None, node_field='node'):
 
-            # calculate vertices for parent cell
-            x0 = cx - 0.5 * dx
-            x1 = cx + 0.5 * dx
-            y0 = cy - 0.5 * dy
-            y1 = cy + 0.5 * dy
+        if mfgridshp is None:
+            print 'computing cell geometries...'
+            #self.centroids = self.dis.get_node_coordinates()
+            self.get_cell_centroids()
 
-            self.cell_geometries[cn] = Polygon([(x0, y0), (x1, y0), (x1, y1), (x0, y1), (x0, y0)])
-        self.m1['geometry'] = [self.cell_geometries[cn] for cn in self.m1.node]
+            for i, dfr in self.m1.iterrows():
+                r, c = dfr.row - 1, dfr.column - 1
+                cn = r * self.dis.ncol + c + 1
+                cx, cy = dfr.centroids
+                dx = self.dis.delr[c] * self.GIS_mult
+                dy = self.dis.delc[r] * self.GIS_mult  # this is confusing, may be a bug in flopy
 
-    def get_cell_centroids(self):
+                # calculate vertices for parent cell
+                x0 = cx - 0.5 * dx
+                x1 = cx + 0.5 * dx
+                y0 = cy - 0.5 * dy
+                y1 = cy + 0.5 * dy
+
+                self.cell_geometries[cn] = Polygon([(x0, y0), (x1, y0), (x1, y1), (x0, y1), (x0, y0)])
+            self.m1['geometry'] = [self.cell_geometries[cn] for cn in self.m1.node]
+        else:
+            self._read_geoms_from_mfgridshp(mfgridshp=mfgridshp, node_field=node_field)
+
+    def get_cell_centroids(self, mfgridshp=None, node_field='node'):
         """Adds column of cell centroids coordinates (tuples) to Mat1,
         from flopy DIS object.
         """
 
-        self.centroids = self.dis.get_node_coordinates()
+        if mfgridshp is None:
+            self.centroids = self.dis.get_node_coordinates()
 
-        centroids = []
-        for i, r in self.m1.iterrows():
-            r, c = r.row - 1, r.column - 1
-            cx = self.centroids[1][c] * self.GIS_mult + self.xll
-            cy = self.centroids[0][r] * self.GIS_mult + self.yll
-            centroids.append((cx, cy))
-
+            centroids = []
+            for i, r in self.m1.iterrows():
+                r, c = r.row - 1, r.column - 1
+                cx = self.centroids[1][c] * self.GIS_mult + self.xll
+                cy = self.centroids[0][r] * self.GIS_mult + self.yll
+                centroids.append((cx, cy))
+        else:
+            self._read_geoms_from_mfgridshp(mfgridshp, node_field=node_field)
+            centroids = [g.centroid for g in self.m1.geometry]
         self.m1['centroids'] = centroids
 
     def map_outsegs(self, max_levels=1000):

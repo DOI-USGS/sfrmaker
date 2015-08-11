@@ -4,12 +4,18 @@ Notes on SFR input:
     All shps should be in (same) model coordinate units (e.g. ft.)
     If model domain contains a major divide, need to merge relevant NHD datasets 
         (e.g. 04 and 07) prior to running this script
-    Put in paths to input/output files as-is (i.e. no double \\), surrounded by single quotes
+    Put in FULL paths to input/output files as-is (i.e. no double \\)
+
+    Make sure that all XML tags are closed (i.e. <tag></tag>). Otherwise
+    you will get an xml.etree.ElementTree.ParseError
 -->
 <GlobalSettings>
     <!-- working_dir:
-    full path to working folder where intermediate and output will be generated. -->
-    <working_dir>None</working_dir>
+    this option has been problemtic with arcpy. The best approach is to include the
+    SFR_main.py script in the same folder as the input files, and leave this tag empty
+    (sets the working directory to the current directory).
+     -->
+    <working_dir></working_dir>
     <!-- modflow_path:
     path to MODFLOW input files (dis, nam, etc.; used by flopy) -->
     <modflow_path>../model/ozarkgwmod/3-Input/A-calibration</modflow_path>
