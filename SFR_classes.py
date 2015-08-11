@@ -448,21 +448,21 @@ class CellPropsAll:
         #for each cellnumber
 
 
-        cells = arcpy.da.SearchCursor(SFRdata.CELLS, ['SHAPE@XY', 'delx', 'dely', SFRdata.node_attribute, 'row', 'column'])
-
+        #cells = arcpy.da.SearchCursor(SFRdata.CELLS, ['SHAPE@XY', 'delx', 'dely', SFRdata.node_attribute, 'row', 'column'])
+        cells = arcpy.da.SearchCursor(SFRdata.CELLS, ['SHAPE@XY', SFRdata.node_attribute, 'row', 'column'])
         try:
             cells.fields
         except RuntimeError:
             print "At least one of the attribute names in {} is invalid. If grid is structured, the attributes " \
                   "containing row and column information should be called 'row' and 'column' respectively.".format(SFRdata.MFgrid)
         for cell in cells:
-            cellnum = int(cell[3])
-            dx = float(cell[1])
-            dy = float(cell[2])
+            cellnum = int(cell[1])
+            dx = 1.0 #float(cell[1])
+            dy = 1.0 #float(cell[2])
             centroid = cell[0]
             minside = min([dx, dy])
-            row = int(cell[4])
-            column = int(cell[5])
+            row = int(cell[2])
+            column = int(cell[3])
             self.allcells[cellnum] = CellProps(dx, dy, centroid, minside, row, column)
 
 
@@ -1939,7 +1939,7 @@ class SFROperations:
                 localseq = 0
                 for cFragID in FragIDdata.COMID_orderedFragID[ccomid]:
                     localseq += 1
-                    ofp.write('{0:d},{1:d},{2:d},{3:d},{4:d},{5:d},{6:d},{7:d},{8:d}\n'.format(
+                    ofp.write('{0:.0f},{1:.0f},{2:.0f},{3:.0f},{4:.0f},{5:.0f},{6:.0f},{7:.0f},{8:.0f}\n'.format(
                     FragIDdata.allFragIDs[cFragID].cellnum,
                     ccomid,
                     COMIDdata.allcomids[ccomid].hydrosequence,
@@ -2000,13 +2000,13 @@ class SFROperations:
                 if SFRbot < cellbottoms[b]:
                     if b+1 >= nlay:
                         warnstring1 = 'Streambottom elevation={0:f}, Model bottom={1:f} at ' \
-                              'row {2:d}, column {3:d}, cellnum {4:d}'.format(
+                              'row {2:.0f}, column {3:.0f}, cellnum {4:.0f}'.format(
                               SFRbot, cellbottoms[-1], r, c, (r-1)*ncol + c)
                         warnstring2 = 'Land surface is {0:f}'.format(topdata[r-1, c-1])
                         ofp_bottom_warnings.write(warnstring1  + warnstring2 + '\n')
                         print warnstring1
                         print warnstring2
-                        below_bottom.write('{0:f},{1:f},{2:f},{3:d},{4:d}\n'.format(
+                        below_bottom.write('{0:f},{1:f},{2:f},{3:.0f},{4:.0f}\n'.format(
                             SFRbot, cellbottoms[-1], topdata[r-1, c-1], (r-1)*ncol + c, SFRinfo['segment'][i]))
                         below_bot_adjust[(r-1, c-1)] = cellbottoms[-1] - SFRbot  # diff between SFR bottom and model bot
                         # fix the bottoms in this loop instead of below
@@ -2050,8 +2050,8 @@ class SFROperations:
         ofp.write('Layer\t\tNumber of assigned reaches\n')
         print '\nLayer assignments:'
         for i in range(nlay):
-            ofp.write('{0:d}\t\t{1:d}\n'.format(freq[1][i], freq[0][i]))
-            print '{0:d}\t\t{1:d}\n'.format(freq[1][i], freq[0][i])
+            ofp.write('{0:.0f}\t\t{1:.0f}\n'.format(freq[1][i], freq[0][i]))
+            print '{0:.0f}\t\t{1:.0f}\n'.format(freq[1][i], freq[0][i])
         ofp.close()
 
         # write new SFRmat1 file
@@ -2068,7 +2068,7 @@ class SFROperations:
 
         if not SFRdata.Lowerbot:
             if nbelow > 0:
-                print "Warning {0:d} SFR streambed bottoms were below the model bottom. See below_bots.csv".format(
+                print "Warning {0:.0f} SFR streambed bottoms were below the model bottom. See below_bots.csv".format(
                     nbelow)
 
 
@@ -2742,7 +2742,7 @@ class SFRoutput:
                     indat.bedthick,
                     curr_reaches[creach].eff_slope,
                     indat.roughch)
-                printstring = ',{0:.4e},{1:.4e},{2:d},{3:d},{4:.4e},{5:.4e},{6:.4e},{7:.4e},{8:.4e},{9:.4e}\n'.format(
+                printstring = ',{0:.4e},{1:.4e},{2:.0f},{3:.0f},{4:.4e},{5:.4e},{6:.4e},{7:.4e},{8:.4e},{9:.4e}\n'.format(
                     *mixedlist)
                 mat1out.write(printstring)
             #
@@ -2756,7 +2756,7 @@ class SFRoutput:
             mlist1 = (cseg, curr_seg.icalc, curr_seg.outseg, iupseg, iprior, indat.nstrpts)
             mlist2 = (flow, curr_seg.runoff, curr_seg.etsw, curr_seg.pptsw, curr_seg.roughch, indat.roughbk)
             mlist3 = (indat.cdepth, indat.fdepth, indat.awdth, indat.bwdth)
-            printstring = '{0:d},{1:d},{2:d},{3:d},{4:d},{5:d}'.format(*mlist1)
+            printstring = '{0:.0f},{1:.0f},{2:.0f},{3:.0f},{4:.0f},{5:.0f}'.format(*mlist1)
             printstring = printstring+',{0:.5e},{1:.5e},{2:.5e},{3:.5e},{4:.5e},{5:.5e}'.format(*mlist2)
             printstring = printstring+',{0:.5e},{1:.5e},{2:.5e},{3:.5e}'.format(*mlist3)
             mat2out.write('{0:s}\n' .format(printstring))
@@ -2792,7 +2792,7 @@ class SFRoutput:
         if self.indat.tpl:
             ofp.write("ptf ~\n")
         ofp.write("#SFRpackage file generated by Python Script using NHDPlus v2 data\n")
-        ofp.write('{0:d} {1:d} {2:d} {3:d} {4:e} {5:e} {6:d} {7:d} {8:d} {9:d} {10:d} {11:d}\n'.format(
+        ofp.write('{0:.0f} {1:.0f} {2:.0f} {3:.0f} {4:e} {5:e} {6:.0f} {7:.0f} {8:.0f} {9:.0f} {10:.0f} {11:.0f}\n'.format(
             -1*nreaches,
             nseg,
             self.indat.nsfrpar,
@@ -2815,7 +2815,7 @@ class SFRoutput:
                 bedK = '~SFRc~'
             else:
                 bedK = '{0:e}'.format(Mat1['bed_K'][i])
-            ofp.write('{0:d} {1:d} {2:d} {3:d} {4:d} {5:e} {6:e} {7:e} {8:e} {9:s}\n'.format(
+            ofp.write('{0:.0f} {1:.0f} {2:.0f} {3:.0f} {4:.0f} {5:e} {6:e} {7:e} {8:e} {9:s}\n'.format(
                 Mat1['layer'][i],
                 Mat1['row'][i],
                 Mat1['column'][i],
@@ -2827,12 +2827,12 @@ class SFRoutput:
                 Mat1['bed_thickness'][i],
                 bedK))
 
-        ofp.write('{0:d} 0 0 0\n'.format(nseg))
+        ofp.write('{0:.0f} 0 0 0\n'.format(nseg))
         for i in range(len(Mat2)):
             seg = Mat2['segment'][i]
             seg_Mat1_inds = np.where(Mat1['segment'] == seg)
             seginfo = Mat1[seg_Mat1_inds]
-            ofp.write('{0:d} {1:d} {2:d} 0 {3:e} 0.0 0.0 0.0 {4:e}\n'.format(
+            ofp.write('{0:.0f} {1:.0f} {2:.0f} 0 {3:e} 0.0 0.0 0.0 {4:e}\n'.format(
                 seg,
                 self.indat.icalc,
                 Mat2['outseg'][i],
@@ -2958,7 +2958,7 @@ class SFRoutput:
                     except KeyError:
                         continue
 
-                    print "\r{:d}%".format(100 * knt / nSFRcells),
+                    print "\r{:.0f}%".format(100 * knt / nSFRcells),
                     # iterate over multi-index (allows for multiple reaches in one cell)
                     for uniquereach in Mat1.ix[cellnum].index:
                         knt += 1
