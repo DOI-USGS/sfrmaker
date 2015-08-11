@@ -147,6 +147,8 @@ class SFRInput:
         # or, if modflow path isn't supplied, use mfdis as-is
         try:
             self.mfpath = inpars.findall('.//modflow_path')[0].text
+            if self.mfpath is None:
+                self.mfpath = ''
             self.mfnam  = os.path.split(inpars.findall('.//modflow_namfile')[0].text)[-1]
             self.MFdis = os.path.split(inpars.findall('.//MFdis')[0].text)[-1]
         except:
