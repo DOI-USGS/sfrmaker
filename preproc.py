@@ -106,8 +106,13 @@ class NHDdata(object):
             self.domain = shape(fiona.open(model_domain).next()['geometry'])
             self.domain_proj4 = get_proj4(model_domain)
         else:
-            #print 'setting model domain to extent of grid...'
-            #self.domain = unary_union(self.grid.geometry.tolist())
+            print 'setting model domain to extent of grid ' \
+                  'by performing unary union of grid cell geometries...\n' \
+                  '(may take a few minutes for large grids)'
+            # add tiny buffer to overcome floating point errors in gridcell geometries
+            # (otherwise a multipolygon feature may be returned)
+            geoms = [g.buffer(0.001) for g in self.grid.geometry.tolist()]
+            self.domain = unary_union(geoms)
 
         # sort and pair down the grid
         if mf_grid_node_col is not None:
@@ -181,7 +186,7 @@ class NHDdata(object):
     def assign_segments(self):
 
         # create segment numbers
-        self.df.sort('COMID', inplace=True)
+        #self.df.sort('COMID', inplace=True)
         self.df['segment'] = np.arange(len(self.df)) + 1
 
         # reduce dncomids to 1 per segment
@@ -193,7 +198,8 @@ class NHDdata(object):
             # if none match, select the first dncomid
             if len(matching_levelpaths) == 0:
                 matching_levelpaths = [r.dncomids[0]]
-
+            else:
+                matching_levelpaths = list(np.unique(matching_levelpaths))
             self.df.set_value(i, 'dncomids', matching_levelpaths)
 
         # assign upsegs and outsegs based on NHDPlus routing
@@ -202,7 +208,7 @@ class NHDdata(object):
 
         # make a column of outseg integers
         self.df['outseg'] = [d[0] for d in self.df.dnsegs]
-        self.df.sort('segment', inplace=True)
+        #self.df.sort('segment', inplace=True)
 
     def to_sfr(self, roughness=0.037, streambed_thickness=1, streambedK=1,
                icalc=1,
@@ -214,13 +220,13 @@ class NHDdata(object):
         self.df = self.fl[self.fl_cols].join(self.pfvaa[self.pfvaa_cols], how='inner')
 
         print '\nclipping flowlines to active area...'
-        inside = [g.intersects(self.domain) for g in self.df.geometry]
+        inside = np.array([g.intersects(self.domain) for g in self.df.geometry])
         self.df = self.df.ix[inside].copy()
         self.df.sort('COMID', inplace=True)
         flowline_geoms = self.df.geometry.tolist()
         grid_geoms = self.grid.geometry.tolist()
 
-        print "intersecting flowlines with grid cells..."
+        print "intersecting flowlines with grid cells..." # this part crawls in debug mode
         grid_intersections = GISops.intersect_rtree(grid_geoms, flowline_geoms)
 
         print "setting up segments..."
@@ -379,6 +385,8 @@ def make_mat1(flowline_geoms, fl_segments, fl_comids, grid_intersections, grid_g
     for i in range(len(flowline_geoms)):
         segment_geom = flowline_geoms[i]
         segment_nodes = grid_intersections[i]
+        if fl_segments[i] == 1814963:
+            j=2
 
         if segment_geom.type != 'MultiLineString':
             ordered_reach_geoms, ordered_node_numbers = create_reaches(segment_geom, segment_nodes, grid_geoms)
