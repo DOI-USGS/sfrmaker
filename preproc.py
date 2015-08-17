@@ -1,5 +1,6 @@
 __author__ = 'aleaf'
 
+import time
 import numpy as np
 import pandas as pd
 import fiona
@@ -11,13 +12,17 @@ import GISops
 
 class NHDdata(object):
 
-    def __init__(self, NHDFlowline, PlusFlowlineVAA, PlusFlow,
+    convert_elevslope_to_model_units = {'feet': 0.0328084,
+                                        'meters': 0.01}
+
+    def __init__(self, NHDFlowline=None, PlusFlowlineVAA=None, PlusFlow=None, NHDFcode=None,
+                 elevslope=None,
                  mf_grid=None, mf_grid_node_col=None,
                  nrows=None, ncols=None,
                  mfdis=None, xul=None, yul=None, rot=0,
                  model_domain=None,
                  flowlines_proj4=None, mfgrid_proj4=None, domain_proj4=None,
-                 mf_units_mult=1):
+                 mf_units='feet'):
         """Class for working with information from NHDPlus v2.
         See the user's guide for more information:
         <http://www.horizon-systems.com/NHDPlus/NHDPlusV2_documentation.php#NHDPlusV2 User Guide>
@@ -60,13 +65,14 @@ class NHDdata(object):
         domain_proj4 : str, optional
             Proj4 string for coordinate system of model_domain.
             Only needed if model_domain is supplied as a polygon.
-        mf_units_mult : float
-            multiplier to convert GIS units to MODFLOW units
+        mf_units : str, 'feet' or 'meters'
+            Length units of MODFLOW model
         """
         self.Flowline = NHDFlowline
         self.PlusFlowlineVAA = PlusFlowlineVAA
 
         self.PlusFlow = PlusFlow
+        self.elevslope = elevslope
         self.fl_cols = ['COMID', 'FCODE', 'FDATE', 'FLOWDIR',
                           'FTYPE', 'GNIS_ID', 'GNIS_NAME', 'LENGTHKM',
                           'REACHCODE', 'RESOLUTION', 'WBAREACOMI', 'geometry']
@@ -81,8 +87,11 @@ class NHDdata(object):
         self.xul = xul
         self.yul = yul
         self.rot = rot
-        self.mf_units_mult = mf_units_mult
-        self.GISunits = None
+
+        # unit conversions (set below after grid projection is verified)
+        self.mf_units = mf_units
+        self.mf_units_mult = 1.0 # go from GIS units to model units
+        self.GISunits = None #
         self.to_km = None # converts GIS units to km for arbolate sum
 
         self.fl_proj4 = flowlines_proj4
@@ -95,6 +104,7 @@ class NHDdata(object):
         for attr, input in {'fl': NHDFlowline,
                             'pf': PlusFlow,
                             'pfvaa': PlusFlowlineVAA,
+                            'elevs': elevslope,
                             'grid': mf_grid}.iteritems():
             if isinstance(input, pd.DataFrame):
                 self.__dict__[attr] = input
@@ -130,7 +140,9 @@ class NHDdata(object):
                 self.fl_proj4 = get_proj4(NHDFlowline)
 
         # set the indices
-        for attr, index in {'fl': 'COMID', 'pfvaa': 'ComID'}.iteritems():
+        for attr, index in {'fl': 'COMID',
+                            'pfvaa': 'ComID',
+                            'elevs': 'COMID'}.iteritems():
             if not self.__dict__[attr].index.name == index:
                 self.__dict__[attr].index = self.__dict__[attr][index]
 
@@ -144,7 +156,14 @@ class NHDdata(object):
         # set GIS units from modflow grid projection (used for arbolate sum computation)
         # assumes either m or ft!
         self.GISunits = parse_proj4_units(self.mf_grid_proj4)
-        self.to_km = [0.001 if self.GISunits == 'm' else 0.001/0.3048][0]
+        self.mf_units_mult = 1/0.3048 if self.GISunits == 'm' and self.mf_units == 'feet' \
+                             else 0.3048 if not self.GISunits == 'm' and self.mf_units == 'meters' \
+                             else 1.0
+        self.to_km = 0.001 if self.GISunits == 'm' else 0.001/0.3048
+
+        # convert the elevations from elevslope table
+        self.elevs['Max'] = self.elevs.MAXELEVSMO * self.convert_elevslope_to_model_units[self.mf_units]
+        self.elevs['Min'] = self.elevs.MINELEVSMO * self.convert_elevslope_to_model_units[self.mf_units]
 
         if different_projections(self.fl_proj4, self.mf_grid_proj4):
             print "reprojecting NHDFlowlines from\n{}\nto\n{}...".format(self.fl_proj4, self.mf_grid_proj4)
@@ -154,8 +173,6 @@ class NHDdata(object):
                 and different_projections(self.domain_proj4, self.mf_grid_proj4):
             print "reprojecting model domain from\n{}\nto\n{}...".format(self.domain_proj4, self.mf_grid_proj4)
             self.domain = project(self.domain, self.domain_proj4, self.mf_grid_proj4)
-
-
 
     def list_updown_comids(self):
 
@@ -219,11 +236,14 @@ class NHDdata(object):
         # create a working dataframe
         self.df = self.fl[self.fl_cols].join(self.pfvaa[self.pfvaa_cols], how='inner')
 
+        # bring in elevations from elevslope table
+        self.df = self.df.join(self.elevs[['Max', 'Min']], how='inner')
+
         print '\nclipping flowlines to active area...'
         inside = np.array([g.intersects(self.domain) for g in self.df.geometry])
         self.df = self.df.ix[inside].copy()
         self.df.sort('COMID', inplace=True)
-        flowline_geoms = self.df.geometry.tolist()
+        flowline_geoms = [g.intersection(self.domain) for g in self.df.geometry]
         grid_geoms = self.grid.geometry.tolist()
 
         print "intersecting flowlines with grid cells..." # this part crawls in debug mode
@@ -235,7 +255,10 @@ class NHDdata(object):
         fl_segments = self.df.segment.tolist()
         fl_comids = self.df.COMID.tolist()
 
+        print "setting up reaches and Mat1... (may take a few minutes for large grids)"
+        ta = time.time()
         m1 = make_mat1(flowline_geoms, fl_segments, fl_comids, grid_intersections, grid_geoms)
+        print "finished in {:.2f}s".format(time.time() - ta)
 
         print "computing widths..."
         m1['length'] = np.array([g.length for g in m1.geometry])
@@ -247,6 +270,8 @@ class NHDdata(object):
         width = width_from_arbolate(reach_asums) # widths are returned in m
         if self.GISunits != 'm':
             width = width / 0.3048
+
+        print "multiplying length units by {} to convert from GIS to MODFLOW...".format(self.mf_units_mult)
         m1['width'] = width * self.mf_units_mult
         m1['length'] = m1.length * self.mf_units_mult
 
@@ -266,7 +291,7 @@ class NHDdata(object):
         self.m1 = m1
 
         print "setting up Mat2..."
-        self.m2 = self.df[['segment', 'outseg']]
+        self.m2 = self.df[['segment', 'outseg', 'Max', 'Min']].copy()
         self.m2['icalc'] = icalc
         self.m2.index = self.m2.segment
         print 'Done'
@@ -324,25 +349,45 @@ def create_reaches(part, segment_nodes, grid_geoms):
 
     ordered_node_numbers: list of model cells containing the SFR reaches for the segment
     """
-    reach_geoms = [part.intersection(grid_geoms[c]) for c in segment_nodes]
+    reach_nodes = {}
+    reach_geoms = {}
+    # interesct flowline part with grid nodes
+    reach_intersections = [part.intersection(grid_geoms[c]) for c in segment_nodes]
+
+    # "flatten" all grid cell intersections to single part geometries
+    n = 1
+    for i, g in enumerate(reach_intersections):
+        if g.type == 'LineString':
+            reach_nodes[n] = segment_nodes[i]
+            reach_geoms[n] = g
+            n += 1
+        else:
+            reach_nodes.update({n+nn: segment_nodes[i] for nn, gg in enumerate(g.geoms)})
+            reach_geoms.update({n+nn: gg for nn, gg in enumerate(g.geoms)})
+            n += len(g.geoms)
+
+    # make point features for start and end of flowline part
     start = Point(zip(part.xy[0], part.xy[1])[0])
     end = Point(zip(part.xy[0], part.xy[1])[-1])
 
     ordered_reach_geoms = []
     ordered_node_numbers = []
-    nreaches = len(segment_nodes)
+    nreaches = len(reach_geoms)
     current_reach = start
+
+    # for each flowline part (reach)
     for i in range(nreaches):
-        r = [j for j, g in enumerate(reach_geoms) if current_reach.intersects(g.buffer(1))
-             and segment_nodes[j] + 1 not in ordered_node_numbers]
-        if len(r) > 0:
-            r = r[0]
-            next_reach = reach_geoms[r]
-            ordered_reach_geoms.append(next_reach)
-            ordered_node_numbers.append(segment_nodes[r] + 1)
-            current_reach = next_reach
-        if current_reach.touches(end.buffer(1)):
+        # find the next flowline part (reach) that touches the current reach
+        r = [j for j, g in reach_geoms.iteritems() if current_reach.intersects(g.buffer(0.001))
+             ][0]
+        next_reach = reach_geoms.pop(r)
+        ordered_reach_geoms.append(next_reach)
+        ordered_node_numbers.append(reach_nodes[r] + 1)
+        current_reach = next_reach
+
+        if current_reach.touches(end.buffer(0.001)) and len(ordered_node_numbers) == nreaches:
             break
+    assert len(ordered_node_numbers) == nreaches # new list of ordered node numbers must include all flowline parts
     return ordered_reach_geoms, ordered_node_numbers
 
 def different_projections(proj4, common_proj4):
@@ -375,7 +420,6 @@ def find_next(comid, pftable, comids, max_levels=10):
 
 def make_mat1(flowline_geoms, fl_segments, fl_comids, grid_intersections, grid_geoms):
 
-    print "setting up reaches..."
     reach = []
     segment = []
     node = []
@@ -385,8 +429,6 @@ def make_mat1(flowline_geoms, fl_segments, fl_comids, grid_intersections, grid_g
     for i in range(len(flowline_geoms)):
         segment_geom = flowline_geoms[i]
         segment_nodes = grid_intersections[i]
-        if fl_segments[i] == 1814963:
-            j=2
 
         if segment_geom.type != 'MultiLineString':
             ordered_reach_geoms, ordered_node_numbers = create_reaches(segment_geom, segment_nodes, grid_geoms)
@@ -410,7 +452,6 @@ def make_mat1(flowline_geoms, fl_segments, fl_comids, grid_intersections, grid_g
             print 'bad reach assignment!'
             break
 
-    print "setting up Mat1..."
     m1 = pd.DataFrame({'reach': reach, 'segment': segment, 'node': node,
                             'geometry': geometry, 'comid': comids})
     m1.sort(['segment', 'reach'], inplace=True)
@@ -424,7 +465,7 @@ def parse_proj4_units(proj4string):
     units = [i for i in l if 'units' in i]
     if len(units) == 0:
         return 'latlon'
-    elif 'm' in units:
+    elif 'm' in units[0]:
         return 'm'
     else:
         return 'ft'
