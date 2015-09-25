@@ -340,7 +340,7 @@ class diagnostics(SFRdata):
 
     def plot_segment_linkages(self, linkshp='segment_linkages.shp', outletshp='outlets.shp'):
 
-        from shapely.geometry import LineString
+        from shapely.geometry import LineString, Point
         from GISio import df2shp
 
         print '\nMaking shapefiles of SFR segment linkages and outlet locations...'
@@ -352,10 +352,13 @@ class diagnostics(SFRdata):
 
         linksdf = self.m2[['segment', 'outseg']].copy()
         linksdf['geometry'] = [LineString([geoms[s][1], geoms[o-1][0]])
+                               if o != 0 and o != 999999
+                               else Point(geoms[s][1])
                                for s, o in enumerate(linksdf.outseg)]
-        linksdf = linksdf[linksdf.outseg != 0]
+        outletsdf = linksdf[(linksdf.outseg == 0) | (linksdf.outseg == 999999)].copy()
+        linksdf = linksdf[(linksdf.outseg != 0) & (linksdf.outseg != 999999)].copy()
         df2shp(linksdf, linkshp, prj=self.prj)
-        df2shp(linksdf, outletshp, prj=self.prj)
+        df2shp(outletsdf, outletshp, prj=self.prj)
 
     def _get_sfr_cell_geoms(self):
 
