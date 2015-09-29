@@ -187,15 +187,18 @@ With the XML input file, the SFR_main.py script (calling the methods in sfr_clas
 5) set \<preproc> in the XML input file to False (meaning the existing \<intersect> shapefile will be read in lieu of the preprocessing operations). Then **rerun SFR_main.py**.
 
 ####Run postproc and diagnostics 
-1) Once the reach and segment information tables (**Mat1** and **Mat2**) have been written, the methods in **postproc.py** can be run to address all of the issues listed under the **postproc** and **diagnostics** modules above. An example workflow for **postproc** is given here:  
+1) Once the reach and segment information tables (**Mat1** and **Mat2**) have been written, the methods in **postproc.py** can be run to address all of the issues listed under the **postproc** and **diagnostics** modules above. Example workflows for **postproc** are given here:  
   
 <http://nbviewer.ipython.org/github/aleaf/SFRmaker/blob/master/Examples/Example_postproc_workflow.ipynb>  
+
+<https://github.com/aleaf/SFRmaker/blob/master/Examples/Example_postproc_workflow2.py>
+
 
 Streambed top elevations are set by two methods in postproc.py:  
 * **reset_m1_streambed_top_from_dem()** will sample the minimum DEM elevation for each SFR reach, using zonal statistics.  
 * **smooth_segment_interiors()** will take the sampled minimum elevations, and enforce that they decrease in the downstream direction. The segment end elevations from NHDPlus are retained, ensuring that segment elevations do not rise from start to end. 
 
-As shown in the above example, it is a good idea to run the diagnostics module. This will perform a lot of checks to help avoid common problems with SFR setup.
+As shown in the above examples, it is a good idea to run the diagnostics module. This will perform a lot of checks to help avoid common problems with SFR setup.
 
 ## Visualizating the results:  
 
