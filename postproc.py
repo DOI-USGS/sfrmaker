@@ -49,7 +49,8 @@ class SFRdata(object):
     # u'bed_roughness', u'node', u'reachID', u'outseg'], dtype='object')
 
     def __init__(self, sfrobject=None, Mat1=None, Mat2=None, sfr=None, node_column=False,
-                 mfpath='', mfnam=None, mfdis=None, mfgridshp=None, mfgridshp_node_col='node',
+                 mfpath='', mfnam=None, mfdis=None, mfgridshp=None, mfgridshp_node_field='node',
+                 mfgridshp_row_field=None, mfgridshp_column_field=None, ncol=None,
                  dem=None, dem_units_mult=1, landsurfacefile=None, landsurface_column=None,
                  GIS_mult=1, to_meters_mult=0.3048,
                  Mat2_out=None, xll=0.0, yll=0.0, prj=None, proj4=None, epsg=None,
@@ -73,6 +74,7 @@ class SFRdata(object):
         # need to clean up the init method!!
         self.outpath = ''
         self.elevs = None
+        self.node_column = 'node'
 
         if sfrobject is not None:
             self.__dict__ = sfrobject.__dict__.copy()
@@ -128,13 +130,12 @@ class SFRdata(object):
 
                 # node numbers for cells with SFR
                 if not node_column:
-                    self.node_column = 'node'
                     self.gridtype = 'structured'
                     self.read_dis2()
-                    self.m1['node'] = (self.dis.ncol * (self.m1['row'] - 1) + self.m1['column']).astype('int')
+                    #self.m1['node'] = (self.dis.ncol * (self.m1['row'] - 1) + self.m1['column']).astype('int')
+                    self._compute_mat1_node_numbers(self.dis.ncol)
                 else:
                     self.m1.rename(columns={node_column, 'node'}, inplace=True)
-                    self.node_column = 'node' # so that some code doesn't break for the time being
                 return
                 self.m1['model_top'] = [self.elevs_by_cellnum[c] for c in self.m1.node]
             else:
@@ -144,7 +145,10 @@ class SFRdata(object):
                 self.basename = 'MF'
 
             if mfgridshp is not None:
-                self._read_geoms_from_mfgridshp(mfgridshp, node_column=mfgridshp_node_col)
+                self._read_geoms_from_mfgridshp(mfgridshp, node_field=mfgridshp_node_field,
+                                                row_field=mfgridshp_row_field,
+                                                column_field=mfgridshp_column_field,
+                                                ncol=ncol)
 
             self.node_attribute = 'node' # compatibility with sfr_plots and sfr_classes
 
@@ -191,6 +195,10 @@ class SFRdata(object):
                 raise ValueError('Warning! Circular routing in segments {}.\n'
                                  'Fix manually in Mat2 before continuing'.format(', '.join(map(str, c))))
 
+    def _compute_mat1_node_numbers(self, ncols):
+        self.m1['node'] = (ncols * (self.m1['row'] - 1) + self.m1['column']).astype('int')
+
+
     def parse_mat1_columns(self):
 
         rename_columns = {c: newname for c, newname in self.m1_column_names.iteritems() if c in self.m1.columns}
@@ -212,6 +220,10 @@ class SFRdata(object):
             self.mfdis = mfdis
             self.mfnam = mfnam
             self.mfpath = os.path.split(self.mfdis)[0]
+            #if hasattr(self, 'Elevations'): # clunky
+            #    self.Elevations.mfdis = mfdis
+            #    self.Elevations.mfnam = mfnam
+            #    self.Elevations.mfpath = os.path.split(self.mfdis)[0]
 
         print self.mfdis
         self.m = flopy.modflow.Modflow(model_ws=self.mfpath)
@@ -258,14 +270,29 @@ class SFRdata(object):
                 cellnum = r*self.NCOL + c + 1
                 self.elevs_by_cellnum[cellnum] = self.layer_elevs[0, r, c]
 
-    def _read_geoms_from_mfgridshp(self, mfgridshp, node_field=None, row_field=None, column_field=None):
+    def _read_geoms_from_mfgridshp(self, mfgridshp, node_field=None, row_field=None, column_field=None, ncol=None):
 
-        df = GISio.shp2df(self.mfgridshp)
-        if node_field is None and row_field is not None and column_field is not None:
-            nrow, ncol = df[row_field].max(), df[column_field].max()
-            df['node'] = (ncol * (df[row_field] - 1) + df[column_field]).astype('int')
-            node_field = 'node_field'
-        self.m1.geometry = df.ix[df[node_field].isin(self.m1.node.tolist()), 'geometry'].tolist()
+        df = GISio.shp2df(mfgridshp)
+        if node_field is None: # and row_field is not None and column_field is not None:
+            if row_field is not None and column_field is not None:
+                ncol = df[column_field].max()
+                df['node'] = (ncol * (df[row_field] - 1) + df[column_field]).astype('int')
+                node_field = 'node'
+            else:
+                raise IOError('No node field or row/column field given for grid shapefile.')
+        if 'node' not in self.m1.columns:
+            if ncol is None and column_field:
+                ncol = df[column_field].max()
+            if ncol is not None:
+                self._compute_mat1_node_numbers(ncol)
+            else:
+                raise IOError('No node number information in Mat1. For structured grid, ' \
+                              'cannot compute node numbers without number of columns.' \
+                              'Please provide ncol argument or row and column fields for grid shapefile.')
+        df.index = df[node_field]
+        self.m1['geometry'] = df.ix[self.m1.node.tolist(), 'geometry'].tolist()
+        if os.path.exists(mfgridshp[:-4] + '.prj'):
+            self.prj = mfgridshp[:-4] + '.prj'
 
     def get_cell_geometries(self, mfgridshp=None, node_field='node'):
 
@@ -499,13 +526,13 @@ class SFRdata(object):
         print 'DEM {} elevations assigned to sbtop column in m1'.format(stat)
 
     def reset_model_top_2streambed(self, minimum_thickness=1, outdisfile=None, outsummary=None):
-        if hasattr(self, 'Elevations'):
-            self.Elevations.reset_model_top_2streambed(minimum_thickness=minimum_thickness,
-                                                       outdisfile=outdisfile, outsummary=outsummary)
-        else:
-            self.Elevations = Elevations(sfrobject=self)
-            self.Elevations.reset_model_top_2streambed(minimum_thickness=minimum_thickness,
-                                                       outdisfile=outdisfile, outsummary=outsummary)
+        #if hasattr(self, 'Elevations'):
+        #    self.Elevations.reset_model_top_2streambed(minimum_thickness=minimum_thickness,
+        #                                               outdisfile=outdisfile, outsummary=outsummary)
+        #else:
+        self.Elevations = Elevations(sfrobject=self)
+        self.Elevations.reset_model_top_2streambed(minimum_thickness=minimum_thickness,
+                                                   outdisfile=outdisfile, outsummary=outsummary)
         self.__dict__ = self.Elevations.__dict__.copy()
 
     def incorporate_field_elevations(self, shpfile, elevs_field, distance_tol):
@@ -609,6 +636,7 @@ class SFRdata(object):
         self.diagnostics.check_outlets(model_domain=model_domain)
         self.diagnostics.plot_routing()
         self.diagnostics.check_4gaps_in_routing(model_domain=model_domain, tol=routing_distance_tol)
+        self.diagnostics.plot_segment_linkages()
         self.diagnostics.check_grid_intersection(sfr_linework_shapefile=sfr_linework_shapefile)
 
     def segment_reach2linework_shapefile(self, lines_shapefile, new_lines_shapefile=None,
@@ -1163,7 +1191,7 @@ class Elevations(SFRdata):
         self.minelev = self.sm[-1]
 
 
-    def smooth_segment_interiors(self, report_file='smooth_segment_interiors.txt'):
+    def smooth_segment_interiors(self, report_file='smooth_segment_interiors.txt', tol=1e-5):
 
         print '\nSmoothing segment interiors...\n'
 
@@ -1216,17 +1244,17 @@ class Elevations(SFRdata):
             for i in range(nreaches)[1:]:
 
                 # if the current elevation is equal to or below the minimum
-                if self.segelevs[i] <= self.minelev:
+                if self.segelevs[i] < self.minelev or abs(self.segelevs[i] - self.minelev) < tol:
 
                     # if the current elevation is above the end, interpolate from previous minimum to current
                     # only interpolate to current reach if it is below the previous minimum
                     # (that is, do not allow flat stretches unless the segment minimum elevation is reached)
-                    if self.minelev > self.segelevs[i] >= end:
+                    if self.minelev > self.segelevs[i] > end or abs(self.segelevs[i] - end) < tol:
                         self.interpolate(minloc, i)
                         minloc = i
 
                     # otherwise if it is below the end, interpolate from previous minimum to end
-                    elif self.segelevs[i] <= end:
+                    elif self.segelevs[i] < end:
                         self.interpolate(minloc, nreaches-1)
                         break
                 else:
@@ -1291,6 +1319,7 @@ class Elevations(SFRdata):
             of adjustments made to the model top
 
         """
+
         if outdisfile is None:
             outdisfile = self.mfdis[:-4] + '_adjusted_to_streambed.dis'
 
@@ -1495,6 +1524,7 @@ class Elevations(SFRdata):
         # (mat1 was already sorted by segment)
         confluences['node'] = np.array([g.node.values[0] for s, g in segments])[confluences.segment.values]
         self.m2 = m2
+        self.confluences = confluences
 
 class Widths(SFRdata):
 
@@ -1597,7 +1627,7 @@ class Outsegs(SFRdata):
 
         # list of lists of connected segments
         seglists = [[p]+[s for s in self.outsegs.ix[p, :] if s > 0] for p in self.outsegs.index]
-        '''
+
         # reduce seglists down to unique sets of segments
         unique_lists = []
         for l in seglists:
@@ -1608,7 +1638,7 @@ class Outsegs(SFRdata):
                 unique_lists.append(l)
             else:
                 continue
-        '''
+
         # add model top elevations to dictionary using node numbers
         if 'model_top' not in self.m1.columns:
             self.m1['model_top'] = [self.elevs_by_cellnum[c] for c in self.m1[self.node_column]]
