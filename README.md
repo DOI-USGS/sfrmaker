@@ -57,8 +57,20 @@ These lines tell python where to find arcpy and its associated packages/librarie
 
 		C:\Users\aleaf\AppData\Local\Continuum\Anaconda
 		
-	The **Lib** subfolder in this folder or the **site-packages** folder within Lib may also work. Python checks these folders by default when looking for modules; within these folders, it looks for files with the extension **.pth**, and checks for additional paths within those files (i.e., the arcpy paths listed above).
+	The **Lib** subfolder in this folder or the **site-packages** folder within Lib may also work. Python checks these folders by default when looking for modules; within these folders, it looks for files with the extension **.pth**, and checks for additional paths within those files (i.e., the arcpy paths listed above).  
+
+* ####ArcGIS 10.3:
+ If you are using ArcGIS 10.3, you may need to copy this file (or its equivilant, depending on where the ArcPy-related python distribution is located):  
+ 
+	```  
+	C:\Python27\ArcGISx6410.3\Lib\site-packages\DTBGGP64.pth
+	```
+	to 
 	
+	```
+	C:\Users\USERNAME\Anaconda 	
+	```
+	(or wherever your main python distribution is installed)
 * ####flopy
 available via **pip** (see instructions below), or at <https://github.com/modflowpy/flopy> 
 
