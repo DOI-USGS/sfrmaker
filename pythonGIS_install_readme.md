@@ -4,19 +4,17 @@ The family of packages described below add geospatial functionality to Python, v
 
 Christoph Gohlke's Unofficial Windows Binaries site (<http://www.lfd.uci.edu/~gohlke/pythonlibs/>) has made windows installation a lot easier, by packaging the python modules together with their library dependencies into binary ("wheel") files that can be installed using Python's **pip** package management system.
 
-A brief description of the packages and their dependencies:
+A brief description of the packages and their dependencies:  
 
-| python package         | what it does | underlying library  | python dependencies | unofficial binary |
-|:-------------|:-------------|: -----:| -----:|:-----|
+| python package| what it does | underlying library  | python dependencies | unofficial binary |  
+|:--------------|:------------ | :------------------:| -------------------:| :-----------------|
 | **fiona**     | reads and writes shapefiles | OGR | six, cligj |<http://www.lfd.uci.edu/~gohlke/pythonlibs/#fiona>  |
-| **shapely**   | provides containers and operations for manipulating vector data (points, lines and polygons)      |  GEOS | -- | <http://www.lfd.uci.edu/~gohlke/pythonlibs/#shapely> |
-| **gdal** | are neat      |  GDAL | numpy |  <http://www.lfd.uci.edu/~gohlke/pythonlibs/#gdal>|
-| **rasterio**     | reads and writes rasters | GDAL | **gdal**, affine, cligj (and click), enum34, numpy | <http://www.lfd.uci.edu/~gohlke/pythonlibs/#rasterio>|
+| **shapely**   | provides containers and operations for manipulating vector data (points, lines and polygons)|  GEOS | -- | <http://www.lfd.uci.edu/~gohlke/pythonlibs/#shapely> |
+| **gdal** | python bindings for GDAL library |  GDAL | numpy |<http://www.lfd.uci.edu/~gohlke/pythonlibs/#gdal> |
+| **rasterio** | reads and writes rasters | GDAL | **gdal**, affine, cligj (and click), enum34, numpy | <http://www.lfd.uci.edu/~gohlke/pythonlibs/#rasterio>|
 | **rtree**     | spatial indexing to speed up large intersection operations | libspatialindex | -- | <http://www.lfd.uci.edu/~gohlke/pythonlibs/#rtree>|
 | **pyproj**     | cartographic transformations | PROJ.4 | -- |<http://www.lfd.uci.edu/~gohlke/pythonlibs/#pyproj>|
 | **rasterstats**| summarizes raster data (e.g. zonal statistics)  | GDAL | **gdal**, **rasterio**, **fiona**, **shapely** and numpy| just install using pip (see below) |
-
-
 
 ###1) Installing Python
 If you are not already a python user, I recommend installing the Anaconda Python Distribution (<https://store.continuum.io/cshop/anaconda/>), which is available for free and comes with many popular python packages pre-installed. Assuming you have a 64-bit system, I recommend installing the 64-bit version of Anaconda, as the 32-bit version has memory limitations.
@@ -61,7 +59,8 @@ or upgrading
   
 	```
 >pip install --upgrade <wheel file>
-```
-* #####"side-by-side configuration" error message when trying to use rasterstats or rasterio
+```  
+
+* #####"side-by-side configuration" error message when trying to use rasterstats or rasterio 
 	**Cause:** gdal may be installed incorrectly or there is a version conflict.  
 	**Solution:** try ```pip uninstall gdal```, obtain a gdal binary wheel from <http://www.lfd.uci.edu/~gohlke/pythonlibs/#gdal>, and install the wheel using pip.
