@@ -59,7 +59,8 @@ or upgrading
   
 	```
 >pip install --upgrade <wheel file>
-```
-* #####"side-by-side configuration" error message when trying to use rasterstats or rasterio
+```  
+
+* #####"side-by-side configuration" error message when trying to use rasterstats or rasterio 
 	**Cause:** gdal may be installed incorrectly or there is a version conflict.  
 	**Solution:** try ```pip uninstall gdal```, obtain a gdal binary wheel from <http://www.lfd.uci.edu/~gohlke/pythonlibs/#gdal>, and install the wheel using pip.
