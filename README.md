@@ -77,41 +77,10 @@ available via **pip** (see instructions below), or at <https://github.com/modflo
 ####postproc  
 
 * #####Instructions for Windows users
- The postproc module depends on a collection of packages (**fiona, shapely, gdal, pyproj, rasterio, rasterstats**, and **GIS_utils**) that provide python bindings to open source GIS libraries. **The best bet for Windows users** is to install the required packages from the Unofficial Windows Binaries for Python Extention Packages site:
- <http://www.lfd.uci.edu/~gohlke/pythonlibs/>  
- The binaries on this site generally include the underlying libraries. The general approach is to  
- 
- 
- 	**1)** install **pip**; with the Anaconda Distribution, this can be installed using the **conda** package manager:  
- 
- ``` 
->conda install pip
-```
- 
- 	**2)** Then for each package, from the Unofficial Windows Binaries site above, download the appropriate binary for the python version and either 32 or 64 bit Windows, e.g.  
-```GDAL‑1.11.2‑cp27‑none‑win_amd64.whl``` for Python 2.7 on 64-bit Windows  
+ The postproc module depends on a collection of packages (**fiona, shapely, gdal, pyproj, rasterio, rasterstats**, and **GIS_utils**) that provide python bindings to open source GIS libraries. Instructions for installing these packages can be found here:
+ <https://github.com/aleaf/SFRmaker/blob/master/pythonGIS_install_readme.md>
 
 
-	**3)** Open a command prompt in your Downloads folder by right clicking on the folder and then selecting *Open command window here*. Use pip to install the *.whl* files. E.g., for the above gdal file  
-
-	```
-	>pip install GDAL‑1.11.2‑cp27‑none‑win_amd64.whl
-	```
-	Links to the whl files for each package are provided below:  
-
-	* **fiona** (<http://www.lfd.uci.edu/~gohlke/pythonlibs/#fiona>)
-	* **shapely** (<http://www.lfd.uci.edu/~gohlke/pythonlibs/#shapely>)
-	* **gdal** (<http://www.lfd.uci.edu/~gohlke/pythonlibs/#gdal>)
-	* **rasterio** (<http://www.lfd.uci.edu/~gohlke/pythonlibs/#rasterio>)
-	* **pyrpoj** (<http://www.lfd.uci.edu/~gohlke/pythonlibs/#pyproj>)
-	
-
-	Once gdal, shapely and rasterio are installed, **rasterstats** can be installed using pip:
-
-	```
-	>pip install rasterstats
-	```
-	see <https://github.com/perrygeo/python-raster-stats> for more info on rasterstats.
 
 	**GIS_utils** is just a collection of macros to facilitate basic GIS tasks. If SFRmaker ever gets made into a coherent package, 	GIS_utils will likely be integrated. In the meantime, it can be installed by running  
 
