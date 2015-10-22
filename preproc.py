@@ -98,14 +98,14 @@ class NHDdata(object):
         self.mf_grid_proj4 = mfgrid_proj4
         self.domain_proj4 = domain_proj4
 
-        print "Reading input..."
+        print("Reading input...")
         # handle dataframes or shapefiles as arguments
         # get proj4 for any shapefiles that are submitted
         for attr, input in {'fl': NHDFlowline,
                             'pf': PlusFlow,
                             'pfvaa': PlusFlowlineVAA,
                             'elevs': elevslope,
-                            'grid': mf_grid}.iteritems():
+                            'grid': mf_grid}.items():
             if isinstance(input, pd.DataFrame):
                 self.__dict__[attr] = input
             else:
@@ -116,9 +116,9 @@ class NHDdata(object):
             self.domain = shape(fiona.open(model_domain).next()['geometry'])
             self.domain_proj4 = get_proj4(model_domain)
         else:
-            print 'setting model domain to extent of grid ' \
+            print('setting model domain to extent of grid ' \
                   'by performing unary union of grid cell geometries...\n' \
-                  '(may take a few minutes for large grids)'
+                  '(may take a few minutes for large grids)')
             # add tiny buffer to overcome floating point errors in gridcell geometries
             # (otherwise a multipolygon feature may be returned)
             geoms = [g.buffer(0.001) for g in self.grid.geometry.tolist()]
@@ -142,7 +142,7 @@ class NHDdata(object):
         # set the indices
         for attr, index in {'fl': 'COMID',
                             'pfvaa': 'ComID',
-                            'elevs': 'COMID'}.iteritems():
+                            'elevs': 'COMID'}.items():
             if not self.__dict__[attr].index.name == index:
                 self.__dict__[attr].index = self.__dict__[attr][index]
 
@@ -166,12 +166,12 @@ class NHDdata(object):
         self.elevs['Min'] = self.elevs.MINELEVSMO * self.convert_elevslope_to_model_units[self.mf_units]
 
         if different_projections(self.fl_proj4, self.mf_grid_proj4):
-            print "reprojecting NHDFlowlines from\n{}\nto\n{}...".format(self.fl_proj4, self.mf_grid_proj4)
+            print("reprojecting NHDFlowlines from\n{}\nto\n{}...".format(self.fl_proj4, self.mf_grid_proj4))
             self.fl['geometry'] = projectdf(self.fl, self.fl_proj4, self.mf_grid_proj4)
 
         if model_domain is not None \
                 and different_projections(self.domain_proj4, self.mf_grid_proj4):
-            print "reprojecting model domain from\n{}\nto\n{}...".format(self.domain_proj4, self.mf_grid_proj4)
+            print("reprojecting model domain from\n{}\nto\n{}...".format(self.domain_proj4, self.mf_grid_proj4))
             self.domain = project(self.domain, self.domain_proj4, self.mf_grid_proj4)
 
     def list_updown_comids(self):
@@ -239,28 +239,28 @@ class NHDdata(object):
         # bring in elevations from elevslope table
         self.df = self.df.join(self.elevs[['Max', 'Min']], how='inner')
 
-        print '\nclipping flowlines to active area...'
+        print('\nclipping flowlines to active area...')
         inside = np.array([g.intersects(self.domain) for g in self.df.geometry])
         self.df = self.df.ix[inside].copy()
         self.df.sort('COMID', inplace=True)
         flowline_geoms = [g.intersection(self.domain) for g in self.df.geometry]
         grid_geoms = self.grid.geometry.tolist()
 
-        print "intersecting flowlines with grid cells..." # this part crawls in debug mode
+        print("intersecting flowlines with grid cells...") # this part crawls in debug mode
         grid_intersections = GISops.intersect_rtree(grid_geoms, flowline_geoms)
 
-        print "setting up segments..."
+        print("setting up segments...")
         self.list_updown_comids()
         self.assign_segments()
         fl_segments = self.df.segment.tolist()
         fl_comids = self.df.COMID.tolist()
 
-        print "setting up reaches and Mat1... (may take a few minutes for large grids)"
+        print("setting up reaches and Mat1... (may take a few minutes for large grids)")
         ta = time.time()
         m1 = make_mat1(flowline_geoms, fl_segments, fl_comids, grid_intersections, grid_geoms)
-        print "finished in {:.2f}s".format(time.time() - ta)
+        print("finished in {:.2f}s".format(time.time() - ta))
 
-        print "computing widths..."
+        print("computing widths...")
         m1['length'] = np.array([g.length for g in m1.geometry])
         lengths = m1[['segment', 'length']].copy()
         groups = lengths.groupby('segment')
@@ -271,7 +271,7 @@ class NHDdata(object):
         if self.GISunits != 'm':
             width = width / 0.3048
 
-        print "multiplying length units by {} to convert from GIS to MODFLOW...".format(self.mf_units_mult)
+        print("multiplying length units by {} to convert from GIS to MODFLOW...".format(self.mf_units_mult))
         m1['width'] = width * self.mf_units_mult
         m1['length'] = m1.length * self.mf_units_mult
 
@@ -290,11 +290,11 @@ class NHDdata(object):
 
         self.m1 = m1
 
-        print "setting up Mat2..."
+        print("setting up Mat2...")
         self.m2 = self.df[['segment', 'outseg', 'Max', 'Min']].copy()
         self.m2['icalc'] = icalc
         self.m2.index = self.m2.segment
-        print 'Done'
+        print('Done')
 
     def write_tables(self, basename='SFR'):
         """Write tables with SFR reach (Mat1) and segment (Mat2) information out to csv files.
@@ -311,7 +311,7 @@ class NHDdata(object):
 
         if self.ncols is not None:
             m1_cols.insert(2, 'column')
-        print "writing Mat1 to {0}{1}, Mat2 to {0}{2}".format(basename, 'Mat1.csv', 'Mat2.csv')
+        print("writing Mat1 to {0}{1}, Mat2 to {0}{2}".format(basename, 'Mat1.csv', 'Mat2.csv'))
         self.m1[m1_cols].to_csv(basename + 'Mat1.csv', index=False)
         self.m2[m2_cols].to_csv(basename + 'Mat2.csv', index=False)
 
@@ -324,7 +324,7 @@ class NHDdata(object):
         basename: string
             Output will be written to <basename>.shp
         """
-        print "writing reach geometries to {}".format(basename+'.shp')
+        print("writing reach geometries to {}".format(basename+'.shp'))
         df2shp(self.m1[['reachID', 'node', 'segment', 'reach', 'comid', 'geometry']],
                basename+'.shp', proj4=self.mf_grid_proj4)
 
@@ -367,8 +367,9 @@ def create_reaches(part, segment_nodes, grid_geoms):
             n += len(g.geoms)
 
     # make point features for start and end of flowline part
-    start = Point(zip(part.xy[0], part.xy[1])[0])
-    end = Point(zip(part.xy[0], part.xy[1])[-1])
+    partlist = list(zip(part.xy[0], part.xy[1]))
+    start = Point(partlist[0])
+    end = Point(partlist[-1])
 
     ordered_reach_geoms = []
     ordered_node_numbers = []
@@ -378,7 +379,7 @@ def create_reaches(part, segment_nodes, grid_geoms):
     # for each flowline part (reach)
     for i in range(nreaches):
         # find the next flowline part (reach) that touches the current reach
-        r = [j for j, g in reach_geoms.iteritems() if current_reach.intersects(g.buffer(0.001))
+        r = [j for j, g in reach_geoms.items() if current_reach.intersects(g.buffer(0.001))
              ][0]
         next_reach = reach_geoms.pop(r)
         ordered_reach_geoms.append(next_reach)
@@ -398,7 +399,7 @@ def different_projections(proj4, common_proj4):
     else:
         for prj in proj4, common_proj4:
             if prj is None:
-                print "Warning, no projection information for {}!".format(prj)
+                print("Warning, no projection information for {}!".format(prj))
         return False
 
 def find_next(comid, pftable, comids, max_levels=10):
@@ -449,7 +450,7 @@ def make_mat1(flowline_geoms, fl_segments, fl_comids, grid_intersections, grid_g
                 segment += [fl_segments[i]] * len(geoms)
                 comids += [fl_comids[i]] * len(geoms)
         if len(reach) != len(segment):
-            print 'bad reach assignment!'
+            print('bad reach assignment!')
             break
 
     m1 = pd.DataFrame({'reach': reach, 'segment': segment, 'node': node,
