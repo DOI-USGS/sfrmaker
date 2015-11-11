@@ -580,7 +580,7 @@ class SFRdata(object):
                                                          distance_tol=distance_tol)
         self.__dict__ = self.Elevations.__dict__.copy()
 
-    def plot_stream_profiles(self,  outpdf='complete_profiles.pdf', units='ft', add_profiles={}, minimum_order=1):
+    def plot_stream_profiles(self,  outpdf='complete_profiles.pdf', add_profiles={}, minimum_order=1):
         """Runs the Outsegs.plot_outsegs() method
         """
         if hasattr(self, 'Outsegs'):
@@ -675,7 +675,7 @@ class SFRdata(object):
             pass
         self.diagnostics.check_4gaps_in_routing(model_domain=model_domain, tol=routing_distance_tol)
         self.diagnostics.plot_segment_linkages()
-        self.diagnostics.check_grid_intersection(sfr_linework_shapefile=sfr_linework_shapefile)
+        #self.diagnostics.check_grid_intersection(sfr_linework_shapefile=sfr_linework_shapefile)
 
     def segment_reach2linework_shapefile(self, lines_shapefile, new_lines_shapefile=None,
                                          node_col='node'):
@@ -1724,7 +1724,7 @@ class Outsegs(SFRdata):
                 # record vertical and horizontal position of confluence
                 # (end of segment)
                 cx = confluences[-1][0] + segdf.length.sum()
-                cz = segdf[profiles.keys()].values.max()
+                cz = segdf[list(profiles.keys())].values.max()
                 confluences += [(cx, cz)]
             dist = np.cumsum(rlen)
             dist = list(dist - dist[0])
@@ -1734,7 +1734,7 @@ class Outsegs(SFRdata):
             for k, v in profile.items():
                 plt.plot(dist, v, label=profiles[k], zorder=10)
 
-            confluences[0] = (0, profile.values()[0][0])
+            confluences[0] = (0, list(profile.values())[0][0])
             seglabel_dmin = seglabel_dmin_frac * ax.get_xlim()[1]
             #print seglabel_dmin
             last_label = 0

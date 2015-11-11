@@ -179,7 +179,7 @@ class NHDdata(object):
             self.domain = project(self.domain, self.domain_proj4, self.mf_grid_proj4)
 
     def list_updown_comids(self):
-
+        print('getting routing information from NHDPlus Plusflow table...')
         # setup local variables and cull plusflow table to comids in model
         comids = self.df.index.tolist()
         pf = self.pf.ix[(self.pf.FROMCOMID.isin(comids)) |
@@ -205,7 +205,7 @@ class NHDdata(object):
         self.df['upcomids'] = [fromcomid[tocomid == c].tolist() for c in comids]
 
     def assign_segments(self):
-
+        print('assigning segment numbers...')
         # create segment numbers
         #self.df.sort('COMID', inplace=True)
         self.df['segment'] = np.arange(len(self.df)) + 1
@@ -214,14 +214,14 @@ class NHDdata(object):
         braids = self.df[np.array([len(d) for d in self.df.dncomids]) > 1]
         for i, r in braids.iterrows():
             # select the dncomid that has a matching levelpath
-            matching_levelpaths = np.array(r.dncomids)[self.df.ix[self.df.COMID.isin(r.dncomids), 'LevelPathI'].values
-                                             == r.LevelPathI]
+            levelpath_matches = self.df.ix[r.dncomids, 'LevelPathI'].values == r.LevelPathI
+            in_same_levelpath = np.array(r.dncomids)[levelpath_matches]
             # if none match, select the first dncomid
-            if len(matching_levelpaths) == 0:
-                matching_levelpaths = [r.dncomids[0]]
+            if len(in_same_levelpath) == 0:
+                dncomid = [r.dncomids[0]]
             else:
-                matching_levelpaths = list(np.unique(matching_levelpaths))
-            self.df.set_value(i, 'dncomids', matching_levelpaths)
+                dncomid = np.unique(in_same_levelpath).tolist()
+            self.df.set_value(i, 'dncomids', dncomid)
 
         # assign upsegs and outsegs based on NHDPlus routing
         self.df['upsegs'] = [[self.df.segment[c] if c != 0 else 0 for c in comids] for comids in self.df.upcomids]
@@ -253,16 +253,18 @@ class NHDdata(object):
         print("intersecting flowlines with grid cells...") # this part crawls in debug mode
         grid_intersections = GISops.intersect_rtree(grid_geoms, flowline_geoms)
 
-        print("setting up segments...")
+        print("setting up segments... (may take a few minutes for large networks)")
+        ta = time.time()
         self.list_updown_comids()
         self.assign_segments()
         fl_segments = self.df.segment.tolist()
         fl_comids = self.df.COMID.tolist()
+        print("finished in {:.2f}s\n".format(time.time() - ta))
 
         print("setting up reaches and Mat1... (may take a few minutes for large grids)")
         ta = time.time()
         m1 = make_mat1(flowline_geoms, fl_segments, fl_comids, grid_intersections, grid_geoms)
-        print("finished in {:.2f}s".format(time.time() - ta))
+        print("finished in {:.2f}s\n".format(time.time() - ta))
 
         print("computing widths...")
         m1['length'] = np.array([g.length for g in m1.geometry])
@@ -300,7 +302,10 @@ class NHDdata(object):
         self.m2 = self.df[['segment', 'outseg', 'Max', 'Min']].copy()
         self.m2['icalc'] = icalc
         self.m2.index = self.m2.segment
-        print('Done')
+
+        # add outseg information to Mat1
+        self.m1['outseg'] = [self.m2.outseg[s] for s in self.m1.segment]
+        print('Done creating SFR dataset.')
 
     def write_tables(self, basename='SFR'):
         """Write tables with SFR reach (Mat1) and segment (Mat2) information out to csv files.
@@ -331,7 +336,7 @@ class NHDdata(object):
             Output will be written to <basename>.shp
         """
         print("writing reach geometries to {}".format(basename+'.shp'))
-        df2shp(self.m1[['reachID', 'node', 'segment', 'reach', 'comid', 'geometry']],
+        df2shp(self.m1[['reachID', 'node', 'segment', 'reach', 'outseg', 'comid', 'geometry']],
                basename+'.shp', proj4=self.mf_grid_proj4)
 
 def create_reaches(part, segment_nodes, grid_geoms):
