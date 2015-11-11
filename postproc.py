@@ -1,8 +1,7 @@
+from __future__ import print_function
 __author__ = 'aleaf'
-'''
-
-'''
-
+import sys
+sys.path.append('/Users/aleaf/Documents/GitHub/flopy3')
 import os
 import numpy as np
 import pandas as pd
@@ -76,6 +75,7 @@ class SFRdata(object):
         self.outpath = ''
         self.elevs = None
         self.node_column = 'node'
+        self.dis = None
 
         if sfrobject is not None:
             self.__dict__ = sfrobject.__dict__.copy()
@@ -122,21 +122,22 @@ class SFRdata(object):
             self.cell_geometries = {}
 
             if mfdis is not None:
+
                 self.mfpath = mfpath
                 self.basename = mfdis[:-4]
                 if mfnam is None:
                     mfnam = self.basename + '.nam'
                 self.mfdis = os.path.join(self.mfpath, mfdis)
                 self.mfnam = os.path.join(self.mfpath, mfnam)
+                self.read_dis2()
 
                 # node numbers for cells with SFR
                 if not node_column and 'node' not in self.m1.columns:
                     self.gridtype = 'structured'
-                    self.read_dis2()
-                    #self.m1['node'] = (self.dis.ncol * (self.m1['row'] - 1) + self.m1['column']).astype('int')
                     self._compute_mat1_node_numbers(self.dis.ncol)
-                elif node_column:
-                    self.m1.rename(columns={node_column, 'node'}, inplace=True)
+                elif node_column or 'node' in self.m1.columns:
+                    if node_column:
+                        self.m1.rename(columns={node_column, 'node'}, inplace=True)
                     if 'row' not in self.m1.columns:
                         self._compute_mat1_rc()
                 else:
@@ -208,6 +209,48 @@ class SFRdata(object):
             return
         lrc = np.array(self.dis.get_lrc(self.m1.node.tolist())).T
         self.m1['row'], self.m1['column'] = lrc[1], lrc[2]
+
+    def _interpolate_to_reaches(self, segvar1, segvar2):
+        """Interpolate values in datasets 6b and 6c to each reach in stream segment
+
+        Parameters
+        ----------
+        segvar1 : str
+            Column/variable name in segment_data array for representing start of segment
+            (e.g. hcond1 for hydraulic conductivity)
+            For segments with icalc=2 (specified channel geometry); if width1 is given,
+            the eigth distance point (XCPT8) from dataset 6d will be used as the stream width.
+            For icalc=3, an abitrary width of 5 is assigned.
+            For icalc=4, the mean value for width given in item 6e is used.
+        segvar2 : str
+            Column/variable name in segment_data array for representing start of segment
+            (e.g. hcond2 for hydraulic conductivity)
+        per : int
+            Stress period with segment data to interpolate
+
+        Returns
+        -------
+        reach_values : 1D array
+            One dimmensional array of interpolated values of same length as reach_data array.
+            For example, hcond1 and hcond2 could be entered as inputs to get values for the
+            strhc1 (hydraulic conductivity) column in reach_data.
+
+        """
+        reach_data = self.m1
+        segment_data = self.m2
+        segment_data.sort('segment')
+        reach_data.sort(['segment', 'reach'])
+        reach_values = []
+        for seg in segment_data.segment:
+            reaches = reach_data[reach_data.segment == seg]
+            dist = np.cumsum(reaches.length).values - 0.5 * reaches.length.values
+            icalc = segment_data.icalc[segment_data.segment == seg]
+
+            fp = [segment_data.Max[seg],
+                  segment_data.Min[seg]]
+            xp = [dist[0], dist[-1]]
+            reach_values += np.interp(dist, xp, fp).tolist()
+        return np.array(reach_values)
 
     def parse_mat1_columns(self):
 
@@ -391,12 +434,12 @@ class SFRdata(object):
         if landsurfacefile is None and self.landsurfacefile is not None:
             landsurfacefile = self.landsurfacefile
 
-        if hasattr(self, 'Elevations'):
-            self.Elevations.map_confluences()
-        else:
-            self.Elevations = Elevations(sfrobject=self, dem=dem, landsurfacefile=landsurfacefile,
-                                         landsurface_column=landsurface_column)
-            self.Elevations.map_confluences()
+        #if hasattr(self, 'Elevations'):
+        #    self.Elevations.map_confluences()
+        #else:
+        self.Elevations = Elevations(sfrobject=self, dem=dem, landsurfacefile=landsurfacefile,
+                                     landsurface_column=landsurface_column)
+        self.Elevations.map_confluences()
 
         self.m1 = self.Elevations.m1
         self.m2 = self.Elevations.m2
@@ -512,9 +555,9 @@ class SFRdata(object):
             self.dem_units_mult = dem_units_mult
         print('computing zonal statistics...')
         self.dem_zstats = pd.DataFrame(zonal_stats(self.m1.geometry, self.dem))
-        self.m1['sbtop'] = self.dem_zstats['min'].values
-        self.m1['landsurface'] = self.m1['sbtop'].values
-        self.update_Mat2_elevations()
+        self.m1['sbtop'] = self.dem_zstats['min'].values * self.dem_units_mult
+        DEM_col_name = 'DEM{}'.format(stat)
+        self.m1[DEM_col_name] = self.m1['sbtop'].values
         print('DEM {} elevations assigned to sbtop column in m1'.format(stat))
 
     def reset_model_top_2streambed(self, minimum_thickness=1, outdisfile=None, outsummary=None):
@@ -537,14 +580,14 @@ class SFRdata(object):
                                                          distance_tol=distance_tol)
         self.__dict__ = self.Elevations.__dict__.copy()
 
-    def plot_stream_profiles(self,  outpdf='complete_profiles.pdf', units='ft', add_profiles={}):
+    def plot_stream_profiles(self,  outpdf='complete_profiles.pdf', units='ft', add_profiles={}, minimum_order=1):
         """Runs the Outsegs.plot_outsegs() method
         """
         if hasattr(self, 'Outsegs'):
-            self.Outsegs.plot_outsegs(outpdf=outpdf, units=units, add_profiles=add_profiles)
+            self.Outsegs.plot_outsegs(outpdf=outpdf, add_profiles=add_profiles, minimum_order=minimum_order)
         else:
             self.Outsegs = Outsegs(sfrobject=self)
-            self.Outsegs.plot_outsegs(outpdf=outpdf, units=units, add_profiles=add_profiles)
+            self.Outsegs.plot_outsegs(outpdf=outpdf, add_profiles=add_profiles, minimum_order=minimum_order)
         self.__dict__ = self.Outsegs.__dict__.copy()
 
     def plot_routing(self, outpdf='routing.pdf'):
@@ -626,7 +669,10 @@ class SFRdata(object):
         self.diagnostics.check_overlapping()
         self.diagnostics.check_elevations()
         self.diagnostics.check_outlets(model_domain=model_domain)
-        self.diagnostics.plot_routing()
+        try:
+            self.diagnostics.plot_routing() # won't work with circular routing
+        except:
+            pass
         self.diagnostics.check_4gaps_in_routing(model_domain=model_domain, tol=routing_distance_tol)
         self.diagnostics.plot_segment_linkages()
         self.diagnostics.check_grid_intersection(sfr_linework_shapefile=sfr_linework_shapefile)
@@ -819,7 +865,7 @@ class SFRdata(object):
         self.m2['Max'] = [np.max(sbtop[m1segments == s]) for s in m2segments]
         self.m2['Min'] = [np.min(sbtop[m1segments == s]) for s in m2segments]
 
-    def write_shapefile(self, outshp='SFR.shp', xll=None, yll=None, epsg=None, proj4=None, prj=None):
+    def write_shapefile(self, outshp='SFR_postproc.shp', xll=None, yll=None, epsg=None, proj4=None, prj=None):
 
         for kwd in [xll, yll, epsg, proj4, prj]:
             if kwd is not None:
@@ -883,7 +929,9 @@ class SFRdata(object):
                           nstrail=10,
                           isuzn=1,
                           nsfrsets=30,
+                          irtflag=0,
                           global_stream_depth=1,
+                          global_roughch=0.037,
                           iface=None):
         """
         Method to write an SFR package file from the Mat 1 and 2 (m1 and m2) attributes
@@ -900,6 +948,10 @@ class SFRdata(object):
 
         m1, m2 = self.m1.copy(), self.m2.copy()
 
+        for p, v in {'flow':0, 'roughch': global_roughch}.items():
+            if p not in m2.columns:
+                m2[p] = v
+
         if tpl:
             ext = '.tpl'
         else:
@@ -915,7 +967,7 @@ class SFRdata(object):
         if tpl:
             ofp.write("ptf ~\n")
         ofp.write("#SFRpackage file generated by SFRmaker\n")
-        record_1c = '{0:d} {1:d} {2:d} {3:d} {4:e} {5:e} {6:d} {7:d} {8:d} {9:d} {10:d} {11:d}'.format(
+        record_1c = '{0:d} {1:d} {2:d} {3:d} {4:e} {5:e} {6:d} {7:d} {8:d} {9:d} {10:d} {11:d} {12:d}'.format(
             -1*nreaches,
             nseg,
             nsfrpar,
@@ -927,7 +979,8 @@ class SFRdata(object):
             isfropt,
             nstrail,
             isuzn,
-            nsfrsets
+            nsfrsets,
+            irtflag
         )
         if iface is not None:
             record_1c += ' IFACE'
@@ -1322,7 +1375,7 @@ class Elevations(SFRdata):
         # make sure that streambed thickness is less than minimum_thickness,
         # otherwise there is potential for MODFLOW altitude errors
         # (with streambed top == model top, the streambed bottom will be below the layer 1 bottom)
-        if np.min(self.m1.sbthick >= minimum_thickness):
+        if self.m1.sbthick.min() >= minimum_thickness:
             self.m1.sbthick = 0.9 * minimum_thickness
 
         # make a vector of lowest streambed values for each cell containing SFR (for collocated SFR cells)
@@ -1496,25 +1549,35 @@ class Elevations(SFRdata):
         confluences = m2.ix[confluences_inds, ['segment', 'upsegs', 'Max']].copy()
         upsegs = confluences.upsegs.tolist()
 
-        # run this loop twice so that m2 can be updated and the minimum elevations taken again
+        # run this loop multiple times so that m2 can be updated and the minimum elevations taken again
         for i in range(10):
             elevs = m2.loc[confluences.segment.values, 'Max'].tolist()
             elevs = [np.min([m2.Min[m2.segment.isin(u)].min(), elevs[i]]) for i, u in enumerate(upsegs)]
             m2.loc[confluences.segment.values, 'Max'] = elevs
-            #for i, u in enumerate(upsegs):
-            #    m2.loc[m2.segment.isin(u), 'Min'] = elevs[i]
+
             print("{} segments with min > max".format(len(m2.loc[(m2.Max - m2.Min) < 0, 'Min'])))
             m2.loc[(m2.Max - m2.Min) < 0, 'Min'] = m2.loc[(m2.Max - m2.Min) < 0, 'Max']
-            diffs = np.diff(m2.ix[self.outsegs.ix[1].values[self.outsegs.ix[1].values != 0], 'Max'].values)
-            total_elevation_rise = np.sum(diffs[diffs > 0])
-            print(total_elevation_rise)
+
+            # get number of instances where elevation rises from end of segment to beginning of next
+            non_outlets = (self.m2.outseg != 0).values
+            m2_non_outlets = self.m2[non_outlets].copy()
+            routing_elevation_diffs = m2_non_outlets.Min.values - self.m2.Max[m2_non_outlets.outseg.values].values
+            rises = routing_elevation_diffs < 0
+            rises_df = m2_non_outlets[rises][['segment', 'outseg', 'Min']].copy()
+            rises_dnsegs = self.m2.ix[m2_non_outlets.outseg[rises].values, ['segment', 'Max']].copy()
+            rises_df['dnseg_Max'] = rises_dnsegs.Max.values
+            rises_df['rise'] = rises_df.dnseg_Max - rises_df.Min
+            print("{} segments with min < downstream segment max".format(len(rises_df)))
+            total_elevation_rise = rises_df.rise.sum()
+            print("{} total elevation rise (in model length units)".format(total_elevation_rise))
             if total_elevation_rise == 0:
                 break
+        print("{} segments with min > max".format(len(m2.loc[(m2.Max - m2.Min) < 0, 'Min'])))
         confluences['elev'] = elevs
 
         # get node number for each confluence by getting first node value for each segment dataframe group
         # (mat1 was already sorted by segment)
-        confluences['node'] = np.array([g.node.values[0] for s, g in segments])[confluences.segment.values]
+        confluences['node'] = np.array([g.node.values[0] for s, g in segments])[confluences.segment.values - 1]
         self.m2 = m2
         self.confluences = confluences
 
@@ -1612,12 +1675,97 @@ class Widths(SFRdata):
 
 class Outsegs(SFRdata):
 
-    def plot_outsegs(self, outpdf='complete_profiles.pdf', units='ft', add_profiles={}):
-        print("listing unique segment sequences...")
+    def plot_outsegs(self, outpdf='complete_profiles.pdf', add_profiles={}, minimum_order=1):
+
+        seglabel_dmin_frac = 0.03 # minimum length of segment (in fraction of figure) for labeling
+
+        profiles = {'DEMmin': 'DEM minimum in model cell',
+                    'sbtop': 'SFR package streambed top',
+                    'NHDinterp': 'Interpolated NHDPlus'}
+        profiles.update(add_profiles)
+        profiles = {k:v for k, v in profiles.items() if k in self.m1.columns}
+
         # make a dataframe of all outsegs
         if self.outsegs is None:
             self.map_outsegs()
 
+        print("Plotting elevations along segment sequences, starting with order {}...".format(minimum_order))
+        o = minimum_order - 1
+
+        headwater_segments = self.m2.segment.values[np.array(
+            [i for i, u in enumerate(self.m2.upsegs) if len(u) == 0])] # segments that do not have any upsegs
+
+        unique_seglists = self.outsegs.ix[headwater_segments]
+        if o > 0:
+            unique_seglists.drop_duplicates(unique_seglists.columns[o-1], inplace=True)
+            index = unique_seglists[unique_seglists.columns[o-1]].values
+            unique_seglists = unique_seglists[unique_seglists.columns[o:-1]].copy()
+            unique_seglists.index = index
+        starting_segments = unique_seglists.index.values
+        starting_segments = list(starting_segments[starting_segments > 0])
+        nsegs = len(starting_segments)
+        groups = self.m1.groupby('segment')
+        pdf = PdfPages(outpdf)
+        for si, s in enumerate(starting_segments):
+            print('\r{} of {}'.format(si+1, nsegs), end=',')
+            us = unique_seglists.ix[s]
+            us = [s] + us[us > 0].tolist()
+
+            profile = {k: [] for k in profiles.keys()} # dict of elevation profiles for segment sequence
+            rlen = []
+            confluences = [(0, 0)]
+            for seg in us:
+                segdf = groups.get_group(seg)
+                rlen += segdf.length.tolist()
+
+                for k in profiles.keys():
+                    profile[k] += segdf[k].tolist()
+
+                # record vertical and horizontal position of confluence
+                # (end of segment)
+                cx = confluences[-1][0] + segdf.length.sum()
+                cz = segdf[profiles.keys()].values.max()
+                confluences += [(cx, cz)]
+            dist = np.cumsum(rlen)
+            dist = list(dist - dist[0])
+
+            # make the plot
+            fig, ax = plt.subplots(figsize=(15, 10))
+            for k, v in profile.items():
+                plt.plot(dist, v, label=profiles[k], zorder=10)
+
+            confluences[0] = (0, profile.values()[0][0])
+            seglabel_dmin = seglabel_dmin_frac * ax.get_xlim()[1]
+            #print seglabel_dmin
+            last_label = 0
+            for i in range(1, len(confluences)):
+                plt.axvline(confluences[i][0], c='0.25', lw=0.5, alpha=0.5, zorder=0)
+
+                tx = 0.5 * (confluences[i][0] + confluences[i-1][0])
+                sincelast = tx - last_label
+                if sincelast > seglabel_dmin:
+                    cz = confluences[i][1]
+                    tz = cz + 0.5 * (ax.get_ylim()[1] - cz)
+                    ax.text(tx, tz, str(us[i-1]), ha='center', fontsize=8)
+                    last_label = tx
+            ax.annotate('Segment {}'.format(us[0]), xy=confluences[0], xycoords='data', xytext=(10, 10),
+                        textcoords='offset points', weight='bold',
+                        arrowprops=dict(headwidth=0, width=0.5, shrink=0.05))
+            ax.annotate('Outlet'.format(us[0]), xy=confluences[-1], xycoords='data', xytext=(0, 10),
+                        textcoords='offset points', weight='bold',
+                        ha='center', arrowprops=dict(frac=0, headwidth=0, width=0.5, shrink=0.05))
+            h, l = ax.get_legend_handles_labels()
+            lg = ax.legend(h, l)
+            lg.set_zorder(20)
+            lg.get_frame().set_facecolor('w')
+            ax.set_ylabel("Elevation, in model units")
+            ax.set_xlabel("Distance along segment sequence, in model units")
+            pdf.savefig()
+            plt.close()
+        pdf.close()
+        print('Elevation profiles saved to {}'.format(outpdf))
+        print('\n')
+        '''
         # list of lists of connected segments
         seglists = [[p]+[s for s in self.outsegs.ix[p, :] if s > 0] for p in self.outsegs.index]
 
@@ -1633,9 +1781,15 @@ class Outsegs(SFRdata):
                 continue
 
         # add model top elevations to dictionary using node numbers
-        if 'model_top' not in self.m1.columns:
-            self.m1['model_top'] = [self.elevs_by_cellnum[c] for c in self.m1[self.node_column]]
+        self.m1[self.mfdis] = [self.elevs_by_cellnum[c] for c in self.m1[self.node_column]]
+        add_profiles[self.mfdis] = self.mfdis
 
+        # add any sampled DEM elevations
+        dem_col = [c for c in self.m1.columns if 'DEM' in c]
+        if len(dem_col) > 0:
+            add_profiles[dem_col[0]] = dem_col[0]
+
+        print('plotting elevation profiles for unique sequences...')
         pdf = PdfPages(outpdf)
         for l in unique_lists:
             if len(l) > 1:
@@ -1664,9 +1818,6 @@ class Outsegs(SFRdata):
                     # streambed tops
                     sbtop += df['sbtop'].tolist()
 
-                    # model tops
-                    modeltop += df['model_top'].tolist()
-
                     for p in add_profiles.keys():
                         #elevs = self.cells2vertices(df[add_profiles[p]].tolist())
                         self.profile_elevs[p] += df[add_profiles[p]].tolist()
@@ -1674,7 +1825,6 @@ class Outsegs(SFRdata):
                 # plot the profile
                 fig = plt.figure()
                 ax = fig.add_subplot(111)
-                plt.plot(cdist, modeltop, label='Model top', lw=0.5)
                 plt.plot(cdist, sbtop, label='Streambed top')
 
                 # add any additional profiles
@@ -1703,14 +1853,24 @@ class Outsegs(SFRdata):
                 pdf.savefig()
                 plt.close()
         pdf.close()
-
+        '''
     def plot_routing(self, outpdf='routing.pdf'):
+
+
+
+        if self.dis is None and 'row' in self.m1.columns and 'column' in self.m1.columns:
+            nrow, ncol = self.m1.row.max(), self.m1.column.max()
+        elif self.dis is not None:
+            nrow, ncol = self.dis.nrow, self.dis.ncol
+        else:
+            print('The plot_routing method requires row and column information.')
+            return
 
         # make a dataframe of all outsegs
         self.map_outsegs()
 
         # make a matrix of the model grid, assign outlet values to SFR cells
-        self.watersheds = np.empty((self.dis.nrow * self.dis.ncol))
+        self.watersheds = np.empty((nrow * ncol))
         self.watersheds[:] = np.nan
 
         for s in self.segments:
@@ -1719,7 +1879,7 @@ class Outsegs(SFRdata):
             cns = segdata[self.node_column].values
             self.watersheds[cns] = segdata.Outlet.values[0]
 
-        self.watersheds = np.reshape(self.watersheds, (self.dis.nrow, self.dis.ncol))
+        self.watersheds = np.reshape(self.watersheds, (nrow, ncol))
 
         # now plot it up!
         self.watersheds[self.watersheds == 999999] = np.nan # screen out 999999 values

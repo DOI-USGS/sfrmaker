@@ -128,6 +128,10 @@ class NHDdata(object):
         if mf_grid_node_col is not None:
             self.grid.sort(mf_grid_node_col, inplace=True)
             self.grid.index = self.grid[mf_grid_node_col].values
+        else:
+            print('Warning: Node field for grid shape file not supplied. \
+                  Node numbers will be assigned using index. \
+                  This may result in incorrect location of SFR reaches.')
         self.grid = self.grid[['geometry']]
 
         # get projections
@@ -220,8 +224,8 @@ class NHDdata(object):
             self.df.set_value(i, 'dncomids', matching_levelpaths)
 
         # assign upsegs and outsegs based on NHDPlus routing
-        self.df['upsegs'] = [[self.df.segment[c] if c !=0 else 0 for c in comids] for comids in self.df.upcomids]
-        self.df['dnsegs'] = [[self.df.segment[c] if c !=0 else 0 for c in comids] for comids in self.df.dncomids]
+        self.df['upsegs'] = [[self.df.segment[c] if c != 0 else 0 for c in comids] for comids in self.df.upcomids]
+        self.df['dnsegs'] = [[self.df.segment[c] if c != 0 else 0 for c in comids] for comids in self.df.dncomids]
 
         # make a column of outseg integers
         self.df['outseg'] = [d[0] for d in self.df.dnsegs]
@@ -264,7 +268,9 @@ class NHDdata(object):
         m1['length'] = np.array([g.length for g in m1.geometry])
         lengths = m1[['segment', 'length']].copy()
         groups = lengths.groupby('segment')
-        reach_asums = np.concatenate([np.cumsum(grp.length.values[::-1])[::-1] for s, grp in groups])
+        # compute arbolate sum at reach midpoints
+        reach_asums = np.concatenate([np.cumsum(grp.length.values[::-1])[::-1] - 0.5*grp.length.values
+                                      for s, grp in groups])
         segment_asums = np.array([self.df.ArbolateSu.values[s-1] for s in m1.segment.values])
         reach_asums = -1 * self.to_km * reach_asums + segment_asums # arbolate sums are computed in km
         width = width_from_arbolate(reach_asums) # widths are returned in m
@@ -305,7 +311,7 @@ class NHDdata(object):
             e.g. Mat1 is written to <basename>Mat1.csv
         """
         m1_cols = ['node', 'layer', 'segment', 'reach', 'sbtop', 'width', 'length', 'sbthick', 'sbK', 'roughness', 'reachID']
-        m2_cols = ['segment', 'icalc', 'outseg']
+        m2_cols = ['segment', 'icalc', 'outseg', 'Max', 'Min']
         if self.nrows is not None:
             m1_cols.insert(1, 'row')
 
