@@ -50,7 +50,7 @@ class SFRdata(object):
 
     def __init__(self, sfrobject=None, Mat1=None, Mat2=None, sfr=None, node_column=False,
                  mfpath='', mfnam=None, mfdis=None, mfgridshp=None, mfgridshp_node_field='node',
-                 mfgridshp_row_field=None, mfgridshp_column_field=None, ncol=None,
+                 mfgridshp_row_field=None, mfgridshp_column_field=None, ncol=None, gridtype='structured',
                  dem=None, dem_units_mult=1, landsurfacefile=None, landsurface_column=None,
                  GIS_mult=1, to_meters_mult=0.3048,
                  Mat2_out=None, xll=0.0, yll=0.0, prj=None, proj4=None, epsg=None,
@@ -76,6 +76,7 @@ class SFRdata(object):
         self.elevs = None
         self.node_column = 'node'
         self.dis = None
+        self.gridtype = gridtype
 
         if sfrobject is not None:
             self.__dict__ = sfrobject.__dict__.copy()
@@ -133,7 +134,6 @@ class SFRdata(object):
 
                 # node numbers for cells with SFR
                 if not node_column and 'node' not in self.m1.columns:
-                    self.gridtype = 'structured'
                     self._compute_mat1_node_numbers(self.dis.ncol)
                 elif node_column or 'node' in self.m1.columns:
                     if node_column:
@@ -325,6 +325,15 @@ class SFRdata(object):
                               'cannot compute node numbers without number of columns.' \
                               'Please provide ncol argument or row and column fields for grid shapefile.')
         df.index = df[node_field]
+        if self.gridtype == 'structured' and 'row' not in self.m1.columns or 'column' not in self.m1.columns:
+            if row_field is not None and column_field is not None:
+                self.m1['row'] = df.ix[self.m1.node.tolist(), row_field].tolist()
+                self.m1['column'] = df.ix[self.m1.node.tolist(), column_field].tolist()
+            elif self.mfdis is not None:
+                self._compute_mat1_rc()
+            else:
+                print('No row and column fields in Mat1, and no row and column fields given for {}'.format(mfgridshp))
+                print('SFR input for structured grid requires row and column info.')
         self.m1['geometry'] = df.ix[self.m1.node.tolist(), 'geometry'].tolist()
         if os.path.exists(mfgridshp[:-4] + '.prj'):
             self.prj = mfgridshp[:-4] + '.prj'
@@ -1765,95 +1774,7 @@ class Outsegs(SFRdata):
         pdf.close()
         print('Elevation profiles saved to {}'.format(outpdf))
         print('\n')
-        '''
-        # list of lists of connected segments
-        seglists = [[p]+[s for s in self.outsegs.ix[p, :] if s > 0] for p in self.outsegs.index]
 
-        # reduce seglists down to unique sets of segments
-        unique_lists = []
-        for l in seglists:
-            # find all lists for which the current list is a subset
-            overlap = np.where([set(l).issubset(set(ll)) for ll in seglists])
-            # length 1 means that there are no other lists for which the current is a subset
-            if len(overlap[0]) == 1:
-                unique_lists.append(l)
-            else:
-                continue
-
-        # add model top elevations to dictionary using node numbers
-        self.m1[self.mfdis] = [self.elevs_by_cellnum[c] for c in self.m1[self.node_column]]
-        add_profiles[self.mfdis] = self.mfdis
-
-        # add any sampled DEM elevations
-        dem_col = [c for c in self.m1.columns if 'DEM' in c]
-        if len(dem_col) > 0:
-            add_profiles[dem_col[0]] = dem_col[0]
-
-        print('plotting elevation profiles for unique sequences...')
-        pdf = PdfPages(outpdf)
-        for l in unique_lists:
-            if len(l) > 1:
-                cdist = []
-                cdist_end = 0
-                cdist_ends = [0]
-                sbtop = []
-                modeltop = []
-                self.profile_elevs = {}
-
-                for p in add_profiles.keys():
-                    self.profile_elevs[p] = []
-
-                # make each profile from its segments
-                for s in l:
-                    # make a view of the Mat 1 dataframe that only includes the segment
-                    df = self.m1[self.m1.segment == s].sort('reach')
-
-                    # calculate cumulative distances at cell centers
-                    cdist += (np.cumsum(df['length']) - 0.5 * df['length'] + cdist_end).tolist()
-
-                    cdist_end += np.sum(df['length']) # add length of segment to total
-                    #print cdist_end
-                    cdist_ends.append(cdist_end) # record distances at segment boundaries
-
-                    # streambed tops
-                    sbtop += df['sbtop'].tolist()
-
-                    for p in add_profiles.keys():
-                        #elevs = self.cells2vertices(df[add_profiles[p]].tolist())
-                        self.profile_elevs[p] += df[add_profiles[p]].tolist()
-
-                # plot the profile
-                fig = plt.figure()
-                ax = fig.add_subplot(111)
-                plt.plot(cdist, sbtop, label='Streambed top')
-
-                # add any additional profiles
-                for p in add_profiles.keys():
-                    #print len(cdist)
-                    #print len(self.elevs[p])
-                    plt.plot(cdist, self.profile_elevs[p], label=p, lw=0.5)
-
-                # add in lines marking segment starts/ends
-                # add in annotations labeling each segment
-                for i, x in enumerate(cdist_ends[1:]):
-                    plt.axvline(x, c='0.25', lw=0.5)
-
-                    tx = 0.5 * (cdist_ends[i] + cdist_ends[i-1])
-                    ty = ax.get_ylim()[0] + 0.9 * (ax.get_ylim()[1] - ax.get_ylim()[0])
-                    ax.text(tx, ty, str(l[i-1]), ha='center', fontsize=8)
-
-                ax.set_xlabel('Distance along SFR path')
-                ax.set_ylabel('Elevation, {}'.format(units))
-                title = 'SFR profile for segments:\n'
-                for s in l:
-                    title += ' {:.0f}'.format(s)
-                ax.set_title(title, fontsize=10, fontweight='bold', loc='left')
-                ax.set_ylim(int(np.floor(ax.get_ylim()[0])), int(np.ceil(ax.get_ylim()[1])))
-                plt.legend(loc='best', fontsize=10)
-                pdf.savefig()
-                plt.close()
-        pdf.close()
-        '''
     def plot_routing(self, outpdf='routing.pdf'):
 
 
