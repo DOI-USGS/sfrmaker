@@ -278,10 +278,10 @@ class SFRdata(object):
             #    self.Elevations.mfnam = mfnam
             #    self.Elevations.mfpath = os.path.split(self.mfdis)[0]
 
-        print(self.mfdis)
+        print('reading {}...'.format(self.mfdis))
         self.m = flopy.modflow.Modflow(model_ws=self.mfpath)
-        self.nf = flopy.utils.mfreadnam.parsenamefile(self.mfnam, {})
-        self.dis = flopy.modflow.ModflowDis.load(self.mfdis, self.m, self.nf)
+        #self.nf = flopy.utils.mfreadnam.parsenamefile(self.mfnam, {})
+        self.dis = flopy.modflow.ModflowDis.load(self.mfdis, self.m)
         self.elevs = np.zeros((self.dis.nlay + 1, self.dis.nrow, self.dis.ncol))
         self.elevs[0, :, :] = self.dis.top.array
         self.elevs[1:, :, :] = self.dis.botm.array

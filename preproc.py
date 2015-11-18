@@ -482,7 +482,7 @@ def parse_proj4_units(proj4string):
     else:
         return 'ft'
 
-def width_from_arbolate(arbolate):
+def width_from_arbolate(arbolate, minimum_width=1):
     """Estimate stream width in feet from arbolate sum in meters, using relationship
     described by Feinstein et al (2010), Appendix 2, p 266.
 
@@ -496,7 +496,14 @@ def width_from_arbolate(arbolate):
     width: float
         Estimated width in meters (original formula returned width in ft)
     """
-    return 0.3048 * 0.1193 * (1000 * arbolate) ** 0.5032
+    w = 0.3048 * 0.1193 * (1000 * arbolate) ** 0.5032
+    if isinstance(arbolate, np.ndarray):
+        w[np.isnan(w)] = float(minimum_width)
+    elif np.isnan(w):
+        w = minimum_width
+    else:
+        pass
+    return w
 
 
 class ProjectionError(Exception):

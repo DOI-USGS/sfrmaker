@@ -8,7 +8,7 @@ A brief description of the packages and their dependencies:
 
 | python package| what it does | underlying library  | python dependencies | unofficial binary |  
 |:--------------|:------------ | :------------------:| -------------------:| :-----------------|
-| **fiona**     | reads and writes shapefiles | OGR | six, cligj |<http://www.lfd.uci.edu/~gohlke/pythonlibs/#fiona>  |
+| **fiona**     | reads and writes shapefiles | OGR | gdal, six, cligj |<http://www.lfd.uci.edu/~gohlke/pythonlibs/#fiona>  |
 | **shapely**   | provides containers and operations for manipulating vector data (points, lines and polygons)|  GEOS | -- | <http://www.lfd.uci.edu/~gohlke/pythonlibs/#shapely> |
 | **gdal** | python bindings for GDAL library |  GDAL | numpy |<http://www.lfd.uci.edu/~gohlke/pythonlibs/#gdal> |
 | **rasterio** | reads and writes rasters | GDAL | **gdal**, affine, cligj (and click), enum34, numpy | <http://www.lfd.uci.edu/~gohlke/pythonlibs/#rasterio>|
@@ -19,34 +19,58 @@ A brief description of the packages and their dependencies:
 ###1) Installing Python
 If you are not already a python user, I recommend installing the Anaconda Python Distribution (<https://store.continuum.io/cshop/anaconda/>), which is available for free and comes with many popular python packages pre-installed. Assuming you have a 64-bit system, I recommend installing the 64-bit version of Anaconda, as the 32-bit version has memory limitations.
 
-###2) Installing pip
-Anaconda comes with its own package management system, **conda**, which is especially good at managing dependencies between packages. However, many of the above packages are not available for Windows on **conda**. To minimize the potential for version conflicts, I recommend installing this whole GIS tool chain through the Unofficial Windows Binaries site, using **pip**. Pip can be installed using **conda**. After installing Anaconda, open a command window anywhere (e.g., by typing "cmd" in the Start Menu search box) and enter:  
 
-```  
->conda install pip  
-```
-###3) Downloading the wheel files
+###2) Downloading the wheel files for the packages
 Installer files (called "wheels") can be downloaded for each package at the links given in the above table (alternatively, one can go to the main page listed above and search for the package name). Select the appropriate file for your python version. For example, to install gdal version 1.11.3 on 64-bit Python 2.7, one would choose **GDAL‑1.11.3‑cp27‑none‑win_amd64.whl**.
 
-###4) Installing the wheels using pip
-Open a command window in your download folder and install each package using pip:  
+###3) Installing the wheels using pip
+Open a command window in your download folder and install each package using pip (a package management system for python that comes pre-installed with Anaconda):  
 e.g:
 
 ```
 >pip install Fiona-1.6.2-cp27-none-win_amd64.whl
 ```
-**Note:** **GDAL** must be installed prior to installing **rasterio**, and **gdal**, **rasterio**, **fiona** and **shapely** must be installed prior to installing **rasterstats**. After these other packages are installed, **rasterstats** can simply be installed from **PyPl** using pip.  
+**Note:** **GDAL** must be installed prior to installing **fiona** and **rasterio**, and **gdal**, **rasterio**, **fiona** and **shapely** must be installed prior to installing **rasterstats**. After these other packages are installed, **rasterstats** can simply be installed from **PyPl** using pip.  
 e.g:
 (note that the actual *.whl filenames will vary depending on package and python versions):
 
 ```
+>pip install GDAL-1.11.3-cp27-none-win_amd64.whl
 >pip install Fiona-1.6.2-cp27-none-win_amd64.whl
 >pip install Shapely-1.5.12-cp27-none-win_amd64.whl
->pip install GDAL-1.11.3-cp27-none-win_amd64.whl
 >pip install rasterio-0.28.0-cp27-none-win_amd64.whl
 >pip install rasterstats
 ```
-###Common problems
+###4) Check the installs
+Verify that the packages install correctly. From any command prompt:
+
+```
+>python
+```
+The text on the screen should indicate that the version of python associated with Anaconda was launched. Then try importing the packages:  
+
+```
+>>>import fiona
+```
+Each package should import with no error messages.
+
+
+###Common problems  
+* #####ImportError when trying to use an installed package
+	This likely means that one of the packages dependencies wasn't installed correctly. The python bindings to GDAL, required by several other packages, are often the culprit. Experience suggests that the most reliable route to getting GDAL to work is installing it through the unofficial binaries site above (instead of through Conda or other sources). If necessary, remove any existing python gdal bindings via pip uninstall:
+	
+	```
+>pip uninstall gdal
+
+	```
+
+	
+* #####Pip doesn't work at the command line (as in step 3 above)
+	Pip should come preinstalled with Anaconda, but in case it isn't, it can be installed using **conda**. With Anaconda installed, open a command window anywhere (e.g., by typing "cmd" in the Start Menu search box) and enter:  
+
+	```  
+>conda install pip  
+	```
 * #####message **"requirement already satisfied"** when trying to install a package 
 	**Cause:** some form of the package is already installed on your python distribution  
 	**Solution:** try either uninstalling the existing package first
