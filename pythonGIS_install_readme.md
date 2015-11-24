@@ -17,7 +17,7 @@ A brief description of the packages and their dependencies:
 | **rasterstats**| summarizes raster data (e.g. zonal statistics)  | GDAL | **gdal**, **rasterio**, **fiona**, **shapely** and numpy| just install using pip (see below) |
 
 ###1) Installing Python
-If you are not already a python user, I recommend installing the Anaconda Python Distribution (<https://store.continuum.io/cshop/anaconda/>), which is available for free and comes with many popular python packages pre-installed. Assuming you have a 64-bit system, I recommend installing the 64-bit version of Anaconda, as the 32-bit version has memory limitations.
+If you are not already a python user, I recommend installing the Anaconda Python Distribution (<https://store.continuum.io/cshop/anaconda/>), which is available for free and comes with many popular python packages pre-installed. Assuming you have a 64-bit system, I recommend installing the 64-bit version of Anaconda, as the 32-bit version has memory limitations. Anaconda should be installed as your default python (it should ask whether you want to make it the default during install).
 
 
 ###2) Downloading the wheel files for the packages
