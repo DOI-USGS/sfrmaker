@@ -63,7 +63,24 @@ class SFRdata(object):
         sfrobject: SFRdata instance
             Instantiates SFRdata with attributes from another SFRdata instance
 
-        Mat1: dataframe or filepath
+        Mat1: dataframe or str
+            Mat1 table.
+        Mat2 : dataframe or str
+            Mat2 table.
+        mfgridshp : str
+            Shapefile of MODFLOW grid
+        mfgridshp_node_field : str
+            Attribute field in grid shapefile with model node number
+        mfgridshp_row_field : str
+            Attribute field in grid shapefile with row numbers
+        mfgridshp_column_field : str
+            Attribute field in grid shapefile with column numbers
+        mfdis : str
+            MODFLOW DIS file
+        mfpath : str
+            Path to MODFLOW files
+        mfnam : str
+            MODFLOW nam file
 
 
         GIS_mult: float

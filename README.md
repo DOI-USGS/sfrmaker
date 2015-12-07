@@ -94,7 +94,7 @@ These lines tell python where to find arcpy and its associated packages/librarie
 * ####flopy
 available via **pip** (see instructions below), or at <https://github.com/modflowpy/flopy> 
 
-####postproc  
+####preproc, postproc  and diagnostics
 
 * #####Instructions for Windows users
  The postproc module depends on a collection of packages (**fiona, shapely, gdal, pyproj, rasterio, rasterstats**, and **GIS_utils**) that provide python bindings to open source GIS libraries. Instructions for installing these packages can be found here:
