@@ -54,7 +54,7 @@ class SFRdata(object):
                  dem=None, dem_units_mult=1, landsurfacefile=None, landsurface_column=None,
                  GIS_mult=1, to_meters_mult=0.3048,
                  Mat2_out=None, xll=0.0, yll=0.0, prj=None, proj4=None, epsg=None,
-                 minimum_slope=1e-4, streamflow_file=None):
+                 minimum_slope=1e-4, maximum_slope=1, streamflow_file=None):
         """
         base object class for SFR information in the SFRmaker postproc module.
 
@@ -167,6 +167,7 @@ class SFRdata(object):
             self.to_km = self.to_m / 1000.0
             self.GIS_mult = GIS_mult
             self.minimum_slope = minimum_slope
+            self.maximum_slope = maximum_slope
 
             # coordinate projection of model grid
             self.prj = prj # projection file
@@ -925,6 +926,7 @@ class SFRdata(object):
 
     def write_sfr_package(self, basename='SFR', tpl=False,
                           minimum_slope=1e-4,
+                          maximum_slope=1,
                           bedKmin=1e-6,
                           nsfrpar=0,
                           nparseg=0,
@@ -954,6 +956,9 @@ class SFRdata(object):
         """
 
         m1, m2 = self.m1.copy(), self.m2.copy()
+
+        m1.loc[m1['slope'] > maximum_slope] = maximum_slope
+        m1.loc[m1['slope'] < minimum_slope] = minimum_slope
 
         for p, v in {'flow':0, 'roughch': global_roughch}.items():
             if p not in m2.columns:
@@ -997,7 +1002,6 @@ class SFRdata(object):
 
         for i, r in m1.iterrows():
 
-            slope = r.slope if r.slope > minimum_slope else minimum_slope
             sbK = '~SFRc~' if tpl and r.sbK > bedKmin else '{:e}'.format(r.sbK)
 
             item2_record = '{0:.0f} {1:.0f} {2:.0f} {3:.0f} {4:.0f} {5:e} {6:e} {7:e} {8:e} {9:s}'.format(
@@ -1008,7 +1012,7 @@ class SFRdata(object):
                 r.reach,
                 r.SFRlength,
                 r.sbtop,
-                slope,
+                r.slope,
                 r.sbthick,
                 sbK)
 
@@ -1349,8 +1353,8 @@ class Elevations(SFRdata):
             self.m1.loc[self.m1.segment == s, 'slope'] = slopes
         
         # enforce minimum slope
-        ns = [s if s > self.minimum_slope else self.minimum_slope for s in self.m1.slope.tolist()]
-        self.m1['slope'] = ns
+        self.m1.loc[self.m1['slope'] > self.maximum_slope] = self.maximum_slope
+        self.m1.loc[self.m1['slope'] < self.minimum_slope] = self.minimum_slope
 
 
     def reset_model_top_2streambed(self, minimum_thickness=1, outdisfile=None, outsummary=None):
