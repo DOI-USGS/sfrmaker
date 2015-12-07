@@ -99,8 +99,8 @@ class SFRdata(object):
                         if g in self.m1.columns:
                             self.m1.drop(g, axis=1, inplace=True)
                     self.outpath = os.path.split(Mat1)[0]
-                self.m1.sort(['segment', 'reach'], inplace=True)
-                self.m2.sort('segment', inplace=True)
+                self.m1.sort_values(by=['segment', 'reach'], inplace=True)
+                self.m2.sort_values(by='segment', inplace=True)
                 self.m2.index = list(map(int, self.m2.segment.values))
                 if sum(np.unique(self.m1.segment) - self.m2.segment) != 0:
                     raise IndexError("Segments in Mat1 and Mat2 are different!")
@@ -238,8 +238,8 @@ class SFRdata(object):
         """
         reach_data = self.m1
         segment_data = self.m2
-        segment_data.sort('segment')
-        reach_data.sort(['segment', 'reach'])
+        segment_data.sort_values(by='segment')
+        reach_data.sort_values(by=['segment', 'reach'])
         reach_values = []
         for seg in segment_data.segment:
             reaches = reach_data[reach_data.segment == seg]
@@ -493,7 +493,7 @@ class SFRdata(object):
         for c in self.shared_cells:
 
             # select the collocated reaches for this cell
-            df = self.m1[self.m1.node == c].sort('width', ascending=False)
+            df = self.m1[self.m1.node == c].sort_values(by='width', ascending=False)
 
             # set all of these reaches except the largest to not Dominant
             self.m1.loc[df.index[1:], 'Dominant'] = False
@@ -747,7 +747,7 @@ class SFRdata(object):
                 #    ind = dfs.index[0]
                 #    df.set_value(ind, 'geometry', MultiLineString(reaches.geometry.tolist()))
             print('\n')
-            self.linework_geoms = df[['segment', 'reach', 'node', 'geometry']].sort(['segment', 'reach'])
+            self.linework_geoms = df[['segment', 'reach', 'node', 'geometry']].sort_values(by=['segment', 'reach'])
             GISio.df2shp(self.linework_geoms, new_lines_shapefile, prj=lines_shapefile[:-4] + '.prj')
             return self.linework_geoms
 
@@ -816,11 +816,9 @@ class SFRdata(object):
                 # make dataframe of all reaches within the model cell
                 reaches = pd.DataFrame(df_lines.ix[df_lines[node_col] == n, 'geometry'].copy())
                 reaches['length'] = [g.length for g in reaches.geometry]
-                #reaches.sort('length', inplace=True)
 
                 # streamflow results for that model cell
                 dfs = df.ix[df[self.node_attribute] == n]
-                #dfs.sort('length', inplace=True)
 
                 # for each collocated reach in reaches dataframe,
                 # this inner loop may be somewhat inefficient,
@@ -863,7 +861,7 @@ class SFRdata(object):
                     ind = dfs.index[~dfs.index.isin(assigned)][0]
                     df.loc[ind, 'geometry'] = geoms_entirely_within_node[0]
         print('\n')
-        self.linework_geoms = df[['segment', 'reach', 'node', 'geometry']].sort(['segment', 'reach'])
+        self.linework_geoms = df[['segment', 'reach', 'node', 'geometry']].sort_values(by=['segment', 'reach'])
         GISio.df2shp(self.linework_geoms, new_lines_shapefile, prj=prj)
 
     def update_Mat2_elevations(self):
@@ -1271,7 +1269,7 @@ class Elevations(SFRdata):
             self.seg = seg
 
             # make a view of the Mat 1 dataframe that only includes the segment
-            df = self.m1[self.m1.segment == seg].sort('reach')
+            df = self.m1[self.m1.segment == seg].sort_values(by='reach')
 
             # start with land surface elevations along segment
             self.segelevs = df.landsurface.values
@@ -1394,7 +1392,7 @@ class Elevations(SFRdata):
         for c in self.shared_cells:
 
             # select the collocated reaches for this cell
-            df = self.m1[self.m1.node == c].sort('sbtop', ascending=False)
+            df = self.m1[self.m1.node == c].sort_values(by='sbtop', ascending=False)
 
             # make column of lowest streambed elevation in each cell with SFR
             self.m1.loc[df.index, 'lowest_top'] = np.min(df.sbtop)
@@ -1415,7 +1413,7 @@ class Elevations(SFRdata):
 
         # make a dataframe that shows the largest adjustments made to model top
         self.m1['top_height'] = self.m1.model_top - self.m1.sbtop
-        adjustments = self.m1[self.m1.top_height > 0].sort(columns='top_height', ascending=False)
+        adjustments = self.m1[self.m1.top_height > 0].sort_values(by='top_height', ascending=False)
         adjustments.to_csv(outsummary)
 
         # update the model top in Mat1
@@ -1897,7 +1895,7 @@ class Streamflow(SFRdata):
                 print("segment and reach information not in linework shapefile!")
                 df_lines = self.segment_reach2linework_shapefile(lines_shapefile, node_col=node_col)
 
-            df_lines.sort(['segment', 'reach'], inplace=True)
+            df_lines.sort_values(by=['segment', 'reach'], inplace=True)
 
             # join in node column from mat1
             # segments and reaches in SFR results and Mat1 must be identical! (and sorted)
@@ -2179,7 +2177,7 @@ class Spatial(SFRdata):
 
         else:
             df = GISio.shp2df(sfr_shapefile)
-            df.sort(['segment', 'reach'], inplace=True)
+            df.sort_values(by=['segment', 'reach'], inplace=True)
 
             # check to make sure that SFR shapefile indexing is consistent with Mat1
             diff = np.max(self.m1.reach.values - df.reach.values)
