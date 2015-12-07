@@ -126,7 +126,7 @@ class NHDdata(object):
 
         # sort and pair down the grid
         if mf_grid_node_col is not None:
-            self.grid.sort(mf_grid_node_col, inplace=True)
+            self.grid.sort_values(by=mf_grid_node_col, inplace=True)
             self.grid.index = self.grid[mf_grid_node_col].values
         else:
             print('Warning: Node field for grid shape file not supplied. \
@@ -207,7 +207,6 @@ class NHDdata(object):
     def assign_segments(self):
         print('assigning segment numbers...')
         # create segment numbers
-        #self.df.sort('COMID', inplace=True)
         self.df['segment'] = np.arange(len(self.df)) + 1
 
         # reduce dncomids to 1 per segment
@@ -229,7 +228,6 @@ class NHDdata(object):
 
         # make a column of outseg integers
         self.df['outseg'] = [d[0] for d in self.df.dnsegs]
-        #self.df.sort('segment', inplace=True)
 
     def to_sfr(self, roughness=0.037, streambed_thickness=1, streambedK=1,
                icalc=1,
@@ -246,7 +244,7 @@ class NHDdata(object):
         print('\nclipping flowlines to active area...')
         inside = np.array([g.intersects(self.domain) for g in self.df.geometry])
         self.df = self.df.ix[inside].copy()
-        self.df.sort('COMID', inplace=True)
+        self.df.sort_values(by='COMID', inplace=True)
         flowline_geoms = [g.intersection(self.domain) for g in self.df.geometry]
         grid_geoms = self.grid.geometry.tolist()
 
@@ -298,14 +296,30 @@ class NHDdata(object):
 
         self.m1 = m1
 
-        print("setting up Mat2...")
+        print("\nsetting up Mat2...")
+        ta = time.time()
         self.m2 = self.df[['segment', 'outseg', 'Max', 'Min']].copy()
         self.m2['icalc'] = icalc
+        self.renumber_segments() # enforce best segment numbering
         self.m2.index = self.m2.segment
+        print("finished in {:.2f}s\n".format(time.time() - ta))
 
         # add outseg information to Mat1
         self.m1['outseg'] = [self.m2.outseg[s] for s in self.m1.segment]
-        print('Done creating SFR dataset.')
+        print('\nDone creating SFR dataset.')
+
+    def renumber_segments(self):
+        """Renumber segments so that segment numbering is continuous and always increases
+        in the downstream direction. Experience suggests that this can substantially speed
+        convergence for some models using the NWT solver."""
+        r = renumber_segments(self.m2.segment.values, self.m2.outseg.values)
+
+        self.m2.segment = [r[s] for s in self.m2.segment]
+        self.m2.outseg = [r[s] for s in self.m2.outseg]
+        self.m2.sort_values(by='segment', inplace=True)
+        assert _in_order(self.m2.segment.values, self.m2.outseg.values)
+        assert len(self.m2.segment) == self.m2.segment.max()
+        self.m1.segment = [r[s] for s in self.m1.segment]
 
     def write_tables(self, basename='SFR'):
         """Write tables with SFR reach (Mat1) and segment (Mat2) information out to csv files.
@@ -338,6 +352,59 @@ class NHDdata(object):
         print("writing reach geometries to {}".format(basename+'.shp'))
         df2shp(self.m1[['reachID', 'node', 'segment', 'reach', 'outseg', 'comid', 'geometry']],
                basename+'.shp', proj4=self.mf_grid_proj4)
+
+
+def _in_order(nseg, outseg):
+    """Check that segment numbering increases in downstream direction.
+
+    Parameters
+    ----------
+    nseg : 1-D array of segment numbers
+    outseg : 1-D array of outseg numbers for segments in nseg.
+
+    Returns
+    -------
+    True if there are no decreases in segment number in downstream direction, False otherwise.
+    """
+    inds = (outseg > 0) & (nseg > outseg)
+    if not np.any(inds):
+        return True
+    return False
+
+def _get_headwaters(segments, outsegs):
+        """List all segments that are not outsegs (that do not have any segments upstream).
+
+        Parameters
+        ----------
+        nseg : 1-D array of segment numbers
+        outseg : 1-D array of outseg numbers for segments in nseg.
+
+        Returns
+        -------
+        headwaters : np.ndarray (1-D)
+            One dimmensional array listing all headwater segments.
+        """
+        upsegs = [segments[outsegs == s].tolist()
+                  for s in segments]
+        return segments[np.array([i for i, u in enumerate(upsegs) if len(u) == 0])]
+
+def _get_outlets(segment_seguences_array):
+    """Create a dictionary listing outlets associated with each segment
+    outlet is the last value in each row of segment sequences array that is != 0 or 999999
+
+    Parameters
+    ----------
+    segment_sequences_array : 2-D array produced by map_segment_sequences()
+
+    Returns
+    -------
+    outlets : dict
+        Dictionary of outlet number (values) for each segment (keys).
+    """
+    return {i + 1: r[(r != 0) & (r != 999999)][-1]
+            if len(r[(r != 0) & (r != 999999)]) > 0
+            else i + 1
+            for i, r in enumerate(segment_seguences_array.T)}
 
 def create_reaches(part, segment_nodes, grid_geoms):
     """Creates SFR reaches for a segment by ordering model cells intersected by a LineString
@@ -430,6 +497,76 @@ def find_next(comid, pftable, comids, max_levels=10):
             return list(set(nextocomid).intersection(comids))[0]
     return 0
 
+def map_segment_sequences(segments, outsegs, verbose=True):
+    """Generate array containing all segment routing sequences from each headwater
+    to the respective outlet.
+
+    Parameters
+    ----------
+    nseg : 1-D array of segment numbers
+    outseg : 1-D array of outseg numbers for segments in nseg.
+
+    Returns
+    -------
+    """
+    all_outsegs = np.vstack([segments, outsegs])
+    nseg = len(segments)
+    max_outseg = all_outsegs[-1].max()
+    knt = 1
+    txt = '' # text recording circular routing instances, if encountered
+    while max_outseg > 0:
+
+        nextlevel = np.array([outsegs[s - 1] if s > 0 and s < 999999 else 0
+                              for s in all_outsegs[-1]])
+
+        all_outsegs = np.vstack([all_outsegs, nextlevel])
+        max_outseg = nextlevel.max()
+        if max_outseg == 0:
+            break
+        knt += 1
+        if knt > nseg:
+            # subset outsegs map to only include rows with outseg number > 0 in last column
+            circular_segs = all_outsegs.T[all_outsegs[-1] > 0]
+
+            # only retain one instance of each outseg number at iteration=nss
+            vals = []  # append outseg values to vals after they've appeared once
+            mask = [(True, vals.append(v))[0]
+                    if v not in vals
+                    else False for v in circular_segs[-1]]
+            circular_segs = circular_segs[:, np.array(mask)]
+
+            # cull the circular segments array to remove duplicate instances of routing circles
+            circles = []
+            duplicates = []
+            for i in range(np.shape(circular_segs)[0]):
+                # find where values in the row equal the last value;
+                # record the index of the second to last instance of last value
+                repeat_start_ind = np.where(circular_segs[i] == circular_segs[i, -1])[0][-2:][0]
+                # use that index to slice out the repeated segment sequence
+                circular_seq = circular_segs[i, repeat_start_ind:].tolist()
+                # keep track of unique sequences of repeated segments
+                if set(circular_seq) not in circles:
+                    circles.append(set(circular_seq))
+                    duplicates.append(False)
+                else:
+                    duplicates.append(True)
+            circular_segs = circular_segs[~np.array(duplicates), :]
+
+            txt += '{0} instances where an outlet was not found after {1} consecutive segments!\n' \
+                .format(len(circular_segs), nseg)
+            txt += '\n'.join([' '.join(map(str, row)) for row in circular_segs]) + '\n'
+
+            f = 'circular_routing.csv'
+            np.savetxt(f, circular_segs, fmt='%d', delimiter=',', header=txt)
+            txt += 'See {} for details.'.format(f)
+            if verbose:
+                print(txt)
+            break
+
+    # the array of segment sequence is useful for other other operations,
+    # such as plotting elevation profiles
+    return all_outsegs
+
 def make_mat1(flowline_geoms, fl_segments, fl_comids, grid_intersections, grid_geoms):
 
     reach = []
@@ -466,9 +603,46 @@ def make_mat1(flowline_geoms, fl_segments, fl_comids, grid_intersections, grid_g
 
     m1 = pd.DataFrame({'reach': reach, 'segment': segment, 'node': node,
                             'geometry': geometry, 'comid': comids})
-    m1.sort(['segment', 'reach'], inplace=True)
+    m1.sort_values(by=['segment', 'reach'], inplace=True)
     m1['reachID'] = np.arange(len(m1)) + 1
     return m1
+
+def renumber_segments(nseg, outseg):
+    """Renumber segments so that segment numbering is continuous and always increases
+        in the downstream direction. Experience suggests that this can substantially speed
+        convergence for some models using the NWT solver.
+
+    Parameters
+    ----------
+    nseg : 1-D array
+        Array of segment numbers
+    outseg : 1-D array
+        Array of outsegs for segments in neg.
+
+    Returns
+    -------
+    r : dict
+        Dictionary mapping old segment numbers (keys) to new segment numbers (values)
+    """
+    def reassign_upsegs(r, nexts, upsegs):
+        nextupsegs = []
+        for u in upsegs:
+            r[u] = nexts if u > 0 else u # handle lakes
+            nexts -= 1
+            nextupsegs += list(nseg[outseg == u])
+        return r, nexts, nextupsegs
+
+    print('enforcing best segment numbering...')
+    ns = len(nseg)
+
+    nexts = ns
+    r = {0: 0}
+    nextupsegs = nseg[outseg == 0]
+    for i in range(ns):
+        r, nexts, nextupsegs = reassign_upsegs(r, nexts, nextupsegs)
+        if len(nextupsegs) == 0:
+            break
+    return r
 
 def parse_proj4_units(proj4string):
     """Determine units from proj4 string. Not tested extensively.
