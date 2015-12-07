@@ -70,7 +70,7 @@ sfr.smooth_interior_elevations()
 # in comparison to the mean DEM elevation in each cell along the profile
 # Note: this is optional but allows for inspection to verify that the elevations are reasonable
 # on large networks (with thousands of sequences) this step may take an hour or two.
-sfr.plot_stream_profiles(add_profiles={'NHDinterp': 'Interpolated NHDPlus elevations'})
+sfr.plot_stream_profiles()
 
 # In cells with multiple SFR reaches (at confluences), put all conductance in the dominant reach
 # (to avoid circular routing)
