@@ -5,11 +5,11 @@ Python package to facilitate use of the streamflow-routing (SFR) package in MODF
 This package is provided as-is, and is not an official USGS product. While the authors are continuing to refine and improve the code as time allows, the project remains unfunded and for now, largerly undocumented and somewhat held together by "chewing gum and duct tape." If used properly, the code can in most cases produce a robust, reproducable SFR package in a fraction of the time that would be required for manual construction in a GUI. Some diagnostic and visualization tools are included; however, **it is up to the modeler to check their own results for correctness, using their own tests if necessary.** Some methods in the code are better than others, some are dead-ends, and other methods were written for specific situations encountered in individual projects. In lieu of comprehensive documentation, the best approach is to follow the instructions outlined in this readme file, as well as the IPython Notebook examples linked to below.
 
 ###Code structure
-Currently, SFRmaker consists of three primary modules:  
+Currently, SFRmaker consists of four primary modules. Either sfr_classes or preproc can be used for the preprocessing. See the **Workflow** section further down.
   
 ####sfr_classes.py
 This is essentially the original SFRmaker written by Reeves, Fienen and Leaf in 2014.
-Intersects linework with model grid and develops routed segments and reaches from information in NHDPlus. Produces two tables, **Mat1** and **Mat2**, which contain SFR package information by reach and by segment, respectively. Also produces a shapefile of linework broken by the grid, which contains the stream geometries represented by the SFR reaches.  **Requires Arcpy**.
+Intersects linework with model grid and develops routed segments and reaches from information in NHDPlus. Produces two tables, **Mat1** and **Mat2**, which contain SFR package information by reach and by segment, respectively. Also produces a shapefile of linework broken by the grid, which contains the stream geometries represented by the SFR reaches. **Requires Arcpy**.
 
 ####preproc.py
 This is written as a replacement to sfr_classes, using the [python GIS toolchain](https://github.com/aleaf/SFRmaker/blob/master/pythonGIS_install_readme.md "python GIS toolchain") instead of ArcPy. Accepts NHDPlus datasets and a shapefile of the model grid as input, and produces Mat1 (reach) and Mat2 (segment) tables as output, as well as a shapefile of the linework represented by each SFR reach, with segment and reach information. The speed, flexibility and simplicity of the python GIS packages allow for several improvements over sfr_classes, including  
@@ -27,7 +27,7 @@ Preproc should also fix several known issues with sfr_classes (although it is st
 * routing skipping segments near confluences (unless editing of the input linework has resulted in the removal of COMIDs in the stream sequence)
 * segment numbering decreasing in the downstream direction, which can slow convergance with MODFLOW-NWT in some cases.
 
-The **example_preproc_postproc.py** script in the examples folder shows a complete workflow from input datasets to SFR package input file, using the preproc and postproc modules.
+Preproc can be used instead of sfr_classes to set up the SFR segments and reaches. The **example_preproc_postproc.py** script in the examples folder shows a complete workflow from input datasets to SFR package input file, using the preproc and postproc modules.
 
 
 ####postproc.py
