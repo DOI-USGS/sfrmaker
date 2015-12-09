@@ -974,8 +974,8 @@ class SFRdata(object):
 
         m1, m2 = self.m1.copy(), self.m2.copy()
 
-        m1.loc[m1['slope'] > maximum_slope] = maximum_slope
-        m1.loc[m1['slope'] < minimum_slope] = minimum_slope
+        m1.loc[m1['slope'] > maximum_slope, 'slope'] = maximum_slope
+        m1.loc[m1['slope'] < minimum_slope, 'slope'] = minimum_slope
 
         for p, v in {'flow':0, 'roughch': global_roughch}.items():
             if p not in m2.columns:

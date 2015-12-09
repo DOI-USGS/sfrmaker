@@ -306,6 +306,7 @@ class NHDdata(object):
 
         # add outseg information to Mat1
         self.m1['outseg'] = [self.m2.outseg[s] for s in self.m1.segment]
+        self.m1.sort_values(by=['segment', 'reach'], inplace=True)
         print('\nDone creating SFR dataset.')
 
     def renumber_segments(self):
