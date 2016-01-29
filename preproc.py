@@ -315,12 +315,12 @@ class NHDdata(object):
         convergence for some models using the NWT solver."""
         r = renumber_segments(self.m2.segment.values, self.m2.outseg.values)
 
-        self.m2.segment = [r[s] for s in self.m2.segment]
-        self.m2.outseg = [r[s] for s in self.m2.outseg]
+        self.m2['segment'] = [r[s] for s in self.m2.segment]
+        self.m2['outseg'] = [r[s] for s in self.m2.outseg]
         self.m2.sort_values(by='segment', inplace=True)
         assert _in_order(self.m2.segment.values, self.m2.outseg.values)
         assert len(self.m2.segment) == self.m2.segment.max()
-        self.m1.segment = [r[s] for s in self.m1.segment]
+        self.m1['segment'] = [r[s] for s in self.m1.segment]
 
     def write_tables(self, basename='SFR'):
         """Write tables with SFR reach (Mat1) and segment (Mat2) information out to csv files.
@@ -341,7 +341,7 @@ class NHDdata(object):
         self.m1[m1_cols].to_csv(basename + 'Mat1.csv', index=False)
         self.m2[m2_cols].to_csv(basename + 'Mat2.csv', index=False)
 
-    def write_linework_shapefile(self, basename='SFR'):
+    def write_linework_shapefile(sself, basename='SFR'):
         """Write a shapefile containing linework for each SFR reach,
         with segment, reach, model node number, and NHDPlus COMID attribute information
 

@@ -1370,8 +1370,8 @@ class Elevations(SFRdata):
             self.m1.loc[self.m1.segment == s, 'slope'] = slopes
         
         # enforce minimum slope
-        self.m1.loc[self.m1['slope'] > self.maximum_slope] = self.maximum_slope
-        self.m1.loc[self.m1['slope'] < self.minimum_slope] = self.minimum_slope
+        self.m1.loc[self.m1['slope'] > self.maximum_slope, 'slope'] = self.maximum_slope
+        self.m1.loc[self.m1['slope'] < self.minimum_slope, 'slope'] = self.minimum_slope
 
 
     def reset_model_top_2streambed(self, minimum_thickness=1, outdisfile=None, outsummary=None):
