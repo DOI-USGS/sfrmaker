@@ -341,7 +341,7 @@ class NHDdata(object):
         self.m1[m1_cols].to_csv(basename + 'Mat1.csv', index=False)
         self.m2[m2_cols].to_csv(basename + 'Mat2.csv', index=False)
 
-    def write_linework_shapefile(sself, basename='SFR'):
+    def write_linework_shapefile(self, basename='SFR'):
         """Write a shapefile containing linework for each SFR reach,
         with segment, reach, model node number, and NHDPlus COMID attribute information
 
