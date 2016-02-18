@@ -609,7 +609,7 @@ def make_mat1(flowline_geoms, fl_segments, fl_comids, grid_intersections, grid_g
     return m1
 
 def renumber_segments(nseg, outseg):
-    """Renumber segments so that segment numbering is continuous and always increases
+    """Renumber segments so that segment numbering is continuous, starts at 1, and always increases
         in the downstream direction. Experience suggests that this can substantially speed
         convergence for some models using the NWT solver.
 
@@ -618,7 +618,7 @@ def renumber_segments(nseg, outseg):
     nseg : 1-D array
         Array of segment numbers
     outseg : 1-D array
-        Array of outsegs for segments in neg.
+        Array of outsegs for segments in nseg.
 
     Returns
     -------
@@ -634,6 +634,15 @@ def renumber_segments(nseg, outseg):
         return r, nexts, nextupsegs
 
     print('enforcing best segment numbering...')
+
+    # enforce that all outsegs not listed in nseg are converted to
+    # but leave lakes alone
+    outseg = np.array([o if o in nseg or o < 0 else 0 for o in outseg])
+
+    # if reach data are supplied, segment/outseg pairs may be listed more than once
+    if len(nseg) != len(np.unique(nseg)):
+        d = dict(zip(nseg, outseg))
+        nseg, outseg = np.array(d.keys()), np.array(d.values())
     ns = len(nseg)
 
     nexts = ns
