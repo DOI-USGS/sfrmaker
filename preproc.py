@@ -634,10 +634,12 @@ def renumber_segments(nseg, outseg):
         return r, nexts, nextupsegs
 
     print('enforcing best segment numbering...')
-
-    # enforce that all outsegs not listed in nseg are converted to
+    # enforce that all outsegs not listed in nseg are converted to 0
     # but leave lakes alone
+    r = {0: 0}
+    r.update({o: 0 for o in outseg if o > 0 and o not in nseg})
     outseg = np.array([o if o in nseg or o < 0 else 0 for o in outseg])
+
 
     # if reach data are supplied, segment/outseg pairs may be listed more than once
     if len(nseg) != len(np.unique(nseg)):
@@ -646,7 +648,6 @@ def renumber_segments(nseg, outseg):
     ns = len(nseg)
 
     nexts = ns
-    r = {0: 0}
     nextupsegs = nseg[outseg == 0]
     for i in range(ns):
         r, nexts, nextupsegs = reassign_upsegs(r, nexts, nextupsegs)
