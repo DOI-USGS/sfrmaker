@@ -4,11 +4,146 @@ import time
 import numpy as np
 import pandas as pd
 import fiona
-from shapely.geometry import Point, Polygon, shape
+from shapely.geometry import Point, LineString, Polygon, shape
 from shapely.ops import unary_union
 from GISio import shp2df, df2shp, get_proj4
 from GISops import project, projectdf, build_rtree_index, intersect_rtree
 import GISops
+
+class linesBase(object):
+
+    def __init__(self, lines=None,
+                 mf_grid=None, mf_grid_node_col=None,
+                 nrows=None, ncols=None,
+                 mfdis=None, xul=None, yul=None, rot=0,
+                 model_domain=None,
+                 lines_proj4=None, mfgrid_proj4=None, domain_proj4=None,
+                 mf_units='feet'):
+        """Class for working with information from NHDPlus v2.
+        See the user's guide for more information:
+        <http://www.horizon-systems.com/NHDPlus/NHDPlusV2_documentation.php#NHDPlusV2 User Guide>
+
+        Parameters
+        ==========
+        lines : str, list of strings or dataframe
+            Shapefile, list of shapefiles, or dataframe with linework defining SFR network;
+            assigned to the Flowline attribute.
+        mf_grid : str or dataframe
+            Shapefile or dataframe containing MODFLOW grid
+        mf_grid_node_col : str
+            Column in grid shapefile or dataframe with unique node numbers.
+            In case the grid isn't sorted!
+            (which will result in mixup if rows and columns are assigned later using the node numbers)
+        nrows : int
+            (structured grids) Number of model rows
+        ncols : int
+            (structured grids) Number of model columns
+        mfdis : str
+            MODFLOW discretization file (not yet supported for this class)
+        xul : float, optional
+            x offset of upper left corner of grid. Only needed if using mfdis instead of shapefile
+        yul : float, optional
+            y offset of upper left corner of grid. Only needed if using mfdis instead of shapefile
+        rot : float, optional (default 0)
+            Grid rotation; only needed if using mfdis instead of shapefile.
+        model_domain : str (shapefile) or shapely polygon, optional
+            Polygon defining area in which to create SFR cells.
+            Default is to create SFR at all intersections between the model grid and NHD flowlines.
+        lines_proj4 : str, optional
+            Proj4 string for coordinate system of NHDFlowlines.
+            Only needed if flowlines are supplied in a dataframe.
+        domain_proj4 : str, optional
+            Proj4 string for coordinate system of model_domain.
+            Only needed if model_domain is supplied as a polygon.
+        mf_units : str, 'feet' or 'meters'
+            Length units of MODFLOW model
+        """
+        self.df = lines
+        self.mf_grid = mf_grid
+        self.model_domain = model_domain
+        self.nrows = nrows
+        self.ncols = ncols
+        self.mfdis = mfdis
+        self.xul = xul
+        self.yul = yul
+        self.rot = rot
+
+        # unit conversions (set below after grid projection is verified)
+        self.mf_units = mf_units
+        self.mf_units_mult = 1.0 # go from GIS units to model units
+        self.GISunits = None #
+        self.to_km = None # converts GIS units to km for arbolate sum
+
+        self.proj4 = lines_proj4
+        self.mf_grid_proj4 = mfgrid_proj4
+        self.domain_proj4 = domain_proj4
+
+        print("Reading input...")
+        # handle dataframes or shapefiles as arguments
+        # get proj4 for any shapefiles that are submitted
+        for attr, input in {'df': lines,
+                            'grid': mf_grid}.items():
+            if isinstance(input, pd.DataFrame):
+                self.__dict__[attr] = input
+            else:
+                self.__dict__[attr] = shp2df(input)
+        if isinstance(model_domain, Polygon):
+            self.domain = model_domain
+        elif isinstance(model_domain, str):
+            self.domain = shape(fiona.open(model_domain).next()['geometry'])
+            self.domain_proj4 = get_proj4(model_domain)
+        else:
+            print('setting model domain to extent of grid ' \
+                  'by performing unary union of grid cell geometries...\n' \
+                  '(may take a few minutes for large grids)')
+            # add tiny buffer to overcome floating point errors in gridcell geometries
+            # (otherwise a multipolygon feature may be returned)
+            geoms = [g.buffer(0.001) for g in self.grid.geometry.tolist()]
+            self.domain = unary_union(geoms)
+
+        # sort and pair down the grid
+        if mf_grid_node_col is not None:
+            self.grid.sort_values(by=mf_grid_node_col, inplace=True)
+            self.grid.index = self.grid[mf_grid_node_col].values
+        else:
+            print('Warning: Node field for grid shape file not supplied. \
+                  Node numbers will be assigned using index. \
+                  This may result in incorrect location of SFR reaches.')
+        self.grid = self.grid[['geometry']]
+
+        # get projections
+        if self.mf_grid_proj4 is None and not isinstance(mf_grid, pd.DataFrame):
+            self.mf_grid_proj4 = get_proj4(mf_grid)
+        if self.proj4 is None:
+            if isinstance(lines, list):
+                self.proj4 = get_proj4(lines[0])
+            elif not isinstance(lines, pd.DataFrame):
+                self.proj4 = get_proj4(lines)
+
+        # first check that grid is in projected units
+        if self.mf_grid_proj4.split('proj=')[1].split()[0].strip() == 'longlat':
+            raise ProjectionError(self.mf_grid)
+
+        # reproject the NHD Flowlines and model domain to model grid if they aren't
+        # (prob a better way to check for same projection)
+
+        # set GIS units from modflow grid projection (used for arbolate sum computation)
+        # assumes either m or ft!
+        self.GISunits = parse_proj4_units(self.mf_grid_proj4)
+        self.mf_units_mult = 1/0.3048 if self.GISunits == 'm' and self.mf_units == 'feet' \
+                             else 0.3048 if not self.GISunits == 'm' and self.mf_units == 'meters' \
+                             else 1.0
+        self.to_km = 0.001 if self.GISunits == 'm' else 0.001/0.3048
+
+
+        if different_projections(self.proj4, self.mf_grid_proj4):
+            print("reprojecting NHDFlowlines from\n{}\nto\n{}...".format(self.proj4, self.mf_grid_proj4))
+            self.df['geometry'] = projectdf(self.df, self.proj4, self.mf_grid_proj4)
+
+        if model_domain is not None \
+                and different_projections(self.domain_proj4, self.mf_grid_proj4):
+            print("reprojecting model domain from\n{}\nto\n{}...".format(self.domain_proj4, self.mf_grid_proj4))
+            self.domain = project(self.domain, self.domain_proj4, self.mf_grid_proj4)
 
 class NHDdata(object):
 
@@ -355,6 +490,190 @@ class NHDdata(object):
                basename+'.shp', proj4=self.mf_grid_proj4)
 
 
+class lines(linesBase):
+    """Class for building SFR from generic GIS linework."""
+
+    def __init__(self, lines, minElev_field=None, maxElev_field=None,
+                 model_domain=None,
+                 mf_grid=None, mf_grid_node_col=None,
+                 routing_tol=200):
+
+        linesBase.__init__(self, lines=lines, model_domain=model_domain,
+                           mf_grid=mf_grid, mf_grid_node_col=mf_grid_node_col)
+
+        self.start_cds = [(g.xy[0][0], g.xy[1][0]) for g in self.df.geometry]
+        self.end_cds = [(g.xy[0][-1], g.xy[1][-1]) for g in self.df.geometry]
+        self.routing_tol = routing_tol
+
+        self.df['elevMax'] = self.df[maxElev_field] if maxElev_field is not None else 0
+        self.df['elevMin'] = self.df[minElev_field] if minElev_field is not None else 0
+        self.df['segment'] = np.arange(1, len(self.df) + 1)
+        self.df['outsegs'] = 0
+        self.df['upsegs'] = [[]] * len(self.df)
+
+    def get_end_elevs_from_dem(self, dem):
+
+        from GISio import get_values_at_points
+        self.df['elevMax'] = get_values_at_points(dem, self.start_cds)
+        self.df['elevMin'] = get_values_at_points(dem, self.end_cds)
+
+    def route_lines_by_proximity(self):
+
+        nearest_start = get_nearest(self.start_cds, self.end_cds)
+
+        # record the preliminary seg. number of nearest start if within tol
+        self.df['outseg'] = [self.df.segment[n]
+                             if Point(*self.start_cds[n]).distance(\
+                                Point(*self.end_cds[i])) < self.routing_tol
+                 else 0 for i, n in enumerate(nearest_start)]
+
+        self.df['upsegs'] = [self.df.segment[self.df.outseg == s].tolist() for s in self.df.segment]
+
+    def route_lines_to_sfr(self, sfrlinework, route2reach1=True,
+                           trim_buffer=20, routing_tol=None):
+        """Route the linework in the lines class to an existing
+        set of lines representing an SFR package.
+
+        Parameters
+        ----------
+        sfrlinework : str (shapefile path) or dataframe
+            Contains linework representing SFR package (e.g. already broken by grid)
+        route2reach1 : boolean
+            If true, linework is routed to closest starting coordinate of an SFR segment.
+            Otherwise, routing is to closest starting coordinate of an SFR reach
+            (existing SFR segment in that location will have to be subdivided).
+        """
+        tol = self.routing_tol if routing_tol is None else routing_tol
+
+        if not isinstance(sfrlinework, pd.DataFrame):
+            self.sfr = shp2df(sfrlinework)
+        else:
+            self.sfr = sfrlinework.copy()
+
+        if route2reach1:
+            segments = self.sfr.ix[self.sfr.reach == 1, 'segment'].tolist()
+            geoms = self.sfr.ix[self.sfr.reach == 1, 'geometry'].tolist()
+        else:
+            segments = self.sfr.segment.tolist()
+            geoms = [g for g in self.sfr.geometry]
+
+        # update segment numbering so that it starts after highest seg in sfr dataset
+        if len(set(self.df.segment).intersection(self.sfr.segment)) != 0:
+            maxseg = self.sfr.segment.max()
+            self.df['segment'] += maxseg
+            self.df.loc[self.df.outseg > 0, 'outseg'] += maxseg
+            self.df['upsegs'] = [[u + maxseg for u in us] for us in self.df.upsegs.tolist()]
+
+        sfr_start_cds = [(g.xy[0][0], g.xy[1][0]) for g in geoms]
+
+        print('routing new lines within {} to SFR...'.format(tol))
+
+        is_outlet = self.df.outseg.values == 0
+        new_lines_outlet_cds = map(tuple, np.array(self.end_cds)[is_outlet])
+
+        # get index of nearest start to each end
+
+        nearest_sfr = get_nearest(sfr_start_cds, new_lines_outlet_cds)
+
+        # record the preliminary seg. number of nearest start if within tol
+        self.df.loc[is_outlet, 'outseg'] = [segments[n]
+                                       if Point(*sfr_start_cds[n]).distance(\
+                                          Point(*new_lines_outlet_cds[i])) < tol
+                                       else 0 for i, n in enumerate(nearest_sfr)]
+        if not route2reach1:
+            reaches = self.sfr.reach.tolist()
+            self.df.loc[is_outlet, 'outreach'] = [reaches[n]
+                                       if Point(*sfr_start_cds[n]).distance(\
+                                          Point(*new_lines_outlet_cds[i])) < tol
+                                       else 0 for i, n in enumerate(nearest_sfr)]
+
+        def fix_newline_end(line, sfr_start_coord, trim_buffer=20):
+            # trim the ends of the new lines (in case of overlap)
+            # and connect them to start of closest segment or reach on SFR network
+            diff = line.difference(Point(line.coords[-1]).buffer(trim_buffer))
+            if diff.length > 0:
+                return LineString(list(diff.coords) + [sfr_start_coord])
+            return LineString([line.coords[0], sfr_start_coord])
+
+        # only connect the lines that are within the routing tolerance
+        geoms = self.df.geometry.values
+        geoms[is_outlet] = [fix_newline_end(l, sfr_start_cds[nearest_sfr[i]], trim_buffer=trim_buffer)
+                            if Point(l.coords[-1]).distance(\
+                               Point(sfr_start_cds[nearest_sfr[i]])) < tol
+                            else l
+                            for i, l in enumerate(self.df.geometry[is_outlet])]
+        self.df['geometry'] = geoms
+
+    def to_sfr(self):
+
+        print('\nclipping lines to active area...')
+        inside = np.array([g.intersects(self.domain) for g in self.df.geometry])
+        self.df = self.df.ix[inside].copy()
+        self.df.sort_values(by='segment', inplace=True)
+        line_geoms = [g.intersection(self.domain) for g in self.df.geometry]
+        grid_geoms = self.grid.geometry.tolist()
+
+        print("establishing routing...")
+        self.route_lines_by_proximity()
+
+        print("intersecting lines with grid cells...") # this part crawls in debug mode
+        grid_intersections = GISops.intersect_rtree(grid_geoms, line_geoms)
+
+        print("setting up reaches and Mat1... (may take a few minutes for large grids)")
+        ta = time.time()
+        segments = self.df.segment.tolist()
+        m1 = make_mat1(line_geoms, segments, segments, grid_intersections, grid_geoms)
+        print("finished in {:.2f}s\n".format(time.time() - ta))
+
+        print("computing widths...")
+        m1['length'] = np.array([g.length for g in m1.geometry])
+        lengths = m1[['segment', 'length']].copy()
+        groups = lengths.groupby('segment')
+
+        print("computing arbolate sums at reach midpoints...")
+        ta = time.time()
+        reach_asums = np.concatenate([np.cumsum(grp.length.values[::-1])[::-1] - 0.5*grp.length.values
+                                      for s, grp in groups])
+        segment_asums = np.array([self.df.ArbolateSu.values[s-1] for s in m1.segment.values])
+        reach_asums = -1 * self.to_km * reach_asums + segment_asums # arbolate sums are computed in km
+        print("finished in {:.2f}s\n".format(time.time() - ta))
+
+        print("computing widths...")
+        width = width_from_arbolate(reach_asums) # widths are returned in m
+        if self.GISunits != 'm':
+            width = width / 0.3048
+
+        print("multiplying length units by {} to convert from GIS to MODFLOW...".format(self.mf_units_mult))
+        m1['width'] = width * self.mf_units_mult
+        m1['length'] = m1.length * self.mf_units_mult
+
+        m1['roughness'] = roughness
+        m1['sbthick'] = streambed_thickness
+        m1['sbK'] = streambedK
+        m1['sbtop'] = 0
+
+        if self.nrows is not None:
+            m1['row'] = np.floor(m1.node / self.ncols) + 1
+        if self.ncols is not None:
+            column = m1.node.values % self.ncols
+            column[column == 0] = self.ncols # last column has remainder of 0
+            m1['column'] = column
+        m1['layer'] = 1
+
+        self.m1 = m1
+
+        print("\nsetting up Mat2...")
+        ta = time.time()
+        self.m2 = self.df[['segment', 'outseg', 'Max', 'Min']].copy()
+        self.m2['icalc'] = icalc
+        self.renumber_segments() # enforce best segment numbering
+        self.m2.index = self.m2.segment
+        print("finished in {:.2f}s\n".format(time.time() - ta))
+
+        # add outseg information to Mat1
+        self.m1['outseg'] = [self.m2.outseg[s] for s in self.m1.segment]
+        self.m1.sort_values(by=['segment', 'reach'], inplace=True)
+        print('\nDone creating SFR dataset.')
 def _in_order(nseg, outseg):
     """Check that segment numbering increases in downstream direction.
 
@@ -497,6 +816,64 @@ def find_next(comid, pftable, comids, max_levels=10):
             # so there is no way to determine a preferred routing path)
             return list(set(nextocomid).intersection(comids))[0]
     return 0
+
+def get_nearest(starts, ends):
+    """Returns index of nearest start coordinate to each coordinate in ends.
+
+    Parameters
+    ----------
+    starts : list of tuples
+        Could be starting coordinates of each LineString.
+    ends : list of tuples
+        Could be ending coordinates of each LineString.
+    """
+    try:
+        from rtree import index
+    except:
+        raise ImportError("This method requires the rtree package.")
+
+    idx = index.Index()
+    for i, start in enumerate(starts):
+        idx.insert(i, start)
+    return [list(idx.nearest(end, 2))[0] if list(idx.nearest(end, 1))[0] != i
+            else list(idx.nearest(end, 2))[1]
+            for i, end in enumerate(ends)]
+
+def get_upsegs(nseg, outseg):
+    """From segment_data, returns nested dict of containing sets of all
+    segments upstream of each segment.
+
+    Parameters
+    ----------
+    nseg : 1-D array of segment numbers
+    outseg : 1-D array of outseg numbers for each segment in nseg.
+
+    Returns
+    -------
+    upsegs : dict
+        Nested dictionary of form {stress period: {segment: [set of upsegs]}}
+
+    Note:
+    This method will not work if there are instances of circular routing.
+    """
+
+    # make a list of adjacent upsegments keyed to outseg list in Mat2
+    upsegs = {o: set(nseg[outseg == o]) for o in np.unique(outseg)}
+
+    outsegs = outseg[outseg != 0].tolist() # exclude 0, the outlet designator
+
+    # for each outseg key, for each upseg, check for more upsegs, append until headwaters has been reached
+    for s in outsegs:
+        upsegslist = upsegs[s]
+        for i in range(len(nseg)): # limit iterations to number of segments
+            added_upsegs = set()
+            [added_upsegs.update(set(upsegs[us])) for us in upsegslist if us in outsegs]
+            if len(added_upsegs) == 0:
+                break
+            else:
+                upsegslist = added_upsegs
+                upsegs[s].update(added_upsegs)
+    return upsegs
 
 def map_segment_sequences(segments, outsegs, verbose=True):
     """Generate array containing all segment routing sequences from each headwater
