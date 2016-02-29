@@ -1,6 +1,7 @@
 __author__ = 'aleaf'
 
 import time
+import operator
 import numpy as np
 import pandas as pd
 import fiona
@@ -375,6 +376,7 @@ class NHDdata(object):
 
         # bring in elevations from elevslope table
         self.df = self.df.join(self.elevs[['Max', 'Min']], how='inner')
+        self.df.rename(columns={'Max': 'elevMax', 'Min': 'elevMin'}, inplace=True)
 
         print('\nclipping flowlines to active area...')
         inside = np.array([g.intersects(self.domain) for g in self.df.geometry])
@@ -396,7 +398,7 @@ class NHDdata(object):
 
         print("setting up reaches and Mat1... (may take a few minutes for large grids)")
         ta = time.time()
-        m1 = make_mat1(flowline_geoms, fl_segments, fl_comids, grid_intersections, grid_geoms)
+        m1 = make_mat1(flowline_geoms, fl_segments, fl_comids, grid_intersections, grid_geoms, tol=.001)
         print("finished in {:.2f}s\n".format(time.time() - ta))
 
         print("computing widths...")
@@ -433,15 +435,17 @@ class NHDdata(object):
 
         print("\nsetting up Mat2...")
         ta = time.time()
-        self.m2 = self.df[['segment', 'outseg', 'Max', 'Min']].copy()
+        self.m2 = self.df[['segment', 'outseg', 'elevMax', 'elevMin']].copy()
         self.m2['icalc'] = icalc
-        self.renumber_segments() # enforce best segment numbering
         self.m2.index = self.m2.segment
         print("finished in {:.2f}s\n".format(time.time() - ta))
 
         # add outseg information to Mat1
         self.m1['outseg'] = [self.m2.outseg[s] for s in self.m1.segment]
+
+        self.renumber_segments() # enforce best segment numbering
         self.m1.sort_values(by=['segment', 'reach'], inplace=True)
+        self.m1['ReachID'] = np.arange(1, len(self.m1) + 1)
         print('\nDone creating SFR dataset.')
 
     def renumber_segments(self):
@@ -450,12 +454,13 @@ class NHDdata(object):
         convergence for some models using the NWT solver."""
         r = renumber_segments(self.m2.segment.values, self.m2.outseg.values)
 
-        self.m2['segment'] = [r[s] for s in self.m2.segment]
-        self.m2['outseg'] = [r[s] for s in self.m2.outseg]
+        self.m2['segment'] = [r.get(s, s) for s in self.m2.segment]
+        self.m2['outseg'] = [r.get(s, s) for s in self.m2.outseg]
         self.m2.sort_values(by='segment', inplace=True)
         assert _in_order(self.m2.segment.values, self.m2.outseg.values)
         assert len(self.m2.segment) == self.m2.segment.max()
-        self.m1['segment'] = [r[s] for s in self.m1.segment]
+        self.m1['segment'] = [r.get(s, s) for s in self.m1.segment]
+        self.m1['outseg'] = [r.get(s, s) for s in self.m1.outseg]
 
     def write_tables(self, basename='SFR'):
         """Write tables with SFR reach (Mat1) and segment (Mat2) information out to csv files.
@@ -466,7 +471,7 @@ class NHDdata(object):
             e.g. Mat1 is written to <basename>Mat1.csv
         """
         m1_cols = ['node', 'layer', 'segment', 'reach', 'sbtop', 'width', 'length', 'sbthick', 'sbK', 'roughness', 'reachID']
-        m2_cols = ['segment', 'icalc', 'outseg', 'Max', 'Min']
+        m2_cols = ['segment', 'icalc', 'outseg', 'elevMax', 'elevMin']
         if self.nrows is not None:
             m1_cols.insert(1, 'row')
 
@@ -508,8 +513,40 @@ class lines(linesBase):
         self.df['elevMax'] = self.df[maxElev_field] if maxElev_field is not None else 0
         self.df['elevMin'] = self.df[minElev_field] if minElev_field is not None else 0
         self.df['segment'] = np.arange(1, len(self.df) + 1)
-        self.df['outsegs'] = 0
+        self.df['outseg'] = 0
         self.df['upsegs'] = [[]] * len(self.df)
+
+        self.allupsegs = {} # dict containing set of all upstream segments for each segment
+
+    def append2sfr(self, sfrlinework, route2reach1=True,
+                   trim_buffer=20, routing_tol=None,
+                   roughness=0.037, streambed_thickness=1, streambedK=1,
+                   icalc=1,
+                   iupseg=0, iprior=0, nstrpts=0, flow=0, runoff=0, etsw=0, pptsw=0,
+                   roughch=0, roughbk=0, cdepth=0, fdepth=0, awdth=0, bwdth=0):
+        """Convert linework to input that can be appended to an existing SFR dataset.
+
+        Creates Mat1 (m1) and Mat2 (m2) attributes.
+        """
+
+        if not isinstance(sfrlinework, pd.DataFrame):
+            self.sfr = shp2df(sfrlinework)
+        else:
+            self.sfr = sfrlinework.copy()
+
+        self.sfr.sort_values(by=['segment', 'reach'], inplace=True)
+        # assign reachIDs if they don't exist
+        if 'reachID' not in self.sfr.columns:
+            self.sfr['reachID'] = np.arange(1, len(self.sfr) + 1)
+
+        self.route_lines_by_proximity()
+        self.route_lines_to_sfr(sfrlinework=sfrlinework, route2reach1=route2reach1,
+                   trim_buffer=trim_buffer, routing_tol=routing_tol)
+        return self.to_sfr(starting_reachID=self.sfr.reachID.max()+1,
+                    roughness=roughness, streambed_thickness=streambed_thickness, streambedK=streambedK,
+                    icalc=icalc,
+                    iupseg=iupseg, iprior=iprior, nstrpts=nstrpts, flow=flow, runoff=runoff, etsw=etsw, pptsw=pptsw,
+                    roughch=roughch, roughbk=roughbk, cdepth=cdepth, fdepth=fdepth, awdth=awdth, bwdth=bwdth)
 
     def get_end_elevs_from_dem(self, dem):
 
@@ -517,22 +554,67 @@ class lines(linesBase):
         self.df['elevMax'] = get_values_at_points(dem, self.start_cds)
         self.df['elevMin'] = get_values_at_points(dem, self.end_cds)
 
-    def route_lines_by_proximity(self):
+    def get_segment_asums(self):
+        """Using allupsegs dictionary, sum lengths of all upstream segments for each segment
 
+        Returns
+        -------
+        segment_asums : dict
+            Dictionary of arbolate sums for each segment
+        """
+        if 'length' not in self.df.columns:
+            self.df['length'] = [g.length for g in self.df.geometry]
+        return {s: self.df.length[self.df.segment.isin(self.allupsegs[s])].sum() * self.to_km
+                if s in self.allupsegs.keys() else 0
+                for s in self.df.segment.tolist()}
+
+    def renumber_segments(self):
+        """Renumber segments so that segment numbering is continuous and always increases
+        in the downstream direction. Experience suggests that this can substantially speed
+        convergence for some models using the NWT solver."""
+        r = renumber_segments(self.m2.segment.values, self.m2.outseg.values)
+
+        self.m2['segment'] = [r.get(s, s) for s in self.m2.segment]
+        self.m2['outseg'] = [r.get(s, s) for s in self.m2.outseg]
+        self.m2.sort_values(by='segment', inplace=True)
+        assert _in_order(self.m2.segment.values, self.m2.outseg.values)
+        assert len(self.m2.segment) == self.m2.segment.max()
+        self.m1['segment'] = [r.get(s, s) for s in self.m1.segment]
+        self.m1['outseg'] = [r.get(s, s) for s in self.m1.outseg]
+
+    def route_lines_by_proximity(self, tol=50):
+        """Route lines based on proximity of starts and ends.
+
+        Parameters
+        ----------
+        tol : numeric
+            Only consider starting coordinates within tol of each end coordinate. This
+            number should be fairly small, otherwise circular routing may occur.
+        """
         nearest_start = get_nearest(self.start_cds, self.end_cds)
 
         # record the preliminary seg. number of nearest start if within tol
         self.df['outseg'] = [self.df.segment[n]
                              if Point(*self.start_cds[n]).distance(\
-                                Point(*self.end_cds[i])) < self.routing_tol
+                                Point(*self.end_cds[i])) < tol
                  else 0 for i, n in enumerate(nearest_start)]
 
         self.df['upsegs'] = [self.df.segment[self.df.outseg == s].tolist() for s in self.df.segment]
+
+        self.allupsegs = get_upsegs(self.df.segment.values, self.df.outseg.values)
+
+        #check for circular routing (a segment shouldn't be upstream of itself)
+        for k, v in self.allupsegs.items():
+            assert len({k}.intersection(v)) == 0
 
     def route_lines_to_sfr(self, sfrlinework, route2reach1=True,
                            trim_buffer=20, routing_tol=None):
         """Route the linework in the lines class to an existing
         set of lines representing an SFR package.
+
+        Assigns SFR outsegs and out reaches
+        Modifies connecting lines so that they end at point on SFR network
+        Renumbers segments in added lines so SFR segment numbers aren't duplicated
 
         Parameters
         ----------
@@ -544,11 +626,6 @@ class lines(linesBase):
             (existing SFR segment in that location will have to be subdivided).
         """
         tol = self.routing_tol if routing_tol is None else routing_tol
-
-        if not isinstance(sfrlinework, pd.DataFrame):
-            self.sfr = shp2df(sfrlinework)
-        else:
-            self.sfr = sfrlinework.copy()
 
         if route2reach1:
             segments = self.sfr.ix[self.sfr.reach == 1, 'segment'].tolist()
@@ -563,13 +640,16 @@ class lines(linesBase):
             self.df['segment'] += maxseg
             self.df.loc[self.df.outseg > 0, 'outseg'] += maxseg
             self.df['upsegs'] = [[u + maxseg for u in us] for us in self.df.upsegs.tolist()]
+            self.allupsegs = get_upsegs(self.df.segment.values, self.df.outseg.values)
+            #self.allupsegs = {s + maxseg: {ss + maxseg if ss > 0 else ss for ss in v}
+            #                  for s, v in self.allupsegs.items()}
 
         sfr_start_cds = [(g.xy[0][0], g.xy[1][0]) for g in geoms]
 
         print('routing new lines within {} to SFR...'.format(tol))
 
         is_outlet = self.df.outseg.values == 0
-        new_lines_outlet_cds = map(tuple, np.array(self.end_cds)[is_outlet])
+        new_lines_outlet_cds = list(map(tuple, np.array(self.end_cds)[is_outlet]))
 
         # get index of nearest start to each end
 
@@ -581,8 +661,9 @@ class lines(linesBase):
                                           Point(*new_lines_outlet_cds[i])) < tol
                                        else 0 for i, n in enumerate(nearest_sfr)]
         if not route2reach1:
-            reaches = self.sfr.reach.tolist()
-            self.df.loc[is_outlet, 'outreach'] = [reaches[n]
+            #reaches = self.sfr.reach.tolist()
+            reaches = self.sfr.reachID.tolist()
+            self.df.loc[is_outlet, 'outreachID'] = [reaches[n]
                                        if Point(*sfr_start_cds[n]).distance(\
                                           Point(*new_lines_outlet_cds[i])) < tol
                                        else 0 for i, n in enumerate(nearest_sfr)]
@@ -592,7 +673,8 @@ class lines(linesBase):
             # and connect them to start of closest segment or reach on SFR network
             diff = line.difference(Point(line.coords[-1]).buffer(trim_buffer))
             if diff.length > 0:
-                return LineString(list(diff.coords) + [sfr_start_coord])
+                return LineString(list(diff.coords) + [sfr_start_coord]) \
+                if sfr_start_cds not in diff.coords else LineString(list(diff.coords))
             return LineString([line.coords[0], sfr_start_coord])
 
         # only connect the lines that are within the routing tolerance
@@ -604,7 +686,16 @@ class lines(linesBase):
                             for i, l in enumerate(self.df.geometry[is_outlet])]
         self.df['geometry'] = geoms
 
-    def to_sfr(self):
+    def to_sfr(self, starting_reachID=1,
+               roughness=0.037, streambed_thickness=1, streambedK=1,
+               icalc=1,
+               iupseg=0, iprior=0, nstrpts=0, flow=0, runoff=0, etsw=0, pptsw=0,
+               roughch=0, roughbk=0, cdepth=0, fdepth=0, awdth=0, bwdth=0,
+               tol=0.01):
+        """Convert linework to SFR input.
+
+        Creates Mat1 (m1) and Mat2 (m2) attributes.
+        """
 
         print('\nclipping lines to active area...')
         inside = np.array([g.intersects(self.domain) for g in self.df.geometry])
@@ -613,8 +704,10 @@ class lines(linesBase):
         line_geoms = [g.intersection(self.domain) for g in self.df.geometry]
         grid_geoms = self.grid.geometry.tolist()
 
-        print("establishing routing...")
-        self.route_lines_by_proximity()
+        # segments may already be routed if appending to SFR
+        if self.df.outseg.sum() == 0:
+            print("establishing routing...")
+            self.route_lines_by_proximity()
 
         print("intersecting lines with grid cells...") # this part crawls in debug mode
         grid_intersections = GISops.intersect_rtree(grid_geoms, line_geoms)
@@ -622,10 +715,12 @@ class lines(linesBase):
         print("setting up reaches and Mat1... (may take a few minutes for large grids)")
         ta = time.time()
         segments = self.df.segment.tolist()
-        m1 = make_mat1(line_geoms, segments, segments, grid_intersections, grid_geoms)
+        m1 = make_mat1(line_geoms, segments, segments, grid_intersections, grid_geoms, tol=tol)
+        m1.sort_values(by=['segment', 'reach'], inplace=True)
+        m1['reachID'] = np.arange(starting_reachID, len(m1) + starting_reachID)
         print("finished in {:.2f}s\n".format(time.time() - ta))
 
-        print("computing widths...")
+        print("computing lengths...")
         m1['length'] = np.array([g.length for g in m1.geometry])
         lengths = m1[['segment', 'length']].copy()
         groups = lengths.groupby('segment')
@@ -634,7 +729,8 @@ class lines(linesBase):
         ta = time.time()
         reach_asums = np.concatenate([np.cumsum(grp.length.values[::-1])[::-1] - 0.5*grp.length.values
                                       for s, grp in groups])
-        segment_asums = np.array([self.df.ArbolateSu.values[s-1] for s in m1.segment.values])
+        segment_asums_d = self.get_segment_asums()
+        segment_asums = np.array([segment_asums_d[s] for s in m1.segment.values])
         reach_asums = -1 * self.to_km * reach_asums + segment_asums # arbolate sums are computed in km
         print("finished in {:.2f}s\n".format(time.time() - ta))
 
@@ -660,11 +756,25 @@ class lines(linesBase):
             m1['column'] = column
         m1['layer'] = 1
 
+        print("\nsetting up Mat2...")
+        ta = time.time()
+        m2 = self.df[['segment', 'outseg', 'outreachID', 'elevMax', 'elevMin']].copy()
+        m2['icalc'] = icalc
+        m2.index = m2.segment
+        print("finished in {:.2f}s\n".format(time.time() - ta))
+
+        # add outseg information to Mat1
+        m1['outseg'] = [m2.outseg[s] for s in m1.segment]
+        m1.sort_values(by=['segment', 'reach'], inplace=True)
+        return m1, m2
+
+        '''
+        # at this point a new 'SFR' object should be created (with its own methods such as "renumber segments")
         self.m1 = m1
 
         print("\nsetting up Mat2...")
         ta = time.time()
-        self.m2 = self.df[['segment', 'outseg', 'Max', 'Min']].copy()
+        self.m2 = self.df[['segment', 'outseg', 'elevMax', 'elevMin']].copy()
         self.m2['icalc'] = icalc
         self.renumber_segments() # enforce best segment numbering
         self.m2.index = self.m2.segment
@@ -674,6 +784,9 @@ class lines(linesBase):
         self.m1['outseg'] = [self.m2.outseg[s] for s in self.m1.segment]
         self.m1.sort_values(by=['segment', 'reach'], inplace=True)
         print('\nDone creating SFR dataset.')
+        '''
+
+
 def _in_order(nseg, outseg):
     """Check that segment numbering increases in downstream direction.
 
@@ -726,7 +839,7 @@ def _get_outlets(segment_seguences_array):
             else i + 1
             for i, r in enumerate(segment_seguences_array.T)}
 
-def create_reaches(part, segment_nodes, grid_geoms):
+def create_reaches(part, segment_nodes, grid_geoms, tol=0.01):
     """Creates SFR reaches for a segment by ordering model cells intersected by a LineString
 
     Parameters
@@ -751,6 +864,9 @@ def create_reaches(part, segment_nodes, grid_geoms):
     reach_geoms = {}
     # interesct flowline part with grid nodes
     reach_intersections = [part.intersection(grid_geoms[c]) for c in segment_nodes]
+    reach_intersections = [g for g in reach_intersections if g.length > 0] #drops points and empty geometries
+    # empty geometries are created when segment_nodes variable includes nodes intersected by
+    # other parts of a multipart line. Not sure what causes points besides duplicate vertices.
 
     # "flatten" all grid cell intersections to single part geometries
     n = 1
@@ -765,26 +881,33 @@ def create_reaches(part, segment_nodes, grid_geoms):
             n += len(g.geoms)
 
     # make point features for start and end of flowline part
-    partlist = list(zip(part.xy[0], part.xy[1]))
-    start = Point(partlist[0])
-    end = Point(partlist[-1])
+    start = Point(part.coords[0])
+    end = Point(part.coords[-1])
 
     ordered_reach_geoms = []
     ordered_node_numbers = []
-    nreaches = len(reach_geoms)
     current_reach = start
+    nreaches = len(reach_geoms) # length before entries are popped
 
     # for each flowline part (reach)
     for i in range(nreaches):
+        '''
         # find the next flowline part (reach) that touches the current reach
-        r = [j for j, g in reach_geoms.items() if current_reach.intersects(g.buffer(0.001))
-             ][0]
+        try:
+            r = [j for j, g in reach_geoms.items() if current_reach.intersects(g.buffer(tol))
+                ][0]
+        except:
+            pass
+        '''
+        dist = {j: g.distance(current_reach) for j, g in reach_geoms.items()}
+        dist_sorted = sorted(dist.items(), key=operator.itemgetter(1))
+        r = dist_sorted[0][0]
         next_reach = reach_geoms.pop(r)
         ordered_reach_geoms.append(next_reach)
         ordered_node_numbers.append(reach_nodes[r] + 1)
         current_reach = next_reach
 
-        if current_reach.touches(end.buffer(0.001)) and len(ordered_node_numbers) == nreaches:
+        if current_reach.touches(end.buffer(tol)) and len(ordered_node_numbers) == nreaches:
             break
     assert len(ordered_node_numbers) == nreaches # new list of ordered node numbers must include all flowline parts
     return ordered_reach_geoms, ordered_node_numbers
@@ -852,9 +975,6 @@ def get_upsegs(nseg, outseg):
     -------
     upsegs : dict
         Nested dictionary of form {stress period: {segment: [set of upsegs]}}
-
-    Note:
-    This method will not work if there are instances of circular routing.
     """
 
     # make a list of adjacent upsegments keyed to outseg list in Mat2
@@ -945,7 +1065,7 @@ def map_segment_sequences(segments, outsegs, verbose=True):
     # such as plotting elevation profiles
     return all_outsegs
 
-def make_mat1(flowline_geoms, fl_segments, fl_comids, grid_intersections, grid_geoms):
+def make_mat1(flowline_geoms, fl_segments, fl_comids, grid_intersections, grid_geoms, tol=0.01):
 
     reach = []
     segment = []
@@ -957,8 +1077,8 @@ def make_mat1(flowline_geoms, fl_segments, fl_comids, grid_intersections, grid_g
         segment_geom = flowline_geoms[i]
         segment_nodes = grid_intersections[i]
 
-        if segment_geom.type != 'MultiLineString':
-            ordered_reach_geoms, ordered_node_numbers = create_reaches(segment_geom, segment_nodes, grid_geoms)
+        if segment_geom.type != 'MultiLineString' and segment_geom.type != 'GeometryCollection':
+            ordered_reach_geoms, ordered_node_numbers = create_reaches(segment_geom, segment_nodes, grid_geoms, tol=tol)
             reach += list(np.arange(len(ordered_reach_geoms)) + 1)
             geometry += ordered_reach_geoms
             node += ordered_node_numbers
@@ -1000,7 +1120,8 @@ def renumber_segments(nseg, outseg):
     Returns
     -------
     r : dict
-        Dictionary mapping old segment numbers (keys) to new segment numbers (values)
+        Dictionary mapping old segment numbers (keys) to new segment numbers (values). r only
+        contains entries for number that were remapped.
     """
     def reassign_upsegs(r, nexts, upsegs):
         nextupsegs = []
