@@ -607,7 +607,7 @@ class lines(linesBase):
         for k, v in self.allupsegs.items():
             assert len({k}.intersection(v)) == 0
 
-    def route_lines_to_sfr(self, sfrlinework, route2reach1=True,
+    def route_lines_to_sfr(self, sfrlinework, route2reach1=False,
                            trim_buffer=20, routing_tol=None):
         """Route the linework in the lines class to an existing
         set of lines representing an SFR package.
@@ -665,13 +665,13 @@ class lines(linesBase):
                                        if Point(*sfr_start_cds[n]).distance(\
                                           Point(*new_lines_outlet_cds[i])) < tol
                                        else 0 for i, n in enumerate(nearest_sfr)]
-        if not route2reach1:
-            #reaches = self.sfr.reach.tolist()
-            reaches = self.sfr.reachID.tolist()
-            self.df.loc[is_outlet, 'outreachID'] = [reaches[n]
-                                       if Point(*sfr_start_cds[n]).distance(\
-                                          Point(*new_lines_outlet_cds[i])) < tol
-                                       else 0 for i, n in enumerate(nearest_sfr)]
+        #if not route2reach1:
+        #reaches = self.sfr.reach.tolist()
+        reaches = self.sfr.reachID.tolist()
+        self.df.loc[is_outlet, 'outreachID'] = [reaches[n]
+                                   if Point(*sfr_start_cds[n]).distance(\
+                                      Point(*new_lines_outlet_cds[i])) < tol
+                                   else 0 for i, n in enumerate(nearest_sfr)]
 
         def fix_newline_end(line, sfr_start_coord, trim_buffer=20):
             # trim the ends of the new lines (in case of overlap)

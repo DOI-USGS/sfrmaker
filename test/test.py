@@ -37,7 +37,7 @@ trim_buffer=20
 
 lns = lines(newlines, mf_grid=grid, mf_grid_node_col='node', model_domain=domain)
 lns.get_end_elevs_from_dem(dem)
-m1, m2 = lns.append2sfr(nhd.m1, route2reach1=False, routing_tol=200)
+m1, m2 = lns.append2sfr(nhd.m1, routing_tol=200)
 
 nhd.m1 = nhd.m1.append(m1)
 nhd.m2 = nhd.m2.append(m2)
