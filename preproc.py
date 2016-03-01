@@ -540,7 +540,7 @@ class lines(linesBase):
             self.sfr['reachID'] = np.arange(1, len(self.sfr) + 1)
 
         self.route_lines_by_proximity()
-        self.route_lines_to_sfr(sfrlinework=sfrlinework, route2reach1=route2reach1,
+        self.route_lines_to_sfr(sfrlinework=self.sfr, route2reach1=route2reach1,
                    trim_buffer=trim_buffer, routing_tol=routing_tol)
         return self.to_sfr(starting_reachID=self.sfr.reachID.max()+1,
                     roughness=roughness, streambed_thickness=streambed_thickness, streambedK=streambedK,
@@ -625,6 +625,11 @@ class lines(linesBase):
             Otherwise, routing is to closest starting coordinate of an SFR reach
             (existing SFR segment in that location will have to be subdivided).
         """
+        if not isinstance(sfrlinework, pd.DataFrame):
+            self.sfr = shp2df(sfrlinework)
+        else:
+            self.sfr = sfrlinework.copy()
+
         tol = self.routing_tol if routing_tol is None else routing_tol
 
         if route2reach1:
@@ -786,6 +791,24 @@ class lines(linesBase):
         print('\nDone creating SFR dataset.')
         '''
 
+
+class SFRdata(object):
+
+    m1_columns2flopy = {'layer': 'k',
+                        'row': 'i',
+                        'column': 'j',
+                        'segment': 'iseg',
+                        'reach': 'ireach',
+                        'sbtop': 'strtop',
+                        'length': 'rchlen',
+                        'sbthick': 'strthick',
+                        'sbK': 'strhc1'
+                        }
+    m2_columns2flopy = {'segment': 'nseg'
+                        }
+
+    def __init__(self, reach_data, segment_data):
+        pass
 
 def _in_order(nseg, outseg):
     """Check that segment numbering increases in downstream direction.

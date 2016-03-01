@@ -41,6 +41,9 @@ class SFRdata(object):
                        'bed_roughness': 'roughness',
                        'cellnum': 'node'}
 
+    m2_column_names = {'elevMax': 'Max',
+                       'elevMin': 'Min'}
+
     m1_integer_columns = {'row', 'column', 'layer', 'node', 'reachID',
                           'comid', 'segment', 'reach', 'outseg', 'outlet'}
     # working on parser for column names
@@ -123,7 +126,7 @@ class SFRdata(object):
                     raise IndexError("Segments in Mat1 and Mat2 are different!")
 
                 # enforce consistent column names (maintaining compatibility with past SFRmaker versions)
-                self.parse_mat1_columns()
+                self.parse_columns()
 
                 # enforce integer columns
                 int_cols = self.m1_integer_columns.intersection(set(self.m1.columns))
@@ -270,10 +273,12 @@ class SFRdata(object):
             reach_values += np.interp(dist, xp, fp).tolist()
         return np.array(reach_values)
 
-    def parse_mat1_columns(self):
+    def parse_columns(self):
 
         rename_columns = {c: newname for c, newname in self.m1_column_names.items() if c in self.m1.columns}
         self.m1.rename(columns=rename_columns, inplace=True)
+        rename_columns = {c: newname for c, newname in self.m2_column_names.items() if c in self.m2.columns}
+        self.m2.rename(columns=rename_columns, inplace=True)
 
     @ property
     def shared_cells(self):
