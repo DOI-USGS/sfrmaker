@@ -143,13 +143,9 @@ class SFRdata(object):
             self.cell_geometries = {}
 
             if mfdis is not None:
-
-                self.mfpath = mfpath
+                self.mfdis = mfdis
+                self.mfpath = os.path.split(mfdis)[0]
                 self.basename = mfdis[:-4]
-                if mfnam is None:
-                    mfnam = self.basename + '.nam'
-                self.mfdis = os.path.join(self.mfpath, mfdis)
-                self.mfnam = os.path.join(self.mfpath, mfnam)
                 self.read_dis2()
 
                 # node numbers for cells with SFR
@@ -303,7 +299,6 @@ class SFRdata(object):
 
         print('reading {}...'.format(self.mfdis))
         self.m = flopy.modflow.Modflow(model_ws=self.mfpath)
-        #self.nf = flopy.utils.mfreadnam.parsenamefile(self.mfnam, {})
         self.dis = flopy.modflow.ModflowDis.load(self.mfdis, self.m)
         self.elevs = np.zeros((self.dis.nlay + 1, self.dis.nrow, self.dis.ncol))
         self.elevs[0, :, :] = self.dis.top.array
@@ -357,6 +352,7 @@ class SFRdata(object):
             else:
                 print('No row and column fields in Mat1, and no row and column fields given for {}'.format(mfgridshp))
                 print('SFR input for structured grid requires row and column info.')
+        assert len(self.m1.node.unique()) == len(self.m1.node) # check for non-unique node numbers
         self.m1['geometry'] = df.ix[self.m1.node.tolist(), 'geometry'].tolist()
         if os.path.exists(mfgridshp[:-4] + '.prj'):
             self.prj = mfgridshp[:-4] + '.prj'
