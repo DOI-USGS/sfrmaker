@@ -1099,7 +1099,8 @@ def make_mat1(flowline_geoms, fl_segments, fl_comids, grid_intersections, grid_g
     for i in range(len(flowline_geoms)):
         segment_geom = flowline_geoms[i]
         segment_nodes = grid_intersections[i]
-
+        if fl_comids[i] == 4491372:
+            j=2
         if segment_geom.type != 'MultiLineString' and segment_geom.type != 'GeometryCollection':
             ordered_reach_geoms, ordered_node_numbers = create_reaches(segment_geom, segment_nodes, grid_geoms, tol=tol)
             reach += list(np.arange(len(ordered_reach_geoms)) + 1)

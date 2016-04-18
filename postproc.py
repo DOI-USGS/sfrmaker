@@ -352,7 +352,6 @@ class SFRdata(object):
             else:
                 print('No row and column fields in Mat1, and no row and column fields given for {}'.format(mfgridshp))
                 print('SFR input for structured grid requires row and column info.')
-        assert len(self.m1.node.unique()) == len(self.m1.node) # check for non-unique node numbers
         self.m1['geometry'] = df.ix[self.m1.node.tolist(), 'geometry'].tolist()
         if os.path.exists(mfgridshp[:-4] + '.prj'):
             self.prj = mfgridshp[:-4] + '.prj'
@@ -587,6 +586,72 @@ class SFRdata(object):
         DEM_col_name = 'DEM{}'.format(stat)
         self.m1[DEM_col_name] = self.m1['sbtop'].values
         print('DEM {} elevations assigned to sbtop column in m1'.format(stat))
+
+    def reset_segment_ends_from_dem(self):
+        """Often the NHDPlus elevations don't match DEM at scales below 100k.
+        Starting at outlets and iterating by segment level, adjust segment end elevations downward
+        if a lower elevation was sampled from the DEM in the current segment, or any upstream segments.
+        Adjust downstream segment start elevation to keep it consistent with upseg end elevations."""
+        nseg = self.m2.segment.values
+        outseg = self.m2.outseg.values
+        elevmin = self.m2.Min.values
+        elevmax = self.m2.Max.values
+        dem_min = np.array([self.m1.ix[self.m1.segment == s, 'DEMmin'].min() for s in nseg])
+        dem_reach1 = np.array([self.m1.ix[(self.m1.segment.values == s) &
+                                      (self.m1.reach.values ==1), 'DEMmin'].values[0] for s in nseg])
+        def get_nextupsegs(upsegs):
+            nextupsegs = []
+            for s in upsegs:
+                nextupsegs += nseg[outseg == s].tolist()
+            return nextupsegs
+
+        def get_upsegs(seg):
+            upsegs = nseg[outseg == seg].tolist()
+            all_upsegs = upsegs
+            for i in range(len(nseg)):
+                upsegs = get_nextupsegs(upsegs)
+                if len(upsegs) > 0:
+                    all_upsegs.extend(upsegs)
+                else:
+                    break
+            return all_upsegs
+
+        def get_upseg_levels(seg):
+            upsegs = nseg[outseg == seg].tolist()
+            all_upsegs = [upsegs]
+            for i in range(len(nseg)):
+                upsegs = get_nextupsegs(upsegs)
+                if len(upsegs) > 0:
+                    all_upsegs.append(upsegs)
+                else:
+                    break
+            return all_upsegs
+
+        def reset_elevations(seg):
+            # reset segment elevations above (upsegs) and below (outseg) a node
+            oseg = outseg[seg -1]
+            all_upsegs = np.array(get_upsegs(seg) + [seg]) # all segments upstream of node
+            oldmin = elevmin[(all_upsegs-1)].min() # minimum current elevation upstream of node
+            smin = dem_min[(all_upsegs-1)].min() # minimum sampled DEM elevation upstream of node
+            if oseg > 0:
+                outseg_max = elevmax[oseg - 1] # outseg reach 1 elevation (already updated)
+                smin = np.min([outseg_max, smin])
+            if smin < oldmin: # reset if the DEM is lower
+                elevmin[seg - 1] = smin
+            if oseg > 0: # if the node is not an outlet, reset the outseg max
+                elevmax[outseg[seg -1] -1] = np.min([smin, oldmin, outseg_max])
+            if len(all_upsegs) == 1:
+                elevmax[seg -1] = np.min([elevmax[seg-1], dem_reach1[seg-1]])
+
+        # get list of segments at each level, starting with 0 (outlet)
+        segment_levels = get_upseg_levels(0)
+        # at each level, reset all of the segment elevations as necessary
+        for level in segment_levels:
+            [reset_elevations(s) for s in level]
+
+        # update mat 2 with new elevations
+        self.m2['Max'] = elevmax
+        self.m2['Min'] = elevmin
 
     def reset_model_top_2streambed(self, minimum_thickness=1, outdisfile=None, outsummary=None):
         #if hasattr(self, 'Elevations'):
