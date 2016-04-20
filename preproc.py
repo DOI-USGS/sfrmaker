@@ -105,11 +105,11 @@ class linesBase(object):
         # sort and pair down the grid
         if mf_grid_node_col is not None:
             self.grid.sort_values(by=mf_grid_node_col, inplace=True)
+            if len(self.grid) != self.grid[mf_grid_node_col].max():
+                raise NodeIndexWarning(mf_grid, mf_grid_node_col)
             self.grid.index = self.grid[mf_grid_node_col].values
         else:
-            print('Warning: Node field for grid shape file not supplied. \
-                  Node numbers will be assigned using index. \
-                  This may result in incorrect location of SFR reaches.')
+            raise NodeIndexWarning(mf_grid)
         self.grid = self.grid[['geometry']]
 
         # get projections
@@ -263,12 +263,11 @@ class NHDdata(object):
         # sort and pair down the grid
         if mf_grid_node_col is not None:
             self.grid.sort_values(by=mf_grid_node_col, inplace=True)
+            if len(self.grid) != self.grid[mf_grid_node_col].max():
+                raise NodeIndexWarning(mf_grid, mf_grid_node_col)
             self.grid.index = self.grid[mf_grid_node_col].values
         else:
-            print('Warning: Node field for grid shape file not supplied. \
-                  Node numbers will be assigned using index. \
-                  This may result in incorrect location of SFR reaches.')
-        self.grid = self.grid[['geometry']]
+            raise NodeIndexWarning(mf_grid)
 
         # get projections
         if self.mf_grid_proj4 is None and not isinstance(mf_grid, pd.DataFrame):
@@ -1099,8 +1098,6 @@ def make_mat1(flowline_geoms, fl_segments, fl_comids, grid_intersections, grid_g
     for i in range(len(flowline_geoms)):
         segment_geom = flowline_geoms[i]
         segment_nodes = grid_intersections[i]
-        if fl_comids[i] == 4491372:
-            j=2
         if segment_geom.type != 'MultiLineString' and segment_geom.type != 'GeometryCollection':
             ordered_reach_geoms, ordered_node_numbers = create_reaches(segment_geom, segment_nodes, grid_geoms, tol=tol)
             reach += list(np.arange(len(ordered_reach_geoms)) + 1)
@@ -1218,3 +1215,21 @@ class ProjectionError(Exception):
         self.infile = infile
     def __str__(self):
         return('\n\nModel grid shapefile is in lat-lon. Please use a projected coordinate system.')
+
+class NodeIndexWarning(Warning):
+    def __init__(self, grid_shapefile, node_field=None):
+        self.grid_shapefile = grid_shapefile
+        self.node_field = node_field
+    def __str__(self):
+        if self.node_field is None:
+            return('\nWarning: Node field for {} not supplied. \
+                  Node numbers will be assigned sequentially to grid cells starting at 1. \
+                  This will result in incorrect location of SFR reaches if the grid shapefile \
+                  is not sorted.'.format(self.node_field))
+        else:
+            return('\nWarning: Node numbers in field {} of grid are not consecutive intergers \
+                   starting at 1. SFRmaker will sort the grid cells by node, but then use \
+                   base-1 consecutive integers for indexing (same as MODFLOW USG). These will be \
+                   the node numbers reported in the output (sfr package, tables, and shapefile). This \
+                   may lead to confusion if the SFR output is joined back to {}.'
+                   .format(self.node_field, self.grid_shapefile))

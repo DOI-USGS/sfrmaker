@@ -16,9 +16,7 @@ nhdpathGL = '../Examples/data/'
 pfvaa_files = nhdpathGL + 'PlusFlowlineVAA.dbf'
 pf_files = nhdpathGL + 'PlusFlow.dbf'
 elevslope_files = nhdpathGL + 'elevslope.dbf'
-#sfr_lines = shp2df('/Users/aleaf/Documents/BR/BadRiver/streams/preproc/SFR_lines.shp')
-#nhd_lines = sfr_lines[sfr_lines.COMID != 0].copy()
-nhd_lines_proj4 = get_proj4('/Users/aleaf/Documents/BR/BadRiver/streams/preproc/SFR_lines.shp')
+nhd_lines_proj4 = get_proj4(nhd_lines)
 
 if not os.path.isdir('temp'):
     os.makedirs('temp')

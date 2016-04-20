@@ -165,11 +165,20 @@ class SFRdata(object):
                 self.mfdis = None
                 self.basename = 'MF'
 
+            # coordinate projection of model grid
+            self.prj = prj # projection file
+            self.proj4 = proj4
+            self.epsg = epsg
+            if proj4 is None and prj is not None:
+                self.proj4 = GISio.get_proj4(prj)
+
             if mfgridshp is not None:
                 self._read_geoms_from_mfgridshp(mfgridshp, node_field=mfgridshp_node_field,
                                                 row_field=mfgridshp_row_field,
                                                 column_field=mfgridshp_column_field,
                                                 ncol=ncol)
+                if self.prj is None and os.path.exists(mfgridshp[:-4] + '.prj'):
+                    self.prj = mfgridshp[:-4] + '.prj'
 
             self.node_attribute = 'node' # compatibility with sfr_plots and sfr_classes
 
@@ -184,13 +193,6 @@ class SFRdata(object):
             self.GIS_mult = GIS_mult
             self.minimum_slope = minimum_slope
             self.maximum_slope = maximum_slope
-
-            # coordinate projection of model grid
-            self.prj = prj # projection file
-            self.proj4 = proj4
-            self.epsg = epsg
-            if proj4 is None and prj is not None:
-                self.proj4 = GISio.get_proj4(prj)
 
             # streamflow file for plotting SFR results
             if mfnam is not None and streamflow_file is None:
@@ -326,6 +328,8 @@ class SFRdata(object):
     def _read_geoms_from_mfgridshp(self, mfgridshp, node_field=None, row_field=None, column_field=None, ncol=None):
 
         df = GISio.shp2df(mfgridshp)
+        # set the index for the model grid;
+        # create the index from the rows and columns if they are provided
         if node_field is None: # and row_field is not None and column_field is not None:
             if row_field is not None and column_field is not None:
                 ncol = df[column_field].max()
@@ -333,6 +337,8 @@ class SFRdata(object):
                 node_field = 'node'
             else:
                 raise IOError('No node field or row/column field given for grid shapefile.')
+        df.index = df[node_field] if node_field in df.columns else df.index
+        df.sort_index(level=0, inplace=True)
         if 'node' not in self.m1.columns:
             if ncol is None and column_field:
                 ncol = df[column_field].max()
@@ -342,7 +348,7 @@ class SFRdata(object):
                 raise IOError('No node number information in Mat1. For structured grid, ' \
                               'cannot compute node numbers without number of columns.' \
                               'Please provide ncol argument or row and column fields for grid shapefile.')
-        df.index = df[node_field]
+
         if self.gridtype == 'structured' and 'row' not in self.m1.columns or 'column' not in self.m1.columns:
             if row_field is not None and column_field is not None:
                 self.m1['row'] = df.ix[self.m1.node.tolist(), row_field].tolist()
@@ -352,9 +358,7 @@ class SFRdata(object):
             else:
                 print('No row and column fields in Mat1, and no row and column fields given for {}'.format(mfgridshp))
                 print('SFR input for structured grid requires row and column info.')
-        self.m1['geometry'] = df.ix[self.m1.node.tolist(), 'geometry'].tolist()
-        if os.path.exists(mfgridshp[:-4] + '.prj'):
-            self.prj = mfgridshp[:-4] + '.prj'
+        self.m1['geometry'] = df.loc[self.m1.node.values -1, 'geometry'].tolist() # back to zero-based!
 
     def get_cell_geometries(self, mfgridshp=None, node_field='node'):
 
