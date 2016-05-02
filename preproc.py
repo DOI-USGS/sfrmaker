@@ -455,7 +455,8 @@ class NHDdata(object):
 
         self.m2['segment'] = [r.get(s, s) for s in self.m2.segment]
         self.m2['outseg'] = [r.get(s, s) for s in self.m2.outseg]
-        self.m2.sort_values(by='segment', inplace=True)
+        self.m2.sort_values(by=['segment'], inplace=True)
+        self.m2.index = self.m2.segment.values # reset the index to new segment numbers
         assert _in_order(self.m2.segment.values, self.m2.outseg.values)
         assert len(self.m2.segment) == self.m2.segment.max()
         self.m1['segment'] = [r.get(s, s) for s in self.m1.segment]

@@ -28,7 +28,6 @@ def header(infile):
             continue
     return knt
 
-
 class SFRdata(object):
 
     # dictionary to convert different variations on column names to internally consistent names
@@ -300,8 +299,16 @@ class SFRdata(object):
             #    self.Elevations.mfpath = os.path.split(self.mfdis)[0]
 
         print('reading {}...'.format(self.mfdis))
-        self.m = flopy.modflow.Modflow(model_ws=self.mfpath)
-        self.dis = flopy.modflow.ModflowDis.load(self.mfdis, self.m)
+        try:
+            self.m = flopy.modflow.Modflow(model_ws=self.mfpath)
+            self.dis = flopy.modflow.ModflowDis.load(self.mfdis, self.m)
+        except:
+            #  Modflow.load() may load dis successfully, even if ModflowDis.load() fails
+            model_ws, mfnam = os.path.split(self.mfdis)
+            self.mfnam = mfnam[:-4] + '.nam'
+            self.m = flopy.modflow.Modflow.load(self.mfnam, model_ws=model_ws, load_only='dis')
+            self.dis = self.m.dis
+
         self.elevs = np.zeros((self.dis.nlay + 1, self.dis.nrow, self.dis.ncol))
         self.elevs[0, :, :] = self.dis.top.array
         self.elevs[1:, :, :] = self.dis.botm.array
@@ -358,7 +365,7 @@ class SFRdata(object):
             else:
                 print('No row and column fields in Mat1, and no row and column fields given for {}'.format(mfgridshp))
                 print('SFR input for structured grid requires row and column info.')
-        self.m1['geometry'] = df.loc[self.m1.node.values -1, 'geometry'].tolist() # back to zero-based!
+        self.m1['geometry'] = df.iloc[self.m1.node.astype(int) -1]['geometry'].tolist() # back to zero-based!
 
     def get_cell_geometries(self, mfgridshp=None, node_field='node'):
 
