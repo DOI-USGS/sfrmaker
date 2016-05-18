@@ -206,7 +206,8 @@ class SFRdata(object):
             self.outsegs = None # dataframe showing successive outsegs from headwaters (index) to outlets
 
             # create unique reach IDs from Mat1 index
-            self.m1['reachID'] = self.m1.index.values
+            if 'reachID' not in self.m1.columns:
+                self.m1['reachID'] = self.m1.index.values
 
             # assign upstream segments to Mat2
             self.m2['upsegs'] = [self.m2.segment[self.m2.outseg == s].tolist() for s in self.segments]
