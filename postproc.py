@@ -8,8 +8,10 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 from shapely.geometry import Polygon, LineString, MultiLineString
-
-from rasterstats import zonal_stats
+try:
+    from rasterstats import zonal_stats
+except:
+    print('Warning: rasterstats not imported.')
 import flopy
 import GISio, GISops
 

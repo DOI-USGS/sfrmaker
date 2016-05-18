@@ -1,5 +1,5 @@
 __author__ = 'aleaf'
-
+import warnings
 import time
 import operator
 import numpy as np
@@ -106,10 +106,10 @@ class linesBase(object):
         if mf_grid_node_col is not None:
             self.grid.sort_values(by=mf_grid_node_col, inplace=True)
             if len(self.grid) != self.grid[mf_grid_node_col].max():
-                raise NodeIndexWarning(mf_grid, mf_grid_node_col)
+                warnings.warn(NodeIndexWarning(mf_grid, mf_grid_node_col))
             self.grid.index = self.grid[mf_grid_node_col].values
         else:
-            raise NodeIndexWarning(mf_grid)
+            warnings.warn(NodeIndexWarning(mf_grid))
         self.grid = self.grid[['geometry']]
 
         # get projections
@@ -264,10 +264,10 @@ class NHDdata(object):
         if mf_grid_node_col is not None:
             self.grid.sort_values(by=mf_grid_node_col, inplace=True)
             if len(self.grid) != self.grid[mf_grid_node_col].max():
-                raise NodeIndexWarning(mf_grid, mf_grid_node_col)
+                warnings.warn(NodeIndexWarning(mf_grid, mf_grid_node_col))
             self.grid.index = self.grid[mf_grid_node_col].values
         else:
-            raise NodeIndexWarning(mf_grid)
+            warnings.warn(NodeIndexWarning(mf_grid))
 
         # get projections
         if self.mf_grid_proj4 is None and not isinstance(mf_grid, pd.DataFrame):
@@ -298,7 +298,7 @@ class NHDdata(object):
         self.mf_units_mult = 1/0.3048 if self.GISunits == 'm' and self.mf_units == 'feet' \
                              else 0.3048 if not self.GISunits == 'm' and self.mf_units == 'meters' \
                              else 1.0
-        self.to_km = 0.001 if self.GISunits == 'm' else 0.001/0.3048
+        self.to_km = 0.001 if self.GISunits == 'm' else 0.001 * 0.3048
 
         # convert the elevations from elevslope table
         self.elevs['Max'] = self.elevs.MAXELEVSMO * self.convert_elevslope_to_model_units[self.mf_units]
@@ -409,6 +409,7 @@ class NHDdata(object):
                                       for s, grp in groups])
         segment_asums = np.array([self.df.ArbolateSu.values[s-1] for s in m1.segment.values])
         reach_asums = -1 * self.to_km * reach_asums + segment_asums # arbolate sums are computed in km
+        m1['asum'] = reach_asums
         width = width_from_arbolate(reach_asums) # widths are returned in m
         if self.GISunits != 'm':
             width = width / 0.3048
@@ -470,7 +471,8 @@ class NHDdata(object):
         basename: string
             e.g. Mat1 is written to <basename>Mat1.csv
         """
-        m1_cols = ['node', 'layer', 'segment', 'reach', 'sbtop', 'width', 'length', 'sbthick', 'sbK', 'roughness', 'reachID']
+        m1_cols = ['node', 'layer', 'segment', 'reach', 'sbtop', 'width', 'length', 'sbthick',
+                   'sbK', 'roughness', 'asum', 'reachID']
         m2_cols = ['segment', 'icalc', 'outseg', 'elevMax', 'elevMin']
         if self.nrows is not None:
             m1_cols.insert(1, 'row')
@@ -491,7 +493,7 @@ class NHDdata(object):
             Output will be written to <basename>.shp
         """
         print("writing reach geometries to {}".format(basename+'.shp'))
-        df2shp(self.m1[['reachID', 'node', 'segment', 'reach', 'outseg', 'comid', 'geometry']],
+        df2shp(self.m1[['reachID', 'node', 'segment', 'reach', 'outseg', 'comid', 'asum', 'geometry']],
                basename+'.shp', proj4=self.mf_grid_proj4)
 
 
@@ -737,6 +739,7 @@ class lines(linesBase):
         segment_asums_d = self.get_segment_asums()
         segment_asums = np.array([segment_asums_d[s] for s in m1.segment.values])
         reach_asums = -1 * self.to_km * reach_asums + segment_asums # arbolate sums are computed in km
+        m1['asum'] = reach_asums
         print("finished in {:.2f}s\n".format(time.time() - ta))
 
         print("computing widths...")
@@ -1223,14 +1226,14 @@ class NodeIndexWarning(Warning):
         self.node_field = node_field
     def __str__(self):
         if self.node_field is None:
-            return('\nWarning: Node field for {} not supplied. \
-                  Node numbers will be assigned sequentially to grid cells starting at 1. \
-                  This will result in incorrect location of SFR reaches if the grid shapefile \
-                  is not sorted.'.format(self.node_field))
+            return("\nWarning: Node field for {} not supplied."
+                   "Node numbers will be assigned sequentially to grid cells starting at 1."
+                   "This will result in incorrect location of SFR reaches if the grid shapefile"
+                   "is not sorted.".format(self.node_field))
         else:
-            return('\nWarning: Node numbers in field {} of grid are not consecutive intergers \
-                   starting at 1. SFRmaker will sort the grid cells by node, but then use \
-                   base-1 consecutive integers for indexing (same as MODFLOW USG). These will be \
-                   the node numbers reported in the output (sfr package, tables, and shapefile). This \
-                   may lead to confusion if the SFR output is joined back to {}.'
+            return("\nWarning: Node numbers in field {} of grid are not consecutive intergers"
+                    "starting at 1. SFRmaker will sort the grid cells by node, but then use"
+                    "base-1 consecutive integers for indexing (same as MODFLOW USG). These will be"
+                    "the node numbers reported in the output (sfr package, tables, and shapefile). This"
+                    "may lead to confusion if the SFR output is joined back to {}."
                    .format(self.node_field, self.grid_shapefile))
