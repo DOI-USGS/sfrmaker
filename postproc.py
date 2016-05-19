@@ -1529,7 +1529,8 @@ class Elevations(SFRdata):
         new_m = flopy.modflow.mf.Modflow(model_ws=os.path.split(outdisfile)[0],
                                          modelname=os.path.split(outdisfile)[1][:-4])
         newdis = flopy.modflow.ModflowDis(new_m, nlay=self.dis.nlay, nrow=self.dis.nrow, ncol=self.dis.ncol,
-                                          delr=self.dis.delr, delc=self.dis.delc, top=newtop, botm=newbots)
+                                          delr=self.dis.delr, delc=self.dis.delc, itmuni=self.dis.itmuni,
+                                          lenuni=self.dis.lenuni, top=newtop, botm=newbots)
 
         if isinstance(newdis.fn_path, list):
             newdis.fn_path = newdis.fn_path[0]
