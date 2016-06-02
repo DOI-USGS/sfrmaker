@@ -146,6 +146,55 @@ class linesBase(object):
             print("reprojecting model domain from\n{}\nto\n{}...".format(self.domain_proj4, self.mf_grid_proj4))
             self.domain = project(self.domain, self.domain_proj4, self.mf_grid_proj4)
 
+    def renumber_segments(self):
+        """Renumber segments so that segment numbering is continuous and always increases
+        in the downstream direction. Experience suggests that this can substantially speed
+        convergence for some models using the NWT solver."""
+        r = renumber_segments(self.m2.segment.values, self.m2.outseg.values)
+
+        self.m2['segment'] = [r.get(s, s) for s in self.m2.segment]
+        self.m2['outseg'] = [r.get(s, s) for s in self.m2.outseg]
+        self.m2.sort_values(by=['segment'], inplace=True)
+        self.m2.index = self.m2.segment.values # reset the index to new segment numbers
+        assert _in_order(self.m2.segment.values, self.m2.outseg.values)
+        assert len(self.m2.segment) == self.m2.segment.max()
+        self.m1['segment'] = [r.get(s, s) for s in self.m1.segment]
+        self.m1['outseg'] = [r.get(s, s) for s in self.m1.outseg]
+
+    def write_tables(self, basename='SFR'):
+        """Write tables with SFR reach (Mat1) and segment (Mat2) information out to csv files.
+
+        Parameters
+        ----------
+        basename: string
+            e.g. Mat1 is written to <basename>Mat1.csv
+        """
+        m1_cols = ['node', 'layer', 'segment', 'reach', 'sbtop', 'width', 'length', 'sbthick',
+                   'sbK', 'roughness', 'asum', 'reachID']
+        m2_cols = ['segment', 'icalc', 'outseg', 'elevMax', 'elevMin']
+        if self.nrows is not None:
+            m1_cols.insert(1, 'row')
+
+        if self.ncols is not None:
+            m1_cols.insert(2, 'column')
+        print("writing Mat1 to {0}{1}, Mat2 to {0}{2}".format(basename, 'Mat1.csv', 'Mat2.csv'))
+        self.m1[m1_cols].to_csv(basename + 'Mat1.csv', index=False)
+        self.m2[m2_cols].to_csv(basename + 'Mat2.csv', index=False)
+
+    def write_linework_shapefile(self, basename='SFR'):
+        """Write a shapefile containing linework for each SFR reach,
+        with segment, reach, model node number, and NHDPlus COMID attribute information
+
+        Parameters
+        ----------
+        basename: string
+            Output will be written to <basename>.shp
+        """
+        print("writing reach geometries to {}".format(basename+'.shp'))
+        df2shp(self.m1[['reachID', 'node', 'segment', 'reach', 'outseg', 'comid', 'asum', 'geometry']],
+               basename+'.shp', proj4=self.mf_grid_proj4)
+
+
 class NHDdata(object):
 
     convert_elevslope_to_model_units = {'feet': 0.0328084,
@@ -706,7 +755,7 @@ class lines(linesBase):
 
         print('\nclipping lines to active area...')
         inside = np.array([g.intersects(self.domain) for g in self.df.geometry])
-        self.df = self.df.ix[inside].copy()
+        self.df = self.df.loc[inside].copy()
         self.df.sort_values(by='segment', inplace=True)
         line_geoms = [g.intersection(self.domain) for g in self.df.geometry]
         grid_geoms = self.grid.geometry.tolist()
@@ -766,7 +815,9 @@ class lines(linesBase):
 
         print("\nsetting up Mat2...")
         ta = time.time()
-        m2 = self.df[['segment', 'outseg', 'outreachID', 'elevMax', 'elevMin']].copy()
+        write_columns = list(set(['segment', 'outseg', 'outreachID', 'elevMax', 'elevMin'])\
+                             .intersection(set(self.df.columns)))
+        m2 = self.df[write_columns].copy()
         m2['icalc'] = icalc
         m2.index = m2.segment
         print("finished in {:.2f}s\n".format(time.time() - ta))
@@ -774,7 +825,13 @@ class lines(linesBase):
         # add outseg information to Mat1
         m1['outseg'] = [m2.outseg[s] for s in m1.segment]
         m1.sort_values(by=['segment', 'reach'], inplace=True)
+        m1['ReachID'] = np.arange(1, len(m1) + 1)
+        self.m1 = m1
+        self.m2 = m2
+        self.renumber_segments() # enforce best segment numbering
+        print('\nDone creating SFR dataset.')
         return m1, m2
+
 
         '''
         # at this point a new 'SFR' object should be created (with its own methods such as "renumber segments")
