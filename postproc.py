@@ -1028,7 +1028,7 @@ class SFRdata(object):
                           nsfrpar=0,
                           nparseg=0,
                           const=128390.4,
-                          dleak=0.001,
+                          dleak=0.0001,
                           istcb1=50,
                           istcb2=66,
                           isfropt=1,
