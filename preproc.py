@@ -191,7 +191,7 @@ class linesBase(object):
             Output will be written to <basename>.shp
         """
         print("writing reach geometries to {}".format(basename+'.shp'))
-        df2shp(self.m1[['reachID', 'node', 'segment', 'reach', 'outseg', 'comid', 'asum', 'geometry']],
+        df2shp(self.m1[['reachID', 'node', 'segment', 'reach', 'outseg', 'comid', 'asum', 'width', 'geometry']],
                basename+'.shp', proj4=self.mf_grid_proj4)
 
 
