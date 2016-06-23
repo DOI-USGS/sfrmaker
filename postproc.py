@@ -1047,7 +1047,7 @@ class SFRdata(object):
         basename : str
             Basename for SFR package file.
         tpl : boolean
-            Flag for writing PEST template file (default=False)
+            Flag for writing PEST template file (default=False).
 
         iface: (int)
             An optional keyword that indicates that an IFACE value will be read for each reach and
