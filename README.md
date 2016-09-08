@@ -56,59 +56,27 @@ Contains methods to check for common SFR problems such as
 
 ### Dependencies:
 
-SFRmaker runs in Python 2.7. The Anaconda Scientific Python Distribution (<https://store.continuum.io/cshop/anaconda/>) is available for free, and provides an easy way for managing python packages through its package manager **conda**. Additional dependencies are listed by module below:
+#####SFRmaker runs in Python 2 or 3
+The Anaconda Scientific Python Distribution (<https://store.continuum.io/cshop/anaconda/>) is available for free, and provides an easy way for managing python packages through its package manager **conda**. Additional dependencies are listed by module below:
 
-####sfr_classes  
-* #####ESRI Arcpy
-which **must be added to the path of your main python distribution**.
-
-	**Adding Arcpy to the python path**:  	
-	1) **Make a file called: Desktop10.pth**, with the following lines:  
-
-	```
-	C:\ArcGIS\Desktop10.2\arcpy  
-	C:\ArcGIS\Desktop10.2\bin64  
-	C:\ArcGIS\Desktop10.2\ArcToolbox\Scripts
-	```
-Notes:  
-These lines tell python where to find arcpy and its associated packages/libraries. The second line may be "bin" for 32 bit or "bin64" for 64 bit. If you are using ArcMap 10.0 or 10.1, "Desktop10.2" in the above path needs to be modified accordingly.
-
-	2) **Place this file where python can find it.** For Anaconda on Windows 7, this path should work (replacing ```aleaf``` with your username):
-
-		C:\Users\aleaf\AppData\Local\Continuum\Anaconda
-		
-	The **Lib** subfolder in this folder or the **site-packages** folder within Lib may also work. Python checks these folders by default when looking for modules; within these folders, it looks for files with the extension **.pth**, and checks for additional paths within those files (i.e., the arcpy paths listed above).  
-
-* ####ArcGIS 10.3:
- If you are using ArcGIS 10.3, you may need to copy this file (or its equivilant, depending on where the ArcPy-related python distribution is located):  
- 
-	```  
-	C:\Python27\ArcGISx6410.3\Lib\site-packages\DTBGGP64.pth
-	```
-	to 
-	
-	```
-	C:\Users\USERNAME\Anaconda 	
-	```
-	(or wherever your main python distribution is installed)
-* ####flopy
+#####flopy
 available via **pip** (see instructions below), or at <https://github.com/modflowpy/flopy> 
 
-####preproc, postproc  and diagnostics
-
-* #####Instructions for Windows users
- The postproc module depends on a collection of packages (**fiona, shapely, gdal, pyproj, rasterio, rasterstats**, and **GIS_utils**) that provide python bindings to open source GIS libraries. Instructions for installing these packages can be found here:
+#####GIS packages
+ The postproc module depends on a collection of packages (**fiona, shapely, gdal, pyproj, rasterio, rasterstats**, and **GIS_utils**) that provide python bindings to open source GIS libraries. Instructions for installing these packages on Windows can be found here:
  <https://github.com/aleaf/SFRmaker/blob/master/pythonGIS_install_readme.md>
 
 
 
-	**GIS_utils** is just a collection of macros to facilitate basic GIS tasks. If SFRmaker ever gets made into a coherent package, 	GIS_utils will likely be integrated. In the meantime, it can be installed by running  
+**GIS_utils** is just a collection of macros to facilitate basic GIS tasks. If SFRmaker ever gets made into a coherent package, 	GIS_utils will likely be integrated. In the meantime, it can be installed by running  
 
 	```
 	>pip install https://github.com/aleaf/GIS_utils/archive/master.zip
 	```
 
-
+#### Note
+for running the **sfr_classes / ArcPy** version of SFRmaker see
+<https://github.com/aleaf/SFRmaker/blob/master/SFRmaker_arcpy_workflow.md>
 
 
   
@@ -166,40 +134,13 @@ Used for deriving streambed top elevations for individual reaches (below the 100
   
 ## Workflow for building SFR package:
 
-####Run sfr_classes
-With the XML input file, the SFR_main.py script (calling the methods in sfr_classes) will produce two tables, **Mat1** and **Mat2**, with SFR reach and segment information.
-  
-1) **Setup XML input file** (see EXAMPLE.XML in \<InputFiles> section) to point to the above input datasets  
-  
-* check settings in \<GlobalSettings> section; make sure that \<preproc> is set to **True**  
-* Set \<elevflag> to NHDPlus (this will set segment end elevations from NHDPlus COMID min/max elevations in the **elevslope** table)
+#### For a complete workflow see the examples:
+<http://nbviewer.ipython.org/github/aleaf/SFRmaker/blob/master/Examples/example_SFRmaker_script.py>  
 
-2) Make sure that the "infile" variable in **SFR_main.py** (see SFR_main_EXAMPLE.py) points to the XML input file. Also make sure that the calls to classes are entered correctly.
-
-3) **Run SFR_main.py** by typing *python SFR_main.py* at the command prompt  
-
-4) If a "manual intervention" message is encountered in screen output,  
-
-* **check the following files:  **
-	* **fix_com_IDs.txt:** Lists stream segments that have multiple ends and starts; usually these are 		streams that are broken into mulitple parts by the grid boundary. 
-	* **boundary_manual_fix_issues.txt:** Lists stream segments that don't have any connections to other 		segments.  
-* **edit the offending segments** (COMIDs) in the shapefile specified under \<IntermediateFiles>\<intersect> in the XML input file (usually this means deleting the parts of multi-part COMIDs that are isolated by the grid boundary, and possibly deleting any unconnected segments).  
-  
-5) set \<preproc> in the XML input file to False (meaning the existing \<intersect> shapefile will be read in lieu of the preprocessing operations). Then **rerun SFR_main.py**.
-
-####Run postproc and diagnostics 
-1) Once the reach and segment information tables (**Mat1** and **Mat2**) have been written, the methods in **postproc.py** can be run to address all of the issues listed under the **postproc** and **diagnostics** modules above. Example workflows for **postproc** are given here:  
-  
-<http://nbviewer.ipython.org/github/aleaf/SFRmaker/blob/master/Examples/Example_postproc_workflow.ipynb>  
-
-<https://github.com/aleaf/SFRmaker/blob/master/Examples/Example_postproc_workflow2.py>
+<https://github.com/aleaf/SFRmaker/blob/master/Examples/example_Notebook.ipynb>
 
 
-Streambed top elevations are set by two methods in postproc.py:  
-* **reset_m1_streambed_top_from_dem()** will sample the minimum DEM elevation for each SFR reach, using zonal statistics.  
-* **smooth_segment_interiors()** will take the sampled minimum elevations, and enforce that they decrease in the downstream direction. The segment end elevations from NHDPlus are retained, ensuring that segment elevations do not rise from start to end. 
-
-As shown in the above examples, it is a good idea to run the diagnostics module. This will perform a lot of checks to help avoid common problems with SFR setup.
+As shown in the above examples, it is a good idea to run diagnostics using the Flopy checker. This will perform a lot of checks to help avoid common problems with SFR setup.
 
 ## Visualizating the results:  
 
