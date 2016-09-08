@@ -1,4 +1,4 @@
-"""Example workflow for generating an SFR package 
+"""Example workflow for generating an SFR package
 from NHDPlus data, a DEM, and MODFLOW grid.
 """
 import sys
@@ -12,57 +12,62 @@ from preproc import NHDdata
 from postproc import SFRdata
 
 # shapefiles defining the model grid, and the area that will include SFR
-mf_grid = 'SFR/modelgrid.shp'
-mf_domain = 'SFR/ozarkBoundary.shp'
+mf_grid = 'data/grid.shp'
+mf_domain = 'data/domain.shp'
 
 # NHDPlus input files (see the input requirements in the SFRmaker readme file
-# (Note that multiple datasets can be supplied as lists; 
+# (Note that multiple datasets can be supplied as lists;
 # when the SFR area covers multiple drainage basins)
-pfvaa_files = 'SFR/nhdozarkAtts.dbf'
-plusflow_path = '/Users/aleaf/Documents/NHDPlus/NHDPlusMS/NHDPlus{}/NHDPlusAttributes/PlusFlow.dbf'
-regions = ['07', '08', '10L', '11']
-pf_files = [plusflow_path.format(r) for r in regions]
-elevslope_files = 'SFR/ozarkselevslope.dbf'
-flowlines = 'SFR/NHDmrgBufClpAlbGT1.shp'
+pfvaa_files = ['data/PlusFlowlineVAA.dbf']
+plusflow_files = ['data/PlusFlow.dbf']
+elevslope_files = ['data/elevslope.dbf']
+flowlines = ['data/NHDFlowlines.shp']
+
+# dem used for streambed elevations
+dem = 'data/dem.tif'
+dem_units_mult = 1. # convert dem elevation units to modflow units
 
 ta = time.time()
 # Read in the NHD datasets
-nhd = NHDdata(NHDFlowline=flowlines, PlusFlowlineVAA=pfvaa_files, PlusFlow=pf_files,
+nhd = NHDdata(NHDFlowline=flowlines, PlusFlowlineVAA=pfvaa_files, PlusFlow=plusflow_files,
               elevslope=elevslope_files,
-              mf_grid=mf_grid, mf_grid_node_col='cellnum', mf_units='feet',
+              mf_grid=mf_grid, mf_units='feet',
               model_domain=mf_domain)
 # Setup the segments, reaches, and other basic SFR parameters
 nhd.to_sfr()
 
 # Write out this information to Mat1 and Mat2 tables
-nhd.write_tables(basename='ozark')
+nhd.write_tables(basename='example')
 
 # Write out a shapefile that has the SFR linework
 nhd.write_linework_shapefile(basename='SFRlines')
 print("preproc finished in {:.2f}s\n".format(time.time() - ta))
 
 # Mat 1 and Mat2 files generated from preproc.py above
-m1 = 'ozarkMat1.csv'
-m2 = 'ozarkMat2.csv'
+m1 = 'exampleMat1.csv'
+m2 = 'exampleMat2.csv'
 
 # Read in Mat1 and Mat2 into an SFRdata object (postproc module)
 # also include MODFLOW DIS file, NAM file, and path to model datasets
 sfr = SFRdata(Mat1=m1, Mat2=m2, mfgridshp=mf_grid,
-              mfdis='ozark.dis', mfpath='ozarkgwmod/3-Input/A-calibration/',
-              mfnam='ozark.nam',
-              mfgridshp_node_field='cellnum',
-              mfgridshp_row_field='irow',
-              mfgridshp_column_field='icol')
+              mfdis='example.dis', mfpath='data',
+              mfnam='example.nam')
 
-# For interior stream reaches (not at the ends of segments), 
+# For interior stream reaches (not at the ends of segments),
 # assign streambed tops from the minimum DEM elevations in the model cell
-sfr.reset_m1_streambed_top_from_dem('dem30m1.tif', dem_units_mult=1/0.3048)
+sfr.reset_m1_streambed_top_from_dem(dem, dem_units_mult=dem_units_mult)
+
+# Often the NHDPlus elevations don't match DEM at scales below 100k.
+# reset the segment end elevations to the minimum dem elevation
+# encountered in the end reach and all reaches upstream
+# (to use the NHDPlus elevations for the segment ends, comment this out)
+sfr.reset_segment_ends_from_dem()
 
 # Create array listing all unique segment sequences from headwaters to outlet
 # used by other methods, and ensures that there is no circular routing
 sfr.map_outsegs()
 
-# Remove any bumps in the DEM elevations, 
+# Remove any bumps in the DEM elevations,
 # so that interior elevations in the segments always decrease in the downstream direction
 sfr.smooth_interior_elevations()
 
@@ -84,21 +89,21 @@ sfr.consolidate_conductance()
 sfr.reset_model_top_2streambed(minimum_thickness=1)
 
 # write out a shapefile of the SFR dataset
-sfr.write_shapefile('SFR_postproc.shp')
+sfr.write_shapefile('SFR_package.shp')
 
 # run some diagnostics to look for common problems
-sfr.run_diagnostics(model_domain=mf_domain, sfr_linework_shapefile='SFRlines.shp')
+#sfr.run_diagnostics(model_domain=mf_domain, sfr_linework_shapefile='data/SFRlines.shp')
 
 # write out updated Mat1 and Mat2 tables
-sfr.write_tables(basename='ozark_pp_')
+sfr.write_tables(basename='example_pp_')
 
 # write the SFR package file
-sfr.write_sfr_package(basename='ozark')
+sfr.write_sfr_package(basename='data/example')
 
-# the development branch of flopy now includes an SFR module, with a checker
-# run the flopy suite of diagnostics as well
+# flopy now includes an SFR module, with a checker
+# run the flopy suite of diagnostics
 import flopy
-m = flopy.modflow.Modflow(model_ws='ozarkgwmod/3-Input/A-calibration/')
-dis = flopy.modflow.ModflowDis.load('ozarkgwmod/3-Input/A-calibration/ozark_adjusted_to_streambed.dis', m)
-sfr = flopy.modflow.ModflowSfr2.load('ozark.sfr', m)
+m = flopy.modflow.Modflow.load('example.nam', model_ws='data')
+#dis = flopy.modflow.ModflowDis.load('ozarkgwmod/3-Input/A-calibration/ozark_adjusted_to_streambed.dis', m)
+sfr = flopy.modflow.ModflowSfr2.load('data/example.sfr', m)
 sfr.check(f='flopy_SFR_check')
