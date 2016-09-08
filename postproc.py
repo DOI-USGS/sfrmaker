@@ -8,8 +8,10 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 from shapely.geometry import Polygon, LineString, MultiLineString
-
-from rasterstats import zonal_stats
+try:
+    from rasterstats import zonal_stats
+except:
+    print('Warning: rasterstats not imported.')
 import flopy
 import GISio, GISops
 
@@ -28,7 +30,6 @@ def header(infile):
             continue
     return knt
 
-
 class SFRdata(object):
 
     # dictionary to convert different variations on column names to internally consistent names
@@ -40,6 +41,9 @@ class SFRdata(object):
                        'bed_slope': 'slope',
                        'bed_roughness': 'roughness',
                        'cellnum': 'node'}
+
+    m2_column_names = {'elevMax': 'Max',
+                       'elevMin': 'Min'}
 
     m1_integer_columns = {'row', 'column', 'layer', 'node', 'reachID',
                           'comid', 'segment', 'reach', 'outseg', 'outlet'}
@@ -123,7 +127,7 @@ class SFRdata(object):
                     raise IndexError("Segments in Mat1 and Mat2 are different!")
 
                 # enforce consistent column names (maintaining compatibility with past SFRmaker versions)
-                self.parse_mat1_columns()
+                self.parse_columns()
 
                 # enforce integer columns
                 int_cols = self.m1_integer_columns.intersection(set(self.m1.columns))
@@ -139,14 +143,11 @@ class SFRdata(object):
             self.elevs_by_cellnum = {} # dictionary to store the model top elevation by cellnumber
             self.cell_geometries = {}
 
+            self.mfnam = mfnam
             if mfdis is not None:
-
-                self.mfpath = mfpath
+                self.mfdis = mfdis
+                self.mfpath = os.path.split(mfdis)[0] if mfpath == "" else mfpath
                 self.basename = mfdis[:-4]
-                if mfnam is None:
-                    mfnam = self.basename + '.nam'
-                self.mfdis = os.path.join(self.mfpath, mfdis)
-                self.mfnam = os.path.join(self.mfpath, mfnam)
                 self.read_dis2()
 
                 # node numbers for cells with SFR
@@ -166,11 +167,20 @@ class SFRdata(object):
                 self.mfdis = None
                 self.basename = 'MF'
 
+            # coordinate projection of model grid
+            self.prj = prj # projection file
+            self.proj4 = proj4
+            self.epsg = epsg
+            if proj4 is None and prj is not None:
+                self.proj4 = GISio.get_proj4(prj)
+
             if mfgridshp is not None:
                 self._read_geoms_from_mfgridshp(mfgridshp, node_field=mfgridshp_node_field,
                                                 row_field=mfgridshp_row_field,
                                                 column_field=mfgridshp_column_field,
                                                 ncol=ncol)
+                if self.prj is None and os.path.exists(mfgridshp[:-4] + '.prj'):
+                    self.prj = mfgridshp[:-4] + '.prj'
 
             self.node_attribute = 'node' # compatibility with sfr_plots and sfr_classes
 
@@ -186,13 +196,6 @@ class SFRdata(object):
             self.minimum_slope = minimum_slope
             self.maximum_slope = maximum_slope
 
-            # coordinate projection of model grid
-            self.prj = prj # projection file
-            self.proj4 = proj4
-            self.epsg = epsg
-            if proj4 is None and prj is not None:
-                self.proj4 = GISio.get_proj4(prj)
-
             # streamflow file for plotting SFR results
             if mfnam is not None and streamflow_file is None:
                 streamflow_file = mfnam[:-4] + '_streamflow.dat'
@@ -204,7 +207,8 @@ class SFRdata(object):
             self.outsegs = None # dataframe showing successive outsegs from headwaters (index) to outlets
 
             # create unique reach IDs from Mat1 index
-            self.m1['reachID'] = self.m1.index.values
+            if 'reachID' not in self.m1.columns:
+                self.m1['reachID'] = self.m1.index.values
 
             # assign upstream segments to Mat2
             self.m2['upsegs'] = [self.m2.segment[self.m2.outseg == s].tolist() for s in self.segments]
@@ -270,10 +274,12 @@ class SFRdata(object):
             reach_values += np.interp(dist, xp, fp).tolist()
         return np.array(reach_values)
 
-    def parse_mat1_columns(self):
+    def parse_columns(self):
 
         rename_columns = {c: newname for c, newname in self.m1_column_names.items() if c in self.m1.columns}
         self.m1.rename(columns=rename_columns, inplace=True)
+        rename_columns = {c: newname for c, newname in self.m2_column_names.items() if c in self.m2.columns}
+        self.m2.rename(columns=rename_columns, inplace=True)
 
     @ property
     def shared_cells(self):
@@ -289,17 +295,20 @@ class SFRdata(object):
         """
         if mfdis is not None:
             self.mfdis = mfdis
+            if self.mfpath == "":
+                self.mfpath = os.path.split(self.mfdis)[0]
+        if mfnam is not None:
             self.mfnam = mfnam
-            self.mfpath = os.path.split(self.mfdis)[0]
-            #if hasattr(self, 'Elevations'): # clunky
-            #    self.Elevations.mfdis = mfdis
-            #    self.Elevations.mfnam = mfnam
-            #    self.Elevations.mfpath = os.path.split(self.mfdis)[0]
 
         print('reading {}...'.format(self.mfdis))
-        self.m = flopy.modflow.Modflow(model_ws=self.mfpath)
-        #self.nf = flopy.utils.mfreadnam.parsenamefile(self.mfnam, {})
-        self.dis = flopy.modflow.ModflowDis.load(self.mfdis, self.m)
+        try:
+            self.m = flopy.modflow.Modflow(model_ws=self.mfpath)
+            self.dis = flopy.modflow.ModflowDis.load(self.mfdis, self.m)
+        except:
+            #  Modflow.load() may load dis successfully, even if ModflowDis.load() fails
+            self.m = flopy.modflow.Modflow.load(self.mfnam, model_ws=self.mfpath, load_only='dis')
+            self.dis = self.m.dis
+
         self.elevs = np.zeros((self.dis.nlay + 1, self.dis.nrow, self.dis.ncol))
         self.elevs[0, :, :] = self.dis.top.array
         self.elevs[1:, :, :] = self.dis.botm.array
@@ -326,6 +335,8 @@ class SFRdata(object):
     def _read_geoms_from_mfgridshp(self, mfgridshp, node_field=None, row_field=None, column_field=None, ncol=None):
 
         df = GISio.shp2df(mfgridshp)
+        # set the index for the model grid;
+        # create the index from the rows and columns if they are provided
         if node_field is None: # and row_field is not None and column_field is not None:
             if row_field is not None and column_field is not None:
                 ncol = df[column_field].max()
@@ -333,6 +344,8 @@ class SFRdata(object):
                 node_field = 'node'
             else:
                 raise IOError('No node field or row/column field given for grid shapefile.')
+        df.index = df[node_field] if node_field in df.columns else df.index
+        df.sort_index(level=0, inplace=True)
         if 'node' not in self.m1.columns:
             if ncol is None and column_field:
                 ncol = df[column_field].max()
@@ -342,7 +355,7 @@ class SFRdata(object):
                 raise IOError('No node number information in Mat1. For structured grid, ' \
                               'cannot compute node numbers without number of columns.' \
                               'Please provide ncol argument or row and column fields for grid shapefile.')
-        df.index = df[node_field]
+
         if self.gridtype == 'structured' and 'row' not in self.m1.columns or 'column' not in self.m1.columns:
             if row_field is not None and column_field is not None:
                 self.m1['row'] = df.ix[self.m1.node.tolist(), row_field].tolist()
@@ -352,9 +365,7 @@ class SFRdata(object):
             else:
                 print('No row and column fields in Mat1, and no row and column fields given for {}'.format(mfgridshp))
                 print('SFR input for structured grid requires row and column info.')
-        self.m1['geometry'] = df.ix[self.m1.node.tolist(), 'geometry'].tolist()
-        if os.path.exists(mfgridshp[:-4] + '.prj'):
-            self.prj = mfgridshp[:-4] + '.prj'
+        self.m1['geometry'] = df.iloc[self.m1.node.astype(int) -1]['geometry'].tolist() # back to zero-based!
 
     def get_cell_geometries(self, mfgridshp=None, node_field='node'):
 
@@ -586,6 +597,72 @@ class SFRdata(object):
         DEM_col_name = 'DEM{}'.format(stat)
         self.m1[DEM_col_name] = self.m1['sbtop'].values
         print('DEM {} elevations assigned to sbtop column in m1'.format(stat))
+
+    def reset_segment_ends_from_dem(self):
+        """Often the NHDPlus elevations don't match DEM at scales below 100k.
+        Starting at outlets and iterating by segment level, adjust segment end elevations downward
+        if a lower elevation was sampled from the DEM in the current segment, or any upstream segments.
+        Adjust downstream segment start elevation to keep it consistent with upseg end elevations."""
+        nseg = self.m2.segment.values
+        outseg = self.m2.outseg.values
+        elevmin = self.m2.Min.values
+        elevmax = self.m2.Max.values
+        dem_min = np.array([self.m1.ix[self.m1.segment == s, 'DEMmin'].min() for s in nseg])
+        dem_reach1 = np.array([self.m1.ix[(self.m1.segment.values == s) &
+                                      (self.m1.reach.values ==1), 'DEMmin'].values[0] for s in nseg])
+        def get_nextupsegs(upsegs):
+            nextupsegs = []
+            for s in upsegs:
+                nextupsegs += nseg[outseg == s].tolist()
+            return nextupsegs
+
+        def get_upsegs(seg):
+            upsegs = nseg[outseg == seg].tolist()
+            all_upsegs = upsegs
+            for i in range(len(nseg)):
+                upsegs = get_nextupsegs(upsegs)
+                if len(upsegs) > 0:
+                    all_upsegs.extend(upsegs)
+                else:
+                    break
+            return all_upsegs
+
+        def get_upseg_levels(seg):
+            upsegs = nseg[outseg == seg].tolist()
+            all_upsegs = [upsegs]
+            for i in range(len(nseg)):
+                upsegs = get_nextupsegs(upsegs)
+                if len(upsegs) > 0:
+                    all_upsegs.append(upsegs)
+                else:
+                    break
+            return all_upsegs
+
+        def reset_elevations(seg):
+            # reset segment elevations above (upsegs) and below (outseg) a node
+            oseg = outseg[seg -1]
+            all_upsegs = np.array(get_upsegs(seg) + [seg]) # all segments upstream of node
+            oldmin = elevmin[(all_upsegs-1)].min() # minimum current elevation upstream of node
+            smin = dem_min[(all_upsegs-1)].min() # minimum sampled DEM elevation upstream of node
+            if oseg > 0:
+                outseg_max = elevmax[oseg - 1] # outseg reach 1 elevation (already updated)
+                smin = np.min([outseg_max, smin])
+            if smin < oldmin: # reset if the DEM is lower
+                elevmin[seg - 1] = smin
+            if oseg > 0: # if the node is not an outlet, reset the outseg max
+                elevmax[outseg[seg -1] -1] = np.min([smin, oldmin, outseg_max])
+            if len(all_upsegs) == 1:
+                elevmax[seg -1] = np.min([elevmax[seg-1], dem_reach1[seg-1]])
+
+        # get list of segments at each level, starting with 0 (outlet)
+        segment_levels = get_upseg_levels(0)
+        # at each level, reset all of the segment elevations as necessary
+        for level in segment_levels:
+            [reset_elevations(s) for s in level]
+
+        # update mat 2 with new elevations
+        self.m2['Max'] = elevmax
+        self.m2['Min'] = elevmin
 
     def reset_model_top_2streambed(self, minimum_thickness=1, outdisfile=None, outsummary=None):
         #if hasattr(self, 'Elevations'):
@@ -948,7 +1025,7 @@ class SFRdata(object):
                           nsfrpar=0,
                           nparseg=0,
                           const=128390.4,
-                          dleak=0.001,
+                          dleak=0.0001,
                           istcb1=50,
                           istcb2=66,
                           isfropt=1,
@@ -964,6 +1041,8 @@ class SFRdata(object):
 
         Parameters
         ----------
+        basename : str
+            Basename for SFR package file.
 
         iface: (int)
             An optional keyword that indicates that an IFACE value will be read for each reach and

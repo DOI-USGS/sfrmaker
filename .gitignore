@@ -7,10 +7,9 @@ selected_segments.pdf
 .idea/*
 *.pyc
 .gitignore
-*.dbf
-*.shp
-*.shx
 *.sbn
+*.cpg
+*.qpj
 *.sbx
 *.shp.xml
 *.lock
