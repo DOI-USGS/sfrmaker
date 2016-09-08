@@ -5,7 +5,7 @@ import sys
 
 # if preproc.py and postproc.py are in a different folder from this script,
 # add that folder to the path so python can find it
-sys.path.append('/Users/aleaf/Documents/GitHub/SFR')
+sys.path.append('../')
 import time
 from GISio import shp2df, get_proj4
 from preproc import NHDdata
@@ -90,9 +90,6 @@ sfr.reset_model_top_2streambed(minimum_thickness=1)
 
 # write out a shapefile of the SFR dataset
 sfr.write_shapefile('SFR_package.shp')
-
-# run some diagnostics to look for common problems
-#sfr.run_diagnostics(model_domain=mf_domain, sfr_linework_shapefile='data/SFRlines.shp')
 
 # write out updated Mat1 and Mat2 tables
 sfr.write_tables(basename='example_pp_')
