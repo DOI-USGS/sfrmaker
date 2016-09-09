@@ -13,10 +13,8 @@ from GISio import shp2df, get_proj4
 from preproc import NHDdata
 from postproc import SFRdata
 
-if not os.path.isdir('data'):
-    os.makedirs('data')
 if not os.path.isdir('temp'):
-    os.makedirs('data')
+    os.makedirs('temp')
 
 mffiles = glob.glob('../Examples/data/example.*')
 for f in mffiles:
