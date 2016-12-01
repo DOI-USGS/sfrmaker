@@ -143,9 +143,10 @@ class SFRdata(object):
             self.elevs_by_cellnum = {} # dictionary to store the model top elevation by cellnumber
             self.cell_geometries = {}
 
+            self.mfnam = mfnam
             if mfdis is not None:
                 self.mfdis = mfdis
-                self.mfpath = os.path.split(mfdis)[0]
+                self.mfpath = os.path.split(mfdis)[0] if mfpath == "" else mfpath
                 self.basename = mfdis[:-4]
                 self.read_dis2()
 
@@ -294,12 +295,10 @@ class SFRdata(object):
         """
         if mfdis is not None:
             self.mfdis = mfdis
+            if self.mfpath == "":
+                self.mfpath = os.path.split(self.mfdis)[0]
+        if mfnam is not None:
             self.mfnam = mfnam
-            self.mfpath = os.path.split(self.mfdis)[0]
-            #if hasattr(self, 'Elevations'): # clunky
-            #    self.Elevations.mfdis = mfdis
-            #    self.Elevations.mfnam = mfnam
-            #    self.Elevations.mfpath = os.path.split(self.mfdis)[0]
 
         print('reading {}...'.format(self.mfdis))
         try:
@@ -307,9 +306,7 @@ class SFRdata(object):
             self.dis = flopy.modflow.ModflowDis.load(self.mfdis, self.m)
         except:
             #  Modflow.load() may load dis successfully, even if ModflowDis.load() fails
-            model_ws, mfnam = os.path.split(self.mfdis)
-            self.mfnam = mfnam[:-4] + '.nam'
-            self.m = flopy.modflow.Modflow.load(self.mfnam, model_ws=model_ws, load_only='dis')
+            self.m = flopy.modflow.Modflow.load(self.mfnam, model_ws=self.mfpath, load_only='dis')
             self.dis = self.m.dis
 
         self.elevs = np.zeros((self.dis.nlay + 1, self.dis.nrow, self.dis.ncol))
