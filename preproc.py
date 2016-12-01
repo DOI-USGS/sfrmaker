@@ -557,16 +557,9 @@ class lines(linesBase):
         linesBase.__init__(self, lines=lines, model_domain=model_domain,
                            mf_grid=mf_grid, mf_grid_node_col=mf_grid_node_col)
 
-        self.start_cds = [(g.xy[0][0], g.xy[1][0]) for g in self.df.geometry]
-        self.end_cds = [(g.xy[0][-1], g.xy[1][-1]) for g in self.df.geometry]
         self.routing_tol = routing_tol
-
         self.df['elevMax'] = self.df[maxElev_field] if maxElev_field is not None else 0
         self.df['elevMin'] = self.df[minElev_field] if minElev_field is not None else 0
-        self.df['segment'] = np.arange(1, len(self.df) + 1)
-        self.df['outseg'] = 0
-        self.df['upsegs'] = [[]] * len(self.df)
-
         self.allupsegs = {} # dict containing set of all upstream segments for each segment
 
     def append2sfr(self, sfrlinework, route2reach1=True,
@@ -619,6 +612,14 @@ class lines(linesBase):
                 if s in self.allupsegs.keys() else 0
                 for s in self.df.segment.tolist()}
 
+    @property
+    def start_cds(self):
+        return [(g.xy[0][0], g.xy[1][0]) for g in self.df.geometry]
+
+    @property
+    def end_cds(self):
+        return [(g.xy[0][-1], g.xy[1][-1]) for g in self.df.geometry]
+
     def renumber_segments(self):
         """Renumber segments so that segment numbering is continuous and always increases
         in the downstream direction. Experience suggests that this can substantially speed
@@ -645,10 +646,10 @@ class lines(linesBase):
         nearest_start = get_nearest(self.start_cds, self.end_cds)
 
         # record the preliminary seg. number of nearest start if within tol
-        self.df['outseg'] = [self.df.segment[n]
-                             if Point(*self.start_cds[n]).distance(\
-                                Point(*self.end_cds[i])) < tol
-                 else 0 for i, n in enumerate(nearest_start)]
+        segments = self.df.segment.values
+        self.df['outseg'] = [segments[n] if Point(*self.start_cds[n]).distance(\
+                                            Point(*self.end_cds[i])) < tol
+                             else 0 for i, n in enumerate(nearest_start)]
 
         self.df['upsegs'] = [self.df.segment[self.df.outseg == s].tolist() for s in self.df.segment]
 
@@ -756,7 +757,10 @@ class lines(linesBase):
         print('\nclipping lines to active area...')
         inside = np.array([g.intersects(self.domain) for g in self.df.geometry])
         self.df = self.df.loc[inside].copy()
-        self.df.sort_values(by='segment', inplace=True)
+        self.df['segment'] = np.arange(1, len(self.df) + 1)
+        self.df['outseg'] = 0
+        self.df['upsegs'] = [[]] * len(self.df)
+
         line_geoms = [g.intersection(self.domain) for g in self.df.geometry]
         grid_geoms = self.grid.geometry.tolist()
 
