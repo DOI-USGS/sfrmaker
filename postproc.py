@@ -664,14 +664,15 @@ class SFRdata(object):
         self.m2['Max'] = elevmax
         self.m2['Min'] = elevmin
 
-    def reset_model_top_2streambed(self, minimum_thickness=1, outdisfile=None, outsummary=None):
+    def reset_model_top_2streambed(self, minimum_thickness=1, outdisfile=None, outsummary=None, external_files=False):
         #if hasattr(self, 'Elevations'):
         #    self.Elevations.reset_model_top_2streambed(minimum_thickness=minimum_thickness,
         #                                               outdisfile=outdisfile, outsummary=outsummary)
         #else:
         self.Elevations = Elevations(sfrobject=self)
         self.Elevations.reset_model_top_2streambed(minimum_thickness=minimum_thickness,
-                                                   outdisfile=outdisfile, outsummary=outsummary)
+                                                   outdisfile=outdisfile, outsummary=outsummary,
+                                                   external_files=external_files)
         self.__dict__ = self.Elevations.__dict__.copy()
 
     def incorporate_field_elevations(self, shpfile, elevs_field, distance_tol):
@@ -1453,7 +1454,8 @@ class Elevations(SFRdata):
         self.m1.loc[self.m1['slope'] < self.minimum_slope, 'slope'] = self.minimum_slope
 
 
-    def reset_model_top_2streambed(self, minimum_thickness=1, outdisfile=None, outsummary=None):
+    def reset_model_top_2streambed(self, minimum_thickness=1, outdisfile=None, outsummary=None,
+                                   external_files=False):
         """Make the model top elevation consistent with the SFR streambed elevations;
         Adjust other layers downward (this puts all SFR cells in layer1)
 
@@ -1526,16 +1528,21 @@ class Elevations(SFRdata):
         # update the layer in Mat1 to 1 for all SFR cells
         self.m1['layer'] = 1
 
-        new_m = flopy.modflow.mf.Modflow(model_ws=os.path.split(outdisfile)[0],
-                                         modelname=os.path.split(outdisfile)[1][:-4])
-        newdis = flopy.modflow.ModflowDis(new_m, nlay=self.dis.nlay, nrow=self.dis.nrow, ncol=self.dis.ncol,
-                                          delr=self.dis.delr, delc=self.dis.delc, top=newtop, botm=newbots)
+        if not external_files:
+            new_m = flopy.modflow.mf.Modflow(model_ws=os.path.split(outdisfile)[0],
+                                             modelname=os.path.split(outdisfile)[1][:-4])
+            newdis = flopy.modflow.ModflowDis(new_m, nlay=self.dis.nlay, nrow=self.dis.nrow, ncol=self.dis.ncol,
+                                              delr=self.dis.delr, delc=self.dis.delc, top=newtop, botm=newbots)
 
-        if isinstance(newdis.fn_path, list):
-            newdis.fn_path = newdis.fn_path[0]
-        self.mfdis = outdisfile
-        print('writing new discretization file {} using flopy...'.format(outdisfile))
-        newdis.write_file()
+            if isinstance(newdis.fn_path, list):
+                newdis.fn_path = newdis.fn_path[0]
+            self.mfdis = outdisfile
+            print('writing new discretization file {} using flopy...'.format(outdisfile))
+            newdis.write_file()
+        else:
+            np.savetxt('top.dat', newtop, fmt='%.2f')
+            for i in range(newbots.shape[0]):
+                np.savetxt('botm{}.dat'.format(i), newbots[i], fmt='%.2f')
         print('Done.')
 
     def incorporate_field_elevations(self, shpfile, elevs_field, distance_tol):
