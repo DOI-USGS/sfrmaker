@@ -565,8 +565,6 @@ class lines(linesBase):
         self.df['elevMax'] = self.df[maxElev_field] if maxElev_field is not None else 0
         self.df['elevMin'] = self.df[minElev_field] if minElev_field is not None else 0
         self.allupsegs = {} # dict containing set of all upstream segments for each segment
-        if 'segment' not in self.df.columns:
-            self.df['segment'] = np.arange(1, len(self.df)+1)
 
     def append2sfr(self, sfrlinework, route2reach1=True,
                    trim_buffer=20, routing_tol=None,
@@ -589,6 +587,9 @@ class lines(linesBase):
         if 'reachID' not in self.sfr.columns:
             self.sfr['reachID'] = np.arange(1, len(self.sfr) + 1)
 
+        # set the segment numbers to being after other dataset
+        starting_segment = self.sfr.segment.max() + 1
+        self.df['segment'] = np.arange(len(self.df)) + starting_segment
         self.route_lines_by_proximity()
         self.route_lines_to_sfr(sfrlinework=self.sfr, route2reach1=route2reach1,
                    trim_buffer=trim_buffer, routing_tol=routing_tol)
