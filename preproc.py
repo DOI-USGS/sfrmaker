@@ -207,7 +207,7 @@ class NHDdata(object):
                  nrows=None, ncols=None,
                  mfdis=None, xul=None, yul=None, rot=0,
                  model_domain=None,
-                 flowlines_proj4=None, mfgrid_proj4=None, domain_proj4=None,
+                 lines_proj4=None, mfgrid_proj4=None, domain_proj4=None,
                  mf_units='feet'):
         """Class for working with information from NHDPlus v2.
         See the user's guide for more information:
@@ -245,7 +245,7 @@ class NHDdata(object):
         model_domain : str (shapefile) or shapely polygon, optional
             Polygon defining area in which to create SFR cells.
             Default is to create SFR at all intersections between the model grid and NHD flowlines.
-        flowlines_proj4 : str, optional
+        lines_proj4 : str, optional
             Proj4 string for coordinate system of NHDFlowlines.
             Only needed if flowlines are supplied in a dataframe.
         domain_proj4 : str, optional
@@ -280,7 +280,7 @@ class NHDdata(object):
         self.GISunits = None #
         self.to_km = None # converts GIS units to km for arbolate sum
 
-        self.fl_proj4 = flowlines_proj4
+        self.fl_proj4 = lines_proj4
         self.mf_grid_proj4 = mfgrid_proj4
         self.domain_proj4 = domain_proj4
 
@@ -552,16 +552,21 @@ class lines(linesBase):
 
     def __init__(self, lines, minElev_field=None, maxElev_field=None,
                  model_domain=None,
-                 mf_grid=None, mf_grid_node_col=None,
+                 mf_grid=None, mf_grid_node_col=None, mf_units='feet',
+                 lines_proj4=None,
                  routing_tol=200):
 
         linesBase.__init__(self, lines=lines, model_domain=model_domain,
-                           mf_grid=mf_grid, mf_grid_node_col=mf_grid_node_col)
+                           mf_grid=mf_grid, mf_grid_node_col=mf_grid_node_col,
+                           mf_units=mf_units,
+                           lines_proj4=lines_proj4)
 
         self.routing_tol = routing_tol
         self.df['elevMax'] = self.df[maxElev_field] if maxElev_field is not None else 0
         self.df['elevMin'] = self.df[minElev_field] if minElev_field is not None else 0
         self.allupsegs = {} # dict containing set of all upstream segments for each segment
+        if 'segment' not in self.df.columns:
+            self.df['segment'] = np.arange(1, len(self.df)+1)
 
     def append2sfr(self, sfrlinework, route2reach1=True,
                    trim_buffer=20, routing_tol=None,
@@ -644,6 +649,7 @@ class lines(linesBase):
             Only consider starting coordinates within tol of each end coordinate. This
             number should be fairly small, otherwise circular routing may occur.
         """
+        '''
         nearest_start = get_nearest(self.start_cds, self.end_cds)
 
         # record the preliminary seg. number of nearest start if within tol
@@ -652,6 +658,20 @@ class lines(linesBase):
                                             Point(*self.end_cds[i])) < tol
                              else 0 for i, n in enumerate(nearest_start)]
 
+        self.df['upsegs'] = [self.df.segment[self.df.outseg == s].tolist() for s in self.df.segment]
+
+        self.allupsegs = get_upsegs(self.df.segment.values, self.df.outseg.values)
+        '''
+        nearest_start = get_nearest(self.start_cds, self.end_cds)
+        next_starts = np.array(self.start_cds)[np.array(nearest_start)]
+        end_crds = np.array(self.end_cds)
+
+        # record the preliminary seg. number of nearest start if within tol
+        segments = self.df.segment.values
+        distances = distance(end_crds, next_starts)
+        outsegs = np.zeros(len(segments))
+        outsegs[distances < tol] = nearest_start[distances < tol]
+        self.df['outseg'] = outsegs
         self.df['upsegs'] = [self.df.segment[self.df.outseg == s].tolist() for s in self.df.segment]
 
         self.allupsegs = get_upsegs(self.df.segment.values, self.df.outseg.values)
@@ -699,7 +719,7 @@ class lines(linesBase):
             self.df.loc[self.df.outseg > 0, 'outseg'] += maxseg
             self.df['upsegs'] = [[u + maxseg for u in us] for us in self.df.upsegs.tolist()]
             self.allupsegs = get_upsegs(self.df.segment.values, self.df.outseg.values)
-            #self.allupsegs = {s + maxseg: {ss + maxseg if ss > 0 else ss for ss in v}
+            # self.allupsegs = {s + maxseg: {ss + maxseg if ss > 0 else ss for ss in v}
             #                  for s, v in self.allupsegs.items()}
 
         sfr_start_cds = [(g.xy[0][0], g.xy[1][0]) for g in geoms]
@@ -712,19 +732,35 @@ class lines(linesBase):
         # get index of nearest start to each end
 
         nearest_sfr = get_nearest(sfr_start_cds, new_lines_outlet_cds)
+        nearest_sfr = np.array(nearest_sfr)
+        next_sfr = np.array(sfr_start_cds)[nearest_sfr]
+        new_lines_outlet_cds = np.array(new_lines_outlet_cds)
 
         # record the preliminary seg. number of nearest start if within tol
-        self.df.loc[is_outlet, 'outseg'] = [segments[n]
+        outlets = np.zeros(len(self.df.loc[is_outlet, 'outseg']))
+        distances = distance(new_lines_outlet_cds, next_sfr)
+        within_tol = distances < tol
+        outlets[within_tol] = nearest_sfr[within_tol]
+        self.df.loc[is_outlet, 'outseg'] = outlets
+        '''
+        #self.df.loc[is_outlet, 'outseg'] = [segments[n]
                                        if Point(*sfr_start_cds[n]).distance(\
                                           Point(*new_lines_outlet_cds[i])) < tol
                                        else 0 for i, n in enumerate(nearest_sfr)]
         #if not route2reach1:
         #reaches = self.sfr.reach.tolist()
-        reaches = self.sfr.reachID.tolist()
+        '''
+        reaches = self.sfr.reach.values
+        outreaches = np.zeros(len(self.df.loc[is_outlet]))
+        outreaches[within_tol] = reaches[within_tol]
+        self.df.loc[is_outlet, 'outreachID'] = outreaches
+
+        '''
         self.df.loc[is_outlet, 'outreachID'] = [reaches[n]
                                    if Point(*sfr_start_cds[n]).distance(\
                                       Point(*new_lines_outlet_cds[i])) < tol
                                    else 0 for i, n in enumerate(nearest_sfr)]
+        '''
 
         def fix_newline_end(line, sfr_start_coord, trim_buffer=20):
             # trim the ends of the new lines (in case of overlap)
@@ -732,17 +768,30 @@ class lines(linesBase):
             diff = line.difference(Point(line.coords[-1]).buffer(trim_buffer))
             if diff.length > 0:
                 return LineString(list(diff.coords) + [sfr_start_coord]) \
-                if sfr_start_cds not in diff.coords else LineString(list(diff.coords))
+                    if sfr_start_cds not in diff.coords else LineString(list(diff.coords))
             return LineString([line.coords[0], sfr_start_coord])
 
         # only connect the lines that are within the routing tolerance
         geoms = self.df.geometry.values
+
+        '''
+        new_outlet_geoms = []
+        for i, l in enumerate(self.df.geometry[is_outlet]):
+            if within_tol[i]:
+                new_geom = fix_newline_end(l, next_sfr[i], trim_buffer=trim_buffer)
+                new_outlet_geoms.append(new_geom)
+            else:
+                new_outlet_geoms.append(i)
+        geoms[is_outlet] = new_outlet_geoms
+
         geoms[is_outlet] = [fix_newline_end(l, sfr_start_cds[nearest_sfr[i]], trim_buffer=trim_buffer)
                             if Point(l.coords[-1]).distance(\
                                Point(sfr_start_cds[nearest_sfr[i]])) < tol
                             else l
                             for i, l in enumerate(self.df.geometry[is_outlet])]
+        '''
         self.df['geometry'] = geoms
+
 
     def to_sfr(self, starting_reachID=1,
                roughness=0.037, streambed_thickness=1, streambedK=1,
@@ -758,9 +807,12 @@ class lines(linesBase):
         print('\nclipping lines to active area...')
         inside = np.array([g.intersects(self.domain) for g in self.df.geometry])
         self.df = self.df.loc[inside].copy()
-        self.df['segment'] = np.arange(1, len(self.df) + 1)
-        self.df['outseg'] = 0
-        self.df['upsegs'] = [[]] * len(self.df)
+        if 'segment' not in self.df.columns:
+            self.df['segment'] = np.arange(1, len(self.df) + 1)
+        if 'outseg' not in self.df.columns:
+            self.df['outseg'] = 0
+        if 'upsegs' not in self.df.columns:
+            self.df['upsegs'] = [[]] * len(self.df)
 
         line_geoms = [g.intersection(self.domain) for g in self.df.geometry]
         grid_geoms = self.grid.geometry.tolist()
@@ -1000,6 +1052,9 @@ def create_reaches(part, segment_nodes, grid_geoms, tol=0.01):
     assert len(ordered_node_numbers) == nreaches # new list of ordered node numbers must include all flowline parts
     return ordered_reach_geoms, ordered_node_numbers
 
+def distance(c1, c2):
+    return np.sqrt(np.sum((c2 - c1)**2, axis=1))
+
 def different_projections(proj4, common_proj4):
     if not proj4 == common_proj4 \
         and not proj4 is None \
@@ -1046,9 +1101,21 @@ def get_nearest(starts, ends):
     idx = index.Index()
     for i, start in enumerate(starts):
         idx.insert(i, start)
-    return [list(idx.nearest(end, 2))[0] if list(idx.nearest(end, 1))[0] != i
-            else list(idx.nearest(end, 2))[1]
-            for i, end in enumerate(ends)]
+
+    nearest = []
+    for i, end in enumerate(ends):
+        results = list(idx.nearest(end, 2))
+        results = [r for r in results if r != i]
+        nearest.append(results[0])
+    # assert that the nearest segment can't be itself
+    nearest = np.array(nearest)
+    # assert that the nearest segment can't be itself
+    assert np.all(nearest != np.arange(len(nearest)))
+
+    #return [list(idx.nearest(end, 2))[0] if list(idx.nearest(end, 1))[0] != i
+    #        else list(idx.nearest(end, 2))[1]
+    #        for i, end in enumerate(ends)]
+    return nearest
 
 def get_upsegs(nseg, outseg):
     """From segment_data, returns nested dict of containing sets of all
@@ -1064,7 +1131,7 @@ def get_upsegs(nseg, outseg):
     upsegs : dict
         Nested dictionary of form {stress period: {segment: [set of upsegs]}}
     """
-
+    '''
     # make a list of adjacent upsegments keyed to outseg list in Mat2
     upsegs = {o: set(nseg[outseg == o]) for o in np.unique(outseg)}
 
@@ -1081,7 +1148,25 @@ def get_upsegs(nseg, outseg):
             else:
                 upsegslist = added_upsegs
                 upsegs[s].update(added_upsegs)
-    return upsegs
+    '''
+    def get_nextupsegs(upsegs):
+        nextupsegs = []
+        for s in upsegs:
+            nextupsegs += nseg[outseg == s].tolist()
+        return nextupsegs
+
+    def get_upsegs(seg):
+        upsegs = nseg[outseg == seg].tolist()
+        all_upsegs = upsegs
+        for i in range(len(nseg)):
+            upsegs = get_nextupsegs(upsegs)
+            if len(upsegs) > 0:
+                all_upsegs.extend(upsegs)
+            else:
+                break
+        return all_upsegs
+
+    return {s: get_upsegs(s) for s in nseg}
 
 def map_segment_sequences(segments, outsegs, verbose=True):
     """Generate array containing all segment routing sequences from each headwater

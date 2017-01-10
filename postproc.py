@@ -2,6 +2,7 @@ from __future__ import print_function
 __author__ = 'aleaf'
 import sys
 sys.path.append('/Users/aleaf/Documents/GitHub/flopy3')
+sys.path.append('D:/ATLData/Documents/GitHub/flopy')
 import os
 import numpy as np
 import pandas as pd
