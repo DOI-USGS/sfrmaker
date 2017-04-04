@@ -62,8 +62,8 @@ class linesBase(object):
         self.df = lines
         self.mf_grid = mf_grid
         self.model_domain = model_domain
-        self.nrows = nrows
-        self.ncols = ncols
+        self.nrow = nrows
+        self.ncol = ncols
         self.mfdis = mfdis
         self.xul = xul
         self.yul = yul
@@ -172,10 +172,10 @@ class linesBase(object):
         m1_cols = ['node', 'layer', 'segment', 'reach', 'sbtop', 'width', 'length', 'sbthick',
                    'sbK', 'roughness', 'asum', 'reachID']
         m2_cols = ['segment', 'icalc', 'outseg', 'elevMax', 'elevMin']
-        if self.nrows is not None:
+        if self.nrow is not None:
             m1_cols.insert(1, 'row')
 
-        if self.ncols is not None:
+        if self.ncol is not None:
             m1_cols.insert(2, 'column')
         print("writing Mat1 to {0}{1}, Mat2 to {0}{2}".format(basename, 'Mat1.csv', 'Mat2.csv'))
         self.m1[m1_cols].to_csv(basename + 'Mat1.csv', index=False)
@@ -205,8 +205,8 @@ class NHDdata(object):
                  elevslope=None,
                  mf_grid=None, mf_grid_node_col=None,
                  nrows=None, ncols=None,
-                 mfdis=None, xul=None, yul=None, rot=0,
-                 model_domain=None,
+                 mfdis=None, xul=None, yul=None, rot=0, sr=None,
+                 model_domain=None, filter=True,
                  lines_proj4=None, mfgrid_proj4=None, domain_proj4=None,
                  mf_units='feet'):
         """Class for working with information from NHDPlus v2.
@@ -267,8 +267,8 @@ class NHDdata(object):
 
         self.mf_grid = mf_grid
         self.model_domain = model_domain
-        self.nrows = nrows
-        self.ncols = ncols
+        self.nrow = nrows
+        self.ncol = ncols
         self.mfdis = mfdis
         self.xul = xul
         self.yul = yul
@@ -285,17 +285,17 @@ class NHDdata(object):
         self.domain_proj4 = domain_proj4
 
         print("Reading input...")
-        # handle dataframes or shapefiles as arguments
-        # get proj4 for any shapefiles that are submitted
-        for attr, input in {'fl': NHDFlowline,
-                            'pf': PlusFlow,
-                            'pfvaa': PlusFlowlineVAA,
-                            'elevs': elevslope,
-                            'grid': mf_grid}.items():
-            if isinstance(input, pd.DataFrame):
-                self.__dict__[attr] = input
-            else:
-                self.__dict__[attr] = shp2df(input)
+
+        # get projections
+        if self.mf_grid_proj4 is None and not isinstance(mf_grid, pd.DataFrame):
+            self.mf_grid_proj4 = get_proj4(mf_grid)
+        if self.fl_proj4 is None:
+            if isinstance(NHDFlowline, list):
+                self.fl_proj4 = get_proj4(NHDFlowline[0])
+            elif not isinstance(NHDFlowline, pd.DataFrame):
+                self.fl_proj4 = get_proj4(NHDFlowline)
+
+        # model domain
         if isinstance(model_domain, Polygon):
             self.domain = model_domain
         elif isinstance(model_domain, str):
@@ -310,6 +310,43 @@ class NHDdata(object):
             geoms = [g.buffer(0.001) for g in self.grid.geometry.tolist()]
             self.domain = unary_union(geoms)
 
+        # model grid
+        if sr is not None:
+            print('reading grid from flopy SpatialReference...')
+            d = {'geometry': [Polygon(vrts) for vrts in sr.vertices],
+                 'column': np.arange(sr.ncol).tolist() * sr.nrow,
+                 'row': sorted(np.arange(sr.nrow).tolist() * sr.ncol),
+                 'node': np.arange(sr.nrow*sr.ncol)}
+            self.grid = pd.DataFrame(d)
+            self.grid = self.grid[['node', 'row', 'column', 'geometry']]
+            self.nrow = sr.nrow
+            self.ncol = sr.ncol
+            mf_grid_node_col = 'node'
+
+        # handle dataframes or shapefiles as arguments
+        # get proj4 for any shapefiles that are submitted
+        for attr, input in {'fl': NHDFlowline,
+                            'pf': PlusFlow,
+                            'pfvaa': PlusFlowlineVAA,
+                            'elevs': elevslope,
+                            'grid': mf_grid}.items():
+            if isinstance(input, pd.DataFrame):
+                self.__dict__[attr] = input
+            else:
+                # filter flowlines to speed reading them in
+                if input is None:
+                    continue
+                if attr == 'fl' and filter:
+                    if model_domain is not None \
+                            and different_projections(self.domain_proj4, self.fl_proj4):
+                        print(self.domain_proj4)
+                        print(self.fl_proj4)
+                        self.domain_filter = project(self.domain, self.domain_proj4, self.fl_proj4).bounds
+                        print(self.domain_filter)
+                else:
+                    self.domain_filter = None
+                self.__dict__[attr] = shp2df(input, filter=self.domain_filter)
+
         # sort and pair down the grid
         if mf_grid_node_col is not None:
             self.grid.sort_values(by=mf_grid_node_col, inplace=True)
@@ -318,15 +355,6 @@ class NHDdata(object):
             self.grid.index = self.grid[mf_grid_node_col].values
         else:
             warnings.warn(NodeIndexWarning(mf_grid))
-
-        # get projections
-        if self.mf_grid_proj4 is None and not isinstance(mf_grid, pd.DataFrame):
-            self.mf_grid_proj4 = get_proj4(mf_grid)
-        if self.fl_proj4 is None:
-            if isinstance(NHDFlowline, list):
-                self.fl_proj4 = get_proj4(NHDFlowline[0])
-            elif not isinstance(NHDFlowline, pd.DataFrame):
-                self.fl_proj4 = get_proj4(NHDFlowline)
 
         # set the indices
         for attr, index in {'fl': 'COMID',
@@ -473,11 +501,11 @@ class NHDdata(object):
         m1['sbK'] = streambedK
         m1['sbtop'] = 0
 
-        if self.nrows is not None:
-            m1['row'] = np.floor(m1.node / self.ncols) + 1
-        if self.ncols is not None:
-            column = m1.node.values % self.ncols
-            column[column == 0] = self.ncols # last column has remainder of 0
+        if self.nrow is not None:
+            m1['row'] = np.floor(m1.node / self.ncol) + 1
+        if self.ncol is not None:
+            column = m1.node.values % self.ncol
+            column[column == 0] = self.ncol # last column has remainder of 0
             m1['column'] = column
         m1['layer'] = 1
 
@@ -496,6 +524,7 @@ class NHDdata(object):
         self.renumber_segments() # enforce best segment numbering
         self.m1.sort_values(by=['segment', 'reach'], inplace=True)
         self.m1['ReachID'] = np.arange(1, len(self.m1) + 1)
+
         print('\nDone creating SFR dataset.')
 
     def renumber_segments(self):
@@ -524,10 +553,9 @@ class NHDdata(object):
         m1_cols = ['node', 'layer', 'segment', 'reach', 'sbtop', 'width', 'length', 'sbthick',
                    'sbK', 'roughness', 'asum', 'reachID']
         m2_cols = ['segment', 'icalc', 'outseg', 'elevMax', 'elevMin']
-        if self.nrows is not None:
+        if 'row' in self.m1.columns:
             m1_cols.insert(1, 'row')
-
-        if self.ncols is not None:
+        if 'column' in self.m1.columns:
             m1_cols.insert(2, 'column')
         print("writing Mat1 to {0}{1}, Mat2 to {0}{2}".format(basename, 'Mat1.csv', 'Mat2.csv'))
         self.m1[m1_cols].to_csv(basename + 'Mat1.csv', index=False)
@@ -543,7 +571,11 @@ class NHDdata(object):
             Output will be written to <basename>.shp
         """
         print("writing reach geometries to {}".format(basename+'.shp'))
-        df2shp(self.m1[['reachID', 'node', 'segment', 'reach', 'outseg', 'comid', 'asum', 'geometry']],
+        cols = ['reachID', 'node', 'segment', 'reach', 'outseg', 'comid', 'asum', 'geometry']
+        for d in ['column', 'row']:
+            if d in self.m1.columns:
+                cols.insert(2, d)
+        df2shp(self.m1[cols],
                basename+'.shp', proj4=self.mf_grid_proj4)
 
 
@@ -863,11 +895,11 @@ class lines(linesBase):
         m1['sbK'] = streambedK
         m1['sbtop'] = 0
 
-        if self.nrows is not None:
-            m1['row'] = np.floor(m1.node / self.ncols) + 1
-        if self.ncols is not None:
-            column = m1.node.values % self.ncols
-            column[column == 0] = self.ncols # last column has remainder of 0
+        if self.nrow is not None:
+            m1['row'] = np.floor(m1.node / self.ncol) + 1
+        if self.ncol is not None:
+            column = m1.node.values % self.ncol
+            column[column == 0] = self.ncol # last column has remainder of 0
             m1['column'] = column
         m1['layer'] = 1
 
@@ -1017,9 +1049,10 @@ def create_reaches(part, segment_nodes, grid_geoms, tol=0.01):
             reach_geoms[n] = g
             n += 1
         else:
-            reach_nodes.update({n+nn: segment_nodes[i] for nn, gg in enumerate(g.geoms)})
-            reach_geoms.update({n+nn: gg for nn, gg in enumerate(g.geoms)})
-            n += len(g.geoms)
+            geoms = [gg for gg in g.geoms if gg.type == 'LineString']
+            reach_nodes.update({n+nn: segment_nodes[i] for nn, gg in enumerate(geoms)})
+            reach_geoms.update({n+nn: gg for nn, gg in enumerate(geoms)})
+            n += len(geoms)
 
     # make point features for start and end of flowline part
     start = Point(part.coords[0])

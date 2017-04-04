@@ -34,6 +34,7 @@ def header(infile):
 class SFRdata(object):
 
     # dictionary to convert different variations on column names to internally consistent names
+    # input column name: output column name
     m1_column_names = {'length_in_cell': 'length',
                        'width_in_cell': 'width',
                        'top_streambed': 'sbtop',
@@ -41,10 +42,17 @@ class SFRdata(object):
                        'bed_thickness': 'sbthick',
                        'bed_slope': 'slope',
                        'bed_roughness': 'roughness',
-                       'cellnum': 'node'}
+                       'cellnum': 'node',
+                       'iseg': 'segment',
+                       'ireach': 'reach',
+                       'rchlen': 'length',
+                       'strtop': 'sbtop',
+                       'strthick': 'sbthick',
+                       'strhc1': 'sbK'}
 
     m2_column_names = {'elevMax': 'Max',
-                       'elevMin': 'Min'}
+                       'elevMin': 'Min',
+                       'nseg': 'segment'}
 
     m1_integer_columns = {'row', 'column', 'layer', 'node', 'reachID',
                           'comid', 'segment', 'reach', 'outseg', 'outlet'}
@@ -55,6 +63,7 @@ class SFRdata(object):
 
     def __init__(self, sfrobject=None, Mat1=None, Mat2=None, sfr=None, node_column=False,
                  mfpath='', mfnam=None, mfdis=None, mfgridshp=None, mfgridshp_node_field='node',
+                 sr=None,
                  mfgridshp_row_field=None, mfgridshp_column_field=None, ncol=None, gridtype='structured',
                  dem=None, dem_units_mult=1, landsurfacefile=None, landsurface_column=None,
                  GIS_mult=1, to_meters_mult=0.3048,
@@ -121,14 +130,15 @@ class SFRdata(object):
                         if g in self.m1.columns:
                             self.m1.drop(g, axis=1, inplace=True)
                     self.outpath = os.path.split(Mat1)[0]
+
+                # enforce consistent column names (maintaining compatibility with past SFRmaker versions)
+                self.parse_columns()
+
                 self.m1.sort_values(by=['segment', 'reach'], inplace=True)
                 self.m2.sort_values(by='segment', inplace=True)
                 self.m2.index = list(map(int, self.m2.segment.values))
                 if sum(np.unique(self.m1.segment) - self.m2.segment) != 0:
                     raise IndexError("Segments in Mat1 and Mat2 are different!")
-
-                # enforce consistent column names (maintaining compatibility with past SFRmaker versions)
-                self.parse_columns()
 
                 # enforce integer columns
                 int_cols = self.m1_integer_columns.intersection(set(self.m1.columns))
@@ -167,6 +177,8 @@ class SFRdata(object):
                 self.mfnam = None
                 self.mfdis = None
                 self.basename = 'MF'
+
+            self.sr = sr
 
             # coordinate projection of model grid
             self.prj = prj # projection file
@@ -233,7 +245,7 @@ class SFRdata(object):
         lrc = np.array(self.dis.get_lrc(self.m1.node.tolist())).T
         self.m1['row'], self.m1['column'] = lrc[1], lrc[2]
 
-    def _interpolate_to_reaches(self, segvar1, segvar2):
+    def _interpolate_to_reaches(self):
         """Interpolate values in datasets 6b and 6c to each reach in stream segment
 
         Parameters
@@ -281,6 +293,13 @@ class SFRdata(object):
         self.m1.rename(columns=rename_columns, inplace=True)
         rename_columns = {c: newname for c, newname in self.m2_column_names.items() if c in self.m2.columns}
         self.m2.rename(columns=rename_columns, inplace=True)
+
+        # convert from 0 to 1-based (flopy)
+        for k, v in {'k': 'layer',
+                     'i': 'row',
+                     'j': 'column'}.items():
+            if k in self.m1.columns:
+                self.m1[v] = self.m1[k] +1
 
     @ property
     def shared_cells(self):
@@ -371,25 +390,8 @@ class SFRdata(object):
     def get_cell_geometries(self, mfgridshp=None, node_field='node'):
 
         if mfgridshp is None:
-            print('computing cell geometries...')
-            #self.centroids = self.dis.get_node_coordinates()
-            self.get_cell_centroids()
-
-            for i, dfr in self.m1.iterrows():
-                r, c = dfr.row - 1, dfr.column - 1
-                cn = r * self.dis.ncol + c + 1
-                cx, cy = dfr.centroids
-                dx = self.dis.delr[c] * self.GIS_mult
-                dy = self.dis.delc[r] * self.GIS_mult  # this is confusing, may be a bug in flopy
-
-                # calculate vertices for parent cell
-                x0 = cx - 0.5 * dx
-                x1 = cx + 0.5 * dx
-                y0 = cy - 0.5 * dy
-                y1 = cy + 0.5 * dy
-
-                self.cell_geometries[cn] = Polygon([(x0, y0), (x1, y0), (x1, y1), (x0, y1), (x0, y0)])
-            self.m1['geometry'] = [self.cell_geometries[cn] for cn in self.m1.node]
+            cell_polys = np.array([Polygon(p) for p in self.sr.vertices])
+            self.m1['geometry'] = cell_polys[self.m1.node.values -1]
         else:
             self._read_geoms_from_mfgridshp(mfgridshp=mfgridshp, node_field=node_field)
 
@@ -399,14 +401,10 @@ class SFRdata(object):
         """
 
         if mfgridshp is None:
-            self.centroids = self.dis.get_node_coordinates()
-
-            centroids = []
-            for i, r in self.m1.iterrows():
-                r, c = r.row - 1, r.column - 1
-                cx = self.centroids[1][c] * self.GIS_mult + self.xll
-                cy = self.centroids[0][r] * self.GIS_mult + self.yll
-                centroids.append((cx, cy))
+            r, c = self.m1.row.values -1, self.m1.column.values -1
+            cx = self.sr.xcentergrid[r, c]
+            cy = self.sr.ycentergrid[r, c]
+            self.centroids = list(zip(cx, cy))
         else:
             self._read_geoms_from_mfgridshp(mfgridshp, node_field=node_field)
             centroids = [g.centroid for g in self.m1.geometry]
@@ -568,6 +566,35 @@ class SFRdata(object):
                                          landsurface_column=landsurface_column)
             self.Elevations.smooth_segment_interiors(report_file=report_file)
         self.m1 = self.Elevations.m1
+
+    def calculate_slopes(self):
+        '''
+        assign a slope value for each stream cell based on streambed elevations
+        this method is run at the end of smooth_segment_interiors, after the interior elevations have been assigned
+        '''
+        print('calculating slopes...')
+        self.m1['slope'] = np.zeros(len(self.m1))
+        for s in self.segments:
+
+            # calculate the right-hand elevation differences (not perfect, but easy)
+            diffs = self.m1[self.m1.segment == s].sbtop.diff()[1:].tolist()
+
+            if len(diffs) > 0:
+                diffs.append(diffs[-1])  # use the left-hand difference for the last reach
+
+            # edge case where segment only has 1 reach
+            else:
+                diffs = self.m2.Min[s] - self.m2.Max[s]
+
+            # divide by length in cell; reverse sign so downstream = positive (as in SFR package)
+            slopes = diffs / self.m1[self.m1.segment == s].length * -1
+
+            # assign to Mat1
+            self.m1.loc[self.m1.segment == s, 'slope'] = slopes
+
+        # enforce minimum slope
+        self.m1.loc[self.m1['slope'] > self.maximum_slope, 'slope'] = self.maximum_slope
+        self.m1.loc[self.m1['slope'] < self.minimum_slope, 'slope'] = self.minimum_slope
 
     def reset_m1_streambed_top_from_dem(self, dem=None, dem_units_mult=None, stat='min'):
         """Computes streambed top elevations via zonal statistics, using the
@@ -1108,7 +1135,7 @@ class SFRdata(object):
                 r.column,
                 r.segment,
                 r.reach,
-                r.SFRlength,
+                r.length,
                 r.sbtop,
                 r.slope,
                 r.sbthick,
