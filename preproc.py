@@ -350,18 +350,18 @@ class NHDdata(object):
         # sort and pair down the grid
         if mf_grid_node_col is not None:
             self.grid.sort_values(by=mf_grid_node_col, inplace=True)
-            if len(self.grid) != self.grid[mf_grid_node_col].max():
+            if len(self.grid) != self.grid[mf_grid_node_col].max() +1:
                 warnings.warn(NodeIndexWarning(mf_grid, mf_grid_node_col))
             self.grid.index = self.grid[mf_grid_node_col].values
         else:
             warnings.warn(NodeIndexWarning(mf_grid))
 
         # set the indices
-        for attr, index in {'fl': 'COMID',
-                            'pfvaa': 'ComID',
-                            'elevs': 'COMID'}.items():
-            if not self.__dict__[attr].index.name == index:
-                self.__dict__[attr].index = self.__dict__[attr][index]
+        for attr in ['fl', 'pfvaa', 'elevs']:
+            comid_col = [c for c in self.__dict__[attr].columns
+                         if c.lower() == 'comid'][0]
+            if not self.__dict__[attr].index.name == comid_col:
+                self.__dict__[attr].index = self.__dict__[attr][comid_col]
 
         # first check that grid is in projected units
         if self.mf_grid_proj4.split('proj=')[1].split()[0].strip() == 'longlat':
@@ -502,12 +502,11 @@ class NHDdata(object):
         m1['sbtop'] = 0
 
         if self.nrow is not None:
-            m1['row'] = np.floor(m1.node / self.ncol) + 1
+            m1['row'] = np.floor(m1.node / self.ncol).astype(int)
         if self.ncol is not None:
             column = m1.node.values % self.ncol
-            column[column == 0] = self.ncol # last column has remainder of 0
             m1['column'] = column
-        m1['layer'] = 1
+        m1['layer'] = 0
 
         self.m1 = m1
 
@@ -703,7 +702,7 @@ class lines(linesBase):
         segments = self.df.segment.values
         distances = distance(end_crds, next_starts)
         outsegs = np.zeros(len(segments))
-        outsegs[distances < tol] = nearest_start[distances < tol]
+        outsegs[distances < tol] = nearest_start[distances < tol] + 1
         self.df['outseg'] = outsegs
         self.df['upsegs'] = [self.df.segment[self.df.outseg == s].tolist() for s in self.df.segment]
 
@@ -853,7 +852,7 @@ class lines(linesBase):
         # segments may already be routed if appending to SFR
         if self.df.outseg.sum() == 0:
             print("establishing routing...")
-            self.route_lines_by_proximity()
+            self.route_lines_by_proximity(tol=tol)
 
         print("intersecting lines with grid cells...") # this part crawls in debug mode
         grid_intersections = GISops.intersect_rtree(grid_geoms, line_geoms)
@@ -896,12 +895,11 @@ class lines(linesBase):
         m1['sbtop'] = 0
 
         if self.nrow is not None:
-            m1['row'] = np.floor(m1.node / self.ncol) + 1
+            m1['row'] = np.floor(m1.node / self.ncol).astype(int)
         if self.ncol is not None:
             column = m1.node.values % self.ncol
-            column[column == 0] = self.ncol # last column has remainder of 0
             m1['column'] = column
-        m1['layer'] = 1
+        m1['layer'] = 0
 
         print("\nsetting up Mat2...")
         ta = time.time()
@@ -1078,7 +1076,7 @@ def create_reaches(part, segment_nodes, grid_geoms, tol=0.01):
         r = dist_sorted[0][0]
         next_reach = reach_geoms.pop(r)
         ordered_reach_geoms.append(next_reach)
-        ordered_node_numbers.append(reach_nodes[r] + 1)
+        ordered_node_numbers.append(reach_nodes[r])
         current_reach = next_reach
 
         if current_reach.touches(end.buffer(tol)) and len(ordered_node_numbers) == nreaches:
@@ -1408,13 +1406,13 @@ class NodeIndexWarning(Warning):
     def __str__(self):
         if self.node_field is None:
             return("\nWarning: Node field for {} not supplied."
-                   "Node numbers will be assigned sequentially to grid cells starting at 1."
+                   "Node numbers will be assigned sequentially to grid cells starting at 0."
                    "This will result in incorrect location of SFR reaches if the grid shapefile"
                    "is not sorted.".format(self.node_field))
         else:
             return("\nWarning: Node numbers in field {} of grid are not consecutive intergers"
-                    "starting at 1. SFRmaker will sort the grid cells by node, but then use"
-                    "base-1 consecutive integers for indexing (same as MODFLOW USG). These will be"
+                    "starting at 0. SFRmaker will sort the grid cells by node, but then use"
+                    "base-0 consecutive integers for indexing. These will be"
                     "the node numbers reported in the output (sfr package, tables, and shapefile). This"
                     "may lead to confusion if the SFR output is joined back to {}."
                    .format(self.node_field, self.grid_shapefile))

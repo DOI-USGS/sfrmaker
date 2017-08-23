@@ -20,6 +20,9 @@ mffiles = glob.glob('../Examples/data/example.*')
 for f in mffiles:
     shutil.copy(f, os.path.join('temp', os.path.split(f)[1]))
 
+def test_imports():
+    from diagnostics import diagnostics
+
 def test_example():
     # shapefiles defining the model grid, and the area that will include SFR
     mf_grid = '../Examples/data/grid.shp'
@@ -116,4 +119,5 @@ def test_example():
     sfr.check(f='flopy_SFR_check')
 
 if __name__ == '__main__':
-    test_example()
+    test_imports()
+    #test_example()
