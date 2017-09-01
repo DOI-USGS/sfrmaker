@@ -5,7 +5,7 @@ import operator
 import numpy as np
 import pandas as pd
 import fiona
-from shapely.geometry import Point, LineString, Polygon, shape
+from shapely.geometry import Point, LineString, Polygon, shape, box
 from shapely.ops import unary_union
 from GISio import shp2df, df2shp, get_proj4
 from GISops import project, projectdf, build_rtree_index, intersect_rtree
@@ -343,6 +343,8 @@ class NHDdata(object):
                         print(self.fl_proj4)
                         self.domain_filter = project(self.domain, self.domain_proj4, self.fl_proj4).bounds
                         print(self.domain_filter)
+                    else:
+                        self.domain_filter = self.domain.bounds
                 else:
                     self.domain_filter = None
                 self.__dict__[attr] = shp2df(input, filter=self.domain_filter)
@@ -395,14 +397,14 @@ class NHDdata(object):
         print('getting routing information from NHDPlus Plusflow table...')
         # setup local variables and cull plusflow table to comids in model
         comids = self.df.index.tolist()
-        pf = self.pf.ix[(self.pf.FROMCOMID.isin(comids)) |
+        pf = self.pf.loc[(self.pf.FROMCOMID.isin(comids)) |
                         (self.pf.TOCOMID.isin(comids))].copy()
 
         # subset PlusFlow entries for comids that are not in flowlines dataset
         # comids may be missing because they are outside of the model
         # or if the flowlines dataset was edited (resulting in breaks in the routing)
         missing_tocomids = ~pf.TOCOMID.isin(comids) & (pf.TOCOMID != 0)
-        missing = pf.ix[missing_tocomids, ['FROMCOMID', 'TOCOMID']].copy()
+        missing = pf.loc[missing_tocomids, ['FROMCOMID', 'TOCOMID']].copy()
         # recursively crawl the PlusFlow table
         # to try to find a downstream comid in the flowlines dataest
         missing['nextCOMID'] = [find_next(tc, self.pf, comids) for tc in missing.TOCOMID]
@@ -426,8 +428,12 @@ class NHDdata(object):
         braids = self.df[np.array([len(d) for d in self.df.dncomids]) > 1]
         for i, r in braids.iterrows():
             # select the dncomid that has a matching levelpath
-            levelpath_matches = self.df.ix[r.dncomids, 'LevelPathI'].values == r.LevelPathI
-            in_same_levelpath = np.array(r.dncomids)[levelpath_matches]
+            in_index = set(r.dncomids).intersection(set(self.df.index))
+            if len(in_index) > 0:
+                levelpath_matches = self.df.loc[r.dncomids, 'LevelPathI'].values == r.LevelPathI
+                in_same_levelpath = np.array(r.dncomids)[levelpath_matches]
+            else:
+                in_same_levelpath = []
             # if none match, select the first dncomid
             if len(in_same_levelpath) == 0:
                 dncomid = [r.dncomids[0]]
@@ -443,10 +449,9 @@ class NHDdata(object):
         self.df['outseg'] = [d[0] for d in self.df.dnsegs]
 
     def to_sfr(self, roughness=0.037, streambed_thickness=1, streambedK=1,
-               icalc=1,
+               icalc=1, minimum_length=1.,
                iupseg=0, iprior=0, nstrpts=0, flow=0, runoff=0, etsw=0, pptsw=0,
                roughch=0, roughbk=0, cdepth=0, fdepth=0, awdth=0, bwdth=0):
-
 
         # create a working dataframe
         self.df = self.fl[self.fl_cols].join(self.pfvaa[self.pfvaa_cols], how='inner')
@@ -455,12 +460,17 @@ class NHDdata(object):
         self.df = self.df.join(self.elevs[['Max', 'Min']], how='inner')
         self.df.rename(columns={'Max': 'elevMax', 'Min': 'elevMin'}, inplace=True)
 
-        print('\nclipping flowlines to active area...')
+        print('\nclipping flowlines to active area... (may take awhile for active area polygons with many vertices)')
+        # this step is slow for domains with many vertices
+        # (i.e. those created from an ibound array)
+        # would be ideal to discard this step and intersect directly with grid using rtree
+        ta = time.time()
         inside = np.array([g.intersects(self.domain) for g in self.df.geometry])
         self.df = self.df.ix[inside].copy()
         self.df.sort_values(by='COMID', inplace=True)
         flowline_geoms = [g.intersection(self.domain) for g in self.df.geometry]
         grid_geoms = self.grid.geometry.tolist()
+        print("finished in {:.2f}s\n".format(time.time() - ta))
 
         print("intersecting flowlines with grid cells...") # this part crawls in debug mode
         grid_intersections = GISops.intersect_rtree(grid_geoms, flowline_geoms)
@@ -517,29 +527,144 @@ class NHDdata(object):
         self.m2.index = self.m2.segment
         print("finished in {:.2f}s\n".format(time.time() - ta))
 
-        # add outseg information to Mat1
-        self.m1['outseg'] = [self.m2.outseg[s] for s in self.m1.segment]
+        # discard very small reaches; redo numbering
+        print('\nDropping reaches with length < {:.2f}'.format(minimum_length))
+        self.m1 = self.m1.loc[self.m1.length > minimum_length].copy()
 
-        self.renumber_segments() # enforce best segment numbering
+        # patch the routing
+        print('\nRepairing routing connections...')
+        remaining_segments = self.m1.segment.unique()
+
+        old_graph = self.make_graph()
+        paths = self.paths(old_graph)
+        new_graph = {}
+        for k in remaining_segments:
+            for s in paths[k][1:]:
+                if s in remaining_segments:
+                    new_graph[k] = s
+                    break
+                else:
+                    new_graph[k] = 0
+
+        # sync m2 with m1; update the routing
+        remaining = np.array([True if s in remaining_segments else False
+                              for s in self.m2.segment.values])
+        self.m2 = self.m2.loc[remaining].copy()
+        self.m2['outseg'] = [new_graph[s] for s in self.m2.segment]
+
+        # renumber the segments to be consecutive
+        self.renumber_segments()  # enforce best segment numbering
         self.m1.sort_values(by=['segment', 'reach'], inplace=True)
         self.m1['ReachID'] = np.arange(1, len(self.m1) + 1)
+        self.set_outreaches() # fixes any reach numbering gaps first
+        graph = self.make_graph()
+
+        # add outseg information to Mat1
+        self.m1['outseg'] = [graph[s] for s in self.m1.segment]
 
         print('\nDone creating SFR dataset.')
 
+    def make_graph(self):
+        graph = dict(zip(self.m2.segment.values, self.m2.outseg.values))
+        outlets = set(graph.values()).difference(set(graph.keys()))  # including lakes
+        graph.update({o: 0 for o in outlets})
+        return graph
+
+    def paths(self, graph):
+        return {seg: find_path(graph, seg) for seg in graph.keys()}
+
     def renumber_segments(self):
         """Renumber segments so that segment numbering is continuous and always increases
-        in the downstream direction. Experience suggests that this can substantially speed
-        convergence for some models using the NWT solver."""
-        r = renumber_segments(self.m2.segment.values, self.m2.outseg.values)
+        in the downstream direction. This may speed convergence of the NWT solver 
+        in some situations.
+        """
 
+        self.m2.sort_values(by='segment', inplace=True)
+
+        nseg = self.m2.segment
+        outseg = self.m2.outseg
+
+        # explicitly fix any gaps in the numbering
+        # (i.e. from removing segments)
+        nseg2 = np.arange(1, len(nseg) + 1)
+        # intermediate mapping that
+        r1 = dict(zip(nseg, nseg2))
+        r1[0] = 0
+        outseg2 = np.array([r1[s] for s in outseg])
+
+        # function re-assigning upseg numbers consecutively at one level relative to outlet(s)
+        # counts down from the number of segments
+        def reassign_upsegs(r, nexts, upsegs):
+            nextupsegs = []
+            for u in upsegs:
+                r[u] = nexts if u > 0 else u  # handle lakes
+                nexts -= 1
+                nextupsegs += list(nseg2[outseg2 == u])
+            return r, nexts, nextupsegs
+
+        ns = len(nseg)
+
+        # start at outlets with nss;
+        # renumber upsegs consecutively at each level
+        # until all headwaters have been reached
+        nexts = ns
+        r2 = {0: 0}
+        nextupsegs = nseg2[outseg2 == 0]
+        for i in range(ns):
+            r2, nexts, nextupsegs = reassign_upsegs(r2, nexts, nextupsegs)
+            if len(nextupsegs) == 0:
+                break
+        # map original segment numbers to new numbers
+        r = {k: r2.get(v, v) for k, v in r1.items()}
+
+        # renumber segments
         self.m2['segment'] = [r.get(s, s) for s in self.m2.segment]
         self.m2['outseg'] = [r.get(s, s) for s in self.m2.outseg]
-        self.m2.sort_values(by=['segment'], inplace=True)
-        self.m2.index = self.m2.segment.values # reset the index to new segment numbers
-        assert _in_order(self.m2.segment.values, self.m2.outseg.values)
+        self.m2.sort_values(by='segment', inplace=True)
+        inds = (outseg > 0) & (nseg > outseg)
+        assert not np.any(inds)
         assert len(self.m2.segment) == self.m2.segment.max()
+
+        # renumber segments in reach_data
         self.m1['segment'] = [r.get(s, s) for s in self.m1.segment]
-        self.m1['outseg'] = [r.get(s, s) for s in self.m1.outseg]
+        self.m1.sort_values(by=['segment', 'reach'], inplace=True)
+        self.m1['reachID'] = np.arange(1, len(self.m1) + 1)
+        self.set_outreaches()  # reset the outreaches to ensure continuity
+
+    def reset_reaches(self):
+        self.m1.sort_values(by=['segment', 'reach'], inplace=True)
+        reach_data = self.m1
+        segment_data = self.m2
+        ireach = []
+        for iseg in segment_data.segment.values:
+            nreaches = np.sum(reach_data.segment == iseg)
+            ireach += list(range(1, nreaches+1))
+        self.m1['reach'] = ireach
+
+    def set_outreaches(self):
+        """Determine the outreach for each SFR reach (requires a reachID column in reach_data).
+        Uses the segment routing specified for the first stress period to route reaches between segments.
+        """
+        self.m1.sort_values(by=['segment', 'reach'], inplace=True)
+        self.reset_reaches() # ensure that each segment starts with reach 1
+        rd = self.m1
+        graph = self.make_graph()
+        outseg = graph
+        reach1IDs = dict(zip(rd.loc[rd.reach == 1].segment.values,
+                             rd.loc[rd.reach == 1].reachID.values))
+        outreach = []
+        for i in range(len(rd)):
+            # if at the end of reach data or current segment
+            if i + 1 == len(rd) or rd.reach.values[i + 1] == 1:
+                nextseg = outseg[rd.segment.values[i]]  # get next segment
+                if nextseg > 0:  # current reach is not an outlet
+                    nextrchid = reach1IDs[nextseg]  # get reach 1 of next segment
+                else:
+                    nextrchid = 0
+            else:  # otherwise, it's the next reachID
+                nextrchid = rd.reachID.values[i + 1]
+            outreach.append(nextrchid)
+        self.m1['outreach'] = outreach
 
     def write_tables(self, basename='SFR'):
         """Write tables with SFR reach (Mat1) and segment (Mat2) information out to csv files.
@@ -738,8 +863,8 @@ class lines(linesBase):
         tol = self.routing_tol if routing_tol is None else routing_tol
 
         if route2reach1:
-            segments = self.sfr.ix[self.sfr.reach == 1, 'segment'].tolist()
-            geoms = self.sfr.ix[self.sfr.reach == 1, 'geometry'].tolist()
+            segments = self.sfr.loc[self.sfr.reach == 1, 'segment'].tolist()
+            geoms = self.sfr.loc[self.sfr.reach == 1, 'geometry'].tolist()
         else:
             segments = self.sfr.segment.tolist()
             geoms = [g for g in self.sfr.geometry]
@@ -1107,7 +1232,7 @@ def find_next(comid, pftable, comids, max_levels=10):
     nextocomid = [comid]
     comids = set(comids)
     for i in range(max_levels):
-        nextocomid = pftable.ix[pftable.FROMCOMID.isin(nextocomid), 'TOCOMID'].tolist()
+        nextocomid = pftable.loc[pftable.FROMCOMID.isin(nextocomid), 'TOCOMID'].tolist()
         if len(set(nextocomid).intersection(comids)) > 0:
             # if more than one comid is found, simply take the first
             # (often these will be in different levelpaths,
@@ -1392,6 +1517,19 @@ def width_from_arbolate(arbolate, minimum_width=1):
         pass
     return w
 
+def find_path(graph, start, end=0, path=[]):
+    path = path + [start]
+    if start == end:
+        return path
+    if start not in graph:
+        return None
+    if not isinstance(graph[start], list):
+        graph[start] = [graph[start]]
+    for node in graph[start]:
+        if node not in path:
+            newpath = find_path(graph, node, end, path)
+            if newpath: return newpath
+    return None
 
 class ProjectionError(Exception):
     def __init__(self, infile):
