@@ -171,7 +171,7 @@ class linesBase(object):
         """
         m1_cols = ['node', 'layer', 'segment', 'reach', 'sbtop', 'width', 'length', 'sbthick',
                    'sbK', 'roughness', 'asum', 'reachID']
-        m2_cols = ['segment', 'icalc', 'outseg', 'elevMax', 'elevMin']
+        m2_cols = ['segment', 'icalc', 'outseg', 'elevup', 'elevdn']
         if self.nrow is not None:
             m1_cols.insert(1, 'row')
 
@@ -430,15 +430,22 @@ class NHDdata(object):
             # select the dncomid that has a matching levelpath
             in_index = set(r.dncomids).intersection(set(self.df.index))
             if len(in_index) > 0:
+                df = self.df.loc[r.dncomids].sort_values(by='elevdn')
+                dncomid = [df.COMID.values[0]]
+            '''
+            if len(in_index) > 0:
                 levelpath_matches = self.df.loc[r.dncomids, 'LevelPathI'].values == r.LevelPathI
                 in_same_levelpath = np.array(r.dncomids)[levelpath_matches]
+                
             else:
                 in_same_levelpath = []
             # if none match, select the first dncomid
             if len(in_same_levelpath) == 0:
+                
                 dncomid = [r.dncomids[0]]
             else:
                 dncomid = np.unique(in_same_levelpath).tolist()
+            '''
             self.df.set_value(i, 'dncomids', dncomid)
 
         # assign upsegs and outsegs based on NHDPlus routing
@@ -458,7 +465,7 @@ class NHDdata(object):
 
         # bring in elevations from elevslope table
         self.df = self.df.join(self.elevs[['Max', 'Min']], how='inner')
-        self.df.rename(columns={'Max': 'elevMax', 'Min': 'elevMin'}, inplace=True)
+        self.df.rename(columns={'Max': 'elevup', 'Min': 'elevdn'}, inplace=True)
 
         print('\nclipping flowlines to active area... (may take awhile for active area polygons with many vertices)')
         # this step is slow for domains with many vertices
@@ -522,9 +529,12 @@ class NHDdata(object):
 
         print("\nsetting up Mat2...")
         ta = time.time()
-        self.m2 = self.df[['segment', 'outseg', 'elevMax', 'elevMin']].copy()
+        self.m2 = self.df[['segment', 'outseg', 'elevup', 'elevdn']].copy()
         self.m2['icalc'] = icalc
         self.m2.index = self.m2.segment
+        self.m2.sort_values(by='segment', inplace=True)
+        self.m2['width2'] = self.m1.groupby('segment')['width'].max().values
+        self.m2['width1'] = self.m1.groupby('segment')['width'].min().values
         print("finished in {:.2f}s\n".format(time.time() - ta))
 
         # discard very small reaches; redo numbering
@@ -676,7 +686,7 @@ class NHDdata(object):
         """
         m1_cols = ['node', 'layer', 'segment', 'reach', 'sbtop', 'width', 'length', 'sbthick',
                    'sbK', 'roughness', 'asum', 'reachID']
-        m2_cols = ['segment', 'icalc', 'outseg', 'elevMax', 'elevMin']
+        m2_cols = ['segment', 'icalc', 'outseg', 'elevup', 'elevdn', 'width1', 'width2']
         if 'row' in self.m1.columns:
             m1_cols.insert(1, 'row')
         if 'column' in self.m1.columns:
@@ -718,8 +728,8 @@ class lines(linesBase):
                            lines_proj4=lines_proj4)
 
         self.routing_tol = routing_tol
-        self.df['elevMax'] = self.df[maxElev_field] if maxElev_field is not None else 0
-        self.df['elevMin'] = self.df[minElev_field] if minElev_field is not None else 0
+        self.df['elevup'] = self.df[maxElev_field] if maxElev_field is not None else 0
+        self.df['elevdn'] = self.df[minElev_field] if minElev_field is not None else 0
         self.allupsegs = {} # dict containing set of all upstream segments for each segment
 
     def append2sfr(self, sfrlinework, route2reach1=True,
@@ -758,8 +768,8 @@ class lines(linesBase):
     def get_end_elevs_from_dem(self, dem):
 
         from GISio import get_values_at_points
-        self.df['elevMax'] = get_values_at_points(dem, self.start_cds)
-        self.df['elevMin'] = get_values_at_points(dem, self.end_cds)
+        self.df['elevup'] = get_values_at_points(dem, self.start_cds)
+        self.df['elevdn'] = get_values_at_points(dem, self.end_cds)
 
     def get_segment_asums(self):
         """Using allupsegs dictionary, sum lengths of all upstream segments for each segment
@@ -1028,7 +1038,7 @@ class lines(linesBase):
 
         print("\nsetting up Mat2...")
         ta = time.time()
-        write_columns = list(set(['segment', 'outseg', 'outreachID', 'elevMax', 'elevMin'])\
+        write_columns = list(set(['segment', 'outseg', 'outreachID', 'elevup', 'elevdn'])\
                              .intersection(set(self.df.columns)))
         m2 = self.df[write_columns].copy()
         m2['icalc'] = icalc
