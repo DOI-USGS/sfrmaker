@@ -169,8 +169,8 @@ class linesBase(object):
         basename: string
             e.g. Mat1 is written to <basename>Mat1.csv
         """
-        m1_cols = ['node', 'layer', 'segment', 'reach', 'sbtop', 'width', 'length', 'sbthick',
-                   'sbK', 'roughness', 'asum', 'reachID']
+        m1_cols = ['node', 'layer', 'segment', 'reach', 'strtop', 'width', 'length', 'strthick',
+                   'strhc1', 'roughch', 'asum', 'reachID']
         m2_cols = ['segment', 'icalc', 'outseg', 'elevup', 'elevdn']
         if self.nrow is not None:
             m1_cols.insert(1, 'row')
@@ -200,6 +200,9 @@ class NHDdata(object):
 
     convert_elevslope_to_model_units = {'feet': 0.0328084,
                                         'meters': 0.01}
+
+    output_cols = ['node', 'k', 'i', 'j', 'segment', 'reach', 'strtop', 'width', 'length', 'strthick',
+                   'strhc1', 'roughch', 'asum', 'reachID', 'outreach', 'comid']
 
     def __init__(self, NHDFlowline=None, PlusFlowlineVAA=None, PlusFlow=None, NHDFcode=None,
                  elevslope=None,
@@ -314,11 +317,13 @@ class NHDdata(object):
         if sr is not None:
             print('reading grid from flopy SpatialReference...')
             d = {'geometry': [Polygon(vrts) for vrts in sr.vertices],
-                 'column': np.arange(sr.ncol).tolist() * sr.nrow,
-                 'row': sorted(np.arange(sr.nrow).tolist() * sr.ncol),
-                 'node': np.arange(sr.nrow*sr.ncol)}
+                 'j': np.arange(sr.ncol).tolist() * sr.nrow,
+                 'i': sorted(np.arange(sr.nrow).tolist() * sr.ncol),
+                 'node': np.arange(sr.nrow*sr.ncol, dtype=int)}
             self.grid = pd.DataFrame(d)
-            self.grid = self.grid[['node', 'row', 'column', 'geometry']]
+            self.grid['i'] = self.grid.i.astype(int)
+            self.grid['j'] = self.grid.j.astype(int)
+            self.grid = self.grid[['node', 'i', 'j', 'geometry']]
             self.nrow = sr.nrow
             self.ncol = sr.ncol
             mf_grid_node_col = 'node'
@@ -362,6 +367,7 @@ class NHDdata(object):
         for attr in ['fl', 'pfvaa', 'elevs']:
             comid_col = [c for c in self.__dict__[attr].columns
                          if c.lower() == 'comid'][0]
+            self.__dict__[attr][comid_col] = self.__dict__[attr][comid_col].astype(int)
             if not self.__dict__[attr].index.name == comid_col:
                 self.__dict__[attr].index = self.__dict__[attr][comid_col]
 
@@ -455,10 +461,10 @@ class NHDdata(object):
         # make a column of outseg integers
         self.df['outseg'] = [d[0] for d in self.df.dnsegs]
 
-    def to_sfr(self, roughness=0.037, streambed_thickness=1, streambedK=1,
+    def to_sfr(self, roughch=0.037, strthick=1, strhc1=1,
                icalc=1, minimum_length=1.,
                iupseg=0, iprior=0, nstrpts=0, flow=0, runoff=0, etsw=0, pptsw=0,
-               roughch=0, roughbk=0, cdepth=0, fdepth=0, awdth=0, bwdth=0):
+               roughbk=0, cdepth=0, fdepth=0, awdth=0, bwdth=0):
 
         # create a working dataframe
         self.df = self.fl[self.fl_cols].join(self.pfvaa[self.pfvaa_cols], how='inner')
@@ -513,23 +519,24 @@ class NHDdata(object):
         m1['width'] = width * self.mf_units_mult
         m1['length'] = m1.length * self.mf_units_mult
 
-        m1['roughness'] = roughness
-        m1['sbthick'] = streambed_thickness
-        m1['sbK'] = streambedK
-        m1['sbtop'] = 0
+        m1['roughch'] = float(roughch)
+        m1['strthick'] = float(strthick)
+        m1['strhc1'] = float(strhc1)
+        m1['strtop'] = 0.
 
         if self.nrow is not None:
-            m1['row'] = np.floor(m1.node / self.ncol).astype(int)
+            m1['i'] = np.floor(m1.node / self.ncol).astype(int)
         if self.ncol is not None:
-            column = m1.node.values % self.ncol
-            m1['column'] = column
-        m1['layer'] = 0
+            j = m1.node.values % self.ncol
+            m1['j'] = j
+        m1['k'] = 0
 
         self.m1 = m1
 
         print("\nsetting up Mat2...")
         ta = time.time()
         self.m2 = self.df[['segment', 'outseg', 'elevup', 'elevdn']].copy()
+        self.m2['comid'] = self.df.COMID
         self.m2['icalc'] = icalc
         self.m2.index = self.m2.segment
         self.m2.sort_values(by='segment', inplace=True)
@@ -684,13 +691,11 @@ class NHDdata(object):
         basename: string
             e.g. Mat1 is written to <basename>Mat1.csv
         """
-        m1_cols = ['node', 'layer', 'segment', 'reach', 'sbtop', 'width', 'length', 'sbthick',
-                   'sbK', 'roughness', 'asum', 'reachID']
-        m2_cols = ['segment', 'icalc', 'outseg', 'elevup', 'elevdn', 'width1', 'width2']
-        if 'row' in self.m1.columns:
-            m1_cols.insert(1, 'row')
-        if 'column' in self.m1.columns:
-            m1_cols.insert(2, 'column')
+        m1_cols = self.output_cols
+        m2_cols = ['segment', 'icalc', 'outseg', 'elevup', 'elevdn', 'width1', 'width2', 'comid']
+        for ind in ['i', 'j']:
+            if ind not in self.m1.columns:
+                m1_cols.remove(ind)
         print("writing Mat1 to {0}{1}, Mat2 to {0}{2}".format(basename, 'Mat1.csv', 'Mat2.csv'))
         self.m1[m1_cols].to_csv(basename + 'Mat1.csv', index=False)
         self.m2[m2_cols].to_csv(basename + 'Mat2.csv', index=False)
@@ -705,10 +710,10 @@ class NHDdata(object):
             Output will be written to <basename>.shp
         """
         print("writing reach geometries to {}".format(basename+'.shp'))
-        cols = ['reachID', 'node', 'segment', 'reach', 'outseg', 'comid', 'asum', 'geometry']
-        for d in ['column', 'row']:
-            if d in self.m1.columns:
-                cols.insert(2, d)
+        cols = self.output_cols + ['geometry']
+        for ind in ['i', 'j']:
+            if ind not in self.m1.columns:
+                cols.remove(ind)
         df2shp(self.m1[cols],
                basename+'.shp', proj4=self.mf_grid_proj4)
 
@@ -734,10 +739,10 @@ class lines(linesBase):
 
     def append2sfr(self, sfrlinework, route2reach1=True,
                    trim_buffer=20, routing_tol=None,
-                   roughness=0.037, streambed_thickness=1, streambedK=1,
+                   roughch=0.037, strthick=1, strhc1=1,
                    icalc=1,
                    iupseg=0, iprior=0, nstrpts=0, flow=0, runoff=0, etsw=0, pptsw=0,
-                   roughch=0, roughbk=0, cdepth=0, fdepth=0, awdth=0, bwdth=0):
+                   roughbk=0, cdepth=0, fdepth=0, awdth=0, bwdth=0):
         """Convert linework to input that can be appended to an existing SFR dataset.
 
         Creates Mat1 (m1) and Mat2 (m2) attributes.
@@ -760,7 +765,7 @@ class lines(linesBase):
         self.route_lines_to_sfr(sfrlinework=self.sfr, route2reach1=route2reach1,
                    trim_buffer=trim_buffer, routing_tol=routing_tol)
         return self.to_sfr(starting_reachID=self.sfr.reachID.max()+1,
-                    roughness=roughness, streambed_thickness=streambed_thickness, streambedK=streambedK,
+                    rouchch=roughch, strthick=strthick, strhc1=strhc1,
                     icalc=icalc,
                     iupseg=iupseg, iprior=iprior, nstrpts=nstrpts, flow=flow, runoff=runoff, etsw=etsw, pptsw=pptsw,
                     roughch=roughch, roughbk=roughbk, cdepth=cdepth, fdepth=fdepth, awdth=awdth, bwdth=bwdth)
@@ -961,10 +966,10 @@ class lines(linesBase):
 
 
     def to_sfr(self, starting_reachID=1,
-               roughness=0.037, streambed_thickness=1, streambedK=1,
+               roughch=0.037, strthick=1., strhc1=1,
                icalc=1,
                iupseg=0, iprior=0, nstrpts=0, flow=0, runoff=0, etsw=0, pptsw=0,
-               roughch=0, roughbk=0, cdepth=0, fdepth=0, awdth=0, bwdth=0,
+               roughbk=0, cdepth=0, fdepth=0, awdth=0, bwdth=0,
                tol=0.01):
         """Convert linework to SFR input.
 
@@ -1024,17 +1029,17 @@ class lines(linesBase):
         m1['width'] = width * self.mf_units_mult
         m1['length'] = m1.length * self.mf_units_mult
 
-        m1['roughness'] = roughness
-        m1['sbthick'] = streambed_thickness
-        m1['sbK'] = streambedK
-        m1['sbtop'] = 0
+        m1['roughch'] = float(roughch)
+        m1['strthick'] = float(strthick)
+        m1['strhc1'] = float(strhc1)
+        m1['strtop'] = 0.
 
         if self.nrow is not None:
-            m1['row'] = np.floor(m1.node / self.ncol).astype(int)
+            m1['i'] = np.floor(m1.node / self.ncol).astype(int)
         if self.ncol is not None:
-            column = m1.node.values % self.ncol
-            m1['column'] = column
-        m1['layer'] = 0
+            j = m1.node.values % self.ncol
+            m1['j'] = column
+        m1['k'] = 0
 
         print("\nsetting up Mat2...")
         ta = time.time()
