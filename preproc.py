@@ -206,6 +206,7 @@ class NHDdata(object):
 
     def __init__(self, NHDFlowline=None, PlusFlowlineVAA=None, PlusFlow=None, NHDFcode=None,
                  elevslope=None,
+                 elevup_col=None, elevdn_col=None, routing_col=None,
                  mf_grid=None, mf_grid_node_col=None,
                  nrows=None, ncols=None,
                  mfdis=None, xul=None, yul=None, rot=0, sr=None,
@@ -354,6 +355,48 @@ class NHDdata(object):
                     self.domain_filter = None
                 self.__dict__[attr] = shp2df(input, filter=self.domain_filter)
 
+        # set the indices
+        for attr in ['fl', 'pfvaa', 'elevs']:
+            if attr == 'elevs' and elevslope is None:
+                continue
+            comid_col = [c for c in self.__dict__[attr].columns
+                         if c.lower() == 'comid'][0]
+            self.__dict__[attr][comid_col] = self.__dict__[attr][comid_col].astype(int)
+            if not self.__dict__[attr].index.name == comid_col:
+                self.__dict__[attr].index = self.__dict__[attr][comid_col]
+
+        # create a working dataframe
+        self.df = self.fl[self.fl_cols].join(self.pfvaa[self.pfvaa_cols], how='inner')
+
+        # elevations already supplied in flowlines file
+        if elevslope is None:
+            if elevdn_col in self.fl.columns and elevup_col in self.fl.columns:
+                self.elevs = self.fl[[elevup_col, elevdn_col]]
+                self.elevs.rename(columns={elevdn_col: 'Min',
+                                           elevup_col: 'Max'}, inplace=True)
+            else:
+                print('No elevslope.dbf file(s) or up/down elevations columns supplied!')
+        else: # bring in elevations from elevslope.dbf
+            # convert the elevations from elevslope table
+            self.elevs['Max'] = self.elevs.MAXELEVSMO * self.convert_elevslope_to_model_units[self.mf_units]
+            self.elevs['Min'] = self.elevs.MINELEVSMO * self.convert_elevslope_to_model_units[self.mf_units]
+        self.df = self.df.join(self.elevs[['Max', 'Min']], how='inner')
+        self.df.rename(columns={'Max': 'elevup', 'Min': 'elevdn'}, inplace=True)
+
+        # routing information provided in flowlines file
+        if PlusFlow is None:
+            if routing_col in self.fl.columns:
+                graph = dict(zip(self.fl.index, self.fl[routing_col]))
+                graph_r = {}
+                allcomids = set(self.fl[routing_col].tolist() + self.fl.index.tolist())
+                for toid in allcomids:
+                    frmids = [k for k, v in graph.items() if v == toid]
+                    graph_r[toid] = frmids
+                self.df['dncomids'] = [[graph[c]] for c in self.df.index]
+                self.df['upcomids'] = [graph_r[c] for c in self.df.index]
+            else:
+                print('No PlusFlow.dbf file(s) or routing column supplied!')
+
         # sort and pair down the grid
         if mf_grid_node_col is not None:
             self.grid.sort_values(by=mf_grid_node_col, inplace=True)
@@ -362,14 +405,6 @@ class NHDdata(object):
             self.grid.index = self.grid[mf_grid_node_col].values
         else:
             warnings.warn(NodeIndexWarning(mf_grid))
-
-        # set the indices
-        for attr in ['fl', 'pfvaa', 'elevs']:
-            comid_col = [c for c in self.__dict__[attr].columns
-                         if c.lower() == 'comid'][0]
-            self.__dict__[attr][comid_col] = self.__dict__[attr][comid_col].astype(int)
-            if not self.__dict__[attr].index.name == comid_col:
-                self.__dict__[attr].index = self.__dict__[attr][comid_col]
 
         # first check that grid is in projected units
         if self.mf_grid_proj4.split('proj=')[1].split()[0].strip() == 'longlat':
@@ -386,18 +421,18 @@ class NHDdata(object):
                              else 1.0
         self.to_km = 0.001 if self.GISunits == 'm' else 0.001 * 0.3048
 
-        # convert the elevations from elevslope table
-        self.elevs['Max'] = self.elevs.MAXELEVSMO * self.convert_elevslope_to_model_units[self.mf_units]
-        self.elevs['Min'] = self.elevs.MINELEVSMO * self.convert_elevslope_to_model_units[self.mf_units]
+
 
         if different_projections(self.fl_proj4, self.mf_grid_proj4):
             print("reprojecting NHDFlowlines from\n{}\nto\n{}...".format(self.fl_proj4, self.mf_grid_proj4))
-            self.fl['geometry'] = projectdf(self.fl, self.fl_proj4, self.mf_grid_proj4)
+            self.df['geometry'] = project(self.df.geometry, self.fl_proj4, self.mf_grid_proj4)
 
         if model_domain is not None \
                 and different_projections(self.domain_proj4, self.mf_grid_proj4):
             print("reprojecting model domain from\n{}\nto\n{}...".format(self.domain_proj4, self.mf_grid_proj4))
             self.domain = project(self.domain, self.domain_proj4, self.mf_grid_proj4)
+
+
 
     def list_updown_comids(self):
         print('getting routing information from NHDPlus Plusflow table...')
@@ -455,23 +490,19 @@ class NHDdata(object):
             self.df.set_value(i, 'dncomids', dncomid)
 
         # assign upsegs and outsegs based on NHDPlus routing
-        self.df['upsegs'] = [[self.df.segment[c] if c != 0 else 0 for c in comids] for comids in self.df.upcomids]
-        self.df['dnsegs'] = [[self.df.segment[c] if c != 0 else 0 for c in comids] for comids in self.df.dncomids]
+        segments = dict(zip(self.df.index, self.df.segment))
+        #self.df['upsegs'] = [[self.df.segment[c] if c != 0 else 0 for c in comids] for comids in self.df.upcomids]
+        #self.df['dnsegs'] = [[self.df.segment[c] if c != 0 else 0 for c in comids] for comids in self.df.dncomids]
+        self.df['upsegs'] = [[segments.get(c, 0) for c in comids] for comids in self.df.upcomids]
+        self.df['dnsegs'] = [[segments.get(c, 0) for c in comids] for comids in self.df.dncomids]
 
         # make a column of outseg integers
         self.df['outseg'] = [d[0] for d in self.df.dnsegs]
 
     def to_sfr(self, roughch=0.037, strthick=1, strhc1=1,
-               icalc=1, minimum_length=1.,
+               icalc=1, minimum_length=1., one_reach_per_cell=False,
                iupseg=0, iprior=0, nstrpts=0, flow=0, runoff=0, etsw=0, pptsw=0,
                roughbk=0, cdepth=0, fdepth=0, awdth=0, bwdth=0):
-
-        # create a working dataframe
-        self.df = self.fl[self.fl_cols].join(self.pfvaa[self.pfvaa_cols], how='inner')
-
-        # bring in elevations from elevslope table
-        self.df = self.df.join(self.elevs[['Max', 'Min']], how='inner')
-        self.df.rename(columns={'Max': 'elevup', 'Min': 'elevdn'}, inplace=True)
 
         print('\nclipping flowlines to active area... (may take awhile for active area polygons with many vertices)')
         # this step is slow for domains with many vertices
@@ -479,7 +510,7 @@ class NHDdata(object):
         # would be ideal to discard this step and intersect directly with grid using rtree
         ta = time.time()
         inside = np.array([g.intersects(self.domain) for g in self.df.geometry])
-        self.df = self.df.ix[inside].copy()
+        self.df = self.df.loc[inside].copy()
         self.df.sort_values(by='COMID', inplace=True)
         flowline_geoms = [g.intersection(self.domain) for g in self.df.geometry]
         grid_geoms = self.grid.geometry.tolist()
@@ -490,7 +521,8 @@ class NHDdata(object):
 
         print("setting up segments... (may take a few minutes for large networks)")
         ta = time.time()
-        self.list_updown_comids()
+        if 'upcomids' not in self.df.columns or 'dncomids' not in self.df.columns:
+            self.list_updown_comids()
         self.assign_segments()
         fl_segments = self.df.segment.tolist()
         fl_comids = self.df.COMID.tolist()
@@ -522,7 +554,6 @@ class NHDdata(object):
         m1['roughch'] = float(roughch)
         m1['strthick'] = float(strthick)
         m1['strhc1'] = float(strhc1)
-        m1['strtop'] = 0.
 
         if self.nrow is not None:
             m1['i'] = np.floor(m1.node / self.ncol).astype(int)
@@ -544,15 +575,29 @@ class NHDdata(object):
         self.m2['width1'] = self.m1.groupby('segment')['width'].min().values
         print("finished in {:.2f}s\n".format(time.time() - ta))
 
+        self.m1['strtop'] = self.interpolate_to_reaches('elevup', 'elevdn')
+
+        # add outseg information to Mat1; write shapefile prior to dropping reaches
+        self.m1.sort_values(by=['segment', 'reach'], inplace=True)
+        self.m1['ReachID'] = np.arange(1, len(self.m1) + 1)
+        self.set_outreaches()  # fixes any reach numbering gaps first
+        graph = self.make_graph()
+        self.m1['outseg'] = [graph[s] for s in self.m1.segment]
+        self.write_linework_shapefile('temp/all_reaches.shp')
+
         # discard very small reaches; redo numbering
-        print('\nDropping reaches with length < {:.2f}'.format(minimum_length))
-        self.m1 = self.m1.loc[self.m1.length > minimum_length].copy()
+        inds = self.m1.length > minimum_length
+        print('\nDropping {} reaches with length < {:.2f} ...'.format(np.sum(~inds), minimum_length))
+        self.m1 = self.m1.loc[inds].copy()
+
+        # handle co-located reaches
+        self.m1 = consolidate_conductance(self.m1, keep_only_dominant=one_reach_per_cell)
 
         # patch the routing
         print('\nRepairing routing connections...')
         remaining_segments = self.m1.segment.unique()
 
-        old_graph = self.make_graph()
+        old_graph = graph#self.make_graph()
         paths = self.paths(old_graph)
         new_graph = {}
         for k in remaining_segments:
@@ -589,6 +634,41 @@ class NHDdata(object):
 
     def paths(self, graph):
         return {seg: find_path(graph, seg) for seg in graph.keys()}
+
+    def interpolate_to_reaches(self, segvar1, segvar2):
+        """Interpolate values in mat2 (segment data) to reaches in mat1 (reach data)
+
+        Parameters
+        ----------
+        segvar1 : str
+            Column/variable name in segment_data array for representing start of segment
+            (e.g. elevup)
+        segvar2 : str
+            Column/variable name in segment_data array for representing start of segment
+            (e.g. elevdn)
+
+        Returns
+        -------
+        reach_values : 1D array
+            One dimmensional array of interpolated values of same length as mat1.
+            For example, elevup and elevdn could be entered as inputs to get values for the
+            strtop column in reach_data.
+
+        """
+        reach_data = self.m1.sort_values(by=['segment', 'reach'])
+        segment_data = self.m2.sort_values(by='segment')
+        var1 = dict(zip(segment_data.segment, segment_data[segvar1]))
+        var2 = dict(zip(segment_data.segment, segment_data[segvar2]))
+        reach_values = []
+        for seg in segment_data.segment:
+            reaches = reach_data.loc[reach_data.segment == seg]
+            segment_length = np.cumsum(reaches.length.values)[-1]
+            # compute cumulative distance at midpoint of each reach
+            dist = (np.cumsum(reaches.length) - 0.5 * reaches.length).values
+            fp = [var1[seg], var2[seg]]
+            xp = [0, segment_length]
+            reach_values += np.interp(dist, xp, fp).tolist()
+        return np.array(reach_values)
 
     def renumber_segments(self):
         """Renumber segments so that segment numbering is continuous and always increases
@@ -709,13 +789,14 @@ class NHDdata(object):
         basename: string
             Output will be written to <basename>.shp
         """
-        print("writing reach geometries to {}".format(basename+'.shp'))
+        outfile = basename.replace('.shp', '') + '.shp'
+        print("writing reach geometries to {}".format(outfile))
         cols = self.output_cols + ['geometry']
         for ind in ['i', 'j']:
             if ind not in self.m1.columns:
                 cols.remove(ind)
         df2shp(self.m1[cols],
-               basename+'.shp', proj4=self.mf_grid_proj4)
+               outfile, proj4=self.mf_grid_proj4)
 
 
 class lines(linesBase):
@@ -1150,6 +1231,64 @@ def _get_outlets(segment_seguences_array):
             else i + 1
             for i, r in enumerate(segment_seguences_array.T)}
 
+
+def consolidate_conductance(m1, keep_only_dominant=False, strhc1_min=1e-8):
+    """For model cells with multiple SFR reaches, shift all conductance to widest reach,
+    by adjusting the length, and setting the lengths in all smaller collocated reaches to 1,
+    and the K-values in these to bedKmin
+
+    Parameters
+    ----------
+
+    strhc1_min : float
+        Hydraulic conductivity value to use for collocated SFR reaches in a model cell that are not the dominant
+        (widest) reach. This is used to effectively set conductance in these reaches to 0, to avoid circulation
+        of water between the collocated reaches.
+
+    Returns
+    -------
+        Modifies the SFR Mat1 table dataframe attribute of the SFRdata object. A new SFR package file can be
+        written from this table.
+
+    Notes
+    -----
+        See the ConsolidateConductance notebook in the Notebooks folder.
+    """
+    print('Assigning total SFR conductance to dominant reach in cells with multiple reaches...')
+    m1['line_len'] = m1.length
+    m1['cond'] = m1.width * m1.length * m1.strhc1 / m1.strthick
+
+    # make a new column that designates whether a reach is dominant in each cell
+    # dominant reaches include those not collocated with other reaches, and the longest collocated reach
+    m1['Dominant'] = [True] * len(m1)
+
+    for c, nreaches in m1.node.value_counts().iteritems():
+        # this is apparently nearly twice as fast as
+        # a vectorized approach on all of m1.
+        # apparently because it only operates on collocated reaches
+        if nreaches > 1:
+            # select the collocated reaches for this cell
+            df = m1[m1.node == c].sort_values(by='width', ascending=False)
+
+            # set all of these reaches except the largest to not Dominant
+            m1.loc[df.index[1:], 'Dominant'] = False
+
+    # Sum up the conductances for all of the collocated reaches
+    # returns a series of conductance sums by model cell, put these into a new column in Mat1
+    Cond_sums = m1[['node', 'cond']].groupby('node').agg('sum').cond
+    m1['Cond_sum'] = [Cond_sums[c] for c in m1.node]
+
+    # Calculate a new length for widest reaches, set length in secondary collocated reaches to 1
+    # also set the K values in the secondary cells to bedKmin
+    m1['length'] = 1.
+    m1d = m1.loc[m1.Dominant]
+    m1.loc[m1.Dominant, 'length'] = m1d.Cond_sum * m1d.strthick / (m1d.strhc1 * m1d.width)
+    m1.loc[~m1.Dominant, 'strhc1'] = strhc1_min
+    if keep_only_dominant:
+        print('Dropping {} non-dominant reaches...'.format(np.sum(~m1.Dominant)))
+        return m1.loc[m1.Dominant].copy()
+    return m1
+
 def create_reaches(part, segment_nodes, grid_geoms, tol=0.01):
     """Creates SFR reaches for a segment by ordering model cells intersected by a LineString
 
@@ -1174,21 +1313,21 @@ def create_reaches(part, segment_nodes, grid_geoms, tol=0.01):
     reach_nodes = {}
     reach_geoms = {}
     # interesct flowline part with grid nodes
-    reach_intersections = [part.intersection(grid_geoms[c]) for c in segment_nodes]
-    reach_intersections = [g for g in reach_intersections if g.length > 0] #drops points and empty geometries
+    reach_intersections = {c: part.intersection(grid_geoms[c]) for c in segment_nodes}
+    reach_intersections = {c:g for c, g in reach_intersections.items() if g.length > 0} #drops points and empty geometries
     # empty geometries are created when segment_nodes variable includes nodes intersected by
     # other parts of a multipart line. Not sure what causes points besides duplicate vertices.
 
     # "flatten" all grid cell intersections to single part geometries
     n = 1
-    for i, g in enumerate(reach_intersections):
+    for node, g in reach_intersections.items():
         if g.type == 'LineString':
-            reach_nodes[n] = segment_nodes[i]
+            reach_nodes[n] = node
             reach_geoms[n] = g
             n += 1
         else:
             geoms = [gg for gg in g.geoms if gg.type == 'LineString']
-            reach_nodes.update({n+nn: segment_nodes[i] for nn, gg in enumerate(geoms)})
+            reach_nodes.update({n+nn: node for nn, gg in enumerate(geoms)})
             reach_geoms.update({n+nn: gg for nn, gg in enumerate(geoms)})
             n += len(geoms)
 
