@@ -206,7 +206,7 @@ class NHDdata(object):
 
     def __init__(self, NHDFlowline=None, PlusFlowlineVAA=None, PlusFlow=None, NHDFcode=None,
                  elevslope=None,
-                 elevup_col=None, elevdn_col=None, routing_col=None,
+                 elevup_col=None, elevdn_col=None, routing_col=None, arbolate_sum_col=None,
                  mf_grid=None, mf_grid_node_col=None,
                  nrows=None, ncols=None,
                  mfdis=None, xul=None, yul=None, rot=0, sr=None,
@@ -361,6 +361,7 @@ class NHDdata(object):
                 continue
             comid_col = [c for c in self.__dict__[attr].columns
                          if c.lower() == 'comid'][0]
+            self.__dict__[attr].dropna(subset=[comid_col], axis=0, inplace=True)
             self.__dict__[attr][comid_col] = self.__dict__[attr][comid_col].astype(int)
             if not self.__dict__[attr].index.name == comid_col:
                 self.__dict__[attr].index = self.__dict__[attr][comid_col]
@@ -396,6 +397,10 @@ class NHDdata(object):
                 self.df['upcomids'] = [graph_r[c] for c in self.df.index]
             else:
                 print('No PlusFlow.dbf file(s) or routing column supplied!')
+
+        # arbolate sum information provided in flowlines file
+        if arbolate_sum_col is not None:
+            self.df['ArbolateSu'] = self.fl.loc[self.df.index, arbolate_sum_col]
 
         # sort and pair down the grid
         if mf_grid_node_col is not None:
@@ -500,7 +505,8 @@ class NHDdata(object):
         self.df['outseg'] = [d[0] for d in self.df.dnsegs]
 
     def to_sfr(self, roughch=0.037, strthick=1, strhc1=1,
-               icalc=1, minimum_length=1., one_reach_per_cell=False,
+               icalc=1, minimum_length=1.,
+               consolidate_conductance=False, one_reach_per_cell=False,
                iupseg=0, iprior=0, nstrpts=0, flow=0, runoff=0, etsw=0, pptsw=0,
                roughbk=0, cdepth=0, fdepth=0, awdth=0, bwdth=0):
 
@@ -577,21 +583,23 @@ class NHDdata(object):
 
         self.m1['strtop'] = self.interpolate_to_reaches('elevup', 'elevdn')
 
-        # add outseg information to Mat1; write shapefile prior to dropping reaches
+        # add outseg information to Mat1;
+        # make copy of original state prior to dropping any reaches
         self.m1.sort_values(by=['segment', 'reach'], inplace=True)
         self.m1['ReachID'] = np.arange(1, len(self.m1) + 1)
         self.set_outreaches()  # fixes any reach numbering gaps first
         graph = self.make_graph()
         self.m1['outseg'] = [graph[s] for s in self.m1.segment]
-        self.write_linework_shapefile('temp/all_reaches.shp')
+        self.m1_original_reaches = self.m1.copy()
 
         # discard very small reaches; redo numbering
         inds = self.m1.length > minimum_length
-        print('\nDropping {} reaches with length < {:.2f} ...'.format(np.sum(~inds), minimum_length))
+        print('Dropping {} reaches with length < {:.2f} ...'.format(np.sum(~inds), minimum_length))
         self.m1 = self.m1.loc[inds].copy()
 
         # handle co-located reaches
-        self.m1 = consolidate_conductance(self.m1, keep_only_dominant=one_reach_per_cell)
+        if consolidate_conductance or one_reach_per_cell:
+            self.m1 = consolidate_reach_conductances(self.m1, keep_only_dominant=one_reach_per_cell)
 
         # patch the routing
         print('\nRepairing routing connections...')
@@ -763,7 +771,7 @@ class NHDdata(object):
             outreach.append(nextrchid)
         self.m1['outreach'] = outreach
 
-    def write_tables(self, basename='SFR'):
+    def write_tables(self, basename='SFR', m1=None, m2=None):
         """Write tables with SFR reach (Mat1) and segment (Mat2) information out to csv files.
 
         Parameters
@@ -771,16 +779,21 @@ class NHDdata(object):
         basename: string
             e.g. Mat1 is written to <basename>Mat1.csv
         """
+        if m1 is None:
+            m1 = self.m1
+        if m2 is None:
+            m2 = self.m2
         m1_cols = self.output_cols
         m2_cols = ['segment', 'icalc', 'outseg', 'elevup', 'elevdn', 'width1', 'width2', 'comid']
         for ind in ['i', 'j']:
-            if ind not in self.m1.columns:
+            if ind not in m1.columns:
                 m1_cols.remove(ind)
         print("writing Mat1 to {0}{1}, Mat2 to {0}{2}".format(basename, 'Mat1.csv', 'Mat2.csv'))
-        self.m1[m1_cols].to_csv(basename + 'Mat1.csv', index=False)
-        self.m2[m2_cols].to_csv(basename + 'Mat2.csv', index=False)
+        m1[m1_cols].to_csv(basename + 'Mat1.csv', index=False)
+        m2[m2_cols].to_csv(basename + 'Mat2.csv', index=False)
 
-    def write_linework_shapefile(self, basename='SFR'):
+    def write_linework_shapefile(self, basename='SFR', m1=None,
+                                 output_cols=None):
         """Write a shapefile containing linework for each SFR reach,
         with segment, reach, model node number, and NHDPlus COMID attribute information
 
@@ -791,11 +804,16 @@ class NHDdata(object):
         """
         outfile = basename.replace('.shp', '') + '.shp'
         print("writing reach geometries to {}".format(outfile))
-        cols = self.output_cols + ['geometry']
+        if m1 is None:
+            m1 = self.m1
+        if output_cols is None:
+            output_cols = self.output_cols
+        if 'geometry' not in output_cols:
+            output_cols += ['geometry']
         for ind in ['i', 'j']:
-            if ind not in self.m1.columns:
-                cols.remove(ind)
-        df2shp(self.m1[cols],
+            if ind not in m1.columns:
+                output_cols.remove(ind)
+        df2shp(m1[output_cols],
                outfile, proj4=self.mf_grid_proj4)
 
 
@@ -1232,7 +1250,7 @@ def _get_outlets(segment_seguences_array):
             for i, r in enumerate(segment_seguences_array.T)}
 
 
-def consolidate_conductance(m1, keep_only_dominant=False, strhc1_min=1e-8):
+def consolidate_reach_conductances(m1, keep_only_dominant=False, strhc1_min=1e-8):
     """For model cells with multiple SFR reaches, shift all conductance to widest reach,
     by adjusting the length, and setting the lengths in all smaller collocated reaches to 1,
     and the K-values in these to bedKmin
@@ -1254,7 +1272,7 @@ def consolidate_conductance(m1, keep_only_dominant=False, strhc1_min=1e-8):
     -----
         See the ConsolidateConductance notebook in the Notebooks folder.
     """
-    print('Assigning total SFR conductance to dominant reach in cells with multiple reaches...')
+    print('\nAssigning total SFR conductance to dominant reach in cells with multiple reaches...')
     m1['line_len'] = m1.length
     m1['cond'] = m1.width * m1.length * m1.strhc1 / m1.strthick
 
