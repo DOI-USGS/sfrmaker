@@ -1250,7 +1250,7 @@ def _get_outlets(segment_seguences_array):
             for i, r in enumerate(segment_seguences_array.T)}
 
 
-def consolidate_reach_conductances(m1, keep_only_dominant=False, strhc1_min=1e-8):
+def consolidate_reach_conductances(m1, keep_only_dominant=False):
     """For model cells with multiple SFR reaches, shift all conductance to widest reach,
     by adjusting the length, and setting the lengths in all smaller collocated reaches to 1,
     and the K-values in these to bedKmin
@@ -1273,7 +1273,7 @@ def consolidate_reach_conductances(m1, keep_only_dominant=False, strhc1_min=1e-8
         See the ConsolidateConductance notebook in the Notebooks folder.
     """
     print('\nAssigning total SFR conductance to dominant reach in cells with multiple reaches...')
-    m1['line_len'] = m1.length
+    #m1['line_len'] = m1.length
     m1['cond'] = m1.width * m1.length * m1.strhc1 / m1.strthick
 
     # make a new column that designates whether a reach is dominant in each cell
@@ -1298,10 +1298,12 @@ def consolidate_reach_conductances(m1, keep_only_dominant=False, strhc1_min=1e-8
 
     # Calculate a new length for widest reaches, set length in secondary collocated reaches to 1
     # also set the K values in the secondary cells to bedKmin
-    m1['length'] = 1.
+    #m1['length'] = 1.
     m1d = m1.loc[m1.Dominant]
-    m1.loc[m1.Dominant, 'length'] = m1d.Cond_sum * m1d.strthick / (m1d.strhc1 * m1d.width)
-    m1.loc[~m1.Dominant, 'strhc1'] = strhc1_min
+    #m1.loc[m1.Dominant, 'length'] = m1d.Cond_sum * m1d.strthick / (m1d.strhc1 * m1d.width)
+    #m1.loc[~m1.Dominant, 'strhc1'] = strhc1_min
+    m1.loc[m1.Dominant, 'strhc1'] = m1d.Cond_sum * m1d.strthick / (m1d.length * m1d.width)
+    m1.loc[~m1.Dominant, 'strhc1'] = 0.
     if keep_only_dominant:
         print('Dropping {} non-dominant reaches...'.format(np.sum(~m1.Dominant)))
         return m1.loc[m1.Dominant].copy()
