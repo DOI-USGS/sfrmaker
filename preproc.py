@@ -544,10 +544,14 @@ class NHDdata(object):
         lengths = m1[['segment', 'length']].copy()
         groups = lengths.groupby('segment')
         # compute arbolate sum at reach midpoints
-        reach_asums = np.concatenate([np.cumsum(grp.length.values[::-1])[::-1] - 0.5*grp.length.values
+        # verify that self.df and m1 are still in the same order
+        assert np.sum(groups.segment.max().values - self.df.segment.values) == 0
+        reach_cumsums = np.concatenate([np.cumsum(grp.length.values[::-1])[::-1] - 0.5*grp.length.values
                                       for s, grp in groups])
         segment_asums = np.array([self.df.ArbolateSu.values[s-1] for s in m1.segment.values])
-        reach_asums = -1 * self.to_km * reach_asums + segment_asums # arbolate sums are computed in km
+        reach_asums = -1 * self.to_km * reach_cumsums + segment_asums # arbolate sums are computed in km
+        # maintain positive asums; lengths in NHD often aren't exactly equal to feature lengths
+        reach_asums[reach_asums < 0.] = 0
         m1['asum'] = reach_asums
         width = width_from_arbolate(reach_asums) # widths are returned in m
         if self.GISunits != 'm':
@@ -726,7 +730,7 @@ class NHDdata(object):
         self.m2['segment'] = [r.get(s, s) for s in self.m2.segment]
         self.m2['outseg'] = [r.get(s, s) for s in self.m2.outseg]
         self.m2.sort_values(by='segment', inplace=True)
-        inds = (outseg > 0) & (nseg > outseg)
+        inds = (self.m2.outseg > 0) & (self.m2.segment > self.m2.outseg)
         assert not np.any(inds)
         assert len(self.m2.segment) == self.m2.segment.max()
 
