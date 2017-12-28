@@ -478,6 +478,8 @@ class NHDdata(object):
             if len(in_index) > 0:
                 df = self.df.loc[r.dncomids].sort_values(by='elevdn')
                 dncomid = [df.COMID.values[0]]
+            else:
+                dncomid = [0]
             '''
             if len(in_index) > 0:
                 levelpath_matches = self.df.loc[r.dncomids, 'LevelPathI'].values == r.LevelPathI
