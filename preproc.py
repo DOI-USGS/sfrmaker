@@ -13,6 +13,9 @@ import GISops
 
 class linesBase(object):
 
+    output_cols = ['node', 'k', 'i', 'j', 'segment', 'reach', 'strtop', 'width', 'length', 'strthick',
+                   'strhc1', 'roughch', 'asum', 'reachID', 'outreach', 'comid']
+
     def __init__(self, lines=None,
                  mf_grid=None, mf_grid_node_col=None,
                  nrows=None, ncols=None,
@@ -161,7 +164,7 @@ class linesBase(object):
         self.m1['segment'] = [r.get(s, s) for s in self.m1.segment]
         self.m1['outseg'] = [r.get(s, s) for s in self.m1.outseg]
 
-    def write_tables(self, basename='SFR'):
+    def write_tables(self, basename='SFR', m1=None, m2=None):
         """Write tables with SFR reach (Mat1) and segment (Mat2) information out to csv files.
 
         Parameters
@@ -169,17 +172,19 @@ class linesBase(object):
         basename: string
             e.g. Mat1 is written to <basename>Mat1.csv
         """
-        m1_cols = ['node', 'layer', 'segment', 'reach', 'strtop', 'width', 'length', 'strthick',
-                   'strhc1', 'roughch', 'asum', 'reachID']
-        m2_cols = ['segment', 'icalc', 'outseg', 'elevup', 'elevdn']
-        if self.nrow is not None:
-            m1_cols.insert(1, 'row')
-
-        if self.ncol is not None:
-            m1_cols.insert(2, 'column')
+        #m2_cols = ['segment', 'icalc', 'outseg', 'elevup', 'elevdn']
+        if m1 is None:
+            m1 = self.m1
+        if m2 is None:
+            m2 = self.m2
+        m1_cols = self.output_cols
+        m2_cols = ['segment', 'icalc', 'outseg', 'elevup', 'elevdn', 'width1', 'width2', 'comid']
+        for ind in ['i', 'j']:
+            if ind not in m1.columns:
+                m1_cols.remove(ind)
         print("writing Mat1 to {0}{1}, Mat2 to {0}{2}".format(basename, 'Mat1.csv', 'Mat2.csv'))
-        self.m1[m1_cols].to_csv(basename + 'Mat1.csv', index=False)
-        self.m2[m2_cols].to_csv(basename + 'Mat2.csv', index=False)
+        m1[m1_cols].to_csv(basename + 'Mat1.csv', index=False)
+        m2[m2_cols].to_csv(basename + 'Mat2.csv', index=False)
 
     def write_linework_shapefile(self, basename='SFR'):
         """Write a shapefile containing linework for each SFR reach,
@@ -870,10 +875,10 @@ class lines(linesBase):
         self.route_lines_to_sfr(sfrlinework=self.sfr, route2reach1=route2reach1,
                    trim_buffer=trim_buffer, routing_tol=routing_tol)
         return self.to_sfr(starting_reachID=self.sfr.reachID.max()+1,
-                    rouchch=roughch, strthick=strthick, strhc1=strhc1,
+                    roughch=roughch, strthick=strthick, strhc1=strhc1,
                     icalc=icalc,
                     iupseg=iupseg, iprior=iprior, nstrpts=nstrpts, flow=flow, runoff=runoff, etsw=etsw, pptsw=pptsw,
-                    roughch=roughch, roughbk=roughbk, cdepth=cdepth, fdepth=fdepth, awdth=awdth, bwdth=bwdth)
+                    roughbk=roughbk, cdepth=cdepth, fdepth=fdepth, awdth=awdth, bwdth=bwdth)
 
     def get_end_elevs_from_dem(self, dem):
 
@@ -1150,11 +1155,61 @@ class lines(linesBase):
         ta = time.time()
         write_columns = list(set(['segment', 'outseg', 'outreachID', 'elevup', 'elevdn'])\
                              .intersection(set(self.df.columns)))
-        m2 = self.df[write_columns].copy()
-        m2['icalc'] = icalc
-        m2.index = m2.segment
+        self.m2 = self.df[write_columns].copy()
+        self.m2['icalc'] = icalc
+        self.m2.index = self.m2.segment
         print("finished in {:.2f}s\n".format(time.time() - ta))
 
+        self.m1 = m1
+        self.m1.sort_values(by=['segment', 'reach'], inplace=True)
+        self.m1['ReachID'] = np.arange(1, len(self.m1) + 1)
+        self.set_outreaches()  # fixes any reach numbering gaps first
+        graph = self.make_graph()
+        self.m1['outseg'] = [graph[s] for s in self.m1.segment]
+        self.m1_original_reaches = self.m1.copy()
+
+        # discard very small reaches; redo numbering
+        inds = self.m1.length > minimum_length
+        print('Dropping {} reaches with length < {:.2f} ...'.format(np.sum(~inds), minimum_length))
+        self.m1 = self.m1.loc[inds].copy()
+
+        # handle co-located reaches
+        if consolidate_conductance or one_reach_per_cell:
+            self.m1 = consolidate_reach_conductances(self.m1, keep_only_dominant=one_reach_per_cell)
+
+        # patch the routing
+        print('\nRepairing routing connections...')
+        remaining_segments = self.m1.segment.unique()
+
+        old_graph = graph  # self.make_graph()
+        paths = self.paths(old_graph)
+        new_graph = {}
+        for k in remaining_segments:
+            for s in paths[k][1:]:
+                if s in remaining_segments:
+                    new_graph[k] = s
+                    break
+                else:
+                    new_graph[k] = 0
+
+        # sync m2 with m1; update the routing
+        remaining = np.array([True if s in remaining_segments else False
+                              for s in self.m2.segment.values])
+        self.m2 = self.m2.loc[remaining].copy()
+        self.m2['outseg'] = [new_graph[s] for s in self.m2.segment]
+
+        # renumber the segments to be consecutive
+        self.renumber_segments()  # enforce best segment numbering
+        self.m1.sort_values(by=['segment', 'reach'], inplace=True)
+        self.m1['ReachID'] = np.arange(1, len(self.m1) + 1)
+        self.set_outreaches()  # fixes any reach numbering gaps first
+        graph = self.make_graph()
+
+        # add outseg information to Mat1
+        self.m1['outseg'] = [graph[s] for s in self.m1.segment]
+
+        print('\nDone creating SFR dataset.')
+        '''
         # add outseg information to Mat1
         m1['outseg'] = [m2.outseg[s] for s in m1.segment]
         m1.sort_values(by=['segment', 'reach'], inplace=True)
@@ -1163,7 +1218,8 @@ class lines(linesBase):
         self.m2 = m2
         self.renumber_segments() # enforce best segment numbering
         print('\nDone creating SFR dataset.')
-        return m1, m2
+        '''
+        return self.m1, self.m2
 
 
         '''
