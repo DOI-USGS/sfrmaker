@@ -475,16 +475,30 @@ class NHDdata(object):
         # create segment numbers
         self.df['segment'] = np.arange(len(self.df)) + 1
 
+        # dncomids must all be lists
+        assert np.all([isinstance(c, list) for c in self.df.dncomids])
+
         # reduce dncomids to 1 per segment
-        braids = self.df[np.array([len(d) for d in self.df.dncomids]) > 1]
-        for i, r in braids.iterrows():
+        # divergences are where there is more than 1 dncomid
+        diverges = np.array([len(d) for d in self.df.dncomids]) > 1
+        diverging_dncomids = self.df.loc[diverges, 'dncomids'].tolist()
+        all_comids = set(self.df.index)
+        dncomids_at_divergences = []
+        #for i, r in divergences.iterrows():
+        # iterate through segments with a divergence and pick
+        # dncomid with lowest elevation
+        for dncomids in diverging_dncomids:
             # select the dncomid that has a matching levelpath
-            in_index = set(r.dncomids).intersection(set(self.df.index))
+            #in_index = set(r.dncomids).intersection(set(self.df.index))
+            in_index = set(dncomids).intersection(all_comids)
             if len(in_index) > 0:
-                df = self.df.loc[r.dncomids].sort_values(by='elevdn')
+                #df = self.df.loc[r.dncomids].sort_values(by='elevdn')
+                # sort dncomids list by elevation (ascending)
+                df = self.df.loc[dncomids].sort_values(by='elevdn')
                 dncomid = [df.COMID.values[0]]
             else:
                 dncomid = [0]
+            dncomids_at_divergences.append(dncomid)
             '''
             if len(in_index) > 0:
                 levelpath_matches = self.df.loc[r.dncomids, 'LevelPathI'].values == r.LevelPathI
@@ -499,13 +513,26 @@ class NHDdata(object):
             else:
                 dncomid = np.unique(in_same_levelpath).tolist()
             '''
-            self.df.set_value(i, 'dncomids', dncomid)
+            #self.df.set_value(i, 'dncomids', dncomid)
+        assert np.all([isinstance(c, list) for c in dncomids_at_divergences])
+        all_dncomids = self.df.dncomids.tolist()
+        for i, dncomid in enumerate(all_dncomids):
+            if diverges[i]:
+                all_dncomids[i] = dncomids_at_divergences.pop(0)
+        assert len(dncomids_at_divergences) == 0
+        #all_dncomids[diverges] = dncomids_at_divergences
+        self.df['dncomids'] = all_dncomids
+        #self.df.loc[diverges, 'dncomids'] = dncomids_at_divergences
+        assert np.all([isinstance(c, list) for c in df.dncomids.values])
 
         # assign upsegs and outsegs based on NHDPlus routing
         segments = dict(zip(self.df.index, self.df.segment))
         #self.df['upsegs'] = [[self.df.segment[c] if c != 0 else 0 for c in comids] for comids in self.df.upcomids]
         #self.df['dnsegs'] = [[self.df.segment[c] if c != 0 else 0 for c in comids] for comids in self.df.dncomids]
         self.df['upsegs'] = [[segments.get(c, 0) for c in comids] for comids in self.df.upcomids]
+        for comids in self.df.dncomids:
+            if not isinstance(comids, list):
+                break
         self.df['dnsegs'] = [[segments.get(c, 0) for c in comids] for comids in self.df.dncomids]
 
         # make a column of outseg integers
@@ -529,9 +556,6 @@ class NHDdata(object):
         grid_geoms = self.grid.geometry.tolist()
         print("finished in {:.2f}s\n".format(time.time() - ta))
 
-        print("intersecting flowlines with grid cells...") # this part crawls in debug mode
-        grid_intersections = GISops.intersect_rtree(grid_geoms, flowline_geoms)
-
         print("setting up segments... (may take a few minutes for large networks)")
         ta = time.time()
         if 'upcomids' not in self.df.columns or 'dncomids' not in self.df.columns:
@@ -540,6 +564,9 @@ class NHDdata(object):
         fl_segments = self.df.segment.tolist()
         fl_comids = self.df.COMID.tolist()
         print("finished in {:.2f}s\n".format(time.time() - ta))
+
+        print("intersecting flowlines with grid cells...") # this part crawls in debug mode
+        grid_intersections = GISops.intersect_rtree(grid_geoms, flowline_geoms)
 
         print("setting up reaches and Mat1... (may take a few minutes for large grids)")
         ta = time.time()
