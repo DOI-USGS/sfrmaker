@@ -523,7 +523,7 @@ class NHDdata(object):
         #all_dncomids[diverges] = dncomids_at_divergences
         self.df['dncomids'] = all_dncomids
         #self.df.loc[diverges, 'dncomids'] = dncomids_at_divergences
-        assert np.all([isinstance(c, list) for c in df.dncomids.values])
+        assert np.all([isinstance(c, list) for c in self.df.dncomids.values])
 
         # assign upsegs and outsegs based on NHDPlus routing
         segments = dict(zip(self.df.index, self.df.segment))
