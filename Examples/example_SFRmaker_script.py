@@ -32,7 +32,9 @@ ta = time.time()
 nhd = NHDdata(NHDFlowline=flowlines, PlusFlowlineVAA=pfvaa_files, PlusFlow=plusflow_files,
               elevslope=elevslope_files,
               mf_grid=mf_grid, mf_units='feet',
+              nrows=100, ncols=160,
               model_domain=mf_domain)
+
 # Setup the segments, reaches, and other basic SFR parameters
 nhd.to_sfr()
 
