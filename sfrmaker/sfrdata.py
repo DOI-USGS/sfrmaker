@@ -52,6 +52,7 @@ class sfrdata:
               'thts', 'thti', 'eps', 'uhc',
               'outreach', 'outseg', 'line_id',
               'asum', 'geometry']
+
     # order for columns in segment_data
     sdcols = ['nper', 'nseg', 'icalc', 'outseg', 'iupseg',
               'iprior', 'nstrpts',
@@ -82,7 +83,7 @@ class sfrdata:
         self.set_outreaches()
 
     @property
-    def model_units(self):
+    def model_length_units(self):
         """Computational lengths units of numerical model."""
         return self.grid.model_units
 
@@ -195,7 +196,23 @@ class sfrdata:
         """
 
     @staticmethod
-    def from_package(sfrpackagefile, grid):
+    def from_package(sfrpackagefile, grid, linework):
+        """Read SFR package file
+
+        Parameters
+        ----------
+        sfrpackagefile : file path
+            Modflow-2005 or MODFLOW6 SFR package
+        grid : sfrmaker.grid instance
+        linework : shapefile path or DataFrame
+            Contains linestrings for each reach; must have
+            segment and reach, or reach number (rno in MODFLOW 6)
+            information.
+
+        Returns
+        -------
+        sfrdata : sfrmaker.sfrdata instance
+        """
         pass
 
 
