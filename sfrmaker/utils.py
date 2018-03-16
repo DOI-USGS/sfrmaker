@@ -60,6 +60,36 @@ def consolidate_reach_conductances(rd, keep_only_dominant=False):
         return rd.loc[rd.Dominant].copy()
     return rd
 
+def pick_toids(routing, elevations):
+    """Reduce routing connections to one per ID (no divergences).
+    Select the downstream ID based on elevation, or first position in
+    downstream ID list.
+
+    Parameters
+    ----------
+    routing : dict
+        Dictionary of id ints (keys) and to_id lists (values).
+    elevations : dict
+        Dictionary of starting elevations (values) for each id (key)
+
+    Returns
+    -------
+    routing2 : dict
+        Same is input routing dictionary, except values have been
+        reduced from lists to integers identifying the downstream
+        connection.
+    """
+    print('\nPicking routing connections at divergences...')
+    ta = time.time()
+    routing2 = {}
+    for k, v in routing.items():
+        if isinstance(v, list):
+            elevs = [elevations.get(vv, 1e5) for vv in v]
+            routing2[k] = v[np.argmin(elevs)]
+        elif np.isscalar(v):
+            routing2[k] = v
+    print("finished in {:.2f}s\n".format(time.time() - ta))
+    return routing2
 
 def smooth_elevations(fromcomids, tocomids, elevup, elevdn):
     # make forward and reverse dictionaries with routing info
@@ -230,7 +260,8 @@ def make_graph(fromcomids, tocomids, one_to_many=True):
     """
     from collections import defaultdict
     fromcomids = np.array(fromcomids).astype(int)
-    tocomids = np.array(tocomids).astype(int)
+    # convert tocomids to ints regardless of (enclosing) dtypes
+    tocomids = [a.astype(int).tolist() for a in map(np.array, tocomids)]
     tuples = zip(fromcomids, tocomids)
     graph = defaultdict(set)
     for fromcomid, tocomid in tuples:
@@ -243,10 +274,92 @@ def make_graph(fromcomids, tocomids, one_to_many=True):
         return graph121
     return graph
 
+def renumber_segments(nseg, outseg):
+    """Renumber segments so that segment numbering is continuous, starts at 1, and always increases
+        in the downstream direction. Experience suggests that this can substantially speed
+        convergence for some models using the NWT solver.
+
+    Parameters
+    ----------
+    nseg : 1-D array
+        Array of segment numbers
+    outseg : 1-D array
+        Array of outsegs for segments in nseg.
+
+    Returns
+    -------
+    r : dict
+        Dictionary mapping old segment numbers (keys) to new segment numbers (values). r only
+        contains entries for number that were remapped.
+    """
+    def reassign_upsegs(r, nexts, upsegs):
+        nextupsegs = []
+        for u in upsegs:
+            r[u] = nexts if u > 0 else u # handle lakes
+            nexts -= 1
+            nextupsegs += list(nseg[outseg == u])
+        return r, nexts, nextupsegs
+
+    print('enforcing best segment numbering...')
+    # enforce that all outsegs not listed in nseg are converted to 0
+    # but leave lakes alone
+    r = {0: 0}
+    r.update({o: 0 for o in outseg if o > 0 and o not in nseg})
+    outseg = np.array([o if o in nseg or o < 0 else 0 for o in outseg])
+
+    # if reach data are supplied, segment/outseg pairs may be listed more than once
+    if len(nseg) != len(np.unique(nseg)):
+        d = dict(zip(nseg, outseg))
+        nseg, outseg = np.array(d.keys()), np.array(d.values())
+    ns = len(nseg)
+
+    nexts = ns
+    nextupsegs = nseg[outseg == 0]
+    for i in range(ns):
+        r, nexts, nextupsegs = reassign_upsegs(r, nexts, nextupsegs)
+        if len(nextupsegs) == 0:
+            break
+    return r
 
 def setup_reach_data(flowline_geoms, fl_comids, grid_intersections,
                      grid_geoms, tol=0.01):
+    """Create prelimnary stream reaches from lists of grid cell intersections
+    for each flowline.
 
+    Parameters
+    ----------
+    flowline_geoms : list of shapely LineStrings
+        LineStrings representing streams (e.g. read from a shapefile).
+    fl_comids : list of integers
+        List of unique ID numbers, one for each feature in
+        flowline_geoms.
+    grid_intersections : list of lists
+        A list of intersecting grid cell node numbers for
+        each feature in flowline_geoms and fl_comids.
+    grid_geoms : list of shapely Polygons
+        List of Polygons for each grid cell; each node number
+        in grid_intersections refers to a polygon in this list.
+    tol : float
+        Maximum distance for identifying a connecting reach. Routing will
+        not occur to reaches beyond this distance. This number should be small,
+        because the ends of consecutive reaches should be touching if they were
+        created via intersection with the model grid. (default 0.01)
+
+    Returns
+    -------
+    m1 : DataFrame of reaches (one row per reach), with the following columns:
+        reach : int
+            Reach number within a segment.
+        segment : int
+            Segment number.
+        node : int
+            Grid cell number.
+        line_id : int
+            Original ID number for the intersected line.
+        geometry : LineString
+            LineString representing the intersected reach.
+    """
+    print("\nSetting up reach data... (may take a few minutes for large grids)")
     ta = time.time()
     fl_segments = np.arange(1, len(flowline_geoms)+1)
     reach = []
@@ -289,25 +402,30 @@ def setup_reach_data(flowline_geoms, fl_comids, grid_intersections,
 
 
 def create_reaches(part, segment_nodes, grid_geoms, tol=0.01):
-    """Creates SFR reaches for a segment by ordering model cells intersected by a LineString
+    """Creates SFR reaches for a segment by ordering model cells
+    intersected by a LineString part. Reaches within a part are
+    ordered by proximity.
 
     Parameters
     ----------
     part: LineString
-        shapely LineString object (or a part of a MultiLineString)
-
+        Shapely LineString object (or a part of a MultiLineString)
     segment_nodes: list of integers
         Model node numbers intersected by *part*
-
     grid_geoms: list of Polygons
         List of shapely Polygon objects for the model grid cells, sorted by node number
+    tol : float
+        Maximum distance for identifying a connecting reach. Routing will
+        not occur to reaches beyond this distance. This number should be small,
+        because the ends of consecutive reaches should be touching if they were
+        created via intersection with the model grid. (default 0.01)
 
     Returns
     -------
     ordered_reach_geoms: list of LineStrings
-        List of LineString objects representing the SFR reaches for the segment
-
-    ordered_node_numbers: list of model cells containing the SFR reaches for the segment
+        List of LineString objects representing the SFR reaches for the segment.
+    ordered_node_numbers: list of ints
+        List of model cells containing the SFR reaches for the segment
     """
     reach_nodes = {}
     reach_geoms = {}
@@ -341,14 +459,7 @@ def create_reaches(part, segment_nodes, grid_geoms, tol=0.01):
 
     # for each flowline part (reach)
     for i in range(nreaches):
-        '''
         # find the next flowline part (reach) that touches the current reach
-        try:
-            r = [j for j, g in reach_geoms.items() if current_reach.intersects(g.buffer(tol))
-                ][0]
-        except:
-            pass
-        '''
         dist = {j: g.distance(current_reach) for j, g in reach_geoms.items()}
         dist_sorted = sorted(dist.items(), key=operator.itemgetter(1))
         r = dist_sorted[0][0]
@@ -359,7 +470,7 @@ def create_reaches(part, segment_nodes, grid_geoms, tol=0.01):
 
         if current_reach.touches(end.buffer(tol)) and len(ordered_node_numbers) == nreaches:
             break
-    assert len(ordered_node_numbers) == nreaches # new list of ordered node numbers must include all flowline parts
+    assert len(ordered_node_numbers) == nreaches  # new list of ordered node numbers must include all flowline parts
     return ordered_reach_geoms, ordered_node_numbers
 
 

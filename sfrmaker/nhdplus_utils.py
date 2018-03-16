@@ -70,7 +70,7 @@ def load_NHDPlus_v2(NHDFlowlines=None, PlusFlowlineVAA=None, PlusFlow=None, elev
     return df
 
 def get_tocomids(pf, fromcomid_list):
-    print('getting routing information from NHDPlus Plusflow table...')
+    print('\nGetting routing information from NHDPlus Plusflow table...')
     # setup local variables and cull plusflow table to comids in model
     comids = fromcomid_list
     pf = pf.loc[(pf.FROMCOMID.isin(comids)) |
