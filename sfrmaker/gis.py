@@ -155,7 +155,7 @@ def intersect_rtree(geom1, geom2):
         # test each feature inside the bounding box for intersection with the polygon geometry
         inds = [i for i in inds if geom1[i].intersects(poly)]
         isfr.append(inds)
-    print("\nfinished in {:.2f}s\n".format(time.time() - ta))
+    print("\nfinished in {:.2f}s".format(time.time() - ta))
     return isfr
 
 def intersect(geom1, geom2):
@@ -184,7 +184,7 @@ def intersect(geom1, geom2):
         intersects = np.array([r.intersects(g) for r in geom1])
         inds = list(np.arange(ngeom1)[intersects])
         isfr.append(inds)
-    print("\nfinished in {:.2f}s\n".format(time.time() - ta))
+    print("\nfinished in {:.2f}s".format(time.time() - ta))
     return isfr
 
 def parse_units_from_proj4(proj4_str):

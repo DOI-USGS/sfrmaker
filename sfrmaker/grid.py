@@ -26,9 +26,14 @@ class grid:
 
         self.df = df
         self.structured = structured
-        self.nlay = df.k.max() + 1
-        self.nrow = df.i.max() + 1
-        self.ncol = df.j.max() + 1
+        if structured:
+            self.nlay = df.k.max() + 1
+            self.nrow = df.i.max() + 1
+            self.ncol = df.j.max() + 1
+        else:
+            assert 'node' in df.columns, "Unstructured grids require node numbers."
+            self.nlay, self.nrow, self.ncol = None, None, None
+
         self.model_units = model_units
         self.crs = crs(epsg=epsg, proj4=proj4, prjfile=prjfile)
         if crs_units is not None:
@@ -84,6 +89,9 @@ class grid:
                 isactive = active[grid.node.values]
             geoms = grid.df.geometry.values[isactive]
             self._active_area = unary_union(geoms)
+
+    def get_node(self, k, i, j):
+        return k * self.nrow * self.ncol + i * self.ncol + j
 
     @staticmethod
     def from_sr(sr=None, epsg=None, proj4=None, prjfile=None):
@@ -154,6 +162,7 @@ class grid:
             # (this should also work for grids that are missing cells in a given layer;
             # as long as the cell is in at least one layer)
             df = df.groupby('node').first()
+            df['node'] = df.index # put node back in columns
             structured = True
 
         elif node_col in df.columns:
