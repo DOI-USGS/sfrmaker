@@ -72,7 +72,7 @@ class sfrdata:
         self.grid = grid
         self.structured = self.grid.structured
 
-        # assign and default values from kwargs
+        # assign default values from kwargs
         for k, v in kwargs.items():
             if k in self.rdcols:
                 self.reach_data[k] = kwargs.pop(k)
