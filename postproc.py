@@ -624,6 +624,9 @@ class SFRdata(object):
         self.m1['sbtop'] = self.dem_zstats['min'].values * self.dem_units_mult
         DEM_col_name = 'DEM{}'.format(stat)
         self.m1[DEM_col_name] = self.m1['sbtop'].values
+        groups = self.m1.groupby('segment')
+        self.m2['Max'] = groups.DEMmin.first().values
+        self.m2['Min'] = groups.DEMmin.last().values
         print('DEM {} elevations assigned to sbtop column in m1'.format(stat))
 
     def reset_segment_ends_from_dem(self):
