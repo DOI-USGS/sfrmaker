@@ -93,8 +93,8 @@ nhd.write_linework_shapefile(basename='{}/{}'.format(outdir, basename))
 print("preproc finished in {:.2f}s\n".format(time.time() - ta))
 
 # Mat 1 and Mat2 files generated from preproc.py above
-m1 = 'exampleMat1.csv'
-m2 = 'exampleMat2.csv'
+m1 = '{}/{}Mat1.csv'.format(outdir, basename)
+m2 = '{}/{}Mat2.csv'.format(outdir, basename)
 
 # Read in Mat1 and Mat2 into an SFRdata object (postproc module)
 # also include MODFLOW DIS file, NAM file, and path to model datasets
