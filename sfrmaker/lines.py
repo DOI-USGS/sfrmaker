@@ -7,7 +7,7 @@ import fiona
 from fiona.crs import to_string
 from shapely.ops import unary_union
 from shapely.geometry import box
-from .gis import shp2df, get_proj4, crs, read_feature, project
+from .gis import shp2df, get_proj4, crs, read_polygon_feature, project, get_bbox
 from . import grid
 from .utils import make_graph, find_path, unit_conversion, \
     pick_toids, width_from_arbolate_sum, arbolate_sum, \
@@ -123,7 +123,7 @@ class lines:
             If True, the attribute .df is modified;
             if False, a copy of .df is returned.
         """
-        feature = read_feature(feature, self.crs)
+        feature = read_polygon_feature(feature, self.crs)
 
         intersects = np.array([g.intersects(feature) for g in self.df.geometry])
         if inplace:
@@ -174,8 +174,14 @@ class lines:
         reach_data = setup_reach_data(stream_linework, id_list,
                                       grid_intersections, grid_polygons, tol=.001)
 
-        column_order = ['node', 'k', 'i', 'j', 'reachID',
-                        'reach', 'segment', 'line_id', 'geometry']
+        column_order = ['node', 'k', 'i', 'j', 'rno',
+                        'ireach', 'iseg', 'line_id', 'name', 'geometry']
+
+        # transfer names
+        names = dict(zip(self.df.id, self.df.name))
+        reach_data['name'] = [names[line_id] for line_id in reach_data.line_id]
+
+        # assign rows and columns from node
         if grid.structured:
             reach_data['k'] = 0
             reach_data['i'] = np.floor(reach_data.node / grid.ncol).astype(int)
@@ -203,14 +209,29 @@ class lines:
                        width_column='width',
                        up_elevation_column='elevup',
                        dn_elevation_column='elevdn',
+                       name_column='name',
                        length_units='m', height_units='m',
+                       filter=None,
                        epsg=None, proj4=None, prjfile=None):
+        """
+        Parameters
+        ----------
+
+        filter : tuple or str
+            Bounding box (tuple) or shapefile of model stream network area.
+        """
 
         if prjfile is None:
             prjfile = shapefile.replace('.shp', '.prj')
             prjfile = prjfile if os.path.exists(prjfile) else None
 
-        df = shp2df(shapefile)
+        shpfile_crs = crs(epsg=epsg, proj4=proj4, prjfile=prjfile)
+
+        # ensure that filter bbox is in same crs as flowlines
+        if filter is not None and not isinstance(filter, tuple):
+                filter = get_bbox(filter, shpfile_crs)
+
+        df = shp2df(shapefile, filter)
         assert 'geometry' in df.columns, "No feature geometries found in {}.".format(shapefile)
 
         return lines.from_dataframe(df,
@@ -220,6 +241,7 @@ class lines:
                                     width_column=width_column,
                                     up_elevation_column=up_elevation_column,
                                     dn_elevation_column=dn_elevation_column,
+                                    name_column=name_column,
                                     length_units=length_units, height_units=height_units,
                                     epsg=epsg, proj4=proj4, prjfile=prjfile)
 
@@ -232,6 +254,7 @@ class lines:
                        up_elevation_column='elevup',
                        dn_elevation_column='elevdn',
                        geometry_column='geometry',
+                       name_column='name',
                        length_units='m', height_units='m',
                        epsg=None, proj4=None, prjfile=None):
 
@@ -246,11 +269,12 @@ class lines:
                        arbolate_sum_column: 'asum',
                        width_column: 'width',
                        up_elevation_column: 'elevup',
-                       dn_elevation_column: 'elevdn'}
+                       dn_elevation_column: 'elevdn',
+                       name_column: 'name'}
 
         rename_cols = {k:v for k, v in rename_cols.items() if k in df.columns}
         df.rename(columns=rename_cols, inplace=True)
-        column_order = ['id', 'toid', 'asum', 'width', 'elevup', 'elevdn', 'geometry']
+        column_order = ['id', 'toid', 'asum', 'width', 'elevup', 'elevdn', 'name', 'geometry']
         for c in column_order:
             if c not in df.columns:
                 df[c] = 0
@@ -305,6 +329,7 @@ class lines:
 
         return lines.from_dataframe(df, id_column='COMID',
                                     routing_column='tocomid',
+                                    name_column='GNIS_NAME',
                                     length_units='m', height_units='m',
                                     epsg=epsg, proj4=proj4, prjfile=prjfile)
 
@@ -360,8 +385,8 @@ class lines:
 
         print("Computing widths...")
         # length in linework units (not model units)
-        rd['length'] = np.array([g.length for g in rd.geometry])
-        lengths = rd[['line_id', 'length']].copy() # length of each intersected line fragment
+        rd['rchlen'] = np.array([g.length for g in rd.geometry])
+        lengths = rd[['line_id', 'rchlen']].copy() # length of each intersected line fragment
         groups = lengths.groupby('line_id') # fragments grouped by parent line
 
         # compute arbolate sums for lines if they weren't provided
@@ -374,7 +399,7 @@ class lines:
 
         # compute arbolate sum at reach midpoints
         segment_asums = [asums[id] for id in lengths.line_id]
-        reach_cumsums = np.concatenate([np.cumsum(grp.length.values[::-1])[::-1] - 0.5*grp.length.values
+        reach_cumsums = np.concatenate([np.cumsum(grp.rchlen.values[::-1])[::-1] - 0.5*grp.rchlen.values
                                       for s, grp in groups])
         reach_asums = -1 * reach_cumsums + segment_asums
         # maintain positive asums; lengths in NHD often aren't exactly equal to feature lengths
@@ -385,7 +410,7 @@ class lines:
         width = width / self.to_m # convert back to original units
 
         # convert length and width to model units
-        rd['length'] *= mult
+        rd['rchlen'] *= mult
         rd['width'] = width * mult
 
         # discard very small reaches; redo numbering
@@ -396,7 +421,7 @@ class lines:
             mean_area = np.mean([g.area for g in cellgeoms])
             minimum_reach_length = np.sqrt(mean_area) * thresh
 
-        inds = rd.length > minimum_reach_length
+        inds = rd.rchlen > minimum_reach_length
         print('\nDropping {} reaches with length < {:.2f} {}...'.format(np.sum(~inds),
                                                                         minimum_reach_length,
                                                                         self.length_units))
@@ -429,17 +454,17 @@ class lines:
                     new_routing[k] = 0
 
         # map remaining_ids to segment numbers
-        segment = dict(zip(rd.line_id, rd.segment))
+        segment = dict(zip(rd.line_id, rd.iseg))
         line_id = {v:k for k, v in segment.items()}
 
         # renumber the segments to be consecutive,
         # starting at 1 and only increasing downstream
         nseg = [segment[s] for s in remaining_ids]
-        outseg = [segment[new_routing[line_id[s]]] for s in nseg]
+        outseg = [segment.get(new_routing[line_id[s]], 0) for s in nseg]
         r = renumber_segments(nseg, outseg)
         segment = {k: r[v] for k, v in segment.items()}
         line_id = {v: k for k, v in segment.items()}
-        rd['segment'] = [r[s] for s in rd.segment]
+        rd['iseg'] = [r[s] for s in rd.iseg]
 
         # (elevup dict was created above)
         elevdn = dict(zip(self.df.id, self.df.elevdn))
@@ -447,7 +472,7 @@ class lines:
         print('\nSetting up segment data...')
         sd = pd.DataFrame()
         sd['nseg'] = [segment[s] for s in remaining_ids]
-        sd['outseg'] = [segment[new_routing[line_id[s]]] for s in nseg]
+        sd['outseg'] = [segment.get(new_routing[line_id[s]], 0) for s in nseg]
         sd['elevup'] = [elevup[line_id[s]] for s in sd.nseg]
         sd['elevdn'] = [elevdn[line_id[s]] for s in sd.nseg]
         # convert elevation units

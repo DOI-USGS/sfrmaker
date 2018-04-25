@@ -4,7 +4,7 @@ import time
 from functools import partial
 import fiona
 from shapely.ops import transform, unary_union
-from shapely.geometry import shape, mapping
+from shapely.geometry import shape, mapping, Polygon
 import pyproj
 import numpy as np
 import pandas as pd
@@ -285,7 +285,7 @@ def projectXY(x, y, projection1, projection2):
 
     return pyproj.transform(pr1, pr2, x, y)
 
-def read_feature(feature, dest_crs):
+def read_polygon_feature(feature, dest_crs):
     """Read a geometric feature from a shapefile, shapely geometry object,
     or collection of shapely geometry objects. Reproject to dest_crs
     if the feature is read from a shapefile in a different CRS.
@@ -310,8 +310,43 @@ def read_feature(feature, dest_crs):
         if feature_crs != dest_crs:
             feature = project(feature, feature_crs.proj4, dest_crs.proj4)
     elif isinstance(feature, collections.Iterable):
+        if isinstance(feature[0], dict):
+            try:
+                feature = [shape(f) for f in feature]
+            except Exception as ex:
+                print(ex)
+                print("Supplied dictionary doesn't appear to be valid GeoJSON.")
         feature = unary_union(feature)
     return feature
+
+def get_bbox(feature, dest_crs):
+    """Get bounding box for a Polygon feature.
+
+    Parameters
+    ----------
+    feature : str (shapefile path), shapely Polygon or GeoJSON
+    dest_crs : proj4 str
+        Desired output coordinate system (shapefiles only)
+    """
+    if isinstance(feature, str):
+        with fiona.open(feature) as src:
+            l, b, r, t = src.bounds
+            shpcrs = crs(proj4=to_string(src.crs))
+        if shpcrs != dest_crs:
+            x, y = project([(l, b),
+                            (r, t)], shpcrs.proj4, dest_crs.proj4)
+            filter = (x[0], y[0], x[1], y[1])
+        else:
+            filter = (l, b, r, t)
+    elif isinstance(feature, Polygon):
+        filter = feature.bounds
+    elif isinstance(feature, dict):
+        try:
+            filter = shape(feature).bounds
+        except Exception as ex:
+            print(ex)
+            print("Supplied dictionary doesn't appear to be valid GeoJSON.")
+    return filter
 
 def shp2df(shplist, index=None, index_dtype=None, clipto=[], filter=None,
            true_values=None, false_values=None, layer=None,

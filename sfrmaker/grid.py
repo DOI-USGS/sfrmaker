@@ -4,7 +4,9 @@ import pandas as pd
 import fiona
 from shapely.ops import unary_union
 from shapely.geometry import Polygon
-from .gis import shp2df, get_proj4, crs, read_feature
+import flopy
+from .gis import shp2df, get_proj4, crs, read_polygon_feature
+fm = flopy.modflow
 
 class grid:
     """Class representing model grid.
@@ -18,7 +20,8 @@ class grid:
         (optional; otherwise inferred from epsg, proj4, or prjfile inputs.
 
     """
-    
+    units_dict = {'ft': 1, 'm': 2}
+
     def __init__(self, df, structured=True,
                  model_units='ft', crs_units=None,
                  bounds=None, active_area=None,
@@ -69,12 +72,16 @@ class grid:
             self._bounds = allX.min(), allY.min(), allX.max(), allY.max()
         return self._bounds
 
+    @property
+    def lenuni(self):
+        return self.units_dict.get(self.model_units, 0)
+
     def _set_active_area(self, feature=None, ibound_array=None):
         """Establish a polygon that defines the portion of the
         grid where streams will be represented.
         """
         if feature is not None:
-            self._active_area = read_feature(feature, self.crs)
+            self._active_area = read_polygon_feature(feature, self.crs)
 
         # include all i, j locations with at least one active cell
         elif ibound_array is not None:
@@ -82,11 +89,13 @@ class grid:
                   '(make take a while for large grids)')
             if self.structured:
                 active = ((ibound_array > 0).sum(axis=0) > 0)
-                isactive = active[grid.df.i.values,
-                                  grid.df.j.values]
+                isactive = active[self.df.i.values,
+                                  self.df.j.values]
             else:
                 active = ibound_array > 0
                 isactive = active[grid.node.values]
+
+            self.df['isactive'] = isactive
             geoms = grid.df.geometry.values[isactive]
             self._active_area = unary_union(geoms)
 
@@ -94,7 +103,8 @@ class grid:
         return k * self.nrow * self.ncol + i * self.ncol + j
 
     @staticmethod
-    def from_sr(sr=None, epsg=None, proj4=None, prjfile=None):
+    def from_sr(sr=None, active_area=None,
+                epsg=None, proj4=None, prjfile=None):
 
         vertices = sr.vertices
         polygons = [Polygon(v) for v in sr.vertices]
@@ -110,12 +120,13 @@ class grid:
         if prjfile is not None:
             proj4 = get_proj4(prjfile)
         return grid.from_dataframe(df,
-                                   bounds=sr.bounds,
+                                   bounds=sr.bounds, active_area=active_area,
                                    epsg=epsg, proj4=proj4, prjfile=prjfile)
 
     @staticmethod
     def from_shapefile(shapefile=None,
                        node_col='node', kcol='k', icol='i', jcol='j',
+                       active_area=None,
                        epsg=None, proj4=None, prjfile=None):
 
         if prjfile is None:
@@ -128,13 +139,14 @@ class grid:
         assert 'geometry' in df.columns, "No feature geometries found in {}.".format(shapefile)
 
         return grid.from_dataframe(df, node_col=node_col, kcol=kcol, icol=icol, jcol=jcol,
-                                   bounds=src.bounds,
+                                   bounds=bounds, active_area=active_area,
                                    epsg=epsg, proj4=proj4, prjfile=prjfile)
 
     @staticmethod
     def from_dataframe(df=None,
                        node_col='node', kcol='k', icol='i', jcol='j',
                        geometry_column='geometry',
+                       model_units='ft', active_area=None,
                        epsg=None, proj4=None, prjfile=None, **kwargs):
 
         assert geometry_column in df.columns, \
@@ -176,4 +188,8 @@ class grid:
         else:
             df['node'] = np.arange(len(df))
 
-        return grid(df, structured=structured, epsg=epsg, proj4=proj4, prjfile=prjfile, **kwargs)
+        return grid(df, active_area=active_area,
+                    model_units=model_units, structured=structured,
+                    epsg=epsg, proj4=proj4, prjfile=prjfile, **kwargs)
+
+
