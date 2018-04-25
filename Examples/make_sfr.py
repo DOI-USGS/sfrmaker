@@ -1,5 +1,6 @@
 import sys
 import glob
+import os
 sys.path.append('..')
 sys.path += glob.glob('/Users/aleaf/Documents/GitHub/*')
 import numpy as np
@@ -13,6 +14,11 @@ pfvaa_files = ['data/PlusFlowlineVAA.dbf']
 plusflow_files = ['data/PlusFlow.dbf']
 elevslope_files = ['data/elevslope.dbf']
 flowlines = ['data/NHDFlowlines.shp']
+
+# output folder
+outdir = 'temp/'
+if not os.path.isdir(outdir):
+    os.mkdir(outdir)
 
 lns = lines.from_NHDPlus_v2(NHDFlowlines=flowlines,
                             PlusFlowlineVAA=pfvaa_files,
@@ -31,4 +37,5 @@ grd = grid.from_sr(sr)
 #grd = grid.from_shapefile('data/grid.shp', icol='row', jcol='column')
 
 sfr = lns.to_sfr(grd)
+sfr.write_package(outdir + 'example.sfr')
 j=2

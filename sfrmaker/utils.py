@@ -292,6 +292,11 @@ def renumber_segments(nseg, outseg):
         Dictionary mapping old segment numbers (keys) to new segment numbers (values). r only
         contains entries for number that were remapped.
     """
+    if not isinstance(nseg, np.ndarray):
+        nseg = np.array(nseg)
+    if not isinstance(outseg, np.ndarray):
+        outseg = np.array(outseg)
+
     def reassign_upsegs(r, nexts, upsegs):
         nextupsegs = []
         for u in upsegs:
@@ -348,9 +353,9 @@ def setup_reach_data(flowline_geoms, fl_comids, grid_intersections,
     Returns
     -------
     m1 : DataFrame of reaches (one row per reach), with the following columns:
-        reach : int
+        ireach : int
             Reach number within a segment.
-        segment : int
+        iseg : int
             Segment number.
         node : int
             Grid cell number.
@@ -393,10 +398,10 @@ def setup_reach_data(flowline_geoms, fl_comids, grid_intersections,
             print('bad reach assignment!')
             break
 
-    m1 = pd.DataFrame({'reach': reach, 'segment': segment, 'node': node,
+    m1 = pd.DataFrame({'ireach': reach, 'iseg': segment, 'node': node,
                             'geometry': geometry, 'line_id': comids})
-    m1.sort_values(by=['segment', 'reach'], inplace=True)
-    m1['reachID'] = np.arange(len(m1)) + 1
+    m1.sort_values(by=['iseg', 'ireach'], inplace=True)
+    m1['rno'] = np.arange(len(m1)) + 1
     print("finished in {:.2f}s\n".format(time.time() - ta))
     return m1
 

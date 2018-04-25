@@ -1,6 +1,6 @@
 import fiona
 from fiona.crs import to_string
-from .gis import shp2df, crs, project
+from .gis import shp2df, crs, project, get_bbox
 
 def load_NHDPlus_v2(NHDFlowlines=None, PlusFlowlineVAA=None, PlusFlow=None, elevslope=None,
                     filter=None,
@@ -25,8 +25,10 @@ def load_NHDPlus_v2(NHDFlowlines=None, PlusFlowlineVAA=None, PlusFlow=None, elev
         DBF file or list of DBF files with end elevations for each
         line arc in NHDFlowlines. Must contain the following attribute fields:
         COMID : common identifier number
-    filter : tuple or str
-        Bounding box (tuple) or shapefile of model stream network area.
+    filter : tuple, str (filepath), shapely Polygon or GeoJSON polygon
+        Bounding box (tuple) or polygon feature of model stream network area.
+        Shapefiles will be reprojected to the CRS of the flowlines; all other
+        feature types must be supplied in same CRS as flowlines.
     """
     # get crs information from flowline projection file
     if prjfile is None:
@@ -34,19 +36,12 @@ def load_NHDPlus_v2(NHDFlowlines=None, PlusFlowlineVAA=None, PlusFlow=None, elev
     nhdcrs = crs(epsg=epsg, proj4=proj4, prjfile=prjfile)
 
     # ensure that filter bbox is in same crs as flowlines
-    if filter is not None and isinstance(filter, str):
-        with fiona.open(filter) as src:
-            l, b, r, t = src.bounds
-            shpcrs = crs(proj4=to_string(src.crs))
-        if shpcrs != nhdcrs:
-            x, y = project([(l, b),
-                            (r, t)], shpcrs.proj4, nhdcrs.proj4)
-            filter = (x[0], y[0], x[1], y[1])
-        else:
-            filter = (l, b, r, t)
+    if filter is not None and not isinstance(filter, tuple):
+        filter = get_bbox(filter, nhdcrs)
 
     fl_cols = ['COMID',  # 'FCODE', 'FDATE', 'FLOWDIR',
-               # 'FTYPE', 'GNIS_ID', 'GNIS_NAME', 'LENGTHKM',
+               # 'FTYPE', 'GNIS_ID',
+               'GNIS_NAME', #'LENGTHKM',
                # 'REACHCODE', 'RESOLUTION', 'WBAREACOMI',
                'geometry']
     pfvaa_cols = ['ArbolateSu',  # 'Hydroseq', 'DnHydroseq',
