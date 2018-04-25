@@ -38,10 +38,10 @@ sfr = lns.to_sfr(sr=sr)
 #### write the sfr package file
 
 ```python
-sfr.write_package('model.sfr`)
+sfr.write_package('model.sfr')
 ```
-to write a MODFLOW 6 SFR package:
+#### to write a MODFLOW 6 SFR package:
 
 ```python
-sfr.write_package('model.sfr`, version='mf6')
+sfr.write_package('model.sfr', version='mf6')
 ```
