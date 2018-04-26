@@ -289,9 +289,10 @@ class lines:
                      epsg=epsg, proj4=proj4, prjfile=prjfile)
 
     @staticmethod
-    def from_NHDPlus_v2(NHDFlowlines=None, PlusFlowlineVAA=None, PlusFlow=None, elevslope=None,
-             filter=None,
-             epsg=None, proj4=None, prjfile=None):
+    def from_NHDPlus_v2(NHDPlus_paths=None,
+                        NHDFlowlines=None, PlusFlowlineVAA=None, PlusFlow=None, elevslope=None,
+                        filter=None,
+                        epsg=None, proj4=None, prjfile=None):
         """
         Parameters
         ==========
@@ -315,7 +316,8 @@ class lines:
         filter : tuple or str
             Bounding box (tuple) or shapefile of model stream network area.
         """
-        df = load_NHDPlus_v2(NHDFlowlines=NHDFlowlines, PlusFlowlineVAA=PlusFlowlineVAA,
+        df = load_NHDPlus_v2(NHDPlus_paths=NHDPlus_paths,
+                             NHDFlowlines=NHDFlowlines, PlusFlowlineVAA=PlusFlowlineVAA,
                              PlusFlow=PlusFlow, elevslope=elevslope,
                              filter=filter,
                              epsg=epsg, proj4=proj4, prjfile=prjfile)
@@ -338,7 +340,7 @@ class lines:
                                     length_units='m', height_units='m',
                                     epsg=epsg, proj4=proj4, prjfile=prjfile)
 
-    def to_sfr(self, grid=None, sr=None,
+    def to_sfr(self, grid=None, sr=None, active_area=None,
                minimum_reach_length=None,
                consolidate_conductance=False, one_reach_per_cell=False,
                model_name=None,
@@ -372,7 +374,7 @@ class lines:
         sfrdata : sfrmaker.sfrdata instance
         """
         if grid is None and sr is not None:
-            grid = gridclass.from_sr(sr)
+            grid = gridclass.from_sr(sr, active_area=active_area)
         # reproject the flowlines if they aren't in same CRS as grid
         if self.crs != grid.crs:
             self.reproject(grid.crs.proj4)
