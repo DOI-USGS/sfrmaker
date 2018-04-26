@@ -441,6 +441,49 @@ class sfrdata:
         # grid is still used to write output to make it easier to deal with unstructured
         # ModflowSfr2 property allows dynamic access to flopy methods
 
+    def interpolate_to_reaches(self, segvar1, segvar2, per=0):
+        """Interpolate values in datasets 6b and 6c to each reach in stream segment
+
+        Parameters
+        ----------
+        segvar1 : str
+            Column/variable name in segment_data array for representing start of segment
+            (e.g. hcond1 for hydraulic conductivity)
+            For segments with icalc=2 (specified channel geometry); if width1 is given,
+            the eigth distance point (XCPT8) from dataset 6d will be used as the stream width.
+            For icalc=3, an abitrary width of 5 is assigned.
+            For icalc=4, the mean value for width given in item 6e is used.
+        segvar2 : str
+            Column/variable name in segment_data array for representing start of segment
+            (e.g. hcond2 for hydraulic conductivity)
+        per : int
+            Stress period with segment data to interpolate
+
+        Returns
+        -------
+        reach_values : 1D array
+            One dimmensional array of interpolated values of same length as reach_data array.
+            For example, hcond1 and hcond2 could be entered as inputs to get values for the
+            strhc1 (hydraulic conductivity) column in reach_data.
+
+        """
+        reach_data = self.reach_data
+        segment_data = self.segment_data.groupby('per').get_group(per)
+        segment_data.sort_values(by='nseg', inplace=True)
+        reach_data.sort_values(by=['iseg', 'ireach'], inplace=True)
+        rd_groups = reach_data.groupby('iseg')
+        sd_groups = segment_data.groupby('nseg')
+        reach_values = []
+        for seg in segment_data.nseg:
+            reaches = rd_groups.get_group(seg)
+            dist = (np.cumsum(reaches.rchlen) - 0.5 * reaches.rchlen).values
+
+            fp = [sd_groups.get_group(seg)[segvar1].values[0],
+                  sd_groups.get_group(seg)[segvar2].values[0]]
+            xp = [dist[0], dist[-1]]
+            reach_values += np.interp(dist, xp, fp).tolist()
+        return np.array(reach_values)
+
     def sample_elevations(self, dem, method='buffers',
                           buffer_distance=None,
                           statistic='min'):
@@ -458,6 +501,41 @@ class sfrdata:
         buffer_distance : float
             Buffer distance to apply around reach LineStrings, in crs_units.
         """
+        raise NotImplementedError
+
+    def get_slopes(self, default_slope=0.001, minimum_slope=0.0001,
+                   maximum_slope=1.):
+        """Compute slopes by reach using values in strtop (streambed top) and rchlen (reach length)
+        columns of reach_data. The slope for a reach n is computed as strtop(n+1) - strtop(n) / rchlen(n).
+        Slopes for outlet reaches are set equal to a default value (default_slope).
+        Populates the slope column in reach_data.
+
+        Parameters
+        ----------
+        default_slope : float
+            Slope value applied to outlet reaches (where water leaves the model).
+            Default value is 0.001
+        minimum_slope : float
+            Assigned to reaches with computed slopes less than this value.
+            This ensures that the Manning's equation won't produce unreasonable values of stage
+            (in other words, that stage is consistent with assumption that
+            streamflow is primarily drive by the streambed gradient).
+            Default value is 0.0001.
+        maximum_slope : float
+            Assigned to reaches with computed slopes more than this value.
+            Default value is 1.
+        """
+        rd = self.reach_data
+        elev = dict(zip(rd.rno, rd.strtop))
+        dist = dict(zip(rd.rno, rd.rchlen))
+        dnelev = {rid: elev[rd.outreach.values[i]] if rd.outreach.values[i] != 0
+        else -9999 for i, rid in enumerate(rd.rno)}
+        slopes = np.array(
+            [(elev[i] - dnelev[i]) / dist[i] if dnelev[i] != -9999
+             else default_slope for i in rd.rno])
+        slopes[slopes < minimum_slope] = minimum_slope
+        slopes[slopes > maximum_slope] = maximum_slope
+        self.reach_data['slope'] = slopes
 
     @staticmethod
     def from_package(sfrpackagefile, grid, linework):
