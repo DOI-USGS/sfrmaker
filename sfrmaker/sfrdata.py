@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import flopy
 from .utils import renumber_segments, find_path, make_graph
-from .checks import valid_rnos, rno_nseg_routing_consistent
+from .checks import valid_rnos, valid_nsegs, rno_nseg_routing_consistent
 
 fm = flopy.modflow
 
@@ -27,12 +27,17 @@ class sfrdata:
     segment_data : DataFrame
         Table containing information on the segments (optional).
     grid : sfrmaker.grid class instance
+    model_length_units : str
+        'm' or 'ft'
     model_time_units : str
         's': seconds
         'm': minutes
         'h': hours
         'd': days
         'y': years
+    enforce_increasing_nsegs : bool
+        If True, segment numbering is checked to ensure
+        that it only increases downstream, and reset if it doesnt.
     kwargs : keyword arguments
         Optional values to assign globally to SFR variables. For example
         icalc=1 would assign all segments an icalc value of 1. For default
@@ -96,9 +101,10 @@ class sfrdata:
                 'strhc1': 1,
                 }
 
-    def __init__(self, reach_data=None,
+    def __init__(self, reach_data,
                  segment_data=None, grid=None,
                  model_length_units='ft', model_time_units='d',
+                 enforce_increasing_nsegs=True,
                  **kwargs):
 
         self.reach_data = self._setup_reach_data(reach_data)
@@ -124,12 +130,18 @@ class sfrdata:
                 self.segment_data[k] = v
 
         # routing
-        check that segment numbering is valid
-        # call renumber_segments if it isn't, in attached method simliar to self.set_outreaches()
-        self.set_outreaches() # establish rno routing
         self._segment_routing = None  # dictionary of routing connections
         self._reach_routing = None # dictionary of rno routing connections
         self._paths = None  # routing sequence from each segment to outlet
+
+        if not self._valid_nsegs(increasing=enforce_increasing_nsegs):
+            self.reset_segments()
+        # establish rno routing
+        # set_outreaches checks for valid rnos and resets them if not
+        # resets out reaches either way using segment data
+        # not the ideal logic for MODFLOW 6 case where only
+        # rno and connections are supplied
+        self.set_outreaches()
 
         # attached instance of flopy ModflowSfr2 package object
         self._ModflowSfr2 = None
@@ -224,8 +236,9 @@ class sfrdata:
         return rd
 
     @staticmethod
-    def get_empty_segment_data(nsegments=0):
-        sd = fm.ModflowSfr2.get_empty_segment_data(nsegments)
+    def get_empty_segment_data(nsegments=0, default_value=0):
+        sd = fm.ModflowSfr2.get_empty_segment_data(nsegments,
+                                                   default_value=default_value)
         sd = pd.DataFrame(sd)
         sd['per'] = 0
         for c in sd.columns:
@@ -233,35 +246,38 @@ class sfrdata:
         return sd[sfrdata.sdcols]
 
     def _setup_segment_data(self, segment_data):
-        sd = sfrdata.get_empty_segment_data(len(segment_data))
+        # if no segment_data was provided
+        if segment_data is None:
+            # create segment_data from iseg and ireach columns in reach data
+            # if
+            if valid_nsegs(self.reach_data.iseg, increasing=False) and \
+                    self.reach_data.outseg.sum() > 0:
+                self.reach_data.sort_values(by=['iseg', 'ireach'], inplace=True)
+                nss = self.reach_data.iseg.max()
+                sd = sfrdata.get_empty_segment_data(nss)
+                routing = dict(zip(self.reach_data.iseg, self.reach_data.outseg))
+                sd['nseg'] = range(len(sd))
+                sd['outseg'] = [routing[s] for s in sd.nseg]
+            # create segment_data from reach routing (one reach per segment)
+            else:
+                has_rno_routing = self._check_reach_routing()
+                assert has_rno_routing, \
+                    "Reach data must contain rno column with unique, " \
+                    "consecutive reach numbers starting at 1. If no " \
+                    "segment_data are supplied, segment routing must be" \
+                    "included in iseg and outseg columns, or reach data " \
+                    "must contain outreach column with routing connections."
+                sd = sfrdata.get_empty_segment_data(len(self.reach_data))
+                sd['nseg'] = self.reach_data.rno
+                sd['outseg'] = self.reach_data.outreach
+        # transfer supplied segment data to default template
+        else:
+            sd = sfrdata.get_empty_segment_data(len(segment_data))
         segment_data.sort_values(by='nseg', inplace=True)
         segment_data.index = range(len(segment_data))
         for c in segment_data.columns:
             sd[c] = segment_data[c].astype(sfrdata.dtypes.get(c, np.float32))
         return sd
-
-    @property
-    def routing(self):
-        could base routing off of reach connections in reach_data
-        set segment data from that
-        but this might just be confusing
-        either day, need to also update other dataframe when routing changes
-        if self._routing is None or self._routing_changed():
-            toid = self.df.toid.values
-            # check whether or not routing is
-            # many-to-one or one-to-one (no diversions)
-            # squeeze it down
-            to_one = False
-            # if below == True, all toids are scalar or length 1 lists
-            to_one = np.isscalar(np.squeeze(toid)[0])
-            # if not, try converting any scalars to lists
-            if not to_one:
-                toid = [[l] if np.isscalar(l) else l for l in toid]
-                to_one = np.isscalar(np.squeeze(toid)[0])
-            toid = np.squeeze(toid)
-            self._routing = make_graph(self.df.id.values, toid,
-                                       one_to_many=not to_one)
-        return self._routing
 
     @property
     def paths(self):
@@ -304,6 +320,16 @@ class sfrdata:
                              self.segment_data.nseg)
         isasegment = isasegment | (self.segment_data.outseg < 0)
         self.segment_data.loc[~isasegment, 'outseg'] = 0.
+
+    def reset_segments(self):
+        """Reset the segment numbering so that is consecutive,
+        starts at 1 and only increases downstream."""
+        r = renumber_segments(self.segment_data.nseg,
+                              self.segment_data.outseg)
+        self.segment_data['nseg'] = [r[s] for s in self.segment_data.nseg]
+        self.segment_data['outseg'] = [r[s] for s in self.segment_data.outseg]
+        self.reach_data['iseg'] = [r[s] for s in self.reach_data.iseg]
+        self.reach_data['outseg'] = [r[s] for s in self.reach_data.outseg]
 
     def reset_reaches(self):
         """Ensure that the reaches in each segment are numbered
@@ -351,6 +377,18 @@ class sfrdata:
         incols = 'rno' in self.reach_data.columns
         arevalid = valid_rnos(self.reach_data.rno.tolist())
         return incols & arevalid
+
+    def _check_reach_routing(self):
+        """Cursory check of reach routing."""
+        valid_rnos = self._valid_rnos()
+        non_zero_outreaches = 'outreach' in self.reach_data.columns & \
+        self.reach_data.outreach.sum() > 0
+        return valid_rnos & non_zero_outreaches
+
+    def _valid_nsegs(self, increasing=True):
+        return valid_nsegs(self.segment_data.nseg,
+                           self.segment_data.outseg,
+                           increasing=increasing)
 
     def create_ModflowSfr2(self, m=None, const=None,
                            isfropt=1, # override flopy default of 0

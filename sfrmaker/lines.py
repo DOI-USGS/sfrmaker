@@ -14,6 +14,7 @@ from .utils import make_graph, find_path, unit_conversion, \
     consolidate_reach_conductances, renumber_segments
 from .nhdplus_utils import load_NHDPlus_v2
 from .sfrdata import sfrdata
+from .checks import routing_is_circular
 
 class lines:
     """Class for working with linestring feature input.
@@ -445,34 +446,50 @@ class lines:
         # when id and toid columns are changed in self.df
         # but only rd (reach_data) has been changed
         new_routing = {}
+        # for each segment
         for k in remaining_ids:
+            # interate through successive downstream segments
             for s in self.paths[k][1:]:
+                # assign the first segment that still exists as the outseg
                 if s in remaining_ids:
                     new_routing[k] = s
                     break
-                else:
-                    new_routing[k] = 0
+            # if no segments are left downstream, assign outlet
+            if k not in new_routing.keys():
+                new_routing[k] = 0
 
         # map remaining_ids to segment numbers
         segment = dict(zip(rd.line_id, rd.iseg))
-        line_id = {v:k for k, v in segment.items()}
+        line_id = {s: lid for lid, s in segment.items()}
+
+        # get the segment associated with each line id
+        nseg = [segment[rid] for rid in remaining_ids]
+        # get the segment associated with new connection for each line id
+        outseg = [segment.get(new_routing[line_id[s]], 0) for s in nseg]
 
         # renumber the segments to be consecutive,
         # starting at 1 and only increasing downstream
-        nseg = [segment[s] for s in remaining_ids]
-        outseg = [segment.get(new_routing[line_id[s]], 0) for s in nseg]
         r = renumber_segments(nseg, outseg)
-        segment = {k: r[v] for k, v in segment.items()}
-        line_id = {v: k for k, v in segment.items()}
-        rd['iseg'] = [r[s] for s in rd.iseg]
+        # map new segment numbers to line_ids
+        #segment2 = {lid: r[s] for lid, s in segment.items()}
+        #line_id2 = {s: lid for lid, s in segment2.items()}
 
-        # (elevup dict was created above)
-        elevdn = dict(zip(self.df.id, self.df.elevdn))
+        # update reach_data
+        rd['iseg'] = [r[s] for s in rd.iseg]
 
         print('\nSetting up segment data...')
         sd = pd.DataFrame()
-        sd['nseg'] = [segment[s] for s in remaining_ids]
-        sd['outseg'] = [segment.get(new_routing[line_id[s]], 0) for s in nseg]
+        #sd['nseg'] = [segment2[lid] for lid in remaining_ids]
+        #sd['outseg'] = [segment2.get(new_routing[line_id2[s]], 0) for s in nseg]
+        sd['nseg'] = [r[s] for s in nseg]
+        sd['outseg'] = [r[s] for s in outseg]
+        sd.sort_values(by='nseg', inplace=True)
+
+        # verify that no segments route to themselves
+        assert not routing_is_circular(sd.nseg, sd.outseg)
+
+        # (elevup dict was created above)
+        elevdn = dict(zip(self.df.id, self.df.elevdn))
         sd['elevup'] = [elevup[line_id[s]] for s in sd.nseg]
         sd['elevdn'] = [elevdn[line_id[s]] for s in sd.nseg]
         # convert elevation units
