@@ -40,7 +40,7 @@ dis = fm.ModflowDis(m, nlay=1, nrow=nrow, ncol=nrow,
                     top=1000, botm=0)
 m.sr = sr
 
-grd = grid.from_sr(sr)
+grd = grid.from_sr(sr, active_area='data/active_area.shp')
 #grd = grid.from_shapefile('data/grid.shp', icol='row', jcol='column')
 
 sfr = lns.to_sfr(grd)
@@ -49,4 +49,5 @@ sfr.reach_data['strtop'] = sfr.interpolate_to_reaches('elevup', 'elevdn')
 sfr.get_slopes()
 
 sfr.write_package(outdir + 'example.sfr')
+sfr.export_sfrlines(outdir + 'example.shp')
 j=2

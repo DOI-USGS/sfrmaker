@@ -5,6 +5,7 @@ import pandas as pd
 import flopy
 from .utils import renumber_segments, find_path, make_graph
 from .checks import valid_rnos, valid_nsegs, rno_nseg_routing_consistent
+from .gis import df2shp
 
 fm = flopy.modflow
 
@@ -38,6 +39,8 @@ class sfrdata:
     enforce_increasing_nsegs : bool
         If True, segment numbering is checked to ensure
         that it only increases downstream, and reset if it doesnt.
+    model_name : str
+            Base name for writing sfr output.
     kwargs : keyword arguments
         Optional values to assign globally to SFR variables. For example
         icalc=1 would assign all segments an icalc value of 1. For default
@@ -105,6 +108,7 @@ class sfrdata:
                  segment_data=None, grid=None,
                  model_length_units='ft', model_time_units='d',
                  enforce_increasing_nsegs=True,
+                 model_name=None,
                  **kwargs):
 
         self.reach_data = self._setup_reach_data(reach_data)
@@ -145,6 +149,9 @@ class sfrdata:
 
         # attached instance of flopy ModflowSfr2 package object
         self._ModflowSfr2 = None
+        if model_name is None:
+            model_name = 'model'
+        self.model_name = model_name
 
         # units
         self._model_length_units = model_length_units
@@ -581,4 +588,8 @@ class sfrdata:
             # write a MODFLOW 6 file
             sfr6.write_file(outpath=mf6_ws)
 
-
+    def export_sfrlines(self, filename=None):
+        """Export shapefiles of linework"""
+        if filename is None:
+            filename = self.model_name + '_sfrlines.shp'
+        df2shp(self.reach_data, filename, epsg=self.grid.crs.epsg)

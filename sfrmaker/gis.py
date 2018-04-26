@@ -285,10 +285,10 @@ def projectXY(x, y, projection1, projection2):
 
     return pyproj.transform(pr1, pr2, x, y)
 
-def read_polygon_feature(feature, dest_crs):
+def read_polygon_feature(feature, dest_crs, feature_crs=None):
     """Read a geometric feature from a shapefile, shapely geometry object,
     or collection of shapely geometry objects. Reproject to dest_crs
-    if the feature is read from a shapefile in a different CRS.
+    if the feature is in a different CRS.
 
     Parameters
     ----------
@@ -305,10 +305,8 @@ def read_polygon_feature(feature, dest_crs):
     if isinstance(feature, str):
         with fiona.open(feature) as src:
             feature_crs = crs(src.crs)
-        geoms = shp2df(feature)['geomety'].values
+        geoms = shp2df(feature)['geometry'].values
         feature = unary_union(geoms)
-        if feature_crs != dest_crs:
-            feature = project(feature, feature_crs.proj4, dest_crs.proj4)
     elif isinstance(feature, collections.Iterable):
         if isinstance(feature[0], dict):
             try:
@@ -317,6 +315,18 @@ def read_polygon_feature(feature, dest_crs):
                 print(ex)
                 print("Supplied dictionary doesn't appear to be valid GeoJSON.")
         feature = unary_union(feature)
+    elif isinstance(feature, dict):
+        try:
+            feature = shape(feature)
+        except Exception as ex:
+            print(ex)
+            print("Supplied dictionary doesn't appear to be valid GeoJSON.")
+    elif isinstance(feature, Polygon):
+        pass
+    else:
+        raise TypeError("Unrecognized feature input.")
+    if feature_crs is not None and feature_crs != dest_crs:
+        feature = project(feature, feature_crs.proj4, dest_crs.proj4)
     return feature
 
 def get_bbox(feature, dest_crs):
@@ -487,3 +497,141 @@ with shapefile coordinate system'.format(filter))
                     df[c] = df[c].map(replace_boolean)
 
     return df
+
+def shp_properties(df):
+
+    newdtypes = {'bool': 'str',
+                 'object': 'str',
+                 'datetime64[ns]': 'str'}
+
+    # fiona/OGR doesn't like numpy ints
+    # shapefile doesn't support 64 bit ints,
+    # but apparently leaving the ints alone is more reliable
+    # than intentionally downcasting them to 32 bit
+    # pandas is smart enough to figure it out on .to_dict()?
+    for c in df.columns:
+        if c != 'geometry':
+            df[c] = df[c].astype(newdtypes.get(df.dtypes[c].name,
+                                               df.dtypes[c].name))
+        if 'int' in df.dtypes[c].name:
+            if np.max(np.abs(df[c])) > 2**31 -1:
+                df[c] = df[c].astype(str)
+
+    # strip dtypes to just 'float', 'int' or 'str'
+    def stripandreplace(s):
+        return ''.join([i for i in s
+                        if not i.isdigit()]).replace('object', 'str')
+    dtypes = [stripandreplace(df[c].dtype.name)
+              if c != 'geometry'
+              else df[c].dtype.name for c in df.columns]
+    properties = collections.OrderedDict(list(zip(df.columns, dtypes)))
+    return properties
+
+def df2shp(dataframe, shpname, geo_column='geometry', index=False,
+           retain_order=False,
+           prj=None, epsg=None, proj4=None, crs=None):
+    '''
+    Write a DataFrame to a shapefile
+    dataframe: dataframe to write to shapefile
+    geo_column: optional column containing geometry to write - default is 'geometry'
+    index: If true, write out the dataframe index as a column
+    retain_order : boolean
+        Retain column order in dataframe, using an OrderedDict. Shapefile will
+        take about twice as long to write, since OrderedDict output is not
+        supported by the pandas DataFrame object.
+
+    --->there are four ways to specify the projection....choose one
+    prj: <file>.prj filename (string)
+    epsg: EPSG identifier (integer)
+    proj4: pyproj style projection string definition
+    crs: crs attribute (dictionary) as read by fiona
+    '''
+    # first check if output path exists
+    if os.path.split(shpname)[0] != '' and not os.path.isdir(os.path.split(shpname)[0]):
+        raise IOError("Output folder doesn't exist")
+
+    # check for empty dataframe
+    if len(dataframe) == 0:
+        raise IndexError("DataFrame is empty!")
+
+    df = dataframe.copy()  # make a copy so the supplied dataframe isn't edited
+
+    # reassign geometry column if geo_column is special (e.g. something other than "geometry")
+    if geo_column != 'geometry':
+        df['geometry'] = df[geo_column]
+        df.drop(geo_column, axis=1, inplace=True)
+
+    # assign none for geometry, to write a dbf file from dataframe
+    Type = None
+    if 'geometry' not in df.columns:
+        df['geometry'] = None
+        Type = 'None'
+        mapped = [None] * len(df)
+
+    # reset the index to integer index to enforce ordering
+    # retain index as attribute field if index=True
+    df.reset_index(inplace=True, drop=not index)
+
+    # enforce character limit for names! (otherwise fiona marks it zero)
+    # somewhat kludgey, but should work for duplicates up to 99
+    df.columns = list(map(str, df.columns))  # convert columns to strings in case some are ints
+    overtheline = [(i, '{}{}'.format(c[:8], i)) for i, c in enumerate(df.columns) if len(c) > 10]
+
+    newcolumns = list(df.columns)
+    for i, c in overtheline:
+        newcolumns[i] = c
+    df.columns = newcolumns
+
+    properties = shp_properties(df)
+    del properties['geometry']
+
+    # set projection (or use a prj file, which must be copied after shp is written)
+    # alternatively, provide a crs in dictionary form as read using fiona
+    # from a shapefile like fiona.open(inshpfile).crs
+
+    if epsg is not None:
+        from fiona.crs import from_epsg
+        crs = from_epsg(int(epsg))
+    elif proj4 is not None:
+        from fiona.crs import from_string
+        crs = from_string(proj4)
+    elif crs is not None:
+        pass
+    else:
+        pass
+
+    if Type != 'None':
+        for g in df.geometry:
+            try:
+                Type = g.type
+            except:
+                continue
+        mapped = [mapping(g) for g in df.geometry]
+
+    schema = {'geometry': Type, 'properties': properties}
+    length = len(df)
+
+    if not retain_order:
+        props = df.drop('geometry', axis=1).astype(object).to_dict(orient='records')
+    else:
+        props = [collections.OrderedDict(r) for i, r in df.drop('geometry', axis=1).astype(object).iterrows()]
+    print('writing {}...'.format(shpname))
+    with fiona.collection(shpname, "w", driver="ESRI Shapefile", crs=crs, schema=schema) as output:
+        for i in range(length):
+            output.write({'properties': props[i],
+                          'geometry': mapped[i]})
+
+    if prj is not None:
+        """
+        if 'epsg' in prj.lower():
+            epsg = int(prj.split(':')[1])
+            prjstr = getPRJwkt(epsg).replace('\n', '') # get rid of any EOL
+            ofp = open("{}.prj".format(shpname[:-4]), 'w')
+            ofp.write(prjstr)
+            ofp.close()
+        """
+        try:
+            print('copying {} --> {}...'.format(prj, "{}.prj".format(shpname[:-4])))
+            shutil.copyfile(prj, "{}.prj".format(shpname[:-4]))
+        except IOError:
+            print('Warning: could not find specified prj file. shp will not be projected.')
