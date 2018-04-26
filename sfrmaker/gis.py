@@ -69,6 +69,9 @@ class crs:
             return False
         return True
 
+    def __repr__(self):
+        return self.proj4
+
 def get_proj4(prj):
     """Get proj4 string for a projection file
 
@@ -418,7 +421,8 @@ def shp2df(shplist, index=None, index_dtype=None, clipto=[], filter=None,
         # for reading in shapefiles
         meta = shp_obj.meta
         if meta['schema']['geometry'] != 'None':
-
+            if filter is not None:
+                print('filtering on bounding box {}, {}, {}, {}...'.format(*filter))
             if clip:  # limit what is brought in to items in index of clipto
                 for line in shp_obj.filter(bbox=filter):
                     props = line['properties']

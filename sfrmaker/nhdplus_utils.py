@@ -1,8 +1,26 @@
-import fiona
-from fiona.crs import to_string
+import os
 from .gis import shp2df, crs, project, get_bbox
 
-def load_NHDPlus_v2(NHDFlowlines=None, PlusFlowlineVAA=None, PlusFlow=None, elevslope=None,
+
+def get_NHDPlus_v2_filepaths(NHDPlus_paths):
+    if isinstance(NHDPlus_paths, str):
+        NHDPlus_paths = [NHDPlus_paths]
+    NHDFlowlines = [os.path.join(f, 'NHDSnapshot/Hydrography/NHDFlowline.shp')
+                    for f in NHDPlus_paths]
+    PlusFlowlineVAA = [os.path.join(f, 'NHDPlusAttributes/PlusFlowlineVAA.dbf')
+                    for f in NHDPlus_paths]
+    PlusFlow = [os.path.join(f, 'NHDPlusAttributes/PlusFlow.dbf')
+                    for f in NHDPlus_paths]
+    elevslope = [os.path.join(f, 'NHDPlusAttributes/elevslope.dbf')
+                    for f in NHDPlus_paths]
+    for paths in NHDFlowlines, PlusFlowlineVAA, PlusFlow, elevslope:
+        for f in paths:
+            if not os.path.exists(f):
+                raise FileNotFoundError(f)
+    return NHDFlowlines, PlusFlowlineVAA, PlusFlow, elevslope
+
+def load_NHDPlus_v2(NHDPlus_paths=None,
+                    NHDFlowlines=None, PlusFlowlineVAA=None, PlusFlow=None, elevslope=None,
                     filter=None,
                     epsg=None, proj4=None, prjfile=None):
     """
@@ -30,6 +48,10 @@ def load_NHDPlus_v2(NHDFlowlines=None, PlusFlowlineVAA=None, PlusFlow=None, elev
         Shapefiles will be reprojected to the CRS of the flowlines; all other
         feature types must be supplied in same CRS as flowlines.
     """
+    if NHDPlus_paths is not None:
+        NHDFlowlines, PlusFlowlineVAA, PlusFlow, elevslope = \
+            get_NHDPlus_v2_filepaths(NHDPlus_paths)
+
     # get crs information from flowline projection file
     if prjfile is None:
         prjfile = NHDFlowlines if not isinstance(NHDFlowlines, list) else NHDFlowlines[0]
