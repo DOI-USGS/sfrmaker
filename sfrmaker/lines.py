@@ -13,6 +13,7 @@ from .utils import make_graph, find_path, unit_conversion, \
     pick_toids, width_from_arbolate_sum, arbolate_sum, \
     consolidate_reach_conductances, renumber_segments
 from .nhdplus_utils import load_NHDPlus_v2
+from .grid import grid as gridclass
 from .sfrdata import sfrdata
 from .checks import routing_is_circular
 
@@ -111,7 +112,8 @@ class lines:
         df_routing = dict(zip(self.df.id, self.df.toid))
         return df_routing == self._routing
 
-    def cull(self, feature, inplace=False):
+    def cull(self, feature, feature_crs=None,
+             inplace=False):
         """Cull linework; retaining only the
         lines that intersect a polygon feature.
 
@@ -124,7 +126,8 @@ class lines:
             If True, the attribute .df is modified;
             if False, a copy of .df is returned.
         """
-        feature = read_polygon_feature(feature, self.crs)
+        feature = read_polygon_feature(feature, self.crs,
+                                       feature_crs=feature_crs)
 
         intersects = np.array([g.intersects(feature) for g in self.df.geometry])
         if inplace:
@@ -154,7 +157,7 @@ class lines:
         from .gis import intersect, intersect_rtree
         from .utils import setup_reach_data
 
-        # reproject the flowlines in they aren't in same CRS as grid
+        # reproject the flowlines if they aren't in same CRS as grid
         if self.crs != grid.crs:
             self.reproject(grid.crs.proj4)
 
@@ -201,6 +204,7 @@ class lines:
         assert np.isfinite(np.max(geoms[0].xy[0])), \
             "Invalid reprojection; check CRS for lines and grid."
         self.df['geometry'] = geoms
+        self.crs.proj4 = dest_proj4
 
     @staticmethod
     def from_shapefile(shapefile,
@@ -334,9 +338,10 @@ class lines:
                                     length_units='m', height_units='m',
                                     epsg=epsg, proj4=proj4, prjfile=prjfile)
 
-    def to_sfr(self, grid,
+    def to_sfr(self, grid=None, sr=None,
                minimum_reach_length=None,
                consolidate_conductance=False, one_reach_per_cell=False,
+               model_name=None,
                **kwargs):
         """Create a streamflow routing dataset from the information
         in sfrmaker.lines class instance and a supplied sfrmaker.grid class instance.
@@ -358,16 +363,25 @@ class lines:
             If True, streambed conductance in each reach is consolidated
             (consolidate_conductance = True), and additional reaches besides
             the most downstream reach are dropped.
+        model_name : str
+            Base name for writing sfr output.
         kwargs : keyword arguments to sfrmaker.sfrdata
 
         Returns
         -------
         sfrdata : sfrmaker.sfrdata instance
         """
+        if grid is None and sr is not None:
+            grid = gridclass.from_sr(sr)
+        # reproject the flowlines if they aren't in same CRS as grid
+        if self.crs != grid.crs:
+            self.reproject(grid.crs.proj4)
         if grid.active_area is not None:
-            self.cull(grid.active_area)
+            self.cull(grid.active_area, inplace=True)
         elif grid._bounds is not None: # cull to grid bounding box if already computed
-            self.cull(box(*grid._bounds))
+            self.cull(box(*grid._bounds), inplace=True)
+        if model_name is None:
+            model_name = 'model'
 
         mult = unit_conversion[self.length_units+grid.model_units]
         mult_h = unit_conversion[self.height_units+grid.model_units]
@@ -502,5 +516,6 @@ class lines:
         # smoothing elevations, writing sfr package files
         # and other output
         rd = rd[[c for c in sfrdata.rdcols if c in rd.columns]].copy()
-        sfrd = sfrdata(reach_data=rd, segment_data=sd, grid=grid, **kwargs)
+        sfrd = sfrdata(reach_data=rd, segment_data=sd, grid=grid,
+                       model_name=model_name, **kwargs)
         return sfrd
