@@ -261,7 +261,8 @@ def make_graph(fromcomids, tocomids, one_to_many=True):
     from collections import defaultdict
     fromcomids = np.array(fromcomids).astype(int)
     # convert tocomids to ints regardless of (enclosing) dtypes
-    tocomids = [a.astype(int).tolist() for a in map(np.array, tocomids)]
+    #tocomids = [a.astype(int).tolist() for a in map(np.array, tocomids)]
+    tocomids = np.array(tocomids).astype(int)
     tuples = zip(fromcomids, tocomids)
     graph = defaultdict(set)
     for fromcomid, tocomid in tuples:

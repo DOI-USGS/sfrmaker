@@ -12,7 +12,7 @@ def valid_rnos(rnos):
     onebased = np.min(sorted_reaches) == 1
     return consecutive & onebased
 
-def valid_nsegs(nsegs, outsegs=None, increasing=False):
+def valid_nsegs(nsegs, outsegs=None, increasing=True):
     """Check that segment numbers are valid.
 
     Parameters
@@ -23,14 +23,18 @@ def valid_nsegs(nsegs, outsegs=None, increasing=False):
     increasing : bool
         If True, segment numbers must also only increase downstream.
     """
+    # cast to array if list or series
+    nsegs = np.atleast_1d(nsegs)
+    outsegs = np.atleast_1d(outsegs)
     consecutive_and_onebased = valid_rnos(nsegs)
     if increasing:
         assert outsegs is not None
         graph = make_graph(nsegs, outsegs, one_to_many=False)
         monotonic = []
         for s in nsegs:
-            seg_sequence = find_path(graph, s)
-            monotonic.append(np.all(np.array(seg_sequence).diff() > 0))
+            seg_sequence = find_path(graph.copy(), s)
+            monotonic.append(np.all(np.diff(np.array(seg_sequence)) > 0))
+        monotonic = np.all(monotonic)
         return consecutive_and_onebased & monotonic
     else:
         return consecutive_and_onebased
@@ -82,22 +86,62 @@ def rno_nseg_routing_consistent(nseg, outseg, iseg, ireach, rno, outreach):
                                    last_consistent)
     return np.all(segments_consistent)
 
-def routing_is_valid(nseg, outseg, iseg, ireach, rno, outreach):
-    """Check that routing for an SFR dataset is valid.
+def routing_numbering_is_valid(nseg, outseg, iseg, ireach,
+                               rno, outreach, increasing_nseg=True):
+    """Check that routing numbering for an SFR dataset is valid.
 
     * verify that segment numbering is consecutive and starts at 1
         * optionally verify that segment number only increase downstream
     * verify that unique reach numbering (e.g. rno in MODFLOW 6)
         is consecutive and starts at 1
+    * check that routing is consistent between segment connections
+        (MODFLOW-2005 convention of nseg -> outseg)
+        and reach connections (MODFLOW 6 convention based on rno)
 
-    :param nseg:
-    :param outseg:
-    :param iseg:
-    :param ireach:
-    :param rno:
-    :param outreach:
-    :return:
+    An additional check would be all non-outlet connections are
+    listed in nseg and/or rno, but these can be assumed to be outlets
+    (converted to 0) without modifying the nseg or rno.
+
+    Parameters
+    ----------
+    nseg : list or 1D numpy array
+    outseg : list or 1D numpy array
+    iseg : list or 1D numpy array
+    ireach : list or 1D numpy array
+    rno : list or 1D numpy array
+    outreach : list or 1D numpy array
+    increasing_nseg : bool
+        If True, segment numbers must also only increase downstream.
+
+    Returns
+    -------
+    valid
     """
+    return valid_rnos(rno) & \
+           valid_nsegs(nseg, outseg, increasing=increasing_nseg) & \
+           rno_nseg_routing_consistent(nseg, outseg, iseg, ireach,
+                                       rno, outreach)
+
+def routing_is_circular(fromid, toid):
+    """Verify that segments or reaches never route to themselves.
+
+    Parameters
+    ----------
+    fromid : list or 1D array
+        e.g. COMIDS, segments, or rnos
+    toid : list or 1D array
+        routing connections
+    """
+    fromid = np.atleast_1d(fromid)
+    toid = np.atleast_1d(toid)
+
+    graph = make_graph(fromid, toid, one_to_many=False)
+    paths = {fid: find_path(graph, fid) for fid in graph.keys()}
+    # a fromid should not appear more than once in its sequence
+    for k, v in paths.items():
+        if v.count(k) > 1:
+            return True
+    return False
 
 
 
