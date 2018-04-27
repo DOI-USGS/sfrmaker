@@ -1,8 +1,22 @@
 import os
+import time
 from .gis import shp2df, crs, project, get_bbox
 
 
+def get_prj_file(NHDPlus_paths=None, NHDFlowlines=None):
+    if NHDPlus_paths is not None:
+        if isinstance(NHDPlus_paths, str):
+            NHDPlus_paths = [NHDPlus_paths]
+        return os.path.join(NHDPlus_paths[0], 'NHDSnapshot/Hydrography/NHDFlowline.prj')
+    elif NHDFlowlines is not None:
+        if isinstance(NHDFlowlines, str):
+            NHDFlowlines = [NHDFlowlines]
+        return NHDFlowlines[0][:-4] + '.prj'
+
 def get_NHDPlus_v2_filepaths(NHDPlus_paths):
+    print('for basins:')
+    for path in NHDPlus_paths:
+        print(path)
     if isinstance(NHDPlus_paths, str):
         NHDPlus_paths = [NHDPlus_paths]
     NHDFlowlines = [os.path.join(f, 'NHDSnapshot/Hydrography/NHDFlowline.shp')
@@ -48,13 +62,16 @@ def load_NHDPlus_v2(NHDPlus_paths=None,
         Shapefiles will be reprojected to the CRS of the flowlines; all other
         feature types must be supplied in same CRS as flowlines.
     """
+    print("\nloading NHDPlus v2 hydrography data...")
+    ta = time.time()
+
     if NHDPlus_paths is not None:
         NHDFlowlines, PlusFlowlineVAA, PlusFlow, elevslope = \
             get_NHDPlus_v2_filepaths(NHDPlus_paths)
 
     # get crs information from flowline projection file
     if prjfile is None:
-        prjfile = NHDFlowlines if not isinstance(NHDFlowlines, list) else NHDFlowlines[0]
+        prjfile = get_prj_file(NHDPlus_paths, NHDFlowlines)
     nhdcrs = crs(epsg=epsg, proj4=proj4, prjfile=prjfile)
 
     # ensure that filter bbox is in same crs as flowlines
@@ -81,6 +98,7 @@ def load_NHDPlus_v2(NHDPlus_paths=None,
     df = fl[fl_cols].copy()
     df = df.join(pfvaa[pfvaa_cols], how='inner')
     df = df.join(elevs[elevs_cols], how='inner')
+    print("\nload finished in {:.2f}s".format(time.time() - ta))
 
     # add routing information from PlusFlow table;
     df['tocomid'] = get_tocomids(pf, df.index.tolist())
@@ -88,6 +106,8 @@ def load_NHDPlus_v2(NHDPlus_paths=None,
 
 def get_tocomids(pf, fromcomid_list):
     print('\nGetting routing information from NHDPlus Plusflow table...')
+    ta = time.time()
+
     # setup local variables and cull plusflow table to comids in model
     comids = fromcomid_list
     pf = pf.loc[(pf.FROMCOMID.isin(comids)) |
@@ -110,6 +130,7 @@ def get_tocomids(pf, fromcomid_list):
     tocomid = pf.TOCOMID.values
     fromcomid = pf.FROMCOMID.values
     tocomids = [tocomid[fromcomid == c].tolist() for c in comids]
+    print("finished in {:.2f}s\n".format(time.time() - ta))
     return tocomids
 
 def find_next_comid(comid, pftable, comids, max_levels=10):

@@ -173,8 +173,10 @@ class grid:
             # (subsequent instances would be underlying layers for same cell)
             # (this should also work for grids that are missing cells in a given layer;
             # as long as the cell is in at least one layer)
-            df = df.groupby('node').first()
-            df['node'] = df.index # put node back in columns
+            if len(set(df.node).difference(df.groupby('k').get_group(0).node)) != 0:
+                # this may take awhile for large grids
+                df = df.groupby('node').first()
+                df['node'] = df.index # put node back in columns
             structured = True
 
         elif node_col in df.columns:

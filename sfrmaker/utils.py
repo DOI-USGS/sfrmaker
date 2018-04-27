@@ -68,7 +68,7 @@ def pick_toids(routing, elevations):
     Parameters
     ----------
     routing : dict
-        Dictionary of id ints (keys) and to_id lists (values).
+        Dictionary of id ints (keys) and to_id lists or sets (values).
     elevations : dict
         Dictionary of starting elevations (values) for each id (key)
 
@@ -83,6 +83,8 @@ def pick_toids(routing, elevations):
     ta = time.time()
     routing2 = {}
     for k, v in routing.items():
+        if isinstance(v, set):
+            v = list(v)
         if isinstance(v, list):
             elevs = [elevations.get(vv, 1e5) for vv in v]
             routing2[k] = v[np.argmin(elevs)]
@@ -255,19 +257,23 @@ def make_graph(fromcomids, tocomids, one_to_many=True):
     Returns
     -------
     graph : defaultdict
-        Dictionary of lists (tocomids) keyed by values
+        Dictionary of lists or ints (tocomids) keyed by values
         in fromcomids.
     """
     from collections import defaultdict
     fromcomids = np.array(fromcomids).astype(int)
-    # convert tocomids to ints regardless of (enclosing) dtypes
-    #tocomids = [a.astype(int).tolist() for a in map(np.array, tocomids)]
-    tocomids = np.array(tocomids).astype(int)
+    # convert tocomid values to ints regardless of (enclosing) dtypes
+    tocomids = [a.astype(int).tolist() for a in map(np.array, tocomids)]
+
     tuples = zip(fromcomids, tocomids)
-    graph = defaultdict(set)
-    for fromcomid, tocomid in tuples:
-        graph[fromcomid].update({tocomid})
-    if not one_to_many:
+    graph = defaultdict(list)
+    if one_to_many: # tocomids should all be lists (not ints)
+        for fromcomid, tocomid in tuples:
+            v = graph[fromcomid] + tocomid
+            graph[fromcomid] = list(set(v))
+    else: # tocomids should all be ints
+        for fromcomid, tocomid in tuples:
+            graph[fromcomid] = [tocomid]
         graph121 = {}
         for k, v in graph.items():
             assert len(v) == 1, "one_to_many=False but node {} connects to {}".format(k, v)
