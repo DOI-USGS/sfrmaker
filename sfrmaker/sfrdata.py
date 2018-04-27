@@ -2,6 +2,7 @@ import sys
 sys.path.append('/Users/aleaf/Documents/GitHub/flopy3')
 import numpy as np
 import pandas as pd
+from shapely.geometry import LineString
 import flopy
 from .utils import renumber_segments, find_path, make_graph
 from .checks import valid_rnos, valid_nsegs, rno_nseg_routing_consistent
@@ -140,6 +141,7 @@ class sfrdata:
 
         if not self._valid_nsegs(increasing=enforce_increasing_nsegs):
             self.reset_segments()
+
         # establish rno routing
         # set_outreaches checks for valid rnos and resets them if not
         # resets out reaches either way using segment data
@@ -280,7 +282,9 @@ class sfrdata:
         # transfer supplied segment data to default template
         else:
             sd = sfrdata.get_empty_segment_data(len(segment_data))
-        segment_data.sort_values(by='nseg', inplace=True)
+        if 'per' not in segment_data.columns:
+            segment_data['per'] = 0
+        segment_data.sort_values(by=['per', 'nseg'], inplace=True)
         segment_data.index = range(len(segment_data))
         for c in segment_data.columns:
             sd[c] = segment_data[c].astype(sfrdata.dtypes.get(c, np.float32))
@@ -326,7 +330,7 @@ class sfrdata:
         isasegment = np.in1d(self.segment_data.outseg,
                              self.segment_data.nseg)
         isasegment = isasegment | (self.segment_data.outseg < 0)
-        self.segment_data.loc[~isasegment, 'outseg'] = 0.
+        self.segment_data.loc[~isasegment, 'outseg'] = 0
 
     def reset_segments(self):
         """Reset the segment numbering so that is consecutive,
@@ -337,6 +341,8 @@ class sfrdata:
         self.segment_data['outseg'] = [r[s] for s in self.segment_data.outseg]
         self.reach_data['iseg'] = [r[s] for s in self.reach_data.iseg]
         self.reach_data['outseg'] = [r[s] for s in self.reach_data.outseg]
+        self.segment_data.sort_values(by=['per', 'nseg'], inplace=True)
+        self.reach_data.sort_values(by=['iseg', 'ireach'], inplace=True)
 
     def reset_reaches(self):
         """Ensure that the reaches in each segment are numbered
@@ -357,6 +363,7 @@ class sfrdata:
         Uses the segment routing specified for the first stress period to route reaches between segments.
         """
         self.reach_data.sort_values(by=['iseg', 'ireach'], inplace=True)
+        self.segment_data.sort_values(by=['per', 'nseg'], inplace=True)
         if not self._valid_rnos():
             self.reach_data['rno'] = np.arange(1, len(self.reach_data) + 1)
         self.reset_reaches()  # ensure that each segment starts with reach 1
@@ -365,18 +372,20 @@ class sfrdata:
         outseg = self.segment_routing
         reach1IDs = dict(zip(rd[rd.ireach == 1].iseg,
                              rd[rd.ireach == 1].rno))
+        ireach = rd.ireach.values
+        iseg = rd.iseg.values
+        rno = rd.rno.values
         outreach = []
         for i in range(len(rd)):
             # if at the end of reach data or current segment
-            if i + 1 == len(rd) or rd.ireach[i + 1] == 1:
-                nextseg = outseg[rd.iseg[i]]  # get next segment
+            if i + 1 == len(rd) or ireach[i+1] == 1:
+                nextseg = outseg[iseg[i]]  # get next segment
                 if nextseg > 0:  # current reach is not an outlet
-                    nextrchid = reach1IDs[
-                        nextseg]  # get reach 1 of next segment
+                    nextrchid = reach1IDs[nextseg] # get reach 1 of next segment
                 else:
                     nextrchid = 0
             else:  # otherwise, it's the next reachID
-                nextrchid = rd.rno[i + 1]
+                nextrchid = rno[i + 1]
             outreach.append(nextrchid)
         self.reach_data['outreach'] = outreach
 
@@ -593,3 +602,36 @@ class sfrdata:
         if filename is None:
             filename = self.model_name + '_sfrlines.shp'
         df2shp(self.reach_data, filename, epsg=self.grid.crs.epsg)
+
+    def export_routing(self, filename=None):
+        """Export linework shapefile showing all routing connections between SFR reaches.
+        A length field containing the distance between connected reaches
+        can be used to filter for the longest connections in a GIS.
+        """
+        if filename is None:
+            filename = self.model_name + '_sfr_routing.shp'
+        rd = self.reach_data[['node', 'iseg', 'ireach', 'rno', 'outreach']].copy()
+        rd.sort_values(by='rno', inplace=True)
+        cellgeoms = self.grid.df.loc[rd.node.values, 'geometry']
+
+        # get the cell centers for each reach
+        x0 = [g.centroid.x for g in cellgeoms]
+        y0 = [g.centroid.y for g in cellgeoms]
+        loc = dict(zip(rd.rno, zip(x0, y0)))
+
+        # make lines of the reach connections between cell centers
+        geoms = []
+        lengths = []
+        for i, r in enumerate(rd.rno.values):
+            x0, y0 = loc[r]
+            outreach = rd.outreach.values[i]
+            if outreach == 0:
+                x1, y1 = x0, y0
+            else:
+                x1, y1 = loc[outreach]
+            geoms.append(LineString([(x0, y0), (x1, y1)]))
+            lengths.append(np.sqrt((x1 - x0) ** 2 + (y1 - y0) ** 2))
+        lengths = np.array(lengths)
+        rd['length'] = lengths
+        rd['geometry'] = geoms
+        df2shp(rd, filename, epsg=self.grid.crs.epsg)

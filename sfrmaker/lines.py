@@ -12,7 +12,7 @@ from . import grid
 from .utils import make_graph, find_path, unit_conversion, \
     pick_toids, width_from_arbolate_sum, arbolate_sum, \
     consolidate_reach_conductances, renumber_segments
-from .nhdplus_utils import load_NHDPlus_v2
+from .nhdplus_utils import load_NHDPlus_v2, get_prj_file
 from .grid import grid as gridclass
 from .sfrdata import sfrdata
 from .checks import routing_is_circular
@@ -110,10 +110,10 @@ class lines:
         # compare the private routing attribute
         # to current values in reach data
         df_routing = dict(zip(self.df.id, self.df.toid))
-        return df_routing == self._routing
+        return df_routing != self._routing
 
-    def cull(self, feature, feature_crs=None,
-             inplace=False):
+    def cull(self, feature, simplify=False, tol=None,
+             feature_crs=None, inplace=False):
         """Cull linework; retaining only the
         lines that intersect a polygon feature.
 
@@ -126,14 +126,22 @@ class lines:
             If True, the attribute .df is modified;
             if False, a copy of .df is returned.
         """
+        print('\nCulling hydrography to active area...')
+        ta = time.time()
         feature = read_polygon_feature(feature, self.crs,
                                        feature_crs=feature_crs)
-
-        intersects = np.array([g.intersects(feature) for g in self.df.geometry])
+        if simplify:
+            print('simplification tolerance: {:.2f}'.format(tol))
+            feature = feature.simplify(tol)
+        lines = self.df.geometry.tolist()
+        print('starting lines: {:,d}'.format(len(lines)))
+        intersects = np.array([g.intersects(feature) for g in lines])
+        print('remaining lines: {:,d}'.format(np.sum(intersects)))
         if inplace:
             self.df = self.df.loc[intersects]
         else:
             return self.df.loc[intersects].copy()
+        print("finished in {:.2f}s\n".format(time.time() - ta))
 
     def intersect(self, grid, size_thresh=1e5):
         """Intersect linework with a model grid.
@@ -165,10 +173,11 @@ class lines:
         stream_linework = self.df.geometry.tolist()
         id_list = self.df.id.tolist()
 
-        print("\nIntersecting flowlines with grid cells...")
+        ncells, nlines = len(grid_polygons), len(stream_linework)
+        print("\nIntersecting {:,d} flowlines with {:,d} grid cells...".format(nlines, ncells))
         # building the spatial index takes a while
         # only use spatial index if number of tests exceeds size_thresh
-        size = len(grid_polygons) * len(stream_linework)
+        size = ncells * nlines
         if size < size_thresh:
             grid_intersections = intersect(grid_polygons, stream_linework)
         else:
@@ -200,6 +209,8 @@ class lines:
         assert self.crs.proj4 is not None, "No proj4 string for flowlines"
         assert dest_proj4 is not None, "No destination CRS."
 
+        print('\nreprojecting hydrography from\n{}\nto\n{}\n'.format(self.crs.proj4,
+                                                                     dest_proj4))
         geoms = project(self.df.geometry, self.crs.proj4, dest_proj4)
         assert np.isfinite(np.max(geoms[0].xy[0])), \
             "Invalid reprojection; check CRS for lines and grid."
@@ -234,7 +245,7 @@ class lines:
 
         # ensure that filter bbox is in same crs as flowlines
         if filter is not None and not isinstance(filter, tuple):
-                filter = get_bbox(filter, shpfile_crs)
+            filter = get_bbox(filter, shpfile_crs)
 
         df = shp2df(shapefile, filter)
         assert 'geometry' in df.columns, "No feature geometries found in {}.".format(shapefile)
@@ -323,7 +334,7 @@ class lines:
                              epsg=epsg, proj4=proj4, prjfile=prjfile)
 
         if prjfile is None:
-            prjfile = NHDFlowlines if not isinstance(NHDFlowlines, list) else NHDFlowlines[0]
+            prjfile = get_prj_file(NHDPlus_paths, NHDFlowlines)
 
         # convert arbolate sums from km to m
         df['asum'] = df.ArbolateSu * 1000
@@ -373,13 +384,24 @@ class lines:
         -------
         sfrdata : sfrmaker.sfrdata instance
         """
+        print("\nCreating sfr dataset...")
+        totim = time.time()
+
         if grid is None and sr is not None:
+            print('\nCreating grid class instance from flopy SpatialReference...')
+            ta = time.time()
             grid = gridclass.from_sr(sr, active_area=active_area)
+            print("finished in {:.2f}s\n".format(time.time() - ta))
+
         # reproject the flowlines if they aren't in same CRS as grid
         if self.crs != grid.crs:
             self.reproject(grid.crs.proj4)
         if grid.active_area is not None:
-            self.cull(grid.active_area, inplace=True)
+            # compute an effective mean length for grid cells
+            mean_area = np.mean([g.area for g in grid.df.geometry])
+            mean_cell_length = np.sqrt(mean_area)
+            self.cull(grid.active_area, inplace=True,
+                      simplify=True, tol=mean_cell_length)
         elif grid._bounds is not None: # cull to grid bounding box if already computed
             self.cull(box(*grid._bounds), inplace=True)
         if model_name is None:
@@ -395,7 +417,12 @@ class lines:
         to_one = np.isscalar(np.squeeze(list(routing.values()))[0])
         if not to_one:
             routing = pick_toids(routing, elevup)
-        self.df.toid = [routing[i] for i in self.df.id.tolist()]
+        valid_ids = routing.keys()
+        # df.toid column is basis for routing attributes
+        # all paths terminating in invalid toids (outside of the model)
+        # will be none; set invalid toids = 0
+        self.df.toid = [routing[i] if routing[i] in valid_ids else 0
+                        for i in self.df.id.tolist()]
 
         # intersect lines with model grid to get preliminary reaches
         rd = self.intersect(grid)
@@ -487,6 +514,7 @@ class lines:
         # starting at 1 and only increasing downstream
         r = renumber_segments(nseg, outseg)
         # map new segment numbers to line_ids
+        line_id = {r[s]: lid for s, lid in line_id.items()}
         #segment2 = {lid: r[s] for lid, s in segment.items()}
         #line_id2 = {s: lid for lid, s in segment2.items()}
 
@@ -520,4 +548,5 @@ class lines:
         rd = rd[[c for c in sfrdata.rdcols if c in rd.columns]].copy()
         sfrd = sfrdata(reach_data=rd, segment_data=sd, grid=grid,
                        model_name=model_name, **kwargs)
+        print("\nTime to create sfr dataset: {:.2f}s\n".format(time.time() - totim))
         return sfrd
