@@ -5,7 +5,8 @@ import fiona
 from shapely.ops import unary_union
 from shapely.geometry import Polygon
 import flopy
-from .gis import shp2df, get_proj4, crs, read_polygon_feature
+from .gis import shp2df, get_proj4, crs, read_polygon_feature, \
+    build_rtree_index, intersect_rtree, intersect
 fm = flopy.modflow
 
 class grid:
@@ -42,6 +43,9 @@ class grid:
         if crs_units is not None:
             self.crs._length_units = crs_units
 
+        # spatial index for intersecting
+        self._idx = None
+
         # set the active area where streams will be simulated
         self._bounds = bounds
         self._active_area = None
@@ -55,6 +59,7 @@ class grid:
 
     @property
     def active_area(self):
+        """Shapely Polygon delinating area where SFR will be simulated."""
         return self._active_area
 
     @property
@@ -73,37 +78,68 @@ class grid:
         return self._bounds
 
     @property
+    def spatial_index(self):
+        """Rtree index for intersecting features with model grid."""
+        if self._idx is None:
+            self._idx = build_rtree_index(self.df.geometry.tolist())
+        return self._idx
+
+    @property
     def lenuni(self):
         return self.units_dict.get(self.model_units, 0)
 
-    def _set_active_area(self, feature=None, ibound_array=None):
+    def _set_active_area(self, feature=None):
         """Establish a polygon that defines the portion of the
         grid where streams will be represented.
+
+        feature : shapely Polygon, list of Polygons, or shapefile path
+            Polygons must be in same CRS as linework; shapefile
+            features will be reprojected if their crs is different.
+        isfr : list or ndarray of boolean values
+            Length must be equal to nrow * ncol, or the number of nodes in a layer (
+            Indicates whether or not a particular cell can have an SFR reach.
+            (0 or False indicates no SFR).
         """
         if feature is not None:
             self._active_area = read_polygon_feature(feature, self.crs)
 
-        # include all i, j locations with at least one active cell
-        elif ibound_array is not None:
-            print('Creating active area from the ibound array... ' +
-                  '(make take a while for large grids)')
-            if self.structured:
-                active = ((ibound_array > 0).sum(axis=0) > 0)
-                isactive = active[self.df.i.values,
-                                  self.df.j.values]
-            else:
-                active = ibound_array > 0
-                isactive = active[grid.node.values]
+            # if a polygon feature is supplied but all cells are active
+            # set isfr from polygon
+            if self.df.isfr.sum() == len(self.df):
+                self._set_isfr_from_active_area()
 
-            self.df['isactive'] = isactive
-            geoms = grid.df.geometry.values[isactive]
+        # otherwise if no feature is supplied by all cells are active
+        # leave active area as none
+        elif self.df.isfr.sum() == len(self.df):
+            pass
+
+        # no feature was supplied but some cells are inactive
+        else:
+            print('Creating active area polygon from unary_union of cells with isfr=1. '
+                  'This will take a while for large grids. To avoid this step,'
+                  'supply a shapefile or shapely polygon of the SFR domain when'
+                  'instantiating the grid objec.')
+            geoms = self.df.geometry.values[self.df.isfr == 1]
             self._active_area = unary_union(geoms)
+
+    def _set_isfr_from_active_area(self):
+        """Intersect model grid cells with active area polygon,
+        assign isfr = 1 to cells that intersect."""
+        #intersections = intersect_rtree(self.df.geometry.tolist(),
+        #                                [self.active_area],
+        #                                index=self.spatial_index)
+        print('setting isfr values...')
+        intersections = intersect(self.df.geometry.tolist(),
+                                        [self.active_area])
+        self.df.sort_values(by='node', inplace=True)
+        self.df['isfr'] = 0
+        self.df.loc[np.squeeze(intersections), 'isfr'] = 1
 
     def get_node(self, k, i, j):
         return k * self.nrow * self.ncol + i * self.ncol + j
 
     @staticmethod
-    def from_sr(sr=None, active_area=None,
+    def from_sr(sr=None, active_area=None, isfr=None,
                 epsg=None, proj4=None, prjfile=None):
 
         vertices = sr.vertices
@@ -119,6 +155,10 @@ class grid:
             proj4 = sr.proj4_str
         if prjfile is not None:
             proj4 = get_proj4(prjfile)
+        if isfr is not None:
+            assert isfr.size == len(df), \
+                "isfr column must be of same length as the number of nodes in a layer."
+            df['isfr'] = isfr.ravel()
         return grid.from_dataframe(df,
                                    bounds=sr.bounds, active_area=active_area,
                                    epsg=epsg, proj4=proj4, prjfile=prjfile)
@@ -126,6 +166,7 @@ class grid:
     @staticmethod
     def from_shapefile(shapefile=None,
                        node_col='node', kcol='k', icol='i', jcol='j',
+                       isfr_col='isfr',
                        active_area=None,
                        epsg=None, proj4=None, prjfile=None):
 
@@ -139,12 +180,14 @@ class grid:
         assert 'geometry' in df.columns, "No feature geometries found in {}.".format(shapefile)
 
         return grid.from_dataframe(df, node_col=node_col, kcol=kcol, icol=icol, jcol=jcol,
+                                   isfr_col=isfr_col,
                                    bounds=bounds, active_area=active_area,
                                    epsg=epsg, proj4=proj4, prjfile=prjfile)
 
     @staticmethod
     def from_dataframe(df=None,
                        node_col='node', kcol='k', icol='i', jcol='j',
+                       isfr_col='isfr',
                        geometry_column='geometry',
                        model_units='ft', active_area=None,
                        epsg=None, proj4=None, prjfile=None, **kwargs):
@@ -189,6 +232,11 @@ class grid:
             df['node'] = np.arange(len(df))
         else:
             df['node'] = np.arange(len(df))
+
+        if isfr_col in df.columns:
+            df['isfr'] = df[isfr_col].astype(int)
+        else:
+            df['isfr'] = 1
 
         return grid(df, active_area=active_area,
                     model_units=model_units, structured=structured,

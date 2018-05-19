@@ -20,7 +20,7 @@ if not os.path.isdir(outdir):
 
 lns = lines.from_NHDPlus_v2(NHDPlus_paths=NHDPlus_paths,
                             filter='quiver_outlet_area.shp')
-nrow, ncol = 112, 160
+nrow, ncol = 35, 35
 xll, yll = 497812, 1160724
 dxy = 1000 /.3048
 sr = flopy.utils.SpatialReference(delr=np.ones(ncol)*dxy,
@@ -28,7 +28,7 @@ sr = flopy.utils.SpatialReference(delr=np.ones(ncol)*dxy,
                                   lenuni=1,
                                   xll=xll, yll=yll, rotation=0,
                                   proj4_str='+init=epsg:5070')
-
+sr.write_shapefile('temp/grid.shp')
 sfr = lns.to_sfr(sr=sr, active_area='quiver_outlet_area.shp')
 
 sfr.reach_data['strtop'] = sfr.interpolate_to_reaches('elevup', 'elevdn')

@@ -128,19 +128,30 @@ class lines:
         """
         print('\nCulling hydrography to active area...')
         ta = time.time()
+        df = self.df.copy()
         feature = read_polygon_feature(feature, self.crs,
                                        feature_crs=feature_crs)
         if simplify:
             print('simplification tolerance: {:.2f}'.format(tol))
-            feature = feature.simplify(tol)
-        lines = self.df.geometry.tolist()
-        print('starting lines: {:,d}'.format(len(lines)))
-        intersects = np.array([g.intersects(feature) for g in lines])
-        print('remaining lines: {:,d}'.format(np.sum(intersects)))
-        if inplace:
-            self.df = self.df.loc[intersects]
+            feature_s = feature.simplify(tol).buffer(tol)
         else:
-            return self.df.loc[intersects].copy()
+            feature_s = feature
+        lines = df.geometry.tolist()
+        print('starting lines: {:,d}'.format(len(lines)))
+        #isn = np.array([g.intersection(feature_s) for g in lines])
+        #df['geometry'] = isn
+        #drop = np.array([g.is_empty for g in isn])
+        #df = df.loc[~drop]
+        intersects = [g.intersects(feature_s) for g in lines]
+        df = df.loc[intersects]
+        df['geometry'] = [g.intersection(feature) for g in df.geometry]
+        drop = np.array([g.is_empty for g in df.geometry.tolist()])
+        df = df.loc[~drop]
+        print('remaining lines: {:,d}'.format(len(df)))
+        if inplace:
+            self.df = df
+        else:
+            return df
         print("finished in {:.2f}s\n".format(time.time() - ta))
 
     def intersect(self, grid, size_thresh=1e5):
@@ -178,10 +189,12 @@ class lines:
         # building the spatial index takes a while
         # only use spatial index if number of tests exceeds size_thresh
         size = ncells * nlines
-        if size < size_thresh:
+        # don't spend time on a spatial index if it isn't created and problem is small
+        if size < size_thresh and grid._idx is None:
             grid_intersections = intersect(grid_polygons, stream_linework)
         else:
-            grid_intersections = intersect_rtree(grid_polygons, stream_linework)
+            idx = grid.spatial_index
+            grid_intersections = intersect_rtree(grid_polygons, stream_linework, index=idx)
 
         # create preliminary reaches
         reach_data = setup_reach_data(stream_linework, id_list,
@@ -351,7 +364,8 @@ class lines:
                                     length_units='m', height_units='m',
                                     epsg=epsg, proj4=proj4, prjfile=prjfile)
 
-    def to_sfr(self, grid=None, sr=None, active_area=None,
+    def to_sfr(self, grid=None, sr=None,
+               active_area=None, isfr=None,
                minimum_reach_length=None,
                consolidate_conductance=False, one_reach_per_cell=False,
                model_name=None,
@@ -390,18 +404,14 @@ class lines:
         if grid is None and sr is not None:
             print('\nCreating grid class instance from flopy SpatialReference...')
             ta = time.time()
-            grid = gridclass.from_sr(sr, active_area=active_area)
-            print("finished in {:.2f}s\n".format(time.time() - ta))
+            grid = gridclass.from_sr(sr, active_area=active_area, isfr=isfr)
+            print("grid class created in {:.2f}s\n".format(time.time() - ta))
 
         # reproject the flowlines if they aren't in same CRS as grid
         if self.crs != grid.crs:
             self.reproject(grid.crs.proj4)
         if grid.active_area is not None:
-            # compute an effective mean length for grid cells
-            mean_area = np.mean([g.area for g in grid.df.geometry])
-            mean_cell_length = np.sqrt(mean_area)
-            self.cull(grid.active_area, inplace=True,
-                      simplify=True, tol=mean_cell_length)
+            self.cull(grid.active_area, inplace=True, simplify=True, tol=2000)
         elif grid._bounds is not None: # cull to grid bounding box if already computed
             self.cull(box(*grid._bounds), inplace=True)
         if model_name is None:

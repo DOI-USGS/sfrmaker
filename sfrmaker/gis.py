@@ -126,13 +126,13 @@ def build_rtree_index(geom):
     print("finished in {:.2f}s".format(time.time() - ta))
     return idx
 
-def intersect_rtree(geom1, geom2):
+def intersect_rtree(geom1, geom2, index=None):
     """Intersect features in geom1 with those in geom2. For each feature in geom2, return a list of
      the indices of the intersecting features in geom1.
 
     Parameters:
     ----------
-    geom1 : list or rtree spatial index object
+    geom1 : list
         list of shapely geometry objects
     geom2 : list
         list of shapely polygon objects to be intersected with features in geom1
@@ -144,10 +144,10 @@ def intersect_rtree(geom1, geom2):
     A list of the same length as geom2; containing for each feature in geom2,
     a list of indicies of intersecting geometries in geom1.
     """
-    if isinstance(geom1, list):
+    if index is None:
         idx = build_rtree_index(geom1)
     else:
-        idx = geom1
+        idx = index
     isfr = []
     print('\nIntersecting {} features...'.format(len(geom2)))
     ta = time.time()
