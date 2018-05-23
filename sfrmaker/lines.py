@@ -29,12 +29,12 @@ class lines:
         toid: integers representing routing connections
         ...
         geometry: shapely LineString objects for each feature
-    length_units : 'm' or 'ft'
+    length_units : 'meters' or 'feet'
         Length units for feature attributes (e.g. width, arbolate sum, etc.)
-        (default 'm')
-    height_units : 'm' or 'ft'
+        (default 'meters')
+    height_units : 'meters' or 'feet'
         Length units for elevation attributes
-        (default 'm')
+        (default 'meters')
     epsg: int
         EPSG code identifying Coordinate Reference System (CRS)
         for features in df.geometry
@@ -49,7 +49,7 @@ class lines:
     """
 
     def __init__(self, df=None,
-                 length_units='m', height_units='m',
+                 length_units='meters', height_units='meters',
                  epsg=None, proj4=None, prjfile=None):
 
         self.df = df
@@ -62,13 +62,13 @@ class lines:
 
     @property
     def to_m(self):
-        if self.length_units == 'ft':
+        if self.length_units == 'feet':
             return 0.3048
         return 1.0
 
     @property
     def to_ft(self):
-        if self.length_units == 'ft':
+        if self.length_units == 'feet':
             return 1.
         return 1/0.3048
 
@@ -239,7 +239,7 @@ class lines:
                        up_elevation_column='elevup',
                        dn_elevation_column='elevdn',
                        name_column='name',
-                       length_units='m', height_units='m',
+                       length_units='meters', height_units='meters',
                        filter=None,
                        epsg=None, proj4=None, prjfile=None):
         """
@@ -284,7 +284,7 @@ class lines:
                        dn_elevation_column='elevdn',
                        geometry_column='geometry',
                        name_column='name',
-                       length_units='m', height_units='m',
+                       length_units='meters', height_units='meters',
                        epsg=None, proj4=None, prjfile=None):
 
         assert geometry_column in df.columns, \
@@ -361,7 +361,7 @@ class lines:
         return lines.from_dataframe(df, id_column='COMID',
                                     routing_column='tocomid',
                                     name_column='GNIS_NAME',
-                                    length_units='m', height_units='m',
+                                    length_units='meters', height_units='meters',
                                     epsg=epsg, proj4=proj4, prjfile=prjfile)
 
     def to_sfr(self, grid=None, sr=None,
@@ -407,6 +407,9 @@ class lines:
             grid = gridclass.from_sr(sr, active_area=active_area, isfr=isfr)
             print("grid class created in {:.2f}s\n".format(time.time() - ta))
 
+        # print grid information to screen
+        print(grid)
+
         # reproject the flowlines if they aren't in same CRS as grid
         if self.crs != grid.crs:
             self.reproject(grid.crs.proj4)
@@ -417,8 +420,8 @@ class lines:
         if model_name is None:
             model_name = 'model'
 
-        mult = unit_conversion[self.length_units+grid.model_units]
-        mult_h = unit_conversion[self.height_units+grid.model_units]
+        mult = unit_conversion.get(self.length_units+grid.model_units, 1.)
+        mult_h = unit_conversion.get(self.height_units+grid.model_units, 1.)
 
         # convert routing connections (toid column) from lists (one-to-many)
         # to ints (one-to-one or many-to-one)

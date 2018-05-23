@@ -4,8 +4,8 @@ import numpy as np
 import pandas as pd
 from shapely.geometry import Point
 
-unit_conversion = {'ftm': 0.3048,
-                   'mft': 1/.3048}
+unit_conversion = {'feetmeters': 0.3048,
+                   'metersfeet': 1/.3048}
 
 def consolidate_reach_conductances(rd, keep_only_dominant=False):
     """For model cells with multiple SFR reaches, shift all conductance to widest reach,
