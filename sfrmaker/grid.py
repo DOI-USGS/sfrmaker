@@ -14,17 +14,17 @@ class grid:
 
     Parameters
     ----------
-    model_units : str ('ft' or 'm')
+    model_units : str ('feet' or 'meters')
         Computation units units of model
-    crs_units : str ('ft' or 'm')
+    crs_units : str ('feet' or 'meters')
         Units of coordinate reference system for grid.
         (optional; otherwise inferred from epsg, proj4, or prjfile inputs.
 
     """
-    units_dict = {'ft': 1, 'm': 2}
+    units_dict = {'feet': 1, 'meters': 2}
 
     def __init__(self, df, structured=True,
-                 model_units='ft', crs_units=None,
+                 model_units='feet', crs_units=None,
                  bounds=None, active_area=None,
                  epsg=None, proj4=None, prjfile=None):
 
@@ -49,6 +49,7 @@ class grid:
         # set the active area where streams will be simulated
         self._bounds = bounds
         self._active_area = None
+        self._active_area_defined_by = None
         self._set_active_area(active_area)
 
     def __setattr__(self, key, value):
@@ -56,6 +57,22 @@ class grid:
             self._set_active_area(value)
         else:
             super(grid, self).__setattr__(key, value)
+
+    def __repr__(self):
+        s = 'Model grid information\n'
+        if self.structured:
+            s += 'structured grid\nnnodes: {:,d}\n'.format(len(self.df))
+            for dim in ['nlay', 'nrow', 'ncol']:
+                s += '{}: {:d}\n'.format(dim, self.__dict__[dim])
+        else:
+            s += 'unstructured grid\n'
+            s += 'nnodes: {:,d}\n'.format(len(self.df))
+        s += 'model length units: {}\n'.format(self.model_units)
+        s += 'crs: {}'.format(self.crs)
+        s += 'bounds: {:.2f}, {:.2f}, {:.2f}, {:.2f}\n'.format(*self.bounds)
+        s += 'active area defined by: {}'.format(self._active_area_defined_by)
+        s += '\n'
+        return s
 
     @property
     def active_area(self):
@@ -107,11 +124,17 @@ class grid:
             # set isfr from polygon
             if self.df.isfr.sum() == len(self.df):
                 self._set_isfr_from_active_area()
+                if isinstance(feature, str):
+                    self._active_area_defined_by = feature
+                else:
+                    self._active_area_defined_by = 'supplied Polygon feature(s)'
+            else:
+                self._active_area_defined_by = 'isfr array'
 
-        # otherwise if no feature is supplied by all cells are active
+        # otherwise if no feature is supplied but all cells are active
         # leave active area as none
         elif self.df.isfr.sum() == len(self.df):
-            pass
+            self._active_area_defined_by = 'all cells'
 
         # no feature was supplied but some cells are inactive
         else:
@@ -121,6 +144,7 @@ class grid:
                   'instantiating the grid objec.')
             geoms = self.df.geometry.values[self.df.isfr == 1]
             self._active_area = unary_union(geoms)
+            self._active_area_defined_by = 'isfr array'
 
     def _set_isfr_from_active_area(self):
         """Intersect model grid cells with active area polygon,
@@ -160,6 +184,7 @@ class grid:
                 "isfr column must be of same length as the number of nodes in a layer."
             df['isfr'] = isfr.ravel()
         return grid.from_dataframe(df,
+                                   model_units=sr.model_length_units,
                                    bounds=sr.bounds, active_area=active_area,
                                    epsg=epsg, proj4=proj4, prjfile=prjfile)
 
@@ -189,7 +214,7 @@ class grid:
                        node_col='node', kcol='k', icol='i', jcol='j',
                        isfr_col='isfr',
                        geometry_column='geometry',
-                       model_units='ft', active_area=None,
+                       model_units='feet', active_area=None,
                        epsg=None, proj4=None, prjfile=None, **kwargs):
 
         assert geometry_column in df.columns, \

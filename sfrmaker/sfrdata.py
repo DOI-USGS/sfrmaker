@@ -30,10 +30,10 @@ class sfrdata:
         Table containing information on the segments (optional).
     grid : sfrmaker.grid class instance
     model_length_units : str
-        'm' or 'ft'
+        'meters' or 'feet'
     model_time_units : str
         's': seconds
-        'm': minutes
+        'meters': minutes
         'h': hours
         'd': days
         'y': years
@@ -107,7 +107,7 @@ class sfrdata:
 
     def __init__(self, reach_data,
                  segment_data=None, grid=None,
-                 model_length_units='ft', model_time_units='d',
+                 model_length_units='feet', model_time_units='d',
                  enforce_increasing_nsegs=True,
                  model_name=None,
                  **kwargs):
@@ -175,7 +175,7 @@ class sfrdata:
     @property
     def _lenuni(self):
         """MODFLOW length units code"""
-        d = {"ft": 1, "m": 2}
+        d = {"feet": 1, "meters": 2}
         return d[self.model_length_units]
 
     @property
