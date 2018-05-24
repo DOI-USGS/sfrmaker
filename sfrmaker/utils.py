@@ -535,13 +535,14 @@ def width_from_arbolate_sum(arbolate_sum, minimum_width=1):
     width: float
         Estimated width in meters (original formula returned width in ft)
     """
-    w = 0.3048 * 0.1193 * (arbolate_sum) ** 0.5032
-    if isinstance(arbolate_sum, np.ndarray):
-        w[np.isnan(w)] = float(minimum_width)
-    elif np.isnan(w):
-        w = minimum_width
-    else:
-        pass
+    scalar = np.isscalar(arbolate_sum)
+    if scalar:
+        arbolate_sum = np.array([arbolate_sum])
+    w = 0.3048 * 0.1193 * arbolate_sum ** 0.5032
+    fill = np.isnan(w) | (w == 0)
+    w[fill] = minimum_width
+    if scalar:
+        return w[0]
     return w
 
 
