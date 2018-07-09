@@ -143,10 +143,15 @@ class lines:
         #drop = np.array([g.is_empty for g in isn])
         #df = df.loc[~drop]
         intersects = [g.intersects(feature_s) for g in lines]
+        if not np.any(intersects):
+            print('No lines in active area. Check CRS.')
+            quit()
+
         df = df.loc[intersects]
         df['geometry'] = [g.intersection(feature) for g in df.geometry]
         drop = np.array([g.is_empty for g in df.geometry.tolist()])
-        df = df.loc[~drop]
+        if len(drop) > 0:
+            df = df.loc[~drop]
         print('remaining lines: {:,d}'.format(len(df)))
         if inplace:
             self.df = df
