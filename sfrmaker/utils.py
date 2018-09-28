@@ -28,7 +28,7 @@ def consolidate_reach_conductances(rd, keep_only_dominant=False):
     """
     print('\nAssigning total SFR conductance to dominant reach in cells with multiple reaches...')
     # use value of 1 for streambed k, since k would be constant within a cell
-    rd['cond'] = rd.width * rd.length * rd.strhc1 / rd.strthick
+    rd['cond'] = rd.width * rd.rchlen * rd.strhc1 # assume value of 1 for strthick
 
     # make a new column that designates whether a reach is dominant in each cell
     # dominant reaches include those not collocated with other reaches, and the longest collocated reach
@@ -50,10 +50,9 @@ def consolidate_reach_conductances(rd, keep_only_dominant=False):
     Cond_sums = rd[['node', 'cond']].groupby('node').agg('sum').cond
     rd['Cond_sum'] = [Cond_sums[c] for c in rd.node]
 
-    # Calculate a new length for widest reaches, set length in secondary collocated reaches to 1
-    # also set the K values in the secondary cells to 0
+    # Calculate a new streambed Kv for widest reaches, set streambed Kv in secondary collocated reaches to 0
     m1d = rd.loc[rd.Dominant]
-    rd.loc[rd.Dominant, 'strhc1'] = m1d.Cond_sum * m1d.strthick / (m1d.length * m1d.width)
+    rd.loc[rd.Dominant, 'strhc1'] = m1d.Cond_sum / (m1d.rchlen * m1d.width)
     rd.loc[~rd.Dominant, 'strhc1'] = 0.
     if keep_only_dominant:
         print('Dropping {} non-dominant reaches...'.format(np.sum(~rd.Dominant)))
