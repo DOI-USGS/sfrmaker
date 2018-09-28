@@ -240,7 +240,8 @@ class lines:
                        id_column='id',
                        routing_column='toid',
                        arbolate_sum_column='asum',
-                       width_column='width',
+                       width1_column='width1',
+                       width2_column='width2',
                        up_elevation_column='elevup',
                        dn_elevation_column='elevdn',
                        name_column='name',
@@ -272,7 +273,8 @@ class lines:
                                     id_column=id_column,
                                     routing_column=routing_column,
                                     arbolate_sum_column=arbolate_sum_column,
-                                    width_column=width_column,
+                                    width1_column=width1_column,
+                                    width2_column=width2_column,
                                     up_elevation_column=up_elevation_column,
                                     dn_elevation_column=dn_elevation_column,
                                     name_column=name_column,
@@ -284,7 +286,8 @@ class lines:
                        id_column='id',
                        routing_column='toid',
                        arbolate_sum_column='asum',
-                       width_column='width',
+                       width1_column='width1',
+                       width2_column='width2',
                        up_elevation_column='elevup',
                        dn_elevation_column='elevdn',
                        geometry_column='geometry',
@@ -301,14 +304,15 @@ class lines:
         rename_cols = {id_column: 'id',
                        routing_column: 'toid',
                        arbolate_sum_column: 'asum',
-                       width_column: 'width',
+                       width1_column: 'width1',
+                       width2_column: 'width2',
                        up_elevation_column: 'elevup',
                        dn_elevation_column: 'elevdn',
                        name_column: 'name'}
 
         rename_cols = {k:v for k, v in rename_cols.items() if k in df.columns}
         df.rename(columns=rename_cols, inplace=True)
-        column_order = ['id', 'toid', 'asum', 'width', 'elevup', 'elevdn', 'name', 'geometry']
+        column_order = ['id', 'toid', 'asum', 'width1', 'width2', 'elevup', 'elevdn', 'name', 'geometry']
         for c in column_order:
             if c not in df.columns:
                 df[c] = 0
@@ -445,31 +449,37 @@ class lines:
         # intersect lines with model grid to get preliminary reaches
         rd = self.intersect(grid)
 
-        print("Computing widths...")
         # length in linework units (not model units)
         rd['rchlen'] = np.array([g.length for g in rd.geometry])
-        lengths = rd[['line_id', 'rchlen']].copy() # length of each intersected line fragment
-        groups = lengths.groupby('line_id') # fragments grouped by parent line
+        lengths = rd[['line_id', 'rchlen']].copy()  # length of each intersected line fragment
+        groups = lengths.groupby('line_id')  # fragments grouped by parent line
 
-        # compute arbolate sums for lines if they weren't provided
-        if 'asum' not in self.df.columns:
-            asums = arbolate_sum(self.df.id,
-                                 dict(zip(self.df.id, [g.length for g in self.df.geometry])),
-                                 self.routing)
+        # estimate widths if they aren't supplied
+        if self.df.width1.sum() == 0:
+            print("Computing widths...")
+
+            # compute arbolate sums for lines if they weren't provided
+            if 'asum' not in self.df.columns:
+                asums = arbolate_sum(self.df.id,
+                                     dict(zip(self.df.id, [g.length for g in self.df.geometry])),
+                                     self.routing)
+            else:
+                asums = dict(zip(self.df.id, self.df.asum))
+
+            # compute arbolate sum at reach midpoints
+            segment_asums = [asums[id] for id in lengths.line_id]
+            reach_cumsums = np.concatenate([np.cumsum(grp.rchlen.values[::-1])[::-1] - 0.5*grp.rchlen.values
+                                          for s, grp in groups])
+            reach_asums = -1 * reach_cumsums + segment_asums
+            # maintain positive asums; lengths in NHD often aren't exactly equal to feature lengths
+            reach_asums[reach_asums < 0.] = 0
+            rd['asum'] = reach_asums
+            # width estimation formula expects meters
+            width = width_from_arbolate_sum(reach_asums * self.to_m)
+            width = width / self.to_m # convert back to original units
+        # add the widths later directly to
         else:
-            asums = dict(zip(self.df.id, self.df.asum))
-
-        # compute arbolate sum at reach midpoints
-        segment_asums = [asums[id] for id in lengths.line_id]
-        reach_cumsums = np.concatenate([np.cumsum(grp.rchlen.values[::-1])[::-1] - 0.5*grp.rchlen.values
-                                      for s, grp in groups])
-        reach_asums = -1 * reach_cumsums + segment_asums
-        # maintain positive asums; lengths in NHD often aren't exactly equal to feature lengths
-        reach_asums[reach_asums < 0.] = 0
-        rd['asum'] = reach_asums
-        # width estimation formula expects meters
-        width = width_from_arbolate_sum(reach_asums * self.to_m)
-        width = width / self.to_m # convert back to original units
+            width = 0.
 
         # convert length and width to model units
         rd['rchlen'] *= mult
@@ -488,7 +498,7 @@ class lines:
                                                                         minimum_reach_length,
                                                                         self.length_units))
         rd = rd.loc[inds].copy()
-
+        rd['strhc1'] = 1. # default value of streambed Kv for now
         # handle co-located reaches
         if consolidate_conductance or one_reach_per_cell:
             rd = consolidate_reach_conductances(rd, keep_only_dominant=one_reach_per_cell)
@@ -557,6 +567,15 @@ class lines:
         # convert elevation units
         sd['elevup'] *= mult_h
         sd['elevdn'] *= mult_h
+
+        # apply widths if they were included
+        if self.df[['width1', 'width2']].sum().sum() > 0:
+            width1 = dict(zip(self.df.id, self.df.width1))
+            width2 = dict(zip(self.df.id, self.df.width2))
+            sd['width1'] = [width1[line_id[s]] for s in sd.nseg]
+            sd['width2'] = [width2[line_id[s]] for s in sd.nseg]
+        elif self.df.width2.sum() == 0:
+            raise NotImplementedError('Need to supply width1 and width2 or use arbolate sum.')
 
         # create sfrdata instance
         # this class has methods for fix segment and reach numbering,
