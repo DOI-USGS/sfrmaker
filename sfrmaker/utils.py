@@ -59,6 +59,49 @@ def consolidate_reach_conductances(rd, keep_only_dominant=False):
         return rd.loc[rd.Dominant].copy()
     return rd
 
+def interpolate_to_reaches(reach_data, segment_data,
+                           segvar1, segvar2,
+                           reach_data_group_col='iseg', segment_data_group_col='nseg'
+                           ):
+    """Interpolate values in datasets 6b and 6c to each reach in stream segment
+
+    Parameters
+    ----------
+    segvar1 : str
+        Column/variable name in segment_data array for representing start of segment
+        (e.g. hcond1 for hydraulic conductivity)
+        For segments with icalc=2 (specified channel geometry); if width1 is given,
+        the eigth distance point (XCPT8) from dataset 6d will be used as the stream width.
+        For icalc=3, an abitrary width of 5 is assigned.
+        For icalc=4, the mean value for width given in item 6e is used.
+    segvar2 : str
+        Column/variable name in segment_data array for representing start of segment
+        (e.g. hcond2 for hydraulic conductivity)
+
+    Returns
+    -------
+    reach_values : 1D array
+        One dimmensional array of interpolated values of same length as reach_data array.
+        For example, hcond1 and hcond2 could be entered as inputs to get values for the
+        strhc1 (hydraulic conductivity) column in reach_data.
+
+    """
+    rd_groups = reach_data.groupby(reach_data_group_col)
+    sd_groups = segment_data.groupby(segment_data_group_col)
+
+    reach_values = []
+    for seg in segment_data[segment_data_group_col]:
+        reaches = rd_groups.get_group(seg)
+        segdata = sd_groups.get_group(seg)
+        segment_length = reaches.rchlen.sum()
+        # reach midpoint locations (to interpolate to)
+        dist = (np.cumsum(reaches.rchlen) - 0.5 * reaches.rchlen).values
+        fp = [segdata[segvar1].values[0], # values at segment ends
+              segdata[segvar2].values[0]]
+        xp = [0, segment_length] # segment start/end distances
+        reach_values += np.interp(dist, xp, fp).tolist()
+    return np.array(reach_values)
+
 def pick_toids(routing, elevations):
     """Reduce routing connections to one per ID (no divergences).
     Select the downstream ID based on elevation, or first position in
