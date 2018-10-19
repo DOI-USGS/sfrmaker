@@ -11,7 +11,7 @@ from .gis import shp2df, get_proj4, crs, read_polygon_feature, project, get_bbox
 from . import grid
 from .utils import make_graph, find_path, unit_conversion, \
     pick_toids, width_from_arbolate_sum, arbolate_sum, \
-    consolidate_reach_conductances, renumber_segments
+    consolidate_reach_conductances, renumber_segments, interpolate_to_reaches
 from .nhdplus_utils import load_NHDPlus_v2, get_prj_file
 from .grid import grid as gridclass
 from .sfrdata import sfrdata
@@ -29,10 +29,10 @@ class lines:
         toid: integers representing routing connections
         ...
         geometry: shapely LineString objects for each feature
-    length_units : 'meters' or 'feet'
+    attr_length_units : 'meters' or 'feet'
         Length units for feature attributes (e.g. width, arbolate sum, etc.)
         (default 'meters')
-    height_units : 'meters' or 'feet'
+    attr_height_units : 'meters' or 'feet'
         Length units for elevation attributes
         (default 'meters')
     epsg: int
@@ -49,28 +49,51 @@ class lines:
     """
 
     def __init__(self, df=None,
-                 length_units='meters', height_units='meters',
+                 attr_length_units='meters',
+                 attr_height_units='meters',
                  epsg=None, proj4=None, prjfile=None):
 
         self.df = df
-        self.length_units = length_units
-        self.height_units = height_units
+        self.attr_length_units = attr_length_units
+        self.attr_height_units = attr_height_units
         self.crs = crs(epsg=epsg, proj4=proj4, prjfile=prjfile)
+        self._geometry_length_units = None
 
         self._routing = None # dictionary of routing connections
         self._paths = None # routing sequence from each segment to outlet
 
     @property
-    def to_m(self):
-        if self.length_units == 'feet':
+    def attr_to_m(self):
+        if self.attr_length_units == 'feet':
             return 0.3048
         return 1.0
 
     @property
-    def to_ft(self):
-        if self.length_units == 'feet':
+    def attr_to_ft(self):
+        if self.attr_length_units == 'feet':
             return 1.
         return 1/0.3048
+
+    @property
+    def geometry_to_m(self):
+        if self.geometry_length_units == 'feet':
+            return 0.3048
+        return 1.0
+
+    @property
+    def geometry_to_ft(self):
+        if self.geometry_length_units == 'feet':
+            return 1.
+        return 1 / 0.3048
+
+    @property
+    def geometry_length_units(self):
+        self._geometry_length_units = self.crs.length_units
+        if self._geometry_length_units is None:
+            print("Warning: No length units specified in CRS for input LineStrings; "
+                  "defaulting to meters.")
+            self._geometry_length_units = 'meters'
+        return self._geometry_length_units
 
     @property
     def routing(self):
@@ -245,7 +268,7 @@ class lines:
                        up_elevation_column='elevup',
                        dn_elevation_column='elevdn',
                        name_column='name',
-                       length_units='meters', height_units='meters',
+                       attr_length_units='meters', attr_height_units='meters',
                        filter=None,
                        epsg=None, proj4=None, prjfile=None):
         """
@@ -278,7 +301,8 @@ class lines:
                                     up_elevation_column=up_elevation_column,
                                     dn_elevation_column=dn_elevation_column,
                                     name_column=name_column,
-                                    length_units=length_units, height_units=height_units,
+                                    attr_length_units=attr_length_units,
+                                    attr_height_units=attr_height_units,
                                     epsg=epsg, proj4=proj4, prjfile=prjfile)
 
     @staticmethod
@@ -292,7 +316,8 @@ class lines:
                        dn_elevation_column='elevdn',
                        geometry_column='geometry',
                        name_column='name',
-                       length_units='meters', height_units='meters',
+                       attr_length_units='meters',
+                       attr_height_units='meters',
                        epsg=None, proj4=None, prjfile=None):
 
         assert geometry_column in df.columns, \
@@ -310,15 +335,25 @@ class lines:
                        dn_elevation_column: 'elevdn',
                        name_column: 'name'}
 
-        rename_cols = {k:v for k, v in rename_cols.items() if k in df.columns}
+        # dictionary for assigning new column names
+        rename_cols = {k:v for k, v in rename_cols.items() if k in df.columns and v != k}
+        # drop any existing columns that have one of the new names
+        # (otherwise pandas will create a DataFrame
+        # instead of a Series under that column name)
+        to_drop = set(rename_cols.values()).intersection(df.columns)
+        df.drop(to_drop, axis=1, inplace=True)
         df.rename(columns=rename_cols, inplace=True)
+
         column_order = ['id', 'toid', 'asum', 'width1', 'width2', 'elevup', 'elevdn', 'name', 'geometry']
         for c in column_order:
             if c not in df.columns:
                 df[c] = 0
+            else:
+                assert isinstance(df[c], pd.Series)
         df = df[column_order].copy()
 
-        return lines(df, length_units=length_units, height_units=height_units,
+        return lines(df, attr_length_units=attr_length_units,
+                     attr_height_units=attr_height_units,
                      epsg=epsg, proj4=proj4, prjfile=prjfile)
 
     @staticmethod
@@ -370,12 +405,14 @@ class lines:
         return lines.from_dataframe(df, id_column='COMID',
                                     routing_column='tocomid',
                                     name_column='GNIS_NAME',
-                                    length_units='meters', height_units='meters',
+                                    attr_length_units='meters',
+                                    attr_height_units='meters',
                                     epsg=epsg, proj4=proj4, prjfile=prjfile)
 
     def to_sfr(self, grid=None, sr=None,
                active_area=None, isfr=None,
                minimum_reach_length=None,
+               cull_flowlines_to_active_area=True,
                consolidate_conductance=False, one_reach_per_cell=False,
                model_name=None,
                **kwargs):
@@ -422,15 +459,17 @@ class lines:
         # reproject the flowlines if they aren't in same CRS as grid
         if self.crs != grid.crs:
             self.reproject(grid.crs.proj4)
-        if grid.active_area is not None:
-            self.cull(grid.active_area, inplace=True, simplify=True, tol=2000)
-        elif grid._bounds is not None: # cull to grid bounding box if already computed
-            self.cull(box(*grid._bounds), inplace=True)
+        if cull_flowlines_to_active_area:
+            if grid.active_area is not None:
+                self.cull(grid.active_area, inplace=True, simplify=True, tol=2000)
+            elif grid._bounds is not None: # cull to grid bounding box if already computed
+                self.cull(box(*grid._bounds), inplace=True)
         if model_name is None:
             model_name = 'model'
 
-        mult = unit_conversion.get(self.length_units+grid.model_units, 1.)
-        mult_h = unit_conversion.get(self.height_units+grid.model_units, 1.)
+        mult = unit_conversion.get(self.attr_length_units+grid.model_units, 1.)
+        mult_h = unit_conversion.get(self.attr_height_units+grid.model_units, 1.)
+        gis_mult = unit_conversion.get(self.geometry_length_units+grid.model_units, 1.)
 
         # convert routing connections (toid column) from lists (one-to-many)
         # to ints (one-to-one or many-to-one)
@@ -449,24 +488,29 @@ class lines:
         # intersect lines with model grid to get preliminary reaches
         rd = self.intersect(grid)
 
-        # length in linework units (not model units)
-        rd['rchlen'] = np.array([g.length for g in rd.geometry])
-        lengths = rd[['line_id', 'rchlen']].copy()  # length of each intersected line fragment
-        groups = lengths.groupby('line_id')  # fragments grouped by parent line
+        # length of intersected line fragments (in model units)
+        rd['rchlen'] = np.array([g.length for g in rd.geometry]) * gis_mult
 
         # estimate widths if they aren't supplied
         if self.df.width1.sum() == 0:
             print("Computing widths...")
+            raise NotImplementedError('Check length unit conversions before using this option.')
 
-            # compute arbolate sums for lines if they weren't provided
+            # compute arbolate sums for original LineStrings if they weren't provided
             if 'asum' not in self.df.columns:
                 asums = arbolate_sum(self.df.id,
-                                     dict(zip(self.df.id, [g.length for g in self.df.geometry])),
+                                     dict(zip(self.df.id,
+                                              np.array([g.length for g in self.df.geometry]) * self.geometry_to_m
+                                              )),
                                      self.routing)
             else:
-                asums = dict(zip(self.df.id, self.df.asum))
+                asums = dict(zip(self.df.id, self.df.asum * self.attr_to_m))
 
-            # compute arbolate sum at reach midpoints
+            # compute arbolate sum at reach midpoints (in meters)
+            lengths = rd[['line_id', 'geometry']].copy()
+            lengths['rchlen'] = np.array([g.length for g in lengths.geometry]) * self.geometry_to_m
+            groups = lengths.groupby('line_id')  # fragments grouped by parent line
+
             segment_asums = [asums[id] for id in lengths.line_id]
             reach_cumsums = np.concatenate([np.cumsum(grp.rchlen.values[::-1])[::-1] - 0.5*grp.rchlen.values
                                           for s, grp in groups])
@@ -475,15 +519,24 @@ class lines:
             reach_asums[reach_asums < 0.] = 0
             rd['asum'] = reach_asums
             # width estimation formula expects meters
-            width = width_from_arbolate_sum(reach_asums * self.to_m)
-            width = width / self.to_m # convert back to original units
-        # add the widths later directly to
-        else:
-            width = 0.
+            width = width_from_arbolate_sum(reach_asums)
 
-        # convert length and width to model units
-        rd['rchlen'] *= mult
-        rd['width'] = width * mult
+            rd['width'] = width * unit_conversion.get('meters'+grid.model_units, 1.) # convert back to model units
+
+        # interpolate linestring end widths to intersected reaches
+        else:
+            # verify that each linestring has only 1 segment associated with it
+            # (interpolation might be wrong for multiple segments otherwise)
+            assert rd.groupby('line_id').iseg.nunique().max() == 1
+            # sort the linestring and reach data so that they are aligned
+            self.df.sort_values(by='id', inplace=True)
+            rd.sort_values(by=['line_id', 'ireach'], inplace=True)
+            rd['width'] = interpolate_to_reaches(reach_data=rd,
+                                                 segment_data=self.df,
+                                                 segvar1='width1', segvar2='width2',
+                                                 reach_data_group_col='line_id',
+                                                 segment_data_group_col='id'
+                                                 )
 
         # discard very small reaches; redo numbering
         # set minimum reach length based on cell size
@@ -491,12 +544,12 @@ class lines:
         if minimum_reach_length is None:
             cellgeoms = grid.df.loc[rd.node.values, 'geometry']
             mean_area = np.mean([g.area for g in cellgeoms])
-            minimum_reach_length = np.sqrt(mean_area) * thresh
+            minimum_reach_length = np.sqrt(mean_area) * thresh * gis_mult
 
         inds = rd.rchlen > minimum_reach_length
         print('\nDropping {} reaches with length < {:.2f} {}...'.format(np.sum(~inds),
                                                                         minimum_reach_length,
-                                                                        self.length_units))
+                                                                        grid.model_units))
         rd = rd.loc[inds].copy()
         rd['strhc1'] = 1. # default value of streambed Kv for now
         # handle co-located reaches
@@ -517,10 +570,11 @@ class lines:
         # when id and toid columns are changed in self.df
         # but only rd (reach_data) has been changed
         new_routing = {}
+        paths = self.paths.copy()
         # for each segment
         for k in remaining_ids:
             # interate through successive downstream segments
-            for s in self.paths[k][1:]:
+            for s in paths[k][1:]:
                 # assign the first segment that still exists as the outseg
                 if s in remaining_ids:
                     new_routing[k] = s
