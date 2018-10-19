@@ -129,9 +129,9 @@ class sfrdata:
                 kwargs[k] = v
         # assign kwargs to reach/segment data
         for k, v in kwargs.items():
-            if k in self.rdcols:
+            if k in self.rdcols and k not in reach_data.columns:
                 self.reach_data[k] = v
-            elif k in self.sdcols:
+            elif k in self.sdcols and k not in segment_data.columns:
                 self.segment_data[k] = v
 
         # routing
@@ -221,7 +221,7 @@ class sfrdata:
     def ModflowSfr2(self):
         """Flopy ModflowSfr2 instance."""
         if self._ModflowSfr2 is None:
-            self._ModflowSfr2 = self.create_ModflowSfr2()
+            self.create_ModflowSfr2()
         return self._ModflowSfr2
 
     @staticmethod
@@ -320,7 +320,7 @@ class sfrdata:
         # check if segment and reach routing in dataframe are consistent
         consistent = rno_nseg_routing_consistent(sd.nseg, sd.outseg,
                                                  rd.iseg, rd.ireach,
-                                                 rd.rno, rd.outeach)
+                                                 rd.rno, rd.outreach)
         # return True if the dataframes changed,
         # or are inconsistent between segments and reach numbers
         return segment_routing_changed & reach_routing_changed & ~consistent
@@ -406,7 +406,7 @@ class sfrdata:
                            self.segment_data.outseg,
                            increasing=increasing)
 
-    def create_ModflowSfr2(self, m=None, const=None,
+    def create_ModflowSfr2(self, model=None, const=None,
                            isfropt=1, # override flopy default of 0
                            unit_number=None,
                            ipakcb=None, istcb2=None,
@@ -416,19 +416,20 @@ class sfrdata:
         if const is None:
             const = self.const
 
+        m = model
         if m is None:
             m = fm.Modflow(model_ws='',
                        structured=self.structured)
 
         # translate segment data
-        # populate MODFLOW 2005 segment variables from reach data
-        width1 = self.reach_data.groupby('iseg')['width'].min()
-        width1.index = width1.index -1 # convert from iseg to zero-based
-        width2 = self.reach_data.groupby('iseg')['width'].max()
-        width2.index = width2.index - 1  # convert from iseg to zero-based
+        # populate MODFLOW 2005 segment variables from reach data if they weren't entered
+        if self.segment_data[['width1', 'width2']].sum().sum() == 0:
+            raise NotImplementedError('Double check indexing below before using this option.')
+            width1 = self.reach_data.groupby('iseg')['width'].min().to_dict()
+            width2 = self.reach_data.groupby('iseg')['width'].max().to_dict()
 
-        self.segment_data['width2'] = width2
-        self.segment_data['width1'] = width1
+            self.segment_data['width1'] = [width1[s] for s in self.segment_data.nseg]
+            self.segment_data['width2'] = [width2[s] for s in self.segment_data.nseg]
 
         assert not np.any(np.isnan(self.segment_data))
         # create record array for each stress period
@@ -444,11 +445,11 @@ class sfrdata:
         rd = rd.to_records(index=False)
         nstrm = -len(rd)
 
-        return fm.ModflowSfr2(model=m, nstrm=nstrm, const=const,
-                              reach_data=rd, segment_data=sd,
-                              isfropt=isfropt, unit_number=unit_number,
-                              ipakcb=ipakcb, istcb2=istcb2,
-                              **kwargs)
+        self._ModflowSfr2 = fm.ModflowSfr2(model=m, nstrm=nstrm, const=const,
+                                           reach_data=rd, segment_data=sd,
+                                           isfropt=isfropt, unit_number=unit_number,
+                                           ipakcb=ipakcb, istcb2=istcb2,
+                                           **kwargs)
 
         # create a flopy model attribute that can be updated
         # user should be able to assign dynamically
@@ -483,22 +484,18 @@ class sfrdata:
             strhc1 (hydraulic conductivity) column in reach_data.
 
         """
+        from .utils import interpolate_to_reaches
+
         reach_data = self.reach_data
         segment_data = self.segment_data.groupby('per').get_group(per)
         segment_data.sort_values(by='nseg', inplace=True)
         reach_data.sort_values(by=['iseg', 'ireach'], inplace=True)
-        rd_groups = reach_data.groupby('iseg')
-        sd_groups = segment_data.groupby('nseg')
-        reach_values = []
-        for seg in segment_data.nseg:
-            reaches = rd_groups.get_group(seg)
-            dist = (np.cumsum(reaches.rchlen) - 0.5 * reaches.rchlen).values
 
-            fp = [sd_groups.get_group(seg)[segvar1].values[0],
-                  sd_groups.get_group(seg)[segvar2].values[0]]
-            xp = [dist[0], dist[-1]]
-            reach_values += np.interp(dist, xp, fp).tolist()
-        return np.array(reach_values)
+        return interpolate_to_reaches(reach_data, segment_data,
+                                      segvar1, segvar2,
+                                      reach_data_group_col='iseg',
+                                      segment_data_group_col='nseg'
+                                      )
 
     def sample_elevations(self, dem, method='buffers',
                           buffer_distance=None,
