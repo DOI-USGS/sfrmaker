@@ -1,5 +1,7 @@
 import sys
 sys.path.append('/Users/aleaf/Documents/GitHub/flopy3')
+import os
+import time
 import numpy as np
 import pandas as pd
 from shapely.geometry import LineString
@@ -7,6 +9,7 @@ import flopy
 from .utils import renumber_segments, find_path, make_graph
 from .checks import valid_rnos, valid_nsegs, rno_nseg_routing_consistent
 from .gis import df2shp
+from .grid import Grid
 
 fm = flopy.modflow
 
@@ -106,7 +109,8 @@ class sfrdata:
                 }
 
     def __init__(self, reach_data,
-                 segment_data=None, grid=None,
+                 segment_data=None, grid=None, sr=None,
+                 isfr=None,
                  model_length_units='feet', model_time_units='d',
                  enforce_increasing_nsegs=True,
                  model_name=None,
@@ -114,6 +118,15 @@ class sfrdata:
 
         self.reach_data = self._setup_reach_data(reach_data)
         self.segment_data = self._setup_segment_data(segment_data)
+
+        if grid is None and sr is not None:
+            print('\nCreating grid class instance from flopy SpatialReference...')
+            ta = time.time()
+            grid = Grid.from_sr(sr, isfr=isfr)
+            print("grid class created in {:.2f}s\n".format(time.time() - ta))
+
+        # print grid information to screen
+        print(grid)
         self.grid = grid
         self.structured = self.grid.structured
 
@@ -570,6 +583,15 @@ class sfrdata:
         """
         pass
 
+    @staticmethod
+    def from_tables(reach_data, segment_data,
+                    grid=None, sr=None, isfr=None):
+        reach_data = pd.read_csv(reach_data)
+        segment_data = pd.read_csv(segment_data)
+        return sfrdata(reach_data=reach_data, segment_data=segment_data,
+                       grid=grid, sr=sr,
+                       isfr=isfr)
+
     def write_package(self, filename=None, version='mf2005',
                       **kwargs):
         """Write and SFR package file.
@@ -593,6 +615,12 @@ class sfrdata:
 
             # write a MODFLOW 6 file
             sfr6.write_file(outpath=mf6_ws)
+
+    def write_tables(self, filepath='./sfr'):
+
+        filepath, file_extension = os.path.splitext(filepath)
+        self.reach_data.drop('geometry', axis=1).to_csv('{}_reach_data.csv'.format(filepath), index=False)
+        self.segment_data.to_csv('{}_segment_data.csv'.format(filepath), index=False)
 
     def export_sfrlines(self, filename=None):
         """Export shapefiles of linework"""

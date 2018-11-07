@@ -2,9 +2,10 @@ import os
 import collections
 import time
 from functools import partial
+import shutil
 import fiona
 from shapely.ops import transform, unary_union
-from shapely.geometry import shape, mapping, Polygon
+from shapely.geometry import shape, mapping, Polygon, box
 import pyproj
 import numpy as np
 import pandas as pd
@@ -344,13 +345,16 @@ def get_bbox(feature, dest_crs):
     if isinstance(feature, str):
         with fiona.open(feature) as src:
             l, b, r, t = src.bounds
+            bbox_src_crs = box(*src.bounds)
             shpcrs = crs(proj4=to_string(src.crs))
         if shpcrs != dest_crs:
-            x, y = project([(l, b),
-                            (r, t)], shpcrs.proj4, dest_crs.proj4)
-            filter = (x[0], y[0], x[1], y[1])
-        else:
-            filter = (l, b, r, t)
+            bbox_dest_crs = project(bbox_src_crs, shpcrs.proj4, dest_crs.proj4)
+            l, b, r, t = bbox_dest_crs.bounds
+            #x, y = project([(l, b),
+            #                (r, t)], shpcrs.proj4, dest_crs.proj4)
+            #filter = (x[0], y[0], x[1], y[1])
+            #else:
+        filter = (l, b, r, t)
     elif isinstance(feature, Polygon):
         filter = feature.bounds
     elif isinstance(feature, dict):
