@@ -7,13 +7,13 @@ import fiona
 from fiona.crs import to_string
 from shapely.ops import unary_union
 from shapely.geometry import box
-from .gis import shp2df, get_proj4, crs, read_polygon_feature, project, get_bbox
+from .gis import shp2df, df2shp, crs, read_polygon_feature, project, get_bbox
 from . import grid
 from .utils import make_graph, find_path, unit_conversion, \
     pick_toids, width_from_arbolate_sum, arbolate_sum, \
     consolidate_reach_conductances, renumber_segments, interpolate_to_reaches
 from .nhdplus_utils import load_NHDPlus_v2, get_prj_file
-from .grid import grid as gridclass
+from .grid import Grid
 from .sfrdata import sfrdata
 from .checks import routing_is_circular
 
@@ -258,6 +258,9 @@ class lines:
         self.df['geometry'] = geoms
         self.crs.proj4 = dest_proj4
 
+    def write_shapefile(self, outshp='flowlines.shp'):
+        df2shp(self.df, outshp, epsg=self.crs.epsg, prj=self.crs.prjfile)
+
     @staticmethod
     def from_shapefile(shapefile,
                        id_column='id',
@@ -450,7 +453,7 @@ class lines:
         if grid is None and sr is not None:
             print('\nCreating grid class instance from flopy SpatialReference...')
             ta = time.time()
-            grid = gridclass.from_sr(sr, active_area=active_area, isfr=isfr)
+            grid = Grid.from_sr(sr, active_area=active_area, isfr=isfr)
             print("grid class created in {:.2f}s\n".format(time.time() - ta))
 
         # print grid information to screen

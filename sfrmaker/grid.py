@@ -2,15 +2,18 @@ import os
 import numpy as np
 import pandas as pd
 import fiona
+from rasterio import Affine
+from rasterio import features
 from shapely.ops import unary_union
-from shapely.geometry import Polygon
+from shapely.geometry import Polygon, shape
 import flopy
-from .gis import shp2df, get_proj4, crs, read_polygon_feature, \
+from .gis import shp2df, df2shp, get_proj4, crs, read_polygon_feature, \
     build_rtree_index, intersect_rtree, intersect
 fm = flopy.modflow
 
-class grid:
-    """Class representing model grid.
+class Grid:
+    """Base class for model grids. Has methods and attributes
+    that are common to both Structured and Unstructured Grids.
 
     Parameters
     ----------
@@ -23,21 +26,14 @@ class grid:
     """
     units_dict = {'feet': 1, 'meters': 2}
 
-    def __init__(self, df, structured=True,
+    def __init__(self, df,
                  model_units='feet', crs_units=None,
                  bounds=None, active_area=None,
-                 epsg=None, proj4=None, prjfile=None):
+                 epsg=None, proj4=None, prjfile=None, **kwargs):
 
         self.df = df
-        self.structured = structured
-        if structured:
-            self.nlay = df.k.max() + 1
-            self.nrow = df.i.max() + 1
-            self.ncol = df.j.max() + 1
-        else:
-            assert 'node' in df.columns, "Unstructured grids require node numbers."
-            self.nlay, self.nrow, self.ncol = None, None, None
 
+        # coordinate projection stuff
         self.model_units = model_units
         self.crs = crs(epsg=epsg, proj4=proj4, prjfile=prjfile)
         if crs_units is not None:
@@ -50,17 +46,17 @@ class grid:
         self._bounds = bounds
         self._active_area = None
         self._active_area_defined_by = None
-        self._set_active_area(active_area)
+
 
     def __setattr__(self, key, value):
         if key == "active_area":
             self._set_active_area(value)
         else:
-            super(grid, self).__setattr__(key, value)
+            super(Grid, self).__setattr__(key, value)
 
     def __repr__(self):
         s = 'Model grid information\n'
-        if self.structured:
+        if isinstance(self, StructuredGrid):
             s += 'structured grid\nnnodes: {:,d}\n'.format(len(self.df))
             for dim in ['nlay', 'nrow', 'ncol']:
                 s += '{}: {:d}\n'.format(dim, self.__dict__[dim])
@@ -68,7 +64,7 @@ class grid:
             s += 'unstructured grid\n'
             s += 'nnodes: {:,d}\n'.format(len(self.df))
         s += 'model length units: {}\n'.format(self.model_units)
-        s += 'crs: {}'.format(self.crs)
+        s += 'crs: {}\n'.format(self.crs)
         s += 'bounds: {:.2f}, {:.2f}, {:.2f}, {:.2f}\n'.format(*self.bounds)
         s += 'active area defined by: {}'.format(self._active_area_defined_by)
         s += '\n'
@@ -133,17 +129,16 @@ class grid:
 
         # otherwise if no feature is supplied but all cells are active
         # leave active area as none
+        # main reason not to handle this the same as below
+        # is that unary_unions of a lot of cells are slow
+        # and with all cells active,
+        # don't have to worry about inactive cells getting intersected
         elif self.df.isfr.sum() == len(self.df):
             self._active_area_defined_by = 'all cells'
 
-        # no feature was supplied but some cells are inactive
+        # no feature was supplied; set from isfr values
         else:
-            print('Creating active area polygon from unary_union of cells with isfr=1. '
-                  'This will take a while for large grids. To avoid this step,'
-                  'supply a shapefile or shapely polygon of the SFR domain when'
-                  'instantiating the grid objec.')
-            geoms = self.df.geometry.values[self.df.isfr == 1]
-            self._active_area = unary_union(geoms)
+            self.create_active_area_polygon_from_isfr()
             self._active_area_defined_by = 'isfr array'
 
     def _set_isfr_from_active_area(self):
@@ -159,34 +154,25 @@ class grid:
         self.df['isfr'] = 0
         self.df.loc[np.squeeze(intersections), 'isfr'] = 1
 
+    def create_active_area_polygon_from_isfr(self):
+        """The StructuredGrid and UnstructuredGrid classes
+        have their own ways of doing this."""
+        return
+
     def get_node(self, k, i, j):
         return k * self.nrow * self.ncol + i * self.ncol + j
 
-    @staticmethod
-    def from_sr(sr=None, active_area=None, isfr=None,
-                epsg=None, proj4=None, prjfile=None):
+    def write_active_area_shapefile(self, outshp='active_area.shp'):
+        if self._active_area is None:
+            self.create_active_area_polygon_from_isfr()
+        assert isinstance(self._active_area, Polygon), \
+            "active area didn't get set correctly (not a shapely Polygon)"
+        df = pd.DataFrame({'geometry': [self._active_area],
+                           'description': ['Active area where SFR will be applied.']})
+        df2shp(df, outshp, epsg=self.crs.epsg, prj=self.crs.prjfile)
 
-        vertices = sr.vertices
-        polygons = [Polygon(v) for v in sr.vertices]
-        df = pd.DataFrame({'node': range(0, len(vertices)),
-                           'i': sorted(list(range(sr.nrow)) * sr.ncol),
-                           'j': list(range(sr.ncol)) * sr.nrow,
-                           'geometry': polygons
-                           }, columns=['node', 'i', 'j', 'geometry'])
-        if epsg is None:
-            epsg = sr.epsg
-        if proj4 is None:
-            proj4 = sr.proj4_str
-        if prjfile is not None:
-            proj4 = get_proj4(prjfile)
-        if isfr is not None:
-            assert isfr.size == len(df), \
-                "isfr column must be of same length as the number of nodes in a layer."
-            df['isfr'] = isfr.ravel()
-        return grid.from_dataframe(df,
-                                   model_units=sr.model_length_units,
-                                   bounds=sr.bounds, active_area=active_area,
-                                   epsg=epsg, proj4=proj4, prjfile=prjfile)
+    def write_grid_shapefile(self, outshp='grid.shp'):
+        df2shp(self.df, outshp, epsg=self.crs.epsg, prj=self.crs.prjfile)
 
     @staticmethod
     def from_shapefile(shapefile=None,
@@ -204,13 +190,132 @@ class grid:
         df = shp2df(shapefile)
         assert 'geometry' in df.columns, "No feature geometries found in {}.".format(shapefile)
 
-        return grid.from_dataframe(df, node_col=node_col, kcol=kcol, icol=icol, jcol=jcol,
+        return Grid.from_dataframe(df, node_col=node_col, kcol=kcol, icol=icol, jcol=jcol,
                                    isfr_col=isfr_col,
                                    bounds=bounds, active_area=active_area,
                                    epsg=epsg, proj4=proj4, prjfile=prjfile)
 
+
+
+class StructuredGrid(Grid):
+    """Class representing a model grid that has a row/column structure.
+    """
+    def __init__(self, df,
+                 xul=None, yul=None, dx=None, dy=None, rotation=0.,
+                 nrow=None, ncol=None,
+                 uniform=None,
+                 model_units='feet', crs_units=None,
+                 bounds=None, active_area=None,
+                 epsg=None, proj4=None, prjfile=None, **kwargs):
+
+        Grid.__init__(self, df, model_units=model_units, crs_units=crs_units,
+                      bounds=bounds, active_area=active_area,
+                      epsg=epsg, proj4=proj4, prjfile=prjfile, **kwargs)
+
+        # structured grid parameters
+        self.xul = xul
+        self.yul = yul
+        self.rotation = rotation
+        self.nrow = self.df.i.max() + 1
+        self.ncol = self.df.j.max() + 1
+
+        # uniform structured grid parameters
+        self._uniform = uniform  # whether grid is uniform or not
+        self.dx = dx
+        self.dy = dy
+
+        self.nlay = df.k.max() + 1
+        self.nrow = df.i.max() + 1
+        self.ncol = df.j.max() + 1
+
+        self._set_active_area(active_area)
+
+    @property
+    def isfr(self):
+        return np.reshape(self.df.isfr.values,
+                          (self.nrow, self.ncol)).astype(np.int32)
+
+    @property
+    def uniform(self):
+        """Check if cells are uniform by comparing their areas."""
+        if self._uniform is None:
+            areas = [g.area for g in self.df.geometry]
+            self._uniform = np.allclose(areas, np.mean(areas))
+        return self._uniform
+
+    @property
+    def transform(self):
+        """Rasterio-style affine transform object.
+        https://www.perrygeo.com/python-affine-transforms.html
+        """
+        if self.uniform:
+            for param in ['dx', 'rotation', 'xul', 'dy', 'yul']:
+                if self.__dict__[param] is None:
+                    print('This method requires a uniform grid and '
+                          'specification of xul, yul, dx, dy, and rotation.')
+                    return
+            return Affine(self.dx, 0., self.xul,
+                          0., -self.dy, self.yul) * Affine.rotation(self.rotation)
+
+    def create_active_area_polygon_from_isfr(self):
+        """Convert 2D numpy array representing active area where
+        SFR will be simulated (isfr) to a polygon (if multiple
+        polygons area created, the largest one by area is retained).
+        """
+        # vectorize the raster
+        shapes = features.shapes(self.isfr, transform=self.transform)
+        # convert the shapes corresponding to raster values of 1 to shapely objects
+        shapes = [shape(s[0]) for s in list(shapes) if s[1] == 1]
+        # get the shape with the largest area
+        areas = [s.area for s in shapes]
+        self._active_area = shapes[np.argmax(areas)]
+
     @staticmethod
-    def from_dataframe(df=None,
+    def from_sr(sr=None, active_area=None, isfr=None,
+                epsg=None, proj4=None, prjfile=None):
+        """Create StructureGrid class instance from a
+        flopy SpatialReference instance."""
+        vertices = sr.vertices
+        polygons = [Polygon(v) for v in sr.vertices]
+        df = pd.DataFrame({'node': range(0, len(vertices)),
+                           'i': sorted(list(range(sr.nrow)) * sr.ncol),
+                           'j': list(range(sr.ncol)) * sr.nrow,
+                           'geometry': polygons
+                           }, columns=['node', 'i', 'j', 'geometry'])
+        if epsg is None:
+            epsg = sr.epsg
+        if proj4 is None:
+            proj4 = sr.proj4_str
+        if prjfile is not None:
+            proj4 = get_proj4(prjfile)
+        if isfr is not None:
+            # if a 3D array is supplied for isfr, convert to 2D
+            # (retain all i, j locations with at least one active layer;
+            # assuming that top of each highest-active cell represents the land surface)
+            if len(isfr.shape) == 3:
+                isfr = np.any(isfr == 1, axis=0).astype(int)
+                df['isfr'] = isfr.ravel()
+            elif isfr.shape == (sr.nrow, sr.ncol):
+                df['isfr'] = isfr.ravel()
+            else:
+                assert isfr.size == len(df), \
+                    "isfr must be of shape (nlay, nrow, ncol), (nrow, ncol) or (nrow * ncol,)"
+                df['isfr'] = isfr
+        uniform = False
+        dx, dy = None, None
+        if len(set(sr.delc)) == 1 and len(set(sr.delr)) == 1:
+            dx = sr.delr[0] * sr.length_multiplier
+            dy = sr.delc[0] * sr.length_multiplier
+            uniform = True
+        return StructuredGrid.from_dataframe(df, uniform=uniform,
+                                             xul=sr.xul, yul=sr.yul, dx=dx, dy=dy,
+                                             rotation=sr.rotation,
+                                             model_units=sr.model_length_units,
+                                             bounds=sr.bounds, active_area=active_area,
+                                             epsg=epsg, proj4=proj4, prjfile=prjfile)
+
+    @staticmethod
+    def from_dataframe(df=None, uniform=False,
                        node_col='node', kcol='k', icol='i', jcol='j',
                        isfr_col='isfr',
                        geometry_column='geometry',
@@ -220,38 +325,90 @@ class grid:
         assert geometry_column in df.columns, \
             "No feature geometries found in dataframe column '{}'".format(geometry_column)
 
-        structured = False # grids will be treated as unstructured unless row/column information is found
-        if icol in df.columns or jcol in df.columns:
-            assert icol in df.columns, "No icol={} not found".format(icol)
-            assert jcol in df.columns, "No icol={} not found".format(jcol)
-            if kcol in df.columns:
-                df['k'] = df[kcol]
-            else:
-                df['k'] = 0
-            df['i'] = df[icol]
-            df['j'] = df[jcol]
-            # convert to zero-based if one-based
-            for dim in ['k', 'i', 'j']:
-                if df[dim].min() == 1:
-                    df[dim] -= 1
-            nrow, ncol = df.i.max()+1, df.j.max()+1
-            df.sort_values(by=['k', 'i', 'j'], inplace=True)
-            df['node'] = ncol * df.i + df.j
-            # only retain first instance of each node
-            # (subsequent instances would be underlying layers for same cell)
-            # (this should also work for grids that are missing cells in a given layer;
-            # as long as the cell is in at least one layer)
-            if len(set(df.node).difference(df.groupby('k').get_group(0).node)) != 0:
-                # this may take awhile for large grids
-                df = df.groupby('node').first()
-                df['node'] = df.index # put node back in columns
-            structured = True
+        assert icol in df.columns, "No icol={} not found".format(icol)
+        assert jcol in df.columns, "No jcol={} not found".format(jcol)
 
-        elif node_col in df.columns:
+        # set layer column
+        if kcol in df.columns:
+            df['k'] = df[kcol]
+        else:
+            df['k'] = 0
+
+        # set i, j columns
+        df['i'] = df[icol]
+        df['j'] = df[jcol]
+        # convert to zero-based if one-based
+        for dim in ['k', 'i', 'j']:
+            if df[dim].min() == 1:
+                df[dim] -= 1
+        nrow, ncol = df.i.max()+1, df.j.max()+1
+        df.sort_values(by=['k', 'i', 'j'], inplace=True)
+        df['node'] = ncol * df.i + df.j
+
+        # only retain first instance of each node
+        # (subsequent instances would be underlying layers for same cell)
+        # (this should also work for grids that are missing cells in a given layer;
+        # as long as the cell is in at least one layer)
+        if len(set(df.node).difference(df.groupby('k').get_group(0).node)) != 0:
+            # this may take awhile for large grids
+            df = df.groupby('node').first()
+            df['node'] = df.index # put node back in columns
+
+        if isfr_col in df.columns:
+            df['isfr'] = df[isfr_col].astype(int)
+        else:
+            df['isfr'] = 1
+
+        return StructuredGrid(df, active_area=active_area,
+                              model_units=model_units,
+                              uniform=uniform,
+                              epsg=epsg, proj4=proj4, prjfile=prjfile, **kwargs)
+
+
+class UnstructuredGrid(Grid):
+    """Class representing an unstructured model grid."""
+
+    def __init__(self, df,
+                 model_units='feet', crs_units=None,
+                 bounds=None, active_area=None,
+                 epsg=None, proj4=None, prjfile=None):
+        Grid.__init__(self, df, model_units=model_units, crs_units=crs_units,
+                      bounds=bounds, active_area=active_area,
+                      epsg=epsg, proj4=proj4, prjfile=prjfile)
+
+        assert 'node' in df.columns, \
+            "DataFrame df must have a 'node' column for identifying model cells."
+
+        self._set_active_area(active_area)
+
+    def create_active_area_polygon_from_isfr(self):
+        """Create active area polygon from union of cells where isfr=1.
+        """
+        print('Creating active area polygon from shapely.ops.unary_union '
+              'of cells with isfr=1. '
+              'This will take a while for large grids. To avoid this step,'
+              'supply a shapefile or shapely polygon of the SFR domain when'
+              'instantiating the grid objec.')
+        geoms = self.df.geometry.values[self.df.isfr == 1]
+        self._active_area = unary_union(geoms)
+
+    @staticmethod
+    def from_dataframe(df=None,
+                       node_col='node',
+                       isfr_col='isfr',
+                       geometry_column='geometry',
+                       model_units='feet', active_area=None,
+                       epsg=None, proj4=None, prjfile=None, **kwargs):
+
+        assert geometry_column in df.columns, \
+            "No feature geometries found in dataframe column '{}'".format(geometry_column)
+
+        if node_col in df.columns:
             df['node'] = df[node_col]
             # convert to zero-based if one-based
             if df.node.min() == 1:
                 df['node'] -= 1
+
             df.sort_values(by=['node'], inplace=True)
             # enforce consecutive node numbering
             df['node'] = np.arange(len(df))
@@ -262,9 +419,6 @@ class grid:
             df['isfr'] = df[isfr_col].astype(int)
         else:
             df['isfr'] = 1
-
-        return grid(df, active_area=active_area,
-                    model_units=model_units, structured=structured,
-                    epsg=epsg, proj4=proj4, prjfile=prjfile, **kwargs)
-
-
+        return UnstructuredGrid(df, active_area=active_area,
+                                model_units=model_units,
+                                epsg=epsg, proj4=proj4, prjfile=prjfile, **kwargs)
