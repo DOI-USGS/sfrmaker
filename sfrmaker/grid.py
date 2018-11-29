@@ -8,7 +8,7 @@ from shapely.ops import unary_union
 from shapely.geometry import Polygon, shape
 import flopy
 from .gis import shp2df, df2shp, get_proj4, crs, read_polygon_feature, \
-    build_rtree_index, intersect_rtree, intersect
+    build_rtree_index, intersect
 fm = flopy.modflow
 
 class Grid:
@@ -196,10 +196,10 @@ class Grid:
                                    epsg=epsg, proj4=proj4, prjfile=prjfile)
 
 
-
 class StructuredGrid(Grid):
     """Class representing a model grid that has a row/column structure.
     """
+    _structured = True
     def __init__(self, df,
                  xul=None, yul=None, dx=None, dy=None, rotation=0.,
                  nrow=None, ncol=None,
@@ -367,6 +367,7 @@ class StructuredGrid(Grid):
 
 class UnstructuredGrid(Grid):
     """Class representing an unstructured model grid."""
+    _structured = False
 
     def __init__(self, df,
                  model_units='feet', crs_units=None,

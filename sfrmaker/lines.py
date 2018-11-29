@@ -13,7 +13,7 @@ from .utils import make_graph, find_path, unit_conversion, \
     pick_toids, width_from_arbolate_sum, arbolate_sum, \
     consolidate_reach_conductances, renumber_segments, interpolate_to_reaches
 from .nhdplus_utils import load_NHDPlus_v2, get_prj_file
-from .grid import Grid
+from .grid import StructuredGrid
 from .sfrdata import sfrdata
 from .checks import routing_is_circular
 
@@ -236,7 +236,7 @@ class lines:
         reach_data['name'] = [names[line_id] for line_id in reach_data.line_id]
 
         # assign rows and columns from node
-        if grid.structured:
+        if isinstance(grid, StructuredGrid):
             reach_data['k'] = 0
             reach_data['i'] = np.floor(reach_data.node / grid.ncol).astype(int)
             reach_data['j'] = reach_data.node.values % grid.ncol
@@ -414,6 +414,7 @@ class lines:
 
     def to_sfr(self, grid=None, sr=None,
                active_area=None, isfr=None,
+               model=None,
                minimum_reach_length=None,
                cull_flowlines_to_active_area=True,
                consolidate_conductance=False, one_reach_per_cell=False,
@@ -453,7 +454,7 @@ class lines:
         if grid is None and sr is not None:
             print('\nCreating grid class instance from flopy SpatialReference...')
             ta = time.time()
-            grid = Grid.from_sr(sr, active_area=active_area, isfr=isfr)
+            grid = StructuredGrid.from_sr(sr, active_area=active_area, isfr=isfr)
             print("grid class created in {:.2f}s\n".format(time.time() - ta))
 
         # print grid information to screen
@@ -641,6 +642,7 @@ class lines:
         # and other output
         rd = rd[[c for c in sfrdata.rdcols if c in rd.columns]].copy()
         sfrd = sfrdata(reach_data=rd, segment_data=sd, grid=grid,
+                       model=model,
                        model_name=model_name, **kwargs)
         print("\nTime to create sfr dataset: {:.2f}s\n".format(time.time() - totim))
         return sfrd
