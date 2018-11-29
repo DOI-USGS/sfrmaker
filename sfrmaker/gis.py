@@ -5,7 +5,7 @@ from functools import partial
 import shutil
 import fiona
 from shapely.ops import transform, unary_union
-from shapely.geometry import shape, mapping, Polygon, box
+from shapely.geometry import shape, mapping, Polygon, box, Point
 import pyproj
 import numpy as np
 import pandas as pd
@@ -126,6 +126,28 @@ def build_rtree_index(geom):
         idx.insert(i, g.bounds)
     print("finished in {:.2f}s".format(time.time() - ta))
     return idx
+
+def export_reach_data(reach_data, grid, filename,
+                      nodes=None, geomtype='Polygon'):
+    """Generic method for exporting data to a shapefile; joins
+    attributes in reach_data to geometries in grid using node numbers.
+    """
+    assert grid is not None, "need grid attribute for export"
+    if nodes is not None:
+        keep = [True if n in nodes else False for n in reach_data.node]
+        rd = reach_data.loc[keep].copy()
+    else:
+        rd = reach_data.copy()
+    assert np.array_equal(grid.df.node.values, np.arange(grid.size))
+    assert np.array_equal(grid.df.node.values, grid.df.index.values)
+    polygons = grid.df.loc[rd.node, 'geometry'].values
+    if geomtype.lower() == 'polygon':
+        rd['geometry'] = polygons
+    elif geomtype.lower() == 'point':
+        rd['geometry'] = [p.centroid for p in polygons]
+    else:
+        raise ValueError('Unrecognized geomtype "{}"'.format(geomtype))
+    df2shp(rd, filename, epsg=grid.crs.epsg)
 
 def intersect_rtree(geom1, geom2, index=None):
     """Intersect features in geom1 with those in geom2. For each feature in geom2, return a list of

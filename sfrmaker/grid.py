@@ -91,6 +91,10 @@ class Grid:
         return self._bounds
 
     @property
+    def size(self):
+        return len(self.df)
+
+    @property
     def spatial_index(self):
         """Rtree index for intersecting features with model grid."""
         if self._idx is None:
@@ -269,6 +273,14 @@ class StructuredGrid(Grid):
         # get the shape with the largest area
         areas = [s.area for s in shapes]
         self._active_area = shapes[np.argmax(areas)]
+
+    @staticmethod
+    def from_json(jsonfile, active_area=None, isfr=None,
+                  epsg=None, proj4=None, prjfile=None):
+        from .utils import load_sr
+        sr = load_sr(jsonfile)
+        return StructuredGrid.from_sr(sr, active_area=active_area, isfr=isfr,
+                  epsg=epsg, proj4=proj4, prjfile=prjfile)
 
     @staticmethod
     def from_sr(sr=None, active_area=None, isfr=None,
