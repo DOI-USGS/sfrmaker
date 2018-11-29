@@ -8,7 +8,7 @@ from shapely.geometry import LineString
 import flopy
 from .utils import renumber_segments, find_path, make_graph
 from .checks import valid_rnos, valid_nsegs, rno_nseg_routing_consistent
-from .gis import df2shp
+from .gis import df2shp, export_reach_data
 from .grid import StructuredGrid, UnstructuredGrid
 
 fm = flopy.modflow
@@ -324,6 +324,10 @@ class sfrdata:
         for k, v in self.defaults.items():
             if k in self.sdcols and k not in segment_data.columns:
                 sd[k] = v
+
+        # add outsegs to reach_data
+        routing = dict(zip(sd.nseg, sd.outseg))
+        self.reach_data['outseg'] = [routing[s] for s in self.reach_data.iseg]
         return sd
 
     @property
@@ -378,6 +382,8 @@ class sfrdata:
         self.reach_data['iseg'] = [r[s] for s in self.reach_data.iseg]
         self.reach_data['outseg'] = [r[s] for s in self.reach_data.outseg]
         self.segment_data.sort_values(by=['per', 'nseg'], inplace=True)
+        self.segment_data.index = np.arange(len(self.segment_data))
+        assert np.array_equal(self.segment_data.nseg.values, self.segment_data.index.values+1)
         self.reach_data.sort_values(by=['iseg', 'ireach'], inplace=True)
 
     def reset_reaches(self):
@@ -683,11 +689,30 @@ class sfrdata:
         self.reach_data.drop('geometry', axis=1).to_csv('{}_reach_data.csv'.format(filepath), index=False)
         self.segment_data.to_csv('{}_segment_data.csv'.format(filepath), index=False)
 
-    def export_sfrlines(self, filename=None):
-        """Export shapefiles of linework"""
+    def export_cells(self, filename=None, nodes=None):
+        """Export shapefile of model cells with stream reaches."""
+        if filename is None:
+            filename = self.package_name + '_sfrcells.shp'
+        export_reach_data(self.reach_data, self.grid, filename,
+                          nodes=nodes, geomtype='polygon')
+
+    def export_outlets(self, filename=None):
+        """Export shapefile of model cells with stream reaches."""
+        if filename is None:
+            filename = self.package_name + '_sfr_outlets.shp'
+        nodes = self.reach_data.loc[self.reach_data.outreach == 0, 'node'].values
+        export_reach_data(self.reach_data, self.grid, filename,
+                          nodes=nodes, geomtype='point')
+
+    def export_lines(self, filename=None):
+        """Export shapefile of linework"""
         if filename is None:
             filename = self.package_name + '_sfrlines.shp'
-        df2shp(self.reach_data, filename, epsg=self.grid.crs.epsg)
+        rd = self.reach_data
+        assert 'geometry' in rd.columns and \
+               isinstance(rd.geometry.values[0], LineString), \
+            "No LineStrings in reach_data.geometry"
+        df2shp(rd, filename, epsg=self.grid.crs.epsg)
 
     def export_routing(self, filename=None):
         """Export linework shapefile showing all routing connections between SFR reaches.
@@ -721,3 +746,48 @@ class sfrdata:
         rd['length'] = lengths
         rd['geometry'] = geoms
         df2shp(rd, filename, epsg=self.grid.crs.epsg)
+
+    def export_transient_variable(self, varname, filename=None):
+        """Export point shapefile showing locations with
+        a given segment_data variable applied. For example, segments
+        where streamflow is entering or leaving the upstream end of a stream segment (FLOW)
+        or where RUNOFF is applied. Cell centroids of the first reach of segments with
+        non-zero terms of varname are exported; values of varname are exported by
+        stress period in the attribute fields (e.g. flow0, flow1, flow2... for FLOW
+        in stress periods 0, 1, 2...
+
+        Parameters
+        ----------
+        f : str, filename
+        varname : str
+            Variable in SFR Package dataset 6a (see SFR package documentation)
+
+        """
+        if filename is None:
+            filename = self.package_name + '_sfr_routing.shp'
+
+        # if the data are in mf2005 format (by segment)
+        sd = self.segment_data.sort_values(by=['per', 'nseg'])
+
+        # pivot the segment data to segments x periods with values of varname
+        just_the_values = sd.pivot(index='nseg', columns='per', values=varname)
+        hasvalues = np.nansum(just_the_values, axis=1) > 0
+        df = just_the_values.loc[hasvalues]
+        if len(df) == 0:
+            print('No non-zero values of {} to export!'.format(varname))
+            return
+        # rename the columns to indicate stress periods
+        df.columns = ['{}{}'.format(i, varname) for i in range(df.shape[1])]
+        segs = df.index
+
+        # join the pivoted values to reach location info
+        # for now, follow mf2005 model and assume that variable applies to reach 1
+        isseg = np.array([True if s in segs else False for s in self.reach_data.iseg])
+        locations = isseg & (self.reach_data.ireach == 1)
+        rd = self.reach_data.loc[locations][['node', 'k', 'i', 'j', 'iseg', 'ireach']].copy()
+        rd.sort_values(by=['iseg'], inplace=True)
+        rd.index = rd.iseg
+        assert np.array_equal(rd.index.values, df.index.values)
+        rd = rd.join(df)
+
+        export_reach_data(rd, self.grid, filename, geomtype='point')

@@ -1,5 +1,6 @@
 import time
 import operator
+import json
 import numpy as np
 import pandas as pd
 from shapely.geometry import Point
@@ -586,5 +587,23 @@ def width_from_arbolate_sum(arbolate_sum, minimum_width=1):
     if scalar:
         return w[0]
     return w
+
+def load_json(jsonfile):
+    """Convenience function to load a json file; replacing
+    some escaped characters."""
+    with open(jsonfile) as f:
+        return json.load(f)
+
+def load_sr(jsonfile):
+    """Create a SpatialReference instance from model config json file."""
+    from flopy.utils import SpatialReference
+    with open(jsonfile) as input:
+        cfg = json.load(input)
+
+    return SpatialReference(delr=np.ones(cfg['ncol'])* cfg['delr'],
+                            delc=np.ones(cfg['nrow']) * cfg['delc'],
+                            xul=cfg['xul'], yul=cfg['yul'],
+                            epsg=cfg['epsg']
+                              )
 
 
