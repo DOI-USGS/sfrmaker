@@ -133,7 +133,8 @@ class mf6sfr:
             df = pd.DataFrame(v)
             df['per'] = k
             sd = sd.append(df)
-        return sd.loc[:, sd.sum(axis=0) > 0]
+        keepcols = (sd.sum(axis=0) > 0) | np.in1d(sd.columns.values, ['per'])
+        return sd.loc[:, keepcols]
 
     def _get_packagedata(self):
         # [rno, cellid, rlen, rwid, rgrd, rtp, rbth, rhk, man, ncon,
@@ -193,7 +194,9 @@ class mf6sfr:
                 'depth1', 'depth2'}
         cols = set(sd.columns).intersection(cols)
         icalc = dict(zip(zip(self.sd.nseg, self.sd.per), self.sd.icalc))
-        if len(cols) > 0:
+        if len(cols) == 0:
+            return None
+        elif len(cols) > 0:
             print('distributing values to reaches:\n')
             for c in cols.difference({'depth1', 'depth2'}):
                 print('{} -> {}...'.format(self.mf5names[c], c))
@@ -267,8 +270,11 @@ class mf6sfr:
         distributed['iseg'] = distributed.iseg.astype(int)
         return distributed
 
-    def write_file(self, outpath=''):
-        outfile = os.path.join(outpath, self.ModflowSfr2.file_name[0] + '6')
+    def write_file(self, filename=None, outpath=''):
+        if filename is not None:
+            outfile = filename
+        else:
+            outfile = os.path.join(outpath, self.ModflowSfr2.file_name[0] + '6')
         header = '# sfr6 input; converted from {} by mf6sfr'.format(self.ModflowSfr2.file_name[0])
         with open(outfile, 'w') as output:
             output.write(header + '\n')
@@ -303,13 +309,14 @@ class mf6sfr:
             output.write('END Connectiondata\n')
 
             # skip the diversions block for now
-            periods = self.perioddata.groupby('per')
-            for per in range(self.nper):
-                output.write('\nBEGIN Period {}\n'.format(per + 1))
-                grp = periods.get_group(per).replace('ACTIVE', np.nan)
-                datacols = {'inflow', 'manning', 'rainfall', 'evaporation', 'runoff', 'stage'}
-                datacols = datacols.intersection(grp.columns)
-                grp = grp.loc[:, datacols]
-                grp.stack().to_csv(output, sep=' ', index=True, header=False)
-                output.write('END Period {}\n'.format(per + 1))
+            if self.perioddata is not None:
+                periods = self.perioddata.groupby('per')
+                for per in range(self.nper):
+                    output.write('\nBEGIN Period {}\n'.format(per + 1))
+                    grp = periods.get_group(per).replace('ACTIVE', np.nan)
+                    datacols = {'inflow', 'manning', 'rainfall', 'evaporation', 'runoff', 'stage'}
+                    datacols = datacols.intersection(grp.columns)
+                    grp = grp.loc[:, datacols]
+                    grp.stack().to_csv(output, sep=' ', index=True, header=False)
+                    output.write('END Period {}\n'.format(per + 1))
         print('wrote {}'.format(outfile))
