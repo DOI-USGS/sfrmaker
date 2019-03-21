@@ -265,7 +265,7 @@ class lines:
     def from_shapefile(shapefile,
                        id_column='id',
                        routing_column='toid',
-                       arbolate_sum_column='asum',
+                       arbolate_sum_column2='asum2',
                        width1_column='width1',
                        width2_column='width2',
                        up_elevation_column='elevup',
@@ -298,7 +298,7 @@ class lines:
         return lines.from_dataframe(df,
                                     id_column=id_column,
                                     routing_column=routing_column,
-                                    arbolate_sum_column=arbolate_sum_column,
+                                    arbolate_sum_column2=arbolate_sum_column2,
                                     width1_column=width1_column,
                                     width2_column=width2_column,
                                     up_elevation_column=up_elevation_column,
@@ -312,7 +312,7 @@ class lines:
     def from_dataframe(df,
                        id_column='id',
                        routing_column='toid',
-                       arbolate_sum_column='asum',
+                       arbolate_sum_column2='asum2',
                        width1_column='width1',
                        width2_column='width2',
                        up_elevation_column='elevup',
@@ -331,7 +331,7 @@ class lines:
         # rename the columns for consistency
         rename_cols = {id_column: 'id',
                        routing_column: 'toid',
-                       arbolate_sum_column: 'asum',
+                       arbolate_sum_column2: 'asum2',
                        width1_column: 'width1',
                        width2_column: 'width2',
                        up_elevation_column: 'elevup',
@@ -347,7 +347,11 @@ class lines:
         df.drop(to_drop, axis=1, inplace=True)
         df.rename(columns=rename_cols, inplace=True)
 
-        column_order = ['id', 'toid', 'asum', 'width1', 'width2', 'elevup', 'elevdn', 'name', 'geometry']
+        column_order = ['id', 'toid',
+                        'asum1', 'asum2',
+                        'width1', 'width2',
+                        'elevup', 'elevdn',
+                        'name', 'geometry']
         for c in column_order:
             if c not in df.columns:
                 df[c] = 0
@@ -397,7 +401,7 @@ class lines:
             prjfile = get_prj_file(NHDPlus_paths, NHDFlowlines)
 
         # convert arbolate sums from km to m
-        df['asum'] = df.ArbolateSu * 1000
+        df['asum2'] = df.ArbolateSu * 1000
 
         # convert comid end elevations from cm to m
         if 'MAXELEVSMO' in df.columns:
@@ -416,6 +420,7 @@ class lines:
                active_area=None, isfr=None,
                model=None,
                minimum_reach_length=None,
+               minimum_reach_width=1.,
                cull_flowlines_to_active_area=True,
                consolidate_conductance=False, one_reach_per_cell=False,
                model_name=None,
@@ -432,6 +437,10 @@ class lines:
             an effective mean model cell length by taking the square root
             of the average cell area, and then set minimum_reach_length
             to 5% of effective mean cell length.
+                minimum_reach_length : float
+        minimum_reach_width : float
+            Minimum reach width to specify (in model units), if computing widths from
+            arbolate sum values. (default = 1)
         consolidate_conductance : bool
             If True, total reach conductance each cell is computed, and
             assigned to the most downstream reach via the hydraulic conductivity
@@ -498,34 +507,52 @@ class lines:
         # estimate widths if they aren't supplied
         if self.df.width1.sum() == 0:
             print("Computing widths...")
-            raise NotImplementedError('Check length unit conversions before using this option.')
 
             # compute arbolate sums for original LineStrings if they weren't provided
-            if 'asum' not in self.df.columns:
+            if 'asum2' not in self.df.columns:
+                raise NotImplementedError('Check length unit conversions before using this option.')
                 asums = arbolate_sum(self.df.id,
                                      dict(zip(self.df.id,
                                               np.array([g.length for g in self.df.geometry]) * self.geometry_to_m
                                               )),
                                      self.routing)
             else:
-                asums = dict(zip(self.df.id, self.df.asum * self.attr_to_m))
+                asums = dict(zip(self.df.id, self.df.asum2 * self.attr_to_m))
+
+            # populate starting asums (asum1)
+            routing_r = {v: k for k, v in self.routing.items() if v != 0}
+            self.df['asum1'] = [asums.get(routing_r.get(id, 0), 0) for id in self.df.id.values]
+            asum1s = dict(zip(self.df.id, self.df.asum1))
 
             # compute arbolate sum at reach midpoints (in meters)
-            lengths = rd[['line_id', 'geometry']].copy()
+            lengths = rd[['line_id', 'ireach', 'geometry']].copy()
             lengths['rchlen'] = np.array([g.length for g in lengths.geometry]) * self.geometry_to_m
             groups = lengths.groupby('line_id')  # fragments grouped by parent line
 
-            segment_asums = [asums[id] for id in lengths.line_id]
-            reach_cumsums = np.concatenate([np.cumsum(grp.rchlen.values[::-1])[::-1] - 0.5*grp.rchlen.values
-                                          for s, grp in groups])
-            reach_asums = -1 * reach_cumsums + segment_asums
+            #segment_asums = [asums[id] for id in lengths.line_id]
+            #reach_cumsums = np.concatenate([np.cumsum(grp.rchlen.values[::-1])[::-1] - 0.5*grp.rchlen.values
+            #                              for s, grp in groups])
+            #reach_asums = -1 * reach_cumsums + segment_asums
+            reach_cumsums = []
+            ordered_ids = rd.line_id.loc[rd.line_id.diff() != 0].values
+            for id in ordered_ids:
+                grp = groups.get_group(id).sort_values(by='ireach')
+                dist = np.cumsum(grp.rchlen.values) - 0.5 * grp.rchlen.values
+                reach_cumsums.append(dist)
+            reach_cumsums = np.concatenate(reach_cumsums)
+            segment_asums = [asum1s[id] for id in lengths.line_id]
+            reach_asums = segment_asums + reach_cumsums
             # maintain positive asums; lengths in NHD often aren't exactly equal to feature lengths
-            reach_asums[reach_asums < 0.] = 0
+            #reach_asums[reach_asums < 0.] = 0
             rd['asum'] = reach_asums
             # width estimation formula expects meters
             width = width_from_arbolate_sum(reach_asums)
-
             rd['width'] = width * unit_conversion.get('meters'+grid.model_units, 1.) # convert back to model units
+            rd.loc[rd.width < minimum_reach_width, 'width'] = minimum_reach_width
+
+            # assign width1 and width2 back to segment data
+            self.df['width1'] = width_from_arbolate_sum(self.df.asum1.values) * mult
+            self.df['width2'] = width_from_arbolate_sum(self.df.asum2.values) * mult
 
         # interpolate linestring end widths to intersected reaches
         else:
@@ -540,7 +567,7 @@ class lines:
                                                  segvar1='width1', segvar2='width2',
                                                  reach_data_group_col='line_id',
                                                  segment_data_group_col='id'
-                                                 )
+                                                 ) * mult
 
         # discard very small reaches; redo numbering
         # set minimum reach length based on cell size
