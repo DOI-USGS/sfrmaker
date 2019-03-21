@@ -26,7 +26,8 @@ class mf6sfr:
     cols = ['rno', 'cellid', 'k', 'i', 'j', 'rlen', 'rwid', 'rgrd',
             'rtp', 'rbth', 'rhk', 'man', 'ncon', 'ustrf', 'ndv', 'idomain']
 
-    def __init__(self, ModflowSfr2):
+    def __init__(self, ModflowSfr2, options=['print_input',
+                                             'save_flows']):
 
         # check for other packages
         try:
@@ -71,8 +72,11 @@ class mf6sfr:
         self._period_data = None
 
         # stuff to write
-        self.options_block = '\nBEGIN Options\n  PRINT_INPUT\n  SAVE_FLOWS\n'
-        self.options_block += '  UNIT_CONVERSION  {}\nEND Options\n'.format(ModflowSfr2.const)
+        self.options_block = '\nBEGIN Options\n'
+        for opt in options:
+            self.options_block += '  {}\n'.format(opt)
+        self.options_block += '  unit_conversion  {}\n'.format(ModflowSfr2.const)
+        self.options_block += 'END Options\n'
 
         self.dimensions_block = '\nBEGIN Dimensions\n  NREACHES {:d}\nEND Dimensions\n'.format(self.nreaches)
 
@@ -243,6 +247,7 @@ class mf6sfr:
             distributed = pd.concat(reaches)
         distributed['per'] = distributed.per.astype(int)
         distributed.index = distributed.rno
+        distributed.index.name = 'rno_idx'
         distributed.sort_values(by=['per', 'rno'], inplace=True)
 
         # for icalc=0 reaches with no depth specified in per 0
@@ -314,6 +319,7 @@ class mf6sfr:
                 for per in range(self.nper):
                     output.write('\nBEGIN Period {}\n'.format(per + 1))
                     grp = periods.get_group(per).replace('ACTIVE', np.nan)
+                    assert np.array_equal(grp.index.values, grp.rno.values)
                     datacols = {'inflow', 'manning', 'rainfall', 'evaporation', 'runoff', 'stage'}
                     datacols = datacols.intersection(grp.columns)
                     grp = grp.loc[:, datacols]
