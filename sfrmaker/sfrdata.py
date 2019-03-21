@@ -383,7 +383,8 @@ class sfrdata:
         self.reach_data['outseg'] = [r[s] for s in self.reach_data.outseg]
         self.segment_data.sort_values(by=['per', 'nseg'], inplace=True)
         self.segment_data.index = np.arange(len(self.segment_data))
-        assert np.array_equal(self.segment_data.nseg.values, self.segment_data.index.values+1)
+        assert np.array_equal(self.segment_data.loc[self.segment_data.per == 0, 'nseg'].values,
+                              self.segment_data.loc[self.segment_data.per == 0].index.values+1)
         self.reach_data.sort_values(by=['iseg', 'ireach'], inplace=True)
 
     def reset_reaches(self):
@@ -444,8 +445,9 @@ class sfrdata:
         return valid_rnos & non_zero_outreaches
 
     def _valid_nsegs(self, increasing=True):
-        return valid_nsegs(self.segment_data.nseg,
-                           self.segment_data.outseg,
+        sd0 = self.segment_data.loc[self.segment_data.per == 0]
+        return valid_nsegs(sd0.nseg,
+                           sd0.outseg,
                            increasing=increasing)
 
     def create_ModflowSfr2(self, model=None, const=None,
@@ -659,7 +661,7 @@ class sfrdata:
                        grid=grid, sr=sr,
                        isfr=isfr)
 
-    def write_package(self, filename=None, version='mf2005',
+    def write_package(self, filename=None, version='mf2005', options=[],
                       **kwargs):
         """Write and SFR package file.
 
@@ -678,7 +680,7 @@ class sfrdata:
 
             from .mf5to6 import mf6sfr
             # instantiate mf6sfr converter object with mf-nwt model/sfr package from flopy
-            sfr6 = mf6sfr(self.ModflowSfr2)
+            sfr6 = mf6sfr(self.ModflowSfr2, options=options)
 
             # write a MODFLOW 6 file
             sfr6.write_file(filename=filename)
