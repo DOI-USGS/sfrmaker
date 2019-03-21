@@ -365,7 +365,7 @@ def renumber_segments(nseg, outseg):
     # if reach data are supplied, segment/outseg pairs may be listed more than once
     if len(nseg) != len(np.unique(nseg)):
         d = dict(zip(nseg, outseg))
-        nseg, outseg = np.array(d.keys()), np.array(d.values())
+        nseg, outseg = np.array(list(d.keys())), np.array(list(d.values()))
     ns = len(nseg)
 
     nexts = ns
