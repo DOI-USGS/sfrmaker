@@ -80,7 +80,7 @@ def load_NHDPlus_v2(NHDPlus_paths=None,
 
     fl_cols = ['COMID',  # 'FCODE', 'FDATE', 'FLOWDIR',
                # 'FTYPE', 'GNIS_ID',
-               'GNIS_NAME', #'LENGTHKM',
+               'GNIS_NAME', 'LENGTHKM',
                # 'REACHCODE', 'RESOLUTION', 'WBAREACOMI',
                'geometry']
     pfvaa_cols = ['ArbolateSu',  # 'Hydroseq', 'DnHydroseq',
