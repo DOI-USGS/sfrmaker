@@ -473,6 +473,7 @@ def shp2df(shplist, index=None, index_dtype=None, clipto=[], filter=None,
                 if filter is not None:
                     print('Check filter {} for consistency \
 with shapefile coordinate system'.format(filter))
+                continue
             geoms = shp_df.geometry.tolist()
             if geoms.count(None) == 0:
                 shp_df['geometry'] = [shape(g) for g in geoms]
