@@ -32,7 +32,7 @@ def valid_nsegs(nsegs, outsegs=None, increasing=True):
         graph = make_graph(nsegs, outsegs, one_to_many=False)
         monotonic = []
         for s in nsegs:
-            seg_sequence = find_path(graph.copy(), s)
+            seg_sequence = find_path(graph.copy(), s)[:-1] # last number is 0 for outlet
             monotonic.append(np.all(np.diff(np.array(seg_sequence)) > 0))
         monotonic = np.all(monotonic)
         return consecutive_and_onebased & monotonic
