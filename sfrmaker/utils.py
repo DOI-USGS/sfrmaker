@@ -87,7 +87,10 @@ def interpolate_to_reaches(reach_data, segment_data,
         strhc1 (hydraulic conductivity) column in reach_data.
 
     """
-    segment_data = segment_data.loc[segment_data.per == 0]
+    if 'per' in segment_data.columns:
+        segment_data = segment_data.loc[segment_data.per == 0]
+    assert len(segment_data[segment_data_group_col].unique()) == len(segment_data), \
+    "Segment ID column: {} has not non-unique values."
     rd_groups = reach_data.groupby(reach_data_group_col)
     sd_groups = segment_data.groupby(segment_data_group_col)
 
