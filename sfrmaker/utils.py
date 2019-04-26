@@ -87,6 +87,7 @@ def interpolate_to_reaches(reach_data, segment_data,
         strhc1 (hydraulic conductivity) column in reach_data.
 
     """
+    segment_data = segment_data.loc[segment_data.per == 0]
     rd_groups = reach_data.groupby(reach_data_group_col)
     sd_groups = segment_data.groupby(segment_data_group_col)
 
@@ -101,6 +102,7 @@ def interpolate_to_reaches(reach_data, segment_data,
               segdata[segvar2].values[0]]
         xp = [0, segment_length] # segment start/end distances
         reach_values += np.interp(dist, xp, fp).tolist()
+    assert len(reach_values) == len(reach_data)
     return np.array(reach_values)
 
 def pick_toids(routing, elevations):

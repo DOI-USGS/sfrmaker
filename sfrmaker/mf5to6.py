@@ -2,7 +2,7 @@ import os
 import numpy as np
 import pandas as pd
 from copy import copy
-
+from .utils import interpolate_to_reaches
 
 class mf6sfr:
 
@@ -144,7 +144,12 @@ class mf6sfr:
         # [rno, cellid, rlen, rwid, rgrd, rtp, rbth, rhk, man, ncon,
         # ustrf, ndv, aux, boundname]
         print('converting reach and segment data to package data...')
-        rwid = self.ModflowSfr2._interpolate_to_reaches('width1', 'width2')
+        #rwid = self.ModflowSfr2._interpolate_to_reaches('width1', 'width2')
+        rwid = interpolate_to_reaches(self.rd, self.sd,
+                                      'width1', 'width2',
+                                      reach_data_group_col='iseg',
+                                      segment_data_group_col='nseg'
+                                      )
         man = self._segment_data2reach_data('roughch')
 
         packagedata = pd.DataFrame()

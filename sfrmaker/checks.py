@@ -143,6 +143,37 @@ def routing_is_circular(fromid, toid):
             return True
     return False
 
+def same_sfr_numbering(reach_data1, reach_data2):
+    """Compare two sets of reach data.
 
+    Parameters
+    ----------
+    reach_data1 : DataFrame
+        Must have columns:
+        i : zero-based row
+        j : zero-based column
+        iseg : segment number
+        ireach : reach number
+    reach_data2 : DataFrame
+        Must have same columns as reach_data1
 
+    Returns
+    -------
+    issame : bool
+        Whether the two datasets have the same numbering for i, j andn iseg/ireach.
+
+    Notes
+    -----
+    k (layer) is not tested because k can be different for the same SFR package depending on the context.
+    For example, a reach might have k=1 in the input file, and k=3 in the output file if
+    the flux was placed in the highest active layer.
+
+    """
+    cols = ['i', 'j', 'iseg', 'ireach']
+    rd1 = reach_data1[cols].sort_values(by=['iseg', 'ireach']).copy()
+    rd2 = reach_data2[cols].sort_values(by=['iseg', 'ireach']).copy()
+    col_equal = []
+    for c in rd1.columns:
+        col_equal.append(np.array_equal(rd1[c], rd2[c]))
+    return np.all(col_equal)
 
