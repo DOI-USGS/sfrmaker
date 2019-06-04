@@ -36,7 +36,7 @@ def get_NHDPlus_v2_filepaths(NHDPlus_paths):
 def load_NHDPlus_v2(NHDPlus_paths=None,
                     NHDFlowlines=None, PlusFlowlineVAA=None, PlusFlow=None, elevslope=None,
                     filter=None,
-                    epsg=None, proj4=None, prjfile=None):
+                    epsg=None, proj_str=None, prjfile=None):
     """
     Parameters
     ==========
@@ -72,7 +72,7 @@ def load_NHDPlus_v2(NHDPlus_paths=None,
     # get crs information from flowline projection file
     if prjfile is None:
         prjfile = get_prj_file(NHDPlus_paths, NHDFlowlines)
-    nhdcrs = crs(epsg=epsg, proj4=proj4, prjfile=prjfile)
+    nhdcrs = crs(epsg=epsg, proj_str=proj_str, prjfile=prjfile)
 
     # ensure that filter bbox is in same crs as flowlines
     if filter is not None and not isinstance(filter, tuple):
@@ -155,12 +155,13 @@ def read_nhdplus(shpfiles, bbox_filter=None,
 
     # read shapefile into dataframe and find the index column
     df = shp2df(shpfiles, filter=bbox_filter)
-    index_col = [c for c in df.columns if c.lower() == index_col]
-    if len(index_col) == 0:
-        if isinstance(shpfiles, list):
-            shpfiles = '\n'.join(shpfiles)
-        raise IndexError('No {} column found in: \n{}'.format(index_col,
-                                                              shpfiles))
-    else:
-        df.index = df[index_col[0]]
-    return df
+    if len(df) > 0:
+        index_col = [c for c in df.columns if c.lower() == index_col]
+        if len(index_col) == 0:
+            if isinstance(shpfiles, list):
+                shpfiles = '\n'.join(shpfiles)
+            raise IndexError('No {} column found in: \n{}'.format(index_col,
+                                                                  shpfiles))
+        else:
+            df.index = df[index_col[0]]
+        return df
