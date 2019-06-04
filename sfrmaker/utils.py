@@ -8,6 +8,101 @@ from shapely.geometry import Point
 unit_conversion = {'feetmeters': 0.3048,
                    'metersfeet': 1/.3048}
 
+
+def assign_layers(reach_data, botm_array, pad=1., inplace=False):
+    """Assigns the appropriate layer for each SFR reach,
+            based on cell bottoms at location of reach.
+
+    Parameters
+    ----------
+    reach_data : DataFrame with reach information
+    botm : 3D numpy array of bottom elevations
+    pad : scalar
+        Minimum distance that streambed bottom must be above layer bottom.
+        When determining the layer or whether the streambed bottom is below
+        the model bottom, streambed bottom - pad is used. Similarly, when
+        lowering the model bottom to accomodate the streambed bottom,
+        a value of streambed bottom - pad is used.
+    inplace : bool
+        If True, operate on reach_data and botm_array, otherwise,
+        return 1D array of layer numbers and 2D array of new model botm elevations
+
+    Returns
+    -------
+    (if inplace=True)
+    layers : 1D array of layer numbers
+    new_model_botms : 2D array of new model bottom elevations
+
+    Notes
+    -----
+    Streambed bottom = strtop - strthick
+    When multiple reaches occur in a cell, the lowest streambed bottom is used
+    in determining the layer and any corrections to the model bottom.
+
+    """
+    i, j = reach_data.i.values, reach_data.j.values
+    streambotms = reach_data.strtop.values - reach_data.strthick.values
+    layers = get_layer(botm_array, i, j, streambotms - pad)
+
+    # check against model bottom
+    model_botm = botm_array[-1, i, j]
+    below = streambotms - pad <= model_botm
+    below_i = i[below]
+    below_j = j[below]
+    new_model_botm = None
+    if np.any(below):
+        new_model_botm = botm_array[-1].copy()
+        for ib, jb in zip(below_i, below_j):
+            inds = (reach_data.i == ib) & (
+                    reach_data.j == jb)
+            new_model_botm[ib, jb] = streambotms[inds].min() - pad
+        assert not np.any(streambotms <= new_model_botm[i, j])
+    if inplace:
+        if new_model_botm is not None:
+            botm_array[-1] = new_model_botm
+        reach_data['k'] = layers
+    else:
+        return layers, new_model_botm
+
+
+def get_layer(botm_array, i, j, elev):
+    """Return the layers for elevations at i, j locations.
+
+    Parameters
+    ----------
+    botm_array : 3D numpy array of layer bottom elevations
+    i : scaler or sequence
+        row index (zero-based)
+    j : scaler or sequence
+        column index
+    elev : scaler or sequence
+        elevation (in same units as model)
+
+    Returns
+    -------
+    k : np.ndarray (1-D) or scalar
+        zero-based layer index
+    """
+    def to_array(arg):
+        if not isinstance(arg, np.ndarray):
+            return np.array([arg])
+        else:
+            return arg
+
+    i = to_array(i)
+    j = to_array(j)
+    nlay = botm_array.shape[0]
+    elev = to_array(elev)
+    botms = botm_array[:, i, j].tolist()
+    layers = np.sum(((botms - elev) > 0), axis=0)
+    # force elevations below model bottom into bottom layer
+    layers[layers > nlay - 1] = nlay - 1
+    layers = np.atleast_1d(np.squeeze(layers))
+    if len(layers) == 1:
+        layers = layers[0]
+    return layers
+
+
 def consolidate_reach_conductances(rd, keep_only_dominant=False):
     """For model cells with multiple SFR reaches, shift all conductance to widest reach,
     by adjusting the length, and setting the lengths in all smaller collocated reaches to 1,
@@ -60,6 +155,7 @@ def consolidate_reach_conductances(rd, keep_only_dominant=False):
         return rd.loc[rd.Dominant].copy()
     return rd
 
+
 def interpolate_to_reaches(reach_data, segment_data,
                            segvar1, segvar2,
                            reach_data_group_col='iseg', segment_data_group_col='nseg'
@@ -108,6 +204,7 @@ def interpolate_to_reaches(reach_data, segment_data,
     assert len(reach_values) == len(reach_data)
     return np.array(reach_values)
 
+
 def pick_toids(routing, elevations):
     """Reduce routing connections to one per ID (no divergences).
     Select the downstream ID based on elevation, or first position in
@@ -140,6 +237,7 @@ def pick_toids(routing, elevations):
             routing2[k] = v
     print("finished in {:.2f}s\n".format(time.time() - ta))
     return routing2
+
 
 def smooth_elevations(fromcomids, tocomids, elevup, elevdn):
     # make forward and reverse dictionaries with routing info
@@ -329,6 +427,7 @@ def make_graph(fromcomids, tocomids, one_to_many=True):
         return graph121
     return graph
 
+
 def renumber_segments(nseg, outseg):
     """Renumber segments so that segment numbering is continuous, starts at 1, and always increases
         in the downstream direction. Experience suggests that this can substantially speed
@@ -380,6 +479,7 @@ def renumber_segments(nseg, outseg):
         if len(nextupsegs) == 0:
             break
     return r
+
 
 def setup_reach_data(flowline_geoms, fl_comids, grid_intersections,
                      grid_geoms, tol=0.01):
@@ -569,6 +669,7 @@ def arbolate_sum(segment, lengths, routing):
         asum[s] = np.sum(lnupsegs) + lengths[s]
     return asum
 
+
 def width_from_arbolate_sum(arbolate_sum, minimum_width=1):
     """Estimate stream width in feet from arbolate sum in meters, using relationship
     described by Feinstein et al (2010), Appendix 2, p 266.
@@ -593,11 +694,13 @@ def width_from_arbolate_sum(arbolate_sum, minimum_width=1):
         return w[0]
     return w
 
+
 def load_json(jsonfile):
     """Convenience function to load a json file; replacing
     some escaped characters."""
     with open(jsonfile) as f:
         return json.load(f)
+
 
 def load_sr(jsonfile):
     """Create a SpatialReference instance from model config json file."""
