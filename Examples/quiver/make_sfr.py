@@ -27,7 +27,7 @@ sr = flopy.utils.SpatialReference(delr=np.ones(ncol)*dxy,
                                   delc=np.ones(nrow)*dxy,
                                   lenuni=1,
                                   xll=xll, yll=yll, rotation=0,
-                                  proj4_str='+init=epsg:5070')
+                                  proj_str='+init=epsg:5070')
 sr.write_shapefile('temp/grid.shp')
 sfr = lns.to_sfr(sr=sr, active_area='quiver_outlet_area.shp')
 

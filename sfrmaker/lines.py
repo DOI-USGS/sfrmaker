@@ -39,8 +39,8 @@ class lines:
         EPSG code identifying Coordinate Reference System (CRS)
         for features in df.geometry
         (optional)
-    proj4: str
-        PROJ4 string identifying CRS for features in df.geometry
+    proj_str: str
+        proj_str string identifying CRS for features in df.geometry
         (optional)
     prjfile: str
         File path to projection (.prj) file identifying CRS
@@ -51,12 +51,12 @@ class lines:
     def __init__(self, df=None,
                  attr_length_units='meters',
                  attr_height_units='meters',
-                 epsg=None, proj4=None, prjfile=None):
+                 epsg=None, proj_str=None, prjfile=None):
 
         self.df = df
         self.attr_length_units = attr_length_units
         self.attr_height_units = attr_height_units
-        self.crs = crs(epsg=epsg, proj4=proj4, prjfile=prjfile)
+        self.crs = crs(epsg=epsg, proj_str=proj_str, prjfile=prjfile)
         self._geometry_length_units = None
 
         self._routing = None # dictionary of routing connections
@@ -206,7 +206,7 @@ class lines:
 
         # reproject the flowlines if they aren't in same CRS as grid
         if self.crs != grid.crs:
-            self.reproject(grid.crs.proj4)
+            self.reproject(grid.crs.proj_str)
 
         grid_polygons = grid.df.geometry.tolist()
         stream_linework = self.df.geometry.tolist()
@@ -246,17 +246,17 @@ class lines:
             column_order.remove('j')
         return reach_data[column_order].copy()
 
-    def reproject(self, dest_proj4):
-        assert self.crs.proj4 is not None, "No proj4 string for flowlines"
-        assert dest_proj4 is not None, "No destination CRS."
+    def reproject(self, dest_proj_str):
+        assert self.crs.proj_str is not None, "No proj_str string for flowlines"
+        assert dest_proj_str is not None, "No destination CRS."
 
-        print('\nreprojecting hydrography from\n{}\nto\n{}\n'.format(self.crs.proj4,
-                                                                     dest_proj4))
-        geoms = project(self.df.geometry, self.crs.proj4, dest_proj4)
+        print('\nreprojecting hydrography from\n{}\nto\n{}\n'.format(self.crs.proj_str,
+                                                                     dest_proj_str))
+        geoms = project(self.df.geometry, self.crs.proj_str, dest_proj_str)
         assert np.isfinite(np.max(geoms[0].xy[0])), \
             "Invalid reprojection; check CRS for lines and grid."
         self.df['geometry'] = geoms
-        self.crs.proj4 = dest_proj4
+        self.crs.proj_str = dest_proj_str
 
     def write_shapefile(self, outshp='flowlines.shp'):
         df2shp(self.df, outshp, epsg=self.crs.epsg, prj=self.crs.prjfile)
@@ -273,7 +273,7 @@ class lines:
                        name_column='name',
                        attr_length_units='meters', attr_height_units='meters',
                        filter=None,
-                       epsg=None, proj4=None, prjfile=None):
+                       epsg=None, proj_str=None, prjfile=None):
         """
         Parameters
         ----------
@@ -286,13 +286,13 @@ class lines:
             prjfile = shapefile.replace('.shp', '.prj')
             prjfile = prjfile if os.path.exists(prjfile) else None
 
-        shpfile_crs = crs(epsg=epsg, proj4=proj4, prjfile=prjfile)
+        shpfile_crs = crs(epsg=epsg, proj_str=proj_str, prjfile=prjfile)
 
         # ensure that filter bbox is in same crs as flowlines
         if filter is not None and not isinstance(filter, tuple):
             filter = get_bbox(filter, shpfile_crs)
 
-        df = shp2df(shapefile, filter)
+        df = shp2df(shapefile, filter=filter)
         assert 'geometry' in df.columns, "No feature geometries found in {}.".format(shapefile)
 
         return lines.from_dataframe(df,
@@ -306,7 +306,7 @@ class lines:
                                     name_column=name_column,
                                     attr_length_units=attr_length_units,
                                     attr_height_units=attr_height_units,
-                                    epsg=epsg, proj4=proj4, prjfile=prjfile)
+                                    epsg=epsg, proj_str=proj_str, prjfile=prjfile)
 
     @staticmethod
     def from_dataframe(df,
@@ -321,7 +321,7 @@ class lines:
                        name_column='name',
                        attr_length_units='meters',
                        attr_height_units='meters',
-                       epsg=None, proj4=None, prjfile=None):
+                       epsg=None, proj_str=None, prjfile=None):
 
         assert geometry_column in df.columns, \
             "No feature geometries found: dataframe column '{}' doesn't exist.".format(geometry_column)
@@ -361,13 +361,13 @@ class lines:
 
         return lines(df, attr_length_units=attr_length_units,
                      attr_height_units=attr_height_units,
-                     epsg=epsg, proj4=proj4, prjfile=prjfile)
+                     epsg=epsg, proj_str=proj_str, prjfile=prjfile)
 
     @staticmethod
     def from_NHDPlus_v2(NHDPlus_paths=None,
                         NHDFlowlines=None, PlusFlowlineVAA=None, PlusFlow=None, elevslope=None,
                         filter=None,
-                        epsg=None, proj4=None, prjfile=None):
+                        epsg=None, proj_str=None, prjfile=None):
         """
         Parameters
         ==========
@@ -395,7 +395,7 @@ class lines:
                              NHDFlowlines=NHDFlowlines, PlusFlowlineVAA=PlusFlowlineVAA,
                              PlusFlow=PlusFlow, elevslope=elevslope,
                              filter=filter,
-                             epsg=epsg, proj4=proj4, prjfile=prjfile)
+                             epsg=epsg, proj_str=proj_str, prjfile=prjfile)
 
         if prjfile is None:
             prjfile = get_prj_file(NHDPlus_paths, NHDFlowlines)
@@ -414,7 +414,7 @@ class lines:
                                     name_column='GNIS_NAME',
                                     attr_length_units='meters',
                                     attr_height_units='meters',
-                                    epsg=epsg, proj4=proj4, prjfile=prjfile)
+                                    epsg=epsg, proj_str=proj_str, prjfile=prjfile)
 
     def to_sfr(self, grid=None, sr=None,
                active_area=None, isfr=None,
@@ -471,7 +471,7 @@ class lines:
 
         # reproject the flowlines if they aren't in same CRS as grid
         if self.crs != grid.crs:
-            self.reproject(grid.crs.proj4)
+            self.reproject(grid.crs.proj_str)
         if cull_flowlines_to_active_area:
             if grid.active_area is not None:
                 self.cull(grid.active_area, inplace=True, simplify=True, tol=2000)

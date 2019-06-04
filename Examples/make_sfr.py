@@ -33,7 +33,7 @@ sr = flopy.utils.SpatialReference(delr=np.ones(ncol)*dxy,
                                   delc=np.ones(nrow)*dxy,
                                   lenuni=1,
                                   xll=682688, yll=5139052, rotation=0,
-                                  proj4_str='+init=epsg:26715')
+                                  proj_str='+init=epsg:26715')
 
 m = fm.Modflow('example', model_ws=outdir)
 dis = fm.ModflowDis(m, nlay=1, nrow=nrow, ncol=nrow,
