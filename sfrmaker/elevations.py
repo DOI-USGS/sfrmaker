@@ -3,6 +3,7 @@ import time
 import numpy as np
 from .utils import make_graph, get_nextupsegs, get_upsegs
 
+
 def smooth_elevations(fromcomids, tocomids, elevup, elevdn):
     # make forward and reverse dictionaries with routing info
     graph = dict(zip(fromcomids, tocomids))

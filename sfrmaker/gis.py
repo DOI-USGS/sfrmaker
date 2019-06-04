@@ -14,22 +14,22 @@ from fiona.crs import from_epsg, from_string, to_string
 class crs:
 
     def __init__(self, crs=None,
-                 epsg=None, proj4=None, prjfile=None):
+                 epsg=None, proj_str=None, prjfile=None):
 
         self._crs = crs
         self.epsg = epsg
-        self._proj4 = proj4
+        self._proj_str = proj_str
         self._length_units = None
         self.prjfile = prjfile
         if prjfile is not None:
             assert os.path.exists(prjfile), "{} not found.".format(prjfile)
-            self._proj4 = get_proj4(prjfile)
+            self._proj_str = get_proj_str(prjfile)
 
     @property
     def crs(self):
         if self._crs is None:
-            if self._proj4 is not None:
-                self._crs = from_string(self._proj4)
+            if self._proj_str is not None:
+                self._crs = from_string(self._proj_str)
             elif self.epsg is not None:
                 self._crs = from_epsg(self.epsg)
         return self._crs
@@ -37,26 +37,26 @@ class crs:
     @property
     def length_units(self):
         if self._length_units is None:
-            return parse_units_from_proj4(self.proj4)
+            return parse_units_from_proj_str(self.proj_str)
 
     @property
-    def proj4(self):
-        if self._proj4 is None and self._crs is not None:
-            self._proj4 = to_string(self._crs)
-        elif self._proj4 is None and self.prjfile is not None:
-            self._proj4 = get_proj4(self.prjfile)
-        return self._proj4
+    def proj_str(self):
+        if self._proj_str is None and self._crs is not None:
+            self._proj_str = to_string(self._crs)
+        elif self._proj_str is None and self.prjfile is not None:
+            self._proj_str = get_proj_str(self.prjfile)
+        return self._proj_str
 
     def _reset(self):
-        self._proj4 = None
+        self._proj_str = None
         self._crs = None
 
     def __setattr__(self, key, value):
         if key == "crs":
             super(crs, self).__setattr__("_crs", value)
-            self._proj4 = None
-        elif key == "proj4":
-            super(crs, self).__setattr__("_proj4", value)
+            self._proj_str = None
+        elif key == "proj_str":
+            super(crs, self).__setattr__("_proj_str", value)
             self._crs = None
         elif key == "length_units":
             super(crs, self).__setattr__("_length_units", value)
@@ -66,15 +66,15 @@ class crs:
     def __eq__(self, other):
         if not isinstance(other, crs):
             return False
-        if other.proj4 != self.proj4:
+        if other.proj_str != self.proj_str:
             return False
         return True
 
     def __repr__(self):
-        return self.proj4
+        return self.proj_str
 
-def get_proj4(prj):
-    """Get proj4 string for a projection file
+def get_proj_str(prj):
+    """Get proj_str string for a projection file
 
     Parameters
     ----------
@@ -83,14 +83,14 @@ def get_proj4(prj):
 
     Returns
     -------
-    proj4 string (http://trac.osgeo.org/proj/)
+    proj_str (https://proj.org/)
 
     """
     '''
     Using fiona (couldn't figure out how to do this with just a prj file)
     from fiona.crs import to_string
     c = fiona.open(shp).crs
-    proj4 = to_string(c)
+    proj_str = to_string(c)
     '''
     # using osgeo
     from osgeo import osr
@@ -101,8 +101,8 @@ def get_proj4(prj):
             prjtext = src.read()
         srs = osr.SpatialReference()
         srs.ImportFromESRI([prjtext])
-        proj4 = srs.ExportToProj4()
-        return proj4
+        proj_str = srs.ExportToproj_str()
+        return proj_str
     except:
         pass
 
@@ -213,24 +213,24 @@ def intersect(geom1, geom2):
     print("\nfinished in {:.2f}s".format(time.time() - ta))
     return isfr
 
-def parse_units_from_proj4(proj4_str):
+def parse_units_from_proj_str(proj_str):
     units = None
     try:
         # need this because preserve_units doesn't seem to be
-        # working for complex proj4 strings.  So if an
+        # working for complex proj strings.  So if an
         # epsg code was passed, we have no choice, but if a
-        # proj4 string was passed, we can just parse it
-        if "EPSG" in proj4_str.upper():
+        # proj string was passed, we can just parse it
+        if "EPSG" in proj_str.upper():
             import pyproj
 
-            crs = pyproj.Proj(proj4_str,
+            crs = pyproj.Proj(proj_str,
                               preseve_units=True,
                               errcheck=True)
             proj_str = crs.srs
         else:
-            proj_str = proj4_str
-        # http://proj4.org/parameters.html#units
-        # from proj4 source code
+            proj_str = proj_str
+        # http://proj.org/parameters.html#units
+        # from proj source code
         # "us-ft", "0.304800609601219", "U.S. Surveyor's Foot",
         # "ft", "0.3048", "International Foot",
         if "units=m" in proj_str:
@@ -251,9 +251,9 @@ def project(geom, projection1, projection2):
     geom: shapely geometry object, list of shapely geometry objects,
           list of (x, y) tuples, or (x, y) tuple.
     projection1: string
-        Proj4 string specifying source projection
+        proj string specifying source projection
     projection2: string
-        Proj4 string specifying destination projection
+        proj string specifying destination projection
     """
     # check for x, y values instead of shapely objects
     if isinstance(geom, tuple):
@@ -298,9 +298,9 @@ def projectXY(x, y, projection1, projection2):
     x: scalar or 1-D array
     x: scalar or 1-D array
     projection1: string
-        Proj4 string specifying source projection
+        proj string specifying source projection
     projection2: string
-        Proj4 string specifying destination projection
+        proj string specifying destination projection
     """
     projection1 = str(projection1)
     projection2 = str(projection2)
@@ -352,7 +352,7 @@ def read_polygon_feature(feature, dest_crs, feature_crs=None):
     else:
         raise TypeError("Unrecognized feature input.")
     if feature_crs is not None and feature_crs != dest_crs:
-        feature = project(feature, feature_crs.proj4, dest_crs.proj4)
+        feature = project(feature, feature_crs.proj, dest_crs.proj)
     return feature
 
 def get_bbox(feature, dest_crs):
@@ -361,19 +361,19 @@ def get_bbox(feature, dest_crs):
     Parameters
     ----------
     feature : str (shapefile path), shapely Polygon or GeoJSON
-    dest_crs : proj4 str
+    dest_crs : proj str
         Desired output coordinate system (shapefiles only)
     """
     if isinstance(feature, str):
         with fiona.open(feature) as src:
             l, b, r, t = src.bounds
             bbox_src_crs = box(*src.bounds)
-            shpcrs = crs(proj4=to_string(src.crs))
+            shpcrs = crs(proj=to_string(src.crs))
         if shpcrs != dest_crs:
-            bbox_dest_crs = project(bbox_src_crs, shpcrs.proj4, dest_crs.proj4)
+            bbox_dest_crs = project(bbox_src_crs, shpcrs.proj, dest_crs.proj)
             l, b, r, t = bbox_dest_crs.bounds
             #x, y = project([(l, b),
-            #                (r, t)], shpcrs.proj4, dest_crs.proj4)
+            #                (r, t)], shpcrs.proj, dest_crs.proj)
             #filter = (x[0], y[0], x[1], y[1])
             #else:
         filter = (l, b, r, t)
@@ -560,7 +560,7 @@ def shp_properties(df):
 
 def df2shp(dataframe, shpname, geo_column='geometry', index=False,
            retain_order=False,
-           prj=None, epsg=None, proj4=None, crs=None):
+           prj=None, epsg=None, proj=None, crs=None):
     '''
     Write a DataFrame to a shapefile
     dataframe: dataframe to write to shapefile
@@ -574,7 +574,7 @@ def df2shp(dataframe, shpname, geo_column='geometry', index=False,
     --->there are four ways to specify the projection....choose one
     prj: <file>.prj filename (string)
     epsg: EPSG identifier (integer)
-    proj4: pyproj style projection string definition
+    proj: pyproj style projection string definition
     crs: crs attribute (dictionary) as read by fiona
     '''
     # first check if output path exists
@@ -623,9 +623,9 @@ def df2shp(dataframe, shpname, geo_column='geometry', index=False,
     if epsg is not None:
         from fiona.crs import from_epsg
         crs = from_epsg(int(epsg))
-    elif proj4 is not None:
+    elif proj is not None:
         from fiona.crs import from_string
-        crs = from_string(proj4)
+        crs = from_string(proj)
     elif crs is not None:
         pass
     else:
