@@ -319,6 +319,14 @@ def get_nextupsegs(graph_r, upsegs):
     nextupsegs : list
         Flat list of next segments upstream from upsegs
     """
+    #nextupsegs = []
+    #for s in upsegs:
+    #    next = graph_r.get(s)
+    #    if next is not None:
+    #        if not isinstance(next, list):
+    #            next = [next]
+    #        nextupsegs += next
+    #return nextupsegs
     nextupsegs = []
     for s in upsegs:
         nextupsegs += graph_r[s]
@@ -341,6 +349,21 @@ def get_upsegs(graph_r, seg):
     all_upsegs : set
         Flat set of all segments upstream from seg.
     """
+    #graph_r = graph_r.copy()
+    #upsegs = graph_r.get(seg, set())
+    #if not isinstance(upsegs, set):
+    #    upsegs = {upsegs}
+    #else:
+    #    upsegs = upsegs.copy()
+    #all_upsegs = upsegs
+    #if len(upsegs) > 0:
+    #    for i in range(len(graph_r)):
+    #        upsegs = get_nextupsegs(graph_r, upsegs)
+    #        if len(upsegs) > 0:
+    #            all_upsegs.update(upsegs)
+    #        else:
+    #            break
+    #return all_upsegs
     upsegs = graph_r[seg].copy()
     all_upsegs = upsegs
     for i in range(len(graph_r)):
@@ -406,20 +429,34 @@ def make_graph(fromcomids, tocomids, one_to_many=True):
         Dictionary of lists or ints (tocomids) keyed by values
         in fromcomids.
     """
+    #from collections import defaultdict
+    #fromcomids = np.array(fromcomids).astype(int)
+    ## convert tocomid values to ints regardless of (enclosing) dtypes
+    #tocomids = [a.astype(int).tolist() for a in map(np.array, tocomids)]
+#
+    #tuples = zip(fromcomids, tocomids)
+    #graph = defaultdict(list)
+    #if one_to_many: # tocomids should all be lists (not ints)
+    #    for fromcomid, tocomid in tuples:
+    #        v = graph[fromcomid] + tocomid
+    #        graph[fromcomid] = list(set(v))
+    #else: # tocomids should all be ints
+    #    for fromcomid, tocomid in tuples:
+    #        graph[fromcomid] = [tocomid]
+    #    graph121 = {}
+    #    for k, v in graph.items():
+    #        assert len(v) == 1, "one_to_many=False but node {} connects to {}".format(k, v)
+    #        graph121[k] = v.pop()
+    #    return graph121
+    #return graph
     from collections import defaultdict
     fromcomids = np.array(fromcomids).astype(int)
-    # convert tocomid values to ints regardless of (enclosing) dtypes
-    tocomids = [a.astype(int).tolist() for a in map(np.array, tocomids)]
-
+    tocomids = np.array(tocomids).astype(int)
     tuples = zip(fromcomids, tocomids)
-    graph = defaultdict(list)
-    if one_to_many: # tocomids should all be lists (not ints)
-        for fromcomid, tocomid in tuples:
-            v = graph[fromcomid] + tocomid
-            graph[fromcomid] = list(set(v))
-    else: # tocomids should all be ints
-        for fromcomid, tocomid in tuples:
-            graph[fromcomid] = [tocomid]
+    graph = defaultdict(set)
+    for fromcomid, tocomid in tuples:
+        graph[fromcomid].update({tocomid})
+    if not one_to_many:
         graph121 = {}
         for k, v in graph.items():
             assert len(v) == 1, "one_to_many=False but node {} connects to {}".format(k, v)

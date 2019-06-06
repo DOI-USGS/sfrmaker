@@ -33,6 +33,7 @@ def get_NHDPlus_v2_filepaths(NHDPlus_paths):
                 raise FileNotFoundError(f)
     return NHDFlowlines, PlusFlowlineVAA, PlusFlow, elevslope
 
+
 def load_NHDPlus_v2(NHDPlus_paths=None,
                     NHDFlowlines=None, PlusFlowlineVAA=None, PlusFlow=None, elevslope=None,
                     filter=None,
@@ -75,8 +76,9 @@ def load_NHDPlus_v2(NHDPlus_paths=None,
     nhdcrs = crs(epsg=epsg, proj_str=proj_str, prjfile=prjfile)
 
     # ensure that filter bbox is in same crs as flowlines
+    # get filters from shapefiles, shapley Polygons or GeoJSON polygons
     if filter is not None and not isinstance(filter, tuple):
-        filter = get_bbox(filter, nhdcrs)
+        filter = get_bbox(filter, dest_crs=nhdcrs)
 
     fl_cols = ['COMID',  # 'FCODE', 'FDATE', 'FLOWDIR',
                # 'FTYPE', 'GNIS_ID',
