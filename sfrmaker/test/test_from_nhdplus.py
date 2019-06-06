@@ -2,9 +2,9 @@ import os
 import numpy as np
 import pytest
 import flopy.modflow as fm
-from flopy.utils import SpatialReference
 import sfrmaker
 
+#TODO: make tests more rigorous
 
 @pytest.fixture(scope='module')
 def lines_from_NHDPlus(datapath):
@@ -27,31 +27,36 @@ def active_area_shapefile(datapath):
 
 
 @pytest.fixture(scope='module')
-def model_grid():
-    nrow, ncol = 112, 160
-    dxy = 250
-    sr = SpatialReference(delr=np.ones(ncol)*dxy,
-                                      delc=np.ones(nrow)*dxy,
-                                      lenuni=1,
-                                      xll=682688, yll=5139052, rotation=0,
-                                      proj4_str='+init=epsg:26715')
-    return sr
-
-
-@pytest.fixture(scope='module')
 def model(model_grid):
     m = fm.Modflow('example', model_ws=outdir)
     dis = fm.ModflowDis(m, nlay=1, nrow=nrow, ncol=nrow,
                         top=1000, botm=0)
     m.sr = model_grid
+    return model
 
 
-def test_make_sfr(outdir, model_grid,
+@pytest.fixture(scope='module')
+def sfrmaker_grid_from_sr(model_grid, active_area_shapefile):
+    grid = sfrmaker.StructuredGrid.from_sr(model_grid,
+                                          active_area=active_area_shapefile)
+    return grid
+
+
+@pytest.fixture(scope='module')
+def sfrmaker_grid_from_shapefile(grid_shapefile):
+    #grid = sfrmaker.StructuredGrid.from_sr(model_grid,
+    #                                       active_area=active_area_shapefile)
+    #return grid
+    pass
+
+#@pytest.mark.parameterize('grid', [sfrmaker_grid_from_sr,
+#                                   sfrmaker_grid_from_shapefile
+#                                   ])
+def test_make_sfr(outdir, sfrmaker_grid_from_sr,
                   lines_from_NHDPlus,
                   active_area_shapefile):
-    grd = sfrmaker.StructuredGrid.from_sr(model_grid,
-                                                      active_area=active_area_shapefile)
-    sfr = lines_from_NHDPlus.to_sfr(grd)
+
+    sfr = lines_from_NHDPlus.to_sfr(grid=sfrmaker_grid_from_sr)
 
     sfr.reach_data['strtop'] = sfr.interpolate_to_reaches('elevup', 'elevdn')
     sfr.get_slopes()

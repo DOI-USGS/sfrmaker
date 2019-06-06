@@ -4,6 +4,7 @@ import pandas as pd
 import pytest
 import sfrmaker
 
+#TODO: make tests more rigorous
 
 @pytest.fixture(scope="module")
 def name_path():
