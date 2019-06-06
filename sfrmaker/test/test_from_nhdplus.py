@@ -1,8 +1,8 @@
 import os
 import numpy as np
 import pytest
-import flopy
 import flopy.modflow as fm
+from flopy.utils import SpatialReference
 import sfrmaker
 
 
@@ -30,7 +30,7 @@ def active_area_shapefile(datapath):
 def model_grid():
     nrow, ncol = 112, 160
     dxy = 250
-    sr = flopy.utils.SpatialReference(delr=np.ones(ncol)*dxy,
+    sr = SpatialReference(delr=np.ones(ncol)*dxy,
                                       delc=np.ones(nrow)*dxy,
                                       lenuni=1,
                                       xll=682688, yll=5139052, rotation=0,

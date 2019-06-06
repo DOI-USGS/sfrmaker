@@ -1,12 +1,19 @@
 import os
 import pytest
 import pandas as pd
+import pytest
 import sfrmaker
 
 
-def test_make_sfr(outdir, datapath):
-    name = 'map_test'
-    lns = sfrmaker.lines.from_shapefile('{}/shellmound/{}_flowlines.shp'.format(datapath, name),
+@pytest.fixture(scope="module")
+def name_path():
+    return 'map_test', 'shellmound'
+
+
+@pytest.fixture(scope="module")
+def lines(datapath, name_path):
+    name, path = name_path
+    lns = sfrmaker.lines.from_shapefile('{}/{}/{}_flowlines.shp'.format(datapath, path, name),
                                         id_column='COMID',
                                         routing_column='tocomid',
                                         width1_column='width1',
@@ -17,12 +24,28 @@ def test_make_sfr(outdir, datapath):
                                         attr_length_units='feet',
                                         attr_height_units='feet',
                                         epsg=5070)
-    grd = sfrmaker.StructuredGrid.from_json('{}/shellmound/map_test_grid.json'.format(datapath))
-    sfr = lns.to_sfr(grid=grd,
-                              isfr=None,
-                              cull_flowlines_to_active_area=True,
-                              one_reach_per_cell=True
-                              )
+    return lns
+
+
+@pytest.fixture(scope="module")
+def grid(datapath, name_path):
+    name, path = name_path
+    grd = sfrmaker.StructuredGrid.from_json('{}/{}/{}_grid.json'.format(datapath, path, name))
+    return grd
+
+
+@pytest.fixture(scope="module")
+def sfr(lines, grid):
+    sfr = lines.to_sfr(grid=grid,
+                       isfr=None,
+                       cull_flowlines_to_active_area=True,
+                       one_reach_per_cell=True
+                       )
+    return sfr
+
+
+@pytest.fixture(scope="module")
+def sfr_with_inflows(sfr):
 
     # add some inflows
     tmp = sfr.segment_data.loc[sfr.segment_data.nseg.isin([17, 18])].sort_values(by='nseg').copy()
@@ -33,7 +56,23 @@ def test_make_sfr(outdir, datapath):
         itmp['per'] = i
         dfs.append(itmp)
     sfr.segment_data = sfr.segment_data.append(pd.concat(dfs))
+    return sfr
 
+
+def test_write_mf2005(sfr, outdir, name_path):
+    name, path = name_path
+    # write an mf2005 version
+    sfr.write_package('{}/{}.sfr'.format(outdir, name))
+
+
+def test_write_mf6(sfr, outdir, name_path):
+    name, path = name_path
+    # write a MODFLOW6 version
+    sfr.write_package('{}/{}.sfr'.format(outdir, name), version='mf6')
+
+
+def test_shapefile_export(sfr, outdir, name_path):
+    name, path = name_path
     sfr.export_cells('{}/{}_cells.shp'.format(outdir, name))
     sfr.export_outlets('{}/{}_outlets.shp'.format(outdir, name))
     sfr.export_transient_variable('flow', '{}/{}_inlets.shp'.format(outdir, name))
