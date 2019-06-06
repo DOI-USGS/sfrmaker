@@ -1,0 +1,23 @@
+# These are required for developing the package (running the tests, building
+# the documentation) but not necessarily required for _using_ it.
+pyaml
+numpy
+pandas
+gdal
+fiona
+rasterio
+shapely
+pyproj
+flopy
+codecov
+coverage
+flake8
+pytest
+sphinx
+# These are dependencies of various sphinx extensions for documentation.
+ipython
+matplotlib
+numpydoc
+sphinx-copybutton
+sphinx_rtd_theme
+
