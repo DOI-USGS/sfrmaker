@@ -156,9 +156,10 @@ class lines:
                                        feature_crs=feature_crs)
         if simplify:
             print('simplification tolerance: {:.2f}'.format(tol))
-            feature_s = feature.simplify(tol).buffer(tol)
+            feature_s = feature.simplify(tol).buffer(tol).buffer(0)
         else:
-            feature_s = feature
+            feature_s = feature.buffer(0) # in case feature is invalid, might fix
+
         lines = df.geometry.tolist()
         print('starting lines: {:,d}'.format(len(lines)))
         #isn = np.array([g.intersection(feature_s) for g in lines])
