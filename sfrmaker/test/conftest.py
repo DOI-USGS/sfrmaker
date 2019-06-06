@@ -1,7 +1,8 @@
 import os
+import numpy as np
 import pandas as pd
 import pytest
-# TODO: set up pytest
+from flopy.utils import SpatialReference
 
 
 @pytest.fixture(scope="session")
@@ -47,3 +48,20 @@ def sfr_test_numbering():
     sd['outseg'] = [4, 0, 6, 8, 3, 8, 1, 2, 8]
     return rd, sd
 
+
+@pytest.fixture(scope='module')
+def grid_shapefile(outdir):
+    return outdir + 'grid.shp'
+
+
+@pytest.fixture(scope='module')
+def model_grid(grid_shapefile):
+    nrow, ncol = 112, 160
+    dxy = 250
+    sr = SpatialReference(delr=np.ones(ncol)*dxy,
+                                      delc=np.ones(nrow)*dxy,
+                                      lenuni=1,
+                                      xll=682688, yll=5139052, rotation=0,
+                                      proj4_str='+init=epsg:26715')
+    sr.write_shapefile(grid_shapefile)
+    return sr
