@@ -7,7 +7,7 @@ from rasterio import features
 from shapely.ops import unary_union
 from shapely.geometry import Polygon, shape
 import flopy
-from .gis import shp2df, df2shp, get_proj, crs, read_polygon_feature, \
+from .gis import shp2df, df2shp, get_proj_str, crs, read_polygon_feature, \
     build_rtree_index, intersect
 fm = flopy.modflow
 
@@ -29,13 +29,13 @@ class Grid:
     def __init__(self, df,
                  model_units='feet', crs_units=None,
                  bounds=None, active_area=None,
-                 epsg=None, proj=None, prjfile=None, **kwargs):
+                 epsg=None, proj_str=None, prjfile=None, **kwargs):
 
         self.df = df
 
         # coordinate projection stuff
         self.model_units = model_units
-        self.crs = crs(epsg=epsg, proj=proj, prjfile=prjfile)
+        self.crs = crs(epsg=epsg, proj_str=proj_str, prjfile=prjfile)
         if crs_units is not None:
             self.crs._length_units = crs_units
 
@@ -46,7 +46,6 @@ class Grid:
         self._bounds = bounds
         self._active_area = None
         self._active_area_defined_by = None
-
 
     def __setattr__(self, key, value):
         if key == "active_area":
@@ -183,7 +182,7 @@ class Grid:
                        node_col='node', kcol='k', icol='i', jcol='j',
                        isfr_col='isfr',
                        active_area=None,
-                       epsg=None, proj=None, prjfile=None):
+                       epsg=None, proj_str=None, prjfile=None):
 
         if prjfile is None:
             prjfile = shapefile.replace('.shp', '.prj')
@@ -197,7 +196,7 @@ class Grid:
         return Grid.from_dataframe(df, node_col=node_col, kcol=kcol, icol=icol, jcol=jcol,
                                    isfr_col=isfr_col,
                                    bounds=bounds, active_area=active_area,
-                                   epsg=epsg, proj=proj, prjfile=prjfile)
+                                   epsg=epsg, proj_str=proj_str, prjfile=prjfile)
 
 
 class StructuredGrid(Grid):
@@ -210,11 +209,11 @@ class StructuredGrid(Grid):
                  uniform=None,
                  model_units='feet', crs_units=None,
                  bounds=None, active_area=None,
-                 epsg=None, proj=None, prjfile=None, **kwargs):
+                 epsg=None, proj_str=None, prjfile=None, **kwargs):
 
         Grid.__init__(self, df, model_units=model_units, crs_units=crs_units,
                       bounds=bounds, active_area=active_area,
-                      epsg=epsg, proj=proj_str, prjfile=prjfile, **kwargs)
+                      epsg=epsg, proj_str=proj_str, prjfile=prjfile, **kwargs)
 
         # structured grid parameters
         self.xul = xul
@@ -297,7 +296,7 @@ class StructuredGrid(Grid):
         if epsg is None:
             epsg = sr.epsg
         if proj_str is None:
-            proj_str = sr.proj_str
+            proj_str = sr.proj4_str
         if prjfile is not None:
             proj_str = get_proj_str(prjfile)
         if isfr is not None:

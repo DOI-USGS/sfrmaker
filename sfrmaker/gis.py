@@ -73,6 +73,7 @@ class crs:
     def __repr__(self):
         return self.proj_str
 
+
 def get_proj_str(prj):
     """Get proj_str string for a projection file
 
@@ -101,7 +102,7 @@ def get_proj_str(prj):
             prjtext = src.read()
         srs = osr.SpatialReference()
         srs.ImportFromESRI([prjtext])
-        proj_str = srs.ExportToproj_str()
+        proj_str = srs.ExportToProj4()
         return proj_str
     except:
         pass
@@ -311,6 +312,7 @@ def projectXY(x, y, projection1, projection2):
 
     return pyproj.transform(pr1, pr2, x, y)
 
+
 def read_polygon_feature(feature, dest_crs, feature_crs=None):
     """Read a geometric feature from a shapefile, shapely geometry object,
     or collection of shapely geometry objects. Reproject to dest_crs
@@ -352,8 +354,9 @@ def read_polygon_feature(feature, dest_crs, feature_crs=None):
     else:
         raise TypeError("Unrecognized feature input.")
     if feature_crs is not None and feature_crs != dest_crs:
-        feature = project(feature, feature_crs.proj, dest_crs.proj)
-    return feature
+        feature = project(feature, feature_crs.proj_str, dest_crs.proj_str)
+    return feature.buffer(0)
+
 
 def get_bbox(feature, dest_crs):
     """Get bounding box for a Polygon feature.
@@ -368,12 +371,12 @@ def get_bbox(feature, dest_crs):
         with fiona.open(feature) as src:
             l, b, r, t = src.bounds
             bbox_src_crs = box(*src.bounds)
-            shpcrs = crs(proj=to_string(src.crs))
-        if shpcrs != dest_crs:
-            bbox_dest_crs = project(bbox_src_crs, shpcrs.proj, dest_crs.proj)
+            shpcrs = crs(proj_str=to_string(src.crs))
+        if dest_crs is not None and shpcrs != dest_crs:
+            bbox_dest_crs = project(bbox_src_crs, shpcrs.proj_str, dest_crs.proj_str)
             l, b, r, t = bbox_dest_crs.bounds
             #x, y = project([(l, b),
-            #                (r, t)], shpcrs.proj, dest_crs.proj)
+            #                (r, t)], shpcrs.proj_str, dest_crs.proj_str)
             #filter = (x[0], y[0], x[1], y[1])
             #else:
         filter = (l, b, r, t)
@@ -386,6 +389,7 @@ def get_bbox(feature, dest_crs):
             print(ex)
             print("Supplied dictionary doesn't appear to be valid GeoJSON.")
     return filter
+
 
 def shp2df(shplist, index=None, index_dtype=None, clipto=[], filter=None,
            true_values=None, false_values=None, layer=None,
@@ -560,7 +564,7 @@ def shp_properties(df):
 
 def df2shp(dataframe, shpname, geo_column='geometry', index=False,
            retain_order=False,
-           prj=None, epsg=None, proj=None, crs=None):
+           prj=None, epsg=None, proj_str=None, crs=None):
     '''
     Write a DataFrame to a shapefile
     dataframe: dataframe to write to shapefile
