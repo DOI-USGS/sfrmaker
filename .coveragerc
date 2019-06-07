@@ -1,0 +1,5 @@
+[run]
+source = sfrmaker
+omit = /Users/aleaf/Documents/GitHub/flopy/*
+    sfrmaker/_version.py
+    
