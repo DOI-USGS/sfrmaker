@@ -12,6 +12,7 @@ dependencies:
 - fiona
 - rasterio=1.*
 - shapely
+- rtree
 - pyproj
 - pyshp
 - flopy
