@@ -11,7 +11,7 @@ def lines_from_NHDPlus(datapath):
     pfvaa_files = ['{}/badriver/PlusFlowlineVAA.dbf'.format(datapath)]
     plusflow_files = ['{}/badriver/PlusFlow.dbf'.format(datapath)]
     elevslope_files = ['{}/badriver/elevslope.dbf'.format(datapath)]
-    flowlines = ['{}/badriver/NHDFlowlines.shp'.format(datapath)]
+    flowlines = ['{}/badriver/NHDflowlines.shp'.format(datapath)]
 
     lns = sfrmaker.lines.from_NHDPlus_v2(NHDFlowlines=flowlines,
                                 PlusFlowlineVAA=pfvaa_files,

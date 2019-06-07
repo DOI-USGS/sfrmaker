@@ -4,8 +4,8 @@ SFRmaker is a python package for automating construction of stream flow routing 
 
 
 ### Version 0.1
-[![Build Status](https://travis-ci.org/aleaf/MFsetup.svg?branch=master)](https://travis-ci.org/aleaf/MFsetup)
-[![Coverage Status](https://codecov.io/github/aleaf/MFsetup/coverage.svg?branch=master)](https://codecov.io/github/aleaf/MFsetup/coverage.svg?branch=master)
+[![Build Status](https://travis-ci.com/aleaf/SFRmaker.svg?branch=master)](https://travis-ci.com/aleaf/SFRmaker)
+[![Coverage Status](https://codecov.io/github/aleaf/SFRmaker/coverage.svg?branch=master)](https://codecov.io/github/aleaf/SFRmaker/coverage.svg?branch=master)
 
 
 Getting Started
@@ -154,5 +154,5 @@ Any Polyline shapefile can be supplied in lieu of NHDPlus, but it must have the 
 
 
 
-#####2) Model grid information
+####2) Model grid information
 is supplied by creating a 	[`flopy.utils.SpatialReference`](https://github.com/modflowpy/flopy/blob/develop/flopy/utils/reference.py) instance, as shown in the examples.
