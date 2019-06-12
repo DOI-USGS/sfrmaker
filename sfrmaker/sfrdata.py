@@ -638,6 +638,8 @@ class sfrdata:
             elevs = smooth_elevations(self.reach_data.rno.tolist(),
                                       self.reach_data.outreach.tolist(),
                                       elevs)
+        else:
+            elevs = dict(zip(self.reach_data.rno, elevs))
         return elevs
 
     def set_streambed_top_elevations_from_dem(self, dem, dem_z_units=None,
