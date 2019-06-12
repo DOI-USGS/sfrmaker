@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 from .utils import make_graph, find_path
 
+
 def valid_rnos(rnos):
     """Check that unique reach numbers (rno in MODFLOW 6)
     are consecutive and start at 1.
@@ -11,6 +12,7 @@ def valid_rnos(rnos):
                   == len(rnos) - 1
     onebased = np.min(sorted_reaches) == 1
     return consecutive & onebased
+
 
 def valid_nsegs(nsegs, outsegs=None, increasing=True):
     """Check that segment numbers are valid.
@@ -38,6 +40,7 @@ def valid_nsegs(nsegs, outsegs=None, increasing=True):
         return consecutive_and_onebased & monotonic
     else:
         return consecutive_and_onebased
+
 
 def rno_nseg_routing_consistent(nseg, outseg, iseg, ireach, rno, outreach):
     """Check that routing of segments (MODFLOW-2005 style) is consistent
@@ -86,6 +89,7 @@ def rno_nseg_routing_consistent(nseg, outseg, iseg, ireach, rno, outreach):
                                    last_consistent)
     return np.all(segments_consistent)
 
+
 def routing_numbering_is_valid(nseg, outseg, iseg, ireach,
                                rno, outreach, increasing_nseg=True):
     """Check that routing numbering for an SFR dataset is valid.
@@ -122,6 +126,7 @@ def routing_numbering_is_valid(nseg, outseg, iseg, ireach,
            rno_nseg_routing_consistent(nseg, outseg, iseg, ireach,
                                        rno, outreach)
 
+
 def routing_is_circular(fromid, toid):
     """Verify that segments or reaches never route to themselves.
 
@@ -142,6 +147,7 @@ def routing_is_circular(fromid, toid):
         if v.count(k) > 1:
             return True
     return False
+
 
 def same_sfr_numbering(reach_data1, reach_data2):
     """Compare two sets of reach data.
@@ -177,3 +183,13 @@ def same_sfr_numbering(reach_data1, reach_data2):
         col_equal.append(np.array_equal(rd1[c], rd2[c]))
     return np.all(col_equal)
 
+
+def reach_elevations_decrease_downstream(reach_data):
+    """Verify that reach elevations decrease monotonically in the downstream direction."""
+    rd = reach_data.reset_index()
+    elev = dict(zip(rd.rno, rd.strtop))
+    dnelev = {rid: elev[rd.outreach[i]] if rd.outreach[i] != 0
+              else -9999 for i, rid in enumerate(rd.rno)}
+    diffs = np.array([(dnelev[i] - elev[i]) if dnelev[i] != -9999
+                      else -.001 for i in rd.rno])
+    return np.max(diffs) <= 0

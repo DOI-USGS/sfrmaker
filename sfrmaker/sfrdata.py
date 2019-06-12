@@ -5,11 +5,14 @@ import time
 import numpy as np
 import pandas as pd
 from shapely.geometry import LineString
+from rasterstats import zonal_stats
 import flopy
 from .utils import renumber_segments, find_path, make_graph
 from .checks import valid_rnos, valid_nsegs, rno_nseg_routing_consistent
+from .elevations import smooth_elevations
 from .gis import df2shp, export_reach_data
 from .grid import StructuredGrid, UnstructuredGrid
+from .units import convert_length_units
 
 fm = flopy.modflow
 
@@ -578,9 +581,12 @@ class sfrdata:
                     sd[[*sdcols]].values.sum(axis=(0, 1)) != 0.:
                 self.reach_data[col] = self.interpolate_to_reaches(*sdcols)
 
-    def sample_elevations(self, dem, method='buffers',
-                          buffer_distance=None,
-                          statistic='min'):
+    def sample_reach_elevations(self, dem, dem_z_units=None,
+                                method='buffers',
+                                buffer_distance=100,
+                                statistic='min',
+                                smooth=True
+                                ):
         """Computes zonal statistics on a raster for SFR reaches, using
         either buffer polygons around the reach LineStrings, or the model
         grid cell polygons containing each reach.
@@ -589,13 +595,81 @@ class sfrdata:
         ----------
         dem : path to valid raster dataset
             Must be in same Coordinate Reference System as model grid.
+        dem_z_units : str
+            Elevation units for DEM ('feet' or 'meters'). If None, units
+            are assumed to be same as model (default).
         method : str; 'buffers' or 'cell polygons'
             If 'buffers', buffers (with flat caps; cap_style=2 in LineString.buffer())
             will be created around the reach LineStrings (geometry column in reach_data).
         buffer_distance : float
             Buffer distance to apply around reach LineStrings, in crs_units.
+        statistic : str
+            "stats" argument to rasterstats.zonal_stats.
+            "min" is recommended for streambed elevations (default).
+        smooth : bool
+            Run sfrmaker.elevations.smooth_elevations on sampled elevations
+            to ensure that they decrease monotonically in the downstream direction
+            (default=True).
+
+        Returns
+        -------
+        elevs : dict of sampled elevations keyed by reach number
         """
-        raise NotImplementedError
+        rnos = self.reach_data.rno.tolist()
+        if method == 'buffers':
+            assert isinstance(self.reach_data.geometry[0], LineString), \
+                "Need LineString geometries in reach_data.geometry column to use buffer option."
+            features = [g.buffer(100) for g in self.reach_data.geometry]
+            txt = 'buffered LineStrings'
+        elif method == 'cell polygons':
+            assert self.grid is not None, \
+                "Need an attached sfrmaker.Grid instance to use cell polygons option."
+            features = self.grid.df.loc[self.reach_data.node, 'geometry'].tolist()
+            txt = method
+        print('running rasterstats.zonal_stats on {}...'.format(txt))
+        t0 = time.time()
+        results = zonal_stats(features,
+                              dem,
+                              stats='min')
+        elevs = [r['min'] for r in results]
+        print("finished in {:.2f}s\n".format(time.time() - t0))
+
+        if smooth:
+            elevs = smooth_elevations(self.reach_data.rno.tolist(),
+                                      self.reach_data.outreach.tolist(),
+                                      elevs)
+        return elevs
+
+    def set_streambed_top_elevations_from_dem(self, dem, dem_z_units=None,
+                                              method='buffers',
+                                              **kwargs):
+        """Set streambed top elevations from a DEM raster.
+        Runs sfrdata.sample_reach_elevations
+
+        Parameters
+        ----------
+        dem : path to valid raster dataset
+            Must be in same Coordinate Reference System as model grid.
+        dem_z_units : str
+            Elevation units for DEM ('feet' or 'meters'). If None, units
+            are assumed to be same as model (default).
+        method : str; 'buffers' or 'cell polygons'
+            If 'buffers', buffers (with flat caps; cap_style=2 in LineString.buffer())
+            will be created around the reach LineStrings (geometry column in reach_data).
+        kwargs : keyword arguments to sfrdata.sample_reach_elevations
+
+        Returns
+        -------
+        updates strtop column of sfrdata.reach_data
+        """
+        sampled_elevs = self.sample_reach_elevations(dem=dem, method=method,
+                                                     **kwargs)
+        if dem_z_units is None:
+            dem_z_units = self.model_length_units
+        mult = convert_length_units(dem_z_units, self.model_length_units)
+        self.reach_data['strtop'] = [sampled_elevs[rno]
+                                     for rno in self.reach_data['rno'].values]
+        self.reach_data['strtop'] *= mult
 
     def get_slopes(self, default_slope=0.001, minimum_slope=0.0001,
                    maximum_slope=1.):

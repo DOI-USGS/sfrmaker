@@ -6,6 +6,7 @@ pandas
 gdal
 fiona
 rasterio
+rasterstats
 shapely
 pyproj
 flopy

@@ -107,6 +107,7 @@ def get_proj_str(prj):
     except:
         pass
 
+
 def build_rtree_index(geom):
     """Builds an rtree index. Useful for multiple intersections with same index.
 
@@ -127,6 +128,7 @@ def build_rtree_index(geom):
         idx.insert(i, g.bounds)
     print("finished in {:.2f}s".format(time.time() - ta))
     return idx
+
 
 def export_reach_data(reach_data, grid, filename,
                       nodes=None, geomtype='Polygon'):
@@ -149,6 +151,7 @@ def export_reach_data(reach_data, grid, filename,
     else:
         raise ValueError('Unrecognized geomtype "{}"'.format(geomtype))
     df2shp(rd, filename, epsg=grid.crs.epsg)
+
 
 def intersect_rtree(geom1, geom2, index=None):
     """Intersect features in geom1 with those in geom2. For each feature in geom2, return a list of
@@ -185,6 +188,7 @@ def intersect_rtree(geom1, geom2, index=None):
     print("\nfinished in {:.2f}s".format(time.time() - ta))
     return isfr
 
+
 def intersect(geom1, geom2):
     """Same as intersect_rtree, except without spatial indexing. Fine for smaller datasets,
     but scales by 10^4 with the side of the problem domain.
@@ -213,6 +217,7 @@ def intersect(geom1, geom2):
         isfr.append(inds)
     print("\nfinished in {:.2f}s".format(time.time() - ta))
     return isfr
+
 
 def parse_units_from_proj_str(proj_str):
     units = None
@@ -243,6 +248,7 @@ def parse_units_from_proj_str(proj_str):
         return units
     except:
         pass
+
 
 def project(geom, projection1, projection2):
     """Reproject a shapely geometry object to new coordinate system
@@ -533,6 +539,7 @@ with shapefile coordinate system'.format(filter))
 
     return df
 
+
 def shp_properties(df):
 
     newdtypes = {'bool': 'str',
@@ -561,6 +568,7 @@ def shp_properties(df):
               else df[c].dtype.name for c in df.columns]
     properties = collections.OrderedDict(list(zip(df.columns, dtypes)))
     return properties
+
 
 def df2shp(dataframe, shpname, geo_column='geometry', index=False,
            retain_order=False,

@@ -1,0 +1,21 @@
+name: sfrmaker
+channels:
+- conda-forge
+- defaults
+- conda-forge/label/dev
+dependencies:
+- python=3.6.*
+- ipython
+- matplotlib
+- pyyaml
+- numpy
+- pandas
+- gdal
+- fiona
+- rasterio=1.*
+- rasterstats
+- shapely
+- rtree
+- pyproj
+- pyshp
+- flopy

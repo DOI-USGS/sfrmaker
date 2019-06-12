@@ -17,6 +17,7 @@ import sfrmaker
 ```
 #### create an instance of the lines class from NHDPlus data 
 * alternatively, **`lines`** can also be created from a shapefile or dataframe containing LineString features representing streams
+* see input data requirements below for more details
 
 ```python
 lns = sfrmaker.lines.from_NHDPlus_v2(NHDFlowlines='NHDFlowlines.shp',  
@@ -25,6 +26,7 @@ lns = sfrmaker.lines.from_NHDPlus_v2(NHDFlowlines='NHDFlowlines.shp',
                             			elevslope='elevslope.dbf',  
                             			filter='data/grid.shp')
 ```
+
 #### create an instance of `lines` from a hydrography shapefile
 * when creating `lines` from a shapefile or dataframe, attribute field or column names can be supplied in lieu of the NHDPlus attribute tables (.dbf files).
 
@@ -92,17 +94,38 @@ numpy
 pandas  
 fiona  
 rasterio  
+rasterstats  
 shapely  
 pyproj  
 rtree    
 flopy  
 
-### Install to site_packages folder
+### Install python and dependency packages
+Download and install the [Anaconda python distribution](https://www.anaconda.com/distribution/).
+Open an Anaconda Command Prompt on Windows or a terminal window on OSX.
+From the root folder for the package (that contains `requirements.yml`), install the above packages from `requirements.yml`.
+
+```
+conda env create -f requirements.yml
+```
+activate the environment:
+
+```
+conda activate sfrmaker
+```
+
+
+### Install SFRmaker to site_packages folder
+from the root folder for the package (that contains `setup.py`):
+  
 ```
 python setup.py install
 ```
-### Install in current location (to current python path)
-(i.e., for development)  
+### Install SFRmaker in current location (to current python path)
+Instead of copying the source code to the python `site_packages` folder, this option creates a link so that python uses the source code in-situ.
+
+from the root folder for the package (that contains `setup.py`):
+
 
 ```  
 pip install -e .
@@ -112,8 +135,8 @@ Input data requirements
 -----------------------------------------------
 
 
-####1) Hydrography data
-#####NHDPlus v2 hydrography datasets    
+#### 1) Hydrography data
+##### NHDPlus v2 hydrography datasets    
  * Available at <http://www.horizon-systems.com/NHDPlus/NHDPlusV2_data.php>
  * Archives needed/relevant files:
  	* **NHDPlusV21\_XX\_YY\_NHDSnapshot_**.7z**   
@@ -138,7 +161,7 @@ Input data requirements
 	* XX is Drainage Area ID (e.g., GL for Great Lakes) and YY is the Vector Processing Unit (VPU; e.g. 04) in the  above (see NHDPlus 	website for details).  
 
 
-#####Other hydrography   
+##### Other hydrography   
 Any Polyline shapefile can be supplied in lieu of NHDPlus, but it must have the following columns, as shown in the second example:  
 
 **flowlines\_file**: path to shapefile  
@@ -154,5 +177,17 @@ Any Polyline shapefile can be supplied in lieu of NHDPlus, but it must have the 
 
 
 
-####2) Model grid information
+#### 2) Model grid information
 is supplied by creating a 	[`flopy.utils.SpatialReference`](https://github.com/modflowpy/flopy/blob/develop/flopy/utils/reference.py) instance, as shown in the examples.
+
+
+Running the example script
+-----------------------------------------------
+from the Examples folder:
+
+```
+python make_sfr.py
+```
+
+This creates an sfr package and adds it to the model in `Examples/data/badriver/tylerforks`.
+Shapefiles for visualization of the sfr package are written to `Examples/temp`.
