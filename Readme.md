@@ -55,7 +55,7 @@ sr = flopy.utils.SpatialReference(delr=np.ones(160)*250,
                                   proj_str='+init=epsg:26715')
 ```
 
-#### alternatively, the model grid can be defined with an `sfrmaker.StructuredGrid` instance
+#### alternatively, the model grid can be defined with a `sfrmaker.StructuredGrid` instance
 * can be created from a shapefile or `SpatialReference`.  
 * an `active_area` polygon defines the area within the grid where SFR will be populated
 * See example scripts in `Examples/` for more details.

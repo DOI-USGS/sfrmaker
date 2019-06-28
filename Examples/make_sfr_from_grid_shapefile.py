@@ -1,8 +1,8 @@
-import sys
-import glob
+"""
+Make a SFR package for a prexisting MODFLOW model,
+using a shapefile to specify the grid
+"""
 import os
-sys.path.append('..')
-sys.path += glob.glob('/Users/aleaf/Documents/GitHub/*')
 import numpy as np
 import flopy
 fm = flopy.modflow

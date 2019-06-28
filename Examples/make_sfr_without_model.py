@@ -1,13 +1,11 @@
 """
-Make a SFR package for a prexisting MODFLOW model,
-using a flopy SpatialReference to specify the grid
+Make a SFR package without a prexisting Flopy model,
+using a shapefile to specify the grid. Reaches will
+be assigned to layer 1 by default, and Flopy diagnostics that
+only involved the SFR package can still be run.
 """
 import os
-import numpy as np
-import flopy
-fm = flopy.modflow
 from sfrmaker import lines, StructuredGrid
-from sfrmaker.utils import assign_layers
 
 # NHDPlus input files (see the input requirements in the SFRmaker readme file
 # (Note that multiple datasets can be supplied as lists
@@ -35,50 +33,27 @@ lns = lines.from_NHDPlus_v2(NHDFlowlines=flowlines,
                             elevslope=elevslope_files,
                             filter='{}/grid.shp'.format(data_dir))
 
-# make a flopy.utils.reference.SpatialReference instance
-# that represents the model grid
-m = fm.Modflow.load('tf.nam', model_ws='{}/tylerforks'.format(data_dir))
-
-sr = flopy.utils.SpatialReference(delr=m.dis.delr.array,  # cell spacing along a row
-                                  delc=m.dis.delc.array,  # cell spacing along a column
-                                  lenuni=1,  # model units of feet
-                                  xll=682688, yll=5139052,  # lower left corner of model grid
-                                  rotation=0,  # grid is unrotated
-                                  proj4_str='+init=epsg:26715'  # projected coordinate system of model (UTM NAD27 zone 15 North)
-                                  )
-m.sr = sr
-
-# make a sfrmaker.StructuredGrid instance from the SpatialReference
+# make a sfrmaker.StructuredGrid instance from a shapefile of the model grid
+# for a structured grid, attribute fields with row and column information must be passed
 # active_area is a polygon that specifies the area where SFR reaches will be populated
-grd = StructuredGrid.from_sr(sr,
-                             active_area='{}/active_area.shp'.format(data_dir)
-                             )
+grd = StructuredGrid.from_shapefile(shapefile='{}/grid.shp'.format(data_dir),
+                                    icol='i',
+                                    jcol='j',
+                                    active_area='{}/active_area.shp'.format(data_dir)
+                                    )
 
 # from the lines and StructuredGrid instances, make a sfrmaker.sfrdata instance
 # (lines are intersected with the model grid and converted to reaches, etc.)
-sfr = lns.to_sfr(grd, model=m)
+sfr = lns.to_sfr(grd)
 sfr.set_streambed_top_elevations_from_dem(dem, dem_z_units='meters')
 
-# assign layers to the sfr reaches
-# if the model bottom is changed, write out a new one and update model
-botm = m.dis.botm.array.copy()
-layers, new_botm = assign_layers(sfr.reach_data, botm_array=botm)
-sfr.reach_data['k'] = layers
-if new_botm is not None:
-    botm[-1] = new_botm
-    np.savetxt('{}/external/botm{}.dat'.format(m.model_ws,
-                                      m.nlay-1),
-                                      new_botm, fmt='%.2f')
-    sfr.ModflowSfr2.parent.dis.botm = botm
-
 # run Flopy diagnostics (refresh the ModflowSfr2 instance first)
-sfr.create_ModflowSfr2(model=m)
+sfr.create_ModflowSfr2()
 sfr.ModflowSfr2.check()
 
 # write the SFR package
 # turn on writing of SFR water balance ascii output by specifying unit no. for istcb2
-sfr.write_package(istcb2=223)  # writes a sfr file to the model workspace
-m.write_name_file()  # write new version of name file with sfr package
+sfr.write_package(outdir + 'example.sfr', istcb2=223)  # writes a sfr file to the model workspace
 
 # wite shapefiles for visualization
 sfr.export_cells(outdir + 'example_cells.shp')
