@@ -433,7 +433,6 @@ def make_graph(fromcomids, tocomids, one_to_many=True):
     #fromcomids = np.array(fromcomids).astype(int)
     ## convert tocomid values to ints regardless of (enclosing) dtypes
     #tocomids = [a.astype(int).tolist() for a in map(np.array, tocomids)]
-#
     #tuples = zip(fromcomids, tocomids)
     #graph = defaultdict(list)
     #if one_to_many: # tocomids should all be lists (not ints)
@@ -451,11 +450,15 @@ def make_graph(fromcomids, tocomids, one_to_many=True):
     #return graph
     from collections import defaultdict
     fromcomids = np.array(fromcomids).astype(int)
-    tocomids = np.array(tocomids).astype(int)
-    tuples = zip(fromcomids, tocomids)
+    scalar_tocomids = np.all([np.isscalar(v) for v in tocomids])
+    if scalar_tocomids:
+        tocomid_sets = [{int(v)} for v in tocomids]
+    else:
+        tocomid_sets = [set(a.astype(int).tolist()) for a in map(np.array, tocomids)]
+    tuples = zip(fromcomids, tocomid_sets)
     graph = defaultdict(set)
     for fromcomid, tocomid in tuples:
-        graph[fromcomid].update({tocomid})
+        graph[fromcomid].update(set(tocomid))
     if not one_to_many:
         graph121 = {}
         for k, v in graph.items():

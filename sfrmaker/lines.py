@@ -110,8 +110,11 @@ class lines:
                 toid = [[l] if np.isscalar(l) else l for l in toid]
                 to_one = np.isscalar(np.squeeze(toid)[0])
             toid = np.squeeze(toid)
-            self._routing = make_graph(self.df.id.values, toid,
+            routing = make_graph(self.df.id.values, toid,
                                        one_to_many=not to_one)
+            if not to_one:
+                routing = pick_toids(routing, self.elevup)
+            self._routing = routing
         return self._routing
 
     @property
@@ -261,6 +264,8 @@ class lines:
 
     def write_shapefile(self, outshp='flowlines.shp'):
         df2shp(self.df, outshp, epsg=self.crs.epsg, prj=self.crs.prjfile)
+
+
 
     @staticmethod
     def from_shapefile(shapefile,
@@ -487,15 +492,20 @@ class lines:
 
         # convert routing connections (toid column) from lists (one-to-many)
         # to ints (one-to-one or many-to-one)
-        elevup = dict(zip(self.df.id, self.df.elevup))
+        self.elevup = dict(zip(self.df.id, self.df.elevup))
         routing = self.routing.copy()
+
+        # one to many routing is not supported
         to_one = np.isscalar(np.squeeze(list(routing.values()))[0])
-        if not to_one:
-            routing = pick_toids(routing, elevup)
+        assert to_one, "routing is still one-to-many"
+        #if not to_one:
+        #    routing = pick_toids(routing, elevup)
         valid_ids = routing.keys()
         # df.toid column is basis for routing attributes
         # all paths terminating in invalid toids (outside of the model)
         # will be none; set invalid toids = 0
+        # TODO: write a test for pick_toids if some IDs route to more than one connection
+        assert not np.any([isinstance(r, list) for r in routing.items()]), "one to many routing not supported"
         self.df.toid = [routing[i] if routing[i] in valid_ids else 0
                         for i in self.df.id.tolist()]
 
@@ -647,6 +657,7 @@ class lines:
         assert not routing_is_circular(sd.nseg, sd.outseg)
 
         # (elevup dict was created above)
+        elevup = self.elevup
         elevdn = dict(zip(self.df.id, self.df.elevdn))
         sd['elevup'] = [elevup[line_id[s]] for s in sd.nseg]
         sd['elevdn'] = [elevdn[line_id[s]] for s in sd.nseg]

@@ -55,11 +55,30 @@ sr = flopy.utils.SpatialReference(delr=np.ones(160)*250,
                                   proj_str='+init=epsg:26715')
 ```
 
+#### alternatively, the model grid can be defined with an `sfrmaker.StructuredGrid` instance
+* can be created from a shapefile or `SpatialReference`.  
+* an `active_area` polygon defines the area within the grid where SFR will be populated
+* See example scripts in `Examples/` for more details.
+
+```python
+
+grd = StructuredGrid.from_shapefile(shapefile='Examples/data/badriver/grid.shp',
+                                    icol='i',
+                                    jcol='j',
+                                    active_area='Examples/data/badriver/active_area.shp'.format(data_dir)
+                                    )
+```
+
 #### intersect the lines with the model grid
 * results in an **`sfrdata`** class instance
 
 ```python
 sfr = lns.to_sfr(sr=sr)
+```
+or  
+
+```python
+sfr = lns.to_sfr(grid=grd)
 ```
 
 #### write a sfr package file
@@ -178,7 +197,7 @@ Any Polyline shapefile can be supplied in lieu of NHDPlus, but it must have the 
 
 
 #### 2) Model grid information
-is supplied by creating a 	[`flopy.utils.SpatialReference`](https://github.com/modflowpy/flopy/blob/develop/flopy/utils/reference.py) instance, as shown in the examples.
+is supplied by creating a 	[`flopy.utils.SpatialReference`](https://github.com/modflowpy/flopy/blob/develop/flopy/utils/reference.py) instance or via a shapefile, as shown in the examples.
 
 
 Running the example script

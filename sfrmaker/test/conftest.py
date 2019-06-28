@@ -52,8 +52,8 @@ def sfr_test_numbering():
 
 
 @pytest.fixture(scope='module')
-def grid_shapefile(outdir):
-    return outdir + 'grid.shp'
+def tyler_forks_grid_shapefile(datapath):
+    return '{}/badriver/grid.shp'.format(datapath)
 
 
 @pytest.fixture(scope='module')
@@ -63,7 +63,7 @@ def tylerforks_model(datapath):
 
 
 @pytest.fixture(scope='module')
-def tylerforks_model_grid(grid_shapefile, tylerforks_model):
+def tylerforks_model_grid(tyler_forks_grid_shapefile, tylerforks_model):
     m = tylerforks_model
     sr = flopy.utils.SpatialReference(delr=m.dis.delr.array,  # cell spacing along a row
                                       delc=m.dis.delc.array,  # cell spacing along a column

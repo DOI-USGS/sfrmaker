@@ -11,6 +11,7 @@ from .gis import shp2df, df2shp, get_proj_str, crs, read_polygon_feature, \
     build_rtree_index, intersect
 fm = flopy.modflow
 
+
 class Grid:
     """Base class for model grids. Has methods and attributes
     that are common to both Structured and Unstructured Grids.
@@ -68,6 +69,28 @@ class Grid:
         s += 'active area defined by: {}'.format(self._active_area_defined_by)
         s += '\n'
         return s
+
+    def __eq__(self, other):
+        if not isinstance(other, Grid):
+            return False
+        if other._structured != self._structured:
+            return False
+        if other.size != self.size:
+            return False
+        if other.crs.length_units != self.crs.length_units:
+            return False
+        if other.bounds != self.bounds:
+            return False
+        if self._structured:
+            if other.nrow != self.nrow:
+                return False
+            if other.ncol != self.ncol:
+                return False
+            if other.rotation != self.rotation:
+                return False
+        if not np.array_equal(self.isfr, other.isfr):
+            return False
+        return True
 
     @property
     def active_area(self):
@@ -176,27 +199,6 @@ class Grid:
 
     def write_grid_shapefile(self, outshp='grid.shp'):
         df2shp(self.df, outshp, epsg=self.crs.epsg, prj=self.crs.prjfile)
-
-    @staticmethod
-    def from_shapefile(shapefile=None,
-                       node_col='node', kcol='k', icol='i', jcol='j',
-                       isfr_col='isfr',
-                       active_area=None,
-                       epsg=None, proj_str=None, prjfile=None):
-
-        if prjfile is None:
-            prjfile = shapefile.replace('.shp', '.prj')
-            prjfile = prjfile if os.path.exists(prjfile) else None
-        with fiona.open(shapefile) as src:
-            bounds = src.bounds
-
-        df = shp2df(shapefile)
-        assert 'geometry' in df.columns, "No feature geometries found in {}.".format(shapefile)
-
-        return Grid.from_dataframe(df, node_col=node_col, kcol=kcol, icol=icol, jcol=jcol,
-                                   isfr_col=isfr_col,
-                                   bounds=bounds, active_area=active_area,
-                                   epsg=epsg, proj_str=proj_str, prjfile=prjfile)
 
 
 class StructuredGrid(Grid):
@@ -326,8 +328,29 @@ class StructuredGrid(Grid):
                                              epsg=epsg, proj_str=proj_str, prjfile=prjfile)
 
     @staticmethod
-    def from_dataframe(df=None, uniform=False,
+    def from_shapefile(shapefile=None,
                        node_col='node', kcol='k', icol='i', jcol='j',
+                       isfr_col='isfr',
+                       active_area=None,
+                       epsg=None, proj_str=None, prjfile=None):
+
+        if prjfile is None:
+            prjfile = shapefile.replace('.shp', '.prj')
+            prjfile = prjfile if os.path.exists(prjfile) else None
+        with fiona.open(shapefile) as src:
+            bounds = src.bounds
+
+        df = shp2df(shapefile)
+        assert 'geometry' in df.columns, "No feature geometries found in {}.".format(shapefile)
+
+        return StructuredGrid.from_dataframe(df, node_col=node_col, kcol=kcol, icol=icol, jcol=jcol,
+                                             isfr_col=isfr_col,
+                                             bounds=bounds, active_area=active_area,
+                                             epsg=epsg, proj_str=proj_str, prjfile=prjfile)
+
+    @staticmethod
+    def from_dataframe(df=None, uniform=False,
+                       kcol='k', icol='i', jcol='j',
                        isfr_col='isfr',
                        geometry_column='geometry',
                        model_units='feet', active_area=None,
@@ -336,8 +359,8 @@ class StructuredGrid(Grid):
         assert geometry_column in df.columns, \
             "No feature geometries found in dataframe column '{}'".format(geometry_column)
 
-        assert icol in df.columns, "No icol={} not found".format(icol)
-        assert jcol in df.columns, "No jcol={} not found".format(jcol)
+        assert icol in df.columns, "No icol='{}' not found".format(icol)
+        assert jcol in df.columns, "No jcol='{}' not found".format(jcol)
 
         # set layer column
         if kcol in df.columns:

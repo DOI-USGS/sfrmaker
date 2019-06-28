@@ -1,5 +1,6 @@
 import os
 import shutil
+import copy
 import numpy as np
 import pytest
 import flopy.modflow as fm
@@ -8,7 +9,7 @@ from sfrmaker.checks import reach_elevations_decrease_downstream
 
 #TODO: make tests more rigorous
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='function')
 def lines_from_NHDPlus(datapath):
     pfvaa_files = ['{}/badriver/PlusFlowlineVAA.dbf'.format(datapath)]
     plusflow_files = ['{}/badriver/PlusFlow.dbf'.format(datapath)]
@@ -34,18 +35,22 @@ def dem(datapath):
 
 
 @pytest.fixture(scope='module')
-def sfrmaker_grid_from_sr(tylerforks_model_grid, active_area_shapefile):
+def sfrmaker_grid_from_sr(tylerforks_model_grid, active_area_shapefile,
+                          tyler_forks_grid_shapefile):
     grid = sfrmaker.StructuredGrid.from_sr(sr=tylerforks_model_grid,
-                                          active_area=active_area_shapefile)
+                                           active_area=active_area_shapefile)
+    grid.write_grid_shapefile(tyler_forks_grid_shapefile)
     return grid
 
 
 @pytest.fixture(scope='module')
-def sfrmaker_grid_from_shapefile(grid_shapefile):
-    #grid = sfrmaker.StructuredGrid.from_sr(model_grid,
-    #                                       active_area=active_area_shapefile)
-    #return grid
-    pass
+def sfrmaker_grid_from_shapefile(tyler_forks_grid_shapefile, active_area_shapefile):
+    grid = sfrmaker.StructuredGrid.from_shapefile(tyler_forks_grid_shapefile,
+                                                  node_col='node',
+                                                  icol='i',
+                                                  jcol='j',
+                                                  active_area=active_area_shapefile)
+    return grid
 
 
 @pytest.fixture
@@ -67,17 +72,39 @@ def test_sample_elevations(dem, sfrdata, datapath, method):
     assert reach_elevations_decrease_downstream(sfr.reach_data)
 
 
-#@pytest.mark.parametrize('grid', [sfrmaker_grid_from_sr,
-#                                   sfrmaker_grid_from_shapefile
-#                                   ])
-def test_make_sfr(outdir, sfrmaker_grid_from_sr,
+def test_structuredgrid_from_shapefile(sfrmaker_grid_from_shapefile, sfrmaker_grid_from_sr):
+    grid = sfrmaker_grid_from_shapefile
+    grid_sr = sfrmaker_grid_from_sr
+    assert grid == grid_sr
+
+
+def test_unstructuredgrid_from_shapfile(tyler_forks_grid_shapefile,
+                                        sfrmaker_grid_from_sr):
+    # TODO: test creating unstructured grid from same shapefile
+    # with no row or column information passed
+    pass
+
+
+# ugly work-around for fixtures not being supported as test parameters yet
+# https://github.com/pytest-dev/pytest/issues/349
+@pytest.fixture(params=['sfrmaker_grid_from_sr',
+                        'sfrmaker_grid_from_shapefile'])
+def grid(request,
+        sfrmaker_grid_from_sr,
+        sfrmaker_grid_from_shapefile):
+    return {'sfrmaker_grid_from_sr': sfrmaker_grid_from_sr,
+            'sfrmaker_grid_from_shapefile': sfrmaker_grid_from_shapefile}[request.param]
+
+
+def test_make_sfr(outdir,
+                  grid,
                   tylerforks_model,
                   lines_from_NHDPlus,
                   active_area_shapefile,
                   dem):
 
     m = tylerforks_model
-    sfr = lines_from_NHDPlus.to_sfr(grid=sfrmaker_grid_from_sr,
+    sfr = lines_from_NHDPlus.to_sfr(grid=grid,
                                     model=m)
     sfr.set_streambed_top_elevations_from_dem(dem, dem_z_units='meters')
 

@@ -586,7 +586,7 @@ def df2shp(dataframe, shpname, geo_column='geometry', index=False,
     --->there are four ways to specify the projection....choose one
     prj: <file>.prj filename (string)
     epsg: EPSG identifier (integer)
-    proj: pyproj style projection string definition
+    proj_str: pyproj style projection string definition
     crs: crs attribute (dictionary) as read by fiona
     '''
     # first check if output path exists
@@ -635,9 +635,9 @@ def df2shp(dataframe, shpname, geo_column='geometry', index=False,
     if epsg is not None:
         from fiona.crs import from_epsg
         crs = from_epsg(int(epsg))
-    elif proj is not None:
+    elif proj_str is not None:
         from fiona.crs import from_string
-        crs = from_string(proj)
+        crs = from_string(proj_str)
     elif crs is not None:
         pass
     else:
