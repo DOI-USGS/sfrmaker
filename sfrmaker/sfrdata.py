@@ -4,13 +4,14 @@ import os
 import time
 import numpy as np
 import pandas as pd
-from shapely.geometry import LineString
+import rasterio
 from rasterstats import zonal_stats
+from shapely.geometry import LineString
 import flopy
 from .utils import renumber_segments, find_path, make_graph
 from .checks import valid_rnos, valid_nsegs, rno_nseg_routing_consistent
 from .elevations import smooth_elevations
-from .gis import df2shp, export_reach_data
+from .gis import df2shp, export_reach_data, project, crs
 from .grid import StructuredGrid, UnstructuredGrid
 from .units import convert_length_units
 
@@ -120,6 +121,9 @@ class sfrdata:
                  package_name=None,
                  **kwargs):
 
+        # attributes
+        self._crs = None
+
         # convert any modflow6 kwargs to modflow5
         kwargs = {sfrdata.mf5names[k] if k in sfrdata.mf6names else k:
                       v for k, v in kwargs.items()}
@@ -216,9 +220,15 @@ class sfrdata:
         return self._model_length_units
 
     @property
+    def crs(self):
+        if self._crs is None:
+            self._crs = self.grid.crs
+        return self._crs
+
+    @property
     def crs_units(self):
         """Length units of the coordinate reference system"""
-        return self.grid.crs.length_units
+        return self.crs.length_units
 
     @property
     def segment_routing(self):
@@ -626,6 +636,18 @@ class sfrdata:
                 "Need an attached sfrmaker.Grid instance to use cell polygons option."
             features = self.grid.df.loc[self.reach_data.node, 'geometry'].tolist()
             txt = method
+
+        # get the CRS for the DEM to make sure it has the same projection
+        # reproject features if it's not
+        with rasterio.open(dem) as src:
+            proj_str = src.crs.to_string()
+            epsg = src.crs.to_epsg()
+        raster_crs = crs(epsg=epsg, proj_str=proj_str)
+        if raster_crs != self.crs:
+            features = project(features,
+                               self.crs.proj_str,
+                               raster_crs.proj_str)
+
         print('running rasterstats.zonal_stats on {}...'.format(txt))
         t0 = time.time()
         results = zonal_stats(features,
@@ -633,6 +655,9 @@ class sfrdata:
                               stats='min')
         elevs = [r['min'] for r in results]
         print("finished in {:.2f}s\n".format(time.time() - t0))
+
+        if all(v is None for v in elevs):
+            raise Exception('No {} intersected with {}. Check projections.'.format(txt, dem))
 
         if smooth:
             elevs = smooth_elevations(self.reach_data.rno.tolist(),
@@ -790,7 +815,8 @@ class sfrdata:
         assert 'geometry' in rd.columns and \
                isinstance(rd.geometry.values[0], LineString), \
             "No LineStrings in reach_data.geometry"
-        df2shp(rd, filename, epsg=self.grid.crs.epsg)
+        df2shp(rd, filename, epsg=self.grid.crs.epsg,
+               proj_str=self.grid.crs.proj_str)
 
     def export_routing(self, filename=None):
         """Export linework shapefile showing all routing connections between SFR reaches.
@@ -823,7 +849,8 @@ class sfrdata:
         lengths = np.array(lengths)
         rd['length'] = lengths
         rd['geometry'] = geoms
-        df2shp(rd, filename, epsg=self.grid.crs.epsg)
+        df2shp(rd, filename, epsg=self.grid.crs.epsg,
+               proj_str=self.grid.crs.proj_str)
 
     def export_transient_variable(self, varname, filename=None):
         """Export point shapefile showing locations with

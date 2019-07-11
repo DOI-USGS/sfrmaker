@@ -6,6 +6,7 @@ import pytest
 import flopy.modflow as fm
 import sfrmaker
 from sfrmaker.checks import reach_elevations_decrease_downstream
+from sfrmaker.gis import crs, project
 
 #TODO: make tests more rigorous
 
@@ -71,6 +72,29 @@ def test_sample_elevations(dem, sfrdata, datapath, method):
     sfr.reach_data['strtop'] = [sampled_elevs[rno] for rno in sfr.reach_data['rno']]
     assert reach_elevations_decrease_downstream(sfr.reach_data)
 
+
+def test_sample_elevations_different_proj(dem, sfrdata, datapath):
+    sfr = sfrdata
+    sampled_elevs1 = sfr.sample_reach_elevations(dem, method='buffers', smooth=True)
+    sampled_elevs1 = np.array(list(sampled_elevs1.values()))
+
+    reach1_geom = sfr.reach_data.geometry[0]
+    crs1 = sfr.crs
+    crs2 = crs(epsg=3070)
+    sfr._crs = crs2
+    sfr.reach_data['geometry'] = project(sfr.reach_data['geometry'].values, crs1.proj_str, crs2.proj_str)
+    reach1_geom_5070 = sfr.reach_data.geometry[0]
+
+    # verify that the reaches were reprojected
+    assert reach1_geom.intersection(reach1_geom_5070).area == 0
+    sampled_elevs2 = sfr.sample_reach_elevations(dem, method='buffers', smooth=True)
+    sampled_elevs2 = np.array(list(sampled_elevs2.values()))
+    rms_error = np.sqrt(np.mean((sampled_elevs2 - sampled_elevs1)**2))
+    assert rms_error < 0.5  # not sure why the elevations don't match better
+
+    # verify that at least the first reach is the same
+    reach1_geom_projected_back_100buffer = project(reach1_geom_5070, crs2.proj_str, crs1.proj_str).buffer(100)
+    assert np.allclose(reach1_geom_projected_back_100buffer.area, reach1_geom.buffer(100).area)
 
 def test_structuredgrid_from_shapefile(sfrmaker_grid_from_shapefile, sfrmaker_grid_from_sr):
     grid = sfrmaker_grid_from_shapefile

@@ -41,11 +41,18 @@ class crs:
 
     @property
     def proj_str(self):
-        if self._proj_str is None and self._crs is not None:
+        if self._proj_str is None and self.crs is not None:
             self._proj_str = to_string(self._crs)
         elif self._proj_str is None and self.prjfile is not None:
             self._proj_str = get_proj_str(self.prjfile)
         return self._proj_str
+
+    @property
+    def pyproj_Proj(self):
+        """pyproj Proj instance. Used for comparing proj4 strings
+        that represent the same CRS in different ways."""
+        if self.proj_str is not None:
+            return pyproj.Proj(self.proj_str)
 
     def _reset(self):
         self._proj_str = None
@@ -66,8 +73,15 @@ class crs:
     def __eq__(self, other):
         if not isinstance(other, crs):
             return False
-        if other.proj_str != self.proj_str:
+        if other.pyproj_Proj is not None and \
+                other.pyproj_Proj != self.pyproj_Proj:
             return False
+        #if other.epsg is not None and other.epsg == self.epsg:
+        #    return True
+        #if other.proj_str is not None and other.proj_str == self.proj_str:
+        #    return True
+        #if other.proj_str != self.proj_str:
+        #    return False
         return True
 
     def __repr__(self):
@@ -150,7 +164,7 @@ def export_reach_data(reach_data, grid, filename,
         rd['geometry'] = [p.centroid for p in polygons]
     else:
         raise ValueError('Unrecognized geomtype "{}"'.format(geomtype))
-    df2shp(rd, filename, epsg=grid.crs.epsg)
+    df2shp(rd, filename, epsg=grid.crs.epsg, proj_str=grid.crs.proj_str)
 
 
 def intersect_rtree(geom1, geom2, index=None):
