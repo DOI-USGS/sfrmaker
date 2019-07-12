@@ -15,10 +15,10 @@ def get_prj_file(NHDPlus_paths=None, NHDFlowlines=None):
 
 def get_NHDPlus_v2_filepaths(NHDPlus_paths):
     print('for basins:')
-    for path in NHDPlus_paths:
-        print(path)
     if isinstance(NHDPlus_paths, str):
         NHDPlus_paths = [NHDPlus_paths]
+    for path in NHDPlus_paths:
+        print(path)
     NHDFlowlines = [os.path.join(f, 'NHDSnapshot/Hydrography/NHDFlowline.shp')
                     for f in NHDPlus_paths]
     PlusFlowlineVAA = [os.path.join(f, 'NHDPlusAttributes/PlusFlowlineVAA.dbf')

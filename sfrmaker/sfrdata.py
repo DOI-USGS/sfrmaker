@@ -14,8 +14,10 @@ from .elevations import smooth_elevations
 from .gis import df2shp, export_reach_data, project, crs
 from .grid import StructuredGrid, UnstructuredGrid
 from .units import convert_length_units
+import sfrmaker
 
 fm = flopy.modflow
+
 
 class sfrdata:
     """Class for working with a streamflow routing (SFR) dataset,
@@ -773,6 +775,9 @@ class sfrdata:
         """
         # recreate the flopy package object in case it changed
         self.create_ModflowSfr2(model=self.model, **kwargs)
+        header_txt = "#SFR package created by SFRmaker v. {}, " \
+                     "via FloPy v. {}".format(sfrmaker.__version__, flopy.__version__)
+        self.ModflowSfr2.heading = header_txt
 
         if version == 'mf2005':
             self.ModflowSfr2.write_file(filename=filename)

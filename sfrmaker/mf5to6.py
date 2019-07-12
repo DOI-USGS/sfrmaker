@@ -3,6 +3,8 @@ import numpy as np
 import pandas as pd
 from copy import copy
 from .utils import interpolate_to_reaches
+import sfrmaker
+
 
 class mf6sfr:
 
@@ -285,7 +287,7 @@ class mf6sfr:
             outfile = filename
         else:
             outfile = os.path.join(outpath, self.ModflowSfr2.file_name[0] + '6')
-        header = '# sfr6 input; converted from {} by mf6sfr'.format(self.ModflowSfr2.file_name[0])
+        header = "# MODFLOW-6 SFR input; created by SFRmaker v. {}".format(sfrmaker.__version__)
         with open(outfile, 'w') as output:
             output.write(header + '\n')
             output.write(self.options_block)

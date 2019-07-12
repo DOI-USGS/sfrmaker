@@ -16,6 +16,8 @@ from .nhdplus_utils import load_NHDPlus_v2, get_prj_file
 from .grid import StructuredGrid
 from .sfrdata import sfrdata
 from .checks import routing_is_circular
+import sfrmaker
+
 
 class lines:
     """Class for working with linestring feature input.
@@ -463,6 +465,7 @@ class lines:
         -------
         sfrdata : sfrmaker.sfrdata instance
         """
+        print("\nSFRmaker version {}".format(sfrmaker.__version__))
         print("\nCreating sfr dataset...")
         totim = time.time()
 

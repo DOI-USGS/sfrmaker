@@ -1,1 +1,2 @@
 mfsetup/_version.py export-subst
+sfrmaker/_version.py export-subst
