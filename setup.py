@@ -24,8 +24,8 @@ pip install --upgrade pip
 
 here = path.abspath(path.dirname(__file__))
 
-with open(path.join(here, 'Readme.md'), encoding='utf-8') as readme_file:
-    readme = readme_file.read()
+with open(path.join(here, 'long_description.rst'), encoding='utf-8') as readme_file:
+    long_description = readme_file.read()
 
 with open(path.join(here, 'requirements.txt')) as requirements_file:
     # Parse requirements.txt, ignoring any commented-out lines.
@@ -38,7 +38,7 @@ setup(
     version=versioneer.get_version(),
     cmdclass=versioneer.get_cmdclass(),
     description="Python package for rapid creation of streamflow routing networks.",
-    long_description=readme,
+    long_description=long_description,
     author="USGS",
     author_email='aleaf@usgs.gov',
     url='https://github.com/aleaf/sfrmaker',
