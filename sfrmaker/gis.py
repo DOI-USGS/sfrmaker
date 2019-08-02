@@ -1,6 +1,7 @@
 import os
 import collections
 import time
+import traceback
 from functools import partial
 import shutil
 import fiona
@@ -24,6 +25,10 @@ class crs:
         if prjfile is not None:
             assert os.path.exists(prjfile), "{} not found.".format(prjfile)
             self._proj_str = get_proj_str(prjfile)
+        if not self.is_valid:
+            print("Warning, coordinate reference system {}\nis invalid. "
+                  "\nPlease supply a valid epsg code, proj4 string, "
+                  "or ESRI projection file".format(self.__repr__()))
 
     @property
     def crs(self):
@@ -33,6 +38,15 @@ class crs:
             elif self.epsg is not None:
                 self._crs = from_epsg(self.epsg)
         return self._crs
+
+    @property
+    def is_valid(self):
+        try:
+            is_valid = self.pyproj_Proj.crs.is_valid
+        except Exception as ex:
+            traceback.print_exception(type(ex), ex, ex.__traceback__)
+            return
+        return self.pyproj_Proj.crs.is_valid
 
     @property
     def length_units(self):

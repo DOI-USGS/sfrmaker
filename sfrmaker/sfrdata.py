@@ -627,11 +627,22 @@ class sfrdata:
         -------
         elevs : dict of sampled elevations keyed by reach number
         """
-        rnos = self.reach_data.rno.tolist()
+
+        # get the CRS and pixel size for the DEM
+        with rasterio.open(dem) as src:
+            proj_str = src.crs.to_string()
+            epsg = src.crs.to_epsg()
+            raster_crs = crs(epsg=epsg, proj_str=proj_str)
+
+            # make sure buffer is large enough for DEM pixel size
+            buffer_distance = np.max([np.sqrt(src.res[0] *
+                                              src.res[1]) * 1.01,
+                                      buffer_distance])
+
         if method == 'buffers':
             assert isinstance(self.reach_data.geometry[0], LineString), \
                 "Need LineString geometries in reach_data.geometry column to use buffer option."
-            features = [g.buffer(100) for g in self.reach_data.geometry]
+            features = [g.buffer(buffer_distance) for g in self.reach_data.geometry]
             txt = 'buffered LineStrings'
         elif method == 'cell polygons':
             assert self.grid is not None, \
@@ -639,12 +650,7 @@ class sfrdata:
             features = self.grid.df.loc[self.reach_data.node, 'geometry'].tolist()
             txt = method
 
-        # get the CRS for the DEM to make sure it has the same projection
-        # reproject features if it's not
-        with rasterio.open(dem) as src:
-            proj_str = src.crs.to_string()
-            epsg = src.crs.to_epsg()
-        raster_crs = crs(epsg=epsg, proj_str=proj_str)
+        # reproject features if they're not in the same crs
         if raster_crs != self.crs:
             features = project(features,
                                self.crs.proj_str,
@@ -660,6 +666,10 @@ class sfrdata:
 
         if all(v is None for v in elevs):
             raise Exception('No {} intersected with {}. Check projections.'.format(txt, dem))
+        if any(v is None for v in elevs):
+            raise Exception('Some {} not intersected with {}. '
+                            'Check that DEM covers the area of the stream network.'
+                            '.'.format(txt, dem))
 
         if smooth:
             elevs = smooth_elevations(self.reach_data.rno.tolist(),

@@ -64,6 +64,11 @@ def test_crs_eq():
     assert crs_26715_epsg == crs_26715_prj
 
 
+def test_isvalid():
+    junk = crs(proj_str='junk')
+    assert not junk.is_valid
+
+
 def test_get_proj_str():
 
     crs_5070_epsg = crs(epsg=5070)
