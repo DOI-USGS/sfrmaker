@@ -12,10 +12,10 @@ dependencies:
 - pandas
 - gdal
 - fiona
-- rasterio=1.*
+- rasterio>=1.0
 - rasterstats
 - shapely
 - rtree
-- pyproj
+- pyproj>=2.0
 - pyshp
 - flopy

@@ -5,10 +5,10 @@ numpy
 pandas
 gdal
 fiona
-rasterio
+rasterio>=1.0
 rasterstats
 shapely
-pyproj
+pyproj>=2.0
 flopy
 codecov
 coverage

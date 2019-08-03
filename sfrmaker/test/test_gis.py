@@ -65,6 +65,14 @@ def test_crs_eq():
 
 
 def test_isvalid():
+    """
+    With pyproj 2, all Proj instances are valid
+    (error is raised in construction if not)
+    https://github.com/pyproj4/pyproj/issues/304
+    """
+    crs_5070_epsg = crs(epsg=5070)
+    assert crs_5070_epsg.is_valid
+
     junk = crs(proj_str='junk')
     assert not junk.is_valid
 

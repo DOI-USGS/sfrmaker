@@ -41,12 +41,10 @@ class crs:
 
     @property
     def is_valid(self):
-        try:
-            is_valid = self.pyproj_Proj.crs.is_valid
-        except Exception as ex:
-            traceback.print_exception(type(ex), ex, ex.__traceback__)
-            return
-        return self.pyproj_Proj.crs.is_valid
+        if isinstance(self.pyproj_Proj, pyproj.Proj):
+            return True
+        else:
+            return False
 
     @property
     def length_units(self):
@@ -66,7 +64,11 @@ class crs:
         """pyproj Proj instance. Used for comparing proj4 strings
         that represent the same CRS in different ways."""
         if self.proj_str is not None:
-            return pyproj.Proj(self.proj_str)
+            try:
+                return pyproj.Proj(self.proj_str)
+            except Exception as ex:
+                traceback.print_exception(type(ex), ex, ex.__traceback__)
+                return
 
     def _reset(self):
         self._proj_str = None
