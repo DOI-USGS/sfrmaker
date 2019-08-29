@@ -4,7 +4,7 @@
     "epsg": 5070,
     "ncol": 20,
     "nrow": 20,
-    "proj_str": "+init=epsg:5070",
+    "proj_str": "epsg:5070",
     "rotation": 0.0,
     "xul": 520487.3,
     "yul": 1194668.3

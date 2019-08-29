@@ -70,7 +70,7 @@ def tylerforks_model_grid(tyler_forks_grid_shapefile, tylerforks_model):
                                       lenuni=1,  # model units of feet
                                       xll=682688, yll=5139052,  # lower left corner of model grid
                                       rotation=0,  # grid is unrotated
-                                      proj4_str='+init=epsg:26715'
+                                      proj4_str='epsg:26715'
                                       # projected coordinate system of model (UTM NAD27 zone 15 North)
                                       )
     m.sr = sr

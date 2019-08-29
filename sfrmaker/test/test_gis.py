@@ -52,7 +52,7 @@ def test_crs_eq():
 
     crs_4269_proj = crs(proj_str='+proj=longlat +datum=NAD83 +no_defs ')
     crs_26715_epsg = crs(epsg=26715)
-    crs_26715_epsg_proj = crs(proj_str='+init=epsg:26715')
+    crs_26715_epsg_proj = crs(proj_str='epsg:26715')
     crs_26715_proj = crs(proj_str='+proj=utm +zone=15 +datum=NAD27 +units=m +no_defs ')
     crs_26715_prj = crs(prjfile='Examples/data/badriver/grid.shp')
     assert crs_4269_proj != crs_26715_epsg
@@ -77,7 +77,7 @@ def test_isvalid():
     assert not junk.is_valid
 
 
-def test_get_proj_str():
+def test_crs_get_proj_str():
 
     crs_5070_epsg = crs(epsg=5070)
-    assert crs_5070_epsg.proj_str == '+init=epsg:5070 +no_defs'
+    assert crs_5070_epsg.proj_str.replace('+init=', '') == 'epsg:5070 +no_defs'
