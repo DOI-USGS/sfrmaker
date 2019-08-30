@@ -1,1 +1,2 @@
-#TODO: add unit tests for lines.py
+import sfrmaker
+import pytest

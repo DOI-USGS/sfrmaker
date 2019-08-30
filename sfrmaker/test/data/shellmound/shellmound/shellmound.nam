@@ -1,0 +1,10 @@
+BEGIN options
+END options
+
+BEGIN packages
+  DIS6  shellmound.dis  dis
+  NPF6  shellmound.npf  npf
+  RCH6  shellmound.rcha  rcha
+  OC6  shellmound.oc  oc
+END packages
+

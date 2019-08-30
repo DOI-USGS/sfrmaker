@@ -1,0 +1,11 @@
+{
+    "delc": 1000.0,
+    "delr": 1000.0,
+    "epsg": 5070,
+    "ncol": 35,
+    "nrow": 30,
+    "rotation": 0.0,
+    "snap_to_NHG": true,
+    "xoff": 500955.0,
+    "yoff": 1176285.0
+}

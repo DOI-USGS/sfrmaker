@@ -4,12 +4,19 @@ import pandas as pd
 import pytest
 import flopy
 import flopy.modflow as fm
-from flopy.utils import SpatialReference
+import sfrmaker
 
 
 @pytest.fixture(scope="session")
 def datapath():
+    """Example datasets for users."""
     return 'Examples/data'
+
+
+@pytest.fixture(scope="session")
+def testdatapath():
+    """Smaller datasets for faster test execution."""
+    return 'sfrmaker/test/data'
 
 
 @pytest.fixture(scope="session")
@@ -52,6 +59,31 @@ def sfr_test_numbering():
 
 
 @pytest.fixture(scope='module')
+def shellmound_simulation(testdatapath):
+    sim = flopy.mf6.MFSimulation.load('mfsim', 'mf6', 'mf6', sim_ws='{}/shellmound/shellmound'.format(testdatapath))
+    return sim
+
+
+@pytest.fixture(scope='module')
+def shellmound_model(shellmound_simulation):
+    return shellmound_simulation.get_model('shellmound')
+
+
+@pytest.fixture(scope='module')
+def shellmound_grid(shellmound_model):
+    m = shellmound_model
+    sr = flopy.utils.SpatialReference(delr=m.dis.delr.array,  # cell spacing along a row
+                                      delc=m.dis.delc.array,  # cell spacing along a column
+                                      lenuni=2,  # model units of meters
+                                      xll=500955.0, yll=1176285.0,  # lower left corner of model grid
+                                      rotation=0,  # grid is unrotated
+                                      proj4_str='epsg:5070'
+                                      )
+    m.sr = sr
+    return sr
+
+
+@pytest.fixture(scope='module')
 def tyler_forks_grid_shapefile(datapath):
     return '{}/badriver/grid.shp'.format(datapath)
 
@@ -76,3 +108,30 @@ def tylerforks_model_grid(tyler_forks_grid_shapefile, tylerforks_model):
     m.sr = sr
     return sr
 
+
+@pytest.fixture(scope='module')
+def lines_from_shapefile(testdatapath):
+    flowlines_file = '{}/shellmound/flowlines.shp'.format(testdatapath)
+    lns = sfrmaker.lines.from_shapefile(flowlines_file,
+                                        id_column='COMID',
+                                        routing_column='tocomid',
+                                        width1_column='width1',
+                                        width2_column='width2',
+                                        up_elevation_column='elevupsmo',
+                                        dn_elevation_column='elevdnsmo',
+                                        name_column='GNIS_NAME',
+                                        attr_length_units='feet',  # units of source data
+                                        attr_height_units='feet'  # units of source data
+                                        )
+    return lns
+
+
+@pytest.fixture(scope='module')
+def shellmound_sfrdata(shellmound_model, lines_from_shapefile,
+            shellmound_grid):
+    m = shellmound_model
+    # from the lines and StructuredGrid instances, make a sfrmaker.sfrdata instance
+    # (lines are intersected with the model grid and converted to reaches, etc.)
+    sfrdata = lines_from_shapefile.to_sfr(sr=shellmound_grid,
+                                          model=m)
+    return sfrdata

@@ -1,9 +1,12 @@
+import inspect
 import time
 import operator
 import json
+import pprint
 import numpy as np
 import pandas as pd
 from shapely.geometry import Point
+from .units import convert_length_units, convert_time_units
 
 unit_conversion = {'feetmeters': 0.3048,
                    'metersfeet': 1/.3048}
@@ -748,10 +751,57 @@ def load_sr(jsonfile):
     with open(jsonfile) as input:
         cfg = json.load(input)
 
-    return SpatialReference(delr=np.ones(cfg['ncol'])* cfg['delr'],
-                            delc=np.ones(cfg['nrow']) * cfg['delc'],
-                            xul=cfg['xul'], yul=cfg['yul'],
-                            epsg=cfg['epsg']
-                              )
+    rename = {'xoff': 'xll',
+              'yoff': 'yll',
+              }
+    for k, v in rename.items():
+        if k in cfg:
+            cfg[v] = cfg.pop(k)
+    cfg['delr'] = np.ones(cfg['ncol'])* cfg['delr']
+    cfg['delc'] = np.ones(cfg['nrow']) * cfg['delc']
+    kwargs = get_input_arguments(cfg, SpatialReference)
+    return SpatialReference(**kwargs)
 
 
+def get_input_arguments(kwargs, function, warn=True):
+    """Return subset of keyword arguments in kwargs dict
+    that are valid parameters to a function or method.
+
+    Parameters
+    ----------
+    kwargs : dict (parameter names, values)
+    function : function of class method
+
+    Returns
+    -------
+    input_kwargs : dict
+    """
+    np.set_printoptions(threshold=20)
+    print('\narguments to {}:'.format(function.__qualname__))
+    params = inspect.signature(function)
+    input_kwargs = {}
+    not_arguments = {}
+    for k, v in kwargs.items():
+        if k in params.parameters:
+            input_kwargs[k] = v
+            print_item(k, v)
+        else:
+            not_arguments[k] = v
+    if warn:
+        print('\nother arguments:')
+        for k, v in not_arguments.items():
+            #print('{}: {}'.format(k, v))
+            print_item(k, v)
+    print('\n')
+    return input_kwargs
+
+
+def print_item(k, v):
+    print('{}: '.format(k), end='')
+    if isinstance(v, dict):
+        #print(json.dumps(v, indent=4))
+        pprint.pprint(v)
+    elif isinstance(v, list):
+        pprint.pprint(v)
+    else:
+        print(v)

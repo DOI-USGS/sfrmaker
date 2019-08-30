@@ -17,7 +17,7 @@ from .units import convert_length_units
 import sfrmaker
 
 fm = flopy.modflow
-
+mf6 = flopy.mf6
 
 class sfrdata:
     """Class for working with a streamflow routing (SFR) dataset,
@@ -114,7 +114,7 @@ class sfrdata:
                 'strhc1': 1,
                 }
 
-    def __init__(self, reach_data,
+    def __init__(self, reach_data=None,
                  segment_data=None, grid=None, sr=None,
                  model=None,
                  isfr=None,
@@ -145,7 +145,6 @@ class sfrdata:
         # print grid information to screen
         print(grid)
         self.grid = grid
-        self.structured = self.grid._structured
 
         # routing
         self._segment_routing = None  # dictionary of routing connections
@@ -189,6 +188,13 @@ class sfrdata:
         """MODFLOW length units code"""
         d = {"feet": 1, "meters": 2}
         return d[self.model_length_units]
+
+    @property
+    def structured(self):
+        if self.grid is not None:
+            return self.grid._structured
+        else:
+            return True
 
     @property
     def model(self):
@@ -535,6 +541,74 @@ class sfrdata:
                                            ipakcb=ipakcb, istcb2=istcb2,
                                            **kwargs)
 
+    def create_mf6sfr(self, model=None, unit_conversion=None,
+                      stage_filerecord=None,
+                      budget_filerecord=None,
+                      **kwargs
+                      ):
+
+        if unit_conversion is None:
+            unit_conversion = self.const
+        if stage_filerecord is None:
+            stage_filerecord = '{}.sfr.stage.bin'.format(self.package_name)
+        if budget_filerecord is None:
+            budget_filerecord = '{}.sfr.cbc'.format(self.package_name)
+
+        if model is not None and model.version == 'mf6':
+            m = model
+            if 'tdis' in model.simulation.package_key_dict.keys():
+                tdis = model.simulation.package_key_dict['tdis']
+                nper = tdis.nper.array
+        # create an flopy mf2005 model instance attached to ModflowSfr2 object
+        # this is a parallel model instance to self.model, that is only
+        # accessible through ModflowSfr2.parent. As long as this method is
+        # called by the @model.setter; this instance should have the same
+        # dis and ibound (idomain) as self.model.
+        # The ModflowSfr2 instance is used as basis for writing packages,
+        # because it includes many features, like checking and exporting,
+        # that ModflowGwfsfr doesn't have)
+        # ibound in BAS package is used by mf5to6 converter
+        # to fill in required "None" values when writing mf6 input
+        elif model is None or model.version != 'mf6':
+            # create simulation
+            sim = flopy.mf6.MFSimulation(version='mf6', exe_name='mf6',
+                                         sim_ws='')
+            m = flopy.mf6.ModflowGwf(sim)
+
+        # create an sfrmaker.mf6sfr instance
+        from .mf5to6 import mf6sfr
+        sfr6 = mf6sfr(self.ModflowSfr2)
+
+        # package data
+        # An error occurred when storing data "packagedata" in a recarray.
+        # packagedata data is a one or two dimensional list containing the variables
+        # "<rno> <cellid> <rlen> <rwid> <rgrd> <rtp> <rbth> <rhk> <man> <ncon> <ustrf> <ndv>"
+        # (some variables may be optional, see MF6 documentation)
+        packagedata = sfr6.packagedata.copy()
+        if self.structured:
+            columns = packagedata.drop(['k', 'i', 'j', 'idomain'], axis=1).columns.tolist()
+            packagedata['cellid'] = list(zip(packagedata.k,
+                                             packagedata.i,
+                                             packagedata.k))
+            columns.insert(1, 'cellid')
+        packagedata = packagedata[columns].values.tolist()
+        connectiondata = [(rno, *sfr6.connections[rno])
+                          for rno in sfr6.packagedata.rno]
+        perioddata = None
+        if sfr6.perioddata is not None:
+            raise NotImplemented("Support for mf6 perioddata input not implemente yet. "
+                                 "Use sfrdata.write_package(version='mf6') instead.")
+
+        mf6sfr = mf6.ModflowGwfsfr(model=m, unit_conversion=unit_conversion,
+                                   stage_filerecord=stage_filerecord,
+                                   budget_filerecord=budget_filerecord,
+                                   nreaches=len(self.reach_data),
+                                   packagedata=packagedata,
+                                   connectiondata=connectiondata,
+                                   diversions=None,  # TODO: add support for diversions
+                                   perioddata=perioddata,  # TODO: add support for creating mf6 perioddata input
+                                   )
+        return mf6sfr
 
     def interpolate_to_reaches(self, segvar1, segvar2, per=0):
         """Interpolate values in datasets 6b and 6c to each reach in stream segment
@@ -739,7 +813,7 @@ class sfrdata:
         dnelev = {rid: elev[rd.outreach.values[i]] if rd.outreach.values[i] != 0
         else -9999 for i, rid in enumerate(rd.rno)}
         slopes = np.array(
-            [(elev[i] - dnelev[i]) / dist[i] if dnelev[i] != -9999
+            [(elev[i] - dnelev[i]) / dist[i] if dnelev[i] != -9999 and dist[i] > 0
              else default_slope for i in rd.rno])
         slopes[slopes < minimum_slope] = minimum_slope
         slopes[slopes > maximum_slope] = maximum_slope
@@ -794,8 +868,8 @@ class sfrdata:
 
         elif version == 'mf6':
 
-            from .mf5to6 import mf6sfr
             # instantiate mf6sfr converter object with mf-nwt model/sfr package from flopy
+            from .mf5to6 import mf6sfr
             sfr6 = mf6sfr(self.ModflowSfr2, options=options)
 
             # write a MODFLOW 6 file
