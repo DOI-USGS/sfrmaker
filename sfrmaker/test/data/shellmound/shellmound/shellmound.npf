@@ -6,32 +6,32 @@ BEGIN griddata
   icelltype
     CONSTANT  1
   k  LAYERED
-    OPEN/CLOSE  '/Users/aleaf/Documents/GitHub/mfsetup/mfsetup/tests/tmp/shellmound/external/k0.dat'  FACTOR  1.0
-    OPEN/CLOSE  '/Users/aleaf/Documents/GitHub/mfsetup/mfsetup/tests/tmp/shellmound/external/k1.dat'  FACTOR  1.0
-    OPEN/CLOSE  '/Users/aleaf/Documents/GitHub/mfsetup/mfsetup/tests/tmp/shellmound/external/k2.dat'  FACTOR  1.0
-    OPEN/CLOSE  '/Users/aleaf/Documents/GitHub/mfsetup/mfsetup/tests/tmp/shellmound/external/k3.dat'  FACTOR  1.0
-    OPEN/CLOSE  '/Users/aleaf/Documents/GitHub/mfsetup/mfsetup/tests/tmp/shellmound/external/k4.dat'  FACTOR  1.0
-    OPEN/CLOSE  '/Users/aleaf/Documents/GitHub/mfsetup/mfsetup/tests/tmp/shellmound/external/k5.dat'  FACTOR  1.0
-    OPEN/CLOSE  '/Users/aleaf/Documents/GitHub/mfsetup/mfsetup/tests/tmp/shellmound/external/k6.dat'  FACTOR  1.0
-    OPEN/CLOSE  '/Users/aleaf/Documents/GitHub/mfsetup/mfsetup/tests/tmp/shellmound/external/k7.dat'  FACTOR  1.0
-    OPEN/CLOSE  '/Users/aleaf/Documents/GitHub/mfsetup/mfsetup/tests/tmp/shellmound/external/k8.dat'  FACTOR  1.0
-    OPEN/CLOSE  '/Users/aleaf/Documents/GitHub/mfsetup/mfsetup/tests/tmp/shellmound/external/k9.dat'  FACTOR  1.0
-    OPEN/CLOSE  '/Users/aleaf/Documents/GitHub/mfsetup/mfsetup/tests/tmp/shellmound/external/k10.dat'  FACTOR  1.0
-    OPEN/CLOSE  '/Users/aleaf/Documents/GitHub/mfsetup/mfsetup/tests/tmp/shellmound/external/k11.dat'  FACTOR  1.0
-    OPEN/CLOSE  '/Users/aleaf/Documents/GitHub/mfsetup/mfsetup/tests/tmp/shellmound/external/k12.dat'  FACTOR  1.0
+        OPEN/CLOSE  'external/k0.dat'  FACTOR  1.0
+        OPEN/CLOSE  'external/k1.dat'  FACTOR  1.0
+        OPEN/CLOSE  'external/k2.dat'  FACTOR  1.0
+        OPEN/CLOSE  'external/k3.dat'  FACTOR  1.0
+        OPEN/CLOSE  'external/k4.dat'  FACTOR  1.0
+        OPEN/CLOSE  'external/k5.dat'  FACTOR  1.0
+        OPEN/CLOSE  'external/k6.dat'  FACTOR  1.0
+        OPEN/CLOSE  'external/k7.dat'  FACTOR  1.0
+        OPEN/CLOSE  'external/k8.dat'  FACTOR  1.0
+        OPEN/CLOSE  'external/k9.dat'  FACTOR  1.0
+        OPEN/CLOSE  'external/k10.dat'  FACTOR  1.0
+        OPEN/CLOSE  'external/k11.dat'  FACTOR  1.0
+        OPEN/CLOSE  'external/k12.dat'  FACTOR  1.0
   k33  LAYERED
-    OPEN/CLOSE  '/Users/aleaf/Documents/GitHub/mfsetup/mfsetup/tests/tmp/shellmound/external/h330.dat'  FACTOR  1.0
-    OPEN/CLOSE  '/Users/aleaf/Documents/GitHub/mfsetup/mfsetup/tests/tmp/shellmound/external/h331.dat'  FACTOR  1.0
-    OPEN/CLOSE  '/Users/aleaf/Documents/GitHub/mfsetup/mfsetup/tests/tmp/shellmound/external/h332.dat'  FACTOR  1.0
-    OPEN/CLOSE  '/Users/aleaf/Documents/GitHub/mfsetup/mfsetup/tests/tmp/shellmound/external/h333.dat'  FACTOR  1.0
-    OPEN/CLOSE  '/Users/aleaf/Documents/GitHub/mfsetup/mfsetup/tests/tmp/shellmound/external/h334.dat'  FACTOR  1.0
-    OPEN/CLOSE  '/Users/aleaf/Documents/GitHub/mfsetup/mfsetup/tests/tmp/shellmound/external/h335.dat'  FACTOR  1.0
-    OPEN/CLOSE  '/Users/aleaf/Documents/GitHub/mfsetup/mfsetup/tests/tmp/shellmound/external/h336.dat'  FACTOR  1.0
-    OPEN/CLOSE  '/Users/aleaf/Documents/GitHub/mfsetup/mfsetup/tests/tmp/shellmound/external/h337.dat'  FACTOR  1.0
-    OPEN/CLOSE  '/Users/aleaf/Documents/GitHub/mfsetup/mfsetup/tests/tmp/shellmound/external/h338.dat'  FACTOR  1.0
-    OPEN/CLOSE  '/Users/aleaf/Documents/GitHub/mfsetup/mfsetup/tests/tmp/shellmound/external/h339.dat'  FACTOR  1.0
-    OPEN/CLOSE  '/Users/aleaf/Documents/GitHub/mfsetup/mfsetup/tests/tmp/shellmound/external/h3310.dat'  FACTOR  1.0
-    OPEN/CLOSE  '/Users/aleaf/Documents/GitHub/mfsetup/mfsetup/tests/tmp/shellmound/external/h3311.dat'  FACTOR  1.0
-    OPEN/CLOSE  '/Users/aleaf/Documents/GitHub/mfsetup/mfsetup/tests/tmp/shellmound/external/h3312.dat'  FACTOR  1.0
+    OPEN/CLOSE  'external/k330.dat'  FACTOR  1.0
+    OPEN/CLOSE  'external/k331.dat'  FACTOR  1.0
+    OPEN/CLOSE  'external/k332.dat'  FACTOR  1.0
+    OPEN/CLOSE  'external/k333.dat'  FACTOR  1.0
+    OPEN/CLOSE  'external/k334.dat'  FACTOR  1.0
+    OPEN/CLOSE  'external/k335.dat'  FACTOR  1.0
+    OPEN/CLOSE  'external/k336.dat'  FACTOR  1.0
+    OPEN/CLOSE  'external/k337.dat'  FACTOR  1.0
+    OPEN/CLOSE  'external/k338.dat'  FACTOR  1.0
+    OPEN/CLOSE  'external/k339.dat'  FACTOR  1.0
+    OPEN/CLOSE  'external/k3310.dat'  FACTOR  1.0
+    OPEN/CLOSE  'external/k3311.dat'  FACTOR  1.0
+    OPEN/CLOSE  'external/k3312.dat'  FACTOR  1.0
 END griddata
 
