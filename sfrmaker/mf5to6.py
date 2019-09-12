@@ -9,14 +9,14 @@ import sfrmaker
 class mf6sfr:
 
     # convert from ModflowSfr to mf6
-    mf6names = {'reachID': 'rno',
+    mf6names = {'rno': 'rno',
                 'node': 'cellid',
                 'rchlen': 'rlen',
                 'slope': 'rgrd',
                 'strtop': 'rtp',
                 'strthick': 'rbth',
                 'strhc1': 'rhk',
-                'roughch': 'manning',
+                'roughch': 'man',
                 'flow': 'inflow',
                 'pptsw': 'rainfall',
                 'etsw': 'evaporation',
@@ -55,13 +55,14 @@ class mf6sfr:
 
         # dataframes of reach and segment data from ModflowSfr2
         self.rd = pd.DataFrame(ModflowSfr2.reach_data)
+        self.rd.rename(columns={'reachID': 'rno'}, inplace=True)
         self.sd = self._get_segment_dataframe()
 
         # package data
         self._package_data = None
 
         # connection info (doesn't support diversions)
-        self.graph = dict(zip(self.rd.reachID, self.rd.outreach))
+        self.graph = dict(zip(self.rd.rno, self.rd.outreach))
         sd0 = pd.DataFrame(ModflowSfr2.segment_data[0])
         self._graph_r = None # filled by properties
         self.outlets = None
@@ -86,7 +87,7 @@ class mf6sfr:
     def graph_r(self):
         if self._graph_r is None:
             outreaches = np.unique(self.rd.outreach)
-            self._graph_r = {o: self.rd.reachID[self.rd.outreach == o].tolist()
+            self._graph_r = {o: self.rd.rno[self.rd.outreach == o].tolist()
                              for o in outreaches}
             self.outlets = self._graph_r[0]
             del self._graph_r[0]
@@ -196,7 +197,7 @@ class mf6sfr:
 
         # get rno for reach 1s
         segroups = self.rd.groupby('iseg')
-        reach1IDs = segroups.first()['reachID'].to_dict()
+        reach1IDs = segroups.first()['rno'].to_dict()
         sd['rno'] = [reach1IDs[i + 1] for i in sd.index]
         # sd['rainfall'] = np.random.randn(len(sd))
 
@@ -217,7 +218,7 @@ class mf6sfr:
             # iterate through segments in sd (multiple periods)
             for i, r in sd.iterrows():
                 seg, per = int(r.nseg), int(r.per)
-                df = pd.DataFrame(segroups.get_group(seg)[['reachID', 'rchlen', 'ireach']])
+                df = pd.DataFrame(segroups.get_group(seg)[['rno', 'rchlen', 'ireach']])
                 df.rename(columns={'reachID': 'rno'}, inplace=True)
                 df['iseg'] = seg
                 df['lenfrac'] = df.rchlen / df.rchlen.sum()
@@ -259,8 +260,9 @@ class mf6sfr:
 
         # for icalc=0 reaches with no depth specified in per 0
         # set stage from strtop; add to distributed period data
-        strtop = self.rd[['reachID', 'strtop', 'iseg', 'ireach']].copy()
-        strtop.rename(columns={'reachID': 'rno', 'strtop': 'stage'}, inplace=True)
+        strtop = self.rd[['rno', 'strtop', 'iseg', 'ireach']].copy()
+        strtop.rename(columns={#'reachID': 'rno',
+                               'strtop': 'stage'}, inplace=True)
         strtop['icalc'] = [icalc[(s, 0)] for s in self.rd.iseg]
         strtop.index = strtop.rno
         # cull to only include per=0 reaches where icalc=0 and depth wasn't specified

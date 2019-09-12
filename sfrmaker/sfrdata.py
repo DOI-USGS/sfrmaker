@@ -2,6 +2,7 @@ import sys
 sys.path.append('/Users/aleaf/Documents/GitHub/flopy3')
 import os
 import time
+import copy
 import numpy as np
 import pandas as pd
 import rasterio
@@ -59,15 +60,15 @@ class sfrdata:
     """
 
     # conversions to MODFLOW6 variable names
-    mf6names = {'reachID': 'rno',
-                'node': 'cellid',
+    mf6names = {'rno': 'rno',
+                #'node': 'cellid',
                 'rchlen': 'rlen',
                 'width': 'rwid',
                 'slope': 'rgrd',
                 'strtop': 'rtp',
                 'strthick': 'rbth',
                 'strhc1': 'rhk',
-                'roughch': 'manning',
+                'roughch': 'man',
                 'flow': 'inflow',
                 'pptsw': 'rainfall',
                 'etsw': 'evaporation',
@@ -103,7 +104,7 @@ class sfrdata:
               'name': np.object, 'geometry': np.object}
 
     # LENUNI = {"u": 0, "f": 1, "m": 2, "c": 3}
-    len_const = {1: 1.486, 2: 1.0, 3: 100.}
+    len_const = {0: 1.0, 1: 1.486, 2: 1.0, 3: 100.}
     # {"u": 0, "s": 1, "m": 2, "h": 3, "d": 4, "y": 5}
     time_const = {1: 1., 2: 60., 3: 3600., 4: 86400., 5: 31557600.}
 
@@ -118,7 +119,7 @@ class sfrdata:
                  segment_data=None, grid=None, sr=None,
                  model=None,
                  isfr=None,
-                 model_length_units='feet', model_time_units='d',
+                 model_length_units="unspecified", model_time_units='d',
                  enforce_increasing_nsegs=True,
                  package_name=None,
                  **kwargs):
@@ -186,7 +187,9 @@ class sfrdata:
     @property
     def _lenuni(self):
         """MODFLOW length units code"""
-        d = {"feet": 1, "meters": 2}
+        d = {"unspecified": 0,
+             "feet": 1,
+             "meters": 2}
         return d[self.model_length_units]
 
     @property
@@ -423,7 +426,7 @@ class sfrdata:
         self.reach_data['ireach'] = ireach
 
     def set_outreaches(self):
-        """Determine the outreach for each SFR reach (requires a reachID column in reach_data).
+        """Determine the outreach for each SFR reach (requires a rno column in reach_data).
         Uses the segment routing specified for the first stress period to route reaches between segments.
         """
         self.reach_data.sort_values(by=['iseg', 'ireach'], inplace=True)
@@ -448,7 +451,7 @@ class sfrdata:
                     nextrchid = reach1IDs[nextseg] # get reach 1 of next segment
                 else:
                     nextrchid = 0
-            else:  # otherwise, it's the next reachID
+            else:  # otherwise, it's the next rno
                 nextrchid = rno[i + 1]
             outreach.append(nextrchid)
         self.reach_data['outreach'] = outreach
@@ -544,6 +547,7 @@ class sfrdata:
     def create_mf6sfr(self, model=None, unit_conversion=None,
                       stage_filerecord=None,
                       budget_filerecord=None,
+                      flopy_rno_input_is_zero_based=True,
                       **kwargs
                       ):
 
@@ -577,6 +581,7 @@ class sfrdata:
 
         # create an sfrmaker.mf6sfr instance
         from .mf5to6 import mf6sfr
+
         sfr6 = mf6sfr(self.ModflowSfr2)
 
         # package data
@@ -589,11 +594,33 @@ class sfrdata:
             columns = packagedata.drop(['k', 'i', 'j', 'idomain'], axis=1).columns.tolist()
             packagedata['cellid'] = list(zip(packagedata.k,
                                              packagedata.i,
-                                             packagedata.k))
+                                             packagedata.j))
             columns.insert(1, 'cellid')
-        packagedata = packagedata[columns].values.tolist()
+
         connectiondata = [(rno, *sfr6.connections[rno])
-                          for rno in sfr6.packagedata.rno]
+                          for rno in sfr6.packagedata.rno if rno in sfr6.connections]
+        # as of 9/12/2019, flopy.mf6.modflow.ModflowGwfsfr requires zero-based input for rno
+        if flopy_rno_input_is_zero_based and self.ModflowSfr2.reach_data['reachID'].min() == 1:
+            packagedata['rno'] -= 1
+            zero_based_connectiondata = []
+            for item in connectiondata:
+                zb_items = tuple(i-1 if i > 0 else i+1 for i in item)
+                zero_based_connectiondata.append(zb_items)
+            connectiondata = zero_based_connectiondata
+        assert packagedata['rno'].min() == 0
+        assert np.min(list(map(np.min, map(np.abs, connectiondata)))) < 1
+
+        # set cellids to None for unconnected reaches or where idomain == 0
+        # note: as of 9/12/2019, this results in an error during ModflowGwfsfr package construction
+        # with either Nonetype or "NONE"
+        # even though MODFLOW 6 requires it
+        #unconnected = ~packagedata['rno'].isin(np.array(list(sfr6.connections.keys())) - 1).values
+        #inactive = m.dis.idomain.array[packagedata.k.values,
+        #                               packagedata.i.values,
+        #                               packagedata.j.values]
+        #packagedata.loc[unconnected | inactive, 'cellid'] = None
+        packagedata = packagedata[columns].values.tolist()
+
         perioddata = None
         if sfr6.perioddata is not None:
             raise NotImplemented("Support for mf6 perioddata input not implemente yet. "
@@ -860,7 +887,9 @@ class sfrdata:
         # recreate the flopy package object in case it changed
         self.create_ModflowSfr2(model=self.model, **kwargs)
         header_txt = "#SFR package created by SFRmaker v. {}, " \
-                     "via FloPy v. {}".format(sfrmaker.__version__, flopy.__version__)
+                     "via FloPy v. {}\n".format(sfrmaker.__version__, flopy.__version__)
+        header_txt += "#model length units: {}, model time units: {}".format(self.model_length_units,
+                                                                                 self.model_time_units)
         self.ModflowSfr2.heading = header_txt
 
         if version == 'mf2005':

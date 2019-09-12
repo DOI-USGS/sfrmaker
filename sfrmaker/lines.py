@@ -674,6 +674,8 @@ class lines:
             width2 = dict(zip(self.df.id, self.df.width2))
             sd['width1'] = [width1[line_id[s]] for s in sd.nseg]
             sd['width2'] = [width2[line_id[s]] for s in sd.nseg]
+            sd['width1'] *= mult
+            sd['width2'] *= mult  # convert length units from source data to model
         elif self.df.width2.sum() == 0:
             raise NotImplementedError('Need to supply width1 and width2 or use arbolate sum.')
 
