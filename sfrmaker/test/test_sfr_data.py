@@ -3,25 +3,16 @@ import pytest
 import numpy as np
 import pandas as pd
 import flopy
-import sfrmaker
 
 
-@pytest.fixture(scope="function")
-def sfrdata(sfr_test_numbering):
-    rd, sd = sfr_test_numbering
-    sd['width1'] = 1
-    sd['width2'] = 1
-    return sfrmaker.sfrdata(reach_data=rd, segment_data=sd)
-
-
-def test_const(shellmound_sfrdata, sfrdata):
+def test_const(shellmound_sfrdata, sfr_testdata):
     assert shellmound_sfrdata._lenuni == 2  # meters
     assert shellmound_sfrdata._itmuni == 4  # days
     assert shellmound_sfrdata.const == 86400
 
-    sfrdata._model_length_units = 'feet'
-    sfrdata._model_time_units = 'days'
-    assert sfrdata.const == 86400 * 1.486
+    sfr_testdata._model_length_units = 'feet'
+    sfr_testdata._model_time_units = 'days'
+    assert sfr_testdata.const == 86400 * 1.486
 
 
 @pytest.fixture(scope="function")
@@ -86,5 +77,11 @@ def test_flopy_mf6sfr_outfile(mf6sfr, mf6sfr_outfile):
             c1 = pkdata1[col]
             c2 = mf6sfr.packagedata.array[col]
         assert np.allclose(c1, c2)
+
+
+def test_ibound_representation_of_idomain(shellmound_sfrdata, shellmound_model):
+    ibound = shellmound_sfrdata.ModflowSfr2.parent.bas6.ibound.array
+    idomain = shellmound_model.dis.idomain.array
+    assert np.array_equal(ibound, idomain)
 
 

@@ -58,6 +58,14 @@ def sfr_test_numbering():
     return rd, sd
 
 
+@pytest.fixture(scope="function")
+def sfr_testdata(sfr_test_numbering):
+    rd, sd = sfr_test_numbering
+    sd['width1'] = 1
+    sd['width2'] = 1
+    return sfrmaker.sfrdata(reach_data=rd, segment_data=sd)
+
+
 @pytest.fixture(scope='module')
 def shellmound_simulation(testdatapath):
     sim = flopy.mf6.MFSimulation.load('mfsim', 'mf6', 'mf6', sim_ws='{}/shellmound/shellmound'.format(testdatapath))

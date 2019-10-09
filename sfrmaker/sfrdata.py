@@ -544,6 +544,10 @@ class sfrdata:
                                            ipakcb=ipakcb, istcb2=istcb2,
                                            **kwargs)
 
+        #if model.version == 'mf6':
+        #    self._ModflowSfr2.parent = model
+        return self._ModflowSfr2
+
     def create_mf6sfr(self, model=None, unit_conversion=None,
                       stage_filerecord=None,
                       budget_filerecord=None,
@@ -899,6 +903,8 @@ class sfrdata:
 
             # instantiate mf6sfr converter object with mf-nwt model/sfr package from flopy
             from .mf5to6 import mf6sfr
+            if len(options) == 0:
+                options = ['print_input', 'save_flows']
             sfr6 = mf6sfr(self.ModflowSfr2, options=options)
 
             # write a MODFLOW 6 file
