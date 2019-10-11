@@ -497,8 +497,8 @@ class sfrdata:
         # ibound in BAS package is used by mf5to6 converter
         # to fill in required "None" values when writing mf6 input
         elif model is None or model.version == 'mf6':
-            m = fm.Modflow(model_ws='',
-                           structured=self.structured)
+            model_ws = '.' if model is None else model.model_ws
+            m = fm.Modflow(model_ws=model_ws, structured=self.structured)
             if model is not None:
                 nper = 1
                 if 'tdis' in model.simulation.package_key_dict.keys():
