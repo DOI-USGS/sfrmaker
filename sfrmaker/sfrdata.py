@@ -20,6 +20,7 @@ import sfrmaker
 fm = flopy.modflow
 mf6 = flopy.mf6
 
+
 class sfrdata:
     """Class for working with a streamflow routing (SFR) dataset,
     where the stream network is discretized into reaches contained
