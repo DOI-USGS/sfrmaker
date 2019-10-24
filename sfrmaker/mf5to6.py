@@ -28,20 +28,24 @@ class mf6sfr:
     cols = ['rno', 'cellid', 'k', 'i', 'j', 'rlen', 'rwid', 'rgrd',
             'rtp', 'rbth', 'rhk', 'man', 'ncon', 'ustrf', 'ndv', 'idomain']
 
-    def __init__(self, ModflowSfr2, options=['print_input',
-                                             'save_flows']):
+    def __init__(self, ModflowSfr2, period_data=None,
+                 idomain=None,
+                 options=['print_input', 'save_flows']):
 
         # check for other packages
-        try:
-            self.idomain = ModflowSfr2.parent.bas6.ibound.array.copy()
-            # constant head cells (-1) also made active
-            self.idomain[self.idomain != 0] = 1
-        except:
-            txt = 'Warning: BAS6 package not found. '
-            txt += 'Cannot check for reaches in inactive cells. '
-            txt += 'Converted SFR package may not run with MODFLOW 6.'
-            print(txt)
-            self.idomain = None
+        if idomain is None:
+            try:
+                self.idomain = ModflowSfr2.parent.bas6.ibound.array.copy()
+                # constant head cells (-1) also made active
+                self.idomain[self.idomain != 0] = 1
+            except:
+                txt = 'Warning: BAS6 package not found. '
+                txt += 'Cannot check for reaches in inactive cells. '
+                txt += 'Converted SFR package may not run with MODFLOW 6.'
+                print(txt)
+                self.idomain = None
+        else:
+            self.idomain = idomain
 
         # copy ModflowSfr2 object and enforce sorting
         self.ModflowSfr2 = copy(ModflowSfr2)
@@ -72,7 +76,7 @@ class mf6sfr:
         self.diversions = None
 
         # period data
-        self._period_data = None
+        self._period_data = period_data
 
         # stuff to write
         self.options_block = '\nBEGIN Options\n'
@@ -117,9 +121,9 @@ class mf6sfr:
         return self._connections
 
     @property
-    def perioddata(self):
+    def period_data(self):
         if self._period_data is None:
-            self._period_data = self._get_perioddata()
+            self._period_data = self._get_period_data()
         return self._period_data
 
     def _segment_data2reach_data(self, var):
@@ -179,110 +183,9 @@ class mf6sfr:
         cols = [c for c in self.cols if c in packagedata.columns]
         return packagedata[cols].sort_values(by='rno')
 
-    def _get_perioddata(self):
+    def _get_period_data(self):
         print('converting segment data to period data...')
-
-        sd = self.sd.copy()
-        cols = [k for k, v in self.mf6names.items() if k in sd.columns]
-        cols += ['per', 'nseg']
-        cols.remove('roughch')
-
-        sd = sd.loc[:, cols]
-        # drop all of the zero values from s.p. 0 (default)
-        datacols = set(sd.columns.difference({'per', 'nseg'}))
-        for c in datacols:  # explicitly convert zeros for each data column
-            sd.loc[(sd.per == 0), c] = sd.loc[(sd.per == 0), c].replace(0., np.nan)
-        sd.head()
-        sd.rename(columns=self.mf6names, inplace=True)
-
-        # get rno for reach 1s
-        segroups = self.rd.groupby('iseg')
-        reach1IDs = segroups.first()['rno'].to_dict()
-        sd['rno'] = [reach1IDs[i + 1] for i in sd.index]
-        # sd['rainfall'] = np.random.randn(len(sd))
-
-        #  distribute other variables to all reaches
-        cols = {'inflow', 'manning', 'rainfall', 'evaporation', 'runoff',
-                'depth1', 'depth2'}
-        cols = set(sd.columns).intersection(cols)
-        icalc = dict(zip(zip(self.sd.nseg, self.sd.per), self.sd.icalc))
-        if len(cols) == 0:
-            return None
-        elif len(cols) > 0:
-            print('distributing values to reaches:\n')
-            for c in cols.difference({'depth1', 'depth2'}):
-                print('{} -> {}...'.format(self.mf5names[c], c))
-            if np.min(list(icalc.values())) < 1:
-                print('strtop, depth1 & depth2 -> stage for icalc<1...')
-            reaches = []
-            # iterate through segments in sd (multiple periods)
-            for i, r in sd.iterrows():
-                seg, per = int(r.nseg), int(r.per)
-                df = pd.DataFrame(segroups.get_group(seg)[['rno', 'rchlen', 'ireach']])
-                df.rename(columns={'reachID': 'rno'}, inplace=True)
-                df['iseg'] = seg
-                df['lenfrac'] = df.rchlen / df.rchlen.sum()
-                df['per'] = per
-                df['icalc'] = icalc[(seg, per)]
-                for c in cols:
-                    if c == 'runoff':
-                        df[c] = r[c] * df.lenfrac  # length-weighted mean
-                    elif c == 'inflow':  # only assign to reach1
-                        inflow = np.zeros(len(df)) * np.nan
-                        inflow[0] = r.inflow
-                        df['inflow'] = inflow
-                    elif c in {'manning', 'rainfall', 'evaporation'}:
-                        df[c] = r[c]  # values already normalized to area
-
-                # distribute depth values from stress period data
-                # this will only populate stages where depth1/depth2 were >0
-                if icalc[(seg, per)] < 1 and 'depth1' in cols:
-                    df['status'] = 'SIMPLE'
-
-                    # interpolate depth1 and depth2 to reaches
-                    dist = (np.cumsum(df.rchlen) - 0.5 * df.rchlen).values
-                    fp = [r.depth1, r.depth2]
-                    xp = [dist[0], dist[-1]]
-                    depth = np.interp(dist, xp, fp)
-                    strtop = segroups.get_group(r.nseg).strtop.values
-                    df['stage'] = strtop + depth
-                else:
-                    df['status'] = 'ACTIVE'
-
-                # drop out rows that didn't have any data
-                df.dropna(subset=cols.difference({'depth1', 'depth2'}), inplace=True)
-                reaches.append(df)
-            distributed = pd.concat(reaches)
-        distributed['per'] = distributed.per.astype(int)
-        distributed.index = distributed.rno
-        distributed.index.name = 'rno_idx'
-        distributed.sort_values(by=['per', 'rno'], inplace=True)
-
-        # for icalc=0 reaches with no depth specified in per 0
-        # set stage from strtop; add to distributed period data
-        strtop = self.rd[['rno', 'strtop', 'iseg', 'ireach']].copy()
-        strtop.rename(columns={#'reachID': 'rno',
-                               'strtop': 'stage'}, inplace=True)
-        strtop['icalc'] = [icalc[(s, 0)] for s in self.rd.iseg]
-        strtop.index = strtop.rno
-        # cull to only include per=0 reaches where icalc=0 and depth wasn't specified
-        per0reaches = distributed.loc[distributed.per == 0, 'rno']
-        strtop = strtop.loc[~strtop.rno.isin(per0reaches) & (strtop.icalc < 1)]
-        strtop['per'] = 0
-        strtop['status'] = 'SIMPLE'
-
-        distributed = distributed.append(strtop)
-        distributed.sort_values(by=['per', 'rno'], inplace=True)
-
-        # rearrange the columns
-        arrangecols = ['per', 'rno', 'status']
-        if 'stage' in distributed.columns: arrangecols += ['stage']
-        for col in cols.difference({'depth1', 'depth2'}):
-            arrangecols.append(col)
-        arrangecols += ['iseg', 'ireach', 'icalc']
-        distributed = distributed[arrangecols]
-        distributed['iseg'] = distributed.iseg.astype(int)
-        return distributed
+        return segment_data_to_period_data(self.sd, self.rd)
 
     def write_file(self, filename=None, outpath=''):
         if filename is not None:
@@ -323,15 +226,122 @@ class mf6sfr:
             output.write('END Connectiondata\n')
 
             # skip the diversions block for now
-            if self.perioddata is not None:
-                periods = self.perioddata.groupby('per')
-                for per in range(self.nper):
+            if self.period_data is not None:
+                periods = self.period_data.groupby('per')
+                for per, group in periods:
                     output.write('\nBEGIN Period {}\n'.format(per + 1))
-                    grp = periods.get_group(per).replace('ACTIVE', np.nan)
-                    assert np.array_equal(grp.index.values, grp.rno.values)
+                    group = group.replace('ACTIVE', np.nan)
+                    assert np.array_equal(group.index.values, group.rno.values)
                     datacols = {'inflow', 'manning', 'rainfall', 'evaporation', 'runoff', 'stage'}
-                    datacols = datacols.intersection(grp.columns)
-                    grp = grp.loc[:, datacols]
-                    grp.stack().to_csv(output, sep=' ', index=True, header=False)
+                    datacols = datacols.intersection(group.columns)
+                    group = group.loc[:, datacols]
+                    group.stack().to_csv(output, sep=' ', index=True, header=False)
                     output.write('END Period {}\n'.format(per + 1))
         print('wrote {}'.format(outfile))
+
+
+def segment_data_to_period_data(segment_data, reach_data):
+    """Convert modflow-2005 style segment data to modflow-6 period data.
+    """
+    sd = segment_data.copy()
+    prd = segment_data.copy()
+    rd = reach_data.copy()
+    cols = [k for k, v in mf6sfr.mf6names.items() if k in prd.columns]
+    cols += ['per', 'nseg']
+    cols.remove('roughch')
+
+    prd = prd.loc[:, cols]
+    # drop all of the zero values from s.p. 0 (default)
+    datacols = set(prd.columns.difference({'per', 'nseg'}))
+    for c in datacols:  # explicitly convert zeros for each data column
+        prd.loc[(prd.per == 0), c] = prd.loc[(prd.per == 0), c].replace(0., np.nan)
+    prd.rename(columns=mf6sfr.mf6names, inplace=True)
+
+    # get rno for reach 1s
+    segroups = rd.groupby('iseg')
+    reach1IDs = segroups.first()['rno'].to_dict()
+    prd['rno'] = [reach1IDs[i + 1] for i in prd.index]
+    # prd['rainfall'] = np.random.randn(len(prd))
+
+    #  distribute other variables to all reaches
+    cols = {'inflow', 'manning', 'rainfall', 'evaporation', 'runoff',
+            'depth1', 'depth2'}
+    cols = set(prd.columns).intersection(cols)
+    icalc = dict(zip(zip(sd.nseg, sd.per), sd.icalc))
+    if len(cols) == 0:
+        return None
+    elif len(cols) > 0:
+        print('distributing values to reaches:\n')
+        for c in cols.difference({'depth1', 'depth2'}):
+            print('{} -> {}...'.format(mf6sfr.mf5names[c], c))
+        if np.min(list(icalc.values())) < 1:
+            print('strtop, depth1 & depth2 -> stage for icalc<1...')
+        reaches = []
+        # iterate through segments in prd (multiple periods)
+        for i, r in prd.iterrows():
+            seg, per = int(r.nseg), int(r.per)
+            df = pd.DataFrame(segroups.get_group(seg)[['rno', 'rchlen', 'ireach']])
+            df.rename(columns={'reachID': 'rno'}, inplace=True)
+            df['iseg'] = seg
+            df['lenfrac'] = df.rchlen / df.rchlen.sum()
+            df['per'] = per
+            df['icalc'] = icalc[(seg, per)]
+            for c in cols:
+                if c == 'runoff':
+                    df[c] = r[c] * df.lenfrac  # length-weighted mean
+                elif c == 'inflow':  # only assign to reach1
+                    inflow = np.zeros(len(df)) * np.nan
+                    inflow[0] = r.inflow
+                    df['inflow'] = inflow
+                elif c in {'manning', 'rainfall', 'evaporation'}:
+                    df[c] = r[c]  # values already normalized to area
+
+            # distribute depth values from stress period data
+            # this will only populate stages where depth1/depth2 were >0
+            if icalc[(seg, per)] < 1 and 'depth1' in cols:
+                df['status'] = 'SIMPLE'
+
+                # interpolate depth1 and depth2 to reaches
+                dist = (np.cumsum(df.rchlen) - 0.5 * df.rchlen).values
+                fp = [r.depth1, r.depth2]
+                xp = [dist[0], dist[-1]]
+                depth = np.interp(dist, xp, fp)
+                strtop = segroups.get_group(r.nseg).strtop.values
+                df['stage'] = strtop + depth
+            else:
+                df['status'] = 'ACTIVE'
+
+            # drop out rows that didn't have any data
+            df.dropna(subset=cols.difference({'depth1', 'depth2'}), inplace=True)
+            reaches.append(df)
+        distributed = pd.concat(reaches)
+    distributed['per'] = distributed.per.astype(int)
+    distributed.index = distributed.rno
+    distributed.index.name = 'rno_idx'
+    distributed.sort_values(by=['per', 'rno'], inplace=True)
+
+    # for icalc=0 reaches with no depth specified in per 0
+    # set stage from strtop; add to distributed period data
+    strtop = rd[['rno', 'strtop', 'iseg', 'ireach']].copy()
+    strtop.rename(columns={  # 'reachID': 'rno',
+        'strtop': 'stage'}, inplace=True)
+    strtop['icalc'] = [icalc[(s, 0)] for s in rd.iseg]
+    strtop.index = strtop.rno
+    # cull to only include per=0 reaches where icalc=0 and depth wasn't specified
+    per0reaches = distributed.loc[distributed.per == 0, 'rno']
+    strtop = strtop.loc[~strtop.rno.isin(per0reaches) & (strtop.icalc < 1)]
+    strtop['per'] = 0
+    strtop['status'] = 'SIMPLE'
+
+    distributed = distributed.append(strtop)
+    distributed.sort_values(by=['per', 'rno'], inplace=True)
+
+    # rearrange the columns
+    arrangecols = ['per', 'rno', 'status']
+    if 'stage' in distributed.columns: arrangecols += ['stage']
+    for col in cols.difference({'depth1', 'depth2'}):
+        arrangecols.append(col)
+    arrangecols += ['iseg', 'ireach', 'icalc']
+    distributed = distributed[arrangecols]
+    distributed['iseg'] = distributed.iseg.astype(int)
+    return distributed

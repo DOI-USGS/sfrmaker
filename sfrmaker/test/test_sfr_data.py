@@ -1,8 +1,33 @@
+import copy
 import os
 import pytest
 import numpy as np
 import pandas as pd
 import flopy
+from ..gis import shp2df
+
+
+@pytest.fixture
+def period_data(shellmound_sfrdata):
+    shellmound_sfrdata = copy.deepcopy(shellmound_sfrdata)
+    perdata = shellmound_sfrdata.period_data
+    assert isinstance(perdata, pd.DataFrame)
+    assert len(perdata) == 0
+    assert set(perdata.columns) == \
+           {'iseg', 'evaporation', 'inflow', 'rno', 'status',
+            'stage', 'runoff', 'rainfall', 'ireach', 'icalc', 'per'}
+    rd = shellmound_sfrdata.reach_data
+    perdata['rno'] = [rd.rno.values[0], rd.rno.values[100]] * 2
+    perdata['inflow'] = [100., 1000., 20., 200.]
+    perdata['per'] = [0, 0, 1, 1]
+    return perdata
+
+
+@pytest.fixture
+def shellmound_sfrdata_with_period_data(shellmound_sfrdata, period_data):
+    shellmound_sfrdata = copy.deepcopy(shellmound_sfrdata)
+    shellmound_sfrdata._period_data = period_data
+    return shellmound_sfrdata
 
 
 def test_const(shellmound_sfrdata, sfr_testdata):
@@ -13,6 +38,37 @@ def test_const(shellmound_sfrdata, sfr_testdata):
     sfr_testdata._model_length_units = 'feet'
     sfr_testdata._model_time_units = 'days'
     assert sfr_testdata.const == 86400 * 1.486
+
+
+def test_write_perioddata(shellmound_sfrdata_with_period_data, outdir):
+    sfrd = shellmound_sfrdata_with_period_data
+    outfile = '{}/test_mf6_sfr_period_data.sfr'.format(outdir)
+    sfrd.write_package(outfile, version='mf6')
+    with open(outfile) as src:
+        rno_values = []
+        txt_values = []
+        q_values = []
+        for line in src:
+            if 'begin period' in line.lower():
+                for i in range(2):
+                    rno, txt, q = next(src).strip().split()
+                    rno_values.append(int(rno))
+                    txt_values.append(txt)
+                    q_values.append(float(q))
+    assert np.array_equal(rno_values,  sfrd.period_data['rno'].values)
+    assert np.allclose(q_values,  sfrd.period_data['inflow'].values)
+    assert set(txt_values) == {'inflow'}
+
+
+def test_export_period_data(shellmound_sfrdata_with_period_data, outdir):
+    sfrd = shellmound_sfrdata_with_period_data
+    outfile = '{}/test_mf6_sfr_period_data.shp'.format(outdir)
+    sfrd.export_period_data(outfile)
+    df = shp2df(outfile)
+    nodes = dict(zip(sfrd.reach_data.rno, sfrd.reach_data.node))
+    for c in ['rno', 'per', 'inflow']:
+        assert np.array_equal(df[c].values,  sfrd.period_data[c].values)
+    assert np.array_equal(df.node.values, np.array([nodes[rno] for rno in df.rno], dtype=int))
 
 
 @pytest.fixture(scope="function")

@@ -9,9 +9,7 @@ from .utils import load_sr, make_graph, find_path
 
 
 def get_inflow_locations_from_parent_model(parent_reach_data, inset_reach_data,
-                                           inset_sr, active_area=None,
-                                           parent_model_length_units='feet', parent_model_time_units='days',
-                                           inset_model_length_units='feet', inset_model_time_units='days'
+                                           inset_sr, active_area=None
                                            ):
     """Get places in an inset model SFR network where the parent SFR network crosses
     the inset model boundary, using common line ID numbers from parent and inset reach datasets.
@@ -38,10 +36,6 @@ def get_inflow_locations_from_parent_model(parent_reach_data, inset_reach_data,
         Describes the area of the inset model where SFR is applied. Used to find
         inset reaches from parent model. Must be in same coordinate system as
         geometries in parent_reach_data. Required only if inset_sr is None.
-    parent_model_length_units : str, default 'feet'
-    parent_model_time_units : str, default 'days'
-    inset_model_length_units : str, default 'feet'
-    inset_model_time_units : str, default 'days'
 
     Returns
     -------
@@ -63,7 +57,6 @@ def get_inflow_locations_from_parent_model(parent_reach_data, inset_reach_data,
 
     if active_area is None:
         active_area = box(*sr.bounds)
-        df2shp(pd.DataFrame({'id': [0], 'geometry': [active_area]}), 'sfrmaker/test/temp/shellmound_perimeter.shp', epsg=5070)
 
     # parent and inset reach data
     if isinstance(parent_reach_data, str):
@@ -148,7 +141,7 @@ def get_inflow_locations_from_parent_model(parent_reach_data, inset_reach_data,
     iseg_ireach = zip(prd.iseg, prd.ireach)
     parent_outlet_iseg_ireach = dict(zip(prd.rno, iseg_ireach))
 
-    df = ird[['line_id', 'name', 'iseg', 'ireach']]
+    df = ird[['line_id', 'name', 'rno', 'iseg', 'ireach']].copy()
     df['parent_rno'] = [parent_rno_lookup[lid] for lid in df['line_id']]
     df['parent_iseg'] = [parent_outlet_iseg_ireach[rno][0] for rno in df['parent_rno']]
     df['parent_ireach'] = [parent_outlet_iseg_ireach[rno][1] for rno in df['parent_rno']]

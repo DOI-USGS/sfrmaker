@@ -16,6 +16,7 @@ from .gis import df2shp, export_reach_data, project, crs
 from .grid import StructuredGrid, UnstructuredGrid
 from .units import convert_length_units
 import sfrmaker
+from sfrmaker.mf5to6 import segment_data_to_period_data
 
 fm = flopy.modflow
 mf6 = flopy.mf6
@@ -127,6 +128,7 @@ class sfrdata:
 
         # attributes
         self._crs = None
+        self._period_data = None
 
         # convert any modflow6 kwargs to modflow5
         kwargs = {sfrdata.mf5names[k] if k in sfrdata.mf6names else k:
@@ -354,6 +356,19 @@ class sfrdata:
         routing = dict(zip(sd.nseg, sd.outseg))
         self.reach_data['outseg'] = [routing[s] for s in self.reach_data.iseg]
         return sd
+
+    @property
+    def period_data(self):
+        if self._period_data is None:
+            self._period_data = self._get_period_data()
+        if not np.array_equal(self._period_data.index.values,
+                              self._period_data.rno.values):
+            self._period_data.index = self._period_data.rno
+        return self._period_data
+
+    def _get_period_data(self):
+        print('converting segment data to period data...')
+        return segment_data_to_period_data(self.segment_data, self.reach_data)
 
     @property
     def paths(self):
@@ -626,9 +641,9 @@ class sfrdata:
         #packagedata.loc[unconnected | inactive, 'cellid'] = None
         packagedata = packagedata[columns].values.tolist()
 
-        perioddata = None
-        if sfr6.perioddata is not None:
-            raise NotImplemented("Support for mf6 perioddata input not implemente yet. "
+        period_data = None
+        if sfr6.period_data is not None:
+            raise NotImplemented("Support for mf6 period_data input not implemente yet. "
                                  "Use sfrdata.write_package(version='mf6') instead.")
 
         mf6sfr = mf6.ModflowGwfsfr(model=m, unit_conversion=unit_conversion,
@@ -638,7 +653,7 @@ class sfrdata:
                                    packagedata=packagedata,
                                    connectiondata=connectiondata,
                                    diversions=None,  # TODO: add support for diversions
-                                   perioddata=perioddata,  # TODO: add support for creating mf6 perioddata input
+                                   perioddata=period_data,  # TODO: add support for creating mf6 perioddata input
                                    )
         return mf6sfr
 
@@ -880,7 +895,8 @@ class sfrdata:
                        grid=grid, sr=sr,
                        isfr=isfr)
 
-    def write_package(self, filename=None, version='mf2005', options=[],
+    def write_package(self, filename=None, version='mf2005', idomain=None,
+                      options=[],
                       **kwargs):
         """Write and SFR package file.
 
@@ -906,7 +922,9 @@ class sfrdata:
             from .mf5to6 import mf6sfr
             if len(options) == 0:
                 options = ['print_input', 'save_flows']
-            sfr6 = mf6sfr(self.ModflowSfr2, options=options)
+            sfr6 = mf6sfr(self.ModflowSfr2, period_data=self.period_data,
+                          idomain=idomain,
+                          options=options)
 
             # write a MODFLOW 6 file
             sfr6.write_file(filename=filename)
@@ -994,7 +1012,7 @@ class sfrdata:
 
         """
         if filename is None:
-            filename = self.package_name + '_sfr_routing.shp'
+            filename = self.package_name + '_sfr_{}.shp'.format(varname)
 
         # if the data are in mf2005 format (by segment)
         sd = self.segment_data.sort_values(by=['per', 'nseg'])
@@ -1021,3 +1039,22 @@ class sfrdata:
         rd = rd.join(df)
 
         export_reach_data(rd, self.grid, filename, geomtype='point')
+
+    def export_period_data(self, filename=None, geomtype='point'):
+        """Export point shapefile showing locations of period data
+        in a MODFLOW-6 SFR package (e.g. inflows, runoff, etc.)
+
+        Parameters
+        ----------
+        f : str, filename
+        geomtype : str ('point' or 'polygon')
+            write the locations as points at the cell centers, or polygons
+            of the model cells containing the period data.
+
+        """
+        if filename is None:
+            filename = self.package_name + '_sfr_period_data.shp'
+        data = self.period_data.copy()
+        nodes = dict(zip(self.reach_data.rno, self.reach_data.node))
+        data['node'] = [nodes[rno] for rno in data['rno']]
+        export_reach_data(data, self.grid, filename, geomtype=geomtype)

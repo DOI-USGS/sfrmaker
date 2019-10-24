@@ -6,9 +6,7 @@ def test_get_inflow_locations_from_parent_model(outdir, shellmound_grid, shellmo
     inset_reach_data = shellmound_sfrdata.reach_data
     inset_sr = shellmound_grid
     df = get_inflow_locations_from_parent_model(parent_reach_data, inset_reach_data,
-                                                inset_sr, active_area=None,
-                                                parent_model_length_units='feet', parent_model_time_units='days',
-                                                inset_model_length_units='feet', inset_model_time_units='days'
+                                                inset_sr, active_area=None
                                                 )
     shellmound_sfrdata.export_cells('{}/shellmound_sfr_cells.shp'.format(outdir))
     shellmound_sfrdata.export_lines('{}/shellmound_sfr_lines.shp'.format(outdir))
@@ -23,4 +21,3 @@ def test_get_inflow_locations_from_parent_model(outdir, shellmound_grid, shellmo
                          }
     symmetric_diff = expected_line_ids ^ set(df.line_id)
     assert len(symmetric_diff) == 0
-    pass
