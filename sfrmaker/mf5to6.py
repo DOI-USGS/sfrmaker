@@ -243,6 +243,8 @@ class mf6sfr:
 def segment_data_to_period_data(segment_data, reach_data):
     """Convert modflow-2005 style segment data to modflow-6 period data.
     """
+    idx_cols = ['per', 'iseg', 'ireach', 'rno', 'icalc']
+    variable_cols = ['status', 'evaporation', 'inflow', 'rainfall', 'runoff', 'stage']
     sd = segment_data.copy()
     prd = segment_data.copy()
     rd = reach_data.copy()
@@ -256,6 +258,15 @@ def segment_data_to_period_data(segment_data, reach_data):
     for c in datacols:  # explicitly convert zeros for each data column
         prd.loc[(prd.per == 0), c] = prd.loc[(prd.per == 0), c].replace(0., np.nan)
     prd.rename(columns=mf6sfr.mf6names, inplace=True)
+
+    # drop columns that have no values
+    prd.dropna(axis=1, how='all', inplace=True)
+
+    # drop rows that have no values
+    cols = set(variable_cols).intersection(prd.columns)
+    prd.dropna(axis=0, how='all', subset=cols, inplace=True)
+    if len(prd) == 0:
+        return pd.DataFrame(columns=idx_cols + variable_cols)
 
     # get rno for reach 1s
     segroups = rd.groupby('iseg')
@@ -333,7 +344,8 @@ def segment_data_to_period_data(segment_data, reach_data):
     strtop['per'] = 0
     strtop['status'] = 'SIMPLE'
 
-    distributed = distributed.append(strtop)
+    if len(strtop) > 0:
+        distributed = distributed.append(strtop)
     distributed.sort_values(by=['per', 'rno'], inplace=True)
 
     # rearrange the columns

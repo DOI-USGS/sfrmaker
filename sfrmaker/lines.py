@@ -9,9 +9,10 @@ from shapely.ops import unary_union
 from shapely.geometry import box
 from .gis import shp2df, df2shp, crs, read_polygon_feature, project, get_bbox
 from . import grid
-from .utils import make_graph, find_path, unit_conversion, \
-    pick_toids, width_from_arbolate_sum, arbolate_sum, \
-    consolidate_reach_conductances, renumber_segments, interpolate_to_reaches
+from .utils import unit_conversion, \
+    width_from_arbolate_sum, arbolate_sum, \
+    consolidate_reach_conductances, interpolate_to_reaches
+from sfrmaker.routing import pick_toids, find_path, make_graph, renumber_segments
 from .nhdplus_utils import load_NHDPlus_v2, get_prj_file
 from .grid import StructuredGrid
 from .sfrdata import sfrdata

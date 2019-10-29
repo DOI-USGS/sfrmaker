@@ -1,11 +1,13 @@
+import os
 import numpy as np
 import pandas as pd
 from shapely.geometry import box
 import flopy
 from flopy.utils.sfroutputfile import SfrFile
 from .gis import shp2df, df2shp
-from .units import (convert_length_units, convert_time_units, get_unit_text)
-from .utils import load_sr, make_graph, find_path
+from .routing import get_next_id_in_subset
+from .utils import load_sr
+from sfrmaker.routing import find_path, make_graph
 
 
 def get_inflow_locations_from_parent_model(parent_reach_data, inset_reach_data,
@@ -85,6 +87,7 @@ def get_inflow_locations_from_parent_model(parent_reach_data, inset_reach_data,
         ird['ireach'] = 1
     mustinclude_cols = {'line_id', 'rno', 'iseg', 'ireach'}
     assert len(mustinclude_cols.intersection(ird.columns)) == len(mustinclude_cols)
+
     graph = make_graph(ird.rno.values, ird.outreach.values, one_to_many=False)
 
     # cull parent reach data to only lines that cross or are just upstream of inset boundary
@@ -97,13 +100,11 @@ def get_inflow_locations_from_parent_model(parent_reach_data, inset_reach_data,
     for i, r in prd.iterrows():
         if r.outreach not in prd.index:
             continue
-        if r.line_id == 1000002:
-            j=2
         downstream_line = prd.loc[r.outreach, 'geometry']
         upstream_line = prd.loc[prd.rno == r.outreach, 'geometry'].values[0]
         intersects = r.geometry.intersects(boundary)
         intersects_downstream = downstream_line.within(active_area)
-        intersects_upstream = upstream_line.within(active_area)
+        #intersects_upstream = upstream_line.within(active_area)
         in_inset_model = r.geometry.within(active_area)
         if intersects_downstream:
             if intersects:
@@ -128,7 +129,6 @@ def get_inflow_locations_from_parent_model(parent_reach_data, inset_reach_data,
 
     # for each reach in ird (potential inset inlets)
     # check that there isn't another inlet downstream
-
     drop_reaches = []
     for i, r in ird.iterrows():
         path = find_path(graph, r.rno)
@@ -146,3 +146,46 @@ def get_inflow_locations_from_parent_model(parent_reach_data, inset_reach_data,
     df['parent_iseg'] = [parent_outlet_iseg_ireach[rno][0] for rno in df['parent_rno']]
     df['parent_ireach'] = [parent_outlet_iseg_ireach[rno][1] for rno in df['parent_rno']]
     return df.reset_index(drop=True)
+
+
+def add_to_perioddata(sfrdata, data, flowline_routing=None,
+                      variable='inflow',
+                      line_id_column_in_data=None,
+                      rno_column_in_data=None,
+                      period_column_in_data='per',
+                      variable_column_in_data='Q_avg'):
+    """Add data to the period data table (sfrdata.period_data)
+    for a MODFLOW-6 style sfrpackage. Source data
+
+    """
+    sfrd = sfrdata
+
+    # map NHDPlus COMIDs to reach numbers
+    if flowline_routing is not None:
+        assert line_id_column_in_data in data.columns, \
+            "Data need an id column so {} locations can be mapped to reach numbers".format(variable)
+        rno_column_in_data = 'rno'
+        r1 = sfrd.reach_data.loc[sfrd.reach_data.ireach == 1]
+        line_id_rno_mapping = dict(zip(r1['line_id'], r1['rno']))
+        line_ids = get_next_id_in_subset(r1.line_id, flowline_routing,
+                                         data[line_id_column_in_data])
+        data[rno_column_in_data] = [line_id_rno_mapping[lid] for lid in line_ids]
+    else:
+        assert rno_column_in_data in data.columns, \
+            "Data to add need reach number or flowline routing information is needed."
+
+    # add inflows to period_data
+    period_data = sfrd.period_data
+    period_data['rno'] = data[rno_column_in_data]
+    period_data['per'] = data[period_column_in_data]
+    period_data[variable] = data[variable_column_in_data]
+
+
+def add_to_segmentdata(sfrdata, flowline_routing, data,
+                      variable='flow',
+                      segment_column_in_data='segment',
+                      period_column_in_data='per',
+                      variable_column_in_data='Q_avg'):
+    """Like add_to_perioddata, but for MODFLOW-2005.
+    """
+    raise NotImplementedError()

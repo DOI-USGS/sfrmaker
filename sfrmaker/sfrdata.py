@@ -9,9 +9,10 @@ import rasterio
 from rasterstats import zonal_stats
 from shapely.geometry import LineString
 import flopy
-from .utils import renumber_segments, find_path, make_graph
+from sfrmaker.routing import find_path, make_graph, renumber_segments
 from .checks import valid_rnos, valid_nsegs, rno_nseg_routing_consistent
 from .elevations import smooth_elevations
+from .flows import add_to_perioddata
 from .gis import df2shp, export_reach_data, project, crs
 from .grid import StructuredGrid, UnstructuredGrid
 from .units import convert_length_units
@@ -364,12 +365,25 @@ class sfrdata:
         if not np.array_equal(self._period_data.index.values,
                               self._period_data.rno.values):
             self._period_data.index = self._period_data.rno
+            self._period_data.index.name = None
         return self._period_data
 
     def _get_period_data(self):
         print('converting segment data to period data...')
         return segment_data_to_period_data(self.segment_data, self.reach_data)
 
+    def add_to_perioddata(self, data, flowline_routing=None,
+                          variable='inflow',
+                          line_id_column_in_data=None,
+                          rno_column_in_data=None,
+                          period_column_in_data='per',
+                          variable_column_in_data='Q_avg'):
+        return add_to_perioddata(self, data, flowline_routing=flowline_routing,
+                                 variable=variable,
+                                 line_id_column_in_data=line_id_column_in_data,
+                                 rno_column_in_data=rno_column_in_data,
+                                 period_column_in_data=period_column_in_data,
+                                 variable_column_in_data=variable_column_in_data)
     @property
     def paths(self):
         """Dict listing routing sequence for each segment
@@ -643,8 +657,10 @@ class sfrdata:
 
         period_data = None
         if sfr6.period_data is not None:
-            raise NotImplemented("Support for mf6 period_data input not implemente yet. "
-                                 "Use sfrdata.write_package(version='mf6') instead.")
+            # TODO: add method to convert period_data df to MF6 input
+            #raise NotImplemented("Support for mf6 period_data input not implemented yet. "
+            #                     "Use sfrdata.write_package(version='mf6') instead.")
+            pass
 
         mf6sfr = mf6.ModflowGwfsfr(model=m, unit_conversion=unit_conversion,
                                    stage_filerecord=stage_filerecord,
@@ -1052,9 +1068,18 @@ class sfrdata:
             of the model cells containing the period data.
 
         """
-        if filename is None:
-            filename = self.package_name + '_sfr_period_data.shp'
-        data = self.period_data.copy()
+        data = self.period_data.dropna(axis=1).sort_values(by=['per', 'rno'])
         nodes = dict(zip(self.reach_data.rno, self.reach_data.node))
-        data['node'] = [nodes[rno] for rno in data['rno']]
-        export_reach_data(data, self.grid, filename, geomtype=geomtype)
+
+        for var in ['evaporation', 'inflow', 'rainfall', 'runoff', 'stage']:
+            if var in data.columns:
+                # pivot the segment data to segments x periods with values of varname
+                df = data.pivot(index='rno', columns='per', values=var).reset_index()
+                # rename the columns to indicate stress periods
+                df.columns = ['rno'] + ['{}{}'.format(i, var) for i in range(df.shape[1]-1)]
+                df['node'] = [nodes[rno] for rno in df['rno']]
+                if filename is None:
+                    filename = self.package_name + '_sfr_period_data_{}.shp'.format(var)
+                elif var not in filename:
+                    filename = os.path.splitext(filename)[0] + '_{}.shp'.format(var)
+                export_reach_data(df, self.grid, filename, geomtype=geomtype)

@@ -7,15 +7,10 @@ import flopy
 from ..gis import shp2df
 
 
-@pytest.fixture
+@pytest.fixture(scope='function')
 def period_data(shellmound_sfrdata):
-    shellmound_sfrdata = copy.deepcopy(shellmound_sfrdata)
+    #shellmound_sfrdata = copy.deepcopy(shellmound_sfrdata)
     perdata = shellmound_sfrdata.period_data
-    assert isinstance(perdata, pd.DataFrame)
-    assert len(perdata) == 0
-    assert set(perdata.columns) == \
-           {'iseg', 'evaporation', 'inflow', 'rno', 'status',
-            'stage', 'runoff', 'rainfall', 'ireach', 'icalc', 'per'}
     rd = shellmound_sfrdata.reach_data
     perdata['rno'] = [rd.rno.values[0], rd.rno.values[100]] * 2
     perdata['inflow'] = [100., 1000., 20., 200.]
@@ -23,9 +18,9 @@ def period_data(shellmound_sfrdata):
     return perdata
 
 
-@pytest.fixture
+@pytest.fixture(scope='function')
 def shellmound_sfrdata_with_period_data(shellmound_sfrdata, period_data):
-    shellmound_sfrdata = copy.deepcopy(shellmound_sfrdata)
+    #shellmound_sfrdata = copy.deepcopy(shellmound_sfrdata)
     shellmound_sfrdata._period_data = period_data
     return shellmound_sfrdata
 
@@ -38,6 +33,17 @@ def test_const(shellmound_sfrdata, sfr_testdata):
     sfr_testdata._model_length_units = 'feet'
     sfr_testdata._model_time_units = 'days'
     assert sfr_testdata.const == 86400 * 1.486
+
+
+def test_empty_period_data(shellmound_sfrdata):
+    #shellmound_sfrdata = copy.deepcopy(shellmound_sfrdata)
+    perdata = shellmound_sfrdata.period_data
+    assert isinstance(perdata, pd.DataFrame)
+    assert len(perdata) == 0
+    assert set(perdata.columns) == \
+           {'iseg', 'evaporation', 'inflow', 'rno', 'status',
+            'stage', 'runoff', 'rainfall',
+            'ireach', 'icalc', 'per'}
 
 
 def test_write_perioddata(shellmound_sfrdata_with_period_data, outdir):
@@ -62,12 +68,15 @@ def test_write_perioddata(shellmound_sfrdata_with_period_data, outdir):
 
 def test_export_period_data(shellmound_sfrdata_with_period_data, outdir):
     sfrd = shellmound_sfrdata_with_period_data
-    outfile = '{}/test_mf6_sfr_period_data.shp'.format(outdir)
+    outfile = '{}/test_mf6_sfr_period_data_inflow.shp'.format(outdir)
     sfrd.export_period_data(outfile)
     df = shp2df(outfile)
     nodes = dict(zip(sfrd.reach_data.rno, sfrd.reach_data.node))
-    for c in ['rno', 'per', 'inflow']:
-        assert np.array_equal(df[c].values,  sfrd.period_data[c].values)
+    pers = [int(c.strip('inflow')) for c in df.columns if 'inflow' in c]
+    assert set(pers) == set(sfrd.period_data.per)
+    assert set(df['rno']) == set(sfrd.period_data.rno)
+    assert np.allclose(df['0inflow'].append(df['1inflow']).values,
+                       sfrd.period_data['inflow'].values)
     assert np.array_equal(df.node.values, np.array([nodes[rno] for rno in df.rno], dtype=int))
 
 

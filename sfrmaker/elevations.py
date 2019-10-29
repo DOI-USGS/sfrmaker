@@ -1,7 +1,7 @@
 """Methods related to sampling and smoothing elevations."""
 import time
 import numpy as np
-from .utils import make_graph, get_nextupsegs, get_upsegs
+from sfrmaker.routing import get_nextupsegs, get_upsegs, make_graph
 
 
 def smooth_elevations(fromids, toids, elevations):#elevup, elevdn):

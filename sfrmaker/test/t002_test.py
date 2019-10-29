@@ -2,7 +2,8 @@ import sys
 sys.path.append('..')
 import numpy as np
 import pandas as pd
-from sfrmaker.utils import arbolate_sum, get_upsegs, make_graph
+from sfrmaker.utils import arbolate_sum
+from sfrmaker.routing import get_upsegs, make_graph
 
 
 def test_get_upsegs(sfr_test_numbering):

@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from .utils import make_graph, find_path
+from sfrmaker.routing import find_path, make_graph
 
 
 def valid_rnos(rnos):

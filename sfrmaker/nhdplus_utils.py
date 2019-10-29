@@ -1,5 +1,6 @@
 import os
 import time
+import pandas as pd
 from .gis import shp2df, crs, project, get_bbox
 
 
@@ -12,6 +13,7 @@ def get_prj_file(NHDPlus_paths=None, NHDFlowlines=None):
         if isinstance(NHDFlowlines, str):
             NHDFlowlines = [NHDFlowlines]
         return NHDFlowlines[0][:-4] + '.prj'
+
 
 def get_NHDPlus_v2_filepaths(NHDPlus_paths):
     print('for basins:')
@@ -32,6 +34,25 @@ def get_NHDPlus_v2_filepaths(NHDPlus_paths):
             if not os.path.exists(f):
                 raise FileNotFoundError(f)
     return NHDFlowlines, PlusFlowlineVAA, PlusFlow, elevslope
+
+
+def get_NHDPlus_v2_routing(PlusFlow_file,
+                           from_col='FROMCOMID', to_col='TOCOMID'):
+    """Read PlusFlow file and return the routing
+    information as a dictionary of to:from COMID numbers.
+    """
+    fname, ext = os.path.splitext(PlusFlow_file)
+    if ext in ['.shp', '.dbf']:
+        df = shp2df(PlusFlow_file)
+    elif ext == '.csv':
+        df = pd.read_csv(PlusFlow_file)
+    else:
+        raise Exception("Unrecognized file-type for PlusFlow table: {}".format(PlusFlow_file))
+    flowline_routing = dict(zip(df[from_col], df[to_col]))
+    comids = set(df[from_col])
+    flowline_routing = {k: v if v in comids else 0
+                        for k, v in flowline_routing.items()}
+    return flowline_routing
 
 
 def load_NHDPlus_v2(NHDPlus_paths=None,
