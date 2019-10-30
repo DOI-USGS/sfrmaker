@@ -53,7 +53,7 @@ def test_get_inflow_locations_from_parent_model(outdir, shellmound_grid, shellmo
 
 
 def test_add_to_perioddata(shellmound_sfrdata):
-    #sfrd = copy.deepcopy(shellmound_sfrdata)
+    sfrd = shellmound_sfrdata  # copy.deepcopy(shellmound_sfrdata)
     rd = shellmound_sfrdata.reach_data.copy()
     line_id = dict(zip(rd.iseg, rd.line_id))
     sfr_routing = shellmound_sfrdata.segment_routing.copy()

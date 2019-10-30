@@ -15,6 +15,7 @@ from .elevations import smooth_elevations
 from .flows import add_to_perioddata
 from .gis import df2shp, export_reach_data, project, crs
 from .grid import StructuredGrid, UnstructuredGrid
+from .observations import write_mf6_sfr_obsfile, add_observations
 from .units import convert_length_units
 import sfrmaker
 from sfrmaker.mf5to6 import segment_data_to_period_data
@@ -130,6 +131,8 @@ class sfrdata:
         # attributes
         self._crs = None
         self._period_data = None
+        self._observations = None
+        self._observations_filename = None
 
         # convert any modflow6 kwargs to modflow5
         kwargs = {sfrdata.mf5names[k] if k in sfrdata.mf6names else k:
@@ -357,6 +360,22 @@ class sfrdata:
         routing = dict(zip(sd.nseg, sd.outseg))
         self.reach_data['outseg'] = [routing[s] for s in self.reach_data.iseg]
         return sd
+
+    @property
+    def observations(self):
+        if self._observations is None:
+            self._observations = pd.DataFrame(columns=['obsname', 'obstype', 'rno'])
+        return self._observations
+
+    @property
+    def observations_file(self):
+        if self._observations_filename is None:
+            self._observations_filename = self.package_name + '.sfr.obs'
+        return self._observations_filename
+
+    @observations_file.setter
+    def observations_file(self, observations_filename):
+        self._observations_filename = observations_filename
 
     @property
     def period_data(self):
@@ -673,6 +692,21 @@ class sfrdata:
                                    )
         return mf6sfr
 
+    def add_observations(self, data, flowline_routing=None,
+                         obstype=None,
+                         line_id_column_in_data=None,
+                         rno_column_in_data=None,
+                         obstype_column_in_data=None,
+                         obsname_column_in_data='site_no'):
+        return add_observations(self, data, flowline_routing=flowline_routing,
+                                obstype=obstype,
+                                line_id_column_in_data=line_id_column_in_data,
+                                rno_column_in_data=rno_column_in_data,
+                                obstype_column_in_data=obstype_column_in_data,
+                                obsname_column_in_data=obsname_column_in_data)
+
+
+
     def interpolate_to_reaches(self, segvar1, segvar2, per=0):
         """Interpolate values in datasets 6b and 6c to each reach in stream segment
 
@@ -912,7 +946,7 @@ class sfrdata:
                        isfr=isfr)
 
     def write_package(self, filename=None, version='mf2005', idomain=None,
-                      options=[],
+                      options=[], write_observations_input=True,
                       **kwargs):
         """Write and SFR package file.
 
@@ -929,6 +963,8 @@ class sfrdata:
                                                                                  self.model_time_units)
         self.ModflowSfr2.heading = header_txt
 
+        if filename is None:
+            filename = self.ModflowSfr2.file_name[0]
         if version == 'mf2005':
             self.ModflowSfr2.write_file(filename=filename)
 
@@ -945,11 +981,27 @@ class sfrdata:
             # write a MODFLOW 6 file
             sfr6.write_file(filename=filename)
 
+            if write_observations_input and len(self.observations) > 0:
+                self.write_mf6_sfr_obsfile(filename=filename + '.obs')
+
     def write_tables(self, filepath='./sfr'):
 
         filepath, file_extension = os.path.splitext(filepath)
         self.reach_data.drop('geometry', axis=1).to_csv('{}_reach_data.csv'.format(filepath), index=False)
         self.segment_data.to_csv('{}_segment_data.csv'.format(filepath), index=False)
+
+    def write_mf6_sfr_obsfile(self,
+                              filename=None,
+                              sfr_output_filename=None):
+        if filename is None:
+            filename = self.observations_file
+        else:
+            self.observations_file = filename
+        if sfr_output_filename is None:
+            sfr_output_filename = filename + '.output.csv'
+        return write_mf6_sfr_obsfile(self.observations,
+                                     filename,
+                                     sfr_output_filename)
 
     def export_cells(self, filename=None, nodes=None):
         """Export shapefile of model cells with stream reaches."""

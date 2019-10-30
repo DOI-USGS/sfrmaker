@@ -134,7 +134,7 @@ def lines_from_shapefile(testdatapath):
     return lns
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='function')
 def shellmound_sfrdata(shellmound_model, lines_from_shapefile,
             shellmound_grid):
     m = shellmound_model
