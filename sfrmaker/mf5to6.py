@@ -30,7 +30,7 @@ class mf6sfr:
 
     def __init__(self, ModflowSfr2, period_data=None,
                  idomain=None,
-                 options=['print_input', 'save_flows']):
+                 options=None):
 
         # check for other packages
         if idomain is None:
@@ -47,13 +47,14 @@ class mf6sfr:
         else:
             self.idomain = idomain
 
+        self.options = options
         # copy ModflowSfr2 object and enforce sorting
         self.ModflowSfr2 = copy(ModflowSfr2)
         self.ModflowSfr2.segment_data[0].sort(order='nseg')
         self.ModflowSfr2.reach_data.sort(order=['iseg', 'ireach'])
 
         self.structured = self.ModflowSfr2.parent.structured
-        self.const = ModflowSfr2.const
+        self.unit_conversion = ModflowSfr2.const
         self.nreaches = len(ModflowSfr2.reach_data)
         self.nper = ModflowSfr2.nper
 
@@ -78,12 +79,7 @@ class mf6sfr:
         # period data
         self._period_data = period_data
 
-        # stuff to write
-        self.options_block = '\nBEGIN Options\n'
-        for opt in options:
-            self.options_block += '  {}\n'.format(opt)
-        self.options_block += '  unit_conversion  {}\n'.format(ModflowSfr2.const)
-        self.options_block += 'END Options\n'
+
 
         self.dimensions_block = '\nBEGIN Dimensions\n  NREACHES {:d}\nEND Dimensions\n'.format(self.nreaches)
 
@@ -96,6 +92,16 @@ class mf6sfr:
             self.outlets = self._graph_r[0]
             del self._graph_r[0]
         return self._graph_r
+
+    @property
+    def options_block(self):
+        # stuff to write
+        options_block = '\nBEGIN Options\n'
+        for opt in self.options:
+            options_block += '  {}\n'.format(opt)
+        options_block += '  unit_conversion  {}\n'.format(self.unit_conversion)
+        options_block += 'END Options\n'
+        return options_block
 
     @property
     def packagedata(self):
@@ -187,11 +193,20 @@ class mf6sfr:
         print('converting segment data to period data...')
         return segment_data_to_period_data(self.sd, self.rd)
 
-    def write_file(self, filename=None, outpath=''):
+    def write_file(self, filename=None, outpath='', options=None):
         if filename is not None:
             outfile = filename
         else:
-            outfile = os.path.join(outpath, self.ModflowSfr2.file_name[0] + '6')
+            outfile = os.path.join(outpath, self.ModflowSfr2.file_name[0])
+
+        if options is not None:
+            self.options = options
+        else:
+            self.options = ['save_flows',
+                            'BUDGET FILEOUT {}.cbc'.format(filename),
+                            'STAGE FILEOUT {}.stage.bin'.format(filename),
+                            ]
+
         header = "# MODFLOW-6 SFR input; created by SFRmaker v. {}".format(sfrmaker.__version__)
         with open(outfile, 'w') as output:
             output.write(header + '\n')

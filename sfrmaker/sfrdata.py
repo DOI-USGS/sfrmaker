@@ -946,7 +946,7 @@ class sfrdata:
                        isfr=isfr)
 
     def write_package(self, filename=None, version='mf2005', idomain=None,
-                      options=[], write_observations_input=True,
+                      options=None, write_observations_input=True,
                       **kwargs):
         """Write and SFR package file.
 
@@ -972,17 +972,24 @@ class sfrdata:
 
             # instantiate mf6sfr converter object with mf-nwt model/sfr package from flopy
             from .mf5to6 import mf6sfr
-            if len(options) == 0:
-                options = ['print_input', 'save_flows']
+            if options is None:
+                # save budget and stage output by default
+                options = ['save_flows',
+                           'BUDGET FILEOUT {}.cbc'.format(filename),
+                           'STAGE FILEOUT {}.stage.bin'.format(filename),
+                           ]
+
+            if write_observations_input and len(self.observations) > 0:
+                obs_input_filename = filename + '.obs'
+                self.write_mf6_sfr_obsfile(filename=obs_input_filename)
+                options.append('OBS6 FILEIN {}'.format(obs_input_filename))
+
             sfr6 = mf6sfr(self.ModflowSfr2, period_data=self.period_data,
                           idomain=idomain,
                           options=options)
 
             # write a MODFLOW 6 file
             sfr6.write_file(filename=filename)
-
-            if write_observations_input and len(self.observations) > 0:
-                self.write_mf6_sfr_obsfile(filename=filename + '.obs')
 
     def write_tables(self, filepath='./sfr'):
 

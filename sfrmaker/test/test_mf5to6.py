@@ -38,10 +38,13 @@ def test_idomain(mf6sfr_instance, shellmound_model):
 def test_write(shellmound_sfrdata, mf6sfr_instance, outdir):
     mf6sfr = mf6sfr_instance
     outfile = os.path.join(outdir, 'junk.sfr')
-    mf6sfr.write_file(filename=outfile)
-
     outfile2 = os.path.join(outdir, 'junk2.sfr')
-    shellmound_sfrdata.write_package(outfile2,
-                            version='mf6'
-                            )
+    mf6sfr.write_file(filename=outfile,
+                      options=['save_flows',
+                               'BUDGET FILEOUT {}.cbc'.format(outfile2),
+                               'STAGE FILEOUT {}.stage.bin'.format(outfile2),
+                               ]
+                      )
+
+    shellmound_sfrdata.write_package(outfile2, version='mf6')
     assert filecmp.cmp(outfile, outfile2)

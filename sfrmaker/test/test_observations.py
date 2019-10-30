@@ -23,7 +23,7 @@ def mf6_observations_file(outdir):
     return os.path.join(outdir, 'test.observations_file.obs')
 
 
-def check_mf6_obs_output(fname, expected):
+def check_mf6_obs_file(fname, expected):
     with open(fname) as src:
         data = []
         for line in src:
@@ -48,14 +48,18 @@ def test_write_mf6_sfr_obsfile(shellmound_sfrdata, flux_observation_data, outdir
                                               obsname_column_in_data='site_no'
                                               )
     shellmound_sfrdata.write_mf6_sfr_obsfile()
-    check_mf6_obs_output(shellmound_sfrdata.observations_file,
+    check_mf6_obs_file(shellmound_sfrdata.observations_file,
                          expected=shellmound_sfrdata.observations)
     os.remove(shellmound_sfrdata.observations_file)
     shellmound_sfrdata.write_package(filename=sfr_package_file, version='mf6')
-    check_mf6_obs_output(shellmound_sfrdata.observations_file,
+    check_mf6_obs_file(shellmound_sfrdata.observations_file,
                          expected=shellmound_sfrdata.observations)
-    j=2
-
+    with open(sfr_package_file) as src:
+        for line in src:
+            if 'obs6' in line.lower():
+                _, _, fname = line.strip().split()
+                assert os.path.exists(fname)
+                break
 
 
 def test_add_observations(shellmound_sfrdata, flux_observation_data):

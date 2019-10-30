@@ -150,3 +150,19 @@ def test_ibound_representation_of_idomain(shellmound_sfrdata, shellmound_model):
     assert np.array_equal(ibound, idomain)
 
 
+def test_write_mf6_package(shellmound_sfrdata, outdir):
+    sfr_package_file = os.path.join(outdir, 'test.package_file.sfr')
+    shellmound_sfrdata.write_package(filename=sfr_package_file, version='mf6')
+    with open(sfr_package_file) as src:
+        for line in src:
+            if 'budget' in line.lower() or 'stage' in line.lower():
+                _, _, fname = line.strip().split()
+                path, fname = os.path.split(fname)
+                assert os.path.isdir(path)
+                assert fname.replace('.cbc', '').replace('.stage.bin', '') == \
+                       os.path.split(sfr_package_file)[1]
+            elif 'unit_conversion' in line.lower():
+                _, conversion = line.strip().split()
+                assert np.allclose(float(conversion), shellmound_sfrdata.const)
+            if 'end options' in line.lower():
+                break
