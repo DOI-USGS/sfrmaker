@@ -79,6 +79,13 @@ def test_export_period_data(shellmound_sfrdata_with_period_data, outdir):
                        sfrd.period_data['inflow'].values)
     assert np.array_equal(df.node.values, np.array([nodes[rno] for rno in df.rno], dtype=int))
 
+    # check export still works if there are multiple items in a reach
+    sfrd._period_data = sfrd.period_data.append(sfrd.period_data)
+    sfrd.export_period_data(outfile)
+    df = shp2df(outfile)
+    assert np.allclose(sorted(df['0inflow'].append(df['1inflow']).values),
+                       sorted(sfrd.period_data.groupby(['rno', 'per']).sum().inflow.values))
+
 
 @pytest.fixture(scope="function")
 def mf6sfr(shellmound_sfrdata, shellmound_model):

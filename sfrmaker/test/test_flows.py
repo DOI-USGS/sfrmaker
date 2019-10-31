@@ -63,15 +63,16 @@ def test_add_to_perioddata(shellmound_sfrdata):
                         for k, v in sfr_routing.items()}
     nlines = 4
     seq = add_line_sequence(flowline_routing, nlines=nlines)
-    flows = pd.DataFrame({'Q_avg': [100., 10.],
-                          'per': [0, 1],
-                          'line_id': seq[-1]})
+    flows = pd.DataFrame({'Q_avg': [100., 10., 200., 20.],
+                          'per': [0, 1, 0, 1],
+                          'line_id': [2, 2, 4, 4]})
     add_to_perioddata(sfrd, flows,
                       flowline_routing=flowline_routing,
                       variable='inflow',
                       line_id_column_in_data='line_id',
                       period_column_in_data='per',
                       variable_column_in_data='Q_avg')
+    flows = flows.loc[flows.line_id != 2]
     assert np.allclose(sfrd.period_data['inflow'].values, flows['Q_avg'].values)
     assert np.allclose(sfrd.period_data['per'].values, flows['per'].values)
     assert rd.loc[rd.line_id == seq[-1], 'rno'].values[0] == sfrd.period_data['rno'].values[0]

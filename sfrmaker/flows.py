@@ -5,7 +5,7 @@ from shapely.geometry import box
 import flopy
 from flopy.utils.sfroutputfile import SfrFile
 from .gis import shp2df, df2shp
-from .routing import get_next_id_in_subset
+from .routing import get_next_id_in_subset, find_path
 from .utils import load_sr
 from sfrmaker.routing import find_path, make_graph
 
@@ -173,6 +173,27 @@ def add_to_perioddata(sfrdata, data, flowline_routing=None,
     else:
         assert rno_column_in_data in data.columns, \
             "Data to add need reach number or flowline routing information is needed."
+
+    # check for duplicate inflows in same path
+    if variable == 'inflow':
+        line_ids = set(data[line_id_column_in_data])
+        drop = set()
+        dropped_line_info_file = 'dropped_inflows_locations.csv'
+        for lid in line_ids:
+            path = find_path(flowline_routing, start=lid)
+            duplicated = set(path[1:]).intersection(line_ids)
+            if len(duplicated) > 0:
+                drop.add(lid)
+                txt = ('warning: {}: {} is upstream '
+                       'of the following line_ids:\n{}\n'
+                       'see {} for details.').format(line_id_column_in_data,
+                                                     lid, duplicated,
+                                                     dropped_line_info_file
+                                                     )
+                print(txt)
+        if len(drop) > 0:
+            data.loc[data[line_id_column_in_data].isin(drop)].to_csv(dropped_line_info_file, index=False)
+            data = data.loc[~data[line_id_column_in_data].isin(drop)]
 
     # add inflows to period_data
     period_data = sfrd.period_data

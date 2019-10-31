@@ -705,8 +705,6 @@ class sfrdata:
                                 obstype_column_in_data=obstype_column_in_data,
                                 obsname_column_in_data=obsname_column_in_data)
 
-
-
     def interpolate_to_reaches(self, segvar1, segvar2, per=0):
         """Interpolate values in datasets 6b and 6c to each reach in stream segment
 
@@ -1133,7 +1131,11 @@ class sfrdata:
         for var in ['evaporation', 'inflow', 'rainfall', 'runoff', 'stage']:
             if var in data.columns:
                 # pivot the segment data to segments x periods with values of varname
-                df = data.pivot(index='rno', columns='per', values=var).reset_index()
+                aggfunc = 'mean'  # how to aggregate multiple instances of rno/per combinations
+                if var in ['inflow', 'runoff']:
+                    aggfunc = 'sum'
+                df = data.reset_index(drop=True).pivot_table(index='rno', columns='per', values=var,
+                                                             aggfunc=aggfunc).reset_index()
                 # rename the columns to indicate stress periods
                 df.columns = ['rno'] + ['{}{}'.format(i, var) for i in range(df.shape[1]-1)]
                 df['node'] = [nodes[rno] for rno in df['rno']]
