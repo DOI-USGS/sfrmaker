@@ -160,6 +160,9 @@ def add_to_perioddata(sfrdata, data, flowline_routing=None,
     """
     sfrd = sfrdata
 
+    # cull data to valid periods
+    data = data.loc[data[period_column_in_data] >= 0].copy()
+
     # map NHDPlus COMIDs to reach numbers
     if flowline_routing is not None:
         assert line_id_column_in_data in data.columns, \
