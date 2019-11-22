@@ -54,14 +54,14 @@ def get_nextupsegs(graph_r, upsegs):
     nextupsegs : list
         Flat list of next segments upstream from upsegs
     """
-    #nextupsegs = []
-    #for s in upsegs:
+    # nextupsegs = []
+    # for s in upsegs:
     #    next = graph_r.get(s)
     #    if next is not None:
     #        if not isinstance(next, list):
     #            next = [next]
     #        nextupsegs += next
-    #return nextupsegs
+    # return nextupsegs
     nextupsegs = []
     for s in upsegs:
         nextupsegs += graph_r[s]
@@ -84,21 +84,21 @@ def get_upsegs(graph_r, seg):
     all_upsegs : set
         Flat set of all segments upstream from seg.
     """
-    #graph_r = graph_r.copy()
-    #upsegs = graph_r.get(seg, set())
-    #if not isinstance(upsegs, set):
+    # graph_r = graph_r.copy()
+    # upsegs = graph_r.get(seg, set())
+    # if not isinstance(upsegs, set):
     #    upsegs = {upsegs}
-    #else:
+    # else:
     #    upsegs = upsegs.copy()
-    #all_upsegs = upsegs
-    #if len(upsegs) > 0:
+    # all_upsegs = upsegs
+    # if len(upsegs) > 0:
     #    for i in range(len(graph_r)):
     #        upsegs = get_nextupsegs(graph_r, upsegs)
     #        if len(upsegs) > 0:
     #            all_upsegs.update(upsegs)
     #        else:
     #            break
-    #return all_upsegs
+    # return all_upsegs
     upsegs = graph_r[seg].copy()
     all_upsegs = upsegs
     for i in range(len(graph_r)):
@@ -139,7 +139,7 @@ def find_path(graph, start, end=0, path=[]):
         if node not in path:
             newpath = find_path(graph, node, end, path)
             if newpath: return newpath
-    j=2
+    j = 2
     return None
 
 
@@ -165,17 +165,17 @@ def make_graph(fromcomids, tocomids, one_to_many=True):
         Dictionary of lists or ints (tocomids) keyed by values
         in fromcomids.
     """
-    #from collections import defaultdict
-    #fromcomids = np.array(fromcomids).astype(int)
+    # from collections import defaultdict
+    # fromcomids = np.array(fromcomids).astype(int)
     ## convert tocomid values to ints regardless of (enclosing) dtypes
-    #tocomids = [a.astype(int).tolist() for a in map(np.array, tocomids)]
-    #tuples = zip(fromcomids, tocomids)
-    #graph = defaultdict(list)
-    #if one_to_many: # tocomids should all be lists (not ints)
+    # tocomids = [a.astype(int).tolist() for a in map(np.array, tocomids)]
+    # tuples = zip(fromcomids, tocomids)
+    # graph = defaultdict(list)
+    # if one_to_many: # tocomids should all be lists (not ints)
     #    for fromcomid, tocomid in tuples:
     #        v = graph[fromcomid] + tocomid
     #        graph[fromcomid] = list(set(v))
-    #else: # tocomids should all be ints
+    # else: # tocomids should all be ints
     #    for fromcomid, tocomid in tuples:
     #        graph[fromcomid] = [tocomid]
     #    graph121 = {}
@@ -183,7 +183,7 @@ def make_graph(fromcomids, tocomids, one_to_many=True):
     #        assert len(v) == 1, "one_to_many=False but node {} connects to {}".format(k, v)
     #        graph121[k] = v.pop()
     #    return graph121
-    #return graph
+    # return graph
     from collections import defaultdict
     fromcomids = np.array(fromcomids).astype(int)
     scalar_tocomids = np.all([np.isscalar(v) for v in tocomids])
@@ -230,7 +230,7 @@ def renumber_segments(nseg, outseg):
     def reassign_upsegs(r, nexts, upsegs):
         nextupsegs = []
         for u in upsegs:
-            r[u] = nexts if u > 0 else u # handle lakes
+            r[u] = nexts if u > 0 else u  # handle lakes
             nexts -= 1
             nextupsegs += list(nseg[outseg == u])
         return r, nexts, nextupsegs
@@ -289,4 +289,3 @@ def get_next_id_in_subset(subset, routing, ids):
 
     assert len(new_ids) == len(ids)
     return new_ids
-

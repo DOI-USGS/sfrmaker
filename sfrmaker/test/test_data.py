@@ -1,5 +1,5 @@
-import pytest
 import flopy
+
 import sfrmaker
 
 
@@ -16,5 +16,4 @@ def test_shellmound_grid(shellmound_grid):
 
 
 def test_lines_from_shapefile(lines_from_shapefile):
-    assert isinstance(lines_from_shapefile, sfrmaker.lines)
-
+    assert isinstance(lines_from_shapefile, sfrmaker.Lines)

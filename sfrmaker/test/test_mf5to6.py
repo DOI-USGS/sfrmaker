@@ -1,16 +1,17 @@
-#TODO: add unit tests for mf5to6.py
+# TODO: add unit tests for mf5to6.py
 import filecmp
-import copy
 import os
+
 import numpy as np
 import pandas as pd
 import pytest
+
 import sfrmaker
 
 
 @pytest.fixture(scope='function')
 def shellmound_ModflowSfr2(shellmound_sfrdata):
-    return shellmound_sfrdata.ModflowSfr2
+    return shellmound_sfrdata.modflow_sfr2
 
 
 @pytest.fixture(scope='function')
@@ -19,7 +20,7 @@ def mf6sfr_instance(shellmound_ModflowSfr2):
 
 
 def test_segment_data_to_perioddata(shellmound_sfrdata):
-    #shellmound_sfrdata = copy.deepcopy(shellmound_sfrdata)
+    # shellmound_sfrdata = copy.deepcopy(shellmound_sfrdata)
     shellmound_sfrdata.segment_data.loc[2, 'flow'] = 100
     perdata = shellmound_sfrdata.period_data
     assert isinstance(perdata, pd.DataFrame)

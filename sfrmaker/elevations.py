@@ -1,10 +1,12 @@
 """Methods related to sampling and smoothing elevations."""
 import time
+
 import numpy as np
+
 from sfrmaker.routing import get_nextupsegs, get_upsegs, make_graph
 
 
-def smooth_elevations(fromids, toids, elevations):#elevup, elevdn):
+def smooth_elevations(fromids, toids, elevations):  # elevup, elevdn):
     # make forward and reverse dictionaries with routing info
     graph = dict(zip(fromids, toids))
     assert 0 in set(graph.values()), 'No outlets in routing network!'
@@ -12,7 +14,8 @@ def smooth_elevations(fromids, toids, elevations):#elevup, elevdn):
 
     # make dictionaries of segment end elevations
     elevations = dict(zip(fromids, elevations))
-    #elevmax = dict(zip(fromids, elevup))
+
+    # elevmax = dict(zip(fromids, elevup))
 
     def get_upseg_levels(seg):
         """Traverse routing network, returning a list of segments
@@ -48,13 +51,13 @@ def smooth_elevations(fromids, toids, elevations):#elevup, elevdn):
         oldmin_s = elevations[seg]
         elevs = [elevmin_s, oldmin_s]
         if oseg > 0:  # if segment is not an outlet,
-            pass #elevs.append(elevmax[oseg])  # outseg start elevation (already updated)
+            pass  # elevs.append(elevmax[oseg])  # outseg start elevation (already updated)
         # set segment end elevation as min of
         # upstream elevations, current elevation, outseg start elevation
         elevations[seg] = np.min(elevs)
         # if the node is not an outlet, reset the outseg max if the current min is lower
         if oseg > 0:
-            #outseg_max = elevmax[oseg]
+            # outseg_max = elevmax[oseg]
             next_reach_elev = elevations[oseg]
             elevations[graph[seg]] = np.min([elevmin_s, next_reach_elev])
 

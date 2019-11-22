@@ -1,9 +1,9 @@
-import os
 import io
+import os
+
 import numpy as np
 import pandas as pd
 import pytest
-from ..observations import write_mf6_sfr_obsfile
 
 
 @pytest.fixture
@@ -49,11 +49,11 @@ def test_write_mf6_sfr_obsfile(shellmound_sfrdata, flux_observation_data, outdir
                                               )
     shellmound_sfrdata.write_mf6_sfr_obsfile()
     check_mf6_obs_file(shellmound_sfrdata.observations_file,
-                         expected=shellmound_sfrdata.observations)
+                       expected=shellmound_sfrdata.observations)
     os.remove(shellmound_sfrdata.observations_file)
     shellmound_sfrdata.write_package(filename=sfr_package_file, version='mf6')
     check_mf6_obs_file(shellmound_sfrdata.observations_file,
-                         expected=shellmound_sfrdata.observations)
+                       expected=shellmound_sfrdata.observations)
     with open(sfr_package_file) as src:
         for line in src:
             if 'obs6' in line.lower():
@@ -81,4 +81,3 @@ def test_add_observations(shellmound_sfrdata, flux_observation_data):
                                               obsname_column_in_data='site_no'
                                               )
     assert set(obs.rno) == set(flux_observation_data.junk)
-

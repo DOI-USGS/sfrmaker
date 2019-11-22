@@ -1,9 +1,12 @@
 import os
+
 import numpy as np
 import pandas as pd
-from shapely.geometry import Point
 import pyproj
-from ..gis import get_proj_str, df2shp, shp2df, shp_properties, crs
+from shapely.geometry import Point
+from gisutils import get_proj_str, df2shp, shp2df
+from gisutils.shapefile import shp_properties
+from ..gis import crs
 
 
 def test_get_proj_str(tmpdir):
@@ -27,7 +30,6 @@ def test_shp_properties():
 
 
 def test_integer_dtypes(tmpdir):
-
     # verify that pandas is recasting numpy ints as python ints when converting to dict
     # (numpy ints invalid for shapefiles)
     d = pd.DataFrame(np.ones((3, 3)), dtype=int).astype(object).to_dict(orient='records')
@@ -42,7 +44,6 @@ def test_integer_dtypes(tmpdir):
 
 
 def test_boolean_dtypes(tmpdir):
-
     df = pd.DataFrame([False, True]).transpose()
     df.columns = ['true', 'false']
     f = '{}/bool.dbf'.format(tmpdir)
@@ -52,7 +53,6 @@ def test_boolean_dtypes(tmpdir):
 
 
 def test_crs_eq():
-
     crs_4269_proj = crs(proj_str='+proj=longlat +datum=NAD83 +no_defs ')
     crs_26715_epsg = crs(epsg=26715)
     crs_26715_epsg_proj = crs(proj_str='epsg:26715')
@@ -81,6 +81,5 @@ def test_isvalid():
 
 
 def test_crs_get_proj_str():
-
     crs_5070_epsg = crs(epsg=5070)
     assert crs_5070_epsg.proj_str.replace('+init=', '') == 'epsg:5070 +no_defs'

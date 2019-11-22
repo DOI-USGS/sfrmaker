@@ -1,20 +1,21 @@
 import sys
+
 sys.path.append('/Users/aleaf/Documents/GitHub/flopy3')
 import os
 import time
-import copy
 import numpy as np
 import pandas as pd
 import rasterio
 from rasterstats import zonal_stats
 from shapely.geometry import LineString
 import flopy
-from sfrmaker.routing import find_path, make_graph, renumber_segments
+from gisutils import df2shp
+from sfrmaker.routing import find_path, renumber_segments
 from .checks import valid_rnos, valid_nsegs, rno_nseg_routing_consistent
 from .elevations import smooth_elevations
 from .flows import add_to_perioddata
-from .gis import df2shp, export_reach_data, project, crs
-from .grid import StructuredGrid, UnstructuredGrid
+from .gis import export_reach_data, project, crs
+from .grid import StructuredGrid
 from .observations import write_mf6_sfr_obsfile, add_observations
 from .units import convert_length_units
 import sfrmaker
@@ -24,7 +25,7 @@ fm = flopy.modflow
 mf6 = flopy.mf6
 
 
-class sfrdata:
+class SFRData:
     """Class for working with a streamflow routing (SFR) dataset,
     where the stream network is discretized into reaches contained
     within individual model cells. Reaches may be grouped into segments,
@@ -65,7 +66,7 @@ class sfrdata:
 
     # conversions to MODFLOW6 variable names
     mf6names = {'rno': 'rno',
-                #'node': 'cellid',
+                # 'node': 'cellid',
                 'rchlen': 'rlen',
                 'width': 'rwid',
                 'slope': 'rgrd',
@@ -80,7 +81,7 @@ class sfrdata:
                 'depth1': 'depth1',
                 'depth2': 'depth2'}
 
-    mf5names = {v:k for k, v in mf6names.items()}
+    mf5names = {v: k for k, v in mf6names.items()}
 
     # order for columns in reach_data
     rdcols = ['rno', 'node', 'k', 'i', 'j',
@@ -135,14 +136,14 @@ class sfrdata:
         self._observations_filename = None
 
         # convert any modflow6 kwargs to modflow5
-        kwargs = {sfrdata.mf5names[k] if k in sfrdata.mf6names else k:
+        kwargs = {SFRData.mf5names[k] if k in SFRData.mf6names else k:
                       v for k, v in kwargs.items()}
         # update default values (used in segment and reach data setup)
         self.defaults.update(kwargs)
 
         self.reach_data = self._setup_reach_data(reach_data)
         self.segment_data = self._setup_segment_data(segment_data)
-        self.isfropt0_to_1() # distribute any isfropt=0 segment data to reaches
+        self.isfropt0_to_1()  # distribute any isfropt=0 segment data to reaches
 
         if grid is None and sr is not None:
             print('\nCreating grid class instance from flopy SpatialReference...')
@@ -156,7 +157,7 @@ class sfrdata:
 
         # routing
         self._segment_routing = None  # dictionary of routing connections
-        self._reach_routing = None # dictionary of rno routing connections
+        self._reach_routing = None  # dictionary of rno routing connections
         self._paths = None  # routing sequence from each segment to outlet
 
         if not self._valid_nsegs(increasing=enforce_increasing_nsegs):
@@ -174,10 +175,9 @@ class sfrdata:
         self._model_length_units = model_length_units
         self.model_time_units = model_time_units
 
-        self.model = model # attached flopy model instance
-        #self._ModflowSfr2 = None # attached instance of flopy ModflowSfr2 package object
+        self.model = model  # attached flopy model instance
+        # self._ModflowSfr2 = None # attached instance of flopy modflow_sfr2 package object
         self.package_name = package_name
-
 
     @property
     def const(self):
@@ -215,7 +215,7 @@ class sfrdata:
         self._model = model
 
         # update the sfr package object as well
-        self.create_ModflowSfr2(model)
+        self.create_modflow_sfr2(model)
 
     @property
     def package_name(self):
@@ -276,45 +276,45 @@ class sfrdata:
         return self._rno_routing
 
     @property
-    def ModflowSfr2(self):
-        """Flopy ModflowSfr2 instance."""
+    def modflow_sfr2(self):
+        """Flopy modflow_sfr2 instance."""
         if self._ModflowSfr2 is None:
-            self.create_ModflowSfr2()
+            self.create_modflow_sfr2()
         return self._ModflowSfr2
 
-    @staticmethod
-    def get_empty_reach_data(nreaches=0, default_value=0):
+    @classmethod
+    def get_empty_reach_data(cls, nreaches=0, default_value=0):
         rd = fm.ModflowSfr2.get_empty_reach_data(nreaches,
                                                  default_value=default_value)
         df = pd.DataFrame(rd)
-        for c in sfrdata.rdcols:
+        for c in SFRData.rdcols:
             if c not in df.columns:
                 df[c] = default_value
             elif c != 'geometry':
-                df[c] = df[c].astype(sfrdata.dtypes.get(c, np.float32))
-        return df[sfrdata.rdcols]
+                df[c] = df[c].astype(cls.dtypes.get(c, np.float32))
+        return df[cls.rdcols]
 
     def _setup_reach_data(self, reach_data):
-        rd = sfrdata.get_empty_reach_data(len(reach_data))
+        rd = SFRData.get_empty_reach_data(len(reach_data))
         reach_data.index = range(len(reach_data))
         for c in reach_data.columns:
-            rd[c] = reach_data[c].astype(sfrdata.dtypes.get(c, np.float32))
-            assert rd[c].dtype == sfrdata.dtypes.get(c, np.float32)
+            rd[c] = reach_data[c].astype(SFRData.dtypes.get(c, np.float32))
+            assert rd[c].dtype == SFRData.dtypes.get(c, np.float32)
         # assign kwargs to reach data
         for k, v in self.defaults.items():
             if k in self.rdcols and k not in reach_data.columns:
                 rd[k] = v
         return rd
 
-    @staticmethod
-    def get_empty_segment_data(nsegments=0, default_value=0):
+    @classmethod
+    def get_empty_segment_data(cls, nsegments=0, default_value=0):
         sd = fm.ModflowSfr2.get_empty_segment_data(nsegments,
                                                    default_value=default_value)
         sd = pd.DataFrame(sd)
         sd['per'] = 0
         for c in sd.columns:
-            sd[c] = sd[c].astype(sfrdata.dtypes.get(c, np.float32))
-        return sd[sfrdata.sdcols]
+            sd[c] = sd[c].astype(cls.dtypes.get(c, np.float32))
+        return sd[cls.sdcols]
 
     def _setup_segment_data(self, segment_data):
         # if no segment_data was provided
@@ -325,7 +325,7 @@ class sfrdata:
                     self.reach_data.outseg.sum() > 0:
                 self.reach_data.sort_values(by=['iseg', 'ireach'], inplace=True)
                 nss = self.reach_data.iseg.max()
-                sd = sfrdata.get_empty_segment_data(nss)
+                sd = SFRData.get_empty_segment_data(nss)
                 routing = dict(zip(self.reach_data.iseg, self.reach_data.outseg))
                 sd['nseg'] = range(len(sd))
                 sd['outseg'] = [routing[s] for s in sd.nseg]
@@ -338,18 +338,18 @@ class sfrdata:
                     "segment_data are supplied, segment routing must be" \
                     "included in iseg and outseg columns, or reach data " \
                     "must contain outreach column with routing connections."
-                sd = sfrdata.get_empty_segment_data(len(self.reach_data))
+                sd = SFRData.get_empty_segment_data(len(self.reach_data))
                 sd['nseg'] = self.reach_data.rno
                 sd['outseg'] = self.reach_data.outreach
         # transfer supplied segment data to default template
         else:
-            sd = sfrdata.get_empty_segment_data(len(segment_data))
+            sd = SFRData.get_empty_segment_data(len(segment_data))
         if 'per' not in segment_data.columns:
             segment_data['per'] = 0
         segment_data.sort_values(by=['per', 'nseg'], inplace=True)
         segment_data.index = range(len(segment_data))
         for c in segment_data.columns:
-            sd[c] = segment_data[c].astype(sfrdata.dtypes.get(c, np.float32))
+            sd[c] = segment_data[c].astype(SFRData.dtypes.get(c, np.float32))
 
         # assign defaults to segment data
         for k, v in self.defaults.items():
@@ -403,6 +403,7 @@ class sfrdata:
                                  rno_column_in_data=rno_column_in_data,
                                  period_column_in_data=period_column_in_data,
                                  variable_column_in_data=variable_column_in_data)
+
     @property
     def paths(self):
         """Dict listing routing sequence for each segment
@@ -457,7 +458,7 @@ class sfrdata:
         self.segment_data.sort_values(by=['per', 'nseg'], inplace=True)
         self.segment_data.index = np.arange(len(self.segment_data))
         assert np.array_equal(self.segment_data.loc[self.segment_data.per == 0, 'nseg'].values,
-                              self.segment_data.loc[self.segment_data.per == 0].index.values+1)
+                              self.segment_data.loc[self.segment_data.per == 0].index.values + 1)
         self.reach_data.sort_values(by=['iseg', 'ireach'], inplace=True)
 
     def reset_reaches(self):
@@ -467,10 +468,10 @@ class sfrdata:
         reach_data = self.reach_data
         segment_data = self.segment_data.groupby('per').get_group(0)
         reach_counts = np.bincount(reach_data.iseg)[1:]
-        reach_counts = dict(zip(range(1, len(reach_counts) +1),
+        reach_counts = dict(zip(range(1, len(reach_counts) + 1),
                                 reach_counts))
         ireach = [list(range(1, reach_counts[s] + 1))
-                   for s in segment_data.nseg]
+                  for s in segment_data.nseg]
         ireach = np.concatenate(ireach)
         self.reach_data['ireach'] = ireach
 
@@ -494,10 +495,10 @@ class sfrdata:
         outreach = []
         for i in range(len(rd)):
             # if at the end of reach data or current segment
-            if i + 1 == len(rd) or ireach[i+1] == 1:
+            if i + 1 == len(rd) or ireach[i + 1] == 1:
                 nextseg = outseg[iseg[i]]  # get next segment
                 if nextseg > 0:  # current reach is not an outlet
-                    nextrchid = reach1IDs[nextseg] # get reach 1 of next segment
+                    nextrchid = reach1IDs[nextseg]  # get reach 1 of next segment
                 else:
                     nextrchid = 0
             else:  # otherwise, it's the next rno
@@ -514,7 +515,7 @@ class sfrdata:
         """Cursory check of reach routing."""
         valid_rnos = self._valid_rnos()
         non_zero_outreaches = 'outreach' in self.reach_data.columns & \
-        self.reach_data.outreach.sum() > 0
+                              self.reach_data.outreach.sum() > 0
         return valid_rnos & non_zero_outreaches
 
     def _valid_nsegs(self, increasing=True):
@@ -523,24 +524,24 @@ class sfrdata:
                            sd0.outseg,
                            increasing=increasing)
 
-    def create_ModflowSfr2(self, model=None, const=None,
-                           isfropt=1, # override flopy default of 0
-                           unit_number=None,
-                           ipakcb=None, istcb2=None,
-                           **kwargs
-                           ):
+    def create_modflow_sfr2(self, model=None, const=None,
+                            isfropt=1,  # override flopy default of 0
+                            unit_number=None,
+                            ipakcb=None, istcb2=None,
+                            **kwargs
+                            ):
 
         if const is None:
             const = self.const
 
         if model is not None and model.version != 'mf6':
             m = model
-        # create an flopy mf2005 model instance attached to ModflowSfr2 object
+        # create an flopy mf2005 model instance attached to modflow_sfr2 object
         # this is a parallel model instance to self.model, that is only
-        # accessible through ModflowSfr2.parent. As long as this method is
+        # accessible through modflow_sfr2.parent. As long as this method is
         # called by the @model.setter; this instance should have the same
         # dis and ibound (idomain) as self.model.
-        # The ModflowSfr2 instance is used as basis for writing packages,
+        # The modflow_sfr2 instance is used as basis for writing packages,
         # because it includes many features, like checking and exporting,
         # that ModflowGwfsfr doesn't have)
         # ibound in BAS package is used by mf5to6 converter
@@ -551,7 +552,7 @@ class sfrdata:
             if model is not None:
                 nper = 1
                 if 'tdis' in model.simulation.package_key_dict.keys():
-                    tdis =  model.simulation.package_key_dict['tdis']
+                    tdis = model.simulation.package_key_dict['tdis']
                     nper = tdis.nper.array
                 if 'dis' in model.package_dict.keys():
                     dis = model.dis
@@ -580,7 +581,7 @@ class sfrdata:
               for per in self.segment_data.per.unique()}
 
         # translate reach data
-        flopy_cols = fm.ModflowSfr2.\
+        flopy_cols = fm.ModflowSfr2. \
             get_default_reach_dtype(structured=self.structured).names
         columns_not_in_flopy = set(self.reach_data.columns).difference(set(flopy_cols))
         rd = self.reach_data.drop(columns_not_in_flopy, axis=1).copy()
@@ -593,7 +594,7 @@ class sfrdata:
                                            ipakcb=ipakcb, istcb2=istcb2,
                                            **kwargs)
 
-        #if model.version == 'mf6':
+        # if model.version == 'mf6':
         #    self._ModflowSfr2.parent = model
         return self._ModflowSfr2
 
@@ -616,12 +617,12 @@ class sfrdata:
             if 'tdis' in model.simulation.package_key_dict.keys():
                 tdis = model.simulation.package_key_dict['tdis']
                 nper = tdis.nper.array
-        # create an flopy mf2005 model instance attached to ModflowSfr2 object
+        # create an flopy mf2005 model instance attached to modflow_sfr2 object
         # this is a parallel model instance to self.model, that is only
-        # accessible through ModflowSfr2.parent. As long as this method is
+        # accessible through modflow_sfr2.parent. As long as this method is
         # called by the @model.setter; this instance should have the same
         # dis and ibound (idomain) as self.model.
-        # The ModflowSfr2 instance is used as basis for writing packages,
+        # The modflow_sfr2 instance is used as basis for writing packages,
         # because it includes many features, like checking and exporting,
         # that ModflowGwfsfr doesn't have)
         # ibound in BAS package is used by mf5to6 converter
@@ -635,7 +636,7 @@ class sfrdata:
         # create an sfrmaker.mf6sfr instance
         from .mf5to6 import mf6sfr
 
-        sfr6 = mf6sfr(self.ModflowSfr2)
+        sfr6 = mf6sfr(self.modflow_sfr2)
 
         # package data
         # An error occurred when storing data "packagedata" in a recarray.
@@ -653,11 +654,11 @@ class sfrdata:
         connectiondata = [(rno, *sfr6.connections[rno])
                           for rno in sfr6.packagedata.rno if rno in sfr6.connections]
         # as of 9/12/2019, flopy.mf6.modflow.ModflowGwfsfr requires zero-based input for rno
-        if flopy_rno_input_is_zero_based and self.ModflowSfr2.reach_data['reachID'].min() == 1:
+        if flopy_rno_input_is_zero_based and self.modflow_sfr2.reach_data['reachID'].min() == 1:
             packagedata['rno'] -= 1
             zero_based_connectiondata = []
             for item in connectiondata:
-                zb_items = tuple(i-1 if i > 0 else i+1 for i in item)
+                zb_items = tuple(i - 1 if i > 0 else i + 1 for i in item)
                 zero_based_connectiondata.append(zb_items)
             connectiondata = zero_based_connectiondata
         assert packagedata['rno'].min() == 0
@@ -667,17 +668,17 @@ class sfrdata:
         # note: as of 9/12/2019, this results in an error during ModflowGwfsfr package construction
         # with either Nonetype or "NONE"
         # even though MODFLOW 6 requires it
-        #unconnected = ~packagedata['rno'].isin(np.array(list(sfr6.connections.keys())) - 1).values
-        #inactive = m.dis.idomain.array[packagedata.k.values,
+        # unconnected = ~packagedata['rno'].isin(np.array(list(sfr6.connections.keys())) - 1).values
+        # inactive = m.dis.idomain.array[packagedata.k.values,
         #                               packagedata.i.values,
         #                               packagedata.j.values]
-        #packagedata.loc[unconnected | inactive, 'cellid'] = None
+        # packagedata.loc[unconnected | inactive, 'cellid'] = None
         packagedata = packagedata[columns].values.tolist()
 
         period_data = None
         if sfr6.period_data is not None:
             # TODO: add method to convert period_data df to MF6 input
-            #raise NotImplemented("Support for mf6 period_data input not implemented yet. "
+            # raise NotImplemented("Support for mf6 period_data input not implemented yet. "
             #                     "Use sfrdata.write_package(version='mf6') instead.")
             pass
 
@@ -914,8 +915,8 @@ class sfrdata:
         slopes[slopes > maximum_slope] = maximum_slope
         self.reach_data['slope'] = slopes
 
-    @staticmethod
-    def from_package(sfrpackagefile, grid, linework):
+    @classmethod
+    def from_package(cls, sfrpackagefile, grid, linework):
         """Read SFR package file
 
         Parameters
@@ -934,14 +935,14 @@ class sfrdata:
         """
         pass
 
-    @staticmethod
-    def from_tables(reach_data, segment_data,
+    @classmethod
+    def from_tables(cls, reach_data, segment_data,
                     grid=None, sr=None, isfr=None):
         reach_data = pd.read_csv(reach_data)
         segment_data = pd.read_csv(segment_data)
-        return sfrdata(reach_data=reach_data, segment_data=segment_data,
-                       grid=grid, sr=sr,
-                       isfr=isfr)
+        return cls(reach_data=reach_data, segment_data=segment_data,
+                   grid=grid, sr=sr,
+                   isfr=isfr)
 
     def write_package(self, filename=None, version='mf2005', idomain=None,
                       options=None, write_observations_input=True,
@@ -954,17 +955,17 @@ class sfrdata:
             'mf2005' or 'mf6'
         """
         # recreate the flopy package object in case it changed
-        self.create_ModflowSfr2(model=self.model, **kwargs)
+        self.create_modflow_sfr2(model=self.model, **kwargs)
         header_txt = "#SFR package created by SFRmaker v. {}, " \
                      "via FloPy v. {}\n".format(sfrmaker.__version__, flopy.__version__)
         header_txt += "#model length units: {}, model time units: {}".format(self.model_length_units,
-                                                                                 self.model_time_units)
-        self.ModflowSfr2.heading = header_txt
+                                                                             self.model_time_units)
+        self.modflow_sfr2.heading = header_txt
 
         if filename is None:
-            filename = self.ModflowSfr2.file_name[0]
+            filename = self.modflow_sfr2.fn_path
         if version == 'mf2005':
-            self.ModflowSfr2.write_file(filename=filename)
+            self.modflow_sfr2.write_file(filename=filename)
 
         elif version == 'mf6':
 
@@ -982,7 +983,7 @@ class sfrdata:
                 self.write_mf6_sfr_obsfile(filename=obs_input_filename)
                 options.append('OBS6 FILEIN {}'.format(obs_input_filename))
 
-            sfr6 = mf6sfr(self.ModflowSfr2, period_data=self.period_data,
+            sfr6 = mf6sfr(self.modflow_sfr2, period_data=self.period_data,
                           idomain=idomain,
                           options=options)
 
@@ -1137,7 +1138,7 @@ class sfrdata:
                 df = data.reset_index(drop=True).pivot_table(index='rno', columns='per', values=var,
                                                              aggfunc=aggfunc).reset_index()
                 # rename the columns to indicate stress periods
-                df.columns = ['rno'] + ['{}{}'.format(i, var) for i in range(df.shape[1]-1)]
+                df.columns = ['rno'] + ['{}{}'.format(i, var) for i in range(df.shape[1] - 1)]
                 df['node'] = [nodes[rno] for rno in df['rno']]
                 if filename is None:
                     filename = self.package_name + '_sfr_period_data_{}.shp'.format(var)

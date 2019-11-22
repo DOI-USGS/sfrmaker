@@ -1,13 +1,11 @@
-import os
-import numpy as np
+import flopy
 import pandas as pd
 from shapely.geometry import box
-import flopy
-from flopy.utils.sfroutputfile import SfrFile
-from .gis import shp2df, df2shp
-from .routing import get_next_id_in_subset, find_path
-from .utils import load_sr
+
 from sfrmaker.routing import find_path, make_graph
+from gisutils import shp2df
+from .routing import get_next_id_in_subset
+from .utils import load_sr
 
 
 def get_inflow_locations_from_parent_model(parent_reach_data, inset_reach_data,
@@ -96,7 +94,7 @@ def get_inflow_locations_from_parent_model(parent_reach_data, inset_reach_data,
     prd = prd.loc[close]
     prd.index = prd.rno
     boundary = active_area.exterior
-    inset_line_id_connections = {} # parent rno: inset line_id
+    inset_line_id_connections = {}  # parent rno: inset line_id
     for i, r in prd.iterrows():
         if r.outreach not in prd.index:
             continue
@@ -104,11 +102,11 @@ def get_inflow_locations_from_parent_model(parent_reach_data, inset_reach_data,
         upstream_line = prd.loc[prd.rno == r.outreach, 'geometry'].values[0]
         intersects = r.geometry.intersects(boundary)
         intersects_downstream = downstream_line.within(active_area)
-        #intersects_upstream = upstream_line.within(active_area)
+        # intersects_upstream = upstream_line.within(active_area)
         in_inset_model = r.geometry.within(active_area)
         if intersects_downstream:
             if intersects:
-                #if not intersects_upstream: # exclude lines that originated within the model
+                # if not intersects_upstream: # exclude lines that originated within the model
                 #    # lines that cross route to their counterpart in inset model
                 inset_line_id_connections[r.rno] = r.line_id
                 pass
@@ -121,7 +119,7 @@ def get_inflow_locations_from_parent_model(parent_reach_data, inset_reach_data,
     prd = prd.loc[prd.rno.isin(inset_line_id_connections.keys())]
 
     # parent rno lookup
-    parent_rno_lookup = {v:k for k, v in inset_line_id_connections.items()}
+    parent_rno_lookup = {v: k for k, v in inset_line_id_connections.items()}
 
     # inlet reaches in inset model
     ird = ird.loc[ird.ireach == 1]
@@ -206,10 +204,10 @@ def add_to_perioddata(sfrdata, data, flowline_routing=None,
 
 
 def add_to_segmentdata(sfrdata, flowline_routing, data,
-                      variable='flow',
-                      segment_column_in_data='segment',
-                      period_column_in_data='per',
-                      variable_column_in_data='Q_avg'):
+                       variable='flow',
+                       segment_column_in_data='segment',
+                       period_column_in_data='per',
+                       variable_column_in_data='Q_avg'):
     """Like add_to_perioddata, but for MODFLOW-2005.
     """
     raise NotImplementedError()

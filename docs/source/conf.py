@@ -76,6 +76,7 @@ author = 'USGS MAP Project'
 # built documents.
 #
 import mfsetup
+
 # The short X.Y version.
 version = mfsetup.__version__
 # The full version, including alpha/beta/rc tags.
@@ -99,7 +100,6 @@ pygments_style = 'sphinx'
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = False
 
-
 # -- Options for HTML output ----------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
@@ -107,6 +107,7 @@ todo_include_todos = False
 #
 html_theme = 'sphinx_rtd_theme'
 import sphinx_rtd_theme
+
 html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 # Theme options are theme-specific and customize the look and feel of a theme
@@ -132,12 +133,10 @@ html_sidebars = {
     ]
 }
 
-
 # -- Options for HTMLHelp output ------------------------------------------
 
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'mfsetup'
-
 
 # -- Options for LaTeX output ---------------------------------------------
 
@@ -167,7 +166,6 @@ latex_documents = [
      'Contributors', 'manual'),
 ]
 
-
 # -- Options for manual page output ---------------------------------------
 
 # One entry per manual page. List of tuples
@@ -176,7 +174,6 @@ man_pages = [
     (master_doc, 'mfsetup', 'MFsetup Documentation',
      [author], 1)
 ]
-
 
 # -- Options for Texinfo output -------------------------------------------
 
@@ -188,9 +185,6 @@ texinfo_documents = [
      author, 'mfsetup', 'Package to facilitate setup of a MODFLOW-6 rgroundwater flow model with the SFR package.',
      'Miscellaneous'),
 ]
-
-
-
 
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {

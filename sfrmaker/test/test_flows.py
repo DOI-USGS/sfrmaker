@@ -1,19 +1,18 @@
-import copy
 import numpy as np
 import pandas as pd
 import pytest
-from ..flows import (get_inflow_locations_from_parent_model, add_to_perioddata)
-from ..gis import shp2df
+
 from .test_routing import add_line_sequence
+from ..flows import (get_inflow_locations_from_parent_model, add_to_perioddata)
+from gisutils import shp2df
 
 
 @pytest.fixture()
 def parent_model_sfr_flow_results():
-
     parent_model_sfrlines = 'sfrmaker/test/data/shellmound/merasnwt_sfrlines.shp'
     rd = shp2df(parent_model_sfrlines)
     rd['Qout'] = 0.
-    rd = rd.rename(columns={'iseg': 'segment', 'ireach': 'reach'})\
+    rd = rd.rename(columns={'iseg': 'segment', 'ireach': 'reach'}) \
         [['rno', 'segment', 'reach', 'Qout']].copy()
     rd.loc[rd.rno == 13933, 'Qout'] = 353146.667
     rd.loc[rd.rno == 11780, 'Qout'] = 3531.46667
@@ -25,7 +24,7 @@ def parent_model_sfr_flow_results():
     rd['kstpkper'] = [(0, 0)] * len(rd)
     rd2 = rd.copy()
     rd2['kstpkper'] = [(1, 1)] * len(rd)
-    rd2['Qout'] *=2
+    rd2['Qout'] *= 2
     rd = rd.append(rd2).copy()
     return rd
 
@@ -76,7 +75,3 @@ def test_add_to_perioddata(shellmound_sfrdata):
     assert np.allclose(sfrd.period_data['inflow'].values, flows['Q_avg'].values)
     assert np.allclose(sfrd.period_data['per'].values, flows['per'].values)
     assert rd.loc[rd.line_id == seq[-1], 'rno'].values[0] == sfrd.period_data['rno'].values[0]
-
-
-
-

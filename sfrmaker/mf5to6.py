@@ -1,13 +1,14 @@
 import os
+from copy import copy
+
 import numpy as np
 import pandas as pd
-from copy import copy
-from .utils import interpolate_to_reaches
+
 import sfrmaker
+from .utils import interpolate_to_reaches
 
 
 class mf6sfr:
-
     # convert from ModflowSfr to mf6
     mf6names = {'rno': 'rno',
                 'node': 'cellid',
@@ -21,9 +22,9 @@ class mf6sfr:
                 'pptsw': 'rainfall',
                 'etsw': 'evaporation',
                 'runoff': 'runoff',
-                'depth1': 'depth1', # need these for distributing stage
+                'depth1': 'depth1',  # need these for distributing stage
                 'depth2': 'depth2'}
-    mf5names = {v :k for k, v in mf6names.items()}
+    mf5names = {v: k for k, v in mf6names.items()}
 
     cols = ['rno', 'cellid', 'k', 'i', 'j', 'rlen', 'rwid', 'rgrd',
             'rtp', 'rbth', 'rhk', 'man', 'ncon', 'ustrf', 'ndv', 'idomain']
@@ -48,7 +49,7 @@ class mf6sfr:
             self.idomain = idomain
 
         self.options = options
-        # copy ModflowSfr2 object and enforce sorting
+        # copy modflow_sfr2 object and enforce sorting
         self.ModflowSfr2 = copy(ModflowSfr2)
         self.ModflowSfr2.segment_data[0].sort(order='nseg')
         self.ModflowSfr2.reach_data.sort(order=['iseg', 'ireach'])
@@ -58,7 +59,7 @@ class mf6sfr:
         self.nreaches = len(ModflowSfr2.reach_data)
         self.nper = ModflowSfr2.nper
 
-        # dataframes of reach and segment data from ModflowSfr2
+        # dataframes of reach and segment data from modflow_sfr2
         self.rd = pd.DataFrame(ModflowSfr2.reach_data)
         self.rd.rename(columns={'reachID': 'rno'}, inplace=True)
         self.sd = self._get_segment_dataframe()
@@ -69,7 +70,7 @@ class mf6sfr:
         # connection info (doesn't support diversions)
         self.graph = dict(zip(self.rd.rno, self.rd.outreach))
         sd0 = pd.DataFrame(ModflowSfr2.segment_data[0])
-        self._graph_r = None # filled by properties
+        self._graph_r = None  # filled by properties
         self.outlets = None
         self._connections = None
 
@@ -78,8 +79,6 @@ class mf6sfr:
 
         # period data
         self._period_data = period_data
-
-
 
         self.dimensions_block = '\nBEGIN Dimensions\n  NREACHES {:d}\nEND Dimensions\n'.format(self.nreaches)
 
@@ -116,7 +115,7 @@ class mf6sfr:
             for k, v in self.graph.items():
                 cnk = []
                 # downstream reach
-                if v != 0: # outlets aren't explicit in MF6
+                if v != 0:  # outlets aren't explicit in MF6
                     cnk += [-v]
                 # upstream reaches
                 if k in self.graph_r.keys():
@@ -138,7 +137,7 @@ class mf6sfr:
         if len(np.unique(sd0[var])) > 1:
             for i in range(len(sd0)):
                 seg_value = sd0[i][var]
-                nreaches = np.sum(self.rd.iseg == i+ 1)
+                nreaches = np.sum(self.rd.iseg == i + 1)
                 reach_values += [seg_value]
         else:
             reach_values = np.ones(len(self.rd)) * sd0[var][0]
@@ -157,7 +156,7 @@ class mf6sfr:
         # [rno, cellid, rlen, rwid, rgrd, rtp, rbth, rhk, man, ncon,
         # ustrf, ndv, aux, boundname]
         print('converting reach and segment data to package data...')
-        #rwid = self.ModflowSfr2._interpolate_to_reaches('width1', 'width2')
+        # rwid = self.modflow_sfr2._interpolate_to_reaches('width1', 'width2')
         rwid = interpolate_to_reaches(self.rd, self.sd,
                                       'width1', 'width2',
                                       reach_data_group_col='iseg',

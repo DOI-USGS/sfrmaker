@@ -1,9 +1,10 @@
 """Script to set up test data from larger files
 """
 import json
+
 import numpy as np
-from flopy.utils.reference import SpatialReference
 from GISio import shp2df, df2shp
+from flopy.utils.reference import SpatialReference
 
 # basic grid parameters
 name = 'map_test'

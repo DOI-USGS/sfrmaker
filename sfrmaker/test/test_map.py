@@ -1,10 +1,10 @@
-import os
-import pytest
 import pandas as pd
 import pytest
+
 import sfrmaker
 
-#TODO: make tests more rigorous
+
+# TODO: make tests more rigorous
 
 @pytest.fixture(scope="module")
 def name_path():
@@ -14,7 +14,7 @@ def name_path():
 @pytest.fixture(scope="module")
 def lines(testdatapath, name_path):
     name, path = name_path
-    lns = sfrmaker.lines.from_shapefile('{}/{}/flowlines.shp'.format(testdatapath, path),
+    lns = sfrmaker.Lines.from_shapefile('{}/{}/flowlines.shp'.format(testdatapath, path),
                                         id_column='COMID',
                                         routing_column='tocomid',
                                         width1_column='width1',
@@ -47,13 +47,12 @@ def sfr(lines, grid):
 
 @pytest.fixture(scope="module")
 def sfr_with_inflows(sfr):
-
     # add some inflows
     tmp = sfr.segment_data.loc[sfr.segment_data.nseg.isin([17, 18])].sort_values(by='nseg').copy()
     dfs = []
     for i in range(1, 4):
         itmp = tmp.copy()
-        itmp['flow'] = [500*i, 1000*i]
+        itmp['flow'] = [500 * i, 1000 * i]
         itmp['per'] = i
         dfs.append(itmp)
     sfr.segment_data = sfr.segment_data.append(pd.concat(dfs))

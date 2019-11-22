@@ -10,3 +10,4 @@ shapely
 pyproj>=2.0
 rtree
 flopy
+gis-utils

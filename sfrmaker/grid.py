@@ -1,14 +1,17 @@
 import os
+
+import fiona
+import flopy
 import numpy as np
 import pandas as pd
-import fiona
 from rasterio import Affine
 from rasterio import features
-from shapely.ops import unary_union
 from shapely.geometry import Polygon, shape
-import flopy
-from .gis import shp2df, df2shp, get_proj_str, crs, read_polygon_feature, \
+from shapely.ops import unary_union
+from gisutils import shp2df, df2shp, get_proj_str
+from .gis import crs, read_polygon_feature, \
     build_rtree_index, intersect
+
 fm = flopy.modflow
 
 
@@ -102,7 +105,7 @@ class Grid:
         if self._bounds is None:
             allX = []  # all x coordinates
             allY = []  # all y coordinatess
-            geoms = self.df.geometry.tolist() # cell polygons
+            geoms = self.df.geometry.tolist()  # cell polygons
             for g in geoms:
                 gx, gy = g.exterior.coords.xy
                 allX += gx
@@ -170,12 +173,12 @@ class Grid:
     def _set_isfr_from_active_area(self):
         """Intersect model grid cells with active area polygon,
         assign isfr = 1 to cells that intersect."""
-        #intersections = intersect_rtree(self.df.geometry.tolist(),
+        # intersections = intersect_rtree(self.df.geometry.tolist(),
         #                                [self.active_area],
         #                                index=self.spatial_index)
         print('setting isfr values...')
         intersections = intersect(self.df.geometry.tolist(),
-                                        [self.active_area])
+                                  [self.active_area])
         self.df.sort_values(by='node', inplace=True)
         self.df['isfr'] = 0
         self.df.loc[np.squeeze(intersections), 'isfr'] = 1
@@ -205,6 +208,7 @@ class StructuredGrid(Grid):
     """Class representing a model grid that has a row/column structure.
     """
     _structured = True
+
     def __init__(self, df,
                  xul=None, yul=None, dx=None, dy=None, rotation=0.,
                  nrow=None, ncol=None,
@@ -275,16 +279,16 @@ class StructuredGrid(Grid):
         areas = [s.area for s in shapes]
         self._active_area = shapes[np.argmax(areas)]
 
-    @staticmethod
-    def from_json(jsonfile, active_area=None, isfr=None,
+    @classmethod
+    def from_json(cls, jsonfile, active_area=None, isfr=None,
                   epsg=None, proj_str=None, prjfile=None):
         from .utils import load_sr
         sr = load_sr(jsonfile)
-        return StructuredGrid.from_sr(sr, active_area=active_area, isfr=isfr,
-                  epsg=epsg, proj_str=proj_str, prjfile=prjfile)
+        return cls.from_sr(sr, active_area=active_area, isfr=isfr,
+                           epsg=epsg, proj_str=proj_str, prjfile=prjfile)
 
-    @staticmethod
-    def from_sr(sr=None, active_area=None, isfr=None,
+    @classmethod
+    def from_sr(cls, sr=None, active_area=None, isfr=None,
                 epsg=None, proj_str=None, prjfile=None):
         """Create StructureGrid class instance from a
         flopy SpatialReference instance."""
@@ -320,15 +324,15 @@ class StructuredGrid(Grid):
             dx = sr.delr[0] * sr.length_multiplier
             dy = sr.delc[0] * sr.length_multiplier
             uniform = True
-        return StructuredGrid.from_dataframe(df, uniform=uniform,
-                                             xul=sr.xul, yul=sr.yul, dx=dx, dy=dy,
-                                             rotation=sr.rotation,
-                                             model_units=sr.model_length_units,
-                                             bounds=sr.bounds, active_area=active_area,
-                                             epsg=epsg, proj_str=proj_str, prjfile=prjfile)
+        return cls.from_dataframe(df, uniform=uniform,
+                                  xul=sr.xul, yul=sr.yul, dx=dx, dy=dy,
+                                  rotation=sr.rotation,
+                                  model_units=sr.model_length_units,
+                                  bounds=sr.bounds, active_area=active_area,
+                                  epsg=epsg, proj_str=proj_str, prjfile=prjfile)
 
-    @staticmethod
-    def from_shapefile(shapefile=None,
+    @classmethod
+    def from_shapefile(cls, shapefile=None,
                        node_col='node', kcol='k', icol='i', jcol='j',
                        isfr_col='isfr',
                        active_area=None,
@@ -343,13 +347,13 @@ class StructuredGrid(Grid):
         df = shp2df(shapefile)
         assert 'geometry' in df.columns, "No feature geometries found in {}.".format(shapefile)
 
-        return StructuredGrid.from_dataframe(df, node_col=node_col, kcol=kcol, icol=icol, jcol=jcol,
-                                             isfr_col=isfr_col,
-                                             bounds=bounds, active_area=active_area,
-                                             epsg=epsg, proj_str=proj_str, prjfile=prjfile)
+        return cls.from_dataframe(df, node_col=node_col, kcol=kcol, icol=icol, jcol=jcol,
+                                  isfr_col=isfr_col,
+                                  bounds=bounds, active_area=active_area,
+                                  epsg=epsg, proj_str=proj_str, prjfile=prjfile)
 
-    @staticmethod
-    def from_dataframe(df=None, uniform=False,
+    @classmethod
+    def from_dataframe(cls, df=None, uniform=False,
                        kcol='k', icol='i', jcol='j',
                        isfr_col='isfr',
                        geometry_column='geometry',
@@ -375,7 +379,7 @@ class StructuredGrid(Grid):
         for dim in ['k', 'i', 'j']:
             if df[dim].min() == 1:
                 df[dim] -= 1
-        nrow, ncol = df.i.max()+1, df.j.max()+1
+        nrow, ncol = df.i.max() + 1, df.j.max() + 1
         df.sort_values(by=['k', 'i', 'j'], inplace=True)
         df['node'] = ncol * df.i + df.j
 
@@ -386,17 +390,17 @@ class StructuredGrid(Grid):
         if len(set(df.node).difference(df.groupby('k').get_group(0).node)) != 0:
             # this may take awhile for large grids
             df = df.groupby('node').first()
-            df['node'] = df.index # put node back in columns
+            df['node'] = df.index  # put node back in columns
 
         if isfr_col in df.columns:
             df['isfr'] = df[isfr_col].astype(int)
         else:
             df['isfr'] = 1
 
-        return StructuredGrid(df, active_area=active_area,
-                              model_units=model_units,
-                              uniform=uniform,
-                              epsg=epsg, proj_str=proj_str, prjfile=prjfile, **kwargs)
+        return cls(df, active_area=active_area,
+                   model_units=model_units,
+                   uniform=uniform,
+                   epsg=epsg, proj_str=proj_str, prjfile=prjfile, **kwargs)
 
 
 class UnstructuredGrid(Grid):
@@ -427,8 +431,8 @@ class UnstructuredGrid(Grid):
         geoms = self.df.geometry.values[self.df.isfr == 1]
         self._active_area = unary_union(geoms)
 
-    @staticmethod
-    def from_dataframe(df=None,
+    @classmethod
+    def from_dataframe(cls, df=None,
                        node_col='node',
                        isfr_col='isfr',
                        geometry_column='geometry',
@@ -454,6 +458,6 @@ class UnstructuredGrid(Grid):
             df['isfr'] = df[isfr_col].astype(int)
         else:
             df['isfr'] = 1
-        return UnstructuredGrid(df, active_area=active_area,
-                                model_units=model_units,
-                                epsg=epsg, proj_str=proj_str, prjfile=prjfile, **kwargs)
+        return cls(df, active_area=active_area,
+                   model_units=model_units,
+                   epsg=epsg, proj_str=proj_str, prjfile=prjfile, **kwargs)

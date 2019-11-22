@@ -2,6 +2,7 @@
 Functions for handling observations of SFR package output.
 """
 import pandas as pd
+
 from .routing import get_next_id_in_subset
 
 
@@ -102,4 +103,3 @@ def write_mf6_sfr_obsfile(observation_locations,
             output.write('  {}  {}  {:d}\n'.format(r.obsname, r.obstype, r.rno))
         output.write('END CONTINUOUS\n')
     print('wrote {}'.format(filename))
-

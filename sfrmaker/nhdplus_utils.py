@@ -1,7 +1,9 @@
 import os
 import time
+
 import pandas as pd
-from .gis import shp2df, crs, project, get_bbox
+from gisutils import shp2df
+from .gis import crs, get_bbox
 
 
 def get_prj_file(NHDPlus_paths=None, NHDFlowlines=None):
@@ -15,7 +17,7 @@ def get_prj_file(NHDPlus_paths=None, NHDFlowlines=None):
         return NHDFlowlines[0][:-4] + '.prj'
 
 
-def get_NHDPlus_v2_filepaths(NHDPlus_paths):
+def get_nhdplus_v2_filepaths(NHDPlus_paths):
     print('for basins:')
     if isinstance(NHDPlus_paths, str):
         NHDPlus_paths = [NHDPlus_paths]
@@ -24,11 +26,11 @@ def get_NHDPlus_v2_filepaths(NHDPlus_paths):
     NHDFlowlines = [os.path.join(f, 'NHDSnapshot/Hydrography/NHDFlowline.shp')
                     for f in NHDPlus_paths]
     PlusFlowlineVAA = [os.path.join(f, 'NHDPlusAttributes/PlusFlowlineVAA.dbf')
-                    for f in NHDPlus_paths]
+                       for f in NHDPlus_paths]
     PlusFlow = [os.path.join(f, 'NHDPlusAttributes/PlusFlow.dbf')
-                    for f in NHDPlus_paths]
+                for f in NHDPlus_paths]
     elevslope = [os.path.join(f, 'NHDPlusAttributes/elevslope.dbf')
-                    for f in NHDPlus_paths]
+                 for f in NHDPlus_paths]
     for paths in NHDFlowlines, PlusFlowlineVAA, PlusFlow, elevslope:
         for f in paths:
             if not os.path.exists(f):
@@ -36,7 +38,7 @@ def get_NHDPlus_v2_filepaths(NHDPlus_paths):
     return NHDFlowlines, PlusFlowlineVAA, PlusFlow, elevslope
 
 
-def get_NHDPlus_v2_routing(PlusFlow_file,
+def get_nhdplus_v2_routing(PlusFlow_file,
                            from_col='FROMCOMID', to_col='TOCOMID'):
     """Read PlusFlow file and return the routing
     information as a dictionary of to:from COMID numbers.
@@ -55,7 +57,7 @@ def get_NHDPlus_v2_routing(PlusFlow_file,
     return flowline_routing
 
 
-def load_NHDPlus_v2(NHDPlus_paths=None,
+def load_nhdplus_v2(NHDPlus_paths=None,
                     NHDFlowlines=None, PlusFlowlineVAA=None, PlusFlow=None, elevslope=None,
                     filter=None,
                     epsg=None, proj_str=None, prjfile=None):
@@ -89,7 +91,7 @@ def load_NHDPlus_v2(NHDPlus_paths=None,
 
     if NHDPlus_paths is not None:
         NHDFlowlines, PlusFlowlineVAA, PlusFlow, elevslope = \
-            get_NHDPlus_v2_filepaths(NHDPlus_paths)
+            get_nhdplus_v2_filepaths(NHDPlus_paths)
 
     # get crs information from flowline projection file
     if prjfile is None:
@@ -127,6 +129,7 @@ def load_NHDPlus_v2(NHDPlus_paths=None,
     df['tocomid'] = get_tocomids(pf, df.index.tolist())
     return df
 
+
 def get_tocomids(pf, fromcomid_list):
     print('\nGetting routing information from NHDPlus Plusflow table...')
     ta = time.time()
@@ -156,6 +159,7 @@ def get_tocomids(pf, fromcomid_list):
     print("finished in {:.2f}s\n".format(time.time() - ta))
     return tocomids
 
+
 def find_next_comid(comid, pftable, comids, max_levels=10):
     """Crawls the PlusFlow table to find the next downstream comid that
     is in the set comids. Looks up subsequent downstream comids to a
@@ -173,9 +177,9 @@ def find_next_comid(comid, pftable, comids, max_levels=10):
             return list(set(nextocomid).intersection(comids))[0]
     return 0
 
+
 def read_nhdplus(shpfiles, bbox_filter=None,
                  index_col='comid'):
-
     # read shapefile into dataframe and find the index column
     df = shp2df(shpfiles, filter=bbox_filter)
     if len(df) > 0:

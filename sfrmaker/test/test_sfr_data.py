@@ -1,15 +1,16 @@
-import copy
 import os
-import pytest
+
+import flopy
 import numpy as np
 import pandas as pd
-import flopy
-from ..gis import shp2df
+import pytest
+
+from gisutils import shp2df
 
 
 @pytest.fixture(scope='function')
 def period_data(shellmound_sfrdata):
-    #shellmound_sfrdata = copy.deepcopy(shellmound_sfrdata)
+    # shellmound_sfrdata = copy.deepcopy(shellmound_sfrdata)
     perdata = shellmound_sfrdata.period_data
     rd = shellmound_sfrdata.reach_data
     perdata['rno'] = [rd.rno.values[0], rd.rno.values[100]] * 2
@@ -20,7 +21,7 @@ def period_data(shellmound_sfrdata):
 
 @pytest.fixture(scope='function')
 def shellmound_sfrdata_with_period_data(shellmound_sfrdata, period_data):
-    #shellmound_sfrdata = copy.deepcopy(shellmound_sfrdata)
+    # shellmound_sfrdata = copy.deepcopy(shellmound_sfrdata)
     shellmound_sfrdata._period_data = period_data
     return shellmound_sfrdata
 
@@ -36,7 +37,7 @@ def test_const(shellmound_sfrdata, sfr_testdata):
 
 
 def test_empty_period_data(shellmound_sfrdata):
-    #shellmound_sfrdata = copy.deepcopy(shellmound_sfrdata)
+    # shellmound_sfrdata = copy.deepcopy(shellmound_sfrdata)
     perdata = shellmound_sfrdata.period_data
     assert isinstance(perdata, pd.DataFrame)
     assert len(perdata) == 0
@@ -61,8 +62,8 @@ def test_write_perioddata(shellmound_sfrdata_with_period_data, outdir):
                     rno_values.append(int(rno))
                     txt_values.append(txt)
                     q_values.append(float(q))
-    assert np.array_equal(rno_values,  sfrd.period_data['rno'].values)
-    assert np.allclose(q_values,  sfrd.period_data['inflow'].values)
+    assert np.array_equal(rno_values, sfrd.period_data['rno'].values)
+    assert np.allclose(q_values, sfrd.period_data['inflow'].values)
     assert set(txt_values) == {'inflow'}
 
 
@@ -152,7 +153,7 @@ def test_flopy_mf6sfr_outfile(mf6sfr, mf6sfr_outfile):
 
 
 def test_ibound_representation_of_idomain(shellmound_sfrdata, shellmound_model):
-    ibound = shellmound_sfrdata.ModflowSfr2.parent.bas6.ibound.array
+    ibound = shellmound_sfrdata.modflow_sfr2.parent.bas6.ibound.array
     idomain = shellmound_model.dis.idomain.array
     assert np.array_equal(ibound, idomain)
 

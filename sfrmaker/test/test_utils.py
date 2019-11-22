@@ -1,5 +1,6 @@
-#TODO: add unit tests for utils.py
+# TODO: add unit tests for utils.py
 import numpy as np
+
 from ..utils import assign_layers
 
 

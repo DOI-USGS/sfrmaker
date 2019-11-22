@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+
 from sfrmaker.routing import find_path, make_graph
 
 
@@ -34,7 +35,7 @@ def valid_nsegs(nsegs, outsegs=None, increasing=True):
         graph = make_graph(nsegs, outsegs, one_to_many=False)
         monotonic = []
         for s in nsegs:
-            seg_sequence = find_path(graph.copy(), s)[:-1] # last number is 0 for outlet
+            seg_sequence = find_path(graph.copy(), s)[:-1]  # last number is 0 for outlet
             monotonic.append(np.all(np.diff(np.array(seg_sequence)) > 0))
         monotonic = np.all(monotonic)
         return consecutive_and_onebased & monotonic
@@ -74,11 +75,10 @@ def rno_nseg_routing_consistent(nseg, outseg, iseg, ireach, rno, outreach):
 
     segments_consistent = []
     for s, g in seg_groups:
-
         # since the segment is sorted,
         # rno[i+1] should == outreach[i]
         preceding_consistent = np.array_equal(g.rno.values[1:],
-                                    g.outreach.values[:1])
+                                              g.outreach.values[:1])
 
         # check that last reach goes to same segment
         # as outseg in segment_routing
@@ -189,7 +189,7 @@ def reach_elevations_decrease_downstream(reach_data):
     rd = reach_data.reset_index()
     elev = dict(zip(rd.rno, rd.strtop))
     dnelev = {rid: elev[rd.outreach[i]] if rd.outreach[i] != 0
-              else -9999 for i, rid in enumerate(rd.rno)}
+    else -9999 for i, rid in enumerate(rd.rno)}
     diffs = np.array([(dnelev[i] - elev[i]) if dnelev[i] != -9999
                       else -.001 for i in rd.rno])
     return np.max(diffs) <= 0

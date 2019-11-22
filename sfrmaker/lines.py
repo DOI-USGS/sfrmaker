@@ -1,26 +1,23 @@
-import time
-import collections
 import os
+import time
+
 import numpy as np
 import pandas as pd
-import fiona
-from fiona.crs import to_string
-from shapely.ops import unary_union
 from shapely.geometry import box
-from .gis import shp2df, df2shp, crs, read_polygon_feature, project, get_bbox
-from . import grid
+from gisutils import shp2df, df2shp, project
+import sfrmaker
+from sfrmaker.routing import pick_toids, find_path, make_graph, renumber_segments
+from .checks import routing_is_circular
+from .gis import crs, read_polygon_feature, get_bbox
+from .grid import StructuredGrid
+from .nhdplus_utils import load_nhdplus_v2, get_prj_file
+from .sfrdata import SFRData
 from .utils import unit_conversion, \
     width_from_arbolate_sum, arbolate_sum, \
     consolidate_reach_conductances, interpolate_to_reaches
-from sfrmaker.routing import pick_toids, find_path, make_graph, renumber_segments
-from .nhdplus_utils import load_NHDPlus_v2, get_prj_file
-from .grid import StructuredGrid
-from .sfrdata import sfrdata
-from .checks import routing_is_circular
-import sfrmaker
 
 
-class lines:
+class Lines:
     """Class for working with linestring feature input.
 
     Parameters
@@ -62,8 +59,8 @@ class lines:
         self.crs = crs(epsg=epsg, proj_str=proj_str, prjfile=prjfile)
         self._geometry_length_units = None
 
-        self._routing = None # dictionary of routing connections
-        self._paths = None # routing sequence from each segment to outlet
+        self._routing = None  # dictionary of routing connections
+        self._paths = None  # routing sequence from each segment to outlet
 
     @property
     def attr_to_m(self):
@@ -75,7 +72,7 @@ class lines:
     def attr_to_ft(self):
         if self.attr_length_units == 'feet':
             return 1.
-        return 1/0.3048
+        return 1 / 0.3048
 
     @property
     def geometry_to_m(self):
@@ -114,7 +111,7 @@ class lines:
                 to_one = np.isscalar(np.squeeze(toid)[0])
             toid = np.squeeze(toid)
             routing = make_graph(self.df.id.values, toid,
-                                       one_to_many=not to_one)
+                                 one_to_many=not to_one)
             if not to_one:
                 routing = pick_toids(routing, self.elevup)
             self._routing = routing
@@ -164,14 +161,14 @@ class lines:
             print('simplification tolerance: {:.2f}'.format(tol))
             feature_s = feature.simplify(tol).buffer(tol).buffer(0)
         else:
-            feature_s = feature.buffer(0) # in case feature is invalid, might fix
+            feature_s = feature.buffer(0)  # in case feature is invalid, might fix
 
         lines = df.geometry.tolist()
         print('starting lines: {:,d}'.format(len(lines)))
-        #isn = np.array([g.intersection(feature_s) for g in lines])
-        #df['geometry'] = isn
-        #drop = np.array([g.is_empty for g in isn])
-        #df = df.loc[~drop]
+        # isn = np.array([g.intersection(feature_s) for g in lines])
+        # df['geometry'] = isn
+        # drop = np.array([g.is_empty for g in isn])
+        # df = df.loc[~drop]
         intersects = [g.intersects(feature_s) for g in lines]
         if not np.any(intersects):
             print('No lines in active area. Check CRS.')
@@ -268,10 +265,8 @@ class lines:
     def write_shapefile(self, outshp='flowlines.shp'):
         df2shp(self.df, outshp, epsg=self.crs.epsg, prj=self.crs.prjfile)
 
-
-
-    @staticmethod
-    def from_shapefile(shapefile,
+    @classmethod
+    def from_shapefile(cls, shapefile,
                        id_column='id',
                        routing_column='toid',
                        arbolate_sum_column2='asum2',
@@ -304,21 +299,21 @@ class lines:
         df = shp2df(shapefile, filter=filter)
         assert 'geometry' in df.columns, "No feature geometries found in {}.".format(shapefile)
 
-        return lines.from_dataframe(df,
-                                    id_column=id_column,
-                                    routing_column=routing_column,
-                                    arbolate_sum_column2=arbolate_sum_column2,
-                                    width1_column=width1_column,
-                                    width2_column=width2_column,
-                                    up_elevation_column=up_elevation_column,
-                                    dn_elevation_column=dn_elevation_column,
-                                    name_column=name_column,
-                                    attr_length_units=attr_length_units,
-                                    attr_height_units=attr_height_units,
-                                    epsg=epsg, proj_str=proj_str, prjfile=prjfile)
+        return cls.from_dataframe(df,
+                                  id_column=id_column,
+                                  routing_column=routing_column,
+                                  arbolate_sum_column2=arbolate_sum_column2,
+                                  width1_column=width1_column,
+                                  width2_column=width2_column,
+                                  up_elevation_column=up_elevation_column,
+                                  dn_elevation_column=dn_elevation_column,
+                                  name_column=name_column,
+                                  attr_length_units=attr_length_units,
+                                  attr_height_units=attr_height_units,
+                                  epsg=epsg, proj_str=proj_str, prjfile=prjfile)
 
-    @staticmethod
-    def from_dataframe(df,
+    @classmethod
+    def from_dataframe(cls, df,
                        id_column='id',
                        routing_column='toid',
                        arbolate_sum_column2='asum2',
@@ -348,7 +343,7 @@ class lines:
                        name_column: 'name'}
 
         # dictionary for assigning new column names
-        rename_cols = {k:v for k, v in rename_cols.items() if k in df.columns and v != k}
+        rename_cols = {k: v for k, v in rename_cols.items() if k in df.columns and v != k}
         # drop any existing columns that have one of the new names
         # (otherwise pandas will create a DataFrame
         # instead of a Series under that column name)
@@ -368,12 +363,13 @@ class lines:
                 assert isinstance(df[c], pd.Series)
         df = df[column_order].copy()
 
-        return lines(df, attr_length_units=attr_length_units,
-                     attr_height_units=attr_height_units,
-                     epsg=epsg, proj_str=proj_str, prjfile=prjfile)
+        return cls(df, attr_length_units=attr_length_units,
+                   attr_height_units=attr_height_units,
+                   epsg=epsg, proj_str=proj_str, prjfile=prjfile)
 
-    @staticmethod
-    def from_NHDPlus_v2(NHDPlus_paths=None,
+
+    @classmethod
+    def from_nhdplus_v2(cls, NHDPlus_paths=None,
                         NHDFlowlines=None, PlusFlowlineVAA=None, PlusFlow=None, elevslope=None,
                         filter=None,
                         epsg=None, proj_str=None, prjfile=None):
@@ -400,7 +396,7 @@ class lines:
         filter : tuple or str
             Bounding box (tuple) or shapefile of model stream network area.
         """
-        df = load_NHDPlus_v2(NHDPlus_paths=NHDPlus_paths,
+        df = load_nhdplus_v2(NHDPlus_paths=NHDPlus_paths,
                              NHDFlowlines=NHDFlowlines, PlusFlowlineVAA=PlusFlowlineVAA,
                              PlusFlow=PlusFlow, elevslope=elevslope,
                              filter=filter,
@@ -418,12 +414,13 @@ class lines:
         if 'MINELEVSMO' in df.columns:
             df['elevdn'] = df.MINELEVSMO / 100.
 
-        return lines.from_dataframe(df, id_column='COMID',
-                                    routing_column='tocomid',
-                                    name_column='GNIS_NAME',
-                                    attr_length_units='meters',
-                                    attr_height_units='meters',
-                                    epsg=epsg, proj_str=proj_str, prjfile=prjfile)
+        return cls.from_dataframe(df, id_column='COMID',
+                                  routing_column='tocomid',
+                                  name_column='GNIS_NAME',
+                                  attr_length_units='meters',
+                                  attr_height_units='meters',
+                                  epsg=epsg, proj_str=proj_str, prjfile=prjfile)
+
 
     def to_sfr(self, grid=None, sr=None,
                active_area=None, isfr=None,
@@ -485,14 +482,14 @@ class lines:
         if cull_flowlines_to_active_area:
             if grid.active_area is not None:
                 self.cull(grid.active_area, inplace=True, simplify=True, tol=2000)
-            elif grid._bounds is not None: # cull to grid bounding box if already computed
+            elif grid._bounds is not None:  # cull to grid bounding box if already computed
                 self.cull(box(*grid._bounds), inplace=True)
         if model_name is None:
             model_name = 'model'
 
-        mult = unit_conversion.get(self.attr_length_units+grid.model_units, 1.)
-        mult_h = unit_conversion.get(self.attr_height_units+grid.model_units, 1.)
-        gis_mult = unit_conversion.get(self.geometry_length_units+grid.model_units, 1.)
+        mult = unit_conversion.get(self.attr_length_units + grid.model_units, 1.)
+        mult_h = unit_conversion.get(self.attr_height_units + grid.model_units, 1.)
+        gis_mult = unit_conversion.get(self.geometry_length_units + grid.model_units, 1.)
 
         # convert routing connections (toid column) from lists (one-to-many)
         # to ints (one-to-one or many-to-one)
@@ -502,7 +499,7 @@ class lines:
         # one to many routing is not supported
         to_one = np.isscalar(np.squeeze(list(routing.values()))[0])
         assert to_one, "routing is still one-to-many"
-        #if not to_one:
+        # if not to_one:
         #    routing = pick_toids(routing, elevup)
         valid_ids = routing.keys()
         # df.toid column is basis for routing attributes
@@ -544,10 +541,10 @@ class lines:
             lengths['rchlen'] = np.array([g.length for g in lengths.geometry]) * self.geometry_to_m
             groups = lengths.groupby('line_id')  # fragments grouped by parent line
 
-            #segment_asums = [asums[id] for id in lengths.line_id]
-            #reach_cumsums = np.concatenate([np.cumsum(grp.rchlen.values[::-1])[::-1] - 0.5*grp.rchlen.values
+            # segment_asums = [asums[id] for id in lengths.line_id]
+            # reach_cumsums = np.concatenate([np.cumsum(grp.rchlen.values[::-1])[::-1] - 0.5*grp.rchlen.values
             #                              for s, grp in groups])
-            #reach_asums = -1 * reach_cumsums + segment_asums
+            # reach_asums = -1 * reach_cumsums + segment_asums
             reach_cumsums = []
             ordered_ids = rd.line_id.loc[rd.line_id.diff() != 0].values
             for id in ordered_ids:
@@ -558,11 +555,11 @@ class lines:
             segment_asums = [asum1s[id] for id in lengths.line_id]
             reach_asums = segment_asums + reach_cumsums
             # maintain positive asums; lengths in NHD often aren't exactly equal to feature lengths
-            #reach_asums[reach_asums < 0.] = 0
+            # reach_asums[reach_asums < 0.] = 0
             rd['asum'] = reach_asums
             # width estimation formula expects meters
             width = width_from_arbolate_sum(reach_asums)
-            rd['width'] = width * unit_conversion.get('meters'+grid.model_units, 1.) # convert back to model units
+            rd['width'] = width * unit_conversion.get('meters' + grid.model_units, 1.)  # convert back to model units
             rd.loc[rd.width < minimum_reach_width, 'width'] = minimum_reach_width
 
             # assign width1 and width2 back to segment data
@@ -586,7 +583,7 @@ class lines:
 
         # discard very small reaches; redo numbering
         # set minimum reach length based on cell size
-        thresh = 0.05 # fraction of cell length (based on square root of area)
+        thresh = 0.05  # fraction of cell length (based on square root of area)
         if minimum_reach_length is None:
             cellgeoms = grid.df.loc[rd.node.values, 'geometry']
             mean_area = np.mean([g.area for g in cellgeoms])
@@ -597,7 +594,7 @@ class lines:
                                                                         minimum_reach_length,
                                                                         grid.model_units))
         rd = rd.loc[inds].copy()
-        rd['strhc1'] = 1. # default value of streambed Kv for now
+        rd['strhc1'] = 1.  # default value of streambed Kv for now
         # handle co-located reaches
         if consolidate_conductance or one_reach_per_cell:
             rd = consolidate_reach_conductances(rd, keep_only_dominant=one_reach_per_cell)
@@ -643,16 +640,16 @@ class lines:
         r = renumber_segments(nseg, outseg)
         # map new segment numbers to line_ids
         line_id = {r[s]: lid for s, lid in line_id.items()}
-        #segment2 = {lid: r[s] for lid, s in segment.items()}
-        #line_id2 = {s: lid for lid, s in segment2.items()}
+        # segment2 = {lid: r[s] for lid, s in segment.items()}
+        # line_id2 = {s: lid for lid, s in segment2.items()}
 
         # update reach_data
         rd['iseg'] = [r[s] for s in rd.iseg]
 
         print('\nSetting up segment data...')
         sd = pd.DataFrame()
-        #sd['nseg'] = [segment2[lid] for lid in remaining_ids]
-        #sd['outseg'] = [segment2.get(new_routing[line_id2[s]], 0) for s in nseg]
+        # sd['nseg'] = [segment2[lid] for lid in remaining_ids]
+        # sd['outseg'] = [segment2.get(new_routing[line_id2[s]], 0) for s in nseg]
         sd['nseg'] = [r[s] for s in nseg]
         sd['outseg'] = [r[s] for s in outseg]
         sd.sort_values(by='nseg', inplace=True)
@@ -685,8 +682,8 @@ class lines:
         # assigning elevations and other properties by reach,
         # smoothing elevations, writing sfr package files
         # and other output
-        rd = rd[[c for c in sfrdata.rdcols if c in rd.columns]].copy()
-        sfrd = sfrdata(reach_data=rd, segment_data=sd, grid=grid,
+        rd = rd[[c for c in SFRData.rdcols if c in rd.columns]].copy()
+        sfrd = SFRData(reach_data=rd, segment_data=sd, grid=grid,
                        model=model,
                        model_name=model_name, **kwargs)
         print("\nTime to create sfr dataset: {:.2f}s\n".format(time.time() - totim))

@@ -3,10 +3,12 @@ Make a SFR package for a prexisting MODFLOW model,
 using a flopy SpatialReference to specify the grid
 """
 import os
-import numpy as np
+
 import flopy
+import numpy as np
+
 fm = flopy.modflow
-from sfrmaker import lines, StructuredGrid
+from sfrmaker import Lines, StructuredGrid
 from sfrmaker.utils import assign_layers
 
 # NHDPlus input files (see the input requirements in the SFRmaker readme file
@@ -29,7 +31,7 @@ if not os.path.isdir(outdir):
 # make an instance of the sfrmaker.lines class from NHDPlus data
 # use a shapefile of the model grid to filter what is read in
 # (only flowlines within the bounding box of the grid)
-lns = lines.from_NHDPlus_v2(NHDFlowlines=flowlines,
+lns = Lines.from_nhdplus_v2(NHDFlowlines=flowlines,
                             PlusFlowlineVAA=pfvaa_files,
                             PlusFlow=plusflow_files,
                             elevslope=elevslope_files,
@@ -44,7 +46,8 @@ sr = flopy.utils.SpatialReference(delr=m.dis.delr.array,  # cell spacing along a
                                   lenuni=1,  # model units of feet
                                   xll=682688, yll=5139052,  # lower left corner of model grid
                                   rotation=0,  # grid is unrotated
-                                  proj4_str='epsg:26715'  # projected coordinate system of model (UTM NAD27 zone 15 North)
+                                  proj4_str='epsg:26715'
+                                  # projected coordinate system of model (UTM NAD27 zone 15 North)
                                   )
 m.sr = sr
 
@@ -67,13 +70,13 @@ sfr.reach_data['k'] = layers
 if new_botm is not None:
     botm[-1] = new_botm
     np.savetxt('{}/external/botm{}.dat'.format(m.model_ws,
-                                      m.nlay-1),
-                                      new_botm, fmt='%.2f')
-    sfr.ModflowSfr2.parent.dis.botm = botm
+                                               m.nlay - 1),
+               new_botm, fmt='%.2f')
+    sfr.modflow_sfr2.parent.dis.botm = botm
 
-# run Flopy diagnostics (refresh the ModflowSfr2 instance first)
-sfr.create_ModflowSfr2(model=m)
-sfr.ModflowSfr2.check()
+# run Flopy diagnostics (refresh the modflow_sfr2 instance first)
+sfr.create_modflow_sfr2(model=m)
+sfr.modflow_sfr2.check()
 
 # write the SFR package
 # turn on writing of SFR water balance ascii output by specifying unit no. for istcb2

@@ -6,6 +6,7 @@ SFRmaker is a python package for automating construction of stream flow routing 
 ### Version 0.1
 [![Build Status](https://travis-ci.com/aleaf/SFRmaker.svg?branch=master)](https://travis-ci.com/aleaf/SFRmaker)
 [![Coverage Status](https://codecov.io/github/aleaf/SFRmaker/coverage.svg?branch=master)](https://codecov.io/github/aleaf/SFRmaker/coverage.svg?branch=master)
+[![PyPI version](https://badge.fury.io/py/sfrmaker.svg)](https://badge.fury.io/py/sfrmaker)
 
 
 Getting Started
@@ -15,24 +16,24 @@ Getting Started
 import flopy
 import sfrmaker
 ```
-#### create an instance of the lines class from NHDPlus data 
-* alternatively, **`lines`** can also be created from a shapefile or dataframe containing LineString features representing streams
+#### create an instance of the Lines class from NHDPlus data 
+* alternatively, **`Lines`** can also be created from a shapefile or dataframe containing LineString features representing streams
 * see input data requirements below for more details
 
 ```python
-lns = sfrmaker.lines.from_NHDPlus_v2(NHDFlowlines='NHDFlowlines.shp',  
+lns = sfrmaker.Lines.from_nhdplus_v2(NHDFlowlines='NHDFlowlines.shp',  
                             			PlusFlowlineVAA='PlusFlowlineVAA.dbf',  
                             			PlusFlow='PlusFlow.dbf',  
                             			elevslope='elevslope.dbf',  
                             			filter='data/grid.shp')
 ```
 
-#### create an instance of `lines` from a hydrography shapefile
-* when creating `lines` from a shapefile or dataframe, attribute field or column names can be supplied in lieu of the NHDPlus attribute tables (.dbf files).
+#### create an instance of `Lines` from a hydrography shapefile
+* when creating `Lines` from a shapefile or dataframe, attribute field or column names can be supplied in lieu of the NHDPlus attribute tables (.dbf files).
 
 
 ```python
-lns = lines.from_shapefile(flowlines_file,
+lns = Lines.from_shapefile(flowlines_file,
                            id_column='COMID',
                            routing_column='tocomid',
                            width1_column='width1',

@@ -5,7 +5,8 @@ be assigned to layer 1 by default, and Flopy diagnostics that
 only involved the SFR package can still be run.
 """
 import os
-from sfrmaker import lines, StructuredGrid
+
+from sfrmaker import Lines, StructuredGrid
 
 # NHDPlus input files (see the input requirements in the SFRmaker readme file
 # (Note that multiple datasets can be supplied as lists
@@ -27,7 +28,7 @@ if not os.path.isdir(outdir):
 # make an instance of the sfrmaker.lines class from NHDPlus data
 # use a shapefile of the model grid to filter what is read in
 # (only flowlines within the bounding box of the grid)
-lns = lines.from_NHDPlus_v2(NHDFlowlines=flowlines,
+lns = Lines.from_nhdplus_v2(NHDFlowlines=flowlines,
                             PlusFlowlineVAA=pfvaa_files,
                             PlusFlow=plusflow_files,
                             elevslope=elevslope_files,
@@ -47,9 +48,9 @@ grd = StructuredGrid.from_shapefile(shapefile='{}/grid.shp'.format(data_dir),
 sfr = lns.to_sfr(grd)
 sfr.set_streambed_top_elevations_from_dem(dem, dem_z_units='meters')
 
-# run Flopy diagnostics (refresh the ModflowSfr2 instance first)
-sfr.create_ModflowSfr2()
-sfr.ModflowSfr2.check()
+# run Flopy diagnostics (refresh the modflow_sfr2 instance first)
+sfr.create_modflow_sfr2()
+sfr.modflow_sfr2.check()
 
 # write the SFR package
 # turn on writing of SFR water balance ascii output by specifying unit no. for istcb2

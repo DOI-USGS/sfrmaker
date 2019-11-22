@@ -1,15 +1,17 @@
 import inspect
-import time
-import operator
 import json
+import operator
 import pprint
+import time
+
 import numpy as np
 import pandas as pd
-from sfrmaker.routing import get_nextupsegs, get_upsegs, make_graph
 from shapely.geometry import Point
 
+from sfrmaker.routing import get_nextupsegs, get_upsegs, make_graph
+
 unit_conversion = {'feetmeters': 0.3048,
-                   'metersfeet': 1/.3048}
+                   'metersfeet': 1 / .3048}
 
 
 def assign_layers(reach_data, botm_array, pad=1., inplace=False):
@@ -86,6 +88,7 @@ def get_layer(botm_array, i, j, elev):
     k : np.ndarray (1-D) or scalar
         zero-based layer index
     """
+
     def to_array(arg):
         if not isinstance(arg, np.ndarray):
             return np.array([arg])
@@ -127,7 +130,7 @@ def consolidate_reach_conductances(rd, keep_only_dominant=False):
     """
     print('\nAssigning total SFR conductance to dominant reach in cells with multiple reaches...')
     # use value of 1 for streambed k, since k would be constant within a cell
-    rd['cond'] = rd.width * rd.rchlen * rd.strhc1 # assume value of 1 for strthick
+    rd['cond'] = rd.width * rd.rchlen * rd.strhc1  # assume value of 1 for strthick
 
     # make a new column that designates whether a reach is dominant in each cell
     # dominant reaches include those not collocated with other reaches, and the longest collocated reach
@@ -189,7 +192,7 @@ def interpolate_to_reaches(reach_data, segment_data,
     if 'per' in segment_data.columns:
         segment_data = segment_data.loc[segment_data.per == 0]
     assert len(segment_data[segment_data_group_col].unique()) == len(segment_data), \
-    "Segment ID column: {} has not non-unique values."
+        "Segment ID column: {} has not non-unique values."
     rd_groups = reach_data.groupby(reach_data_group_col)
     sd_groups = segment_data.groupby(segment_data_group_col)
 
@@ -200,9 +203,9 @@ def interpolate_to_reaches(reach_data, segment_data,
         segment_length = reaches.rchlen.sum()
         # reach midpoint locations (to interpolate to)
         dist = (np.cumsum(reaches.rchlen) - 0.5 * reaches.rchlen).values
-        fp = [segdata[segvar1].values[0], # values at segment ends
+        fp = [segdata[segvar1].values[0],  # values at segment ends
               segdata[segvar2].values[0]]
-        xp = [0, segment_length] # segment start/end distances
+        xp = [0, segment_length]  # segment start/end distances
         reach_values += np.interp(dist, xp, fp).tolist()
     assert len(reach_values) == len(reach_data)
     return np.array(reach_values)
@@ -311,7 +314,7 @@ def setup_reach_data(flowline_geoms, fl_comids, grid_intersections,
     """
     print("\nSetting up reach data... (may take a few minutes for large grids)")
     ta = time.time()
-    fl_segments = np.arange(1, len(flowline_geoms)+1)
+    fl_segments = np.arange(1, len(flowline_geoms) + 1)
     reach = []
     segment = []
     node = []
@@ -334,7 +337,7 @@ def setup_reach_data(flowline_geoms, fl_comids, grid_intersections,
                 geoms, node_numbers = create_reaches(part, segment_nodes, grid_geoms)
                 if j > 0:
                     start_reach = reach[-1]
-                reach += list(np.arange(start_reach, start_reach+len(geoms)) + 1)
+                reach += list(np.arange(start_reach, start_reach + len(geoms)) + 1)
                 geometry += geoms
                 node += node_numbers
                 segment += [fl_segments[i]] * len(geoms)
@@ -344,7 +347,7 @@ def setup_reach_data(flowline_geoms, fl_comids, grid_intersections,
             break
 
     m1 = pd.DataFrame({'ireach': reach, 'iseg': segment, 'node': node,
-                            'geometry': geometry, 'line_id': comids})
+                       'geometry': geometry, 'line_id': comids})
     m1.sort_values(by=['iseg', 'ireach'], inplace=True)
     m1['rno'] = np.arange(len(m1)) + 1
     print("finished in {:.2f}s\n".format(time.time() - ta))
@@ -381,7 +384,8 @@ def create_reaches(part, segment_nodes, grid_geoms, tol=0.01):
     reach_geoms = {}
     # interesct flowline part with grid nodes
     reach_intersections = {c: part.intersection(grid_geoms[c]) for c in segment_nodes}
-    reach_intersections = {c:g for c, g in reach_intersections.items() if g.length > 0} #drops points and empty geometries
+    reach_intersections = {c: g for c, g in reach_intersections.items() if
+                           g.length > 0}  # drops points and empty geometries
     # empty geometries are created when segment_nodes variable includes nodes intersected by
     # other parts of a multipart line. Not sure what causes points besides duplicate vertices.
 
@@ -394,8 +398,8 @@ def create_reaches(part, segment_nodes, grid_geoms, tol=0.01):
             n += 1
         else:
             geoms = [gg for gg in g.geoms if gg.type == 'LineString']
-            reach_nodes.update({n+nn: node for nn, gg in enumerate(geoms)})
-            reach_geoms.update({n+nn: gg for nn, gg in enumerate(geoms)})
+            reach_nodes.update({n + nn: node for nn, gg in enumerate(geoms)})
+            reach_geoms.update({n + nn: gg for nn, gg in enumerate(geoms)})
             n += len(geoms)
 
     # make point features for start and end of flowline part
@@ -405,7 +409,7 @@ def create_reaches(part, segment_nodes, grid_geoms, tol=0.01):
     ordered_reach_geoms = []
     ordered_node_numbers = []
     current_reach = start
-    nreaches = len(reach_geoms) # length before entries are popped
+    nreaches = len(reach_geoms)  # length before entries are popped
 
     # for each flowline part (reach)
     for i in range(nreaches):
@@ -504,7 +508,7 @@ def load_sr(jsonfile):
     for k, v in rename.items():
         if k in cfg:
             cfg[v] = cfg.pop(k)
-    cfg['delr'] = np.ones(cfg['ncol'])* cfg['delr']
+    cfg['delr'] = np.ones(cfg['ncol']) * cfg['delr']
     cfg['delc'] = np.ones(cfg['nrow']) * cfg['delc']
     kwargs = get_input_arguments(cfg, SpatialReference)
     return SpatialReference(**kwargs)
@@ -537,7 +541,7 @@ def get_input_arguments(kwargs, function, warn=True):
     if warn:
         print('\nother arguments:')
         for k, v in not_arguments.items():
-            #print('{}: {}'.format(k, v))
+            # print('{}: {}'.format(k, v))
             print_item(k, v)
     print('\n')
     return input_kwargs
@@ -546,7 +550,7 @@ def get_input_arguments(kwargs, function, warn=True):
 def print_item(k, v):
     print('{}: '.format(k), end='')
     if isinstance(v, dict):
-        #print(json.dumps(v, indent=4))
+        # print(json.dumps(v, indent=4))
         pprint.pprint(v)
     elif isinstance(v, list):
         pprint.pprint(v)

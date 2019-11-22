@@ -24,7 +24,6 @@ fullnames = {'unknown', 'feet', 'meters', 'centimeters',
              'seconds', 'minutes', 'hours', 'days', 'years'}
 lenuni_text = {v: k for k, v in lenuni_values.items() if k in fullnames}
 
-
 volumetric_units = {'liters': 13,
                     'L': 13,
                     'gallons': 14,
@@ -39,7 +38,6 @@ volumetric_units = {'liters': 13,
                     'acre foot': 16,
                     'acre-foot': 16
                     }
-
 
 itmuni_values = {"unknown": 0,
                  "seconds": 1,
@@ -116,20 +114,20 @@ def convert_time_units(itmuni1, itmuni2):
         itmuni2 = itmuni_values.get(itmuni2.lower(), 0)
 
     yearlen = 365.25
-    mults = {(1, 2): 1/60,
-             (1, 3): 1/3600,
-             (1, 4): 1/86400,
-             (1, 5): 1/(86400 * yearlen),
-             (2, 3): 1/60,
-             (2, 4): 1/1440,
-             (2, 5): 1/(1440 * yearlen),
-             (3, 4): 1/24,
-             (3, 5): 1/(24 * yearlen),
+    mults = {(1, 2): 1 / 60,
+             (1, 3): 1 / 3600,
+             (1, 4): 1 / 86400,
+             (1, 5): 1 / (86400 * yearlen),
+             (2, 3): 1 / 60,
+             (2, 4): 1 / 1440,
+             (2, 5): 1 / (1440 * yearlen),
+             (3, 4): 1 / 24,
+             (3, 5): 1 / (24 * yearlen),
              (4, 5): yearlen}
     convert_time_units = np.ones((6, 6), dtype=float)
     for (u0, u1), mult in mults.items():
         convert_time_units[u0, u1] = mult
-        convert_time_units[u1, u0] = 1/mult
+        convert_time_units[u1, u0] = 1 / mult
     mult = convert_time_units[itmuni1, itmuni2]
     return mult
 
@@ -162,28 +160,28 @@ def get_volume_conversions():
     m, n = length_conversions.shape
     size = np.max(list(volumetric_units.values())) + 1
     volume_conversions = np.ones((size, size), dtype=float)
-    volume_conversions[:m, :n] = length_conversions **3
-    mults = {(13, 1): (1/.3048**3)/1000,  # liters to ft3
-             (13, 2): 1/1000,
+    volume_conversions[:m, :n] = length_conversions ** 3
+    mults = {(13, 1): (1 / .3048 ** 3) / 1000,  # liters to ft3
+             (13, 2): 1 / 1000,
              (13, 3): 1000,
              (13, 4): 1e6,
-             (13, 10): (1/.3048**3)/1000/(12**3), # liters to cubic inches
-             (13, 14): 1/3.78541, # liters to gallons
-             (13, 15): 1/(3.78541 * 1e6), # liters to million gallons
-             (13, 16): (1/.3048**3)/1000/43560, # liters to acre feet
+             (13, 10): (1 / .3048 ** 3) / 1000 / (12 ** 3),  # liters to cubic inches
+             (13, 14): 1 / 3.78541,  # liters to gallons
+             (13, 15): 1 / (3.78541 * 1e6),  # liters to million gallons
+             (13, 16): (1 / .3048 ** 3) / 1000 / 43560,  # liters to acre feet
              (14, 1): 1 / 7.48052,  # gallons to ft3
-             (14, 2): (.3048**3) / 7.48052, # gallons to m3
-             (14, 3): 1e6 * (.3048**3) / 7.48052,  # gallons to cm3
-             (14, 4): 1e9 * (.3048**3) / 7.48052,  # gallons to mm3
-             (14, 10): 1/231, # gallons to cubic inches
-             (14, 15): 1/1e6, # gallons to million gallons
-             (14, 16): 1 / 7.48052 / 43560, # gallons to acre feet
+             (14, 2): (.3048 ** 3) / 7.48052,  # gallons to m3
+             (14, 3): 1e6 * (.3048 ** 3) / 7.48052,  # gallons to cm3
+             (14, 4): 1e9 * (.3048 ** 3) / 7.48052,  # gallons to mm3
+             (14, 10): 1 / 231,  # gallons to cubic inches
+             (14, 15): 1 / 1e6,  # gallons to million gallons
+             (14, 16): 1 / 7.48052 / 43560,  # gallons to acre feet
              (15, 1): 1e6 / 7.48052,  # million gallons to ft3
              (15, 2): 1e6 * (.3048 ** 3) / 7.48052,  # million gallons to m3
              (15, 10): 1e6 / 231,
-             (15, 16): 1e6 / 7.48052 / 43560, # million gallons to acre feet
-             (16, 1): 1/43560,  # acre feet to ft3
-             (16, 2): 1/43560 * (.3048 ** 3), # acre feet to m3
+             (15, 16): 1e6 / 7.48052 / 43560,  # million gallons to acre feet
+             (16, 1): 1 / 43560,  # acre feet to ft3
+             (16, 2): 1 / 43560 * (.3048 ** 3),  # acre feet to m3
              }
     for (u0, u1), mult in mults.items():
         volume_conversions[u0, u1] = mult

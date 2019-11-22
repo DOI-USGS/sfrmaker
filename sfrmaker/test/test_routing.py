@@ -2,11 +2,10 @@ from ..routing import get_next_id_in_subset
 
 
 def add_line_sequence(routing, nlines=4):
-
     headwater_line_ids = set(routing.keys()).difference(routing.values())
     # add in some lines upstream of a headwater
     n = nlines
-    new_lines = set(range(n+2)).difference(routing)
+    new_lines = set(range(n + 2)).difference(routing)
     new_routing = {}
     id = new_lines.pop()
     sequence = [id]
@@ -33,7 +32,7 @@ def test_get_next_id_in_subset(shellmound_sfrdata):
     nlines = 4
     seq = add_line_sequence(routing, nlines=nlines)
 
-    result = get_next_id_in_subset(rd.line_id, routing, set(range(nlines+2)))
+    result = get_next_id_in_subset(rd.line_id, routing, set(range(nlines + 2)))
     assert set(result).difference(rd.line_id) == {0}
     assert set(result) == {0, seq[-1]}
-    assert len(result) == len(range(nlines+2))
+    assert len(result) == len(range(nlines + 2))

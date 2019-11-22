@@ -1,7 +1,7 @@
 import sys
+
 sys.path.append('..')
 import numpy as np
-import pandas as pd
 from sfrmaker.utils import arbolate_sum
 from sfrmaker.routing import get_upsegs, make_graph
 
@@ -18,7 +18,6 @@ def test_get_upsegs(sfr_test_numbering):
 
 
 def test_asum(sfr_test_numbering):
-
     rd, sd = sfr_test_numbering
     graph = dict(zip(sd.nseg, sd.outseg))
     lengths = dict(zip(sd.nseg, np.arange(len(sd))))
