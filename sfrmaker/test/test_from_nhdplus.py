@@ -138,7 +138,7 @@ def test_make_sfr(outdir,
                   tylerforks_model,
                   lines_from_NHDPlus,
                   active_area_shapefile,
-                  dem):
+                  dem, mfnwt_exe):
     m = tylerforks_model
     sfr = lines_from_NHDPlus.to_sfr(grid=grid,
                                     model=m)
@@ -166,11 +166,16 @@ def test_make_sfr(outdir,
     sfr.export_lines(outdir + 'example_lines.shp')
     sfr.export_routing(outdir + 'example_routing.shp')
 
-    # run the modflow model
-    if shutil.which('mfnwt') is not None:
-        m.exe_name = 'mfnwt'
+    # run modflow
+    if sfrmaker.utils.exe_exists(mfnwt_exe):
+        m.exe_name = mfnwt_exe
         try:
             success, buff = m.run_model(silent=False)
         except:
             pass
-        assert success, 'model run did not terminate successfully'
+        if not success:
+            list_file = m.lst.fn_path
+            with open(list_file) as src:
+                list_output = src.read()
+        assert success, 'model run did not terminate successfully:\n{}'.format(list_output)
+        return m

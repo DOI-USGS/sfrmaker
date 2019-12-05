@@ -17,6 +17,9 @@ def notebook(request):
     return request.param
 
 
+# even though test runs locally on Windows 10, and on Travis
+@pytest.mark.xfail(os.environ['APPVEYOR'] == 'True',
+                   reason="jupyter kernel has timeout issue on appveyor for some reason")
 def test_notebook(notebook, outdir):
     # run autotest on each notebook
     path, fname = os.path.split(notebook)

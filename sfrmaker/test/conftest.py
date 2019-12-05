@@ -1,11 +1,17 @@
 import os
 import copy
+import platform
 import flopy
 import flopy.modflow as fm
 import pandas as pd
 import pytest
-
 import sfrmaker
+
+
+@pytest.fixture(scope="session")
+def project_root_path():
+    filepath = os.path.split(os.path.abspath(__file__))[0]
+    return os.path.normpath(os.path.join(filepath, '../../'))
 
 
 @pytest.fixture(scope="session")
@@ -27,6 +33,28 @@ def outdir():
     if not os.path.isdir(outdir):
         os.makedirs(outdir)
     return outdir
+
+
+@pytest.fixture(scope="session")
+def bin_path(project_root_path):
+    bin_path = os.path.join(project_root_path, "bin")
+    if "linux" in platform.platform().lower():
+        bin_path = os.path.join(bin_path, "linux")
+    elif "darwin" in platform.platform().lower():
+        bin_path = os.path.join(bin_path, "mac")
+    else:
+        bin_path = os.path.join(bin_path, "win")
+    return bin_path
+
+
+@pytest.fixture(scope="session")
+def mf6_exe(bin_path):
+    return os.path.join(bin_path, 'mf6')
+
+
+@pytest.fixture(scope="session")
+def mfnwt_exe(bin_path):
+    return os.path.join(bin_path, 'mfnwt')
 
 
 @pytest.fixture(scope="function")
