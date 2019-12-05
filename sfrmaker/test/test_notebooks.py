@@ -22,7 +22,7 @@ def test_notebook(notebook, outdir):
     path, fname = os.path.split(notebook)
     cmd = ('jupyter ' + 'nbconvert '
            '--ExecutePreprocessor.timeout=600 '
-           '--ExecutePreprocessor.kernel_name=meras3 '
+           '--ExecutePreprocessor.kernel_name=test '
            '--to ' + 'notebook '
            '--execute ' + '{} '.format(notebook) +
            '--output-dir ' + '{} '.format(outdir) +
