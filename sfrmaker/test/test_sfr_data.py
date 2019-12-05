@@ -158,7 +158,7 @@ def test_ibound_representation_of_idomain(shellmound_sfrdata, shellmound_model):
     assert np.array_equal(ibound, idomain)
 
 
-def test_write_mf6_package(shellmound_sfrdata, outdir):
+def test_write_mf6_package(shellmound_sfrdata, mf6sfr, outdir):
     sfr_package_file = os.path.join(outdir, 'test.package_file.sfr')
     shellmound_sfrdata.write_package(filename=sfr_package_file, version='mf6')
     with open(sfr_package_file) as src:
@@ -173,4 +173,41 @@ def test_write_mf6_package(shellmound_sfrdata, outdir):
                 _, conversion = line.strip().split()
                 assert np.allclose(float(conversion), shellmound_sfrdata.const)
             if 'end options' in line.lower():
+                break
+
+    # check for extra line endings
+    # (https://github.com/pandas-dev/pandas/issues/25048)
+    cols = ['rno', 'k', 'i', 'j', 'rlen', 'rwid', 'rgrd', 'rtp', 'rbth', 'rhk', 'man', 'ncon', 'ustrf', 'ndv']
+    with open(sfr_package_file) as src:
+        for line in src:
+            if 'begin packagedata' in line.lower():
+                next(src) # skip the header
+                for line in src:
+                    if 'end packagedata' in line.lower():
+                        break
+                    assert len(line.strip().split()) >= len(cols) -2
+
+    # check the actual values
+    pdata = pd.DataFrame(mf6sfr.packagedata.array)
+    pdata['k'], pdata['i'], pdata['j'] = zip(*pdata.cellid)
+    pdata.drop('cellid', axis=1, inplace=True)
+    nreaches = len(pdata)
+    cols = ['rno', 'k', 'i', 'j', 'rlen', 'rwid', 'rgrd', 'rtp', 'rbth', 'rhk', 'man', 'ncon', 'ustrf', 'ndv']
+    pdata = pdata[cols].copy()
+    with open(sfr_package_file) as src:
+        for line in src:
+            if 'begin packagedata' in line.lower():
+                next(src)
+                df = pd.read_csv(src, delim_whitespace=True,
+                                 #skiprows=2,
+                                 header=None,
+                                 names=cols,
+                                 nrows=nreaches
+                                 )
+                isna = df.isna().any(axis=1).values.astype(bool)
+                df.dropna(axis=0, inplace=True)
+                for c in ['k', 'i', 'j', 'rno']:
+                    df[c] = df[c].astype(int) - 1
+                pd.testing.assert_frame_equal(df, pdata.loc[~isna],
+                                              check_dtype=False)
                 break

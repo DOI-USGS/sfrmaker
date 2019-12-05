@@ -207,7 +207,8 @@ class mf6sfr:
                             ]
 
         header = "# MODFLOW-6 SFR input; created by SFRmaker v. {}".format(sfrmaker.__version__)
-        with open(outfile, 'w') as output:
+        with open(outfile, 'w', newline=""
+                  ) as output:
             output.write(header + '\n')
             output.write(self.options_block)
             output.write(self.dimensions_block)

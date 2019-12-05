@@ -25,7 +25,7 @@ def outdir():
     # output folder
     outdir = 'sfrmaker/test/temp/'
     if not os.path.isdir(outdir):
-        os.mkdir(outdir)
+        os.makedirs(outdir)
     return outdir
 
 
