@@ -43,6 +43,14 @@ def valid_nsegs(nsegs, outsegs=None, increasing=True):
         return consecutive_and_onebased
 
 
+def is_to_one(toid_sequence):
+    squeezed = np.squeeze(list(toid_sequence))
+    if squeezed.ndim == 0:
+        return True
+    else:
+        return np.isscalar(np.squeeze(list(toid_sequence))[0])
+
+
 def rno_nseg_routing_consistent(nseg, outseg, iseg, ireach, rno, outreach):
     """Check that routing of segments (MODFLOW-2005 style) is consistent
     with routing between unique reach numbers (rno; MODFLOW 6 style)
