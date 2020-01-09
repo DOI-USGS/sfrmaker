@@ -121,29 +121,37 @@ pyproj
 rtree    
 flopy  
 
-### Install python and dependency packages
-Download and install the [Anaconda python distribution](https://www.anaconda.com/distribution/).
-Open an Anaconda Command Prompt on Windows or a terminal window on OSX.
-From the root folder for the package (that contains `requirements.yml`), install the above packages from `requirements.yml`.
+### [Instructions for installing python and the required package dependencies](https://github.com/aleaf/SFRmaker/blob/master/Installing_dependencies.md)
 
-```
-conda env create -f requirements.yml
-```
-activate the environment:
+Before using sfrmaker, the conda environment has to be activated:
 
 ```
 conda activate sfrmaker
 ```
+### Install SFRmaker from PyPi
+with the `sfrmaker` environment activated:  
+
+```
+pip install sfrmaker
+```
 
 
-### Install SFRmaker to site_packages folder
+### Clone and install SFRmaker
+see the [python install instructions](https://github.com/aleaf/SFRmaker/blob/master/Installing_dependencies.md) for more details on cloning a package.
+
+```
+git clone https://github.com/aleaf/SFRmaker.git
+
+```
+
+#### Install SFRmaker to the site_packages folder
 from the root folder for the package (that contains `setup.py`):
   
 ```
 python setup.py install
 ```
-### Install SFRmaker in current location (to current python path)
-Instead of copying the source code to the python `site_packages` folder, this option creates a link so that python uses the source code in-situ.
+#### Install SFRmaker in current location (to current python path)
+Instead of copying the source code to the python `site_packages` folder, this option creates a link so that python uses the source code in-situ. This is the best option if you want to modify the source code.
 
 from the root folder for the package (that contains `setup.py`):
 
@@ -151,6 +159,14 @@ from the root folder for the package (that contains `setup.py`):
 ```  
 pip install -e .
 ```
+### running the test suite
+from the root folder for the package (that contains `setup.py`):
+
+
+```  
+py.test
+```
+(requires the pytest package)
 
 Input data requirements
 -----------------------------------------------
