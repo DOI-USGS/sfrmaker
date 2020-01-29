@@ -4,6 +4,7 @@ Stuff for handling units
 import numpy as np
 
 lenuni_values = {'unknown': 0,
+                 'undefined': 0,
                  'feet': 1,
                  'meters': 2,
                  'centimeters': 3,
@@ -20,7 +21,7 @@ lenuni_values = {'unknown': 0,
                  'meter': 2
                  }
 
-fullnames = {'unknown', 'feet', 'meters', 'centimeters',
+fullnames = {'unknown', 'undefined', 'feet', 'meters', 'centimeters',
              'seconds', 'minutes', 'hours', 'days', 'years'}
 lenuni_text = {v: k for k, v in lenuni_values.items() if k in fullnames}
 
@@ -153,6 +154,33 @@ def get_length_conversions():
         length_conversions[u0, u1] = mult
         length_conversions[u1, u0] = 1 / mult
     return length_conversions
+
+
+def get_model_length_units(model):
+    if model.version == 'mf6':
+        if model.dis.length_units.array is None:
+            return 'undefined'
+        return model.dis.length_units.array
+    else:
+        return lenuni_text[model.dis.lenuni]
+
+
+def get_length_units(argument, grid, model):
+    """How SFRmaker sets the length units
+    from multiple sources of information.
+    """
+    # first take model_length_units argument
+    if argument == 'undefined':
+        # then look at grid
+        if grid is not None and grid.model_units != 'undefined':
+            model_length_units = grid.model_units
+        # then look at model instance
+        elif model is not None:
+            model_length_units = get_model_length_units(model)
+        else:
+            model_length_units = 'undefined'
+        return model_length_units
+    return argument
 
 
 def get_volume_conversions():

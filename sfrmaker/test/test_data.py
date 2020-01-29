@@ -12,7 +12,7 @@ def test_shellmound_model(shellmound_model):
 
 
 def test_shellmound_grid(shellmound_grid):
-    assert isinstance(shellmound_grid, flopy.utils.reference.SpatialReference)
+    assert isinstance(shellmound_grid, flopy.discretization.StructuredGrid)
 
 
 def test_lines_from_shapefile(lines_from_shapefile):

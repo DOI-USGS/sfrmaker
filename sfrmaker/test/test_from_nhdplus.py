@@ -11,66 +11,33 @@ from gisutils import project
 from sfrmaker import Lines
 
 
-# TODO: make tests more rigorous
-
-@pytest.fixture(scope='function')
-def lines_from_NHDPlus(datapath):
-    pfvaa_files = ['{}/badriver/PlusFlowlineVAA.dbf'.format(datapath)]
-    plusflow_files = ['{}/badriver/PlusFlow.dbf'.format(datapath)]
-    elevslope_files = ['{}/badriver/elevslope.dbf'.format(datapath)]
-    flowlines = ['{}/badriver/NHDflowlines.shp'.format(datapath)]
-
-    lns = sfrmaker.Lines.from_nhdplus_v2(NHDFlowlines=flowlines,
-                                         PlusFlowlineVAA=pfvaa_files,
-                                         PlusFlow=plusflow_files,
-                                         elevslope=elevslope_files,
-                                         filter='{}/badriver/grid.shp'.format(datapath))
-    return lns
-
-
-@pytest.fixture(scope='function')
-def active_area_shapefile(datapath):
-    return '{}/badriver/active_area.shp'.format(datapath)
-
-
 @pytest.fixture(scope='module')
 def dem(datapath):
     return os.path.join(datapath, 'badriver/dem_26715.tif')
 
 
 @pytest.fixture(scope='function')
-def sfrmaker_grid_from_sr(tylerforks_model_grid, active_area_shapefile,
-                          tyler_forks_grid_shapefile):
-    grid = sfrmaker.StructuredGrid.from_sr(sr=tylerforks_model_grid,
-                                           active_area=active_area_shapefile)
-    grid.write_grid_shapefile(tyler_forks_grid_shapefile)
-    return grid
-
-
-@pytest.fixture(scope='function')
-def sfrmaker_grid_from_shapefile(tyler_forks_grid_shapefile, active_area_shapefile):
+def sfrmaker_grid_from_shapefile(tyler_forks_grid_shapefile, tylerforks_active_area_shapefile):
     grid = sfrmaker.StructuredGrid.from_shapefile(tyler_forks_grid_shapefile,
                                                   node_col='node',
                                                   icol='i',
                                                   jcol='j',
-                                                  active_area=active_area_shapefile)
+                                                  active_area=tylerforks_active_area_shapefile)
     return grid
 
 
-@pytest.fixture
-def sfrdata(tylerforks_model, lines_from_NHDPlus,
-            sfrmaker_grid_from_sr):
-    m = tylerforks_model
-    # from the lines and StructuredGrid instances, make a sfrmaker.sfrdata instance
-    # (lines are intersected with the model grid and converted to reaches, etc.)
-    sfrdata = lines_from_NHDPlus.to_sfr(grid=sfrmaker_grid_from_sr,
-                                        model=m)
-    return sfrdata
+def test_attribute_units(tylerforks_lines_from_NHDPlus, tylerforks_sfrdata):
+    assert tylerforks_lines_from_NHDPlus.attr_height_units == 'meters'
+    assert tylerforks_lines_from_NHDPlus.attr_length_units == 'meters'
+    assert tylerforks_sfrdata.model_length_units == 'feet'
+    lines_mean_strtop = tylerforks_lines_from_NHDPlus.df[['elevup', 'elevdn']].mean().mean()
+    sfrdata_mean_strtop = tylerforks_sfrdata.reach_data.strtop.mean()
+    assert np.allclose(sfrdata_mean_strtop / lines_mean_strtop, 3.28, atol=0.01)
 
 
 @pytest.mark.parametrize('method', ['cell polygons', 'buffers'])
-def test_sample_elevations(dem, sfrdata, datapath, method):
-    sfr = sfrdata
+def test_sample_elevations(dem, tylerforks_sfrdata, datapath, method):
+    sfr = tylerforks_sfrdata
     sampled_elevs = sfr.sample_reach_elevations(dem, method=method, smooth=True)
     sfr.reach_data['strtop'] = [sampled_elevs[rno] for rno in sfr.reach_data['rno']]
     assert reach_elevations_decrease_downstream(sfr.reach_data)
@@ -80,8 +47,8 @@ def test_output_dir(tylerforks_model, outdir):
     assert tylerforks_model.model_ws == os.path.join(outdir, 'tylerforks')
 
 
-def test_sample_elevations_different_proj(dem, sfrdata, datapath):
-    sfr = sfrdata
+def test_sample_elevations_different_proj(dem, tylerforks_sfrdata, datapath):
+    sfr = tylerforks_sfrdata
     sampled_elevs1 = sfr.sample_reach_elevations(dem, method='buffers', smooth=True)
     sampled_elevs1 = np.array(list(sampled_elevs1.values()))
 
@@ -104,14 +71,14 @@ def test_sample_elevations_different_proj(dem, sfrdata, datapath):
     assert np.allclose(reach1_geom_projected_back_100buffer.area, reach1_geom.buffer(100).area)
 
 
-def test_structuredgrid_from_shapefile(sfrmaker_grid_from_shapefile, sfrmaker_grid_from_sr):
+def test_structuredgrid_from_shapefile(sfrmaker_grid_from_shapefile, tylerforks_sfrmaker_grid_from_flopy):
     grid = sfrmaker_grid_from_shapefile
-    grid_sr = sfrmaker_grid_from_sr
+    grid_sr = tylerforks_sfrmaker_grid_from_flopy
     assert grid == grid_sr
 
 
 def test_unstructuredgrid_from_shapfile(tyler_forks_grid_shapefile,
-                                        sfrmaker_grid_from_sr):
+                                        tylerforks_sfrmaker_grid_from_flopy):
     # TODO: test creating unstructured grid from same shapefile
     # with no row or column information passed
     pass
@@ -119,29 +86,29 @@ def test_unstructuredgrid_from_shapfile(tyler_forks_grid_shapefile,
 
 # ugly work-around for fixtures not being supported as test parameters yet
 # https://github.com/pytest-dev/pytest/issues/349
-@pytest.fixture(params=['sfrmaker_grid_from_sr',
+@pytest.fixture(params=['tylerforks_sfrmaker_grid_from_flopy',
                         'sfrmaker_grid_from_shapefile'])
 def grid(request,
-         sfrmaker_grid_from_sr,
+         tylerforks_sfrmaker_grid_from_flopy,
          sfrmaker_grid_from_shapefile):
-    return {'sfrmaker_grid_from_sr': sfrmaker_grid_from_sr,
+    return {'tylerforks_sfrmaker_grid_from_flopy': tylerforks_sfrmaker_grid_from_flopy,
             'sfrmaker_grid_from_shapefile': sfrmaker_grid_from_shapefile}[request.param]
 
 
-def test_lines_from_NHDPlus(lines_from_NHDPlus):
-    lines = lines_from_NHDPlus
+def test_lines_from_NHDPlus(tylerforks_lines_from_NHDPlus):
+    lines = tylerforks_lines_from_NHDPlus
     assert isinstance(lines, Lines)
 
 
 def test_make_sfr(outdir,
                   grid,
                   tylerforks_model,
-                  lines_from_NHDPlus,
-                  active_area_shapefile,
+                  tylerforks_lines_from_NHDPlus,
+                  tylerforks_active_area_shapefile,
                   dem, mfnwt_exe):
     m = tylerforks_model
-    sfr = lines_from_NHDPlus.to_sfr(grid=grid,
-                                    model=m)
+    sfr = tylerforks_lines_from_NHDPlus.to_sfr(grid=grid,
+                                               model=m)
     sfr.set_streambed_top_elevations_from_dem(dem, dem_z_units='meters')
 
     botm = m.dis.botm.array.copy()

@@ -9,6 +9,7 @@ from fiona.crs import from_epsg, from_string, to_string
 from shapely.geometry import shape, Polygon, box
 from shapely.ops import unary_union
 from gisutils import get_proj_str, df2shp, shp2df, project
+import sfrmaker
 
 
 class crs:
@@ -136,16 +137,19 @@ def export_reach_data(reach_data, grid, filename,
         rd = reach_data.loc[keep].copy()
     else:
         rd = reach_data.copy()
+    assert isinstance(grid, sfrmaker.grid.Grid), "grid needs to be an sfrmaker.Grid instance"
     assert np.array_equal(grid.df.node.values, np.arange(grid.size))
     assert np.array_equal(grid.df.node.values, grid.df.index.values)
     polygons = grid.df.loc[rd.node, 'geometry'].values
+    epsg = grid.crs.epsg
+    proj_str = grid.crs.proj_str
     if geomtype.lower() == 'polygon':
         rd['geometry'] = polygons
     elif geomtype.lower() == 'point':
         rd['geometry'] = [p.centroid for p in polygons]
     else:
         raise ValueError('Unrecognized geomtype "{}"'.format(geomtype))
-    df2shp(rd, filename, epsg=grid.crs.epsg, proj_str=grid.crs.proj_str)
+    df2shp(rd, filename, epsg=epsg, proj_str=proj_str)
 
 
 def intersect_rtree(geom1, geom2, index=None):

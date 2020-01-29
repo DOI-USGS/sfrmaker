@@ -37,29 +37,36 @@ lns = Lines.from_nhdplus_v2(NHDFlowlines=flowlines,
                             elevslope=elevslope_files,
                             filter='{}/grid.shp'.format(data_dir))
 
-# make a flopy.utils.reference.SpatialReference instance
+# make a flopy StructuredGrid instance
 # that represents the model grid
 m = fm.Modflow.load('tf.nam', model_ws='{}/tylerforks'.format(data_dir))
 
-sr = flopy.utils.SpatialReference(delr=m.dis.delr.array,  # cell spacing along a row
-                                  delc=m.dis.delc.array,  # cell spacing along a column
-                                  lenuni=1,  # model units of feet
-                                  xll=682688, yll=5139052,  # lower left corner of model grid
-                                  rotation=0,  # grid is unrotated
-                                  proj4_str='epsg:26715'
-                                  # projected coordinate system of model (UTM NAD27 zone 15 North)
-                                  )
-m.sr = sr
+# delr and delc have to specified in meters (consistent with projected CRS)
+mg = flopy.discretization.StructuredGrid(delr=m.dis.delr.array * .3048,  # cell spacing along a row
+                                         delc=m.dis.delc.array * .3048,  # cell spacing along a column
+                                         xoff=682688, yoff=5139052,  # lower left corner of model grid
+                                         angrot=0,  # grid is unrotated
+                                         proj4='epsg:26715'
+                                         # projected coordinate system of model (UTM NAD27 zone 15 North)
+                                         )
+m.modelgrid = mg
 
-# make a sfrmaker.StructuredGrid instance from the SpatialReference
+# make a sfrmaker.StructuredGrid instance from the model grid
 # active_area is a polygon that specifies the area where SFR reaches will be populated
-grd = StructuredGrid.from_sr(sr,
-                             active_area='{}/active_area.shp'.format(data_dir)
-                             )
+grd = StructuredGrid.from_modelgrid(mg,
+                                    active_area='{}/active_area.shp'.format(data_dir)
+                                    )
 
-# from the lines and StructuredGrid instances, make a sfrmaker.sfrdata instance
+# from the lines and StructuredGrid instances, make a sfrmaker.SFRData instance
 # (lines are intersected with the model grid and converted to reaches, etc.)
-sfr = lns.to_sfr(grd, model=m)
+# unfortunately there are 3 different ways to specify model length units
+# SFRmaker will set the units in this order of priority:
+# 1) as argued with model_length_units= (below)
+# 2) units attached to sfrmaker.StructuredGrid instance
+# 3) units attached to DIS package of flopy model
+# if the grid or model dis package have valid units, any conversions should "just work"
+# in any case, specifying units in the to_sfr call guarantees that the correct units will be used
+sfr = lns.to_sfr(grd, model_length_units='feet', model=m)
 sfr.set_streambed_top_elevations_from_dem(dem, dem_z_units='meters')
 
 # assign layers to the sfr reaches

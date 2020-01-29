@@ -107,7 +107,9 @@ def shellmound_simulation(testdatapath, outdir):
 
 @pytest.fixture(scope='module')
 def get_shellmound_model(shellmound_simulation):
-    return shellmound_simulation.get_model('shellmound')
+    model = shellmound_simulation.get_model('shellmound')
+    model.dis.length_units = 'meters'
+    return model
 
 
 @pytest.fixture(scope='function')
@@ -118,15 +120,19 @@ def shellmound_model(get_shellmound_model):
 @pytest.fixture(scope='function')
 def shellmound_grid(shellmound_model):
     m = shellmound_model
-    sr = flopy.utils.SpatialReference(delr=m.dis.delr.array,  # cell spacing along a row
-                                      delc=m.dis.delc.array,  # cell spacing along a column
-                                      lenuni=2,  # model units of meters
-                                      xll=500955.0, yll=1176285.0,  # lower left corner of model grid
-                                      rotation=0,  # grid is unrotated
-                                      proj4_str='epsg:5070'
-                                      )
-    m.sr = sr
-    return sr
+    mg = flopy.discretization.StructuredGrid(delr=m.dis.delr.array,  # cell spacing along a row
+                                             delc=m.dis.delc.array,  # cell spacing along a column
+                                             xoff=500955.0, yoff=1176285.0,  # lower left corner of model grid
+                                             angrot=0,  # grid is unrotated
+                                             proj4='epsg:5070'
+                                             )
+    m._modelgrid = mg
+    return mg
+
+
+@pytest.fixture(scope='function')
+def tylerforks_active_area_shapefile(datapath):
+    return '{}/badriver/active_area.shp'.format(datapath)
 
 
 @pytest.fixture(scope='module')
@@ -151,7 +157,7 @@ def tylerforks_model(get_tylerforks_model):
 
 
 @pytest.fixture(scope='function')
-def tylerforks_model_grid(tyler_forks_grid_shapefile, tylerforks_model):
+def tylerforks_sr(tyler_forks_grid_shapefile, tylerforks_model):
     m = tylerforks_model
     sr = flopy.utils.SpatialReference(delr=m.dis.delr.array,  # cell spacing along a row
                                       delc=m.dis.delc.array,  # cell spacing along a column
@@ -163,6 +169,55 @@ def tylerforks_model_grid(tyler_forks_grid_shapefile, tylerforks_model):
                                       )
     m.sr = sr
     return sr
+
+
+@pytest.fixture(scope='function')
+def tylerforks_model_grid(tyler_forks_grid_shapefile, tylerforks_model):
+    m = tylerforks_model
+    mg = flopy.discretization.StructuredGrid(delr=m.dis.delr.array * .3048,  # cell spacing along a row
+                                             delc=m.dis.delc.array * .3048,  # cell spacing along a column
+                                             xoff=682688, yoff=5139052,  # lower left corner of model grid
+                                             angrot=0,  # grid is unrotated
+                                             proj4='epsg:26715'
+                                             # projected coordinate system of model (UTM NAD27 zone 15 North)
+                                             )
+    m.modelgrid = mg
+    return mg
+
+
+@pytest.fixture(scope='function')
+def tylerforks_sfrmaker_grid_from_flopy(tylerforks_model_grid, tylerforks_active_area_shapefile,
+                                        tyler_forks_grid_shapefile):
+    grid = sfrmaker.StructuredGrid.from_modelgrid(mg=tylerforks_model_grid,
+                                                  active_area=tylerforks_active_area_shapefile)
+    #grid.write_grid_shapefile(tyler_forks_grid_shapefile)
+    return grid
+
+
+@pytest.fixture(scope='function')
+def tylerforks_lines_from_NHDPlus(datapath):
+    pfvaa_files = ['{}/badriver/PlusFlowlineVAA.dbf'.format(datapath)]
+    plusflow_files = ['{}/badriver/PlusFlow.dbf'.format(datapath)]
+    elevslope_files = ['{}/badriver/elevslope.dbf'.format(datapath)]
+    flowlines = ['{}/badriver/NHDflowlines.shp'.format(datapath)]
+
+    lns = sfrmaker.Lines.from_nhdplus_v2(NHDFlowlines=flowlines,
+                                         PlusFlowlineVAA=pfvaa_files,
+                                         PlusFlow=plusflow_files,
+                                         elevslope=elevslope_files,
+                                         filter='{}/badriver/grid.shp'.format(datapath))
+    return lns
+
+
+@pytest.fixture
+def tylerforks_sfrdata(tylerforks_model, tylerforks_lines_from_NHDPlus,
+                       tylerforks_sfrmaker_grid_from_flopy):
+    m = tylerforks_model
+    # from the lines and StructuredGrid instances, make a sfrmaker.tylerforks_sfrdata instance
+    # (lines are intersected with the model grid and converted to reaches, etc.)
+    sfrdata = tylerforks_lines_from_NHDPlus.to_sfr(grid=tylerforks_sfrmaker_grid_from_flopy,
+                                                   model=m)
+    return sfrdata
 
 
 @pytest.fixture(scope='module')
@@ -188,6 +243,6 @@ def shellmound_sfrdata(shellmound_model, lines_from_shapefile,
     m = shellmound_model
     # from the lines and StructuredGrid instances, make a sfrmaker.sfrdata instance
     # (lines are intersected with the model grid and converted to reaches, etc.)
-    sfrdata = lines_from_shapefile.to_sfr(sr=shellmound_grid,
+    sfrdata = lines_from_shapefile.to_sfr(grid=shellmound_grid,
                                           model=m)
     return sfrdata

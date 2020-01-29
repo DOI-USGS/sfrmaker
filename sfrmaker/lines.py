@@ -4,6 +4,7 @@ import time
 import numpy as np
 import pandas as pd
 from shapely.geometry import box
+import flopy
 from gisutils import shp2df, df2shp, project
 import sfrmaker
 from sfrmaker.routing import pick_toids, find_path, make_graph, renumber_segments
@@ -12,9 +13,10 @@ from .gis import crs, read_polygon_feature, get_bbox
 from .grid import StructuredGrid
 from .nhdplus_utils import load_nhdplus_v2, get_prj_file
 from .sfrdata import SFRData
-from .utils import unit_conversion, \
-    width_from_arbolate_sum, arbolate_sum, \
-    consolidate_reach_conductances, interpolate_to_reaches
+from .units import convert_length_units, get_length_units
+from .utils import (width_from_arbolate_sum, arbolate_sum, \
+                    consolidate_reach_conductances,
+                    interpolate_to_reaches)
 
 
 class Lines:
@@ -425,6 +427,7 @@ class Lines:
     def to_sfr(self, grid=None, sr=None,
                active_area=None, isfr=None,
                model=None,
+               model_length_units='undefined',
                minimum_reach_length=None,
                minimum_reach_width=1.,
                cull_flowlines_to_active_area=True,
@@ -472,9 +475,24 @@ class Lines:
             ta = time.time()
             grid = StructuredGrid.from_sr(sr, active_area=active_area, isfr=isfr)
             print("grid class created in {:.2f}s\n".format(time.time() - ta))
+        elif isinstance(grid, flopy.discretization.StructuredGrid):
+            print('\nCreating grid class instance from flopy Grid instance...')
+            ta = time.time()
+            grid = StructuredGrid.from_modelgrid(grid, active_area=active_area, isfr=isfr)
+            print("grid class created in {:.2f}s\n".format(time.time() - ta))
+        elif not isinstance(grid, sfrmaker.grid.Grid):
+            raise TypeError('Unrecognized input for grid: {}'.format(grid))
 
         # print grid information to screen
         print(grid)
+
+        # print model information to screen
+        print(model)
+
+        model_length_units = get_length_units(model_length_units, grid, model)
+        mult = convert_length_units(self.attr_length_units, model_length_units)
+        mult_h = convert_length_units(self.attr_height_units, model_length_units)
+        gis_mult = convert_length_units(self.geometry_length_units, model_length_units)
 
         # reproject the flowlines if they aren't in same CRS as grid
         if self.crs != grid.crs:
@@ -486,10 +504,6 @@ class Lines:
                 self.cull(box(*grid._bounds), inplace=True)
         if model_name is None:
             model_name = 'model'
-
-        mult = unit_conversion.get(self.attr_length_units + grid.model_units, 1.)
-        mult_h = unit_conversion.get(self.attr_height_units + grid.model_units, 1.)
-        gis_mult = unit_conversion.get(self.geometry_length_units + grid.model_units, 1.)
 
         # convert routing connections (toid column) from lists (one-to-many)
         # to ints (one-to-one or many-to-one)
@@ -559,7 +573,7 @@ class Lines:
             rd['asum'] = reach_asums
             # width estimation formula expects meters
             width = width_from_arbolate_sum(reach_asums)
-            rd['width'] = width * unit_conversion.get('meters' + grid.model_units, 1.)  # convert back to model units
+            rd['width'] = width * convert_length_units('meters', model_length_units) # convert back to model units
             rd.loc[rd.width < minimum_reach_width, 'width'] = minimum_reach_width
 
             # assign width1 and width2 back to segment data
@@ -592,7 +606,7 @@ class Lines:
         inds = rd.rchlen > minimum_reach_length
         print('\nDropping {} reaches with length < {:.2f} {}...'.format(np.sum(~inds),
                                                                         minimum_reach_length,
-                                                                        grid.model_units))
+                                                                        model_length_units))
         rd = rd.loc[inds].copy()
         rd['strhc1'] = 1.  # default value of streambed Kv for now
         # handle co-located reaches
@@ -684,7 +698,7 @@ class Lines:
         # and other output
         rd = rd[[c for c in SFRData.rdcols if c in rd.columns]].copy()
         sfrd = SFRData(reach_data=rd, segment_data=sd, grid=grid,
-                       model=model,
+                       model=model, model_length_units=model_length_units,
                        model_name=model_name, **kwargs)
         print("\nTime to create sfr dataset: {:.2f}s\n".format(time.time() - totim))
         return sfrd

@@ -17,7 +17,7 @@ from .flows import add_to_perioddata
 from .gis import export_reach_data, project, crs
 from .grid import StructuredGrid
 from .observations import write_mf6_sfr_obsfile, add_observations
-from .units import convert_length_units
+from .units import convert_length_units, get_length_units, itmuni_values, lenuni_values
 import sfrmaker
 from sfrmaker.mf5to6 import segment_data_to_period_data
 
@@ -124,7 +124,7 @@ class SFRData:
                  segment_data=None, grid=None, sr=None,
                  model=None,
                  isfr=None,
-                 model_length_units="unspecified", model_time_units='d',
+                 model_length_units="undefined", model_time_units='d',
                  enforce_increasing_nsegs=True,
                  package_name=None,
                  **kwargs):
@@ -150,6 +150,11 @@ class SFRData:
             ta = time.time()
             grid = StructuredGrid.from_sr(sr, isfr=isfr)
             print("grid class created in {:.2f}s\n".format(time.time() - ta))
+        elif isinstance(grid, flopy.discretization.grid.Grid):
+            print('\nCreating grid class instance from flopy modelgrid...')
+            ta = time.time()
+            grid = StructuredGrid.from_modelgrid(grid, isfr=isfr)
+            print("grid class created in {:.2f}s\n".format(time.time() - ta))
 
         # print grid information to screen
         print(grid)
@@ -172,7 +177,7 @@ class SFRData:
         self.get_slopes()
 
         # units
-        self._model_length_units = model_length_units
+        self.model_length_units = get_length_units(model_length_units, grid, model)
         self.model_time_units = model_time_units
 
         self.model = model  # attached flopy model instance
@@ -188,16 +193,12 @@ class SFRData:
     @property
     def _itmuni(self):
         """MODFLOW time units code"""
-        d = {"u": 0, "s": 1, "m": 2, "h": 3, "d": 4, "y": 5}
-        return d[self.model_time_units]
+        return itmuni_values[self.model_time_units]
 
     @property
     def _lenuni(self):
         """MODFLOW length units code"""
-        d = {"unspecified": 0,
-             "feet": 1,
-             "meters": 2}
-        return d[self.model_length_units]
+        return lenuni_values[self.model_length_units]
 
     @property
     def structured(self):
@@ -229,13 +230,6 @@ class SFRData:
             self._package_name = 'model'
         else:
             self._package_name = package_name
-
-    @property
-    def model_length_units(self):
-        """Computational lengths units of numerical model."""
-        if self.grid is not None:
-            self._model_length_units = self.grid.model_units
-        return self._model_length_units
 
     @property
     def crs(self):
@@ -1145,3 +1139,12 @@ class SFRData:
                 elif var not in filename:
                     filename = os.path.splitext(filename)[0] + '_{}.shp'.format(var)
                 export_reach_data(df, self.grid, filename, geomtype=geomtype)
+
+    def export_observations(self, filename=None, geomtype='point'):
+
+        data = self.observations
+        nodes = dict(zip(self.reach_data.rno, self.reach_data.node))
+        data['node'] = [nodes[rno] for rno in data['rno']]
+        if filename is None:
+            filename = self.observations_file + '.shp'
+        export_reach_data(data, self.grid, filename, geomtype=geomtype)

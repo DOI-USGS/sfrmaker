@@ -29,6 +29,7 @@ def parent_model_sfr_flow_results():
     return rd
 
 
+@pytest.mark.xfail(reason="still need to replace sr with modelgrid")
 def test_get_inflow_locations_from_parent_model(outdir, shellmound_grid, shellmound_sfrdata):
     parent_reach_data = 'sfrmaker/test/data/shellmound/merasnwt_sfrlines.shp'
     inset_reach_data = shellmound_sfrdata.reach_data

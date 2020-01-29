@@ -50,7 +50,7 @@ def get_inflow_locations_from_parent_model(parent_reach_data, inset_reach_data,
     # spatial reference instances defining parent and inset grids
     if isinstance(inset_sr, str):
         sr = load_sr(inset_sr)
-    elif isinstance(inset_sr, flopy.utils.reference.SpatialReference):
+    elif isinstance(inset_sr, flopy.discretization.grid.Grid):
         sr = inset_sr
     else:
         raise ValueError('Unrecognized input for inset_sr')

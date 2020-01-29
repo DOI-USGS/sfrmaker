@@ -1,11 +1,11 @@
 import os
-
+import copy
 import flopy
 import numpy as np
 import pandas as pd
 import pytest
-
 from gisutils import shp2df
+import sfrmaker
 
 
 @pytest.fixture(scope='function')
@@ -26,13 +26,30 @@ def shellmound_sfrdata_with_period_data(shellmound_sfrdata, period_data):
     return shellmound_sfrdata
 
 
+def test_init(tylerforks_sfrdata, tylerforks_model_grid, tylerforks_sfrmaker_grid_from_flopy):
+    rd = tylerforks_sfrdata.reach_data.copy()
+    sd = tylerforks_sfrdata.segment_data.copy()
+    grid = copy.deepcopy(tylerforks_model_grid)
+    sfrdata = sfrmaker.SFRData(reach_data=rd, segment_data=sd, grid=grid,
+                               isfr=tylerforks_sfrmaker_grid_from_flopy.isfr)
+    assert isinstance(sfrdata, sfrmaker.SFRData)
+    pd.testing.assert_frame_equal(sfrdata.reach_data, rd,
+                                  check_dtype=False,
+                                  check_less_precise=2)
+    pd.testing.assert_frame_equal(sfrdata.segment_data, sd,
+                                  check_dtype=False)
+    assert isinstance(sfrdata.grid, sfrmaker.StructuredGrid)
+    assert sfrdata.grid == tylerforks_sfrmaker_grid_from_flopy
+    j=2
+
+
 def test_const(shellmound_sfrdata, sfr_testdata):
     assert shellmound_sfrdata._lenuni == 2  # meters
     assert shellmound_sfrdata._itmuni == 4  # days
     assert shellmound_sfrdata.const == 86400
 
-    sfr_testdata._model_length_units = 'feet'
-    sfr_testdata._model_time_units = 'days'
+    sfr_testdata.model_length_units = 'feet'
+    sfr_testdata.model_time_units = 'days'
     assert sfr_testdata.const == 86400 * 1.486
 
 

@@ -1,10 +1,9 @@
 import io
 import os
-
 import numpy as np
 import pandas as pd
 import pytest
-
+from gisutils import shp2df
 
 @pytest.fixture
 def flux_observation_data():
@@ -62,7 +61,7 @@ def test_write_mf6_sfr_obsfile(shellmound_sfrdata, flux_observation_data, outdir
                 break
 
 
-def test_add_observations(shellmound_sfrdata, flux_observation_data):
+def test_add_observations(shellmound_sfrdata, flux_observation_data, outdir):
     obs = shellmound_sfrdata.add_observations(flux_observation_data,
                                               obstype='downstream-flow',
                                               line_id_column_in_data='line_id',
@@ -73,8 +72,14 @@ def test_add_observations(shellmound_sfrdata, flux_observation_data):
     rd = shellmound_sfrdata.reach_data.loc[shellmound_sfrdata.reach_data.ireach == 1]
     rno = dict(zip(rd.line_id, rd.rno))
     assert set(obs.rno) == set([rno[lid] for lid in flux_observation_data.line_id])
+    out_shapefile = os.path.join(outdir, 'obs.shp')
 
-    #
+    # test shapefile export
+    shellmound_sfrdata.export_observations(filename=out_shapefile)
+    df = shp2df(out_shapefile)
+    assert df.drop('geometry', axis=1).equals(shellmound_sfrdata.observations)
+
+    # test assigning obs from custom reach number column?
     obs = shellmound_sfrdata.add_observations(flux_observation_data,
                                               obstype='downstream-flow',
                                               rno_column_in_data='junk',
