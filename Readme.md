@@ -3,7 +3,7 @@ SFRmaker
 SFRmaker is a python package for automating construction of stream flow routing networks from hydrography data. Hydrography are input from a polyline shapefile and intersected with a structured grid defined using a Flopy `SpatialReference` instance. Attribute data are supplied via `.dbf` files (NHDPlus input option) or via specified fields in the hydrography shapefile. Line fragments representing intersections between the flowlines and model grid cells are converted to SFR reaches using the supplied attribute data. MODFLOW-NWT/2005 or MODFLOW-6 SFR package input can then be written, along with shapefiles for visualizing the SFR package dataset.
 
 
-### Version 0.1
+### Version 0.2
 [![Build Status](https://travis-ci.com/aleaf/SFRmaker.svg?branch=master)](https://travis-ci.com/aleaf/SFRmaker)
 [![Build status](https://ci.appveyor.com/api/projects/status/0jk596k6osooyx1p/branch/master?svg=true)](https://ci.appveyor.com/project/aleaf/sfrmaker/branch/master)
 [![Coverage Status](https://codecov.io/github/aleaf/SFRmaker/coverage.svg?branch=master)](https://codecov.io/github/aleaf/SFRmaker/coverage.svg?branch=master)
@@ -121,29 +121,37 @@ pyproj
 rtree    
 flopy  
 
-### Install python and dependency packages
-Download and install the [Anaconda python distribution](https://www.anaconda.com/distribution/).
-Open an Anaconda Command Prompt on Windows or a terminal window on OSX.
-From the root folder for the package (that contains `requirements.yml`), install the above packages from `requirements.yml`.
+### [Instructions for installing python and the required package dependencies](https://github.com/aleaf/SFRmaker/blob/master/Installing_dependencies.md)
 
-```
-conda env create -f requirements.yml
-```
-activate the environment:
+Before using sfrmaker, the conda environment has to be activated:
 
 ```
 conda activate sfrmaker
 ```
+### Install SFRmaker from PyPi
+with the `sfrmaker` environment activated:  
+
+```
+pip install sfrmaker
+```
 
 
-### Install SFRmaker to site_packages folder
+### Clone and install SFRmaker
+see the [python install instructions](https://github.com/aleaf/SFRmaker/blob/master/Installing_dependencies.md) for more details on cloning a package.
+
+```
+git clone https://github.com/aleaf/SFRmaker.git
+
+```
+
+#### Install SFRmaker to the site_packages folder
 from the root folder for the package (that contains `setup.py`):
   
 ```
 python setup.py install
 ```
-### Install SFRmaker in current location (to current python path)
-Instead of copying the source code to the python `site_packages` folder, this option creates a link so that python uses the source code in-situ.
+#### Install SFRmaker in current location (to current python path)
+Instead of copying the source code to the python `site_packages` folder, this option creates a link so that python uses the source code in-situ. This is the best option if you want to modify the source code.
 
 from the root folder for the package (that contains `setup.py`):
 
@@ -151,6 +159,14 @@ from the root folder for the package (that contains `setup.py`):
 ```  
 pip install -e .
 ```
+### running the test suite
+from the root folder for the package (that contains `setup.py`):
+
+
+```  
+py.test
+```
+(requires the pytest package)
 
 Input data requirements
 -----------------------------------------------

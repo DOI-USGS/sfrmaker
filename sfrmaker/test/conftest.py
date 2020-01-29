@@ -1,6 +1,7 @@
 import os
 import copy
 import platform
+import numpy as np
 import flopy
 import flopy.modflow as fm
 import pandas as pd
@@ -174,8 +175,8 @@ def tylerforks_sr(tyler_forks_grid_shapefile, tylerforks_model):
 @pytest.fixture(scope='function')
 def tylerforks_model_grid(tyler_forks_grid_shapefile, tylerforks_model):
     m = tylerforks_model
-    mg = flopy.discretization.StructuredGrid(delr=m.dis.delr.array * .3048,  # cell spacing along a row
-                                             delc=m.dis.delc.array * .3048,  # cell spacing along a column
+    mg = flopy.discretization.StructuredGrid(delr=np.round(m.dis.delr.array * .3048, 4).astype(np.float64),  # cell spacing along a row
+                                             delc=np.round(m.dis.delc.array * .3048, 4).astype(np.float64),  # cell spacing along a column
                                              xoff=682688, yoff=5139052,  # lower left corner of model grid
                                              angrot=0,  # grid is unrotated
                                              proj4='epsg:26715'

@@ -2,7 +2,11 @@
 Release History
 ===============
 
-Version 0.1.3 (2019-07-12)
+Version 0.2.1 (2019-12-12)
+--------------------------
+* fixed bug that was causing cases with only one (intersected stream) segment to fail
+
+Version 0.2.0 (2019-12-08)
 --------------------------
 * added support for MODFLOW6 observation setup
 * added support for specified inflows in MODFLOW6

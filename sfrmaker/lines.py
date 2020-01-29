@@ -8,7 +8,7 @@ import flopy
 from gisutils import shp2df, df2shp, project
 import sfrmaker
 from sfrmaker.routing import pick_toids, find_path, make_graph, renumber_segments
-from .checks import routing_is_circular
+from .checks import routing_is_circular, is_to_one
 from .gis import crs, read_polygon_feature, get_bbox
 from .grid import StructuredGrid
 from .nhdplus_utils import load_nhdplus_v2, get_prj_file
@@ -106,16 +106,19 @@ class Lines:
             # squeeze it down
             to_one = False
             # if below == True, all toids are scalar or length 1 lists
-            to_one = np.isscalar(np.squeeze(toid)[0])
-            # if not, try converting any scalars to lists
-            if not to_one:
-                toid = [[l] if np.isscalar(l) else l for l in toid]
-                to_one = np.isscalar(np.squeeze(toid)[0])
-            toid = np.squeeze(toid)
-            routing = make_graph(self.df.id.values, toid,
-                                 one_to_many=not to_one)
-            if not to_one:
-                routing = pick_toids(routing, self.elevup)
+            if len(toid) > 1:
+                to_one = is_to_one(toid)
+                # if not, try converting any scalars to lists
+                if not to_one:
+                    toid = [[l] if np.isscalar(l) else l for l in toid]
+                    to_one = is_to_one(toid)
+                toid = np.squeeze(list(toid))
+                routing = make_graph(self.df.id.values, toid,
+                                     one_to_many=not to_one)
+                if not to_one:
+                    routing = pick_toids(routing, self.elevup)
+            else:
+                routing = {self.df.id.values[0]: 0}
             self._routing = routing
         return self._routing
 
@@ -511,7 +514,7 @@ class Lines:
         routing = self.routing.copy()
 
         # one to many routing is not supported
-        to_one = np.isscalar(np.squeeze(list(routing.values()))[0])
+        to_one = is_to_one(routing.values())
         assert to_one, "routing is still one-to-many"
         # if not to_one:
         #    routing = pick_toids(routing, elevup)

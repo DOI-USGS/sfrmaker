@@ -73,8 +73,8 @@ def test_sample_elevations_different_proj(dem, tylerforks_sfrdata, datapath):
 
 def test_structuredgrid_from_shapefile(sfrmaker_grid_from_shapefile, tylerforks_sfrmaker_grid_from_flopy):
     grid = sfrmaker_grid_from_shapefile
-    grid_sr = tylerforks_sfrmaker_grid_from_flopy
-    assert grid == grid_sr
+    grid_flopy = tylerforks_sfrmaker_grid_from_flopy
+    assert grid == grid_flopy
 
 
 def test_unstructuredgrid_from_shapfile(tyler_forks_grid_shapefile,

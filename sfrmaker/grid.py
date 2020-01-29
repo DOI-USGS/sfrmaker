@@ -83,7 +83,7 @@ class Grid:
             return False
         if other.crs.length_units != self.crs.length_units:
             return False
-        if other.bounds != self.bounds:
+        if not np.allclose(other.bounds, self.bounds):
             return False
         if self._structured:
             if other.nrow != self.nrow:
