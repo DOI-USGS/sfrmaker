@@ -54,22 +54,16 @@ def get_nextupsegs(graph_r, upsegs):
     nextupsegs : list
         Flat list of next segments upstream from upsegs
     """
-    # nextupsegs = []
-    # for s in upsegs:
-    #    next = graph_r.get(s)
-    #    if next is not None:
-    #        if not isinstance(next, list):
-    #            next = [next]
-    #        nextupsegs += next
-    # return nextupsegs
-    nextupsegs = []
+    nextupsegs = set()
     for s in upsegs:
-        nextupsegs += graph_r[s]
+        nextupsegs.update(graph_r[s])
     return nextupsegs
 
 
 def get_upsegs(graph_r, seg):
-    """Get all segments upstream of seg as a single flat set.
+    """Get all segments upstream of seg as a single flat set,
+    by performing a breadth-first search of the routing graph,
+    going in the upstream direction.
 
     Parameters
     ----------
@@ -84,29 +78,18 @@ def get_upsegs(graph_r, seg):
     all_upsegs : set
         Flat set of all segments upstream from seg.
     """
-    # graph_r = graph_r.copy()
-    # upsegs = graph_r.get(seg, set())
-    # if not isinstance(upsegs, set):
-    #    upsegs = {upsegs}
-    # else:
-    #    upsegs = upsegs.copy()
-    # all_upsegs = upsegs
-    # if len(upsegs) > 0:
-    #    for i in range(len(graph_r)):
-    #        upsegs = get_nextupsegs(graph_r, upsegs)
-    #        if len(upsegs) > 0:
-    #            all_upsegs.update(upsegs)
-    #        else:
-    #            break
-    # return all_upsegs
     upsegs = graph_r[seg].copy()
     all_upsegs = upsegs
     for i in range(len(graph_r)):
         upsegs = get_nextupsegs(graph_r, upsegs)
-        if len(upsegs) > 0:
+        if set(upsegs) == {0}:
+            break
+        elif len(upsegs) > 0:
             all_upsegs.update(upsegs)
         else:
             break
+    if 0 in all_upsegs:
+        all_upsegs.remove(0)
     return all_upsegs
 
 

@@ -14,6 +14,7 @@ def test_get_upsegs(sfr_test_numbering):
     upsegs = []
     for s in sd.nseg:
         upsegs.append(get_upsegs(graph_r, s))
+    assert isinstance(upsegs[1], set)
     assert upsegs[1] == {1, 3, 4, 5, 6, 7, 8, 9}
 
 
