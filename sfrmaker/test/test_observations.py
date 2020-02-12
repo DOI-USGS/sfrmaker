@@ -77,7 +77,10 @@ def test_add_observations(shellmound_sfrdata, flux_observation_data, outdir):
     # test shapefile export
     shellmound_sfrdata.export_observations(filename=out_shapefile)
     df = shp2df(out_shapefile)
-    assert df.drop('geometry', axis=1).equals(shellmound_sfrdata.observations)
+    pd.testing.assert_frame_equal(df.drop('geometry', axis=1),
+                                  shellmound_sfrdata.observations,
+                                  check_dtype=False
+                                  )
 
     # test assigning obs from custom reach number column?
     obs = shellmound_sfrdata.add_observations(flux_observation_data,

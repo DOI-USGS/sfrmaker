@@ -3,7 +3,7 @@ SFRmaker
 SFRmaker is a python package for automating construction of stream flow routing networks from hydrography data. Hydrography are input from a polyline shapefile and intersected with a structured grid defined using a Flopy `SpatialReference` instance. Attribute data are supplied via `.dbf` files (NHDPlus input option) or via specified fields in the hydrography shapefile. Line fragments representing intersections between the flowlines and model grid cells are converted to SFR reaches using the supplied attribute data. MODFLOW-NWT/2005 or MODFLOW-6 SFR package input can then be written, along with shapefiles for visualizing the SFR package dataset.
 
 
-### Version 0.2
+### Version 0.3
 [![Build Status](https://travis-ci.com/aleaf/SFRmaker.svg?branch=master)](https://travis-ci.com/aleaf/SFRmaker)
 [![Build status](https://ci.appveyor.com/api/projects/status/0jk596k6osooyx1p/branch/master?svg=true)](https://ci.appveyor.com/project/aleaf/sfrmaker/branch/master)
 [![Coverage Status](https://codecov.io/github/aleaf/SFRmaker/coverage.svg?branch=master)](https://codecov.io/github/aleaf/SFRmaker/coverage.svg?branch=master)
@@ -46,25 +46,27 @@ lns = Lines.from_shapefile(flowlines_file,
                            attr_height_units='feet')
 ```
                      
-#### create a flopy `SpatialReference` instance defining the model grid
+#### create a flopy `StructuredGrid` instance defining the model grid  
+delr and delc have to specified in meters (consistent with projected CRS)
 
 ```python
-
-sr = flopy.utils.SpatialReference(delr=np.ones(160)*250,
-                                  delc=np.ones(112)*250,
-                                  lenuni=1,
-                                  xll=682688, yll=5139052, rotation=0,
-                                  proj_str='epsg:26715')
+grid = flopy.discretization.StructuredGrid(delr=m.dis.delr.array * .3048,  # cell spacing along a row
+                                           delc=m.dis.delc.array * .3048,  # cell spacing along a column
+                                           xoff=682688, yoff=5139052,  # lower left corner of model grid
+                                           angrot=0,  # grid is unrotated
+                                           proj4='epsg:26715'
+                                           # projected coordinate system of model (UTM NAD27 zone 15 North)
+                                           )
 ```
 
 #### alternatively, the model grid can be defined with a `sfrmaker.StructuredGrid` instance
-* can be created from a shapefile or `SpatialReference`.  
+* can be created from a shapefile or `flopy.discretization.StructuredGrid`  
 * an `active_area` polygon defines the area within the grid where SFR will be populated
 * See example scripts in `Examples/` for more details.
 
 ```python
 
-grd = StructuredGrid.from_shapefile(shapefile='Examples/data/badriver/grid.shp',
+grid = StructuredGrid.from_shapefile(shapefile='Examples/data/badriver/grid.shp',
                                     icol='i',
                                     jcol='j',
                                     active_area='Examples/data/badriver/active_area.shp'.format(data_dir)
@@ -75,13 +77,9 @@ grd = StructuredGrid.from_shapefile(shapefile='Examples/data/badriver/grid.shp',
 * results in an **`sfrdata`** class instance
 
 ```python
-sfr = lns.to_sfr(sr=sr)
+sfr = lns.to_sfr(grid=grid)
 ```
-or  
 
-```python
-sfr = lns.to_sfr(grid=grd)
-```
 
 #### write a sfr package file
 
