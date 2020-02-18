@@ -1,6 +1,3 @@
-import sys
-
-sys.path.append('/Users/aleaf/Documents/GitHub/flopy3')
 import os
 import time
 import numpy as np
@@ -15,17 +12,17 @@ from .checks import valid_rnos, valid_nsegs, rno_nseg_routing_consistent
 from .elevations import smooth_elevations
 from .flows import add_to_perioddata
 from .gis import export_reach_data, project, crs
-from .grid import StructuredGrid
 from .observations import write_mf6_sfr_obsfile, add_observations
-from .units import convert_length_units, get_length_units, itmuni_values, lenuni_values
+from .units import convert_length_units, itmuni_values, lenuni_values
 import sfrmaker
+from sfrmaker.base import DataPackage
 from sfrmaker.mf5to6 import segment_data_to_period_data
-
+from sfrmaker.rivdata import RivData
 fm = flopy.modflow
 mf6 = flopy.mf6
 
 
-class SFRData:
+class SFRData(DataPackage):
     """Class for working with a streamflow routing (SFR) dataset,
     where the stream network is discretized into reaches contained
     within individual model cells. Reaches may be grouped into segments,
@@ -128,16 +125,19 @@ class SFRData:
                  enforce_increasing_nsegs=True,
                  package_name=None,
                  **kwargs):
+        super().__init__(grid=grid, sr=sr, model=model, isfr=isfr,
+                         model_length_units=model_length_units,
+                         model_time_units=model_time_units,
+                         package_name=package_name)
 
         # attributes
-        self._crs = None
         self._period_data = None
         self._observations = None
         self._observations_filename = None
 
         # convert any modflow6 kwargs to modflow5
         kwargs = {SFRData.mf5names[k] if k in SFRData.mf6names else k:
-                      v for k, v in kwargs.items()}
+                  v for k, v in kwargs.items()}
         # update default values (used in segment and reach data setup)
         self.defaults.update(kwargs)
 
@@ -145,25 +145,11 @@ class SFRData:
         self.segment_data = self._setup_segment_data(segment_data)
         self.isfropt0_to_1()  # distribute any isfropt=0 segment data to reaches
 
-        if grid is None and sr is not None:
-            print('\nCreating grid class instance from flopy SpatialReference...')
-            ta = time.time()
-            grid = StructuredGrid.from_sr(sr, isfr=isfr)
-            print("grid class created in {:.2f}s\n".format(time.time() - ta))
-        elif isinstance(grid, flopy.discretization.grid.Grid):
-            print('\nCreating grid class instance from flopy modelgrid...')
-            ta = time.time()
-            grid = StructuredGrid.from_modelgrid(grid, isfr=isfr)
-            print("grid class created in {:.2f}s\n".format(time.time() - ta))
-
-        # print grid information to screen
-        print(grid)
-        self.grid = grid
-
         # routing
         self._segment_routing = None  # dictionary of routing connections
-        self._reach_routing = None  # dictionary of rno routing connections
+        self._rno_routing = None  # dictionary of rno routing connections
         self._paths = None  # routing sequence from each segment to outlet
+        self._reach_paths = None  # routing sequence from each reach number to outlet
 
         if not self._valid_nsegs(increasing=enforce_increasing_nsegs):
             self.reset_segments()
@@ -176,13 +162,9 @@ class SFRData:
         self.set_outreaches()
         self.get_slopes()
 
-        # units
-        self.model_length_units = get_length_units(model_length_units, grid, model)
-        self.model_time_units = model_time_units
-
+        # have to set the model last, because it also sets up a flopy sfr package instance
         self.model = model  # attached flopy model instance
         # self._ModflowSfr2 = None # attached instance of flopy modflow_sfr2 package object
-        self.package_name = package_name
 
     @property
     def const(self):
@@ -406,13 +388,35 @@ class SFRData:
             self._set_paths()
             return self._paths
         if self._routing_changed():
-            self._segment_routing = None
-            self._set_paths()
+            self._reset_routing()
         return self._paths
+
+    @property
+    def reach_paths(self):
+        """Dict listing routing sequence for each segment
+        in SFR network."""
+        if self._paths is None:
+            self._set_reach_paths()
+            return self._reach_paths
+        if self._routing_changed():
+            self._reset_routing()
+        return self._reach_paths
 
     def _set_paths(self):
         routing = self.segment_routing
         self._paths = {seg: find_path(routing, seg) for seg in routing.keys()}
+
+    def _set_reach_paths(self):
+        routing = self.rno_routing
+        self._reach_paths = {rno: find_path(routing, rno) for rno in routing.keys()}
+
+    def _reset_routing(self):
+        self.reset_reaches()
+        self.reset_segments()
+        self._segment_routing = None
+        self._set_paths()
+        self._rno_routing = None
+        self._set_reach_paths()
 
     def _routing_changed(self):
         sd = self.segment_data.groupby('per').get_group(0)
@@ -423,7 +427,7 @@ class SFRData:
 
         # check if reach routing in dataframe is consistent with routing dict
         reach_routing = dict(zip(rd.rno, rd.outreach))
-        reach_routing_changed = reach_routing != self._reach_routing
+        reach_routing_changed = reach_routing != self._rno_routing
 
         # check if segment and reach routing in dataframe are consistent
         consistent = rno_nseg_routing_consistent(sd.nseg, sd.outseg,
@@ -467,7 +471,10 @@ class SFRData:
         ireach = [list(range(1, reach_counts[s] + 1))
                   for s in segment_data.nseg]
         ireach = np.concatenate(ireach)
-        self.reach_data['ireach'] = ireach
+        try:
+            self.reach_data['ireach'] = ireach
+        except:
+            j=2
 
     def set_outreaches(self):
         """Determine the outreach for each SFR reach (requires a rno column in reach_data).
@@ -937,6 +944,114 @@ class SFRData:
         return cls(reach_data=reach_data, segment_data=segment_data,
                    grid=grid, sr=sr,
                    isfr=isfr)
+
+    def to_riv(self, segments=None, rno=None, drop_in_sfr=True):
+        """Cast one or more reaches to a RivData instance,
+        which can then be written as input to the MODFLOW RIV package.
+
+        Parameters
+        ----------
+        segments : sequence of ints
+            Convert the listed segments, and all downstream segments,
+            to the RIV package. If None, all segments are converted (default).
+        nro : sequence of ints
+            Convert the listed reach numbers (nro), and all downstream reaches,
+            to the RIV package. If None, all reaches are converted (default).
+        drop_in_sfr : bool
+            Whether or not to remove the converted segments from the SFR package
+            (default True)
+
+        Returns
+        -------
+        riv : SFRmaker.RivData instance
+        """
+
+        # get the downstream segments to be converted
+        if segments is None and rno is None:
+            loc = slice(None, None)  # all reaches
+            # if all reaches are being converted,
+            # skip dropping the reaches from the sfr package
+            drop_in_sfr = False
+        elif segments is not None:
+            if np.isscalar(segments):
+                segments = [segments]
+            loc = self.reach_data.iseg.isin(segments)
+        elif rno is not None:
+            if np.isscalar(rno):
+                rno = [rno]
+            loc = self.reach_data.rno.isin(rno)
+
+        reaches = self.reach_data.loc[loc, 'rno'].tolist()
+        to_riv_reaches = set()
+        for rno in reaches:
+            # skip reaches that have already been considered
+            if rno not in to_riv_reaches:
+                to_riv_reaches.update(set(self.reach_paths[rno]))
+
+        # subset the RIV reaches from reach_data;
+        # populate RIV input
+        is_riv_reach = self.reach_data.rno.isin(to_riv_reaches)
+        df = self.reach_data.loc[is_riv_reach].copy()
+
+        # add in a column for the stress period
+        # even though transfer of any specified stage changes
+        # aren't implemented yet
+        df['per'] = 0
+
+        df['cond'] = df.width * df.rchlen * df.strhc1 / df.strthick
+
+        if any(self.segment_data.depth1 > 0):
+            # find period with most data
+            per = np.argmax(self.segment_data.groupby('per').count().nseg)
+            reach_depths = self.interpolate_to_reaches('depth1', 'depth2', per=per)
+            df['stage'] = df['strtop'] + reach_depths
+        else:
+            df['stage'] = df['strtop']
+        df['rbot'] = df['strtop'] - df['strthick']
+        cols = ['per', 'rno', 'node', 'k', 'i', 'j', 'cond', 'stage', 'rbot',
+                'outreach', 'asum', 'line_id', 'name', 'geometry']
+        cols = [c for c in cols if c in df.columns]
+        riv_data = df[cols].copy()
+
+        # retain routing information between reaches;
+        # but reset the numbering since the SFR number will be reset anways
+        # (after the RIV reaches are removed from the SFR dataset)
+        new_rnos = renumber_segments(riv_data['rno'], riv_data['outreach'])
+        riv_data['rno'] = [new_rnos[outreach] for outreach in riv_data['rno']]
+        riv_data['outreach'] = [new_rnos[outreach] for outreach in riv_data['outreach']]
+
+        riv = RivData(stress_period_data=riv_data, grid=self.grid,
+                      model=self.model, model_length_units=self.model_length_units,
+                      model_time_units=self.model_time_units,
+                      package_name=self.package_name,)
+
+        if drop_in_sfr:
+            riv_reaches = self.reach_data.rno.isin(to_riv_reaches)
+            riv_nodes = self.reach_data.loc[riv_reaches, 'node']
+            is_riv_node = self.reach_data.node.isin(riv_nodes)
+
+            # drop sfr from all model cells with a riv reach
+            self.reach_data = self.reach_data.loc[~is_riv_node].copy()
+
+            # reset riv outreaches (that are no longer in SFR network)
+            # to zero (exit for sfr network)
+            riv_outreaches = set(self.reach_data.outreach).difference(self.reach_data.rno)
+            outreach_is_riv = self.reach_data.outreach.isin(riv_outreaches)
+            self.reach_data.loc[outreach_is_riv, 'outreach'] = 0
+
+            # drop segments that were completely converted to riv
+            riv_segments = set(self.segment_data.nseg).difference(set(self.reach_data.iseg))
+            # reset outseg numbers in reach_data to zero
+            outseg_is_riv = self.reach_data.outseg.isin(riv_segments)
+            self.reach_data.loc[outseg_is_riv, 'outseg'] = 0
+            # drop these segments from segment_data
+            is_riv_segment = self.segment_data.nseg.isin(riv_segments)
+            self.segment_data = self.segment_data.loc[~is_riv_segment].copy()
+            outseg_is_riv = self.segment_data.outseg.isin(riv_segments)
+            self.segment_data.loc[outseg_is_riv, 'outseg'] = 0
+            # reset the numbering to be consecutive
+            self._reset_routing()
+        return riv
 
     def write_package(self, filename=None, version='mf2005', idomain=None,
                       options=None, write_observations_input=True,

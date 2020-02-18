@@ -35,7 +35,10 @@ def valid_nsegs(nsegs, outsegs=None, increasing=True):
         graph = make_graph(nsegs, outsegs, one_to_many=False)
         monotonic = []
         for s in nsegs:
-            seg_sequence = find_path(graph.copy(), s)[:-1]  # last number is 0 for outlet
+            try:
+                seg_sequence = find_path(graph.copy(), s)[:-1]  # last number is 0 for outlet
+            except:
+                j=2
             monotonic.append(np.all(np.diff(np.array(seg_sequence)) > 0))
         monotonic = np.all(monotonic)
         return consecutive_and_onebased & monotonic
@@ -79,20 +82,26 @@ def rno_nseg_routing_consistent(nseg, outseg, iseg, ireach, rno, outreach):
     seg_groups = df.groupby('iseg')
 
     # segments associated with reach numbers that are first reaches
-    rno1_segments = {g.rno.first(): s for s, g in seg_groups}
+    first_reaches = seg_groups.first()
+    rno1_segments = dict(zip(first_reaches.rno, first_reaches.index))
 
     segments_consistent = []
     for s, g in seg_groups:
         # since the segment is sorted,
         # rno[i+1] should == outreach[i]
-        preceding_consistent = np.array_equal(g.rno.values[1:],
-                                              g.outreach.values[:1])
-
+        if len(g) > 1:
+            preceding_consistent = np.array_equal(g.rno.values[1:],
+                                                  g.outreach.values[:-1])
+        # segments of length 1 don't have any internal routing to check
+        else:
+            preceding_consistent = True
         # check that last reach goes to same segment
         # as outseg in segment_routing
-        last_outreach = g.outreach.last()
-        next_segment = rno1_segments[last_outreach]
+        last_outreach = g.outreach.iloc[-1]
+        next_segment = rno1_segments.get(last_outreach, 0)
         last_consistent = next_segment == segment_routing[s]
+        if not preceding_consistent & last_consistent:
+            j=2
         segments_consistent.append(preceding_consistent &
                                    last_consistent)
     return np.all(segments_consistent)

@@ -228,3 +228,29 @@ def test_write_mf6_package(shellmound_sfrdata, mf6sfr, outdir):
                 pd.testing.assert_frame_equal(df, pdata.loc[~isna],
                                               check_dtype=False)
                 break
+
+
+@pytest.mark.parametrize('kwargs', [{'rno': 1},  # specified reach(es)
+                                    {'segments': 1},  # specified segment(s)
+                                    {},  # all segments
+                                    ])
+def test_to_riv(shellmound_sfrdata, kwargs):
+    sfrd = copy.deepcopy(shellmound_sfrdata)
+
+    riv = sfrd.to_riv(**kwargs)
+
+    riv_spd = riv.stress_period_data
+    rd = sfrd.reach_data
+    assert 'per' in riv_spd.columns
+    if len(kwargs) > 0:
+        overlap = set(riv_spd.node).intersection(rd.node)
+        assert len(overlap) == 0
+    assert sfrmaker.checks.valid_nsegs(riv_spd.rno, riv_spd.outreach)
+    nseg, outseg = sfrd.segment_data.nseg, sfrd.segment_data.outseg,
+    assert sfrmaker.checks.routing_numbering_is_valid(nseg, outseg,
+                                                      rd.iseg, rd.ireach,
+                                                      rd.rno, rd.outreach,
+                                                      increasing_nseg=True)
+    # would be nice to have a way to compare stages
+    # but some sfr were removed that didn't get converted to RIV
+    # (minor reaches collocated with reaches that got converted)
