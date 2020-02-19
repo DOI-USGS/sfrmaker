@@ -101,6 +101,8 @@ class crs:
         return True
 
     def __repr__(self):
+        if self.proj_str is None:
+            return 'No CRS'
         return self.proj_str
 
 

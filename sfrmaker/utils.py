@@ -110,6 +110,19 @@ def get_layer(botm_array, i, j, elev):
     return layers
 
 
+def get_sfr_package_format(sfr_package_file):
+    format = 'mf2005'
+    with open(sfr_package_file) as src:
+        for line in src:
+            if 'being options' in line.lower():
+                format = 'mf6'
+                break
+            elif 'begin packagedata' in line.lower():
+                format = 'mf6'
+                break
+    return format
+
+
 def consolidate_reach_conductances(rd, keep_only_dominant=False):
     """For model cells with multiple SFR reaches, shift all conductance to widest reach,
     by adjusting the length, and setting the lengths in all smaller collocated reaches to 1,

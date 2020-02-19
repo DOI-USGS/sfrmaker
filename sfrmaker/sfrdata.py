@@ -10,10 +10,11 @@ from gisutils import df2shp
 from sfrmaker.routing import find_path, renumber_segments
 from .checks import valid_rnos, valid_nsegs, rno_nseg_routing_consistent
 from .elevations import smooth_elevations
-from .flows import add_to_perioddata
+from .flows import add_to_perioddata, add_to_segment_data
 from .gis import export_reach_data, project, crs
 from .observations import write_mf6_sfr_obsfile, add_observations
 from .units import convert_length_units, itmuni_values, lenuni_values
+from .utils import get_sfr_package_format
 import sfrmaker
 from sfrmaker.base import DataPackage
 from sfrmaker.mf5to6 import segment_data_to_period_data
@@ -380,6 +381,18 @@ class SFRData(DataPackage):
                                  period_column_in_data=period_column_in_data,
                                  variable_column_in_data=variable_column_in_data)
 
+    def add_to_segment_data(self, data, flowline_routing,
+                            variable='flow',
+                            line_id_column_in_data=None,
+                            segment_column_in_data='segment',
+                            period_column_in_data='per',
+                            variable_column_in_data='Q_avg'):
+        return add_to_segment_data(self, data, flowline_routing,
+                                   variable=variable,
+                                   line_id_column_in_data=line_id_column_in_data,
+                                   segment_column_in_data=segment_column_in_data,
+                                   period_column_in_data=period_column_in_data,
+                                   variable_column_in_data=variable_column_in_data)
     @property
     def paths(self):
         """Dict listing routing sequence for each segment
@@ -917,7 +930,10 @@ class SFRData(DataPackage):
         self.reach_data['slope'] = slopes
 
     @classmethod
-    def from_package(cls, sfrpackagefile, grid, linework):
+    def from_package(cls, sfrpackagefile, grid, namefile=None,
+                     sim_name=None, model_ws='.',
+                     version=None, model_name='model', package_name=None,
+                     linework=None):
         """Read SFR package file
 
         Parameters
@@ -934,7 +950,44 @@ class SFRData(DataPackage):
         -------
         sfrdata : sfrmaker.sfrdata instance
         """
-        pass
+        # todo:  finish SFRData.from_package
+        raise NotImplementedError('SFRData.from_package not implemented yet.')
+
+        if version is None:
+            version = get_sfr_package_format(sfrpackagefile)
+        if package_name is None:
+            package_name, _ = os.splitext(sfrpackagefile)
+        # load the model and SFR package
+        if namefile is not None:
+            model_ws, namefile = os.path.split(namefile)
+            m = fm.Modflow.load(namefile, model_ws=model_ws, load_only=['SFR'])
+        elif sim_name is not None:
+            sim = flopy.mf6.MFSimulation.load(sim_name, 'mf6', 'mf6', model_ws)
+            m = sim.get_model(model_name)
+        else:
+            if version != 'mf6':
+                m = fm.Modflow(model_ws=model_ws)
+                sfr = fm.ModflowSfr2.load(sfrpackagefile, model=m)
+            else:
+                sim = flopy.mf6.MFSimulation(sim_ws=model_ws)
+                m = flopy.mf6.ModflowGwf(sim, modelname=model_name,
+                                         model_nam_file='{}.nam'.format(model_name))
+                sfr = mf6.ModflowGwfsfr.load(sfrpackagefile, model=m)
+
+        if m.version != 'mf6':
+            reach_data = pd.DataFrame(m.sfr.reach_data)
+            perioddata_list = []
+            for per, spd in m.sfr.segment_data.items():
+                if spd is not None:
+                    spd = spd.copy()
+                    spd['per'] = per
+                    perioddata_list.append(spd)
+            segment_data = pd.concat(perioddata_list)
+        else:
+            pass
+        return cls(reach_data=reach_data, segment_data=segment_data,
+                   model=m,
+                   grid=grid)
 
     @classmethod
     def from_tables(cls, reach_data, segment_data,

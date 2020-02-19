@@ -3,7 +3,7 @@ import pandas as pd
 import pytest
 
 from .test_routing import add_line_sequence
-from ..flows import (get_inflow_locations_from_parent_model, add_to_perioddata)
+from ..flows import (get_inflow_locations_from_parent_model, add_to_perioddata, add_to_segment_data)
 from gisutils import shp2df
 
 
@@ -76,3 +76,38 @@ def test_add_to_perioddata(shellmound_sfrdata):
     assert np.allclose(sfrd.period_data['inflow'].values, flows['Q_avg'].values)
     assert np.allclose(sfrd.period_data['per'].values, flows['per'].values)
     assert rd.loc[rd.line_id == seq[-1], 'rno'].values[0] == sfrd.period_data['rno'].values[0]
+
+
+def test_add_to_segment_data(shellmound_sfrdata):
+    sfrd = shellmound_sfrdata  # copy.deepcopy(shellmound_sfrdata)
+    rd = shellmound_sfrdata.reach_data.copy()
+    line_id = dict(zip(rd.iseg, rd.line_id))
+    segment = {v:k for k, v in line_id.items()}
+    sfr_routing = shellmound_sfrdata.segment_routing.copy()
+
+    # routing for source hydrography
+    flowline_routing = {line_id.get(k, 0): line_id.get(v, 0)
+                        for k, v in sfr_routing.items()}
+    nlines = 4
+    seq = add_line_sequence(flowline_routing, nlines=nlines)
+    line = sfrd.reach_data.line_id.values[0]
+    flows = pd.DataFrame({'Q_avg': [100., 10., 200., 20., 51, 52, 53, 54],
+                          'per': [0, 1, 0, 1, 2, 3, 4, 5],
+                          'line_id': [2, 2, 4, 4, line, line, line, line]})
+    sd1 = sfrd.segment_data.copy()
+    sd1.index = pd.MultiIndex.from_tuples(zip(sd1.per, sd1.nseg), names=['per', 'nseg'])
+    add_to_segment_data(sfrd, flows,
+                        flowline_routing=flowline_routing,
+                        variable='flow',
+                        line_id_column_in_data='line_id',
+                        period_column_in_data='per',
+                        variable_column_in_data='Q_avg')
+    sd2 = sfrd.segment_data.copy()
+    sd2.index = pd.MultiIndex.from_tuples(zip(sd2.per, sd2.nseg), names=['per', 'nseg'])
+    flows = flows.loc[~flows.line_id.isin([2])]
+    flows['nseg'] = [segment.get(l, segment[seq[-1]]) for l in flows.line_id]
+    flows.index = pd.MultiIndex.from_tuples(zip(flows.per, flows.nseg), names=['per', 'nseg'])
+    assert np.allclose(sd2.loc[flows.index, 'flow'], flows.Q_avg)
+    assert not sd2.isna().any().any()
+    pd.testing.assert_frame_equal(sd1.drop('flow', axis=1),
+                                  sd2.loc[sd1.index].drop('flow', axis=1))

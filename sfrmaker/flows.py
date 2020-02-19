@@ -203,11 +203,77 @@ def add_to_perioddata(sfrdata, data, flowline_routing=None,
     period_data[variable] = data[variable_column_in_data]
 
 
-def add_to_segmentdata(sfrdata, flowline_routing, data,
-                       variable='flow',
-                       segment_column_in_data='segment',
-                       period_column_in_data='per',
-                       variable_column_in_data='Q_avg'):
+def add_to_segment_data(sfrdata, data, flowline_routing=None,
+                        variable='flow',
+                        line_id_column_in_data=None,
+                        segment_column_in_data=None,
+                        period_column_in_data='per',
+                        variable_column_in_data='Q_avg'):
     """Like add_to_perioddata, but for MODFLOW-2005.
     """
-    raise NotImplementedError()
+    sfrd = sfrdata
+
+    # cull data to valid periods
+    data = data.loc[data[period_column_in_data] >= 0].copy()
+
+    # map NHDPlus COMIDs to reach numbers
+    if flowline_routing is not None:
+        assert line_id_column_in_data in data.columns, \
+            "Data need an id column so {} locations can be mapped to reach numbers".format(variable)
+        segment_column_in_data = 'segment'
+        r1 = sfrd.reach_data.loc[sfrd.reach_data.ireach == 1]
+        line_id_iseg_mapping = dict(zip(r1['line_id'], r1['iseg']))
+        line_ids = get_next_id_in_subset(r1.line_id, flowline_routing,
+                                         data[line_id_column_in_data])
+        data[segment_column_in_data] = [line_id_iseg_mapping[lid] for lid in line_ids]
+    else:
+        assert segment_column_in_data in data.columns, \
+            "Data to add need segment number or flowline routing information is needed."
+
+    # check for duplicate inflows in same path
+    if variable == 'flow':
+        line_ids = set(data[line_id_column_in_data])
+        drop = set()
+        dropped_line_info_file = 'dropped_inflows_locations.csv'
+        for lid in line_ids:
+            path = find_path(flowline_routing, start=lid)
+            duplicated = set(path[1:]).intersection(line_ids)
+            if len(duplicated) > 0:
+                drop.add(lid)
+                txt = ('warning: {}: {} is upstream '
+                       'of the following line_ids:\n{}\n'
+                       'see {} for details.').format(line_id_column_in_data,
+                                                     lid, duplicated,
+                                                     dropped_line_info_file
+                                                     )
+                print(txt)
+        if len(drop) > 0:
+            data.loc[data[line_id_column_in_data].isin(drop)].to_csv(dropped_line_info_file, index=False)
+            data = data.loc[~data[line_id_column_in_data].isin(drop)]
+
+    # rename columns in data to be added to same names as segment_data
+    data.rename(columns={period_column_in_data: 'per',
+                         segment_column_in_data: 'nseg',
+                         variable_column_in_data: variable},
+                inplace=True)
+    # update existing segment data
+    sfrd.segment_data.index = pd.MultiIndex.from_tuples(zip(sfrd.segment_data.per, sfrd.segment_data.nseg),
+                                                        names=['per', 'nseg'])
+    loc = list(zip(data.per, data.nseg))
+    data.index = pd.MultiIndex.from_tuples(loc, names=['per', 'nseg'])
+    replace = sorted(list(set(data.index).intersection(sfrd.segment_data.index)))
+    add = sorted(list(set(data.index).difference(sfrd.segment_data.index)))
+    sfrd.segment_data.loc[replace, variable] = data.loc[replace, variable]
+
+    # concat on the added data (create additional rows in segment_data table)
+    to_concat = [sfrd.segment_data]
+    period_groups = data.loc[add, ['per', 'nseg', variable]].reset_index(drop=True).groupby('per')
+    for per, group in period_groups:
+        # start with existing data (row) for that segment
+        df = sfrd.segment_data.loc[(slice(None, None), group.nseg), :].copy()
+        df['per'] = per
+        df.index = zip(df.per, df.nseg)
+        df[variable] = group[variable].values
+        to_concat.append(df)
+    sfrd.segment_data = pd.concat(to_concat).reset_index(drop=True)
+
