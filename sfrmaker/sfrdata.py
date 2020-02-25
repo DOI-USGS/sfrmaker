@@ -12,7 +12,7 @@ from .checks import valid_rnos, valid_nsegs, rno_nseg_routing_consistent
 from .elevations import smooth_elevations
 from .flows import add_to_perioddata, add_to_segment_data
 from .gis import export_reach_data, project, crs
-from .observations import write_mf6_sfr_obsfile, add_observations
+from .observations import write_gage_package, write_mf6_sfr_obsfile, add_observations
 from .units import convert_length_units, itmuni_values, lenuni_values
 from .utils import get_sfr_package_format
 import sfrmaker
@@ -203,16 +203,16 @@ class SFRData(DataPackage):
 
     @property
     def package_name(self):
+        if self._package_name is None:
+            if self.model is not None:
+                self._package_name = self.model.name
+            else:
+                self._package_name = 'model'
         return self._package_name
 
     @package_name.setter
     def package_name(self, package_name):
-        if package_name is None and self.model is not None:
-            self._package_name = self.model.name
-        elif package_name is None:
-            self._package_name = 'model'
-        else:
-            self._package_name = package_name
+        self._package_name = package_name
 
     @property
     def crs(self):
@@ -341,13 +341,16 @@ class SFRData(DataPackage):
     @property
     def observations(self):
         if self._observations is None:
-            self._observations = pd.DataFrame(columns=['obsname', 'obstype', 'rno'])
+            self._observations = pd.DataFrame(columns=['obsname', 'obstype', 'rno', 'iseg', 'ireach'])
         return self._observations
 
     @property
     def observations_file(self):
         if self._observations_filename is None:
-            self._observations_filename = self.package_name + '.sfr.obs'
+            if self.model is not None and self.model.version == 'mf6':
+                self._observations_filename = self.package_name + '.sfr.obs'
+            else:
+                self._observations_filename = self.package_name + '.gage'
         return self._observations_filename
 
     @observations_file.setter
@@ -1127,6 +1130,11 @@ class SFRData(DataPackage):
         if filename is None:
             filename = self.modflow_sfr2.fn_path
         if version == 'mf2005':
+
+            if write_observations_input and len(self.observations) > 0:
+                gage_package_filename = os.path.splitext(filename)[0] + '.gage'
+                self.write_gage_package(filename=gage_package_filename)
+
             self.modflow_sfr2.write_file(filename=filename)
 
         elif version == 'mf6':
@@ -1157,6 +1165,22 @@ class SFRData(DataPackage):
         filepath, file_extension = os.path.splitext(filepath)
         self.reach_data.drop('geometry', axis=1).to_csv('{}_reach_data.csv'.format(filepath), index=False)
         self.segment_data.to_csv('{}_segment_data.csv'.format(filepath), index=False)
+
+    def write_gage_package(self,
+                           filename=None,
+                           gage_package_unit=25,
+                           start_gage_unit=228):
+        if filename is None:
+            filename = self.observations_file
+        else:
+            self.observations_file = filename
+        gage_namfile_entries_file = filename + '.namefile_entries'
+        return write_gage_package(self.observations,
+                                  gage_package_filename=filename,
+                                  gage_namfile_entries_file=gage_namfile_entries_file,
+                                  model=self.model,
+                                  gage_package_unit=gage_package_unit,
+                                  start_gage_unit=start_gage_unit)
 
     def write_mf6_sfr_obsfile(self,
                               filename=None,
