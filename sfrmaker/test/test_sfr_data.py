@@ -1,11 +1,13 @@
 import os
 import copy
+import io
 import flopy
 import numpy as np
 import pandas as pd
 import pytest
 from gisutils import shp2df
 import sfrmaker
+from sfrmaker.mf5to6 import cellids_to_kij
 
 
 @pytest.fixture(scope='function')
@@ -124,7 +126,7 @@ def test_create_mf6sfr(mf6sfr, shellmound_sfrdata, shellmound_model):
 
     # test that packagedata has same information as sfrmaker.sfrdata
     packagedata = pd.DataFrame(mf6sfr.packagedata.array)
-    k, i, j = list(zip(*packagedata['cellid'].tolist()))
+    k, i, j = cellids_to_kij(packagedata['cellid'], drop_inactive=False)
     packagedata['k'] = k
     packagedata['i'] = i
     packagedata['j'] = j
@@ -152,6 +154,7 @@ def test_create_mf6sfr(mf6sfr, shellmound_sfrdata, shellmound_model):
                     print('values in packagedata.{} != sfrdata.segment_data.{}'.format(col, mf2005col))
 
 
+@pytest.mark.skip('waiting on flopy fix for empty packagedata lines where cellid is None')
 def test_flopy_mf6sfr_outfile(mf6sfr, mf6sfr_outfile):
     assert os.path.exists(mf6sfr_outfile)
     # check that the written package data matches in memory package data
@@ -206,28 +209,35 @@ def test_write_mf6_package(shellmound_sfrdata, mf6sfr, outdir):
 
     # check the actual values
     pdata = pd.DataFrame(mf6sfr.packagedata.array)
-    pdata['k'], pdata['i'], pdata['j'] = zip(*pdata.cellid)
+    active = [True if cellid != 'none' else False for cellid in pdata['cellid']]
+    pdata = pdata.loc[active]
+    pdata['k'], pdata['i'], pdata['j'] = cellids_to_kij(pdata.cellid)
     pdata.drop('cellid', axis=1, inplace=True)
-    nreaches = len(pdata)
     cols = ['rno', 'k', 'i', 'j', 'rlen', 'rwid', 'rgrd', 'rtp', 'rbth', 'rhk', 'man', 'ncon', 'ustrf', 'ndv']
     pdata = pdata[cols].copy()
+    rows = []
     with open(sfr_package_file) as src:
         for line in src:
             if 'begin packagedata' in line.lower():
-                next(src)
-                df = pd.read_csv(src, delim_whitespace=True,
-                                 #skiprows=2,
-                                 header=None,
-                                 names=cols,
-                                 nrows=nreaches
-                                 )
-                isna = df.isna().any(axis=1).values.astype(bool)
-                df.dropna(axis=0, inplace=True)
-                for c in ['k', 'i', 'j', 'rno']:
-                    df[c] = df[c].astype(int) - 1
-                pd.testing.assert_frame_equal(df, pdata.loc[~isna],
-                                              check_dtype=False)
+                for line in src:
+                    if 'end packagedata' in line.lower():
+                        break
+                    if 'none' not in line.lower() and '#' not in line:
+                        rows.append(line)
                 break
+    text = ''.join(rows)
+    df = pd.read_csv(io.StringIO(text), delim_whitespace=True,
+                         #skiprows=2,
+                         header=None,
+                         names=cols
+                         )
+    isna = df.isna().any(axis=1).values.astype(bool)
+    df.dropna(axis=0, inplace=True)
+    for c in ['k', 'i', 'j', 'rno']:
+        df[c] = df[c].astype(int) - 1
+    pd.testing.assert_frame_equal(df,
+                                  pdata.loc[~isna].reset_index(drop=True),
+                                  check_dtype=False)
 
 
 @pytest.mark.parametrize('kwargs', [{'rno': 1},  # specified reach(es)

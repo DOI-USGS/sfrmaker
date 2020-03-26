@@ -372,3 +372,29 @@ def segment_data_to_period_data(segment_data, reach_data):
     distributed = distributed[arrangecols]
     distributed['iseg'] = distributed.iseg.astype(int)
     return distributed
+
+
+def cellids_to_kij(cellids, drop_inactive=True):
+    """Unpack tuples of MODFLOW-6 cellids (k, i, j) to
+    lists of k, i, j values; ignoring instances
+    where cellid is None (unconnected cells).
+
+    Parameters
+    ----------
+    cellids : sequence of (k, i, j) tuples
+    drop_inactive : bool
+        If True, drop cellids == 'none'. If False,
+        distribute these to k, i, j.
+
+    Returns
+    -------
+    k, i, j : 1D numpy arrays of integers
+    """
+    active = np.array(cellids) != 'none'
+    if drop_inactive:
+        k, i, j = map(np.array, zip(*cellids[active]))
+    else:
+        k = np.array([cid[0] if cid != 'none' else None for cid in cellids])
+        i = np.array([cid[1] if cid != 'none' else None for cid in cellids])
+        j = np.array([cid[2] if cid != 'none' else None for cid in cellids])
+    return k, i, j

@@ -2,6 +2,13 @@
 Release History
 ===============
 
+Version 0.4.0 (2020-3-27)
+--------------------------
+* added screening of inactive cellids in MODFLOW6 flopy SFR package instance creation
+* added support for MODFLOW-2005 gage package setup
+* added support for specified inflows in MODFLOW-2005 (add_to_segment_data method)
+* added to_riv method to convert SFR segments to RIV package; DataPackage base class
+
 Version 0.3.0 (2020-2-12)
 --------------------------
 * replace FloPy SpatialReference with support for FloPy modelgrid

@@ -682,14 +682,11 @@ class SFRData(DataPackage):
         assert np.min(list(map(np.min, map(np.abs, connectiondata)))) < 1
 
         # set cellids to None for unconnected reaches or where idomain == 0
-        # note: as of 9/12/2019, this results in an error during ModflowGwfsfr package construction
-        # with either Nonetype or "NONE"
-        # even though MODFLOW 6 requires it
-        # unconnected = ~packagedata['rno'].isin(np.array(list(sfr6.connections.keys())) - 1).values
-        # inactive = m.dis.idomain.array[packagedata.k.values,
-        #                               packagedata.i.values,
-        #                               packagedata.j.values]
-        # packagedata.loc[unconnected | inactive, 'cellid'] = None
+        unconnected = ~packagedata['rno'].isin(np.array(list(sfr6.connections.keys())) - 1).values
+        inactive = m.dis.idomain.array[packagedata.k.values,
+                                       packagedata.i.values,
+                                       packagedata.j.values] != 1
+        packagedata.loc[unconnected | inactive, 'cellid'] = 'none'
         packagedata = packagedata[columns].values.tolist()
 
         period_data = None
