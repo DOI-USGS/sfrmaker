@@ -1144,7 +1144,6 @@ class SFRData(DataPackage):
                            'BUDGET FILEOUT {}.cbc'.format(filename),
                            'STAGE FILEOUT {}.stage.bin'.format(filename),
                            ]
-
             if write_observations_input and len(self.observations) > 0:
                 obs_input_filename = filename + '.obs'
                 self.write_mf6_sfr_obsfile(filename=obs_input_filename)

@@ -76,12 +76,16 @@ class Grid:
 
     def __eq__(self, other):
         if not isinstance(other, Grid):
+            print('not an sfrmaker.Grid instance')
             return False
         if other._structured != self._structured:
+            print('different grid types')
             return False
         if other.size != self.size:
+            print('grid sizes not equal!')
             return False
         if other.crs.length_units != self.crs.length_units:
+            print('crs length units are not equal!')
             return False
         if not np.allclose(other.bounds, self.bounds):
             return False
@@ -93,6 +97,7 @@ class Grid:
             if other.rotation != self.rotation:
                 return False
         if not np.array_equal(self.isfr, other.isfr):
+            print('idomain arrays are not equal!')
             return False
         return True
 

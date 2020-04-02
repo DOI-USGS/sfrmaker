@@ -110,4 +110,5 @@ def test_add_to_segment_data(shellmound_sfrdata):
     assert np.allclose(sd2.loc[flows.index, 'flow'], flows.Q_avg)
     assert not sd2.isna().any().any()
     pd.testing.assert_frame_equal(sd1.drop('flow', axis=1),
-                                  sd2.loc[sd1.index].drop('flow', axis=1))
+                                  sd2.loc[sd1.index].drop('flow', axis=1),
+                                  check_dtype=False)

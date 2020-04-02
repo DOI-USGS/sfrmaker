@@ -220,7 +220,7 @@ class mf6sfr:
                     writepakdata[c] += 1  # convert indices to 1-based
                     writepakdata[c] = writepakdata[c].astype(str)
             # fill in NONEs for reaches in inactive cells
-            inactive = writepakdata.idomain == 0
+            inactive = writepakdata.idomain != 1
             if not 'cellid' in writepakdata.columns:
                 writepakdata.loc[inactive, 'k'] = ''
                 writepakdata.loc[inactive, 'i'] = 'NONE'
