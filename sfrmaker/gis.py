@@ -48,8 +48,11 @@ class crs:
 
     @property
     def length_units(self):
+        unit_renames = {'metre': 'meters'}
         if self._length_units is None:
-            return parse_units_from_proj_str(self.proj_str)
+            units = self.pyproj_crs.axis_info[0].unit_name
+            units = unit_renames.get(units, units)
+            return units # parse_units_from_proj_str(self.proj_str)
 
     @property
     def proj_str(self):
@@ -58,6 +61,14 @@ class crs:
         elif self._proj_str is None and self.prjfile is not None:
             self._proj_str = get_proj_str(self.prjfile)
         return self._proj_str
+
+    @property
+    def pyproj_crs(self):
+        """pyproj crs instance.
+        todo: refactor crs class to use this instead of pyproj.Proj
+        """
+        if self.proj_str is not None:
+            return pyproj.CRS.from_string(self.proj_str)
 
     @property
     def pyproj_Proj(self):
@@ -222,14 +233,18 @@ def intersect(geom1, geom2):
 
 def parse_units_from_proj_str(proj_str):
     units = None
+    from pyproj import CRS
+    crs = CRS.from_string(proj_str)
     try:
         # need this because preserve_units doesn't seem to be
         # working for complex proj strings.  So if an
         # epsg code was passed, we have no choice, but if a
         # proj string was passed, we can just parse it
+
         if "EPSG" in proj_str.upper():
             import pyproj
-
+            from pyproj import CRS
+            crs = CRS.from_epsg(4326)
             crs = pyproj.Proj(proj_str,
                               preseve_units=True,
                               errcheck=True)

@@ -23,6 +23,19 @@ def test_crs_eq():
     assert crs_26715_epsg == crs_26715_prj
 
 
+def test_crs_units():
+    crs_4269_proj = crs(proj_str='+proj=longlat +datum=NAD83 +no_defs ')
+    assert crs_4269_proj.length_units == 'degree'
+    crs_26715_epsg = crs(epsg=26715)
+    assert crs_26715_epsg.length_units == 'meters'
+    crs_26715_epsg_proj = crs(proj_str='epsg:26715')
+    assert crs_26715_epsg_proj.length_units == 'meters'
+    crs_26715_proj = crs(proj_str='+proj=utm +zone=15 +datum=NAD27 +units=m +no_defs ')
+    assert crs_26715_proj.length_units == 'meters'
+    crs_26715_prj = crs(prjfile='Examples/data/badriver/grid.shp')
+    assert crs_26715_prj.length_units == 'meters'
+
+
 def test_isvalid():
     """
     With pyproj 2, all Proj instances are valid

@@ -85,7 +85,8 @@ class Grid:
             print('grid sizes not equal!')
             return False
         if other.crs.length_units != self.crs.length_units:
-            print('crs length units are not equal!')
+            print('crs length units {} are not equal to {}!'.format(other.crs.length_units,
+                                                                    self.crs.length_units))
             return False
         if not np.allclose(other.bounds, self.bounds):
             return False
