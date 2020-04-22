@@ -27,3 +27,7 @@ def test_structuredgrid_from_flopy_mg():
     assert grd2.dx == mg.delr[0]
     assert grd2.dy == mg.delc[0]
     assert grd2.crs == crs(epsg=26715)
+
+
+def test_grid_epsg(shellmound_sfrmaker_grid):
+    assert shellmound_sfrmaker_grid.crs.epsg == 5070

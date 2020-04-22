@@ -18,7 +18,7 @@ class crs:
                  epsg=None, proj_str=None, prjfile=None):
 
         self._crs = crs
-        self.epsg = epsg
+        self._epsg = epsg
         self._proj_str = proj_str
         self._length_units = None
         self.prjfile = prjfile
@@ -32,12 +32,19 @@ class crs:
 
     @property
     def crs(self):
+        """todo: refactor this to proj_dict"""
         if self._crs is None:
             if self._proj_str is not None:
                 self._crs = from_string(self._proj_str)
             elif self.epsg is not None:
                 self._crs = from_epsg(self.epsg)
         return self._crs
+
+    @property
+    def epsg(self):
+        if self._epsg is None:
+            self._epsg = self.pyproj_crs.to_epsg()
+        return self._epsg
 
     @property
     def is_valid(self):
