@@ -132,6 +132,13 @@ def shellmound_grid(shellmound_model):
 
 
 @pytest.fixture(scope='function')
+def shellmound_sfrmaker_grid(shellmound_grid):
+    grid = sfrmaker.StructuredGrid.from_modelgrid(shellmound_grid,
+                                                  active_area=None, isfr=None)
+    return grid
+
+
+@pytest.fixture(scope='function')
 def tylerforks_active_area_shapefile(datapath):
     return '{}/badriver/active_area.shp'.format(datapath)
 

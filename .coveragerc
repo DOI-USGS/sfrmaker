@@ -3,4 +3,6 @@ source = sfrmaker
 omit = /Users/aleaf/Documents/GitHub/flopy/*
     sfrmaker/_version.py
     sfrmaker/test/setup_testdata.py
+    sfrmaker/test/*
+    sfrmaker/fileio.py
     

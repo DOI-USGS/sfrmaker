@@ -704,21 +704,39 @@ class SFRData(DataPackage):
                                    connectiondata=connectiondata,
                                    diversions=None,  # TODO: add support for diversions
                                    perioddata=period_data,  # TODO: add support for creating mf6 perioddata input
-                                   )
+                                   **kwargs)
         return mf6sfr
 
     def add_observations(self, data, flowline_routing=None,
-                         obstype=None,
-                         line_id_column_in_data=None,
-                         rno_column_in_data=None,
-                         obstype_column_in_data=None,
-                         obsname_column_in_data='site_no'):
-        return add_observations(self, data, flowline_routing=flowline_routing,
-                                obstype=obstype,
-                                line_id_column_in_data=line_id_column_in_data,
-                                rno_column_in_data=rno_column_in_data,
-                                obstype_column_in_data=obstype_column_in_data,
-                                obsname_column_in_data=obsname_column_in_data)
+                         obstype=None, sfrlines_shapefile=None,
+                         x_location_column=None,
+                         y_location_column=None,
+                         line_id_column=None,
+                         rno_column=None,
+                         obstype_column=None,
+                         obsname_column='site_no'):
+
+         added_obs = add_observations(self, data, flowline_routing=flowline_routing,
+                                      obstype=obstype, sfrlines_shapefile=sfrlines_shapefile,
+                                      x_location_column=x_location_column,
+                                      y_location_column=y_location_column,
+                                      line_id_column=line_id_column,
+                                      rno_column=rno_column,
+                                      obstype_column=obstype_column,
+                                      obsname_column=obsname_column)
+
+         # replace any observations that area already in the observations table
+         if isinstance(self._observations, pd.DataFrame):
+             exists_already = self._observations['obsname'].isin(added_obs['obsname'])
+             self._observations = self._observations.loc[~exists_already]
+         self._observations = self.observations.append(added_obs).reset_index(drop=True)
+
+         for df in self._observations, added_obs:
+             # enforce dtypes (pandas doesn't allow an empty dataframe
+             # to be initialized with more than one specified dtype)
+             for col in ['rno', 'iseg', 'ireach']:
+                 df[col] = df[col].astype(int)
+         return added_obs
 
     def interpolate_to_reaches(self, segvar1, segvar2, per=0):
         """Interpolate values in datasets 6b and 6c to each reach in stream segment
@@ -746,7 +764,7 @@ class SFRData(DataPackage):
             strhc1 (hydraulic conductivity) column in reach_data.
 
         """
-        from .utils import interpolate_to_reaches
+        from sfrmaker.reaches import interpolate_to_reaches
 
         reach_data = self.reach_data
         segment_data = self.segment_data.groupby('per').get_group(per)
@@ -1191,12 +1209,12 @@ class SFRData(DataPackage):
                                      filename,
                                      sfr_output_filename)
 
-    def export_cells(self, filename=None, nodes=None):
+    def export_cells(self, filename=None, nodes=None, geomtype='polygon'):
         """Export shapefile of model cells with stream reaches."""
         if filename is None:
             filename = self.package_name + '_sfrcells.shp'
         export_reach_data(self.reach_data, self.grid, filename,
-                          nodes=nodes, geomtype='polygon')
+                          nodes=nodes, geomtype=geomtype)
 
     def export_outlets(self, filename=None):
         """Export shapefile of model cells with stream reaches."""

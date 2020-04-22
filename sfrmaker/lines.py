@@ -14,9 +14,8 @@ from .grid import StructuredGrid
 from .nhdplus_utils import load_nhdplus_v2, get_prj_file
 from .sfrdata import SFRData
 from .units import convert_length_units, get_length_units
-from .utils import (width_from_arbolate_sum, arbolate_sum, \
-                    consolidate_reach_conductances,
-                    interpolate_to_reaches)
+from .utils import (width_from_arbolate_sum, arbolate_sum)
+from sfrmaker.reaches import consolidate_reach_conductances, interpolate_to_reaches, setup_reach_data
 
 
 class Lines:
@@ -211,7 +210,6 @@ class Lines:
             and original linework IDs.
         """
         from .gis import intersect, intersect_rtree
-        from .utils import setup_reach_data
 
         # reproject the flowlines if they aren't in same CRS as grid
         if self.crs != grid.crs:

@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 
 import sfrmaker
-from .utils import interpolate_to_reaches
+from sfrmaker.reaches import interpolate_to_reaches
 
 
 class mf6sfr:
@@ -200,11 +200,6 @@ class mf6sfr:
 
         if options is not None:
             self.options = options
-        else:
-            self.options = ['save_flows',
-                            'BUDGET FILEOUT {}.cbc'.format(filename),
-                            'STAGE FILEOUT {}.stage.bin'.format(filename),
-                            ]
 
         header = "# MODFLOW-6 SFR input; created by SFRmaker v. {}".format(sfrmaker.__version__)
         with open(outfile, 'w', newline=""

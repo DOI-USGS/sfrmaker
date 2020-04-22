@@ -2,17 +2,19 @@ import io
 import os
 import numpy as np
 import pandas as pd
+from shapely.geometry import Point, box
 import pytest
-from gisutils import shp2df
+from gisutils import shp2df, df2shp
+from sfrmaker.observations import locate_sites, get_closest_reach
 
 
 @pytest.fixture
 def flux_observation_data():
-    data = ('datetime,per,line_id,flow_m3d,site_no,junk,comment\n'
-            '1998-04-01,0,17991438,100.,7281600,262,RF model estimate\n'
-            '1998-05-01,0,17956091,10.,7288570,204,RF model estimate\n'
-            '1998-04-01,1,17991438,200.,7281600,262,base flow separation\n'
-            '1998-05-01,1,17956091,20.,7288570,204,base flow separation\n'
+    data = ('datetime,per,line_id,flow_m3d,site_no,junk,x,y,comment\n'
+            '1998-04-01,0,17991438,100.,7281600,262,533280,1192740,RF model estimate\n'
+            '1998-05-01,0,17956091,10.,7288570,204,515375.2,1189942.5,RF model estimate\n'
+            '1998-04-01,1,17991438,200.,7281600,262,533280,1192740,base flow separation\n'
+            '1998-05-01,1,17956091,20.,7288570,204,515375.2,1189942.5,base flow separation\n'
             )
     data = pd.read_csv(io.StringIO(data))
     return data
@@ -58,8 +60,8 @@ def test_write_gage_package(tylerforks_sfrdata, flux_observation_data, outdir):
     name_file = os.path.join(tylerforks_sfrdata.model.model_ws,
                              tylerforks_sfrdata.model.namefile)
     obs = tylerforks_sfrdata.add_observations(obsdata,
-                                              line_id_column_in_data='line_id',
-                                              obsname_column_in_data='site_no'
+                                              line_id_column='line_id',
+                                              obsname_column='site_no'
                                               )
     tylerforks_sfrdata.write_gage_package()
     expected = tylerforks_sfrdata.observations.sort_values(by='obsname')[['iseg', 'ireach']].reset_index(drop=True).copy()
@@ -82,8 +84,8 @@ def test_write_mf6_sfr_obsfile(shellmound_sfrdata, flux_observation_data, outdir
     shellmound_sfrdata.observations_file = mf6_observations_file
     obs = shellmound_sfrdata.add_observations(flux_observation_data,
                                               obstype='downstream-flow',
-                                              line_id_column_in_data='line_id',
-                                              obsname_column_in_data='site_no'
+                                              line_id_column='line_id',
+                                              obsname_column='site_no'
                                               )
     shellmound_sfrdata.write_mf6_sfr_obsfile()
     expected = shellmound_sfrdata.observations[['obsname', 'obstype', 'rno']]
@@ -101,15 +103,16 @@ def test_write_mf6_sfr_obsfile(shellmound_sfrdata, flux_observation_data, outdir
                 break
 
 
-def test_add_observations(shellmound_sfrdata, flux_observation_data, outdir):
+def test_add_observations_from_line_ids(shellmound_sfrdata, flux_observation_data, outdir):
     obs = shellmound_sfrdata.add_observations(flux_observation_data,
                                               obstype='downstream-flow',
-                                              line_id_column_in_data='line_id',
-                                              obsname_column_in_data='site_no'
+                                              line_id_column='line_id',
+                                              obsname_column='site_no'
                                               )
     assert np.all(obs == shellmound_sfrdata._observations)
     assert set(obs.columns) == {'obsname', 'obstype', 'rno', 'iseg', 'ireach'}
-    rd = shellmound_sfrdata.reach_data.loc[shellmound_sfrdata.reach_data.ireach == 1]
+    # get the last reach in each segment
+    rd = shellmound_sfrdata.reach_data.sort_values(by=['iseg', 'ireach'], axis=0).groupby('iseg').last()
     rno = dict(zip(rd.line_id, rd.rno))
     assert set(obs.rno) == set([rno[lid] for lid in flux_observation_data.line_id])
     rd = shellmound_sfrdata.reach_data
@@ -130,7 +133,65 @@ def test_add_observations(shellmound_sfrdata, flux_observation_data, outdir):
     # test assigning obs from custom reach number column?
     obs = shellmound_sfrdata.add_observations(flux_observation_data,
                                               obstype='downstream-flow',
-                                              rno_column_in_data='junk',
-                                              obsname_column_in_data='site_no'
+                                              rno_column='junk',
+                                              obsname_column='site_no'
                                               )
     assert set(obs.rno) == set(flux_observation_data.junk)
+
+
+def test_add_observations_from_points(shellmound_sfrdata, flux_observation_data, outdir):
+    inputs = (flux_observation_data, [flux_observation_data,  # test adding from a list
+                                      flux_observation_data])
+    for input in inputs:
+        obs = shellmound_sfrdata.add_observations(input,
+                                                  obstype='downstream-flow',
+                                                  x_location_column='x',
+                                                  y_location_column='y',
+                                                  obsname_column='site_no'
+                                                  )
+        assert np.all(obs == shellmound_sfrdata._observations)
+        assert set(obs.columns) == {'obsname', 'obstype', 'rno', 'iseg', 'ireach'}
+        expected = dict(zip(inputs[0].site_no.astype(str), inputs[0].junk))
+        returned = dict(zip(obs.obsname, obs.rno))
+        assert returned == expected
+        rd = shellmound_sfrdata.reach_data
+        iseg_ireach = dict(list(zip(rd.rno, zip(rd.iseg, rd.ireach))))
+        for i, r in obs.iterrows():
+            assert (r.iseg, r.ireach) == iseg_ireach[r.rno]
+
+
+@pytest.mark.parametrize("x, y, expected", ((515459.9, 1189906.1, 202),
+                                            (515375.2, 1189942.5, 204)
+                                  )
+                         )
+def test_get_closest_reach(shellmound_sfrdata, x, y, expected, outdir):
+    sfrlines = shellmound_sfrdata.reach_data
+    rno, dist = get_closest_reach(x, y, sfrlines,
+                                  rno_column='rno')
+    assert rno == expected
+    assert 0 < dist < shellmound_sfrdata.grid.dx
+
+
+def test_locate_sites(shellmound_sfrdata, outdir):
+
+    X, Y, rno = zip(*((515459.9, 1189906.1, 202),
+                      (515375.2, 1189942.5, 204)))
+    df = pd.DataFrame({'geometry': [Point(x, y) for x, y in zip(X, Y)],
+                       'site_no': rno
+                       }
+                      )
+    sites_shapefile = '{}/sites.shp'.format(outdir)
+    df2shp(df, sites_shapefile, epsg=5070)
+    sfrlines_shapefile = '{}/shellmound_lines.shp'.format(outdir)
+    shellmound_sfrdata.export_lines(sfrlines_shapefile)
+    active_area = box(*shellmound_sfrdata.grid.bounds)
+    locs = locate_sites(sites_shapefile,
+                        sfrlines_shapefile,
+                        active_area,
+                        keep_columns=None,
+                        reach_id_col='rno',
+                        site_number_col='site_no',
+                        perimeter_buffer=1000,
+                        distance_threshold=1600
+                         )
+    assert locs.rno.equals(locs.site_no)
