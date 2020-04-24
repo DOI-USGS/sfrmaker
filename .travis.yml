@@ -8,13 +8,24 @@ language: python
 
 matrix:
   include:
-    - env: ENV_FILE="ci/requirements.yml"
+
+    # test with python 3.7 and latest flopy release available via conda
+    - env: ENV_FILE="ci/37-conda-flopy.yml"
+
+    # test with latest python version and flopy develop branch
+    - env: ENV_FILE="ci/latest-python-flopy-develop.yml"
+
+  # for flopy bugs that haven't been fixed in the latest conda release
+  allow_failures:
+    - env: ENV_FILE="ci/37-conda-flopy.yml"
 
 install:
   - sudo apt-get update
   - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
   - bash miniconda.sh -b -p $HOME/miniconda
   - export PATH="$HOME/miniconda/bin:$PATH"
+  - export PATH="$HOME/build/aleaf/modflow-setup/bin/linux:$PATH"
+  - echo $PATH
   - hash -r
   - conda config --set always_yes yes --set changeps1 no
   - conda update conda
@@ -33,6 +44,10 @@ install:
 script:
   - coverage run -m pytest  # Run the tests and check for test coverage.
   - coverage report -m  # Generate test coverage report.
+  - set -e
+  - make -C docs html  # Build the documentation.
+  - pip install doctr
+  - doctr deploy --built-docs docs/build/html .  # Publish the documentation.
 
 after_success:
   - codecov  # Upload the report to codecov.

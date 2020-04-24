@@ -2,8 +2,9 @@ name: test
 channels:
   - conda-forge
   - defaults
+  - atleaf
 dependencies:
-  - python=3.*
+  - python=3.7
   - ipython
   - jupyter
   - notebook
@@ -28,7 +29,6 @@ dependencies:
   - numpydoc
   - sphinx-copybutton
   - sphinx_rtd_theme
+  - flopy
+  - gis-utils
   - pip
-  - pip:
-    - git+git://github.com/modflowpy/flopy@develop
-    - gis-utils
