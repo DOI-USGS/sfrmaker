@@ -2,9 +2,11 @@
 Release History
 ===============
 
-Version 0.4.0 (2020-3-27)
+Version 0.4.0 (2020-4-23)
 --------------------------
-* added screening of inactive cellids in MODFLOW6 flopy SFR package instance creation
+* add automated setup (``SFRdata.add_observations`` method) of sfr observation locations (gages for mf2005 or obs input for mf6), from (x, y) locations, line_ids in source hydrography, or at specified reach numbers
+* some minor patches to the gis module to use the new CRS module in pyproj to parse epsg codes and length units
+* added screening of inactive cellids (set gw cellid to None) in MODFLOW6 flopy SFR package instance creation
 * added support for MODFLOW-2005 gage package setup
 * added support for specified inflows in MODFLOW-2005 (add_to_segment_data method)
 * added to_riv method to convert SFR segments to RIV package; DataPackage base class

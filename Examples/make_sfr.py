@@ -1,9 +1,8 @@
 """
 Make a SFR package for a prexisting MODFLOW model,
-using a flopy SpatialReference to specify the grid
+using a flopy model grid to specify the grid
 """
 import os
-
 import flopy
 import numpy as np
 

@@ -30,5 +30,5 @@ dependencies:
   - sphinx_rtd_theme
   - pip
   - pip:
-    - https://github.com/modflowpy/flopy/zipball/develop
+    - git+git://github.com/modflowpy/flopy@develop
     - gis-utils
