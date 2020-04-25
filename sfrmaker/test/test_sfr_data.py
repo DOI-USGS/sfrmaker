@@ -1,6 +1,7 @@
 import os
 import copy
 import io
+from packaging import version
 import flopy
 import numpy as np
 import pandas as pd
@@ -178,6 +179,8 @@ def test_ibound_representation_of_idomain(shellmound_sfrdata, shellmound_model):
     assert np.array_equal(ibound, idomain)
 
 
+@pytest.mark.xfail(version.parse(flopy.__version__) <= version.parse('3.3.0'),
+                   reason="")
 def test_write_mf6_package(shellmound_sfrdata, mf6sfr, outdir):
     sfr_package_file = os.path.join(outdir, 'test.package_file.sfr')
     shellmound_sfrdata.write_package(filename=sfr_package_file, version='mf6')

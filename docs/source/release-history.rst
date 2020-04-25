@@ -2,7 +2,7 @@
 Release History
 ===============
 
-Version 0.4.0 (2020-4-23)
+Version 0.4.0 (2020-4-25)
 --------------------------
 * add automated setup (``SFRdata.add_observations`` method) of sfr observation locations (gages for mf2005 or obs input for mf6), from (x, y) locations, line_ids in source hydrography, or at specified reach numbers
 * some minor patches to the gis module to use the new CRS module in pyproj to parse epsg codes and length units

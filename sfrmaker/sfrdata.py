@@ -1,11 +1,11 @@
 import os
 import time
+from packaging import version
 import numpy as np
 import pandas as pd
 import rasterio
 from rasterstats import zonal_stats
 from shapely.geometry import LineString
-import flopy
 from gisutils import df2shp
 from sfrmaker.routing import find_path, renumber_segments
 from .checks import valid_rnos, valid_nsegs, rno_nseg_routing_consistent
@@ -19,8 +19,12 @@ import sfrmaker
 from sfrmaker.base import DataPackage
 from sfrmaker.mf5to6 import segment_data_to_period_data
 from sfrmaker.rivdata import RivData
-fm = flopy.modflow
-mf6 = flopy.mf6
+try:
+    import flopy
+    fm = flopy.modflow
+    mf6 = flopy.mf6
+except:
+    flopy = False
 
 
 class SFRData(DataPackage):
@@ -682,11 +686,13 @@ class SFRData(DataPackage):
         assert np.min(list(map(np.min, map(np.abs, connectiondata)))) < 1
 
         # set cellids to None for unconnected reaches or where idomain == 0
-        unconnected = ~packagedata['rno'].isin(np.array(list(sfr6.connections.keys())) - 1).values
-        inactive = m.dis.idomain.array[packagedata.k.values,
-                                       packagedata.i.values,
-                                       packagedata.j.values] != 1
-        packagedata.loc[unconnected | inactive, 'cellid'] = 'none'
+        # can only do this with flopy versions 3.3.1 and later, otherwise flopy will bomb
+        if version.parse(flopy.__version__) > version.parse('3.3.0'):
+            unconnected = ~packagedata['rno'].isin(np.array(list(sfr6.connections.keys())) - 1).values
+            inactive = m.dis.idomain.array[packagedata.k.values,
+                                           packagedata.i.values,
+                                           packagedata.j.values] != 1
+            packagedata.loc[unconnected | inactive, 'cellid'] = 'none'
         packagedata = packagedata[columns].values.tolist()
 
         period_data = None
