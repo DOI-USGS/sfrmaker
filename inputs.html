@@ -1,0 +1,275 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Input data requirements &mdash; SFRmaker 0.4.0.post1+g74510a9 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+        <script src="_static/clipboard.min.js"></script>
+        <script src="_static/copybutton.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Release History" href="release-history.html" />
+    <link rel="prev" title="Examples" href="examples.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> SFRmaker
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.4.0.post1+g74510a9
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html"> Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html"> Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html"> Example scripts</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#"> Input Requirements</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#hydrography-data">1) Hydrography data</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#nhdplus-v2-hydrography-datasets">NHDPlus v2 hydrography datasets</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#notes">Notes:</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#custom-hydrography">Custom hydrography</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#model-grid-information">2) Model grid information</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">Release history</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="release-history.html"> Release History</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">SFRmaker</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Input data requirements</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/inputs.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="input-data-requirements">
+<h1>Input data requirements<a class="headerlink" href="#input-data-requirements" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="hydrography-data">
+<h2>1) Hydrography data<a class="headerlink" href="#hydrography-data" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="nhdplus-v2-hydrography-datasets">
+<h3><a class="reference external" href="http://www.horizon-systems.com/NHDPlus/NHDPlusV2_data.php">NHDPlus v2 hydrography datasets</a><a class="headerlink" href="#nhdplus-v2-hydrography-datasets" title="Permalink to this headline">¶</a></h3>
+<p>Archives needed/relevant files:</p>
+<p><strong>NHDPlusV21_XX_YY_NHDSnapshot_*.7z</strong></p>
+<ul class="simple">
+<li><p>NHDFcode.dbf</p></li>
+<li><p>NHDFlowline.dbf, .prj, .shp, .shx</p></li>
+</ul>
+<p><strong>NHDPlusV21_XX_YY_NHDPlusAttributes_*.7z</strong></p>
+<ul class="simple">
+<li><p>elevslope.dbf</p></li>
+<li><p>PlusFlow.dbf</p></li>
+<li><p>PlusFlowlineVAA.dbf</p></li>
+</ul>
+<div class="section" id="notes">
+<h4>Notes:<a class="headerlink" href="#notes" title="Permalink to this headline">¶</a></h4>
+<p>XX is Drainage Area ID (e.g., GL for Great Lakes) and YY is the Vector Processing Unit (VPU; e.g. 04) in the  above (see NHDPlus website for details).</p>
+</div>
+</div>
+<div class="section" id="custom-hydrography">
+<h3>Custom hydrography<a class="headerlink" href="#custom-hydrography" title="Permalink to this headline">¶</a></h3>
+<p>Any Polyline shapefile can be supplied in lieu of NHDPlus, but it must have the following columns, as shown in the second example:</p>
+<ul class="simple">
+<li><p><strong>flowlines_file</strong>: path to shapefile</p></li>
+<li><p><strong>id_column</strong>: unique identifier for each polyline</p></li>
+<li><p><strong>routing_column</strong>: downstream connection (ID), 0 if none</p></li>
+<li><p><strong>width1_column</strong>: channel width at start of line, in <code class="docutils literal notranslate"><span class="pre">attr\_length\_units</span></code> (optional)</p></li>
+<li><p><strong>width2_column</strong>: channel width at end of line, in <code class="docutils literal notranslate"><span class="pre">attr_length_units</span></code> (optional)</p></li>
+<li><p><strong>up_elevation_column</strong>: streambed elevation at start of line, in <code class="docutils literal notranslate"><span class="pre">attr_height_units</span></code></p></li>
+<li><p><strong>dn_elevation_column</strong>: streambed elevation at end of line, in <code class="docutils literal notranslate"><span class="pre">attr_height_units</span></code></p></li>
+<li><p><strong>name_column</strong>: stream name (optional)</p></li>
+<li><p><strong>attr_length_units</strong>: channel width units</p></li>
+<li><p><strong>attr_height_units</strong>: streambed elevation units</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="model-grid-information">
+<h2>2) Model grid information<a class="headerlink" href="#model-grid-information" title="Permalink to this headline">¶</a></h2>
+<p>is supplied by creating a       <code class="docutils literal notranslate"><span class="pre">`flopy.discretization.Grid</span></code> instance`_, instance or <a class="reference external" href="https://aleaf.github.io/sfrmaker/usage.html#alternatively-the-model-grid-can-be-defined-with-a-sfrmaker-structuredgrid-instance">via a shapefile</a>, as shown in the <a class="reference internal" href="examples.html"><span class="doc">examples</span></a>.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="release-history.html" class="btn btn-neutral float-right" title="Release History" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="examples.html" class="btn btn-neutral float-left" title="Examples" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+      <span class="lastupdated">
+        Last updated on Apr 27, 2020.
+      </span>
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

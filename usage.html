@@ -1,0 +1,334 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Usage &mdash; SFRmaker 0.4.0.post1+g74510a9 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+        <script src="_static/clipboard.min.js"></script>
+        <script src="_static/copybutton.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Examples" href="examples.html" />
+    <link rel="prev" title="Installation" href="installation.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> SFRmaker
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.4.0.post1+g74510a9
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Getting Started</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html"> Installation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#"> Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#create-an-instance-of-the-lines-class-from-nhdplus-data">Create an instance of the Lines class from NHDPlus data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#create-an-instance-of-lines-from-a-hydrography-shapefile">create an instance of <code class="docutils literal notranslate"><span class="pre">Lines</span></code> from a hydrography shapefile</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#create-a-flopy-structuredgrid-instance-defining-the-model-grid">create a flopy <code class="docutils literal notranslate"><span class="pre">StructuredGrid</span></code> instance defining the model grid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#alternatively-the-model-grid-can-be-defined-with-a-sfrmaker-structuredgrid-instance">Alternatively, the model grid can be defined with a <code class="docutils literal notranslate"><span class="pre">sfrmaker.StructuredGrid</span></code> instance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#intersect-the-lines-with-the-model-grid">Intersect the lines with the model grid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#write-a-sfr-package-file">write a sfr package file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#write-a-modflow-6-sfr-package-file">Write a MODFLOW 6 SFR package file:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#write-shapefiles-for-visualizing-the-sfr-package">Write shapefiles for visualizing the SFR package</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html"> Example scripts</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="inputs.html"> Input Requirements</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Release history</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="release-history.html"> Release History</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">SFRmaker</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Usage</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/usage.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="usage">
+<h1>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h1>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">flopy</span>
+<span class="kn">import</span> <span class="nn">sfrmaker</span>
+</pre></div>
+</div>
+<div class="section" id="create-an-instance-of-the-lines-class-from-nhdplus-data">
+<h2>Create an instance of the Lines class from NHDPlus data<a class="headerlink" href="#create-an-instance-of-the-lines-class-from-nhdplus-data" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>alternatively, <strong>``Lines``</strong> can also be created from a shapefile or dataframe containing LineString features representing streams</p></li>
+<li><p>see input data requirements below for more details</p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">lns</span> <span class="o">=</span> <span class="n">sfrmaker</span><span class="o">.</span><span class="n">Lines</span><span class="o">.</span><span class="n">from_nhdplus_v2</span><span class="p">(</span><span class="n">NHDFlowlines</span><span class="o">=</span><span class="s1">&#39;NHDFlowlines.shp&#39;</span><span class="p">,</span>
+                                        <span class="n">PlusFlowlineVAA</span><span class="o">=</span><span class="s1">&#39;PlusFlowlineVAA.dbf&#39;</span><span class="p">,</span>
+                                        <span class="n">PlusFlow</span><span class="o">=</span><span class="s1">&#39;PlusFlow.dbf&#39;</span><span class="p">,</span>
+                                        <span class="n">elevslope</span><span class="o">=</span><span class="s1">&#39;elevslope.dbf&#39;</span><span class="p">,</span>
+                                        <span class="nb">filter</span><span class="o">=</span><span class="s1">&#39;data/grid.shp&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If your model domain encompasses multiple drainage areas, each type of NHDPlus file (e.g. NHDFlowline.shp, PlusFlow.dbf, etc. can be supplied as a list. e.g.</p>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">NHDFlowlines</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;&lt;path to drainage area 1&gt;/NHDFlowlines.shp&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;&lt;path to drainage area 2&gt;/NHDFlowlines.shp&#39;</span><span class="o">...</span>
+              <span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="create-an-instance-of-lines-from-a-hydrography-shapefile">
+<h2>create an instance of <code class="docutils literal notranslate"><span class="pre">Lines</span></code> from a hydrography shapefile<a class="headerlink" href="#create-an-instance-of-lines-from-a-hydrography-shapefile" title="Permalink to this headline">¶</a></h2>
+<p>When creating <code class="docutils literal notranslate"><span class="pre">Lines</span></code> from a shapefile or dataframe, attribute field or column names can be supplied in lieu of the NHDPlus attribute tables (.dbf files).</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">lns</span> <span class="o">=</span> <span class="n">Lines</span><span class="o">.</span><span class="n">from_shapefile</span><span class="p">(</span><span class="n">flowlines_file</span><span class="p">,</span>
+                           <span class="n">id_column</span><span class="o">=</span><span class="s1">&#39;COMID&#39;</span><span class="p">,</span>
+                           <span class="n">routing_column</span><span class="o">=</span><span class="s1">&#39;tocomid&#39;</span><span class="p">,</span>
+                           <span class="n">width1_column</span><span class="o">=</span><span class="s1">&#39;width1&#39;</span><span class="p">,</span>
+                           <span class="n">width2_column</span><span class="o">=</span><span class="s1">&#39;width2&#39;</span><span class="p">,</span>
+                           <span class="n">up_elevation_column</span><span class="o">=</span><span class="s1">&#39;elevupsmo&#39;</span><span class="p">,</span>
+                           <span class="n">dn_elevation_column</span><span class="o">=</span><span class="s1">&#39;elevdnsmo&#39;</span><span class="p">,</span>
+                           <span class="n">name_column</span><span class="o">=</span><span class="s1">&#39;GNIS_NAME&#39;</span><span class="p">,</span>
+                           <span class="n">attr_length_units</span><span class="o">=</span><span class="s1">&#39;feet&#39;</span><span class="p">,</span>
+                           <span class="n">attr_height_units</span><span class="o">=</span><span class="s1">&#39;feet&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="create-a-flopy-structuredgrid-instance-defining-the-model-grid">
+<h2>create a flopy <code class="docutils literal notranslate"><span class="pre">StructuredGrid</span></code> instance defining the model grid<a class="headerlink" href="#create-a-flopy-structuredgrid-instance-defining-the-model-grid" title="Permalink to this headline">¶</a></h2>
+<p>delr and delc have to specified in meters (consistent with projected CRS)</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">grid</span> <span class="o">=</span> <span class="n">flopy</span><span class="o">.</span><span class="n">discretization</span><span class="o">.</span><span class="n">StructuredGrid</span><span class="p">(</span><span class="n">delr</span><span class="o">=</span><span class="n">m</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">delr</span><span class="o">.</span><span class="n">array</span> <span class="o">*</span> <span class="o">.</span><span class="mi">3048</span><span class="p">,</span>  <span class="c1"># cell spacing along a row</span>
+                                           <span class="n">delc</span><span class="o">=</span><span class="n">m</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">delc</span><span class="o">.</span><span class="n">array</span> <span class="o">*</span> <span class="o">.</span><span class="mi">3048</span><span class="p">,</span>  <span class="c1"># cell spacing along a column</span>
+                                           <span class="n">xoff</span><span class="o">=</span><span class="mi">682688</span><span class="p">,</span> <span class="n">yoff</span><span class="o">=</span><span class="mi">5139052</span><span class="p">,</span>  <span class="c1"># lower left corner of model grid</span>
+                                           <span class="n">angrot</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>  <span class="c1"># grid is unrotated</span>
+                                           <span class="n">proj4</span><span class="o">=</span><span class="s1">&#39;epsg:26715&#39;</span>
+                                           <span class="c1"># projected coordinate system of model (UTM NAD27 zone 15 North)</span>
+                                           <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="alternatively-the-model-grid-can-be-defined-with-a-sfrmaker-structuredgrid-instance">
+<h2>Alternatively, the model grid can be defined with a <code class="docutils literal notranslate"><span class="pre">sfrmaker.StructuredGrid</span></code> instance<a class="headerlink" href="#alternatively-the-model-grid-can-be-defined-with-a-sfrmaker-structuredgrid-instance" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>can be created from a shapefile or <code class="docutils literal notranslate"><span class="pre">flopy.discretization.StructuredGrid</span></code></p></li>
+<li><p>an <code class="docutils literal notranslate"><span class="pre">active_area</span></code> polygon defines the area within the grid where SFR will be populated</p></li>
+<li><p>See example scripts in <code class="docutils literal notranslate"><span class="pre">Examples/</span></code> for more details.</p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">grid</span> <span class="o">=</span> <span class="n">StructuredGrid</span><span class="o">.</span><span class="n">from_shapefile</span><span class="p">(</span><span class="n">shapefile</span><span class="o">=</span><span class="s1">&#39;Examples/data/badriver/grid.shp&#39;</span><span class="p">,</span>
+                                    <span class="n">icol</span><span class="o">=</span><span class="s1">&#39;i&#39;</span><span class="p">,</span>
+                                    <span class="n">jcol</span><span class="o">=</span><span class="s1">&#39;j&#39;</span><span class="p">,</span>
+                                    <span class="n">active_area</span><span class="o">=</span><span class="s1">&#39;Examples/data/badriver/active_area.shp&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">data_dir</span><span class="p">)</span>
+                                    <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="intersect-the-lines-with-the-model-grid">
+<h2>Intersect the lines with the model grid<a class="headerlink" href="#intersect-the-lines-with-the-model-grid" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>results in an <strong>``sfrdata``</strong> class instance</p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">sfr</span> <span class="o">=</span> <span class="n">lns</span><span class="o">.</span><span class="n">to_sfr</span><span class="p">(</span><span class="n">grid</span><span class="o">=</span><span class="n">grid</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="write-a-sfr-package-file">
+<h2>write a sfr package file<a class="headerlink" href="#write-a-sfr-package-file" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">sfr</span><span class="o">.</span><span class="n">write_package</span><span class="p">(</span><span class="s1">&#39;model.sfr&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="write-a-modflow-6-sfr-package-file">
+<h2>Write a MODFLOW 6 SFR package file:<a class="headerlink" href="#write-a-modflow-6-sfr-package-file" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">sfr</span><span class="o">.</span><span class="n">write_package</span><span class="p">(</span><span class="s1">&#39;model.sfr6&#39;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="s1">&#39;mf6&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="write-shapefiles-for-visualizing-the-sfr-package">
+<h2>Write shapefiles for visualizing the SFR package<a class="headerlink" href="#write-shapefiles-for-visualizing-the-sfr-package" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">sfr</span><span class="o">.</span><span class="n">export_cells</span><span class="p">(</span><span class="s1">&#39;sfr_cells.shp&#39;</span><span class="p">)</span>
+<span class="n">sfr</span><span class="o">.</span><span class="n">export_outlets</span><span class="p">(</span><span class="s1">&#39;sfr_outlets.shp&#39;</span><span class="p">)</span>
+<span class="n">sfr</span><span class="o">.</span><span class="n">export_transient_variable</span><span class="p">(</span><span class="s1">&#39;flow&#39;</span><span class="p">,</span> <span class="s1">&#39;sfr_inlets.shp&#39;</span><span class="p">)</span> <span class="c1"># inflows to SFR network</span>
+<span class="n">sfr</span><span class="o">.</span><span class="n">export_lines</span><span class="p">(</span><span class="s1">&#39;sfr_lines.shp&#39;</span><span class="p">)</span>
+<span class="n">sfr</span><span class="o">.</span><span class="n">export_routing</span><span class="p">(</span><span class="s1">&#39;sfr_routing.shp&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="examples.html" class="btn btn-neutral float-right" title="Examples" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="installation.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+      <span class="lastupdated">
+        Last updated on Apr 27, 2020.
+      </span>
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
