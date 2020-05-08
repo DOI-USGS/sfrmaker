@@ -44,8 +44,9 @@ def test_write(shellmound_sfrdata, mf6sfr_instance, outdir, external_files_path)
     outfile3 = os.path.join(outdir, 'junk3.sfr')
     
     if external_files_path is not None:
-        if not os.path.isdir(external_files_path):
-            os.makedirs(external_files_path)
+        full_external_files_path = os.path.join(outdir, external_files_path)
+        if not os.path.isdir(full_external_files_path):
+            os.makedirs(full_external_files_path)
             
     mf6sfr.write_file(filename=outfile,
                       options=['save_flows',

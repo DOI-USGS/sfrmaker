@@ -1,4 +1,5 @@
 import os
+import shutil
 import copy
 import platform
 import numpy as np
@@ -27,13 +28,15 @@ def testdatapath():
     return 'sfrmaker/test/data'
 
 
-@pytest.fixture(scope="session")
-def outdir():
-    # output folder
-    outdir = 'sfrmaker/test/temp/'
-    if not os.path.isdir(outdir):
-        os.makedirs(outdir)
-    return outdir
+@pytest.fixture(scope="session", autouse=True)
+def outdir(project_root_path):
+    folder = os.path.join(project_root_path, 'sfrmaker/test/temp/')
+    reset = True
+    if reset:
+        if os.path.isdir(folder):
+            shutil.rmtree(folder)
+        os.makedirs(folder)
+    return folder
 
 
 @pytest.fixture(scope="session")
