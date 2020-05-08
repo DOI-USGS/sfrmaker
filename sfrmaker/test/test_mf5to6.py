@@ -36,16 +36,35 @@ def test_idomain(mf6sfr_instance, shellmound_model):
     assert np.array_equal(ibound, idomain)
 
 
-def test_write(shellmound_sfrdata, mf6sfr_instance, outdir):
+@pytest.mark.parametrize('external_files_path', ('external', None))
+def test_write(shellmound_sfrdata, mf6sfr_instance, outdir, external_files_path):
     mf6sfr = mf6sfr_instance
     outfile = os.path.join(outdir, 'junk.sfr')
     outfile2 = os.path.join(outdir, 'junk2.sfr')
+    outfile3 = os.path.join(outdir, 'junk3.sfr')
+    
+    if external_files_path is not None:
+        if not os.path.isdir(external_files_path):
+            os.makedirs(external_files_path)
+            
     mf6sfr.write_file(filename=outfile,
                       options=['save_flows',
                                'BUDGET FILEOUT {}.cbc'.format(outfile2),
                                'STAGE FILEOUT {}.stage.bin'.format(outfile2),
-                               ]
+                               ],
+                      external_files_path=external_files_path
                       )
 
-    shellmound_sfrdata.write_package(outfile2, version='mf6')
-    assert filecmp.cmp(outfile, outfile2)
+    shellmound_sfrdata.write_package(outfile2, version='mf6', 
+                                     external_files_path=external_files_path)
+    with open(outfile2) as src:
+        text = src.read().replace('junk2_packagedata.dat', 'junk_packagedata.dat')
+        with open(outfile3, 'w') as dest:
+            dest.write(text)
+    assert filecmp.cmp(outfile, outfile3)
+    
+    if external_files_path:
+        for version in 'junk', 'junk2':
+            assert os.path.exists(os.path.join(os.path.split(outfile2)[0],
+                                            external_files_path,
+                                            '{}_packagedata.dat'.format(version)))

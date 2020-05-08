@@ -1132,6 +1132,7 @@ class SFRData(DataPackage):
 
     def write_package(self, filename=None, version='mf2005', idomain=None,
                       options=None, write_observations_input=True,
+                      external_files_path=None,
                       **kwargs):
         """Write and SFR package file.
 
@@ -1178,7 +1179,7 @@ class SFRData(DataPackage):
                           options=options)
 
             # write a MODFLOW 6 file
-            sfr6.write_file(filename=filename)
+            sfr6.write_file(filename=filename, external_files_path=external_files_path)
 
     def write_tables(self, filepath='./sfr'):
 

@@ -192,14 +192,41 @@ class mf6sfr:
         print('converting segment data to period data...')
         return segment_data_to_period_data(self.sd, self.rd)
 
-    def write_file(self, filename=None, outpath='', options=None):
+    def write_file(self, filename=None, outpath='', options=None,
+                   external_files_path=None):
+        """Write a MODFLOW-6 format SFR package file.
+
+        Parameters
+        ----------
+        filename : [type], optional
+            [description], by default None
+        outpath : str, optional
+            [description], by default ''
+        options : [type], optional
+            [description], by default None
+        external_files_path : str, optional
+            Path for writing an external file for packagedata, relative to the location of the SFR package file.
+            If specified, an open/close statement referencing the file is written to the packagedata block.
+            By default, None (packagedata table is written to the SFR package file)
+
+        Raises
+        ------
+        OSError
+            [description]
+        """        
         if filename is not None:
             outfile = filename
+            outpath = os.path.split(filename)[0]
         else:
             outfile = os.path.join(outpath, self.ModflowSfr2.file_name[0])
 
         if options is not None:
             self.options = options
+            
+        if external_files_path is not None:
+            full_external_files_path = os.path.join(outpath, external_files_path)
+            if not os.path.isdir(full_external_files_path):
+                raise OSError("external_files_path doesn't exist:\n{}".format(full_external_files_path))
 
         header = "# MODFLOW-6 SFR input; created by SFRmaker v. {}".format(sfrmaker.__version__)
         with open(outfile, 'w', newline=""
@@ -226,7 +253,22 @@ class mf6sfr:
             columns = list(writepakdata.columns)
             columns[0] = '#{}'.format(columns[0])
             writepakdata.columns = columns
-            writepakdata.drop('idomain', axis=1).to_csv(output, sep=' ', index=False)
+            if external_files_path:
+                
+                # filename for the external package data file
+                packagedata_outfile = '{}_packagedata.dat'.format(os.path.splitext(os.path.split(outfile)[-1])[0])
+                
+                # path to package data file relative to sfr file
+                packagedata_rel_path = os.path.join(external_files_path, packagedata_outfile)
+                output.write('  open/close {}\n'.format(packagedata_rel_path))
+                
+                # path to package data file relative to cwd
+                packagedata_outfile = os.path.join(full_external_files_path, packagedata_outfile)
+                writepakdata.drop('idomain', axis=1).to_csv(packagedata_outfile, sep=' ', index=False)
+                print('wrote {}'.format(packagedata_outfile))
+                
+            else:
+                writepakdata.drop('idomain', axis=1).to_csv(output, sep=' ', index=False)
             output.write('END Packagedata\n')
 
             output.write('\nBEGIN Connectiondata\n')
