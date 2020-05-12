@@ -1,14 +1,36 @@
+"""Code for converting MODFLOW-2005 style SFR Package input to MODFLOW-6 style SFR package input.
+"""
 import os
 from copy import copy
-
+import warnings
 import numpy as np
 import pandas as pd
-
 import sfrmaker
 from sfrmaker.reaches import interpolate_to_reaches
 
 
-class mf6sfr:
+class Mf6SFR:
+    """Class for writing MODFLOW-6 SFR package input
+    from a (MODFLOW-2005 style) flopy.modflow.ModflowSfr2 instance.
+
+    Parameters
+    ----------
+    ModflowSfr2 : flopy.modflow.ModflowSfr2 instance
+    period_data : [type], optional
+        [description], by default None
+    idomain : ndarray, optional
+        3D numpy array designating active cells (idomain==1).
+        SFR reaches in inactive cells will be written with 'none' in the cellid field.
+        by default None
+    options : list, optional
+        List of strings to write to the MODFLOW-6 SFR options block.
+        By default None. An appropriate unit_conversion is written by default.
+        See MODFLOW-6 documentation for other options.
+    auxiliary_line_numbers : bool, optional
+        If true, add 'line_id' as an auxiliary variable to the options block
+        and write hydrography line IDs to the packagedata block in the auxiliary
+        'line_id' column, by default True.
+    """
     # convert from ModflowSfr to mf6
     mf6names = {'rno': 'rno',
                 'node': 'cellid',
@@ -27,11 +49,16 @@ class mf6sfr:
     mf5names = {v: k for k, v in mf6names.items()}
 
     cols = ['rno', 'cellid', 'k', 'i', 'j', 'rlen', 'rwid', 'rgrd',
-            'rtp', 'rbth', 'rhk', 'man', 'ncon', 'ustrf', 'ndv', 'idomain']
+            'rtp', 'rbth', 'rhk', 'man', 'ncon', 'ustrf', 'ndv', 'idomain', 'line_id']
+    def __init__(self, ModflowSfr2=None, SFRData=None,
+                 period_data=None, idomain=None,
+                 options=None, auxiliary_line_numbers=True):
 
-    def __init__(self, ModflowSfr2, period_data=None,
-                 idomain=None,
-                 options=None):
+        # instantiate with SFRData instance instead of ModflowSfr2 instance
+        # allows auxiliary variables from SFRData.reach_data
+        # (that aren't allowed in ModflowSfr2.reach_data) to be written
+        if SFRData is not None:
+            ModflowSfr2 = SFRData.modflow_sfr2
 
         # check for other packages
         if idomain is None:
@@ -48,7 +75,6 @@ class mf6sfr:
         else:
             self.idomain = idomain
 
-        self.options = options
         # copy modflow_sfr2 object and enforce sorting
         self.ModflowSfr2 = copy(ModflowSfr2)
         self.ModflowSfr2.segment_data[0].sort(order='nseg')
@@ -59,17 +85,24 @@ class mf6sfr:
         self.nreaches = len(ModflowSfr2.reach_data)
         self.nper = ModflowSfr2.nper
 
+        # mf6 options block
+        self.auxiliary_line_numbers = auxiliary_line_numbers
+        self.options_block = options
+
         # dataframes of reach and segment data from modflow_sfr2
-        self.rd = pd.DataFrame(ModflowSfr2.reach_data)
-        self.rd.rename(columns={'reachID': 'rno'}, inplace=True)
-        self.sd = self._get_segment_dataframe()
+        if SFRData is not None:
+            self.rd = SFRData.reach_data
+            self.sd = SFRData.segment_data
+        else:
+            self.rd = pd.DataFrame(ModflowSfr2.reach_data)
+            self.rd.rename(columns={'reachID': 'rno'}, inplace=True)
+            self.sd = self._get_segment_dataframe()
 
         # package data
         self._package_data = None
 
         # connection info (doesn't support diversions)
         self.graph = dict(zip(self.rd.rno, self.rd.outreach))
-        sd0 = pd.DataFrame(ModflowSfr2.segment_data[0])
         self._graph_r = None  # filled by properties
         self.outlets = None
         self._connections = None
@@ -94,13 +127,21 @@ class mf6sfr:
 
     @property
     def options_block(self):
+        return self._options_block
+    
+    @options_block.setter
+    def options_block(self, options):
         # stuff to write
         options_block = '\nBEGIN Options\n'
-        for opt in self.options:
-            options_block += '  {}\n'.format(opt)
-        options_block += '  unit_conversion  {}\n'.format(self.unit_conversion)
+        if options is not None:
+            for opt in options:
+                options_block += '  {}\n'.format(opt)
+        if 'unit_conversion' not in options_block:
+            options_block += '  unit_conversion  {}\n'.format(self.unit_conversion)
+        if 'auxiliary' not in options_block and self.auxiliary_line_numbers:
+            options_block += '  auxiliary line_id\n'
         options_block += 'END Options\n'
-        return options_block
+        self._options_block = options_block
 
     @property
     def packagedata(self):
@@ -185,6 +226,12 @@ class mf6sfr:
         else:
             packagedata['idomain'] = 1
 
+        if 'auxiliary' in self.options_block:
+            aux_variables = self.options_block.split('auxiliary')[1].split('\n')[0].split()
+            for var in aux_variables:
+                if var in self.rd.columns:
+                    packagedata[var] = self.rd[var]
+            
         cols = [c for c in self.cols if c in packagedata.columns]
         return packagedata[cols].sort_values(by='rno')
 
@@ -198,12 +245,18 @@ class mf6sfr:
 
         Parameters
         ----------
-        filename : [type], optional
-            [description], by default None
+        filename : str, optional
+            SFR package filename. Default setting is to use the
+            ModflowSfr2.file_name attribute for the ModflowSfr2 instance
+            entered on init of the Mf6SFR class, by default None.
         outpath : str, optional
-            [description], by default ''
-        options : [type], optional
-            [description], by default None
+            Path to write sfr file (with ModflowSfr2.file_name) to. 
+            Usually this is the simulation workspace. 
+            Only used if filename is None.
+        options : list, optional
+            List of strings to write to the MODFLOW-6 SFR options block.
+            By default None. An appropriate unit_conversion is written by default.
+            See MODFLOW-6 documentation for other options.
         external_files_path : str, optional
             Path for writing an external file for packagedata, relative to the location of the SFR package file.
             If specified, an open/close statement referencing the file is written to the packagedata block.
@@ -212,7 +265,7 @@ class mf6sfr:
         Raises
         ------
         OSError
-            [description]
+            If an invalid external_files_path is specified.
         """        
         if filename is not None:
             outfile = filename
@@ -221,7 +274,7 @@ class mf6sfr:
             outfile = os.path.join(outpath, self.ModflowSfr2.file_name[0])
 
         if options is not None:
-            self.options = options
+            self.options_block = options
             
         if external_files_path is not None:
             full_external_files_path = os.path.join(outpath, external_files_path)
@@ -292,6 +345,13 @@ class mf6sfr:
         print('wrote {}'.format(outfile))
 
 
+class mf6sfr(Mf6SFR):
+    def __init__(self, *args, **kwargs):
+        warnings.warn("The 'mf6sfr' class was renamed to Mf6SFR to better follow pep 8.",
+                      DeprecationWarning)
+        Mf6SFR.__init__(*args, **kwargs)
+
+
 def segment_data_to_period_data(segment_data, reach_data):
     """Convert modflow-2005 style segment data to modflow-6 period data.
     """
@@ -300,7 +360,7 @@ def segment_data_to_period_data(segment_data, reach_data):
     sd = segment_data.copy()
     prd = segment_data.copy()
     rd = reach_data.copy()
-    cols = [k for k, v in mf6sfr.mf6names.items() if k in prd.columns]
+    cols = [k for k, v in Mf6SFR.mf6names.items() if k in prd.columns]
     cols += ['per', 'nseg']
     cols.remove('roughch')
 
@@ -309,7 +369,7 @@ def segment_data_to_period_data(segment_data, reach_data):
     datacols = set(prd.columns.difference({'per', 'nseg'}))
     for c in datacols:  # explicitly convert zeros for each data column
         prd.loc[(prd.per == 0), c] = prd.loc[(prd.per == 0), c].replace(0., np.nan)
-    prd.rename(columns=mf6sfr.mf6names, inplace=True)
+    prd.rename(columns=Mf6SFR.mf6names, inplace=True)
 
     # drop columns that have no values
     prd.dropna(axis=1, how='all', inplace=True)
@@ -336,7 +396,7 @@ def segment_data_to_period_data(segment_data, reach_data):
     elif len(cols) > 0:
         print('distributing values to reaches:\n')
         for c in cols.difference({'depth1', 'depth2'}):
-            print('{} -> {}...'.format(mf6sfr.mf5names[c], c))
+            print('{} -> {}...'.format(Mf6SFR.mf5names[c], c))
         if np.min(list(icalc.values())) < 1:
             print('strtop, depth1 & depth2 -> stage for icalc<1...')
         reaches = []

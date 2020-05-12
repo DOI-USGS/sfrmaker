@@ -9,7 +9,7 @@ from rasterio import features
 from shapely.geometry import Polygon, shape
 from shapely.ops import unary_union
 from gisutils import shp2df, df2shp, get_proj_str
-from .gis import crs, read_polygon_feature, \
+from .gis import CRS, read_polygon_feature, \
     build_rtree_index, intersect
 from .units import convert_length_units
 
@@ -40,7 +40,7 @@ class Grid:
 
         # coordinate projection stuff
         self.model_units = model_units
-        self.crs = crs(epsg=epsg, proj_str=proj_str, prjfile=prjfile)
+        self.crs = CRS(epsg=epsg, proj_str=proj_str, prjfile=prjfile)
         if crs_units is not None:
             self.crs._length_units = crs_units
 

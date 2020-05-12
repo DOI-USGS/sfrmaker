@@ -3,7 +3,7 @@ import time
 
 import pandas as pd
 from gisutils import shp2df
-from .gis import crs, get_bbox
+from .gis import CRS, get_bbox
 
 
 def get_prj_file(NHDPlus_paths=None, NHDFlowlines=None):
@@ -96,7 +96,7 @@ def load_nhdplus_v2(NHDPlus_paths=None,
     # get crs information from flowline projection file
     if prjfile is None:
         prjfile = get_prj_file(NHDPlus_paths, NHDFlowlines)
-    nhdcrs = crs(epsg=epsg, proj_str=proj_str, prjfile=prjfile)
+    nhdcrs = CRS(epsg=epsg, proj_str=proj_str, prjfile=prjfile)
 
     # ensure that filter bbox is in same crs as flowlines
     # get filters from shapefiles, shapley Polygons or GeoJSON polygons

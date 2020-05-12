@@ -9,7 +9,7 @@ from gisutils import shp2df, df2shp, project
 import sfrmaker
 from sfrmaker.routing import pick_toids, find_path, make_graph, renumber_segments
 from .checks import routing_is_circular, is_to_one
-from .gis import crs, read_polygon_feature, get_bbox
+from .gis import CRS, read_polygon_feature, get_bbox
 from .grid import StructuredGrid
 from .nhdplus_utils import load_nhdplus_v2, get_prj_file
 from .sfrdata import SFRData
@@ -57,7 +57,7 @@ class Lines:
         self.df = df
         self.attr_length_units = attr_length_units
         self.attr_height_units = attr_height_units
-        self.crs = crs(epsg=epsg, proj_str=proj_str, prjfile=prjfile)
+        self.crs = CRS(epsg=epsg, proj_str=proj_str, prjfile=prjfile)
         self._geometry_length_units = None
 
         self._routing = None  # dictionary of routing connections
@@ -293,7 +293,7 @@ class Lines:
             prjfile = shapefile.replace('.shp', '.prj')
             prjfile = prjfile if os.path.exists(prjfile) else None
 
-        shpfile_crs = crs(epsg=epsg, proj_str=proj_str, prjfile=prjfile)
+        shpfile_crs = CRS(epsg=epsg, proj_str=proj_str, prjfile=prjfile)
 
         # ensure that filter bbox is in same crs as flowlines
         if filter is not None and not isinstance(filter, tuple):

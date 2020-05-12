@@ -6,7 +6,7 @@ import pytest
 
 import sfrmaker
 from sfrmaker.checks import reach_elevations_decrease_downstream
-from sfrmaker.gis import crs
+from sfrmaker.gis import CRS
 from gisutils import project
 from sfrmaker import Lines
 
@@ -54,7 +54,7 @@ def test_sample_elevations_different_proj(dem, tylerforks_sfrdata, datapath):
 
     reach1_geom = sfr.reach_data.geometry[0]
     crs1 = sfr.crs
-    crs2 = crs(epsg=3070)
+    crs2 = CRS(epsg=3070)
     sfr._crs = crs2
     sfr.reach_data['geometry'] = project(sfr.reach_data['geometry'].values, crs1.proj_str, crs2.proj_str)
     reach1_geom_5070 = sfr.reach_data.geometry[0]

@@ -146,9 +146,12 @@ def tylerforks_active_area_shapefile(datapath):
     return '{}/badriver/active_area.shp'.format(datapath)
 
 
-@pytest.fixture(scope='module')
-def tyler_forks_grid_shapefile(datapath):
-    return '{}/badriver/grid.shp'.format(datapath)
+@pytest.fixture(scope='function')
+def tyler_forks_grid_shapefile(datapath, tylerforks_sfrmaker_grid_from_flopy):
+    grid = tylerforks_sfrmaker_grid_from_flopy
+    shapename = '{}/badriver/grid.shp'.format(datapath)
+    grid.write_grid_shapefile(shapename)
+    return shapename
 
 
 @pytest.fixture(scope='module')
@@ -183,10 +186,10 @@ def tylerforks_sr(tyler_forks_grid_shapefile, tylerforks_model):
 
 
 @pytest.fixture(scope='function')
-def tylerforks_model_grid(tyler_forks_grid_shapefile, tylerforks_model):
+def tylerforks_model_grid(tylerforks_model):
     m = tylerforks_model
-    mg = flopy.discretization.StructuredGrid(delr=np.round(m.dis.delr.array * .3048, 4).astype(np.float64),  # cell spacing along a row
-                                             delc=np.round(m.dis.delc.array * .3048, 4).astype(np.float64),  # cell spacing along a column
+    mg = flopy.discretization.StructuredGrid(delr=np.round((m.dis.delr.array * .3048).astype(np.float64), 4),  # cell spacing along a row
+                                             delc=np.round((m.dis.delc.array * .3048).astype(np.float64), 4),  # cell spacing along a column
                                              xoff=682688, yoff=5139052,  # lower left corner of model grid
                                              angrot=0,  # grid is unrotated
                                              proj4='epsg:26715'
@@ -197,11 +200,9 @@ def tylerforks_model_grid(tyler_forks_grid_shapefile, tylerforks_model):
 
 
 @pytest.fixture(scope='function')
-def tylerforks_sfrmaker_grid_from_flopy(tylerforks_model_grid, tylerforks_active_area_shapefile,
-                                        tyler_forks_grid_shapefile):
+def tylerforks_sfrmaker_grid_from_flopy(tylerforks_model_grid, tylerforks_active_area_shapefile):
     grid = sfrmaker.StructuredGrid.from_modelgrid(mg=tylerforks_model_grid,
                                                   active_area=tylerforks_active_area_shapefile)
-    #grid.write_grid_shapefile(tyler_forks_grid_shapefile)
     return grid
 
 

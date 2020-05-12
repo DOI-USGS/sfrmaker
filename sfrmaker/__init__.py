@@ -1,8 +1,8 @@
 from ._version import get_versions
-from .gis import crs
+from .gis import CRS
 from .grid import StructuredGrid, UnstructuredGrid
 from .lines import Lines
-from .mf5to6 import mf6sfr
+from .mf5to6 import Mf6SFR
 from .rivdata import RivData
 from .sfrdata import SFRData
 

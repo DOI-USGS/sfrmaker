@@ -1,5 +1,6 @@
 import collections
 import os
+import warnings
 import time
 import traceback
 import fiona
@@ -12,45 +13,45 @@ from gisutils import get_proj_str, df2shp, shp2df, project
 import sfrmaker
 
 
-class crs:
+class CRS:
 
-    def __init__(self, crs=None,
-                 epsg=None, proj_str=None, prjfile=None):
+    def __init__(self, crs_dict=None,
+                 epsg=None, proj_str=None, wkt=None,
+                 prjfile=None):
 
-        self._crs = crs
+        self._crs_dict = crs_dict
         self._epsg = epsg
         self._proj_str = proj_str
+        self._pyproj_crs = None
         self._length_units = None
         self.prjfile = prjfile
-        if prjfile is not None:
-            assert os.path.exists(prjfile), "{} not found.".format(prjfile)
-            self._proj_str = get_proj_str(prjfile)
+        self._wkt = wkt
         if not self.is_valid:
             print("Warning, coordinate reference system {}\nis invalid. "
                   "\nPlease supply a valid epsg code, proj4 string, "
                   "or ESRI projection file".format(self.__repr__()))
 
     @property
-    def crs(self):
+    def crs_dict(self):
         """todo: refactor this to proj_dict"""
-        if self._crs is None:
-            if self._proj_str is not None:
-                self._crs = from_string(self._proj_str)
-            elif self.epsg is not None:
-                self._crs = from_epsg(self.epsg)
-        return self._crs
+        if self._crs_dict is None:
+            self._crs_dict = self.pyproj_crs.to_dict()
+        return self._crs_dict
 
     @property
     def epsg(self):
-        if self._epsg is None:
+        if self._epsg is None and self.pyproj_crs is not None:
             self._epsg = self.pyproj_crs.to_epsg()
         return self._epsg
 
     @property
     def is_valid(self):
-        if isinstance(self.pyproj_Proj, pyproj.Proj):
-            return True
-        else:
+        try:
+            if isinstance(self.pyproj_crs, pyproj.CRS):
+                return True
+            else:
+                return False
+        except:
             return False
 
     @property
@@ -63,24 +64,57 @@ class crs:
 
     @property
     def proj_str(self):
-        if self._proj_str is None and self.crs is not None:
-            self._proj_str = to_string(self._crs)
-        elif self._proj_str is None and self.prjfile is not None:
-            self._proj_str = get_proj_str(self.prjfile)
-        return self._proj_str
+        #if self._proj_str is None and self.crs is not None:
+        #    self._proj_str = to_string(self._crs)
+        #elif self._proj_str is None and self.prjfile is not None:
+        #    self._proj_str = get_proj_str(self.prjfile)
+        return self.pyproj_crs.to_string()
+
+    @property
+    def wkt(self):
+        if self._wkt is None and self.prjfile is not None:
+            if self.prjfile.endswith('.shp'):
+                self.prjfile = self.prjfile[:-4] + '.prj'
+            assert os.path.exists(self.prjfile), \
+                "{} not found.".format(self.prjfile)
+            with open(self.prjfile) as src:
+                self._wkt = src.read()
+        return self._wkt
 
     @property
     def pyproj_crs(self):
         """pyproj crs instance.
         todo: refactor crs class to use this instead of pyproj.Proj
         """
-        if self.proj_str is not None:
-            return pyproj.CRS.from_string(self.proj_str)
+        pyproj_crs = None
+        if self._pyproj_crs is None:
+            if self._crs_dict is not None:
+                pyproj_crs = pyproj.CRS.from_dict(self._crs_dict)
+            elif self._proj_str is not None:
+                pyproj_crs = pyproj.CRS.from_string(self._proj_str)
+            elif self._epsg is not None:
+                pyproj_crs = pyproj.CRS.from_epsg(self._epsg)
+            elif self.wkt is not None:
+                pyproj_crs = pyproj.CRS.from_wkt(self._wkt)
+            # if possible, have pyproj try to find the closest
+            # authority name and code matching the crs
+            # so that input from epsg codes, proj strings, and prjfiles
+            # results in equal pyproj_crs instances
+            if pyproj_crs is not None:
+                try:
+                    self._pyproj_crs = pyproj.CRS.from_user_input(pyproj_crs.to_authority())
+                except:
+                    j=2
+        return self._pyproj_crs
 
     @property
     def pyproj_Proj(self):
         """pyproj Proj instance. Used for comparing proj4 strings
         that represent the same CRS in different ways."""
+        warnings.warn("The 'use of the pyproj_Proj' attribute is deprecated,"
+                      "please use pyproj_crs instead. See pyproj documentation"
+                      "about shift to the CRS class in versions 2+ for more details.",
+                      DeprecationWarning)
         if self.proj_str is not None:
             try:
                 return pyproj.Proj(self.proj_str)
@@ -88,27 +122,23 @@ class crs:
                 traceback.print_exception(type(ex), ex, ex.__traceback__)
                 return
 
-    def _reset(self):
-        self._proj_str = None
-        self._crs = None
-
     def __setattr__(self, key, value):
-        if key == "crs":
-            super(crs, self).__setattr__("_crs", value)
-            self._proj_str = None
-        elif key == "proj_str":
-            super(crs, self).__setattr__("_proj_str", value)
-            self._crs = None
+        if key in ['crs_dict', 'proj_str', 'epgs', 'wkt', 'pyproj_crs']:
+            self._reset()
+            super(CRS, self).__setattr__("_{}".format(key), value)
+        elif key == 'prjfile' and value is not None:
+            self._reset(context='prjfile')
+            super(CRS, self).__setattr__("{}".format(key), value)
         elif key == "length_units":
-            super(crs, self).__setattr__("_length_units", value)
+            super(CRS, self).__setattr__("_length_units", value)
         else:
-            super(crs, self).__setattr__(key, value)
+            super(CRS, self).__setattr__(key, value)
 
     def __eq__(self, other):
-        if not isinstance(other, crs):
+        if not isinstance(other, CRS):
             return False
-        if other.pyproj_Proj is not None and \
-                other.pyproj_Proj != self.pyproj_Proj:
+        if other.pyproj_crs is not None and \
+                other.pyproj_crs != self.pyproj_crs:
             return False
         # if other.epsg is not None and other.epsg == self.epsg:
         #    return True
@@ -119,9 +149,25 @@ class crs:
         return True
 
     def __repr__(self):
-        if self.proj_str is None:
+        if self.pyproj_crs is None:
             return 'No CRS'
-        return self.proj_str
+        return self.pyproj_crs.__repr__()
+
+    def _reset(self, context='prjfile'):
+        self._crs_dict = None
+        self._proj_str = None
+        self._epsg = None
+        if context != 'prjfile':
+            self.prjfile = None
+        self._wkt = None
+        self._pyproj_crs = None
+
+
+class crs(CRS):
+    def __init__(self, *args, **kwargs):
+        warnings.warn("The 'crs' class was renamed to CRS to better follow pep 8.",
+                      DeprecationWarning)
+        CRS.__init__(*args, **kwargs)
 
 
 def build_rtree_index(geom):
@@ -292,7 +338,7 @@ def read_polygon_feature(feature, dest_crs, feature_crs=None):
     """
     if isinstance(feature, str):
         with fiona.open(feature) as src:
-            feature_crs = crs(src.crs)
+            feature_crs = CRS(wkt=src.crs_wkt)
         geoms = shp2df(feature)['geometry'].values
         feature = unary_union(geoms)
     elif isinstance(feature, collections.Iterable):
@@ -331,7 +377,7 @@ def get_bbox(feature, dest_crs):
         with fiona.open(feature) as src:
             l, b, r, t = src.bounds
             bbox_src_crs = box(*src.bounds)
-            shpcrs = crs(proj_str=to_string(src.crs))
+            shpcrs = CRS(proj_str=to_string(src.crs))
         if dest_crs is not None and shpcrs != dest_crs:
             bbox_dest_crs = project(bbox_src_crs, shpcrs.proj_str, dest_crs.proj_str)
             l, b, r, t = bbox_dest_crs.bounds

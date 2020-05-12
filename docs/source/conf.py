@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# MFsetup documentation build configuration file, created by
+# SFRmaker documentation build configuration file, created by
 # sphinx-quickstart on Thu Jun 28 12:35:56 2018.
 #
 # This file is execfile()d with the current directory set to its
@@ -68,8 +68,8 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'SFRmaker'
-copyright = '2019, USGS MAP Project'
-author = 'USGS MAP Project'
+copyright = '2019, Andrew Leaf'
+author = 'Andrew Leaf'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

@@ -232,7 +232,8 @@ def test_write_mf6_package(shellmound_sfrdata, mf6sfr, outdir):
     df = pd.read_csv(io.StringIO(text), delim_whitespace=True,
                          #skiprows=2,
                          header=None,
-                         names=cols
+                         names=cols,
+                         index_col=False
                          )
     isna = df.isna().any(axis=1).values.astype(bool)
     df.dropna(axis=0, inplace=True)

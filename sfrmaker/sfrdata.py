@@ -11,7 +11,7 @@ from sfrmaker.routing import find_path, renumber_segments
 from .checks import valid_rnos, valid_nsegs, rno_nseg_routing_consistent
 from .elevations import smooth_elevations
 from .flows import add_to_perioddata, add_to_segment_data
-from .gis import export_reach_data, project, crs
+from .gis import export_reach_data, project, CRS
 from .observations import write_gage_package, write_mf6_sfr_obsfile, add_observations
 from .units import convert_length_units, itmuni_values, lenuni_values
 from .utils import get_sfr_package_format
@@ -654,10 +654,10 @@ class SFRData(DataPackage):
                                          sim_ws='')
             m = flopy.mf6.ModflowGwf(sim)
 
-        # create an sfrmaker.mf6sfr instance
-        from .mf5to6 import mf6sfr
+        # create an sfrmaker.Mf6SFR instance
+        from .mf5to6 import Mf6SFR
 
-        sfr6 = mf6sfr(self.modflow_sfr2)
+        sfr6 = Mf6SFR(self.modflow_sfr2)
 
         # package data
         # An error occurred when storing data "packagedata" in a recarray.
@@ -840,7 +840,7 @@ class SFRData(DataPackage):
         with rasterio.open(dem) as src:
             proj_str = src.crs.to_string()
             epsg = src.crs.to_epsg()
-            raster_crs = crs(epsg=epsg, proj_str=proj_str)
+            raster_crs = CRS(epsg=epsg, proj_str=proj_str)
 
             # make sure buffer is large enough for DEM pixel size
             buffer_distance = np.max([np.sqrt(src.res[0] *
@@ -980,7 +980,7 @@ class SFRData(DataPackage):
         if version is None:
             version = get_sfr_package_format(sfrpackagefile)
         if package_name is None:
-            package_name, _ = os.splitext(sfrpackagefile)
+            package_name, _ = os.path.splitext(sfrpackagefile)
         # load the model and SFR package
         if namefile is not None:
             model_ws, namefile = os.path.split(namefile)
@@ -1161,8 +1161,8 @@ class SFRData(DataPackage):
 
         elif version == 'mf6':
 
-            # instantiate mf6sfr converter object with mf-nwt model/sfr package from flopy
-            from .mf5to6 import mf6sfr
+            # instantiate Mf6SFR converter object with mf-nwt model/sfr package from flopy
+            from .mf5to6 import Mf6SFR
             if options is None:
                 # save budget and stage output by default
                 options = ['save_flows',
@@ -1174,7 +1174,7 @@ class SFRData(DataPackage):
                 self.write_mf6_sfr_obsfile(filename=obs_input_filename)
                 options.append('OBS6 FILEIN {}'.format(obs_input_filename))
 
-            sfr6 = mf6sfr(self.modflow_sfr2, period_data=self.period_data,
+            sfr6 = Mf6SFR(SFRData=self, period_data=self.period_data,
                           idomain=idomain,
                           options=options)
 

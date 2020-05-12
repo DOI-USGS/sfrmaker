@@ -1,11 +1,9 @@
 # TODO: add unit tests for mf5to6.py
 import filecmp
 import os
-
 import numpy as np
 import pandas as pd
 import pytest
-
 import sfrmaker
 
 
@@ -15,9 +13,48 @@ def shellmound_ModflowSfr2(shellmound_sfrdata):
 
 
 @pytest.fixture(scope='function')
-def mf6sfr_instance(shellmound_ModflowSfr2):
-    return sfrmaker.mf6sfr(shellmound_ModflowSfr2)
+def mf6sfr_instance_ModflowSfr2(shellmound_ModflowSfr2):
+    return sfrmaker.Mf6SFR(shellmound_ModflowSfr2)
 
+
+@pytest.fixture(scope='function')
+def mf6sfr_instance_SFRdata(shellmound_sfrdata):
+    return sfrmaker.Mf6SFR(SFRData=shellmound_sfrdata)
+
+
+@pytest.mark.parametrize('options', (None, 
+                                     ['save_flows',
+                                      'BUDGET FILEOUT sfr.cbc',
+                                      'STAGE FILEOUT sr.stage.bin',
+                                     ],
+                                     ['auxiliary line_id',
+                                      'unit_conversion 1.0']
+                                     ),
+                         )
+def test_init(options, shellmound_ModflowSfr2):
+    mf6sfr = sfrmaker.Mf6SFR(shellmound_ModflowSfr2, options=options)
+    options_block = mf6sfr.options_block.strip('\n').split('\n')
+    expected_keys = ['BEGIN']
+    if options is not None:
+        expected_keys = expected_keys[:1] + [' '.join(item.split()[:-1]) if len(item.split()) > 1 else item 
+                        for item in options]
+    if 'unit_conversion' not in expected_keys:
+        expected_keys.append('unit_conversion')
+    if 'auxiliary' not in expected_keys:
+        expected_keys.append('auxiliary')
+    expected_keys.append('END')
+    keys = [' '.join(item.split()[:-1]) if len(item.split()) > 1 else item.strip() 
+                    for item in options_block]
+    # verify that there aren't any duplicate entries
+    assert len(set(keys)) == len(keys)
+    assert keys == expected_keys
+
+
+def test_packagedata_aux(mf6sfr_instance_SFRdata):
+    mf6sfr = mf6sfr_instance_SFRdata
+    packagedata = mf6sfr._get_packagedata()
+    assert 'line_id' in packagedata.columns
+    
 
 def test_segment_data_to_perioddata(shellmound_sfrdata):
     # shellmound_sfrdata = copy.deepcopy(shellmound_sfrdata)
@@ -30,15 +67,15 @@ def test_segment_data_to_perioddata(shellmound_sfrdata):
             'ireach', 'icalc', 'per'}
 
 
-def test_idomain(mf6sfr_instance, shellmound_model):
-    ibound = mf6sfr_instance.idomain
+def test_idomain(mf6sfr_instance_ModflowSfr2, shellmound_model):
+    ibound = mf6sfr_instance_ModflowSfr2.idomain
     idomain = shellmound_model.dis.idomain.array
     assert np.array_equal(ibound, idomain)
 
 
 @pytest.mark.parametrize('external_files_path', ('external', None))
-def test_write(shellmound_sfrdata, mf6sfr_instance, outdir, external_files_path):
-    mf6sfr = mf6sfr_instance
+def test_write(shellmound_sfrdata, mf6sfr_instance_SFRdata, outdir, external_files_path):
+    mf6sfr = mf6sfr_instance_SFRdata
     outfile = os.path.join(outdir, 'junk.sfr')
     outfile2 = os.path.join(outdir, 'junk2.sfr')
     outfile3 = os.path.join(outdir, 'junk3.sfr')
