@@ -120,6 +120,7 @@ class SFRData(DataPackage):
                 'roughch': 0.037,
                 'strthick': 1,
                 'strhc1': 1,
+                'gage_starting_unit_number': 228
                 }
 
     def __init__(self, reach_data=None,
@@ -170,6 +171,10 @@ class SFRData(DataPackage):
         # have to set the model last, because it also sets up a flopy sfr package instance
         self.model = model  # attached flopy model instance
         # self._ModflowSfr2 = None # attached instance of flopy modflow_sfr2 package object
+
+        # MODFLOW-2005 gages will be assigned sequential unit numbers
+        # starting at gage_starting_unit_number
+        self.gage_starting_unit_number = self.defaults['gage_starting_unit_number']
 
     @property
     def const(self):
@@ -1132,9 +1137,9 @@ class SFRData(DataPackage):
 
     def write_package(self, filename=None, version='mf2005', idomain=None,
                       options=None, write_observations_input=True,
-                      external_files_path=None,
+                      external_files_path=None, gage_starting_unit_number=None,
                       **kwargs):
-        """Write and SFR package file.
+        """Write SFR package input.
 
         Parameters
         ----------
@@ -1151,11 +1156,14 @@ class SFRData(DataPackage):
 
         if filename is None:
             filename = self.modflow_sfr2.fn_path
+        if gage_starting_unit_number is None:
+            gage_starting_unit_number = self.gage_starting_unit_number
         if version == 'mf2005':
 
             if write_observations_input and len(self.observations) > 0:
                 gage_package_filename = os.path.splitext(filename)[0] + '.gage'
-                self.write_gage_package(filename=gage_package_filename)
+                self.write_gage_package(filename=gage_package_filename,
+                                        gage_starting_unit_number=gage_starting_unit_number)
 
             self.modflow_sfr2.write_file(filename=filename)
 
@@ -1187,21 +1195,21 @@ class SFRData(DataPackage):
         self.reach_data.drop('geometry', axis=1).to_csv('{}_reach_data.csv'.format(filepath), index=False)
         self.segment_data.to_csv('{}_segment_data.csv'.format(filepath), index=False)
 
-    def write_gage_package(self,
-                           filename=None,
-                           gage_package_unit=25,
-                           start_gage_unit=228):
+    def write_gage_package(self, filename=None, gage_package_unit=25,
+                           gage_starting_unit_number=None):
         if filename is None:
             filename = self.observations_file
         else:
             self.observations_file = filename
+        if gage_starting_unit_number is None:
+            gage_starting_unit_number = self.gage_starting_unit_number
         gage_namfile_entries_file = filename + '.namefile_entries'
         return write_gage_package(self.observations,
                                   gage_package_filename=filename,
                                   gage_namfile_entries_file=gage_namfile_entries_file,
                                   model=self.model,
                                   gage_package_unit=gage_package_unit,
-                                  start_gage_unit=start_gage_unit)
+                                  start_gage_unit=gage_starting_unit_number)
 
     def write_mf6_sfr_obsfile(self,
                               filename=None,
