@@ -7,7 +7,7 @@ fiona
 rasterio>=1.0
 rasterstats
 shapely
-pyproj>=2.0
+pyproj>=2.2
 rtree
 flopy
 gis-utils

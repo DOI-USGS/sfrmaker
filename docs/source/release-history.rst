@@ -2,6 +2,13 @@
 Release History
 ===============
 
+Version 0.5.0 (2020-)
+--------------------------
+* add option to write MF6 packagedata block to an external file
+* add default writing of source hydrography line_ids to MF6 packagedata as an auxiliary variable
+* use pyproj CRS module internally for more robust handling of coordinate reference systems
+* add starting gage package unit number attribute to SFRData that can be set by the user
+
 Version 0.4.0 (2020-4-25)
 --------------------------
 * add automated setup (``SFRdata.add_observations`` method) of sfr observation locations (gages for mf2005 or obs input for mf6), from (x, y) locations, line_ids in source hydrography, or at specified reach numbers
