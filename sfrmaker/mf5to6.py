@@ -349,7 +349,7 @@ class mf6sfr(Mf6SFR):
     def __init__(self, *args, **kwargs):
         warnings.warn("The 'mf6sfr' class was renamed to Mf6SFR to better follow pep 8.",
                       DeprecationWarning)
-        Mf6SFR.__init__(*args, **kwargs)
+        Mf6SFR.__init__(self, *args, **kwargs)
 
 
 def segment_data_to_period_data(segment_data, reach_data):

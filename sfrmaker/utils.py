@@ -11,14 +11,20 @@ unit_conversion = {'feetmeters': 0.3048,
                    'metersfeet': 1 / .3048}
 
 
-def assign_layers(reach_data, botm_array, pad=1., inplace=False):
+def assign_layers(reach_data, botm_array, idomain=None, pad=1., inplace=False):
     """Assigns the appropriate layer for each SFR reach,
             based on cell bottoms at location of reach.
 
     Parameters
     ----------
-    reach_data : DataFrame with reach information
-    botm : 3D numpy array of bottom elevations
+    reach_data : DataFrame
+        Table of reach information, similar to SFRData.reach_data
+    botm : ndarary
+        3D numpy array of layer bottom elevations
+    idomain : ndarray
+        3D integer array of MODFLOW ibound or idomain values. Values >=1
+        are considered active. Reaches in cells with values < 1 will be moved
+        to the highest active cell if possible.
     pad : scalar
         Minimum distance that streambed bottom must be above layer bottom.
         When determining the layer or whether the streambed bottom is below

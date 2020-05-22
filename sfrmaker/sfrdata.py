@@ -131,7 +131,7 @@ class SFRData(DataPackage):
                  enforce_increasing_nsegs=True,
                  package_name=None,
                  **kwargs):
-        super().__init__(grid=grid, sr=sr, model=model, isfr=isfr,
+        DataPackage.__init__(self, grid=grid, sr=sr, model=model, isfr=isfr,
                          model_length_units=model_length_units,
                          model_time_units=model_time_units,
                          package_name=package_name)
@@ -843,9 +843,9 @@ class SFRData(DataPackage):
 
         # get the CRS and pixel size for the DEM
         with rasterio.open(dem) as src:
-            proj_str = src.crs.to_string()
+            wkt = src.crs.wkt
             epsg = src.crs.to_epsg()
-            raster_crs = CRS(epsg=epsg, proj_str=proj_str)
+            raster_crs = CRS(epsg=epsg, wkt=wkt)
 
             # make sure buffer is large enough for DEM pixel size
             buffer_distance = np.max([np.sqrt(src.res[0] *

@@ -102,7 +102,11 @@ class CRS:
             # results in equal pyproj_crs instances
             if pyproj_crs is not None:
                 try:
-                    self._pyproj_crs = pyproj.CRS.from_user_input(pyproj_crs.to_authority())
+                    authority = pyproj_crs.to_authority()
+                    if authority is not None:
+                        self._pyproj_crs = pyproj.CRS.from_user_input(pyproj_crs.to_authority())
+                    else:
+                        self._pyproj_crs = pyproj_crs
                 except:
                     j=2
         return self._pyproj_crs
@@ -167,7 +171,7 @@ class crs(CRS):
     def __init__(self, *args, **kwargs):
         warnings.warn("The 'crs' class was renamed to CRS to better follow pep 8.",
                       DeprecationWarning)
-        CRS.__init__(*args, **kwargs)
+        CRS.__init__(self, *args, **kwargs)
 
 
 def build_rtree_index(geom):

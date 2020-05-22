@@ -26,7 +26,7 @@ class RivData(DataPackage):
                  model_length_units="undefined", model_time_units='d',
                  package_name=None,
                  **kwargs):
-        super().__init__(grid=grid, model=model,
+        DataPackage.__init__(self, grid=grid, model=model,
                          model_length_units=model_length_units,
                          model_time_units=model_time_units,
                          package_name=package_name)
