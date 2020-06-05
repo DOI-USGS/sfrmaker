@@ -246,6 +246,7 @@ def test_write_mf6_package(shellmound_sfrdata, mf6sfr, outdir):
 
 @pytest.mark.parametrize('kwargs', [{'rno': 1},  # specified reach(es)
                                     {'segments': 1},  # specified segment(s)
+                                    {'line_ids': 17955471},  # specified line numbers in source hydrography
                                     {},  # all segments
                                     ])
 def test_to_riv(shellmound_sfrdata, kwargs):

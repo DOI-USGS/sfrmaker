@@ -1027,7 +1027,7 @@ class SFRData(DataPackage):
                    grid=grid, sr=sr,
                    isfr=isfr)
 
-    def to_riv(self, segments=None, rno=None, drop_in_sfr=True):
+    def to_riv(self, segments=None, rno=None, line_ids=None, drop_in_sfr=True):
         """Cast one or more reaches to a RivData instance,
         which can then be written as input to the MODFLOW RIV package.
 
@@ -1036,9 +1036,14 @@ class SFRData(DataPackage):
         segments : sequence of ints
             Convert the listed segments, and all downstream segments,
             to the RIV package. If None, all segments are converted (default).
-        nro : sequence of ints
+        rno : sequence of ints
             Convert the listed reach numbers (nro), and all downstream reaches,
             to the RIV package. If None, all reaches are converted (default).
+        line_ids : sequence of ints
+            Convert the segments corresponding to the line_ids 
+            (unique identifiers for LineString features in the source hydrography), 
+            and all downstream segments to the RIV package. If None, all reaches 
+            are converted (default).
         drop_in_sfr : bool
             Whether or not to remove the converted segments from the SFR package
             (default True)
@@ -1049,20 +1054,24 @@ class SFRData(DataPackage):
         """
 
         # get the downstream segments to be converted
-        if segments is None and rno is None:
-            loc = slice(None, None)  # all reaches
+        loc = np.array([True] * len(self.reach_data))
+        if segments is None and rno is None and line_ids is None:
+            #loc = slice(None, None)  # all reaches
             # if all reaches are being converted,
             # skip dropping the reaches from the sfr package
             drop_in_sfr = False
-        elif segments is not None:
+        if segments is not None:
             if np.isscalar(segments):
                 segments = [segments]
-            loc = self.reach_data.iseg.isin(segments)
-        elif rno is not None:
+            loc = loc & self.reach_data.iseg.isin(segments)
+        if line_ids is not None:
+            if np.isscalar(line_ids):
+                line_ids = [line_ids]
+            loc = loc & self.reach_data.line_id.isin(line_ids)
+        if rno is not None:
             if np.isscalar(rno):
                 rno = [rno]
-            loc = self.reach_data.rno.isin(rno)
-
+            loc = loc & self.reach_data.rno.isin(rno)
         reaches = self.reach_data.loc[loc, 'rno'].tolist()
         to_riv_reaches = set()
         for rno in reaches:
