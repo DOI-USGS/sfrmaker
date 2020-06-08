@@ -2,7 +2,7 @@
 Release History
 ===============
 
-Version 0.5.0 (2020-)
+Version 0.5.0 (2020-05-20)
 --------------------------
 * add option to write MF6 packagedata block to an external file
 * add default writing of source hydrography line_ids to MF6 packagedata as an auxiliary variable
