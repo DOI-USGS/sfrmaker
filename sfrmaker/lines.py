@@ -62,6 +62,9 @@ class Lines:
 
         self._routing = None  # dictionary of routing connections
         self._paths = None  # routing sequence from each segment to outlet
+        
+        self.elevup = dict(zip(self.df.id, self.df.elevup))
+
 
     @property
     def attr_to_m(self):
@@ -508,7 +511,6 @@ class Lines:
 
         # convert routing connections (toid column) from lists (one-to-many)
         # to ints (one-to-one or many-to-one)
-        self.elevup = dict(zip(self.df.id, self.df.elevup))
         routing = self.routing.copy()
 
         # one to many routing is not supported
