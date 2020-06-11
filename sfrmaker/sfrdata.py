@@ -335,7 +335,12 @@ class SFRData(DataPackage):
         segment_data.sort_values(by=['per', 'nseg'], inplace=True)
         segment_data.index = range(len(segment_data))
         for c in segment_data.columns:
-            sd[c] = segment_data[c].astype(SFRData.dtypes.get(c, np.float32))
+            values = segment_data[c].astype(SFRData.dtypes.get(c, np.float32))
+            # fill any nan values with 0 (same as empty segment_data;
+            # for example elevation if it wasn't specified and
+            # will be sampled from the DEM)
+            values.fillna(0, inplace=True)
+            sd[c] = values
 
         # assign defaults to segment data
         for k, v in self.defaults.items():
@@ -601,6 +606,7 @@ class SFRData(DataPackage):
             self.segment_data['width2'] = [width2[s] for s in self.segment_data.nseg]
 
         assert not np.any(np.isnan(self.segment_data))
+        
         # create record array for each stress period
         sd = self.segment_data.groupby('per')
         sd = {per: sd.get_group(per).drop('per', axis=1).to_records(index=False)
