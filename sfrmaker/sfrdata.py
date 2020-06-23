@@ -122,6 +122,7 @@ class SFRData(DataPackage):
                 'strhc1': 1,
                 'gage_starting_unit_number': 228
                 }
+    package_type = 'sfr'
 
     def __init__(self, reach_data=None,
                  segment_data=None, grid=None, sr=None,
@@ -1204,11 +1205,15 @@ class SFRData(DataPackage):
             # write a MODFLOW 6 file
             sfr6.write_file(filename=filename, external_files_path=external_files_path)
 
-    def write_tables(self, filepath='./sfr'):
-
-        filepath, file_extension = os.path.splitext(filepath)
-        self.reach_data.drop('geometry', axis=1).to_csv('{}_reach_data.csv'.format(filepath), index=False)
-        self.segment_data.to_csv('{}_segment_data.csv'.format(filepath), index=False)
+    def write_tables(self, basename=None):
+        if basename is None:
+            output_path = '.'
+            basename = self.package_name + '_{}'.format(self.package_type)
+        else:
+            output_path, basename = os.path.split(basename)
+            basename, _ = os.path.splitext(basename)
+        self.reach_data.drop('geometry', axis=1).to_csv('{}/{}_reach_data.csv'.format(output_path, basename), index=False)
+        self.segment_data.to_csv('{}/{}_segment_data.csv'.format(output_path, basename), index=False)
 
     def write_gage_package(self, filename=None, gage_package_unit=25,
                            gage_starting_unit_number=None):
@@ -1239,13 +1244,6 @@ class SFRData(DataPackage):
                                      filename,
                                      sfr_output_filename)
 
-    def export_cells(self, filename=None, nodes=None, geomtype='polygon'):
-        """Export shapefile of model cells with stream reaches."""
-        if filename is None:
-            filename = self.package_name + '_sfrcells.shp'
-        export_reach_data(self.reach_data, self.grid, filename,
-                          nodes=nodes, geomtype=geomtype)
-
     def export_outlets(self, filename=None):
         """Export shapefile of model cells with stream reaches."""
         if filename is None:
@@ -1253,17 +1251,6 @@ class SFRData(DataPackage):
         nodes = self.reach_data.loc[self.reach_data.outreach == 0, 'node'].values
         export_reach_data(self.reach_data, self.grid, filename,
                           nodes=nodes, geomtype='point')
-
-    def export_lines(self, filename=None):
-        """Export shapefile of linework"""
-        if filename is None:
-            filename = self.package_name + '_sfrlines.shp'
-        rd = self.reach_data
-        assert 'geometry' in rd.columns and \
-               isinstance(rd.geometry.values[0], LineString), \
-            "No LineStrings in reach_data.geometry"
-        df2shp(rd, filename, epsg=self.grid.crs.epsg,
-               proj_str=self.grid.crs.proj_str)
 
     def export_routing(self, filename=None):
         """Export linework shapefile showing all routing connections between SFR reaches.
@@ -1344,43 +1331,15 @@ class SFRData(DataPackage):
 
         export_reach_data(rd, self.grid, filename, geomtype='point')
 
-    def export_period_data(self, filename=None, geomtype='point'):
-        """Export point shapefile showing locations of period data
-        in a MODFLOW-6 SFR package (e.g. inflows, runoff, etc.)
-
-        Parameters
-        ----------
-        f : str, filename
-        geomtype : str ('point' or 'polygon')
-            write the locations as points at the cell centers, or polygons
-            of the model cells containing the period data.
-
-        """
-        data = self.period_data.dropna(axis=1).sort_values(by=['per', 'rno'])
-        nodes = dict(zip(self.reach_data.rno, self.reach_data.node))
-
-        for var in ['evaporation', 'inflow', 'rainfall', 'runoff', 'stage']:
-            if var in data.columns:
-                # pivot the segment data to segments x periods with values of varname
-                aggfunc = 'mean'  # how to aggregate multiple instances of rno/per combinations
-                if var in ['inflow', 'runoff']:
-                    aggfunc = 'sum'
-                df = data.reset_index(drop=True).pivot_table(index='rno', columns='per', values=var,
-                                                             aggfunc=aggfunc).reset_index()
-                # rename the columns to indicate stress periods
-                df.columns = ['rno'] + ['{}{}'.format(i, var) for i in range(df.shape[1] - 1)]
-                df['node'] = [nodes[rno] for rno in df['rno']]
-                if filename is None:
-                    filename = self.package_name + '_sfr_period_data_{}.shp'.format(var)
-                elif var not in filename:
-                    filename = os.path.splitext(filename)[0] + '_{}.shp'.format(var)
-                export_reach_data(df, self.grid, filename, geomtype=geomtype)
-
     def export_observations(self, filename=None, geomtype='point'):
 
         data = self.observations
+        if len(data) == 0:
+            print('No observations to export!')
+            return
         nodes = dict(zip(self.reach_data.rno, self.reach_data.node))
         data['node'] = [nodes[rno] for rno in data['rno']]
         if filename is None:
             filename = self.observations_file + '.shp'
         export_reach_data(data, self.grid, filename, geomtype=geomtype)
+

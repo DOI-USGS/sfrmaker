@@ -1,6 +1,7 @@
 """
 Module for creating RIV package input
 """
+import os
 from sfrmaker.base import DataPackage
 
 
@@ -21,6 +22,8 @@ class RivData(DataPackage):
     package_name :
     kwargs :
     """
+    package_type = 'riv'
+
     def __init__(self, stress_period_data=None, grid=None,
                  model=None,
                  model_length_units="undefined", model_time_units='d',
@@ -32,6 +35,17 @@ class RivData(DataPackage):
                          package_name=package_name)
 
         self.stress_period_data = stress_period_data
+
+    def write_table(self, basename=None):
+        if basename is None:
+            output_path = '.'
+            basename = self.package_name + '_{}'.format(self.package_type)
+        else:
+            output_path, basename = os.path.split(basename)
+            basename, _ = os.path.splitext(basename)
+            basename = basename.strip('rivdata').strip('_')
+        output_file_name = '{}/{}_rivdata.csv'.format(output_path, basename)
+        self.stress_period_data.drop('geometry', axis=1).to_csv(output_file_name, index=False)
 
     @classmethod
     def from_lines(cls, lines, grid=None,
