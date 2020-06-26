@@ -18,7 +18,9 @@ from .utils import get_sfr_package_format
 import sfrmaker
 from sfrmaker.base import DataPackage
 from sfrmaker.mf5to6 import segment_data_to_period_data
+from sfrmaker.reaches import consolidate_reach_conductances
 from sfrmaker.rivdata import RivData
+
 try:
     import flopy
     fm = flopy.modflow
@@ -1091,12 +1093,15 @@ class SFRData(DataPackage):
         is_riv_reach = self.reach_data.rno.isin(to_riv_reaches)
         df = self.reach_data.loc[is_riv_reach].copy()
 
+        # consolidate the reaches to 1 per cell
+        df = consolidate_reach_conductances(df, keep_only_dominant=True)
+
         # add in a column for the stress period
         # even though transfer of any specified stage changes
         # aren't implemented yet
         df['per'] = 0
 
-        df['cond'] = df.width * df.rchlen * df.strhc1 / df.strthick
+        df['cond'] = df['Cond_sum']
 
         if any(self.segment_data.depth1 > 0):
             # find period with most data

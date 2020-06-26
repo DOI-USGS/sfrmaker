@@ -71,7 +71,7 @@ class DataPackage:
         else:
             output_path, basename = os.path.split(basename)
             basename, _ = os.path.splitext(basename)
-        basename = basename.strip(self.package_type).strip('_') + '_{}'.format(self.package_type)
+        basename = basename.replace(self.package_type, '').strip('_') + '_{}'.format(self.package_type)
         for datatype in 'cells', 'outlets', 'lines', 'routing', 'period_data', 'observations':
             export_method_name = 'export_{}'.format(datatype)
             export_method = getattr(self, export_method_name, None)
