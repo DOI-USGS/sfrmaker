@@ -12,6 +12,7 @@ try:
 except:
     flopy = False
 from .gis import get_proj_str, project
+from .fileio import read_tables
 from .routing import get_next_id_in_subset
 
 
@@ -27,9 +28,9 @@ def add_observations(sfrdata, data, flowline_routing=None,
     """Add SFR observations to the observations DataFrame
     attribute of an sfrdata instance. Observations can
     by located on the SFR network by specifying reach number
-    directly (rno_column_in_data), by x, y location (x_column_in_data and y_column in data),
+    directly (rno_column), by x, y location (x_column_in_data and y_column in data),
     or by specifying the source hydrography lines that they are located on
-    (line_id_column_in_data).
+    (line_id_column).
 
     Parameters
     ----------
@@ -37,9 +38,9 @@ def add_observations(sfrdata, data, flowline_routing=None,
         SFRData instance with reach_data table attribute. To add observations from x, y coordinates,
         the reach_data table must have a geometry column with LineStrings representing each reach, or
         an sfrlines_shapefile is required. Reach numbers are assumed to be in an 'rno' column.
-    data : DataFrame
+    data : DataFrame, path to csv file, or list of DataFrames or file paths
         Table with information on the observation sites to be located. Must have
-        either reach numbers (rno_column_in_data), line_ids (line_id_column_in_data),
+        either reach numbers (rno_column), line_ids (line_id_column),
         or x and y locations (x_column_in_data and y_column_in_data).
     obstype : str (optional)
         Type of observation to record, for MODFLOW-6 (default 'downstream-flow'; see
@@ -84,18 +85,7 @@ def add_observations(sfrdata, data, flowline_routing=None,
     reach_data = sfrdata.reach_data.copy()
 
     # allow input via a list of tables or single table
-    input_data = data
-    if not isinstance(input_data, list):
-        input_data = [input_data]
-    dfs = []
-    for item in input_data:
-        if isinstance(item, str):
-            dfs.append(pd.read_csv(item))
-        elif isinstance(item, pd.DataFrame):
-            dfs.append(item.copy())
-        else:
-            raise Exception('Unrecognized input type for data:\n{}'.format(item))
-    data = pd.concat(dfs).reset_index(drop=True)
+    data = read_tables(data)
 
     # read reach geometries from a shapefile
     if sfrlines_shapefile is not None:

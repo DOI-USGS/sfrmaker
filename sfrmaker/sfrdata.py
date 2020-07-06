@@ -390,29 +390,29 @@ class SFRData(DataPackage):
 
     def add_to_perioddata(self, data, flowline_routing=None,
                           variable='inflow',
-                          line_id_column_in_data=None,
-                          rno_column_in_data=None,
-                          period_column_in_data='per',
-                          variable_column_in_data='Q_avg'):
+                          line_id_column=None,
+                          rno_column=None,
+                          period_column='per',
+                          data_column='Q_avg'):
         return add_to_perioddata(self, data, flowline_routing=flowline_routing,
                                  variable=variable,
-                                 line_id_column_in_data=line_id_column_in_data,
-                                 rno_column_in_data=rno_column_in_data,
-                                 period_column_in_data=period_column_in_data,
-                                 variable_column_in_data=variable_column_in_data)
+                                 line_id_column=line_id_column,
+                                 rno_column=rno_column,
+                                 period_column=period_column,
+                                 data_column=data_column)
 
     def add_to_segment_data(self, data, flowline_routing,
                             variable='flow',
-                            line_id_column_in_data=None,
-                            segment_column_in_data='segment',
-                            period_column_in_data='per',
-                            variable_column_in_data='Q_avg'):
+                            line_id_column=None,
+                            segment_column='segment',
+                            period_column='per',
+                            data_column='Q_avg'):
         return add_to_segment_data(self, data, flowline_routing,
                                    variable=variable,
-                                   line_id_column_in_data=line_id_column_in_data,
-                                   segment_column_in_data=segment_column_in_data,
-                                   period_column_in_data=period_column_in_data,
-                                   variable_column_in_data=variable_column_in_data)
+                                   line_id_column=line_id_column,
+                                   segment_column=segment_column,
+                                   period_column=period_column,
+                                   data_column=data_column)
     @property
     def paths(self):
         """Dict listing routing sequence for each segment
@@ -1217,8 +1217,11 @@ class SFRData(DataPackage):
         else:
             output_path, basename = os.path.split(basename)
             basename, _ = os.path.splitext(basename)
-        self.reach_data.drop('geometry', axis=1).to_csv('{}/{}_reach_data.csv'.format(output_path, basename), index=False)
-        self.segment_data.to_csv('{}/{}_segment_data.csv'.format(output_path, basename), index=False)
+        self.reach_data.drop('geometry', axis=1).to_csv('{}/{}_sfr_reach_data.csv'.format(output_path, basename), index=False)
+        self.segment_data.to_csv('{}/{}_sfr_segment_data.csv'.format(output_path, basename), index=False)
+        if self.period_data is not None:
+            self.period_data.dropna(axis=1, how='all').to_csv('{}/{}_sfr_period_data.csv'.format(output_path, basename),
+                                                              index=False)
 
     def write_gage_package(self, filename=None, gage_package_unit=25,
                            gage_starting_unit_number=None):

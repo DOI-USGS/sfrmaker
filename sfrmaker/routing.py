@@ -111,6 +111,7 @@ def find_path(graph, start, end=0, path=[]):
     path : list
         List of segment numbers along routing path.
     """
+    graph = graph.copy()
     path = path + [start]
     if start == end:
         return path
@@ -269,6 +270,5 @@ def get_next_id_in_subset(subset, routing, ids):
             if id in subset:
                 new_ids.append(id)
                 break
-
     assert len(new_ids) == len(ids)
     return new_ids

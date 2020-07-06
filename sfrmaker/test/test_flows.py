@@ -69,9 +69,9 @@ def test_add_to_perioddata(shellmound_sfrdata):
     add_to_perioddata(sfrd, flows,
                       flowline_routing=flowline_routing,
                       variable='inflow',
-                      line_id_column_in_data='line_id',
-                      period_column_in_data='per',
-                      variable_column_in_data='Q_avg')
+                      line_id_column='line_id',
+                      period_column='per',
+                      data_column='Q_avg')
     flows = flows.loc[flows.line_id != 2]
     assert np.allclose(sfrd.period_data['inflow'].values, flows['Q_avg'].values)
     assert np.allclose(sfrd.period_data['per'].values, flows['per'].values)
@@ -99,9 +99,9 @@ def test_add_to_segment_data(shellmound_sfrdata):
     add_to_segment_data(sfrd, flows,
                         flowline_routing=flowline_routing,
                         variable='flow',
-                        line_id_column_in_data='line_id',
-                        period_column_in_data='per',
-                        variable_column_in_data='Q_avg')
+                        line_id_column='line_id',
+                        period_column='per',
+                        data_column='Q_avg')
     sd2 = sfrd.segment_data.copy()
     sd2.index = pd.MultiIndex.from_tuples(zip(sd2.per, sd2.nseg), names=['per', 'nseg'])
     flows = flows.loc[~flows.line_id.isin([2])]

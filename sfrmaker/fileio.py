@@ -1,4 +1,5 @@
 import sys
+import pandas as pd
 
 
 def load_mf2005_package(f, model=None):
@@ -202,3 +203,20 @@ def load_mf2005_package(f, model=None):
                        tabfiles=tabfiles, tabfiles_dict=tabfiles_dict,
                        unit_number=unitnumber, filenames=filenames,
                        options=options)
+
+
+def read_tables(data):
+    # allow input via a list of tables or single table
+    input_data = data
+    if not isinstance(input_data, list):
+        input_data = [input_data]
+    dfs = []
+    for item in input_data:
+        if isinstance(item, str):
+            dfs.append(pd.read_csv(item))
+        elif isinstance(item, pd.DataFrame):
+            dfs.append(item.copy())
+        else:
+            raise Exception('Unrecognized input type for data:\n{}'.format(item))
+    data = pd.concat(dfs).reset_index(drop=True)
+    return data

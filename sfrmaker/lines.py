@@ -61,6 +61,8 @@ class Lines:
         self._geometry_length_units = None
 
         self._routing = None  # dictionary of routing connections
+        # static dictionary of original flowline routing
+        self._original_routing = dict(zip(df.id, df.toid))
         self._paths = None  # routing sequence from each segment to outlet
         
         self.elevup = dict(zip(self.df.id, self.df.elevup))
