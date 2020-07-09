@@ -7,7 +7,7 @@ from ..units import convert_length_units
 
 
 def test_structuredgrid_from_flopy_mg():
-    # make a flopy.utils.reference.SpatialReference instance
+    # make a flopy modelgrid instance
     # that represents the model grid
     data_dir = 'Examples/data/badriver'
     m = fm.Modflow.load('tf.nam', model_ws='{}/tylerforks'.format(data_dir), load_only=['DIS'])

@@ -17,8 +17,7 @@ class DataPackage:
 
     package_type = None  # overloaded by SFRData, RivData, etc.
 
-    def __init__(self, grid=None, sr=None,
-                 model=None, isfr=None,
+    def __init__(self, grid=None, model=None, isfr=None,
                  model_length_units="undefined", model_time_units='d',
                  package_name=None,
                  **kwargs):
@@ -38,12 +37,7 @@ class DataPackage:
 
         """
 
-        if grid is None and sr is not None:
-            print('\nCreating grid class instance from flopy SpatialReference...')
-            ta = time.time()
-            grid = StructuredGrid.from_sr(sr, isfr=isfr)
-            print("grid class created in {:.2f}s\n".format(time.time() - ta))
-        elif flopy and isinstance(grid, flopy.discretization.grid.Grid):
+        if flopy and isinstance(grid, flopy.discretization.grid.Grid):
             print('\nCreating grid class instance from flopy modelgrid...')
             ta = time.time()
             grid = StructuredGrid.from_modelgrid(grid, isfr=isfr)

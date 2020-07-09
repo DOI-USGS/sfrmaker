@@ -155,7 +155,6 @@ def test_create_mf6sfr(mf6sfr, shellmound_sfrdata, shellmound_model):
                     print('values in packagedata.{} != sfrdata.segment_data.{}'.format(col, mf2005col))
 
 
-@pytest.mark.skip('waiting on flopy fix for empty packagedata lines where cellid is None')
 def test_flopy_mf6sfr_outfile(mf6sfr, mf6sfr_outfile):
     assert os.path.exists(mf6sfr_outfile)
     # check that the written package data matches in memory package data

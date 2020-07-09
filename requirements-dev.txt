@@ -10,6 +10,10 @@ rasterstats
 shapely
 pyproj>=2.2
 flopy
+rtree
+flopy
+gis-utils
+modflow-export
 codecov
 coverage
 flake8

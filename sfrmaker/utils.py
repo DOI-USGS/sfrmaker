@@ -1,6 +1,5 @@
 import os
 import inspect
-import json
 import pprint
 
 import numpy as np
@@ -184,31 +183,6 @@ def width_from_arbolate_sum(arbolate_sum, minimum_width=1):
     if scalar:
         return w[0]
     return w
-
-
-def load_json(jsonfile):
-    """Convenience function to load a json file; replacing
-    some escaped characters."""
-    with open(jsonfile) as f:
-        return json.load(f)
-
-
-def load_sr(jsonfile):
-    """Create a SpatialReference instance from model config json file."""
-    from flopy.utils import SpatialReference
-    with open(jsonfile) as input:
-        cfg = json.load(input)
-
-    rename = {'xoff': 'xll',
-              'yoff': 'yll',
-              }
-    for k, v in rename.items():
-        if k in cfg:
-            cfg[v] = cfg.pop(k)
-    cfg['delr'] = np.ones(cfg['ncol']) * cfg['delr']
-    cfg['delc'] = np.ones(cfg['nrow']) * cfg['delc']
-    kwargs = get_input_arguments(cfg, SpatialReference)
-    return SpatialReference(**kwargs)
 
 
 def get_input_arguments(kwargs, function, warn=True):

@@ -4,13 +4,14 @@ from shapely.geometry import box
 import flopy
 from sfrmaker.routing import find_path, make_graph
 from gisutils import shp2df
+from mfexport.budget_output import read_sfr_output
 from .fileio import read_tables
 from .routing import get_next_id_in_subset
-from .utils import load_sr
+from sfrmaker.fileio import load_modelgrid
 
 
 def get_inflow_locations_from_parent_model(parent_reach_data, inset_reach_data,
-                                           inset_sr, active_area=None
+                                           inset_grid, active_area=None
                                            ):
     """Get places in an inset model SFR network where the parent SFR network crosses
     the inset model boundary, using common line ID numbers from parent and inset reach datasets.
@@ -30,13 +31,13 @@ def get_inflow_locations_from_parent_model(parent_reach_data, inset_reach_data,
         SFR reach data for inset model. Same columns as parent_reach_data,
         except a geometry column isn't needed. line_id values must correspond to
         same source hydrography as those in parent_reach_data.
-    inset_sr : flopy.utils.reference.SpatialReference instance describing inset model grid
+    inset_grid : flopy.discretization.StructuredGrid instance describing model grid
         Must be in same coordinate system as geometries in parent_reach_data.
         Required only if active_area is None.
     active_area : shapely.geometry.Polygon object
         Describes the area of the inset model where SFR is applied. Used to find
         inset reaches from parent model. Must be in same coordinate system as
-        geometries in parent_reach_data. Required only if inset_sr is None.
+        geometries in parent_reach_data. Required only if inset_grid is None.
 
     Returns
     -------
@@ -49,15 +50,16 @@ def get_inflow_locations_from_parent_model(parent_reach_data, inset_reach_data,
     """
 
     # spatial reference instances defining parent and inset grids
-    if isinstance(inset_sr, str):
-        sr = load_sr(inset_sr)
-    elif isinstance(inset_sr, flopy.discretization.grid.Grid):
-        sr = inset_sr
+    if isinstance(inset_grid, str):
+        grid = load_modelgrid(inset_grid)
+    elif isinstance(inset_grid, flopy.discretization.grid.Grid):
+        grid = inset_grid
     else:
-        raise ValueError('Unrecognized input for inset_sr')
+        raise ValueError('Unrecognized input for inset_grid')
 
     if active_area is None:
-        active_area = box(*sr.bounds)
+        l, r, b, t = grid.extent
+        active_area = box(l, b, r, t)
 
     # parent and inset reach data
     if isinstance(parent_reach_data, str):
@@ -145,6 +147,59 @@ def get_inflow_locations_from_parent_model(parent_reach_data, inset_reach_data,
     df['parent_iseg'] = [parent_outlet_iseg_ireach[rno][0] for rno in df['parent_rno']]
     df['parent_ireach'] = [parent_outlet_iseg_ireach[rno][1] for rno in df['parent_rno']]
     return df.reset_index(drop=True)
+
+
+def get_inflows_from_parent_model(parent_reach_data, inset_reach_data,
+                                  mf2005_parent_sfr_outputfile, mf6_parent_sfr_budget_file,
+                                  inset_grid, active_area=None):
+    """Get places in an inset model SFR network where the parent SFR network crosses
+    the inset model boundary, using common line ID numbers from parent and inset reach datasets.
+    MF2005 or MF6 supported; if either dataset contains only reach numbers (is MODFLOW-6),
+    the reach numbers are used as segment numbers, with each segment only having one reach.
+
+    Parameters
+    ----------
+    parent_reach_data : str (filepath) or DataFrame
+        SFR reach data for parent model. Must include columns:
+        line_id : int; unique identifier for hydrography line that each reach is based on
+        rno : int; unique identifier for each reach. Optional if iseg and ireach columns are included.
+        iseg : int; unique identifier for each segment. Optional if rno is included.
+        ireach : int; unique identifier for each reach. Optional if rno is included.
+        geometry : shapely.geometry object representing location of each reach
+    inset_reach_data : str (filepath) or DataFrame
+        SFR reach data for inset model. Same columns as parent_reach_data,
+        except a geometry column isn't needed. line_id values must correspond to
+        same source hydrography as those in parent_reach_data.
+    mf2005_parent_sfr_outputfile : str (filepath)
+        Modflow-2005 style SFR text file budget output.
+    mf6_parent_sfr_budget_file : str (filepath)
+        Modflow-6 style SFR binary budget output
+    inset_grid : flopy.discretization.StructuredGrid instance describing model grid
+        Must be in same coordinate system as geometries in parent_reach_data.
+        Required only if active_area is None.
+    active_area : shapely.geometry.Polygon object
+        Describes the area of the inset model where SFR is applied. Used to find
+        inset reaches from parent model. Must be in same coordinate system as
+        geometries in parent_reach_data. Required only if inset_grid is None.
+
+    Returns
+    -------
+    inflows : DataFrame
+        Columns:
+        parent_segment : parent model segment
+        parent_reach : parent model reach
+        parent_rno : parent model reach number
+        line_id : unique identifier for hydrography line that each reach is based on
+    """
+    locations = get_inflow_locations_from_parent_model(parent_reach_data=parent_reach_data,
+                                                       inset_reach_data=inset_reach_data,
+                                                       inset_grid=inset_grid,
+                                                       active_area=active_area)
+    df = read_sfr_output(mf2005_sfr_outputfile=mf2005_parent_sfr_outputfile,
+                         mf6_sfr_stage_file=None,
+                         mf6_sfr_budget_file=mf6_parent_sfr_budget_file,
+                         model=None)
+    j=2
 
 
 def add_to_perioddata(sfrdata, data, flowline_routing=None,

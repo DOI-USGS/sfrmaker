@@ -127,14 +127,14 @@ class SFRData(DataPackage):
     package_type = 'sfr'
 
     def __init__(self, reach_data=None,
-                 segment_data=None, grid=None, sr=None,
+                 segment_data=None, grid=None,
                  model=None,
                  isfr=None,
                  model_length_units="undefined", model_time_units='d',
                  enforce_increasing_nsegs=True,
                  package_name=None,
                  **kwargs):
-        DataPackage.__init__(self, grid=grid, sr=sr, model=model, isfr=isfr,
+        DataPackage.__init__(self, grid=grid, model=model, isfr=isfr,
                          model_length_units=model_length_units,
                          model_time_units=model_time_units,
                          package_name=package_name)
@@ -1029,12 +1029,11 @@ class SFRData(DataPackage):
 
     @classmethod
     def from_tables(cls, reach_data, segment_data,
-                    grid=None, sr=None, isfr=None):
+                    grid=None, isfr=None):
         reach_data = pd.read_csv(reach_data)
         segment_data = pd.read_csv(segment_data)
         return cls(reach_data=reach_data, segment_data=segment_data,
-                   grid=grid, sr=sr,
-                   isfr=isfr)
+                   grid=grid, isfr=isfr)
 
     def to_riv(self, segments=None, rno=None, line_ids=None, drop_in_sfr=True):
         """Cast one or more reaches to a RivData instance,

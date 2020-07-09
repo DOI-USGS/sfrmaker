@@ -37,8 +37,7 @@ lns = Lines.from_nhdplus_v2(NHDFlowlines=flowlines,
                             elevslope=elevslope_files,
                             filter='{}/grid.shp'.format(data_dir))
 
-# make a flopy.utils.reference.SpatialReference instance
-# that represents the model grid
+# load the model using flopy
 m = fm.Modflow.load('tf.nam', model_ws='{}/tylerforks'.format(data_dir))
 
 # make a sfrmaker.StructuredGrid instance from a shapefile of the model grid

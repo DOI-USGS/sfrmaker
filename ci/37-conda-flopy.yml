@@ -32,3 +32,5 @@ dependencies:
   - flopy
   - gis-utils
   - pip
+  - pip:
+    - modflow-export

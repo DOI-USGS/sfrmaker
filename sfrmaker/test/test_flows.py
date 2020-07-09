@@ -3,7 +3,8 @@ import pandas as pd
 import pytest
 
 from .test_routing import add_line_sequence
-from ..flows import (get_inflow_locations_from_parent_model, add_to_perioddata, add_to_segment_data)
+from ..flows import (get_inflow_locations_from_parent_model, get_inflows_from_parent_model,
+add_to_perioddata, add_to_segment_data)
 from gisutils import shp2df
 
 
@@ -29,7 +30,6 @@ def parent_model_sfr_flow_results():
     return rd
 
 
-@pytest.mark.xfail(reason="still need to replace sr with modelgrid")
 def test_get_inflow_locations_from_parent_model(outdir, shellmound_grid, shellmound_sfrdata):
     parent_reach_data = 'sfrmaker/test/data/shellmound/merasnwt_sfrlines.shp'
     inset_reach_data = shellmound_sfrdata.reach_data
@@ -50,6 +50,16 @@ def test_get_inflow_locations_from_parent_model(outdir, shellmound_grid, shellmo
                          }
     symmetric_diff = expected_line_ids ^ set(df.line_id)
     assert len(symmetric_diff) == 0
+
+
+@pytest.mark.skip(reason="still working on this feature")
+def test_get_inflows_from_parent_model(shellmound_sfrdata):
+    parent_reach_data = 'sfrmaker/test/data/shellmound/merasnwt_sfrlines.shp'
+    inset_reach_data = shellmound_sfrdata.reach_data
+    result = get_inflows_from_parent_model(parent_reach_data, inset_reach_data,
+                                           #mf2005_parent_sfr_outputfile, mf6_parent_sfr_budget_file,
+                                           #inset_grid, active_area=None
+                                           )
 
 
 def test_add_to_perioddata(shellmound_sfrdata):

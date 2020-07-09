@@ -288,54 +288,16 @@ class StructuredGrid(Grid):
     @classmethod
     def from_json(cls, jsonfile, active_area=None, isfr=None,
                   epsg=None, proj_str=None, prjfile=None):
-        from .utils import load_sr
-        sr = load_sr(jsonfile)
-        return cls.from_sr(sr, active_area=active_area, isfr=isfr,
-                           epsg=epsg, proj_str=proj_str, prjfile=prjfile)
+        from sfrmaker.fileio import load_modelgrid
+        grid = load_modelgrid(jsonfile)
+        return cls.from_modelgrid(grid, active_area=active_area, isfr=isfr,
+                                  epsg=epsg, proj_str=proj_str, prjfile=prjfile)
 
     @classmethod
     def from_sr(cls, sr=None, active_area=None, isfr=None,
                 epsg=None, proj_str=None, prjfile=None):
-        """Create StructureGrid class instance from a
-        flopy SpatialReference instance."""
-        vertices = sr.vertices
-        polygons = [Polygon(v) for v in sr.vertices]
-        df = pd.DataFrame({'node': range(0, len(vertices)),
-                           'i': sorted(list(range(sr.nrow)) * sr.ncol),
-                           'j': list(range(sr.ncol)) * sr.nrow,
-                           'geometry': polygons
-                           }, columns=['node', 'i', 'j', 'geometry'])
-        if epsg is None:
-            epsg = sr.epsg
-        if proj_str is None:
-            proj_str = sr.proj4_str
-        if prjfile is not None:
-            proj_str = get_proj_str(prjfile)
-        if isfr is not None:
-            # if a 3D array is supplied for isfr, convert to 2D
-            # (retain all i, j locations with at least one active layer;
-            # assuming that top of each highest-active cell represents the land surface)
-            if len(isfr.shape) == 3:
-                isfr = np.any(isfr == 1, axis=0).astype(int)
-                df['isfr'] = isfr.ravel()
-            elif isfr.shape == (sr.nrow, sr.ncol):
-                df['isfr'] = isfr.ravel()
-            else:
-                assert isfr.size == len(df), \
-                    "isfr must be of shape (nlay, nrow, ncol), (nrow, ncol) or (nrow * ncol,)"
-                df['isfr'] = isfr
-        uniform = False
-        dx, dy = None, None
-        if len(set(sr.delc)) == 1 and len(set(sr.delr)) == 1:
-            dx = sr.delr[0] * sr.length_multiplier
-            dy = sr.delc[0] * sr.length_multiplier
-            uniform = True
-        return cls.from_dataframe(df, uniform=uniform,
-                                  xul=sr.xul, yul=sr.yul, dx=dx, dy=dy,
-                                  rotation=sr.rotation,
-                                  model_units=sr.model_length_units,
-                                  bounds=sr.bounds, active_area=active_area,
-                                  epsg=epsg, proj_str=proj_str, prjfile=prjfile)
+        raise AttributeError("the from_sr method is depricated. Please use from_modelgrid,"
+                             "as demonstrated in the examples.")
 
     @classmethod
     def from_modelgrid(cls, mg=None, active_area=None, isfr=None,

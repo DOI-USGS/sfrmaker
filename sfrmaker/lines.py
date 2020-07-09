@@ -430,7 +430,7 @@ class Lines:
                                   epsg=epsg, proj_str=proj_str, prjfile=prjfile)
 
 
-    def to_sfr(self, grid=None, sr=None,
+    def to_sfr(self, grid=None,
                active_area=None, isfr=None,
                model=None,
                model_length_units='undefined',
@@ -476,12 +476,7 @@ class Lines:
         print("\nCreating sfr dataset...")
         totim = time.time()
 
-        if grid is None and sr is not None:
-            print('\nCreating grid class instance from flopy SpatialReference...')
-            ta = time.time()
-            grid = StructuredGrid.from_sr(sr, active_area=active_area, isfr=isfr)
-            print("grid class created in {:.2f}s\n".format(time.time() - ta))
-        elif isinstance(grid, flopy.discretization.StructuredGrid):
+        if isinstance(grid, flopy.discretization.StructuredGrid):
             print('\nCreating grid class instance from flopy Grid instance...')
             ta = time.time()
             grid = StructuredGrid.from_modelgrid(grid, active_area=active_area, isfr=isfr)

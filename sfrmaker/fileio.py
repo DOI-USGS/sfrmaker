@@ -1,5 +1,14 @@
+import json
 import sys
+
+import numpy as np
 import pandas as pd
+try:
+    import flopy
+except:
+    flopy = False
+
+from sfrmaker.utils import get_input_arguments
 
 
 def load_mf2005_package(f, model=None):
@@ -220,3 +229,27 @@ def read_tables(data):
             raise Exception('Unrecognized input type for data:\n{}'.format(item))
     data = pd.concat(dfs).reset_index(drop=True)
     return data
+
+
+def load_json(jsonfile):
+    """Convenience function to load a json file; replacing
+    some escaped characters."""
+    with open(jsonfile) as f:
+        return json.load(f)
+
+
+def load_modelgrid(filename):
+    """Create a MFsetupGrid instance from model config json file."""
+    cfg = load_json(filename)
+    rename = {'xll': 'xoff',
+              'yll': 'yoff',
+              }
+    for k, v in rename.items():
+        if k in cfg:
+            cfg[v] = cfg.pop(k)
+    if np.isscalar(cfg['delr']):
+        cfg['delr'] = np.ones(cfg['ncol'])* cfg['delr']
+    if np.isscalar(cfg['delc']):
+        cfg['delc'] = np.ones(cfg['nrow']) * cfg['delc']
+    kwargs = get_input_arguments(cfg, flopy.discretization.StructuredGrid)
+    return flopy.discretization.StructuredGrid(**kwargs)
