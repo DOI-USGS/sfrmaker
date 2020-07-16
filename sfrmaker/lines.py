@@ -8,13 +8,13 @@ import flopy
 from gisutils import shp2df, df2shp, project
 import sfrmaker
 from sfrmaker.routing import pick_toids, find_path, make_graph, renumber_segments
-from .checks import routing_is_circular, is_to_one
-from .gis import CRS, read_polygon_feature, get_bbox
-from .grid import StructuredGrid
-from .nhdplus_utils import load_nhdplus_v2, get_prj_file
-from .sfrdata import SFRData
-from .units import convert_length_units, get_length_units
-from .utils import (width_from_arbolate_sum, arbolate_sum)
+from sfrmaker.checks import routing_is_circular, is_to_one
+from sfrmaker.gis import CRS, read_polygon_feature, get_bbox
+from sfrmaker.grid import StructuredGrid
+from sfrmaker.nhdplus_utils import load_nhdplus_v2, get_prj_file
+from sfrmaker.sfrdata import SFRData
+from sfrmaker.units import convert_length_units, get_length_units
+from sfrmaker.utils import (width_from_arbolate_sum, arbolate_sum)
 from sfrmaker.reaches import consolidate_reach_conductances, interpolate_to_reaches, setup_reach_data
 
 
@@ -61,11 +61,12 @@ class Lines:
         self._geometry_length_units = None
 
         self._routing = None  # dictionary of routing connections
-        # static dictionary of original flowline routing
-        self._original_routing = dict(zip(df.id, df.toid))
         self._paths = None  # routing sequence from each segment to outlet
-        
+
+        # dictionary of elevations at the upstream ends of flowlines
         self.elevup = dict(zip(self.df.id, self.df.elevup))
+        # static dictionary of original flowline routing
+        self._original_routing = self.routing.copy()
 
 
     @property
