@@ -1,5 +1,7 @@
+import os
+import numpy as np
 import pytest
-from ..gis import CRS
+from ..gis import CRS, get_bbox
 
 
 # basic test that different input options don't crash CRS.__init__
@@ -98,6 +100,13 @@ def test_invalid():
 def test_crs_get_proj_str():
     crs_5070_epsg = CRS(epsg=5070)
     assert crs_5070_epsg.proj_str == 'EPSG:5070'
+
+
+def test_get_bbox(project_root_path):
+    shapefile = os.path.join(project_root_path, 'Examples/data/badriver/grid.shp')
+    crs = CRS(epsg=4269)
+    bbox = get_bbox(shapefile, dest_crs=crs)
+    assert np.allclose(bbox, (-90.62442575352304, 46.37890212020774, -90.46249896050521, 46.458360301848685))
 
 
 def test_rtree():
