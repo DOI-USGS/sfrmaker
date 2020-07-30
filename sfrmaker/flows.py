@@ -263,7 +263,6 @@ def add_to_perioddata(sfrdata, data, flowline_routing=None,
         rno_column = 'rno'
         r1 = sfrd.reach_data.loc[sfrd.reach_data.ireach == 1]
         line_id_rno_mapping = dict(zip(r1['line_id'], r1['rno']))
-
         line_ids = get_next_id_in_subset(r1.line_id, flowline_routing,
                                          data[line_id_column])
         data['line_id_in_model'] = line_ids
@@ -322,6 +321,7 @@ def add_to_segment_data(sfrdata, data, flowline_routing=None,
     if flowline_routing is not None:
         assert line_id_column in data.columns, \
             "Data need an id column so {} locations can be mapped to reach numbers".format(variable)
+        flowline_routing = {k: v if v in flowline_routing.keys() else 0 for k, v in flowline_routing.items()}
         segment_column = 'segment'
         r1 = sfrd.reach_data.loc[sfrd.reach_data.ireach == 1]
         line_id_iseg_mapping = dict(zip(r1['line_id'], r1['iseg']))
