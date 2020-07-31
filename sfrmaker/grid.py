@@ -255,7 +255,7 @@ class StructuredGrid(Grid):
         """Check if cells are uniform by comparing their areas."""
         if self._uniform is None:
             areas = [g.area for g in self.df.geometry]
-            self._uniform = np.allclose(areas, np.mean(areas))
+            self._uniform = np.allclose(areas, np.mean(areas), rtol=0.01)
         return self._uniform
 
     @property
@@ -277,13 +277,17 @@ class StructuredGrid(Grid):
         SFR will be simulated (isfr) to a polygon (if multiple
         polygons area created, the largest one by area is retained).
         """
-        # vectorize the raster
-        shapes = features.shapes(self.isfr, transform=self.transform)
-        # convert the shapes corresponding to raster values of 1 to shapely objects
-        shapes = [shape(s[0]) for s in list(shapes) if s[1] == 1]
-        # get the shape with the largest area
-        areas = [s.area for s in shapes]
-        self._active_area = shapes[np.argmax(areas)]
+        if self.transform is not None:
+            # vectorize the raster
+            shapes = features.shapes(self.isfr, transform=self.transform)
+            # convert the shapes corresponding to raster values of 1 to shapely objects
+            shapes = list(shapes)
+            shapes = [shape(s[0]) for s in list(shapes) if s[1] == 1]
+            # get the shape with the largest area
+            areas = [s.area for s in shapes]
+            self._active_area = shapes[np.argmax(areas)]
+        else:
+            self._active_area = unary_union(self.df.loc[self.df.isfr == 1, 'geometry'])
 
     @classmethod
     def from_json(cls, jsonfile, active_area=None, isfr=None,
@@ -372,7 +376,7 @@ class StructuredGrid(Grid):
                                   epsg=epsg, proj_str=proj_str, prjfile=prjfile)
 
     @classmethod
-    def from_dataframe(cls, df=None, uniform=False,
+    def from_dataframe(cls, df=None, uniform=None,
                        kcol='k', icol='i', jcol='j',
                        isfr_col='isfr',
                        geometry_column='geometry',

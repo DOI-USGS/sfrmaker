@@ -1,0 +1,40 @@
+package_version: 'mf6'
+package_name: 'meras3'
+output_path: 'meras3'
+modelgrid:
+  xoffset: 177955
+  yoffset: 938285
+  nrow: 666
+  ncol: 634
+  delr: 1000  # model spacing along a row
+  delc: 1000  # model spacing along a column
+  epsg: 5070  # albers equal area
+active_area:
+  filename: meras_extent.shp
+flowlines:
+  filename: flowlines.shp
+  id_column: COMID  # arguments to sfrmaker.Lines.from_shapefile
+  routing_column: tocomid
+  width1_column: width1
+  width2_column: width2
+  up_elevation_column: elevupsmo
+  dn_elevation_column: elevdnsmo
+  name_column: GNIS_NAME
+  attr_length_units: feet  # units of source data
+  attr_height_units: feet  # units of source data
+dem:
+  filename: dem_min_elevs_1000.tif
+  elevation_units: meters
+set_streambed_top_elevations_from_dem: True
+inflows:  # see sfrmaker.data.add_to_perioddata for arguments
+  filename: inflows.csv
+  line_id_column: line_id
+  period_column: per  # column with model stress periods
+  data_column: flow_m3d  # column with flow values
+observations:  # see sfrmaker.observations.add_observations for arguments
+  filename: observations.csv
+  obstype: downstream-flow  # modflow-6 observation type
+  x_location_column: x  # observation locations, in CRS coordinates
+  y_location_column: y
+  obsname_column: site_no  # column for naming observations
+

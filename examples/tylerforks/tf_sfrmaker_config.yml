@@ -1,0 +1,11 @@
+model:
+  namefile: tf.nam
+  model_ws: tylerforks/
+active_area:
+  filename: active_area.shp
+flowlines:
+  nhdplus_paths: NHDPlus/
+dem:
+  filename: dem_26715.tif
+  elevation_units: meters
+set_streambed_top_elevations_from_dem: True

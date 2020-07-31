@@ -25,16 +25,19 @@ def mf6_observations_file(outdir):
     return os.path.join(outdir, 'test.observations_file.obs')
 
 
-def check_gage_package(fname, name_file, expected):
+def check_gage_package(fname, name_file, expected_data, expected_sites):
     assert os.path.exists(fname)
     assert os.path.exists(name_file)
     data = pd.read_csv(fname, header=None, skiprows=1, delim_whitespace=True)
-    pd.testing.assert_frame_equal(data, expected, check_dtype=False)
+    pd.testing.assert_frame_equal(data, expected_data, check_dtype=False)
+    sites = set()
     with open(name_file) as src:
         for line in src:
             if '.ggo' in line.lower():
                 _, unit, fname = line.strip().split()
-                assert os.path.exists(fname)
+                site, _ = os.path.splitext(fname)
+                sites.add(site)
+    assert not any(sites.symmetric_difference(expected_sites))
 
 
 def check_mf6_obs_file(fname, expected):
@@ -68,13 +71,13 @@ def test_write_gage_package(tylerforks_sfrdata, flux_observation_data, outdir):
     expected['unit'] = np.arange(228, 228+len(obsdata))
     expected.columns = list(range(3))
     expected[3] = 0
-
+    tylerforks_sfrdata.model.write_name_file()
     check_gage_package(gage_package_file, name_file,
-                       expected=expected)
+                       expected_data=expected, expected_sites=set(obs.obsname))
     os.remove(gage_package_file)
     tylerforks_sfrdata.write_package()
     check_gage_package(gage_package_file, name_file,
-                       expected=expected)
+                       expected_data=expected, expected_sites=set(obs.obsname))
 
 
 def test_write_mf6_sfr_obsfile(shellmound_sfrdata, flux_observation_data, outdir):

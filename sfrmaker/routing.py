@@ -112,6 +112,13 @@ def find_path(graph, start, end=0, path=[]):
         List of segment numbers along routing path.
     """
     graph = graph.copy()
+    return _find_path(graph, start, end=0, path=[])
+
+
+def _find_path(graph, start, end=0, path=[]):
+    """Like find_path, but doesn't copy the routing
+    dictionary (graph) so that the recursion works.
+    """
     path = path + [start]
     if start == end:
         return path
@@ -121,7 +128,7 @@ def find_path(graph, start, end=0, path=[]):
         graph[start] = [graph[start]]
     for node in graph[start]:
         if node not in path:
-            newpath = find_path(graph, node, end, path)
+            newpath = _find_path(graph, node, end, path)
             if newpath: return newpath
     j = 2
     return None

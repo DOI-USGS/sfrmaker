@@ -1,6 +1,7 @@
 import os
 import time
 from packaging import version
+import yaml
 import numpy as np
 import pandas as pd
 import rasterio
@@ -14,7 +15,7 @@ from .flows import add_to_perioddata, add_to_segment_data
 from .gis import export_reach_data, project, CRS
 from .observations import write_gage_package, write_mf6_sfr_obsfile, add_observations
 from .units import convert_length_units, itmuni_values, lenuni_values
-from .utils import get_sfr_package_format
+from .utils import get_sfr_package_format, get_input_arguments, assign_layers, update
 import sfrmaker
 from sfrmaker.base import DataPackage
 from sfrmaker.mf5to6 import segment_data_to_period_data
@@ -122,6 +123,7 @@ class SFRData(DataPackage):
                 'roughch': 0.037,
                 'strthick': 1,
                 'strhc1': 1,
+                'istcb2': 223,
                 'gage_starting_unit_number': 228
                 }
     package_type = 'sfr'
@@ -132,7 +134,7 @@ class SFRData(DataPackage):
                  isfr=None,
                  model_length_units="undefined", model_time_units='d',
                  enforce_increasing_nsegs=True,
-                 package_name=None,
+                 package_name='model',
                  **kwargs):
         DataPackage.__init__(self, grid=grid, model=model, isfr=isfr,
                          model_length_units=model_length_units,
@@ -558,6 +560,36 @@ class SFRData(DataPackage):
                            sd0.outseg,
                            increasing=increasing)
 
+    def assign_layers(self, adjusted_botm_output_path='.'):
+        """Assign model layers to SFR reaches, using the discretzation
+        package in the attached model. New botm elevations for the model
+        will be written to a text array file, if any streambed bottoms
+        are below the model bottom.
+
+        Parameters
+        ----------
+        adjusted_botm_output_path : str
+            Path for writing the text array of adjusted model bottom
+            elevations, by default, '.'
+        """
+        if self.model is not None and hasattr(self.model, 'dis'):
+            botm = self.model.dis.botm.array.copy()
+            nlay = botm.shape[0] + 1
+            layers, new_botm = assign_layers(self.reach_data, botm_array=botm)
+            self.reach_data['k'] = layers
+            if new_botm is not None:
+                outfile = '{}_layer_{}_new_botm_elevations.dat'.format(self.package_name,
+                                                                       nlay)
+                outfile = os.path.join(adjusted_botm_output_path, outfile)
+                np.savetxt(outfile, new_botm, fmt='%.2f')
+                msg = ('Sfrmaker pushed some model botm elevations downward'
+                       'to accomodate streambed bottoms. New botm elevations'
+                       'for layer {} written to {}'.format(nlay, outfile))
+                print(msg)
+        else:
+            print('Need a model instance with a discretization package to assign layers. '
+                  'A model can be assigned to the SFRData.model attribute.')
+
     def create_modflow_sfr2(self, model=None, const=None,
                             isfropt=1,  # override flopy default of 0
                             unit_number=None,
@@ -582,7 +614,8 @@ class SFRData(DataPackage):
         # to fill in required "None" values when writing mf6 input
         elif model is None or model.version == 'mf6':
             model_ws = '.' if model is None else model.model_ws
-            m = fm.Modflow(model_ws=model_ws, structured=self.structured)
+            m = fm.Modflow(modelname=self.package_name, model_ws=model_ws,
+                           structured=self.structured)
             if model is not None:
                 nper = 1
                 if 'tdis' in model.simulation.package_key_dict.keys():
@@ -1035,6 +1068,237 @@ class SFRData(DataPackage):
         return cls(reach_data=reach_data, segment_data=segment_data,
                    grid=grid, isfr=isfr)
 
+    @classmethod
+    def from_yaml(cls, config_file, package_name=None, output_path=None,
+                  write_output=True):
+        """Create an SFRData instance from a yaml-format configuration file.
+
+        Parameters
+        ----------
+        config_file : str or mapping
+            Path to Sfrmaker configuration file in yaml format,
+            or a dictionary-like mapping.
+        output_path : str
+            Where output files will be saved. Default is '.'
+            (in default_config.yml).
+        package_name : str
+            Optional argument for naming the output SFR package; otherwise
+            can be specified in configuration file.
+        write_output : bool
+            Whether or not to write output files, including package file,
+            reach and segment data tables and shapefiles.
+
+        Returns
+        -------
+        sfrdata : sfrmaker.SFRData instance
+        """
+        # load the configuration file
+        wd = os.getcwd()
+        if isinstance(config_file, str):
+            # change the cwd to the config file path
+            path, config_file = os.path.split(config_file)
+            path = path if len(path) > 0 else '.'
+            os.chdir(path)
+            with open(config_file) as src:
+                cfg = yaml.load(src, Loader=yaml.Loader)
+        # or accept a mapping as input
+        else:
+            cfg = config_file
+
+        # read in the default configuration
+        defaults_file = os.path.join(os.path.split(__file__)[0],
+                                     'default_config.yml')
+        with open(defaults_file) as src:
+            defaults = yaml.load(src, Loader=yaml.Loader)
+
+        # add defaults to configuration
+        cfg = update(defaults, cfg)
+
+        # set the package_name and output paths
+        if package_name is not None:
+            _, package_name = os.path.split(package_name)
+            package_name, _ = os.path.splitext(package_name)
+        elif 'package_name' in cfg:
+            _, package_name = os.path.split(cfg['package_name'])
+            package_name, _ = os.path.splitext(package_name)
+        elif 'simulation' in cfg:
+            package_name, _ = os.path.splitext(cfg['simulation']['sim_name'])
+        elif 'model' in cfg:
+            package_name, _ = os.path.splitext(cfg['model']['namefile'])
+        if output_path is None:
+            output_path = cfg['output_path']
+
+        cls._tables_path = os.path.join(output_path, cls._tables_path)
+        cls._shapefiles_path = os.path.join(output_path, cls._shapefiles_path)
+
+        # model grids from shapefiles or flopy grids are supported
+        grid = None
+        if 'modelgrid' in cfg:
+            grid_cfg = cfg['modelgrid']
+            if 'shapefile' in grid_cfg:
+                grid_kwargs = get_input_arguments(grid_cfg, sfrmaker.StructuredGrid.from_shapefile)
+                grid = sfrmaker.StructuredGrid.from_shapefile(**grid_kwargs)
+            elif not flopy:
+                raise ImportError("Specifying a modelgrid with xoffset, yoffset, etc. requires flopy.")
+            else:
+                # convert delr/delc to ndarrays
+                for delrc, ncells in {'delr': 'ncol', 'delc': 'nrow'}.items():
+                    if np.isscalar(grid_cfg[delrc]):
+                        if ncells not in grid_cfg:
+                            msg = ("Scalar value for {} requires "
+                                   "specification of {}.".format(delrc, ncells))
+                            raise KeyError(msg)
+                        grid_cfg[delrc] = np.array([grid_cfg[delrc]] * grid_cfg[ncells])
+                grid_cfg['xoff'] = grid_cfg.get('xoffset', grid_cfg.get('xoff', 0.))
+                grid_cfg['yoff'] = grid_cfg.get('yoffset', grid_cfg.get('yoff', 0.))
+                grid_kwargs = get_input_arguments(grid_cfg, flopy.discretization.StructuredGrid)
+                grid = flopy.discretization.StructuredGrid(**grid_kwargs)
+
+        # create a Lines instance
+        no_lines_msg = "A flowlines: block must be specified in configuration file."
+        if 'flowlines' not in cfg:
+            raise KeyError(no_lines_msg)
+        lines_config = cfg['flowlines']
+        # custom hydrography option
+        if 'filename' in lines_config:
+            lines_config['shapefile'] = lines_config['filename']
+            lines_kwargs = get_input_arguments(lines_config, sfrmaker.Lines.from_shapefile)
+            lines = sfrmaker.Lines.from_shapefile(**lines_kwargs)
+        # nhdplus option
+        else:
+            # renames to deal with case issues
+            renames = {'nhdplus_paths': 'NHDPlus_paths',
+                       'nhdflowlines': 'NHDFlowlines',
+                       'plusflowlinevaa': 'PlusFlowlineVAA',
+                       'plusflow': 'PlusFlow'}
+            lines_config = {renames.get(k, k): v for k, v in lines_config.items()}
+            lines_kwargs = get_input_arguments(lines_config, sfrmaker.Lines.from_nhdplus_v2)
+            lines = sfrmaker.Lines.from_nhdplus_v2(**lines_kwargs)
+
+        # load a model if there is one
+        # modflow 6
+        model_version = cfg.get('package_version', 'mf6')
+        no_flopy_msg = "Specifying a model requires flopy."
+        if 'simulation' in cfg:
+            if not flopy:
+                raise ImportError(no_flopy_msg)
+            sim_kwargs = get_input_arguments(cfg['simulation'], flopy.mf6.MFSimulation)
+            sim = mf6.MFSimulation.load(**sim_kwargs)
+            model = sim.get_model(model_name=cfg['model']['modelname'])
+            model_version = model.version
+            if grid is None:
+                grid = model.modelgrid
+        # modflow-2005
+        elif 'model' in cfg:
+            if not flopy:
+                raise ImportError(no_flopy_msg)
+            cfg['model']['f'] = cfg['model']['namefile']
+            model_kwargs = get_input_arguments(cfg['model'], flopy.modflow.Modflow.load)
+            model = flopy.modflow.Modflow.load(**model_kwargs)
+            model_version = model.version
+            if grid is None:
+                grid = model.modelgrid
+        else:
+            model = None
+
+        # create an SFRData instance
+        to_sfr_kwargs = get_input_arguments(cfg, sfrmaker.Lines.to_sfr)
+        to_sfr_kwargs['active_area'] = cfg.get('active_area', {}).get('filename')
+        to_sfr_kwargs['model'] = model
+        to_sfr_kwargs['grid'] = grid
+        to_sfr_kwargs['package_name'] = package_name
+        # to_sfr() populates isfr from model if neither active_area or isfr are argued
+        sfrdata = lines.to_sfr(**to_sfr_kwargs)
+
+        # setup elevations
+        if cfg.get('set_streambed_top_elevations_from_dem', False):
+            error_msg = ("set_streambed_top_elevations_from_dem=True "
+                         "requires a dem: block.")
+            if 'dem' not in cfg:
+                raise KeyError(error_msg)
+            elevation_units = cfg['dem'].get('elevation_units')
+            sfrdata.set_streambed_top_elevations_from_dem(cfg['dem']['filename'],
+                                                          dem_z_units=elevation_units)
+        else:
+            sfrdata.reach_data['strtop'] = sfrdata.interpolate_to_reaches('elevup', 'elevdn')
+
+        # assign layers to the sfr reaches
+        if model is not None:
+            sfrdata.assign_layers(adjusted_botm_output_path=output_path)
+
+        # option to convert reaches to the River Package
+        if 'to_riv' in cfg:
+            rivdata = sfrdata.to_riv(line_ids=cfg['to_riv'],
+                                     drop_in_sfr=True)
+            sfrdata.setup_riv(rivdata)
+            rivdata.write_table()
+            rivdata.write_shapefiles()
+            print('to_riv option: output table and shapefiles written, but'
+                  'writing of RIV package not implemented yet. Use flopy to'
+                  'write the RIV package.')
+
+        # add inflows
+        if 'inflows' in cfg:
+            inflows_input = cfg['inflows']
+            # resample inflows to model stress periods
+            inflows_input['id_column'] = inflows_input['line_id_column']
+            inflows_by_stress_period = pd.read_csv(inflows_input['filename'])
+
+            # check if all inflow sites are included in sfr network
+            missing_sites = set(inflows_by_stress_period[inflows_input['id_column']]). \
+                difference(lines._original_routing.keys())
+            if any(missing_sites):
+                inflows_routing_input = cfg.get('inflows_routing')
+                if inflows_routing_input is None:
+                    raise KeyError(('inflow sites {} are not within the model sfr network. '
+                                    'Please supply an inflows_routing: block'.format(missing_sites)))
+                routing = pd.read_csv(inflows_routing_input['filename'])
+                routing = dict(zip(routing[inflows_routing_input['id_column']],
+                                   routing[inflows_routing_input['routing_column']]))
+            else:
+                routing = lines._original_routing
+            missing_sites = any(set(inflows_by_stress_period[inflows_input['id_column']]). \
+                                difference(routing.keys())),
+            if any(missing_sites):
+                raise KeyError(('Inflow sites {} not found in {}'.format(missing_sites,
+                                                                         inflows_routing_input['filename'])))
+
+            # add resampled inflows to SFR package
+            inflows_input['data'] = inflows_by_stress_period
+            inflows_input['flowline_routing'] = routing
+            if model_version == 'mf6':
+                inflows_input['variable'] = 'inflow'
+                method = sfrdata.add_to_perioddata
+            else:
+                method = sfrdata.add_to_segment_data
+            kwargs = get_input_arguments(inflows_input.copy(), method)
+            method(**kwargs)
+
+        # add observations
+        if 'observations' in cfg:
+            if not model:
+                pass #  raise KeyError('Setup of observations input results a model: block')
+            if model_version != 'mf6':
+                sfrdata.gage_starting_unit_number = cfg['gag']['starting_unit_number']
+            key = 'filename' if 'filename' in cfg['observations'] else 'filenames'
+            cfg['observations']['data'] = cfg['observations'][key]
+            kwargs = get_input_arguments(cfg['observations'].copy(), sfrdata.add_observations)
+            obsdata = sfrdata.add_observations(**kwargs)
+
+        if write_output:
+            if model is None:
+                package_file_path = os.path.join(output_path, package_name + '.sfr')
+            else:
+                package_file_path = os.path.join(model.model_ws, package_name + '.sfr')
+            sfrdata.write_package(package_file_path,
+                                  version=model_version)
+            sfrdata.write_tables()
+            sfrdata.write_shapefiles()
+
+        # change the cwd back
+        os.chdir(wd)
+        return sfrdata
+
     def to_riv(self, segments=None, rno=None, line_ids=None, drop_in_sfr=True):
         """Cast one or more reaches to a RivData instance,
         which can then be written as input to the MODFLOW RIV package.
@@ -1155,8 +1419,27 @@ class SFRData(DataPackage):
             self._reset_routing()
         return riv
 
+    def run_diagnostics(self, checkfile=None, **kwargs):
+        """Run the Flopy SFR diagnostic suite.
+
+        Parameters
+        ----------
+        checkfile : str
+            Path of file to write results to, by default, results
+            are written to {}_SFR.chk, where {} is the
+            SFRData.package_name attribute.
+        kwargs : keyword arguments to flopy.modflow.ModflowSfr2.check()
+
+        """
+        self.create_modflow_sfr2(model=self.model)
+        if checkfile is None:
+            checkfile = '{}_SFR.chk'.format(self.package_name)
+        self._ModflowSfr2.check(checkfile, **kwargs)
+        print('wrote {}'.format(checkfile))
+
     def write_package(self, filename=None, version='mf2005', idomain=None,
-                      options=None, write_observations_input=True,
+                      options=None, run_diagnostics=True,
+                      write_observations_input=True,
                       external_files_path=None, gage_starting_unit_number=None,
                       **kwargs):
         """Write SFR package input.
@@ -1166,6 +1449,10 @@ class SFRData(DataPackage):
         version : str
             'mf2005' or 'mf6'
         """
+        # run the flopy SFR diagnostics
+        if run_diagnostics:
+            self.run_diagnostics()
+
         # recreate the flopy package object in case it changed
         self.create_modflow_sfr2(model=self.model, **kwargs)
         header_txt = "#SFR package created by SFRmaker v. {}, " \
@@ -1178,7 +1465,7 @@ class SFRData(DataPackage):
             filename = self.modflow_sfr2.fn_path
         if gage_starting_unit_number is None:
             gage_starting_unit_number = self.gage_starting_unit_number
-        if version == 'mf2005':
+        if version in {'mf2005', 'mfnwt'}:
 
             if write_observations_input and len(self.observations) > 0:
                 gage_package_filename = os.path.splitext(filename)[0] + '.gage'
@@ -1186,6 +1473,7 @@ class SFRData(DataPackage):
                                         gage_starting_unit_number=gage_starting_unit_number)
 
             self.modflow_sfr2.write_file(filename=filename)
+            print('wrote {}.'.format(filename))
 
         elif version == 'mf6':
 
@@ -1211,16 +1499,24 @@ class SFRData(DataPackage):
 
     def write_tables(self, basename=None):
         if basename is None:
-            output_path = '.'
-            basename = self.package_name + '_{}'.format(self.package_type)
+            output_path = self._tables_path
+            if not os.path.isdir(output_path):
+                os.makedirs(output_path)
+            basename = self.package_name
         else:
             output_path, basename = os.path.split(basename)
             basename, _ = os.path.splitext(basename)
-        self.reach_data.drop('geometry', axis=1).to_csv('{}/{}_sfr_reach_data.csv'.format(output_path, basename), index=False)
-        self.segment_data.to_csv('{}/{}_sfr_segment_data.csv'.format(output_path, basename), index=False)
-        if self.period_data is not None:
-            self.period_data.dropna(axis=1, how='all').to_csv('{}/{}_sfr_period_data.csv'.format(output_path, basename),
-                                                              index=False)
+        reach_data_file = os.path.normpath('{}/{}_sfr_reach_data.csv'.format(output_path, basename))
+        self.reach_data.drop('geometry', axis=1).to_csv(reach_data_file, index=False)
+        print('wrote {}'.format(reach_data_file))
+        segment_data_file = os.path.normpath('{}/{}_sfr_segment_data.csv'.format(output_path, basename))
+        self.segment_data.to_csv(segment_data_file, index=False)
+        print('wrote {}'.format(segment_data_file))
+
+        if self.period_data is not None and len(self.period_data) > 0:
+            pd_file = os.path.normpath('{}/{}_sfr_period_data.csv'.format(output_path, basename))
+            self.period_data.dropna(axis=1, how='all').to_csv(pd_file, index=False)
+            print('wrote {}'.format(pd_file))
 
     def write_gage_package(self, filename=None, gage_package_unit=25,
                            gage_starting_unit_number=None):
@@ -1231,10 +1527,14 @@ class SFRData(DataPackage):
         if gage_starting_unit_number is None:
             gage_starting_unit_number = self.gage_starting_unit_number
         gage_namfile_entries_file = filename + '.namefile_entries'
+        model = self.model
+        if model is None:
+            model = self.modflow_sfr2.parent
+            model.model_ws = os.path.split(filename)[0]
         return write_gage_package(self.observations,
                                   gage_package_filename=filename,
                                   gage_namfile_entries_file=gage_namfile_entries_file,
-                                  model=self.model,
+                                  model=model,
                                   gage_package_unit=gage_package_unit,
                                   start_gage_unit=gage_starting_unit_number)
 

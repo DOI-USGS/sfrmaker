@@ -33,6 +33,7 @@
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
+    'sphinx.ext.autosectionlabel',
     'sphinx.ext.autosummary',
     'sphinx.ext.githubpages',
     'sphinx.ext.intersphinx',
@@ -42,6 +43,7 @@ extensions = [
     'IPython.sphinxext.ipython_console_highlighting',
     'matplotlib.sphinxext.plot_directive',
     'numpydoc',
+    'nbsphinx',
     'sphinx_copybutton',
 ]
 
@@ -92,7 +94,7 @@ language = None
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This patterns also effect to html_static_path and html_extra_path
-exclude_patterns = []
+exclude_patterns = ['_build', 'examples/*.rst']
 
 
 # The name of the Pygments (syntax highlighting) style to use.
@@ -170,7 +172,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'sfrmaker.tex', 'MFsetup Documentation',
+    (master_doc, 'sfrmaker.tex', 'SFRmaker Documentation',
      'Contributors', 'manual'),
 ]
 
@@ -201,4 +203,5 @@ intersphinx_mapping = {
     'scipy': ('https://docs.scipy.org/doc/scipy/reference/', None),
     'pandas': ('https://pandas.pydata.org/pandas-docs/stable', None),
     'matplotlib': ('https://matplotlib.org', None),
+    'flopy': ('https://modflowpy.github.io/flopydoc/', None)
 }

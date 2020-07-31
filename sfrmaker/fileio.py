@@ -253,3 +253,46 @@ def load_modelgrid(filename):
         cfg['delc'] = np.ones(cfg['nrow']) * cfg['delc']
     kwargs = get_input_arguments(cfg, flopy.discretization.StructuredGrid)
     return flopy.discretization.StructuredGrid(**kwargs)
+
+
+def read_mf6_block(filename, blockname):
+    blockname = blockname.lower()
+    data = {}
+    read = False
+    per = None
+    with open(filename) as src:
+        for line in src:
+            line = line.lower()
+            if 'begin' in line and blockname in line:
+                if blockname == 'period':
+                    per = int(line.strip().split()[-1])
+                    data[per] = []
+                elif blockname == 'continuous':
+                    fname = line.strip().split()[-1]
+                    data[fname] = []
+                elif blockname == 'packagedata':
+                    data['packagedata'] = []
+                else:
+                    blockname = line.strip().split()[-1]
+                    data[blockname] = []
+                read = blockname
+                continue
+            if 'end' in line and blockname in line:
+                per = None
+                read = False
+                #break
+            if read == 'options':
+                line = line.strip().split()
+                data[line[0]] = line[1:]
+            elif read == 'packages':
+                pckg, fname, ext = line.strip().split()
+                data[pckg] = fname
+            elif read == 'period':
+                data[per].append(' '.join(line.strip().split()))
+            elif read == 'continuous':
+                data[fname].append(' '.join(line.strip().split()))
+            elif read == 'packagedata':
+                data['packagedata'].append(' '.join(line.strip().split()))
+            elif read == blockname:
+                data[blockname].append(' '.join(line.strip().split()))
+    return data

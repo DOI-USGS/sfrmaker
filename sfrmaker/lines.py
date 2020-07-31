@@ -439,7 +439,7 @@ class Lines:
                minimum_reach_width=1.,
                cull_flowlines_to_active_area=True,
                consolidate_conductance=False, one_reach_per_cell=False,
-               model_name=None,
+               package_name=None,
                **kwargs):
         """Create a streamflow routing dataset from the information
         in sfrmaker.lines class instance and a supplied sfrmaker.grid class instance.
@@ -465,7 +465,7 @@ class Lines:
             If True, streambed conductance in each reach is consolidated
             (consolidate_conductance = True), and additional reaches besides
             the most downstream reach are dropped.
-        model_name : str
+        package_name : str
             Base name for writing sfr output.
         kwargs : keyword arguments to sfrmaker.sfrdata
 
@@ -477,11 +477,18 @@ class Lines:
         print("\nCreating sfr dataset...")
         totim = time.time()
 
-        if isinstance(grid, flopy.discretization.StructuredGrid):
+        if flopy and active_area is None and isfr is None and model is not None:
+            if model.version == 'mf6':
+                isfr = np.sum(model.dis.idomain.array == 1, axis=0) > 0
+            else:
+                isfr = np.sum(model.bas6.ibound.array == 1, axis=0) > 0
+        if flopy and isinstance(grid, flopy.discretization.StructuredGrid):
             print('\nCreating grid class instance from flopy Grid instance...')
             ta = time.time()
             grid = StructuredGrid.from_modelgrid(grid, active_area=active_area, isfr=isfr)
             print("grid class created in {:.2f}s\n".format(time.time() - ta))
+        elif flopy and model is not None:
+            grid = StructuredGrid.from_modelgrid(model.modelgrid, active_area=active_area, isfr=isfr)
         elif not isinstance(grid, sfrmaker.grid.Grid):
             raise TypeError('Unrecognized input for grid: {}'.format(grid))
 
@@ -504,8 +511,11 @@ class Lines:
                 self.cull(grid.active_area, inplace=True, simplify=True, tol=2000)
             elif grid._bounds is not None:  # cull to grid bounding box if already computed
                 self.cull(box(*grid._bounds), inplace=True)
-        if model_name is None:
-            model_name = 'model'
+        if package_name is None:
+            if model is not None:
+                package_name = model.name
+            else:
+                package_name = 'model'
 
         # convert routing connections (toid column) from lists (one-to-many)
         # to ints (one-to-one or many-to-one)
@@ -700,6 +710,6 @@ class Lines:
         rd = rd[[c for c in SFRData.rdcols if c in rd.columns]].copy()
         sfrd = SFRData(reach_data=rd, segment_data=sd, grid=grid,
                        model=model, model_length_units=model_length_units,
-                       model_name=model_name, **kwargs)
+                       package_name=package_name, **kwargs)
         print("\nTime to create sfr dataset: {:.2f}s\n".format(time.time() - totim))
         return sfrd

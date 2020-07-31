@@ -1,0 +1,7 @@
+# configuration defaults for Sfrmaker yaml input
+options:
+  save_flows: True
+output_path: '.'  # where output files will be saved
+gag:
+  starting_unit_number: 250
+  sfr_outtype: 0

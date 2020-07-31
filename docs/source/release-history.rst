@@ -4,9 +4,8 @@ Release History
 
 Version 0.5.0 (2020-xx-xx)
 --------------------------
-* depricated use of the Flopy SpatialReference object
-*
-*
+* added from_yaml method to construct an SFR package from a configuration file
+* deprecated use of the Flopy SpatialReference object
 * add option to write MF6 packagedata block to an external file
 * add default writing of source hydrography line_ids to MF6 packagedata as an auxiliary variable
 * use pyproj CRS module internally for more robust handling of coordinate reference systems

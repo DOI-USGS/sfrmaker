@@ -6,13 +6,13 @@ from sfrmaker.nhdplus_utils import load_nhdplus_v2, get_prj_file
 
 @pytest.fixture
 def nhdplus_dataframe(datapath):
-    pfvaa_files = ['{}/badriver/PlusFlowlineVAA.dbf'.format(datapath)]
-    plusflow_files = ['{}/badriver/PlusFlow.dbf'.format(datapath)]
-    elevslope_files = ['{}/badriver/elevslope.dbf'.format(datapath)]
-    flowlines = ['{}/badriver/NHDflowlines.shp'.format(datapath)]
+    pfvaa_files = ['{}/tylerforks/NHDPlus/NHDPlusAttributes/PlusFlowlineVAA.dbf'.format(datapath)]
+    plusflow_files = ['{}/tylerforks/NHDPlus/NHDPlusAttributes/PlusFlow.dbf'.format(datapath)]
+    elevslope_files = ['{}/tylerforks/NHDPlus/NHDPlusAttributes/elevslope.dbf'.format(datapath)]
+    flowlines = ['{}/tylerforks/NHDPlus/NHDSnapshot/Hydrography/NHDflowline.shp'.format(datapath)]
     df = load_nhdplus_v2(NHDFlowlines=flowlines, PlusFlowlineVAA=pfvaa_files,
                          PlusFlow=plusflow_files, elevslope=elevslope_files,
-                         filter='{}/badriver/grid.shp'.format(datapath),
+                         filter='{}/tylerforks/grid.shp'.format(datapath),
                          )
     return df
 
@@ -27,7 +27,7 @@ def test_original_routing_attribute(nhdplus_dataframe, one_to_many, datapath):
         modified_toids = [[toids[0], id] for toids in df.loc[inds, 'tocomid']] + df.loc[df.index.values[3]:, 'tocomid'].tolist()
         df['tocomid'] = modified_toids
         assert not is_to_one(df.tocomid)
-    flowlines = ['{}/badriver/NHDflowlines.shp'.format(datapath)]
+    flowlines = ['{}/tylerforks/NHDPlus/NHDSnapshot/Hydrography/NHDflowline.shp'.format(datapath)]
     prjfile = get_prj_file(NHDFlowlines=flowlines)
 
     # convert arbolate sums from km to m

@@ -16,6 +16,8 @@ from .units import get_length_units
 class DataPackage:
 
     package_type = None  # overloaded by SFRData, RivData, etc.
+    _tables_path = 'tables/'  # default location for writing tables
+    _shapefiles_path = 'shps/'  # default location for writing shapefiles
 
     def __init__(self, grid=None, model=None, isfr=None,
                  model_length_units="undefined", model_time_units='d',
@@ -60,7 +62,9 @@ class DataPackage:
         """Write shapefiles illustrating all aspects of a boundary package.
         """
         if basename is None:
-            output_path = '.'
+            output_path = self._shapefiles_path
+            if not os.path.isdir(output_path):
+                os.makedirs(output_path)
             basename = self.package_name
         else:
             output_path, basename = os.path.split(basename)
@@ -74,11 +78,12 @@ class DataPackage:
                 continue
             if not callable(export_method):
                 export_method = getattr(DataPackage, export_method_name)
-            output_shapefile_name = '{}/{}_{}.shp'.format(output_path, basename, datatype)
+            output_shapefile_name = os.path.normpath('{}/{}_{}.shp'.format(output_path, basename, datatype))
             export_method(output_shapefile_name)
 
         if self.package_type == 'sfr':
-            self.export_transient_variable('flow', '{}/{}_sfr_inlets.shp'.format(output_path, basename))
+            inlets_shapefile = os.path.normpath('{}/{}_sfr_inlets.shp'.format(output_path, basename))
+            self.export_transient_variable('flow', inlets_shapefile)
 
     def export_cells(self, filename=None, nodes=None, geomtype='polygon'):
         """Export shapefile of model cells with stream reaches."""

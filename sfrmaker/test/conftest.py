@@ -10,6 +10,23 @@ import pytest
 import sfrmaker
 
 
+# stuff for handling slow tests
+def pytest_addoption(parser):
+    parser.addoption(
+        "--runslow", action="store_true", default=False, help="run slow tests"
+    )
+
+
+def pytest_collection_modifyitems(config, items):
+    if config.getoption("--runslow"):
+        # --runslow given in cli: do not skip slow tests
+        return
+    skip_slow = pytest.mark.skip(reason="need --runslow option to run")
+    for item in items:
+        if "slow" in item.keywords:
+            item.add_marker(skip_slow)
+
+
 @pytest.fixture(scope="session")
 def project_root_path():
     filepath = os.path.split(os.path.abspath(__file__))[0]
@@ -19,7 +36,7 @@ def project_root_path():
 @pytest.fixture(scope="session")
 def datapath():
     """Example datasets for users."""
-    return 'Examples/data'
+    return 'examples/'
 
 
 @pytest.fixture(scope="session")
@@ -101,16 +118,16 @@ def sfr_testdata(sfr_test_numbering):
 
 @pytest.fixture(scope='module')
 def shellmound_simulation(testdatapath, outdir):
-    sim = flopy.mf6.MFSimulation.load('mfsim', 'mf6', 'mf6', sim_ws='{}/shellmound/shellmound'.format(testdatapath))
+    sim_data_folder = '{}/shellmound/shellmound'.format(testdatapath)
     sim_ws = os.path.join(outdir, 'shellmound')
-    if not os.path.isdir(sim_ws):
-        os.makedirs(sim_ws)
-    sim.sim_ws = sim_ws
+    shutil.copytree(sim_data_folder, sim_ws, dirs_exist_ok=True)
+    sim = flopy.mf6.MFSimulation.load('mfsim', 'mf6', 'mf6', sim_ws=sim_ws)
+    #sim.set_sim_path(sim_ws)
     return sim
 
 
 @pytest.fixture(scope='module')
-def get_shellmound_model(shellmound_simulation):
+def get_shellmound_model(shellmound_simulation, outdir):
     model = shellmound_simulation.get_model('shellmound')
     model.dis.length_units = 'meters'
     return model
@@ -143,20 +160,20 @@ def shellmound_sfrmaker_grid(shellmound_grid):
 
 @pytest.fixture(scope='function')
 def tylerforks_active_area_shapefile(datapath):
-    return '{}/badriver/active_area.shp'.format(datapath)
+    return '{}/tylerforks/active_area.shp'.format(datapath)
 
 
 @pytest.fixture(scope='function')
 def tyler_forks_grid_shapefile(datapath, tylerforks_sfrmaker_grid_from_flopy):
     grid = tylerforks_sfrmaker_grid_from_flopy
-    shapename = '{}/badriver/grid.shp'.format(datapath)
+    shapename = '{}/tylerforks/grid.shp'.format(datapath)
     grid.write_grid_shapefile(shapename)
     return shapename
 
 
 @pytest.fixture(scope='module')
 def get_tylerforks_model(datapath, outdir):
-    m = fm.Modflow.load('tf.nam', model_ws='{}/badriver/tylerforks'.format(datapath))
+    m = fm.Modflow.load('tf.nam', model_ws='{}/tylerforks/tylerforks'.format(datapath))
     model_ws = os.path.join(outdir, 'tylerforks')
     if not os.path.isdir(model_ws):
         os.makedirs(model_ws)
@@ -193,16 +210,16 @@ def tylerforks_sfrmaker_grid_from_flopy(tylerforks_model_grid, tylerforks_active
 
 @pytest.fixture(scope='function')
 def tylerforks_lines_from_NHDPlus(datapath):
-    pfvaa_files = ['{}/badriver/PlusFlowlineVAA.dbf'.format(datapath)]
-    plusflow_files = ['{}/badriver/PlusFlow.dbf'.format(datapath)]
-    elevslope_files = ['{}/badriver/elevslope.dbf'.format(datapath)]
-    flowlines = ['{}/badriver/NHDflowlines.shp'.format(datapath)]
+    pfvaa_files = ['{}/tylerforks/NHDPlus/NHDPlusAttributes/PlusFlowlineVAA.dbf'.format(datapath)]
+    plusflow_files = ['{}/tylerforks/NHDPlus/NHDPlusAttributes/PlusFlow.dbf'.format(datapath)]
+    elevslope_files = ['{}/tylerforks/NHDPlus/NHDPlusAttributes/elevslope.dbf'.format(datapath)]
+    flowlines = ['{}/tylerforks/NHDPlus/NHDSnapshot/Hydrography/NHDflowline.shp'.format(datapath)]
 
     lns = sfrmaker.Lines.from_nhdplus_v2(NHDFlowlines=flowlines,
                                          PlusFlowlineVAA=pfvaa_files,
                                          PlusFlow=plusflow_files,
                                          elevslope=elevslope_files,
-                                         filter='{}/badriver/grid.shp'.format(datapath))
+                                         filter='{}/tylerforks/grid.shp'.format(datapath))
     return lns
 
 
@@ -243,3 +260,12 @@ def shellmound_sfrdata(shellmound_model, lines_from_shapefile,
     sfrdata = lines_from_shapefile.to_sfr(grid=shellmound_grid,
                                           model=m)
     return sfrdata
+
+
+@pytest.fixture(params=['shellmound_sfrdata',
+                        'tylerforks_sfrdata'])
+def sfrdata(request,
+            shellmound_sfrdata,
+            tylerforks_sfrdata):
+    return {'shellmound_sfrdata': shellmound_sfrdata,
+            'tylerforks_sfrdata': tylerforks_sfrdata}[request.param]

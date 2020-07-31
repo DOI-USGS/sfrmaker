@@ -5,4 +5,4 @@ sys.path.append('..')
 
 def test_crs(datapath):
     from sfrmaker import CRS
-    crsobj = CRS(prjfile='{}/badriver/NHDflowlines.shp'.format(datapath))
+    crsobj = CRS(prjfile='{}/tylerforks/NHDPlus/NHDSnapshot/Hydrography/NHDflowline.shp'.format(datapath))

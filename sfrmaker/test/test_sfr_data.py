@@ -268,3 +268,12 @@ def test_to_riv(shellmound_sfrdata, kwargs):
     # would be nice to have a way to compare stages
     # but some sfr were removed that didn't get converted to RIV
     # (minor reaches collocated with reaches that got converted)
+
+
+def test_run_diagnostics(sfrdata):
+    """Check that flopy diagnostics were run
+    (that a .chk output file was produced)."""
+    sfrdata.run_diagnostics()
+    checkfile = os.path.join(sfrdata.model.model_ws,
+                             '{}_SFR.chk'.format(sfrdata.package_name))
+    assert os.path.getsize(checkfile) > 0

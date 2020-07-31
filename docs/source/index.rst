@@ -7,21 +7,31 @@ SFRmaker |version|
 ==================
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 0
    :caption: Getting Started
 
+    Philosophy <philosophy>
+    Examples <examples>
     Installation <installation>
-    Usage <usage>
-    Example scripts <examples>
 
 .. toctree::
   :maxdepth: 2
   :caption: User Guide
 
    Input Requirements <inputs>
+   Using SFRmaker with a configuration file <examples>
+   Basic Usage in a scripting context <notebooks/SFRmaker_demo>
+   How the streambed elevation sampling works <notebooks/Streambed_elevation_demo>
 
 .. toctree::
   :maxdepth: 1
-  :caption: Release history
+  :caption: Reference
 
    Release History <release-history>
+   Contributing to SFRmaker <contributing>
+
+.. toctree::
+  :maxdepth: 1
+  :caption: Bibliography
+
+   References cited <references>

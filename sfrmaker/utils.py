@@ -1,3 +1,4 @@
+import collections
 import os
 import inspect
 import pprint
@@ -185,7 +186,7 @@ def width_from_arbolate_sum(arbolate_sum, minimum_width=1):
     return w
 
 
-def get_input_arguments(kwargs, function, warn=True):
+def get_input_arguments(kwargs, function, warn=False):
     """Return subset of keyword arguments in kwargs dict
     that are valid parameters to a function or method.
 
@@ -199,22 +200,22 @@ def get_input_arguments(kwargs, function, warn=True):
     input_kwargs : dict
     """
     np.set_printoptions(threshold=20)
-    print('\narguments to {}:'.format(function.__qualname__))
+    #print('\narguments to {}:'.format(function.__qualname__))
     params = inspect.signature(function)
     input_kwargs = {}
     not_arguments = {}
     for k, v in kwargs.items():
         if k in params.parameters:
             input_kwargs[k] = v
-            print_item(k, v)
+            #print_item(k, v)
         else:
             not_arguments[k] = v
     if warn:
-        print('\nother arguments:')
+        #print('\nother arguments:')
         for k, v in not_arguments.items():
             # print('{}: {}'.format(k, v))
             print_item(k, v)
-    print('\n')
+    #print('\n')
     return input_kwargs
 
 
@@ -253,3 +254,18 @@ def exe_exists(exe_name):
         return os.path.exists(exe_path) and \
                os.access(which(exe_path), os.X_OK)
 
+
+def update(d, u):
+    """Recursively update a dictionary of varying depth
+    d with items from u.
+    from: https://stackoverflow.com/questions/3232943/update-value-of-a-nested-dictionary-of-varying-depth
+    """
+    for k, v in u.items():
+        if isinstance(d, collections.Mapping):
+            if isinstance(v, collections.Mapping):
+                d[k] = update(d.get(k, {}), v)
+            else:
+                d[k] = v
+        else:
+            d = {k: v}
+    return d

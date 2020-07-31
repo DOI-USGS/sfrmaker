@@ -38,7 +38,9 @@ class RivData(DataPackage):
 
     def write_table(self, basename=None):
         if basename is None:
-            output_path = '.'
+            output_path = self._tables_path
+            if not os.path.isdir(output_path):
+                os.makedirs(output_path)
             basename = self.package_name + '_{}'.format(self.package_type)
         else:
             output_path, basename = os.path.split(basename)

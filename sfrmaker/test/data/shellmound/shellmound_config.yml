@@ -1,0 +1,38 @@
+package_version: 'mf6'
+package_name: 'shellmound'
+output_path: '../../temp/shellmound'
+modelgrid:
+  xoffset: 500955
+  yoffset: 1176285
+  nrow: 30
+  ncol: 35
+  delr: 1000  # model spacing along a row
+  delc: 1000  # model spacing along a column
+  epsg: 5070  # albers equal area
+flowlines:
+  filename: flowlines.shp
+  id_column: COMID  # arguments to sfrmaker.Lines.from_shapefile
+  routing_column: tocomid
+  width1_column: width1
+  width2_column: width2
+  up_elevation_column: elevupsmo
+  dn_elevation_column: elevdnsmo
+  name_column: GNIS_NAME
+  attr_length_units: feet  # units of source data
+  attr_height_units: feet  # units of source data
+dem:
+  filename: ../../../../examples/meras/dem_min_elevs_1000.tif
+  elevation_units: meters
+set_streambed_top_elevations_from_dem: True
+inflows:  # see sfrmaker.data.add_to_perioddata for arguments
+  filename: inflows.csv
+  line_id_column: line_id
+  period_column: per  # column with model stress periods
+  data_column: flow_m3d  # column with flow values
+observations:  # see sfrmaker.observations.add_observations for arguments
+  filename: ../../../../examples/meras/observations.csv
+  obstype: downstream-flow  # modflow-6 observation type
+  x_location_column: x  # observation locations, in CRS coordinates
+  y_location_column: y
+  obsname_column: site_no  # column for naming observations
+

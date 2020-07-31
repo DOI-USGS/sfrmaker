@@ -23,6 +23,7 @@ sphinx
 ipython
 matplotlib
 numpydoc
+nbsphinx
 sphinx-copybutton
 sphinx_rtd_theme
 

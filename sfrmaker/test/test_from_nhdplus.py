@@ -1,5 +1,4 @@
 import os
-import shutil
 
 import numpy as np
 import pytest
@@ -9,21 +8,12 @@ from sfrmaker.checks import reach_elevations_decrease_downstream
 from sfrmaker.gis import CRS
 from gisutils import project
 from sfrmaker import Lines
+from .test_grid import tyler_forks_grid_from_shapefile
 
 
 @pytest.fixture(scope='module')
 def dem(datapath):
-    return os.path.join(datapath, 'badriver/dem_26715.tif')
-
-
-@pytest.fixture(scope='function')
-def sfrmaker_grid_from_shapefile(tyler_forks_grid_shapefile, tylerforks_active_area_shapefile):
-    grid = sfrmaker.StructuredGrid.from_shapefile(tyler_forks_grid_shapefile,
-                                                  node_col='node',
-                                                  icol='i',
-                                                  jcol='j',
-                                                  active_area=tylerforks_active_area_shapefile)
-    return grid
+    return os.path.join(datapath, 'tylerforks/dem_26715.tif')
 
 
 def test_attribute_units(tylerforks_lines_from_NHDPlus, tylerforks_sfrdata):
@@ -32,7 +22,7 @@ def test_attribute_units(tylerforks_lines_from_NHDPlus, tylerforks_sfrdata):
     assert tylerforks_sfrdata.model_length_units == 'feet'
     lines_mean_strtop = tylerforks_lines_from_NHDPlus.df[['elevup', 'elevdn']].mean().mean()
     sfrdata_mean_strtop = tylerforks_sfrdata.reach_data.strtop.mean()
-    assert np.allclose(sfrdata_mean_strtop / lines_mean_strtop, 3.28, atol=0.01)
+    assert np.allclose(sfrdata_mean_strtop / lines_mean_strtop, 3.28, rtol=0.02)
 
 
 @pytest.mark.parametrize('method', ['cell polygons', 'buffers'])
@@ -71,28 +61,15 @@ def test_sample_elevations_different_proj(dem, tylerforks_sfrdata, datapath):
     assert np.allclose(reach1_geom_projected_back_100buffer.area, reach1_geom.buffer(100).area)
 
 
-def test_structuredgrid_from_shapefile(sfrmaker_grid_from_shapefile, tylerforks_sfrmaker_grid_from_flopy):
-    grid = sfrmaker_grid_from_shapefile
-    grid_flopy = tylerforks_sfrmaker_grid_from_flopy
-    assert grid == grid_flopy
-
-
-def test_unstructuredgrid_from_shapfile(tyler_forks_grid_shapefile,
-                                        tylerforks_sfrmaker_grid_from_flopy):
-    # TODO: test creating unstructured grid from same shapefile
-    # with no row or column information passed
-    pass
-
-
 # ugly work-around for fixtures not being supported as test parameters yet
 # https://github.com/pytest-dev/pytest/issues/349
 @pytest.fixture(params=['tylerforks_sfrmaker_grid_from_flopy',
-                        'sfrmaker_grid_from_shapefile'])
+                        'tyler_forks_grid_from_shapefile'])
 def grid(request,
          tylerforks_sfrmaker_grid_from_flopy,
-         sfrmaker_grid_from_shapefile):
+         tyler_forks_grid_from_shapefile):
     return {'tylerforks_sfrmaker_grid_from_flopy': tylerforks_sfrmaker_grid_from_flopy,
-            'sfrmaker_grid_from_shapefile': sfrmaker_grid_from_shapefile}[request.param]
+            'tyler_forks_grid_from_shapefile': tyler_forks_grid_from_shapefile}[request.param]
 
 
 def test_lines_from_NHDPlus(tylerforks_lines_from_NHDPlus):

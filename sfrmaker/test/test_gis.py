@@ -58,7 +58,7 @@ def test_crs_eq():
     crs_26715_epsg = CRS(epsg=26715)
     crs_26715_epsg_proj = CRS(proj_str='epsg:26715')
     crs_26715_proj = CRS(proj_str='+proj=utm +zone=15 +datum=NAD27 +units=m +no_defs ')
-    crs_26715_prj = CRS(prjfile='Examples/data/badriver/grid.shp')
+    crs_26715_prj = CRS(prjfile='examples/tylerforks/grid.shp')
     assert crs_4269_proj != crs_26715_epsg
     assert crs_4269_proj != crs_26715_epsg_proj
     assert crs_4269_proj != crs_26715_proj
@@ -77,7 +77,7 @@ def test_crs_units():
     assert crs_26715_epsg_proj.length_units == 'meters'
     crs_26715_proj = CRS(proj_str='+proj=utm +zone=15 +datum=NAD27 +units=m +no_defs ')
     assert crs_26715_proj.length_units == 'meters'
-    crs_26715_prj = CRS(prjfile='Examples/data/badriver/grid.shp')
+    crs_26715_prj = CRS(prjfile='examples/tylerforks/grid.shp')
     assert crs_26715_prj.length_units == 'meters'
 
 
@@ -103,7 +103,7 @@ def test_crs_get_proj_str():
 
 
 def test_get_bbox(project_root_path):
-    shapefile = os.path.join(project_root_path, 'Examples/data/badriver/grid.shp')
+    shapefile = os.path.join(project_root_path, 'examples/tylerforks/grid.shp')
     crs = CRS(epsg=4269)
     bbox = get_bbox(shapefile, dest_crs=crs)
     assert np.allclose(bbox, (-90.62442575352304, 46.37890212020774, -90.46249896050521, 46.458360301848685))
