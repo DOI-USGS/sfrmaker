@@ -1127,6 +1127,8 @@ class SFRData(DataPackage):
             package_name, _ = os.path.splitext(cfg['model']['namefile'])
         if output_path is None:
             output_path = cfg['output_path']
+        if not os.path.isdir(output_path):
+            os.makedirs(output_path)
 
         cls._tables_path = os.path.join(output_path, cls._tables_path)
         cls._shapefiles_path = os.path.join(output_path, cls._shapefiles_path)

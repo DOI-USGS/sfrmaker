@@ -22,5 +22,6 @@ def test_meras_example(script):
     """
     path, scriptname = os.path.split(script)
     os.chdir(path)
-    ival = os.system('python {}'.format(scriptname))
-    assert ival == 0, 'could not run {}'.format(scriptname)
+    sfrdata = sfrmaker.SFRData.from_yaml('meras_sfrmaker_config.yml')
+    #ival = os.system('python {}'.format(scriptname))
+    #assert ival == 0, 'could not run {}'.format(scriptname)
