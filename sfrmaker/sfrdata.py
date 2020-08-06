@@ -1130,9 +1130,6 @@ class SFRData(DataPackage):
         if not os.path.isdir(output_path):
             os.makedirs(output_path)
 
-        cls._tables_path = os.path.join(output_path, cls._tables_path)
-        cls._shapefiles_path = os.path.join(output_path, cls._shapefiles_path)
-
         # model grids from shapefiles or flopy grids are supported
         grid = None
         if 'modelgrid' in cfg:
@@ -1211,6 +1208,8 @@ class SFRData(DataPackage):
         to_sfr_kwargs['package_name'] = package_name
         # to_sfr() populates isfr from model if neither active_area or isfr are argued
         sfrdata = lines.to_sfr(**to_sfr_kwargs)
+        sfrdata._tables_path = os.path.join(output_path, sfrdata._tables_path)
+        sfrdata._shapefiles_path = os.path.join(output_path, sfrdata._shapefiles_path)
 
         # setup elevations
         if cfg.get('set_streambed_top_elevations_from_dem', False):

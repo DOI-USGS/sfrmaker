@@ -138,6 +138,9 @@ def test_tylerforks_from_config(config_file, dem):
 
     # dict still has same pathing as config file
     os.chdir(os.path.split(config_file)[0])
+    for folder in 'tables/', 'shps/':
+        if os.path.exists(folder):
+            shutil.rmtree(folder)
     if not dem:
         del cfg['dem']
         del cfg['set_streambed_top_elevations_from_dem']

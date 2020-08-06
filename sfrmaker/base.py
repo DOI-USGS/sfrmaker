@@ -16,8 +16,6 @@ from .units import get_length_units
 class DataPackage:
 
     package_type = None  # overloaded by SFRData, RivData, etc.
-    _tables_path = 'tables/'  # default location for writing tables
-    _shapefiles_path = 'shps/'  # default location for writing shapefiles
 
     def __init__(self, grid=None, model=None, isfr=None,
                  model_length_units="undefined", model_time_units='d',
@@ -48,6 +46,8 @@ class DataPackage:
         # attributes
         self._crs = None
         self._model = None
+        self._tables_path = 'tables/'  # default location for writing tables
+        self._shapefiles_path = 'shps/'  # default location for writing shapefiles
 
         # print grid information to screen
         print(grid)
