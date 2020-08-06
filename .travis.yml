@@ -48,8 +48,11 @@ install:
 
 script:
   # Run the tests and check for test coverage.
-  # report test execution times; run tests marked as slow
-  - coverage run -m pytest -v --durations=0 --runslow sfrmaker/test
+  # report test execution times
+  - coverage run -m pytest -v --durations=0
+  # travis wait to allow > 10 minutes without output for meras example
+  # https://docs.travis-ci.com/user/common-build-problems/#build-times-out-because-no-output-was-received
+  - travis_wait 25 pytest sfrmaker/test/test_examples.py::test_meras_example --durations=0 --runslow
   - coverage report -m  # Generate test coverage report.
   - set -e
   - make -C docs html  # Build the documentation.
