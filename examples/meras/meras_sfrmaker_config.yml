@@ -10,7 +10,7 @@ modelgrid:
   delc: 1000  # model spacing along a column
   epsg: 5070  # albers equal area
 active_area:
-  filename: meras_extent.shp
+  filename: MERAS_Extent.shp
 flowlines:
   filename: flowlines.shp
   id_column: COMID  # arguments to sfrmaker.Lines.from_shapefile

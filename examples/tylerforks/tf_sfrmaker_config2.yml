@@ -9,7 +9,7 @@ modelgrid:
   icol: i  # attribute field with row numbers
   jcol: j  # attribute field with column numbers
 flowlines:
-  NHDFlowlines: NHDPlus/NHDSnapshot/Hydrography/NHDflowline.shp
+  NHDFlowlines: NHDPlus/NHDSnapshot/Hydrography/NHDFlowline.shp
   PlusFlowlineVAA: NHDPlus/NHDPlusAttributes/PlusFlowlineVAA.dbf
   PlusFlow: NHDPlus/NHDPlusAttributes/PlusFlow.dbf
   elevslope: NHDPlus/NHDPlusAttributes/elevslope.dbf

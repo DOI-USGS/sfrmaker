@@ -47,7 +47,9 @@ install:
   #- pip install -r requirements-dev.txt
 
 script:
-  - coverage run -m pytest  # Run the tests and check for test coverage.
+  # Run the tests and check for test coverage.
+  # report test execution times; run tests marked as slow
+  - coverage run -m pytest -v --durations=0 --runslow sfrmaker/test
   - coverage report -m  # Generate test coverage report.
   - set -e
   - make -C docs html  # Build the documentation.

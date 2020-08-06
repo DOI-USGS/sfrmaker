@@ -213,7 +213,7 @@ def tylerforks_lines_from_NHDPlus(datapath):
     pfvaa_files = ['{}/tylerforks/NHDPlus/NHDPlusAttributes/PlusFlowlineVAA.dbf'.format(datapath)]
     plusflow_files = ['{}/tylerforks/NHDPlus/NHDPlusAttributes/PlusFlow.dbf'.format(datapath)]
     elevslope_files = ['{}/tylerforks/NHDPlus/NHDPlusAttributes/elevslope.dbf'.format(datapath)]
-    flowlines = ['{}/tylerforks/NHDPlus/NHDSnapshot/Hydrography/NHDflowline.shp'.format(datapath)]
+    flowlines = ['{}/tylerforks/NHDPlus/NHDSnapshot/Hydrography/NHDFlowline.shp'.format(datapath)]
 
     lns = sfrmaker.Lines.from_nhdplus_v2(NHDFlowlines=flowlines,
                                          PlusFlowlineVAA=pfvaa_files,
