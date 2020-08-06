@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Philosophy &mdash; SFRmaker 0.4.0.post24.dev0+g6d52a50 documentation</title>
+  <title>Philosophy &mdash; SFRmaker 0.4.0.post25.dev0+g26b685e documentation</title>
   
 
   
@@ -41,7 +41,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Using SFRmaker with a configuration file" href="examples.html" />
-    <link rel="prev" title="SFRmaker 0.4.0.post24.dev0+g6d52a50" href="index.html" /> 
+    <link rel="prev" title="SFRmaker 0.4.0.post25.dev0+g26b685e" href="index.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                0.4.0.post24.dev0+g6d52a50
+                0.4.0.post25.dev0+g26b685e
               </div>
             
           
@@ -213,11 +213,11 @@
 </div>
 <div class="section" id="what-sfrmaker-does">
 <h2>What SFRmaker does<a class="headerlink" href="#what-sfrmaker-does" title="Permalink to this headline">¶</a></h2>
-<p>SFRmaker automates the translation of hydrography data into input for the MODFLOW-2005 (Harbaugh, 2005) or MODFLOW-6 (Langevin, 2017) SFR package, using the open-source python geospatial stack. NHDPlus data (McKay and others, 2012) can be read directly, or any hydrography with routing information (in an attribute field) can be used. In general, SFRmaker is designed for the basic use case of a structured model grid and rectangular stream channel, where stage is estimated as part of the SFR package solution (ICALC=1 in MODFLOW-2005 parlance, or the input available in MODFLOW-6). Other options, such as specifying stream depth or unsaturated flow parameters, can be accomplished by editing <code class="docutils literal notranslate"><span class="pre">reach_data</span></code> and <code class="docutils literal notranslate"><span class="pre">segment_data</span></code> tables associated with an <code class="docutils literal notranslate"><span class="pre">SFRData</span></code> object (see Basic Usage section). SFRmaker produces an SFR package input file as output, as well as shapefiles for visualizing the SFR package.</p>
+<p>SFRmaker translates hydrography data into input for the MODFLOW-2005 (Harbaugh, 2005) or MODFLOW-6 (Langevin, 2017) SFR package, using the open-source python geospatial stack. NHDPlus data (McKay and others, 2012) can be read directly, or any hydrography with routing information (in an attribute field) can be used. In general, SFRmaker is designed for the basic use case of a structured model grid and rectangular stream channel, where stage is estimated as part of the SFR package solution (ICALC=1 in MODFLOW-2005 parlance, or the input available in MODFLOW-6). Other options, such as specifying stream depth, unsaturated flow parameters and lake connections, can be accomplished by editing <code class="docutils literal notranslate"><span class="pre">reach_data</span></code> and <code class="docutils literal notranslate"><span class="pre">segment_data</span></code> tables associated with an <code class="docutils literal notranslate"><span class="pre">SFRData</span></code> object (see Basic Usage section). SFRmaker produces an SFR package input file as output, as well as shapefiles for visualizing the SFR package.</p>
 </div>
 <div class="section" id="what-sfrmaker-doesn-t-do">
 <h2>What SFRmaker doesn’t do<a class="headerlink" href="#what-sfrmaker-doesn-t-do" title="Permalink to this headline">¶</a></h2>
-<p>Development of Sfrmaker has been primarily driven by project needs. As a result, it does not provide comprehensive support for the features available in the MODFLOW SFR Package. Currently, only structured model grids (those with row, column indices) are supported. As noted above, advanced SFR input options including unsaturated flow beneath streams and diversions must be specified manually by editing the reach or segment data tables. Non-rectangular channel geometries are not supported. Support for unstructured grids or additional SFR features may be added in the future. Contributions are welcome through GitHub pull requests; see the Contributing page.</p>
+<p>Development of Sfrmaker has been primarily driven by project needs. As a result, it does not provide comprehensive support for the features available in the MODFLOW SFR Package. Currently, only structured model grids (those with row, column indices) are supported. As noted above, advanced SFR input options including lake connections, unsaturated flow beneath streams and diversions must be specified manually by editing the reach or segment data tables. Non-rectangular channel geometries are not supported. Support for unstructured grids and other SFR features may be added in the future. Contributions are welcome through GitHub pull requests; see the Contributing page.</p>
 </div>
 </div>
 
@@ -232,7 +232,7 @@
         <a href="examples.html" class="btn btn-neutral float-right" title="Using SFRmaker with a configuration file" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="index.html" class="btn btn-neutral float-left" title="SFRmaker 0.4.0.post24.dev0+g6d52a50" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="index.html" class="btn btn-neutral float-left" title="SFRmaker 0.4.0.post25.dev0+g26b685e" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
