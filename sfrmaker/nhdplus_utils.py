@@ -120,6 +120,8 @@ def load_nhdplus_v2(NHDPlus_paths=None,
     elevs = read_nhdplus(elevslope)
 
     # join flowline and attribute dataframes
+    fl.columns = [c.upper() for c in list(fl)]  # added this, switch all to upper case
+    fl = fl.rename(columns={"GEOMETRY": "geometry"})  # added this (switch GEOMETRY back to lower case)
     df = fl[fl_cols].copy()
     df = df.join(pfvaa[pfvaa_cols], how='inner')
     df = df.join(elevs[elevs_cols], how='inner')
