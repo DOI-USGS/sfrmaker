@@ -1,19 +1,12 @@
-========
-Examples
-========
+========================================
+Using SFRmaker with a configuration file
+========================================
+For many applications, the easiest way to get started with SFRmaker is to create a configuration file that can then be used in a simple script to generate an SFR package. The two example problems below illustrate the various input options for the configuration file.
 
+MERAS 3: Creating an SFR package from a configuration file with custom hydrography
+-------------------------------------------------------------------------------------
+.. include:: examples/meras.rst
 
-Make an SFR package from NHDPlus files and a flopy model grid
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. literalinclude:: ../../Examples/make_sfr.py
-    :language: python
-    :lines: 5-
-
-Make an SFR package without a prexisting Flopy model, using a shapefile to specify the grid
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Reaches will be assigned to layer 1 by default, and Flopy diagnostics that only involved the SFR package can still be run.
-
-.. literalinclude:: ../../Examples/make_sfr_without_model.py
-    :language: python
-    :lines: 7-
+The Tyler Forks watershed: Creating an SFR package from a configuration file using NHDPlus
+--------------------------------------------------------------------------------------------------
+.. include:: examples/tf.rst

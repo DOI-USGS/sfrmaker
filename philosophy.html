@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Release History &mdash; SFRmaker 0.4.0.post24.dev0+g6d52a50 documentation</title>
+  <title>Philosophy &mdash; SFRmaker 0.4.0.post24.dev0+g6d52a50 documentation</title>
   
 
   
@@ -40,8 +40,8 @@
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Contributing to SFRmaker" href="contributing.html" />
-    <link rel="prev" title="Demonstration of how sfrmaker handles streambed elevations" href="notebooks/Streambed_elevation_demo.html" /> 
+    <link rel="next" title="Using SFRmaker with a configuration file" href="examples.html" />
+    <link rel="prev" title="SFRmaker 0.4.0.post24.dev0+g6d52a50" href="index.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -91,8 +91,13 @@
             
             
               <p class="caption"><span class="caption-text">Getting Started</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="philosophy.html"> Philosophy</a></li>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#"> Philosophy</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#motivation">Motivation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#what-sfrmaker-does">What SFRmaker does</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#what-sfrmaker-doesn-t-do">What SFRmaker doesn’t do</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="examples.html"> Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html"> Installation</a></li>
 </ul>
@@ -104,16 +109,8 @@
 <li class="toctree-l1"><a class="reference internal" href="notebooks/Streambed_elevation_demo.html"> How the streambed elevation sampling works</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Reference</span></p>
-<ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#"> Release History</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#version-0-5-0-2020-xx-xx">Version 0.5.0 (2020-xx-xx)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#version-0-4-0-2020-4-25">Version 0.4.0 (2020-4-25)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#version-0-3-0-2020-2-12">Version 0.3.0 (2020-2-12)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#version-0-2-1-2019-12-12">Version 0.2.1 (2019-12-12)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#version-0-2-0-2019-12-08">Version 0.2.0 (2019-12-08)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#version-0-1-initial-release-2019-07-12">Version 0.1 Initial release (2019-07-12)</a></li>
-</ul>
-</li>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="release-history.html"> Release History</a></li>
 <li class="toctree-l1"><a class="reference internal" href="contributing.html"> Contributing to SFRmaker</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Bibliography</span></p>
@@ -165,13 +162,13 @@
     
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
         
-      <li>Release History</li>
+      <li>Philosophy</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="_sources/release-history.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/philosophy.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -208,58 +205,19 @@
     text-align: unset;
 }
 </style>
-<div class="section" id="release-history">
-<h1>Release History<a class="headerlink" href="#release-history" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="version-0-5-0-2020-xx-xx">
-<h2>Version 0.5.0 (2020-xx-xx)<a class="headerlink" href="#version-0-5-0-2020-xx-xx" title="Permalink to this headline">¶</a></h2>
-<ul class="simple">
-<li><p>added from_yaml method to construct an SFR package from a configuration file</p></li>
-<li><p>deprecated use of the Flopy SpatialReference object</p></li>
-<li><p>add option to write MF6 packagedata block to an external file</p></li>
-<li><p>add default writing of source hydrography line_ids to MF6 packagedata as an auxiliary variable</p></li>
-<li><p>use pyproj CRS module internally for more robust handling of coordinate reference systems</p></li>
-<li><p>add starting gage package unit number attribute to SFRData that can be set by the user</p></li>
-</ul>
+<div class="section" id="philosophy">
+<h1>Philosophy<a class="headerlink" href="#philosophy" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="motivation">
+<h2>Motivation<a class="headerlink" href="#motivation" title="Permalink to this headline">¶</a></h2>
+<p>As the world grapples with increasingly pressing and often complex water resources challenges, demand has grown for groundwater models that more realistically incorporate surface water. Often, groundwater models are motivated by questions regarding groundwater/surface water interactions and the availability or quality of in-stream flows. The Streamflow Routing (SFR) Package for MODFLOW (Prudic, 2004) allows for more realistic simulation of groundwater/surface water interactions and in-stream flows but remains underutilized, presumably due to the complexity of input requirements (Anderson and others, 2015). Preparation of SFR input requires mapping linear stream features to a finite-difference grid, and populating each finite difference cell with attributes describing the properties of stream reaches within that cell. This process can be arduous and error-prone, requiring many geoprocessing operations or even extensive hand-digitizing of features. The number and complexity of operations presents a fundamental challenge to scientific reproducibility (e.g ref: Peng 2011 Science article) and step-wise modeling (Haitjema, 1995).</p>
 </div>
-<div class="section" id="version-0-4-0-2020-4-25">
-<h2>Version 0.4.0 (2020-4-25)<a class="headerlink" href="#version-0-4-0-2020-4-25" title="Permalink to this headline">¶</a></h2>
-<ul class="simple">
-<li><p>add automated setup (<code class="docutils literal notranslate"><span class="pre">SFRdata.add_observations</span></code> method) of sfr observation locations (gages for mf2005 or obs input for mf6), from (x, y) locations, line_ids in source hydrography, or at specified reach numbers</p></li>
-<li><p>some minor patches to the gis module to use the new CRS module in pyproj to parse epsg codes and length units</p></li>
-<li><p>added screening of inactive cellids (set gw cellid to None) in MODFLOW6 flopy SFR package instance creation</p></li>
-<li><p>added support for MODFLOW-2005 gage package setup</p></li>
-<li><p>added support for specified inflows in MODFLOW-2005 (add_to_segment_data method)</p></li>
-<li><p>added to_riv method to convert SFR segments to RIV package; DataPackage base class</p></li>
-</ul>
+<div class="section" id="what-sfrmaker-does">
+<h2>What SFRmaker does<a class="headerlink" href="#what-sfrmaker-does" title="Permalink to this headline">¶</a></h2>
+<p>SFRmaker automates the translation of hydrography data into input for the MODFLOW-2005 (Harbaugh, 2005) or MODFLOW-6 (Langevin, 2017) SFR package, using the open-source python geospatial stack. NHDPlus data (McKay and others, 2012) can be read directly, or any hydrography with routing information (in an attribute field) can be used. In general, SFRmaker is designed for the basic use case of a structured model grid and rectangular stream channel, where stage is estimated as part of the SFR package solution (ICALC=1 in MODFLOW-2005 parlance, or the input available in MODFLOW-6). Other options, such as specifying stream depth or unsaturated flow parameters, can be accomplished by editing <code class="docutils literal notranslate"><span class="pre">reach_data</span></code> and <code class="docutils literal notranslate"><span class="pre">segment_data</span></code> tables associated with an <code class="docutils literal notranslate"><span class="pre">SFRData</span></code> object (see Basic Usage section). SFRmaker produces an SFR package input file as output, as well as shapefiles for visualizing the SFR package.</p>
 </div>
-<div class="section" id="version-0-3-0-2020-2-12">
-<h2>Version 0.3.0 (2020-2-12)<a class="headerlink" href="#version-0-3-0-2020-2-12" title="Permalink to this headline">¶</a></h2>
-<ul class="simple">
-<li><p>replace FloPy SpatialReference with support for FloPy modelgrid</p></li>
-<li><p>updated modflow-6 execs to v 6.1</p></li>
-<li><p>minor big fixes/improvements to get_upsegs function in routing module</p></li>
-</ul>
-</div>
-<div class="section" id="version-0-2-1-2019-12-12">
-<h2>Version 0.2.1 (2019-12-12)<a class="headerlink" href="#version-0-2-1-2019-12-12" title="Permalink to this headline">¶</a></h2>
-<ul class="simple">
-<li><p>fixed bug that was causing cases with only one (intersected stream) segment to fail</p></li>
-</ul>
-</div>
-<div class="section" id="version-0-2-0-2019-12-08">
-<h2>Version 0.2.0 (2019-12-08)<a class="headerlink" href="#version-0-2-0-2019-12-08" title="Permalink to this headline">¶</a></h2>
-<ul class="simple">
-<li><p>added support for MODFLOW6 observation setup</p></li>
-<li><p>added support for specified inflows in MODFLOW6</p></li>
-<li><p>added get_inflow_locations_from_parent_model to get specified stream inflow values from a parent model</p></li>
-<li><p>bug fixes related to MODFLOW6 support</p></li>
-</ul>
-</div>
-<div class="section" id="version-0-1-initial-release-2019-07-12">
-<h2>Version 0.1 Initial release (2019-07-12)<a class="headerlink" href="#version-0-1-initial-release-2019-07-12" title="Permalink to this headline">¶</a></h2>
-<ul class="simple">
-<li><p>see prior GitHub commits for “prehistory” of the project dating back to ArcPy scripts in 2013</p></li>
-</ul>
+<div class="section" id="what-sfrmaker-doesn-t-do">
+<h2>What SFRmaker doesn’t do<a class="headerlink" href="#what-sfrmaker-doesn-t-do" title="Permalink to this headline">¶</a></h2>
+<p>Development of Sfrmaker has been primarily driven by project needs. As a result, it does not provide comprehensive support for the features available in the MODFLOW SFR Package. Currently, only structured model grids (those with row, column indices) are supported. As noted above, advanced SFR input options including unsaturated flow beneath streams and diversions must be specified manually by editing the reach or segment data tables. Non-rectangular channel geometries are not supported. Support for unstructured grids or additional SFR features may be added in the future. Contributions are welcome through GitHub pull requests; see the Contributing page.</p>
 </div>
 </div>
 
@@ -271,10 +229,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="contributing.html" class="btn btn-neutral float-right" title="Contributing to SFRmaker" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="examples.html" class="btn btn-neutral float-right" title="Using SFRmaker with a configuration file" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="notebooks/Streambed_elevation_demo.html" class="btn btn-neutral float-left" title="Demonstration of how sfrmaker handles streambed elevations" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="index.html" class="btn btn-neutral float-left" title="SFRmaker 0.4.0.post24.dev0+g6d52a50" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

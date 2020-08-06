@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Installation &mdash; SFRmaker 0.4.0.post16+g65522d8 documentation</title>
+  <title>Installation &mdash; SFRmaker 0.4.0.post24.dev0+g6d52a50 documentation</title>
   
 
   
@@ -33,14 +33,15 @@
         <script src="_static/language_data.js"></script>
         <script src="_static/clipboard.min.js"></script>
         <script src="_static/copybutton.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Usage" href="usage.html" />
-    <link rel="prev" title="SFRmaker 0.4.0.post16+g65522d8" href="index.html" /> 
+    <link rel="next" title="Input data requirements" href="inputs.html" />
+    <link rel="prev" title="Using SFRmaker with a configuration file" href="examples.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -64,7 +65,7 @@
             
             
               <div class="version">
-                0.4.0.post16+g65522d8
+                0.4.0.post24.dev0+g6d52a50
               </div>
             
           
@@ -91,22 +92,39 @@
             
               <p class="caption"><span class="caption-text">Getting Started</span></p>
 <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="philosophy.html"> Philosophy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html"> Examples</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#"> Installation</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#installing-sfrmaker-from-the-python-package-index-using-pip">Installing SFRmaker from the python package index using pip</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#installing-sfrmaker-from-source">Installing SFRmaker from source</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#updating-sfrmaker-using-git">Updating SFRMaker using Git</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#installing-python-dependencies-with-conda">Installing python dependencies with Conda</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#creating-a-conda-environment">Creating a conda environment</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="usage.html"> Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="examples.html"> Example scripts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#installing-sfrmaker">Installing SFRmaker</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#updating-sfrmaker-using-git">Updating SFRmaker using Git</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id1">Considerations for USGS Users</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id2">Installing the DOI SSL certificate for use with pip</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#installing-the-doi-ssl-certificate-for-use-with-conda">Installing the DOI SSL certificate for use with conda</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#troubleshooting-issues-with-the-usgs-network">Troubleshooting issues with the USGS network</a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 <p class="caption"><span class="caption-text">User Guide</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="inputs.html"> Input Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html"> Using SFRmaker with a configuration file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/SFRmaker_demo.html"> Basic Usage in a scripting context</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/Streambed_elevation_demo.html"> How the streambed elevation sampling works</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Release history</span></p>
+<p class="caption"><span class="caption-text">Reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="release-history.html"> Release History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html"> Contributing to SFRmaker</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Bibliography</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="references.html"> References cited</a></li>
 </ul>
 
             
@@ -172,31 +190,139 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="installation">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="installation">
 <h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
-<p><code class="docutils literal notranslate"><span class="pre">SFRmaker</span></code> depends on a number of python packages, many of which have external C library dependencies. The easiest way to install most of these is with <a class="reference external" href="https://docs.conda.io/en/latest/">conda</a>. A few packages are not available via conda, and must be installed with <a class="reference external" href="https://packaging.python.org/tutorials/installing-packages/#use-pip-for-installing">pip</a>. Instructions for setting up an appropriate <a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/concepts/environments.html">conda environment</a>, including considerations for users on the USGS internal network, are available <a href="https://aleaf.github.io/modflow-setup/installation.html" target="_blank">here</a>.</p>
-<div class="section" id="installing-sfrmaker-from-the-python-package-index-using-pip">
-<h2>Installing SFRmaker from the <a class="reference external" href="https://pypi.org/">python package index</a> using pip<a class="headerlink" href="#installing-sfrmaker-from-the-python-package-index-using-pip" title="Permalink to this headline">¶</a></h2>
-<p>At the command line:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install sfrmaker
+<p><code class="docutils literal notranslate"><span class="pre">sfrmaker</span></code> depends on a number of python packages, many of which have external C library dependencies. The easiest way to install most of these is with <a class="reference external" href="https://docs.conda.io/en/latest/">conda</a>. A few packages are not available via conda, and must be installed with <a class="reference external" href="https://packaging.python.org/tutorials/installing-packages/#use-pip-for-installing">pip</a>. If you are on the USGS internal network, see the <a class="reference internal" href="#considerations-for-usgs-users">Considerations for USGS Users</a> section below first.</p>
+<div class="section" id="installing-python-dependencies-with-conda">
+<h2>Installing python dependencies with Conda<a class="headerlink" href="#installing-python-dependencies-with-conda" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>Download and install the <a class="reference external" href="https://www.anaconda.com/distribution/">Anaconda python distribution</a>.</p>
+<ul>
+<li><p><strong>Make sure to install Anaconda to your username</strong> (not at the system level). More often than not, installing at the system level (for all users) seems to result in issues with library dependencies (for example, import of <code class="docutils literal notranslate"><span class="pre">fiona</span></code> or <code class="docutils literal notranslate"><span class="pre">rasterio</span></code> failing because gdal isn’t found). It is also good practice to periodically do a <a class="reference external" href="https://docs.anaconda.com/anaconda/install/uninstall/">clean uninstall</a> of Anaconda, which requires admin. privileges at the system level.</p>
+<ul>
+<li><p>In the installer, at the “Destination Select” step, select “Install for me only.” It should say something about how the software will be installed to your home folder.</p></li>
+<li><p>If your installer skips the “Destination Select” step, when you get to “Installation Type”, click “Change Install Location” and then “Install for me only.”</p></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Download an environment file:</p>
+<ul>
+<li><p><a class="reference external" href="https://github.com/aleaf/sfrmaker/blob/master/requirements.yml">requirements.yml</a> for a <a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/concepts/environments.html">conda environment</a> with the minimum packages required to run SFRmaker, or</p></li>
+<li><p><a class="reference external" href="https://github.com/aleaf/sfrmaker/blob/master/gis.yml">gis.yml</a> for a more full set of packages in the python geospatial stack, including Jupyter Notebooks and packages needed for testing, documentation and packaging. Note that the environment described by <code class="docutils literal notranslate"><span class="pre">requirements.yml</span></code> is called <cite>sfrmaker</cite>, while environment in <code class="docutils literal notranslate"><span class="pre">gis.yml</span></code> is called <cite>gis</cite>.</p></li>
+<li><p>Alternatively, clone (<a class="reference external" href="https://git-scm.com/book/en/v2/Getting-Started-Installing-Git">using git</a>) or <a class="reference external" href="https://github.com/aleaf/sfrmaker/archive/master.zip">download</a> the <code class="docutils literal notranslate"><span class="pre">sfrmaker</span></code> repository, which includes the two environment files at the root level.</p></li>
+<li><p>Note that both of these environment files contain a <code class="docutils literal notranslate"><span class="pre">pip</span></code> section of packages that will be installed with pip, after the <code class="docutils literal notranslate"><span class="pre">conda</span></code> packages are installed.</p></li>
+</ul>
+</li>
+</ul>
+<div class="section" id="creating-a-conda-environment">
+<h3>Creating a <a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/concepts/environments.html">conda environment</a><a class="headerlink" href="#creating-a-conda-environment" title="Permalink to this headline">¶</a></h3>
+<p>If you are on the USGS internal network, see the <a class="reference internal" href="#considerations-for-usgs-users">Considerations for USGS Users</a> section below first.
+Open an Anaconda Command Prompt on Windows or a terminal window on OSX and point it to the location of <code class="docutils literal notranslate"><span class="pre">requirements.yml</span></code> or <code class="docutils literal notranslate"><span class="pre">gis.yml</span></code> and enter:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda env create -f requirements.yml
 </pre></div>
 </div>
+<p>Building the environment will probably take a while. If the build fails because of an SSL error, fix the problem (see <a class="reference internal" href="#considerations-for-usgs-users">Considerations for USGS Users</a> below) and either:</p>
+<blockquote>
+<div><ol class="loweralpha">
+<li><p>Update the environment</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda env update -f requirements.yml
+</pre></div>
 </div>
-<div class="section" id="installing-sfrmaker-from-source">
-<h2>Installing SFRmaker from source<a class="headerlink" href="#installing-sfrmaker-from-source" title="Permalink to this headline">¶</a></h2>
-<p>Clone or <a class="reference external" href="https://github.com/aleaf/sfrmaker/archive/master.zip">download</a> the <a class="reference external" href="https://github.com/aleaf/SFRmaker">sfrmaker repository</a>. Then with a command window pointed at the root level (containing <code class="docutils literal notranslate"><span class="pre">setup.py</span></code>):</p>
+</li>
+<li><p>or remove and reinstall it:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda env remove -n sfrmaker
+conda env create -f requirements.yml
+</pre></div>
+</div>
+</li>
+</ol>
+</div></blockquote>
+</div>
+</div>
+<div class="section" id="installing-sfrmaker">
+<h2>Installing SFRmaker<a class="headerlink" href="#installing-sfrmaker" title="Permalink to this headline">¶</a></h2>
+<p>Once a suitable conda environment is made, activate it, so that the version of python in it will be at the top of the system path (i.e. will be the one called when <code class="docutils literal notranslate"><span class="pre">python</span></code> is entered at the command line):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda activate sfrmaker
+</pre></div>
+</div>
+<p>Clone or <a class="reference external" href="https://github.com/aleaf/sfrmaker/archive/master.zip">download</a> the <code class="docutils literal notranslate"><span class="pre">sfrmaker</span></code> repository. Then with a command window pointed at the root level (containing <code class="docutils literal notranslate"><span class="pre">setup.py</span></code>):</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install -e .
 </pre></div>
 </div>
 <p>This installs SFRmaker to the active python distribution by linking the source code in-place, making it easier to periodically pull updates using git.</p>
 </div>
 <div class="section" id="updating-sfrmaker-using-git">
-<h2>Updating SFRMaker using Git<a class="headerlink" href="#updating-sfrmaker-using-git" title="Permalink to this headline">¶</a></h2>
+<h2>Updating SFRmaker using Git<a class="headerlink" href="#updating-sfrmaker-using-git" title="Permalink to this headline">¶</a></h2>
 <p>To update SFRmaker (if it was cloned using Git), at the root level of the repository:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git pull origin master
 </pre></div>
 </div>
 <p>Alternatively, SFRmaker could be updated by downloading the repository again and installing via <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">-e</span> <span class="pre">.</span></code>.</p>
+</div>
+<div class="section" id="id1">
+<h2><span class="target" id="considerations-for-usgs-users">Considerations for USGS Users</span><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<p>Using conda or pip on the USGS network requires SSL verification, which can cause a number of issues. If you are encountering persistant issues with creating the conda environment, you may have better luck trying the install off of the USGS network (e.g. at home). See <a class="reference external" href="https://tst.usgs.gov/applications/application-and-script-signing/">here</a> for more information about SSL verification on the USGS network, and to download the DOI SSL certificate.</p>
+<div class="section" id="id2">
+<h3><span class="target" id="installing-the-doi-ssl-certificate-for-use-with-pip">Installing the DOI SSL certificate for use with pip</span><a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<ol class="arabic simple">
+<li><p><a class="reference external" href="https://tst.usgs.gov/applications/application-and-script-signing/">Download the DOI SSL certificate</a></p></li>
+<li><p>On Windows, create the file <code class="docutils literal notranslate"><span class="pre">C:\Users\&lt;your</span> <span class="pre">username&gt;\AppData\Roaming\pip\pip.ini</span></code>.
+On OSX, create <code class="docutils literal notranslate"><span class="pre">/Users/&lt;your</span> <span class="pre">username&gt;/Library/Application</span> <span class="pre">Support/pip/pip.conf</span></code>.</p></li>
+</ol>
+<p>Include the following in this file:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="k">global</span><span class="p">]</span>
+<span class="n">cert</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">path</span> <span class="n">to</span> <span class="n">DOI</span> <span class="n">certificate</span> <span class="n">file</span> <span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">g</span><span class="o">.</span> <span class="n">DOIRootCA2</span><span class="o">.</span><span class="n">cer</span><span class="p">)</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>Note that when you are off the USGS network, you may have to comment out the <code class="docutils literal notranslate"><span class="pre">cert=</span></code> line in the above pip configuration file to get <code class="docutils literal notranslate"><span class="pre">pip</span></code> to work.</p>
+</div>
+<div class="section" id="installing-the-doi-ssl-certificate-for-use-with-conda">
+<h3>Installing the DOI SSL certificate for use with conda<a class="headerlink" href="#installing-the-doi-ssl-certificate-for-use-with-conda" title="Permalink to this headline">¶</a></h3>
+<p>See <a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/configuration/use-condarc.html#ssl-verification-ssl-verify">these instructions</a>. This may or may not work.</p>
+</div>
+<div class="section" id="troubleshooting-issues-with-the-usgs-network">
+<h3>Troubleshooting issues with the USGS network<a class="headerlink" href="#troubleshooting-issues-with-the-usgs-network" title="Permalink to this headline">¶</a></h3>
+<p><strong>If you are on the USGS network, using Windows, and you get this error message:</strong></p>
+<blockquote>
+<div><p>CondaHTTPError: HTTP 500 INTERNAL ERROR for url &lt;<a class="reference external" href="https://repo.anaconda.com/pkgs/msys2/win-64/m2w64-gettext-0.19.7-2.tar.bz2">https://repo.anaconda.com/pkgs/msys2/win-64/m2w64-gettext-0.19.7-2.tar.bz2</a>&gt;
+Elapsed: 00:30.647993</p>
+<p>An HTTP error occurred when trying to retrieve this URL.
+HTTP errors are often intermittent, and a simple retry will get you on your way.</p>
+</div></blockquote>
+<p>Adding the following line to <code class="docutils literal notranslate"><span class="pre">requirements.yml</span></code> should work:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">msys2::m2w64-gettext</span>
+</pre></div>
+</div>
+<p>This tells conda to fetch <code class="docutils literal notranslate"><span class="pre">m2w64-gettext</span></code> from the <code class="docutils literal notranslate"><span class="pre">msys2</span></code> channel instead. Note that this is only a dependency on Windows,
+so it needs to be commented out on other operating systems (normally it wouldn’t need to be listed, but the above HTTP 500 error indicates that installation from the default source location failed.)</p>
+<p><strong>If you are on the USGS network and get an SSL error message</strong>
+(something similar to <code class="docutils literal notranslate"><span class="pre">SSL:</span> <span class="pre">CERTIFICATE_VERIFY_FAILED</span></code>), you need to configure the <code class="docutils literal notranslate"><span class="pre">pip</span></code> package installer to use the USGS certificate (see <a class="reference internal" href="#installing-the-doi-ssl-certificate-for-use-with-pip">Installing the DOI SSL certificate for use with pip</a> above).</p>
+</div>
 </div>
 </div>
 
@@ -208,10 +334,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="usage.html" class="btn btn-neutral float-right" title="Usage" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="inputs.html" class="btn btn-neutral float-right" title="Input data requirements" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="index.html" class="btn btn-neutral float-left" title="SFRmaker 0.4.0.post16+g65522d8" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="examples.html" class="btn btn-neutral float-left" title="Using SFRmaker with a configuration file" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -221,7 +347,7 @@
   <div role="contentinfo">
     <p>
       <span class="lastupdated">
-        Last updated on Jul 16, 2020.
+        Last updated on Aug 06, 2020.
       </span>
 
     </p>
