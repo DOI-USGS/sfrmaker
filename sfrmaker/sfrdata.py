@@ -1490,9 +1490,16 @@ class SFRData(DataPackage):
                            'STAGE FILEOUT {}.stage.bin'.format(filename),
                            ]
             if write_observations_input and len(self.observations) > 0:
-                obs_input_filename = filename + '.obs'
+                if 'obs6 filein' not in ''.join(options).lower():
+                    obs_input_filename = filename + '.obs'
+                    options.append('OBS6 FILEIN {}'.format(obs_input_filename))
+                else:
+                    for entry in options:
+                        if 'obs6 filein' in entry.lower():
+                            break
+                    _, _, obs_input_filename = entry.split()
                 self.write_mf6_sfr_obsfile(filename=obs_input_filename)
-                options.append('OBS6 FILEIN {}'.format(obs_input_filename))
+
 
             sfr6 = Mf6SFR(SFRData=self, period_data=self.period_data,
                           idomain=idomain,

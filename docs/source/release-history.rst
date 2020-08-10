@@ -2,6 +2,9 @@
 Release History
 ===============
 
+Version 0.6.0 (2020-xx-xx)
+--------------------------
+
 Version 0.5.0 (2020-08-10)
 --------------------------
 * added from_yaml method to construct an SFR package from a configuration file
