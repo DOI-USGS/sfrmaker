@@ -1432,10 +1432,12 @@ class SFRData(DataPackage):
         kwargs : keyword arguments to flopy.modflow.ModflowSfr2.check()
 
         """
-        self.create_modflow_sfr2(model=self.model)
-        if checkfile is None:
-            checkfile = '{}_SFR.chk'.format(self.package_name)
-        self._ModflowSfr2.check(checkfile, **kwargs)
+        if flopy:
+            print('\nRunning Flopy v. {} diagnostics...'.format(flopy.__version__))
+            self.create_modflow_sfr2(model=self.model)
+            if checkfile is None:
+                checkfile = '{}_SFR.chk'.format(self.package_name)
+            self._ModflowSfr2.check(checkfile, **kwargs)
         print('wrote {}'.format(checkfile))
 
     def write_package(self, filename=None, version='mf2005', idomain=None,
@@ -1450,6 +1452,7 @@ class SFRData(DataPackage):
         version : str
             'mf2005' or 'mf6'
         """
+        print('SFRmaker v. {}'.format(sfrmaker.__version__))
         # run the flopy SFR diagnostics
         if run_diagnostics:
             self.run_diagnostics()

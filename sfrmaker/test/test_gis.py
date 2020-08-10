@@ -1,7 +1,7 @@
 import os
 import numpy as np
 import pytest
-from ..gis import CRS, get_bbox
+from sfrmaker.gis import CRS, get_bbox, intersect
 
 
 # basic test that different input options don't crash CRS.__init__
@@ -109,5 +109,14 @@ def test_get_bbox(project_root_path):
     assert np.allclose(bbox, (-90.62442575352304, 46.37890212020774, -90.46249896050521, 46.458360301848685))
 
 
-def test_rtree():
+@pytest.mark.skip(reason='still working on faster intersection method')
+@pytest.fixture(scope='module')
+def intersected(tylerforks_sfrmaker_grid_from_flopy, tylerforks_lines_from_NHDPlus):
+    #results = intersect()
+    pass
+
+
+@pytest.mark.skip(reason='still working on faster intersection method')
+def test_intersect():
     from rtree import index
+    pass

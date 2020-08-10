@@ -262,18 +262,18 @@ def read_mf6_block(filename, blockname):
     per = None
     with open(filename) as src:
         for line in src:
-            line = line.lower()
+            line = line.lower().strip().replace('\\', '/')
             if 'begin' in line and blockname in line:
                 if blockname == 'period':
-                    per = int(line.strip().split()[-1])
+                    per = int(line.split()[-1])
                     data[per] = []
                 elif blockname == 'continuous':
-                    fname = line.strip().split()[-1]
+                    fname = line.split()[-1]
                     data[fname] = []
                 elif blockname == 'packagedata':
                     data['packagedata'] = []
                 else:
-                    blockname = line.strip().split()[-1]
+                    blockname = line.split()[-1]
                     data[blockname] = []
                 read = blockname
                 continue
@@ -282,17 +282,17 @@ def read_mf6_block(filename, blockname):
                 read = False
                 #break
             if read == 'options':
-                line = line.strip().split()
+                line = line.split()
                 data[line[0]] = line[1:]
             elif read == 'packages':
-                pckg, fname, ext = line.strip().split()
+                pckg, fname, ext = line.split()
                 data[pckg] = fname
             elif read == 'period':
-                data[per].append(' '.join(line.strip().split()))
+                data[per].append(' '.join(line.split()))
             elif read == 'continuous':
-                data[fname].append(' '.join(line.strip().split()))
+                data[fname].append(' '.join(line.split()))
             elif read == 'packagedata':
-                data['packagedata'].append(' '.join(line.strip().split()))
+                data['packagedata'].append(' '.join(line.split()))
             elif read == blockname:
-                data[blockname].append(' '.join(line.strip().split()))
+                data[blockname].append(' '.join(line.split()))
     return data
