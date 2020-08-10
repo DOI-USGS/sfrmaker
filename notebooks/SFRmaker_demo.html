@@ -565,6 +565,17 @@ finished in 0.04s
 
 </pre></div></div>
 </div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/home/travis/miniconda/envs/test/lib/python3.8/site-packages/pyproj/crs/crs.py:393: FutureWarning: &#39;+init=&lt;authority&gt;:&lt;code&gt;&#39; syntax is deprecated. &#39;&lt;authority&gt;:&lt;code&gt;&#39; is the preferred initialization method. When making the change, be mindful of axis order changes: https://pyproj4.github.io/pyproj/stable/gotchas.html#axis-order-changes-in-proj-6
+  return CRS(_prepare_from_string(in_crs_string))
+/home/travis/miniconda/envs/test/lib/python3.8/site-packages/pyproj/crs/crs.py:280: FutureWarning: &#39;+init=&lt;authority&gt;:&lt;code&gt;&#39; syntax is deprecated. &#39;&lt;authority&gt;:&lt;code&gt;&#39; is the preferred initialization method. When making the change, be mindful of axis order changes: https://pyproj4.github.io/pyproj/stable/gotchas.html#axis-order-changes-in-proj-6
+  projstring = _prepare_from_string(projparams)
+</pre></div></div>
+</div>
 <p>Alternatively, <code class="docutils literal notranslate"><span class="pre">sfrmaker.Lines</span></code> can be instantiated with separate arguments for each NHDPlus file used:</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
@@ -810,7 +821,7 @@ EPSG:26715
 Culling hydrography to active area...
 starting lines: 17
 remaining lines: 17
-finished in 0.01s
+finished in 0.00s
 
 
 Intersecting 17 flowlines with 17,760 grid cells...
@@ -820,7 +831,7 @@ finished in 1.96s
 
 Intersecting 17 features...
 17
-finished in 0.11s
+finished in 0.09s
 
 Setting up reach data... (may take a few minutes for large grids)
 finished in 0.32s
