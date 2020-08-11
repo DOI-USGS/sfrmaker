@@ -12,7 +12,15 @@
    "cell_type": "code",
    "execution_count": 1,
    "metadata": {},
-   "outputs": [],
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "flopy is installed in /home/travis/miniconda/envs/test/lib/python3.7/site-packages/flopy\n"
+     ]
+    }
+   ],
    "source": [
     "import numpy as np\n",
     "import matplotlib.pyplot as plt\n",
@@ -89,9 +97,6 @@
       "--> building dataframe... (may take a while for large shapefiles)\n",
       "\n",
       "reading ../tylerforks/NHDPlus/NHDPlusAttributes/PlusFlow.dbf...\n",
-      "--> building dataframe... (may take a while for large shapefiles)\n",
-      "\n",
-      "reading ../tylerforks/NHDPlus/NHDPlusAttributes/elevslope.dbf...\n",
       "--> building dataframe... (may take a while for large shapefiles)\n"
      ]
     },
@@ -99,9 +104,9 @@
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "/home/travis/miniconda/envs/test/lib/python3.8/site-packages/pyproj/crs/crs.py:393: FutureWarning: '+init=<authority>:<code>' syntax is deprecated. '<authority>:<code>' is the preferred initialization method. When making the change, be mindful of axis order changes: https://pyproj4.github.io/pyproj/stable/gotchas.html#axis-order-changes-in-proj-6\n",
+      "/home/travis/miniconda/envs/test/lib/python3.7/site-packages/pyproj/crs/crs.py:393: FutureWarning: '+init=<authority>:<code>' syntax is deprecated. '<authority>:<code>' is the preferred initialization method. When making the change, be mindful of axis order changes: https://pyproj4.github.io/pyproj/stable/gotchas.html#axis-order-changes-in-proj-6\n",
       "  return CRS(_prepare_from_string(in_crs_string))\n",
-      "/home/travis/miniconda/envs/test/lib/python3.8/site-packages/pyproj/crs/crs.py:280: FutureWarning: '+init=<authority>:<code>' syntax is deprecated. '<authority>:<code>' is the preferred initialization method. When making the change, be mindful of axis order changes: https://pyproj4.github.io/pyproj/stable/gotchas.html#axis-order-changes-in-proj-6\n",
+      "/home/travis/miniconda/envs/test/lib/python3.7/site-packages/pyproj/crs/crs.py:280: FutureWarning: '+init=<authority>:<code>' syntax is deprecated. '<authority>:<code>' is the preferred initialization method. When making the change, be mindful of axis order changes: https://pyproj4.github.io/pyproj/stable/gotchas.html#axis-order-changes-in-proj-6\n",
       "  projstring = _prepare_from_string(projparams)\n"
      ]
     },
@@ -110,7 +115,10 @@
      "output_type": "stream",
      "text": [
       "\n",
-      "load finished in 0.21s\n",
+      "reading ../tylerforks/NHDPlus/NHDPlusAttributes/elevslope.dbf...\n",
+      "--> building dataframe... (may take a while for large shapefiles)\n",
+      "\n",
+      "load finished in 0.23s\n",
       "\n",
       "Getting routing information from NHDPlus Plusflow table...\n",
       "finished in 0.02s\n",
@@ -155,7 +163,7 @@
       "reading ../tylerforks/NHDPlus/NHDPlusAttributes/elevslope.dbf...\n",
       "--> building dataframe... (may take a while for large shapefiles)\n",
       "\n",
-      "load finished in 0.06s\n",
+      "load finished in 0.07s\n",
       "\n",
       "Getting routing information from NHDPlus Plusflow table...\n",
       "finished in 0.02s\n",
@@ -288,7 +296,7 @@
     {
      "data": {
       "text/plain": [
-       "<matplotlib.image.AxesImage at 0x7f2a089b44f0>"
+       "<matplotlib.image.AxesImage at 0x7f833366b610>"
       ]
      },
      "execution_count": 9,
@@ -369,12 +377,12 @@
      "output_type": "stream",
      "text": [
       "\n",
-      "SFRmaker version 0.5.0\n",
+      "SFRmaker version 0.5.0.post1.dev0+gf32c45b\n",
       "\n",
       "Creating sfr dataset...\n",
       "\n",
       "Creating grid class instance from flopy Grid instance...\n",
-      "grid class created in 0.23s\n",
+      "grid class created in 0.30s\n",
       "\n",
       "Model grid information\n",
       "structured grid\n",
@@ -418,14 +426,14 @@
       "Intersecting 17 flowlines with 17,760 grid cells...\n",
       "\n",
       "Building spatial index...\n",
-      "finished in 1.64s\n",
+      "finished in 1.73s\n",
       "\n",
       "Intersecting 17 features...\n",
       "17\n",
-      "finished in 0.09s\n",
+      "finished in 0.10s\n",
       "\n",
       "Setting up reach data... (may take a few minutes for large grids)\n",
-      "finished in 0.27s\n",
+      "finished in 0.28s\n",
       "\n",
       "Computing widths...\n",
       "\n",
@@ -461,7 +469,7 @@
       "active area defined by: all cells\n",
       "\n",
       "\n",
-      "Time to create sfr dataset: 2.55s\n",
+      "Time to create sfr dataset: 2.76s\n",
       "\n"
      ]
     }
@@ -914,11 +922,11 @@
      "output_type": "stream",
      "text": [
       "running rasterstats.zonal_stats on buffered LineStrings...\n",
-      "finished in 4.19s\n",
+      "finished in 4.70s\n",
       "\n",
       "\n",
       "Smoothing elevations...\n",
-      "finished in 0.14s\n"
+      "finished in 0.13s\n"
      ]
     }
    ],
@@ -1180,7 +1188,7 @@
      "output_type": "stream",
      "text": [
       "\n",
-      "Running Flopy v. 3.3.2 diagnostics...\n",
+      "Running Flopy v. 3.3.1 diagnostics...\n",
       "wrote tf_SFR.chk\n"
      ]
     }
@@ -1206,9 +1214,9 @@
      "name": "stdout",
      "output_type": "stream",
      "text": [
-      "SFRmaker v. 0.5.0\n",
+      "SFRmaker v. 0.5.0.post1.dev0+gf32c45b\n",
       "\n",
-      "Running Flopy v. 3.3.2 diagnostics...\n",
+      "Running Flopy v. 3.3.1 diagnostics...\n",
       "passed.\n",
       "\n",
       "Checking for continuity in segment and reach numbering...\n",
@@ -1325,9 +1333,9 @@
      "name": "stdout",
      "output_type": "stream",
      "text": [
-      "SFRmaker v. 0.5.0\n",
+      "SFRmaker v. 0.5.0.post1.dev0+gf32c45b\n",
       "\n",
-      "Running Flopy v. 3.3.2 diagnostics...\n",
+      "Running Flopy v. 3.3.1 diagnostics...\n",
       "passed.\n",
       "\n",
       "Checking for continuity in segment and reach numbering...\n",
@@ -1565,7 +1573,7 @@
    "name": "python",
    "nbconvert_exporter": "python",
    "pygments_lexer": "ipython3",
-   "version": "3.8.5"
+   "version": "3.7.8"
   }
  },
  "nbformat": 4,
