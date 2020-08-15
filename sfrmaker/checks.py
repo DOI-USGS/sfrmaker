@@ -206,9 +206,20 @@ def same_sfr_numbering(reach_data1, reach_data2):
 def reach_elevations_decrease_downstream(reach_data):
     """Verify that reach elevations decrease monotonically in the downstream direction."""
     rd = reach_data.reset_index()
-    elev = dict(zip(rd.rno, rd.strtop))
-    dnelev = {rid: elev[rd.outreach[i]] if rd.outreach[i] != 0
-    else -9999 for i, rid in enumerate(rd.rno)}
+    return elevations_decrease_downstream(rd.rno, rd.outreach, rd.strtop)
+    #elev = dict(zip(rd.rno, rd.strtop))
+    #dnelev = {rid: elev[rd.outreach[i]] if rd.outreach[i] != 0
+    #else -9999 for i, rid in enumerate(rd.rno)}
+    #diffs = np.array([(dnelev[i] - elev[i]) if dnelev[i] != -9999
+    #                  else -.001 for i in rd.rno])
+    #return np.max(diffs) <= 0
+
+
+def elevations_decrease_downstream(ids, toids, elevations):
+    """Verify that reach elevations decrease monotonically in the downstream direction."""
+    elev = dict(zip(ids, elevations))
+    dnelev = {rid: elev[toids[i]] if toids[i] != 0
+              else -9999 for i, rid in enumerate(ids)}
     diffs = np.array([(dnelev[i] - elev[i]) if dnelev[i] != -9999
-                      else -.001 for i in rd.rno])
+                      else -.001 for i in ids])
     return np.max(diffs) <= 0

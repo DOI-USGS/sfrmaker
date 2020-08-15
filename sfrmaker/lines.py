@@ -430,14 +430,14 @@ class Lines:
                                   attr_height_units='meters',
                                   epsg=epsg, proj_str=proj_str, prjfile=prjfile)
 
-
     def to_sfr(self, grid=None,
                active_area=None, isfr=None,
                model=None,
                model_length_units='undefined',
                minimum_reach_length=None,
+               width_from_asum_a_param=0.1193,
+               width_from_asum_b_param=0.5032,
                minimum_reach_width=1.,
-               cull_flowlines_to_active_area=True,
                consolidate_conductance=False, one_reach_per_cell=False,
                package_name=None,
                **kwargs):
@@ -446,15 +446,38 @@ class Lines:
 
         Parameters
         ----------
-        grid : sfrmaker.grid instance
-            Describes the numerical model grid. Grid must have
-        minimum_reach_length : float
+        grid : sfrmaker.grid or flopy.discretization.StructuredGrid
+            Numerica model grid instance. Required unless an attached model
+            has a valid modelgrid attribute.
+        active_area : shapely Polygon, list of shapely Polygons, or shapefile path; optional
+            Shapely Polygons must be in same CRS as input flowlines; shapefile
+            features will be reprojected if their crs is different.
+        isfr : ndarray, optional
+            Numpy integer array of the same size as the model grid, designating area that will
+            be populated with SFR reaches (0=no SFR; 1=SFR). An isfr array of shape
+            nrow x ncol will be broadcast to all layers. Only required if a model is not
+            supplied, or if SFR is only desired in a subset of active model cells.
+            By default, None, in which case the model ibound or idomain array will be used.
+        model : flopy.modflow.Modflow or flopy.mf6.ModflowGwf, optional
+            Flopy model instance
+        model_length_units : str; e.g. {'ft', 'feet', 'meters', etc.}, optional
+            Length units of the model. While SFRmaker will try to read these
+            from a supplied grid (first) and then a supplied model (second),
+            it is good practice to specify them explicitly here.
+        minimum_reach_length : float, optional
             Minimum reach length to retain. Default is to compute
             an effective mean model cell length by taking the square root
             of the average cell area, and then set minimum_reach_length
             to 5% of effective mean cell length.
-                minimum_reach_length : float
-        minimum_reach_width : float
+        width_from_asum_a_param : float, optional
+            :math:`a` parameter used for estimating channel width from arbolate sum.
+            Only needed if input flowlines are lacking width information.
+            See :func:`~sfrmaker.utils.width_from_arbolate`. By default, 0.1193.
+        width_from_asum_b_param : float, optional
+            :math:`b` parameter used for estimating channel width from arbolate sum.
+            Only needed if input flowlines are lacking width information.
+            See :func:`~sfrmaker.utils.width_from_arbolate`. By default, 0.5032.
+        minimum_reach_width : float, optional
             Minimum reach width to specify (in model units), if computing widths from
             arbolate sum values. (default = 1)
         consolidate_conductance : bool
@@ -467,11 +490,12 @@ class Lines:
             the most downstream reach are dropped.
         package_name : str
             Base name for writing sfr output.
-        kwargs : keyword arguments to sfrmaker.sfrdata
+        kwargs : keyword arguments to sfrmaker.SFRData
 
         Returns
         -------
-        sfrdata : sfrmaker.sfrdata instance
+        sfrdata : sfrmaker.SFRData instance
+
         """
         print("\nSFRmaker version {}".format(sfrmaker.__version__))
         print("\nCreating sfr dataset...")
@@ -506,11 +530,11 @@ class Lines:
         # reproject the flowlines if they aren't in same CRS as grid
         if self.crs != grid.crs:
             self.reproject(grid.crs.proj_str)
-        if cull_flowlines_to_active_area:
-            if grid.active_area is not None:
-                self.cull(grid.active_area, inplace=True, simplify=True, tol=2000)
-            elif grid._bounds is not None:  # cull to grid bounding box if already computed
-                self.cull(box(*grid._bounds), inplace=True)
+        # cull the flowlines to the active part of the model grid
+        if grid.active_area is not None:
+            self.cull(grid.active_area, inplace=True, simplify=True, tol=2000)
+        elif grid._bounds is not None:  # cull to grid bounding box if already computed
+            self.cull(box(*grid._bounds), inplace=True)
         if package_name is None:
             if model is not None:
                 package_name = model.name
@@ -566,10 +590,6 @@ class Lines:
             lengths['rchlen'] = np.array([g.length for g in lengths.geometry]) * self.geometry_to_m
             groups = lengths.groupby('line_id')  # fragments grouped by parent line
 
-            # segment_asums = [asums[id] for id in lengths.line_id]
-            # reach_cumsums = np.concatenate([np.cumsum(grp.rchlen.values[::-1])[::-1] - 0.5*grp.rchlen.values
-            #                              for s, grp in groups])
-            # reach_asums = -1 * reach_cumsums + segment_asums
             reach_cumsums = []
             ordered_ids = rd.line_id.loc[rd.line_id.diff() != 0].values
             for id in ordered_ids:
@@ -582,14 +602,27 @@ class Lines:
             # maintain positive asums; lengths in NHD often aren't exactly equal to feature lengths
             # reach_asums[reach_asums < 0.] = 0
             rd['asum'] = reach_asums
-            # width estimation formula expects meters
-            width = width_from_arbolate_sum(reach_asums)
-            rd['width'] = width * convert_length_units('meters', model_length_units) # convert back to model units
+            width = width_from_arbolate_sum(reach_asums,
+                                            a=width_from_asum_a_param,
+                                            b=width_from_asum_b_param,
+                                            minimum_width=minimum_reach_width,
+                                            input_units='meters', output_units=model_length_units)
+            rd['width'] = width
             rd.loc[rd.width < minimum_reach_width, 'width'] = minimum_reach_width
 
             # assign width1 and width2 back to segment data
-            self.df['width1'] = width_from_arbolate_sum(self.df.asum1.values) * mult
-            self.df['width2'] = width_from_arbolate_sum(self.df.asum2.values) * mult
+            self.df['width1'] = width_from_arbolate_sum(self.df.asum1.values,
+                                            a=width_from_asum_a_param,
+                                            b=width_from_asum_b_param,
+                                            minimum_width=minimum_reach_width,
+                                            input_units=self.attr_length_units,
+                                            output_units=model_length_units)
+            self.df['width2'] = width_from_arbolate_sum(self.df.asum2.values,
+                                                        a=width_from_asum_a_param,
+                                                        b=width_from_asum_b_param,
+                                                        minimum_width=minimum_reach_width,
+                                                        input_units=self.attr_length_units,
+                                                        output_units=model_length_units)
 
         # interpolate linestring end widths to intersected reaches
         else:

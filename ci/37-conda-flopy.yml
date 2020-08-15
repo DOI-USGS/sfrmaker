@@ -34,4 +34,5 @@ dependencies:
   - gis-utils
   - pip
   - pip:
+    - pytest-timeout
     - modflow-export

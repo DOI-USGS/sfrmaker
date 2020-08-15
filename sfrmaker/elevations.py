@@ -6,7 +6,27 @@ import numpy as np
 from sfrmaker.routing import get_nextupsegs, get_upsegs, make_graph
 
 
-def smooth_elevations(fromids, toids, elevations):  # elevup, elevdn):
+def smooth_elevations(fromids, toids, elevations, start_elevations=None):  # elevup, elevdn):
+    """
+
+    Parameters
+    ----------
+    fromids : sequence of hashables
+    toids : sequence of hashables
+        Downstream connections of fromids
+    elevations : sequence of floats
+        Elevation for each edge (line) in a stream network, or if start_elevations
+        are specified, the end elevation for each edge.
+    start_elevations : sequence of floats, optional
+        Start elevation for edge (line) in a stream network.
+        By default, None.
+
+    Returns
+    -------
+    Elevations : dict or tuple
+        Dictionary of smoothed edge elevations,
+        or smoothed end elevations, start elevations
+    """
     # make forward and reverse dictionaries with routing info
     graph = dict(zip(fromids, toids))
     assert 0 in set(graph.values()), 'No outlets in routing network!'
@@ -14,8 +34,8 @@ def smooth_elevations(fromids, toids, elevations):  # elevup, elevdn):
 
     # make dictionaries of segment end elevations
     elevations = dict(zip(fromids, elevations))
-
-    # elevmax = dict(zip(fromids, elevup))
+    if start_elevations is not None:
+        elevmax = dict(zip(fromids, start_elevations))
 
     def get_upseg_levels(seg):
         """Traverse routing network, returning a list of segments
@@ -51,15 +71,19 @@ def smooth_elevations(fromids, toids, elevations):  # elevup, elevdn):
         oldmin_s = elevations[seg]
         elevs = [elevmin_s, oldmin_s]
         if oseg > 0:  # if segment is not an outlet,
-            pass  # elevs.append(elevmax[oseg])  # outseg start elevation (already updated)
+            if start_elevations is not None:
+                elevs.append(elevmax[oseg]) # outseg start elevation (already updated)
         # set segment end elevation as min of
         # upstream elevations, current elevation, outseg start elevation
         elevations[seg] = np.min(elevs)
         # if the node is not an outlet, reset the outseg max if the current min is lower
         if oseg > 0:
-            # outseg_max = elevmax[oseg]
-            next_reach_elev = elevations[oseg]
-            elevations[graph[seg]] = np.min([elevmin_s, next_reach_elev])
+            if start_elevations is not None:
+                next_reach_elev = elevmax[oseg]
+                elevmax[graph[seg]] = np.min([elevmin_s, next_reach_elev])
+            else:
+                next_reach_elev = elevations[oseg]
+                elevations[graph[seg]] = np.min([elevmin_s, next_reach_elev])
 
     print('\nSmoothing elevations...')
     ta = time.time()
@@ -69,4 +93,6 @@ def smooth_elevations(fromids, toids, elevations):  # elevup, elevdn):
     for level in segment_levels:
         [reset_elevations(s) for s in level]
     print("finished in {:.2f}s".format(time.time() - ta))
+    if start_elevations is not None:
+        return elevations, elevmax
     return elevations

@@ -33,5 +33,6 @@ dependencies:
   - gis-utils
   - pip
   - pip:
+    - pytest-timeout
     - git+git://github.com/modflowpy/flopy@develop
     - modflow-export

@@ -1,5 +1,7 @@
 References
 ##############
+Allen, G. H., and T. M. Pavelsky (2015), Patterns of river width and surface area revealed by the satellite-derived North American River Width data set, Geophys. Res. Lett., 42, 395–402, doi:10.1002/ 2014GL062764.
+
 Anderson, M.P., Woessner, W.W., and Hunt, R.J., 2015, Applied ground- water modeling—Simulation of flow and advective transport (2nd ed.): Academic Press, Inc., 564 p.
 
 Clark, B.R., Barlow, P.M., Peterson, S.M., Hughes, J.D., Reeves, H.W., and Viger, R.J., 2018, National-scale grid to support regional groundwater availability studies and a national hydrogeologic database: U.S. Geological Survey data release, https://doi.org/10.5066/F7P84B24.
@@ -18,7 +20,11 @@ Langevin, C.D., Hughes, J.D., Banta, E.R., Niswonger, R.G., Panday, Sorab, and P
 
 Leaf, A.T., Fienen, M.N., Hunt, R.J., and Buchwald, C.A., 2015, Groundwater/Surface-Water Interactions in the Bad River Watershed, Wisconsin: U.S. Geological Survey Scientific Investigations Report 2015–5162, 110 p., http://dx.doi.org/10.3133/sir20155162.
 
+Leaf, Andrew T., 2020, Automated construction of streamflow-routing networks for MODFLOW: application in the Mississippi Embayment region: U.S. Geological Survey Scientific Investigations Report 2020-XXXX, in revision.
+
 McKay, L., Bondelid, T., Dewald, T., Johnston, J., Moore, R., and Rea, A., 2012, NHDPlus Version 2—User guide, accessed November 15, 2014, at http://www.horizon-systems.com/NHDPlus/ NHDPlusV2_documentation.php.
+
+Park, C. C. (1977), World-wide variations in hydraulic geometry exponents of stream channels: An analysis and some observations, J. Hydrol., 33(1–2), 133–146, doi:10.1016/0022-1694(77)90103-2.
 
 Peng, R.D., 2011. Reproducible research in computational science, Science v. 334, no. 6060, p. 1226-1227. DOI: 10.1126/science.1213847
 

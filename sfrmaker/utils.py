@@ -6,6 +6,7 @@ import pprint
 import numpy as np
 
 from sfrmaker.routing import get_upsegs, make_graph
+from sfrmaker.units import convert_length_units
 
 unit_conversion = {'feetmeters': 0.3048,
                    'metersfeet': 1 / .3048}
@@ -161,31 +162,6 @@ def arbolate_sum(segment, lengths, routing):
     return asum
 
 
-def width_from_arbolate_sum(arbolate_sum, minimum_width=1):
-    """Estimate stream width in feet from arbolate sum in meters, using relationship
-    described by Feinstein et al (2010), Appendix 2, p 266.
-
-    Parameters
-    ----------
-    arbolate: float
-        Arbolate sum in meters.
-
-    Returns
-    -------
-    width: float
-        Estimated width in meters (original formula returned width in ft)
-    """
-    scalar = np.isscalar(arbolate_sum)
-    if scalar:
-        arbolate_sum = np.array([arbolate_sum])
-    w = 0.3048 * 0.1193 * arbolate_sum ** 0.5032
-    fill = np.isnan(w) | (w == 0)
-    w[fill] = minimum_width
-    if scalar:
-        return w[0]
-    return w
-
-
 def get_input_arguments(kwargs, function, warn=False):
     """Return subset of keyword arguments in kwargs dict
     that are valid parameters to a function or method.
@@ -269,3 +245,95 @@ def update(d, u):
         else:
             d = {k: v}
     return d
+
+
+def width_from_arbolate_sum_old(arbolate_sum, minimum_width=1):
+    """Estimate stream width in feet from arbolate sum in meters, using relationship
+    described by Feinstein et al (2010), Appendix 2, p 266.
+
+    Parameters
+    ----------
+    arbolate: float
+        Arbolate sum in meters.
+
+    Returns
+    -------
+    width: float
+        Estimated width in meters (original formula returned width in ft)
+    """
+    scalar = np.isscalar(arbolate_sum)
+    if scalar:
+        arbolate_sum = np.array([arbolate_sum])
+    w = 0.3048 * 0.1193 * arbolate_sum ** 0.5032
+    fill = np.isnan(w) | (w == 0)
+    w[fill] = minimum_width
+    if scalar:
+        return w[0]
+    return w
+
+
+def width_from_arbolate_sum(asum, a=0.1193, b=0.5032, minimum_width=1., input_units='meters',
+                            output_units='meters'):
+    """Estimate stream width from arbolate sum, using a power law regression
+    comparing measured channel widths to arbolate sum.
+    (after Leaf, 2020 and Feinstein et al. 2010, Appendix 2, p 266.)
+
+    .. math::
+        width = unit\_conversion * a * {asum_{(meters)}}^b
+
+    Parameters
+    ----------
+    asum: float or 1D array
+        Arbolate sum in the input units.
+    a : float
+        Multiplier parameter. Literature values:
+        Feinstein et al (2010; Lake MI Basin): 0.1193
+        Leaf (2020; Mississippi Embayment): 0.0592
+    b : float
+        Exponent in power law relationship. Literature values:
+        Feinstein et al (2010; Lake MI Basin): 0.5032
+        Leaf (2020; Mississippi Embayment): 0.5127
+    minimum_width : float
+        Minimum width to be returned. By default, 1.
+    input_units : str, any length unit; e.g. {'m', 'meters', 'km', etc.}
+        Length unit of asum
+    output_units : str, any length unit; e.g. {'m', 'meters', 'ft', etc.}
+        Length unit of output width
+
+    Returns
+    -------
+    width: float
+        Estimated width in feet
+
+    Notes
+    -----
+    The original relationship described by Feinstein et al (2010) was for arbolate sum in meters
+    and output widths in feet. The :math:`u` values above reflect this unit conversion. Therefore, the
+    :math:`unit\_conversion` parameter above includes conversion of the input to meters, and output
+    from feet to the specified output units.
+
+    NaN arbolate sums are filled with the specified ``minimum_width``.
+
+    References
+    ----------
+    see :doc:`References Cited <../references>`
+
+    Examples
+    --------
+    Original equation from Feinstein et al (2010), for arbolate sum of 1,000 km:
+    >>> width = width_from_arbolate_sum(1000, 0.1193, 0.5032, input_units='kilometers', output_units='feet')
+    >>> round(width, 2)
+    124.69
+    """
+    if not np.isscalar(asum):
+        asum = np.atleast_1d(np.squeeze(asum))
+    input_unit_conversion = convert_length_units(input_units, 'meters')
+    output_unit_conversion = convert_length_units('feet', output_units)
+    w = output_unit_conversion * a * (asum * input_unit_conversion) ** b
+    if not np.isscalar(asum):
+        w[np.isnan(w)] = float(minimum_width)
+    elif np.isnan(w):
+        w = minimum_width
+    else:
+        pass
+    return w

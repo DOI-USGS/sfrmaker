@@ -93,7 +93,7 @@ def get_upsegs(graph_r, seg):
     return all_upsegs
 
 
-def find_path(graph, start, end=0):
+def find_path(graph, start, end=0, limit=None):
     """Get a path through the routing network,
     from a segment to an outlet.
 
@@ -105,6 +105,9 @@ def find_path(graph, start, end=0):
         Starting segment
     end : int
         Ending segment (default 0)
+    limit : int
+        Option to limit the length of the path returned.
+        By default, None (path is traced to the end routing number).
 
     Returns
     -------
@@ -112,16 +115,18 @@ def find_path(graph, start, end=0):
         List of segment numbers along routing path.
     """
     graph = graph.copy()
-    return _find_path(graph, start, end=end)
+    return _find_path(graph, start, end=end, limit=limit)
 
 
-def _find_path(graph, start, end=0, path=None):
+def _find_path(graph, start, end=0, path=None, limit=None):
     """Like find_path, but doesn't copy the routing
     dictionary (graph) so that the recursion works.
     """
     if path is None:
         path = list()
     path = path + [start]
+    if limit is not None and len(path) == limit:  # limit recursion depth
+        return path
     if start == end:
         return path
     if start not in graph:

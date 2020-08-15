@@ -263,7 +263,7 @@ def locate_sites(site_data,
         writing output_csv_file and output_shape_file.
     perimeter_buffer : scalar
         Exclude flows within this distance of perimeter defined
-        by active_area_shapefile. For example, a value of 1000 would
+        by active_area. For example, a value of 1000 would
         mean that sites must be at least 1 km inside of the active area perimeter to
         be included.
     distance_threshold : scalar

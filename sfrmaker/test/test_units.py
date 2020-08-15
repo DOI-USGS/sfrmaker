@@ -17,19 +17,29 @@ def test_convert_flux():
 
 
 def test_convert_length_units():
-    assert np.allclose(convert_length_units(2, 1), 1 / .3048)
+    assert np.allclose(convert_length_units(2, 1), 1/.3048)
     assert np.allclose(convert_length_units(1, 2), .3048)
-    assert np.allclose(convert_length_units('meters', 'feet'), 1 / .3048)
+    assert np.allclose(convert_length_units('meters', 'feet'), 1/.3048)
     assert np.allclose(convert_length_units('feet', 'meters'), .3048)
-    assert np.allclose(convert_length_units('m', 'ft'), 1 / .3048)
+    assert np.allclose(convert_length_units('m', 'ft'), 1/.3048)
     assert np.allclose(convert_length_units('ft', 'm'), .3048)
+    assert np.allclose(convert_length_units(None, 'm'), 1.)
+    assert np.allclose(convert_length_units('millimeters', 'meters'), 1/1000)
+    assert np.allclose(convert_length_units('meters', 'millimeters'), 1000)
+    assert np.allclose(convert_length_units('meters', 'km'), 0.001)
+    assert np.allclose(convert_length_units('kilometers', 'meters'), 1000)
+    assert np.allclose(convert_length_units('kilometers', 'cm'), 1000*100)
 
 
 def test_convert_time_units():
     assert np.allclose(convert_time_units(4, 1), 86400)
     assert np.allclose(convert_time_units('days', 'seconds'), 86400)
     assert np.allclose(convert_time_units('d', 's'), 86400)
-    assert np.allclose(convert_time_units(1, 4), 1 / 86400)
+    assert np.allclose(convert_time_units(1, 4), 1/86400)
+    assert np.allclose(convert_time_units(None, 'd'), 1.)
+    assert np.allclose(convert_time_units(5, 4), 1/365.25)
+    assert np.allclose(convert_time_units(4, 5), 365.25)
+    assert np.allclose(convert_time_units('years', 'days'), 1/365.25)
 
 
 def test_get_model_length_units():

@@ -1,7 +1,7 @@
 # TODO: add unit tests for utils.py
 import numpy as np
-
-from ..utils import assign_layers
+import pytest
+from sfrmaker.utils import assign_layers, width_from_arbolate_sum
 
 
 def test_assign_layers(shellmound_sfrdata, shellmound_model):
@@ -16,3 +16,25 @@ def test_assign_layers(shellmound_sfrdata, shellmound_model):
                   shellmound_model.dis.botm.array[rd.k.values,
                                                   rd.i.values,
                                                   rd.j.values])
+
+
+@pytest.mark.parametrize('asum,expected',
+                         ((1e6, 124.7*.3048),)
+                         )
+def test_width_from_arbolate_sum_defaults(asum, expected):
+    result = width_from_arbolate_sum(asum)
+    assert np.allclose(result, expected, rtol=1e-4)
+
+
+@pytest.mark.parametrize('asum,a,b,input_units,output_units,expected',
+                         ((1e6, 0.1193, 0.5032, 'meters', 'feet', 124.7),
+                          (1e3, 0.1193, 0.5032, 'km', 'meters', 124.7*.3048),
+                          (1e6, 0.0628, 0.5099, 'meters', 'feet', 72.00),
+                          (1e3, 0.0628, 0.5099, 'km', 'meters', 72.00*.3048),
+                          ([1e3], 0.0628, 0.5099, 'km', 'meters', [72.00*.3048]),
+                          (np.array([1e3]), 0.0628, 0.5099, 'km', 'meters', [72.00*.3048]))
+                         )
+def test_width_from_arbolate_sum(asum, a, b, input_units, output_units, expected):
+    result = width_from_arbolate_sum(asum, a, b, minimum_width=1,
+                                     input_units=input_units, output_units=output_units)
+    assert np.allclose(result, expected, rtol=1e-4)
