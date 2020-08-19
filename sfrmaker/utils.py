@@ -126,7 +126,7 @@ def get_sfr_package_format(sfr_package_file):
     return format
 
 
-def arbolate_sum(segment, lengths, routing):
+def arbolate_sum(segment, lengths, routing, starting_asums=None):
     """Compute the total length of all tributaries upstream from
     segment, including that segment, using the supplied lengths and
     routing connections.
@@ -142,23 +142,29 @@ def arbolate_sum(segment, lengths, routing):
     routing : dict
         Dictionary describing routing connections between
         segments (nodes); values represent downstream connections.
+    starting_asums : dict
+        Option to supply starting arbolate sum values for any of
+        the segments. By default, None.
 
     Returns
     -------
     asum : float or dict
         Arbolate sums for each segment.
     """
-    scalar = False
     if np.isscalar(segment):
-        scalar = True
         segment = [segment]
     graph_r = make_graph(list(routing.values()), list(routing.keys()))
 
     asum = {}
     for s in segment:
         upsegs = get_upsegs(graph_r, s)
-        lnupsegs = [lengths[s] for s in upsegs]
-        asum[s] = np.sum(lnupsegs) + lengths[s]
+        lnupsegs = [lengths[us] for us in upsegs]
+        upstream_starting_asums = [0.]
+        segment_starting_asum = 0.
+        if starting_asums is not None:
+            upstream_starting_asums = [starting_asums.get(us, 0.) for us in upsegs]
+            segment_starting_asum = starting_asums.get(s, 0.)
+        asum[s] = np.sum(lnupsegs) + lengths[s] + np.sum(upstream_starting_asums) + segment_starting_asum
     return asum
 
 

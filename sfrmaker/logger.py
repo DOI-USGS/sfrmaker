@@ -60,7 +60,6 @@ class Logger(object):
             self.f = filename
             self.filename = filename.name
             self.mode = filename.mode
-        self.log("start")
         self.t = datetime.now()
 
     def statement(self, phrase,

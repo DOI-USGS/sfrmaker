@@ -14,7 +14,7 @@ from sfrmaker.logger import Logger
 from sfrmaker.nhdplus_utils import get_nhdplus_v2_filepaths, get_prj_file
 from sfrmaker.routing import find_path, make_graph
 from sfrmaker.units import convert_length_units
-from sfrmaker.utils import width_from_arbolate_sum
+from sfrmaker.utils import width_from_arbolate_sum, arbolate_sum
 
 
 def cull_flowlines(NHDPlus_paths,
@@ -142,7 +142,9 @@ def cull_flowlines(NHDPlus_paths,
     # cull by arbolate sum first
     if asum_thresh is not None:
         logger.statement('Dropping Flowlines with arbolate sum less than {}km'.format(asum_thresh))
-        fl = fl.loc[fl.nhd_asum >= asum_thresh]
+        # exclude streams classified as perennial from threshold
+        criteria = (fl.FCODE == 46006) | (fl.nhd_asum >= asum_thresh)
+        fl = fl.loc[criteria]
 
     # then cull intermittent streams
     if intermittent_streams_asum_thresh is not None:
@@ -225,7 +227,7 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
                        ):
     """Preprocess NHDPlus data to a single DataFrame of flowlines
     that each route to no more than one flowline, with width, elevation
-    and recomputed arbolate sum attributes. A key part of the preprocessing is handling divergences in the stream network, as described in more detail in the ``Notes`` section. In picking routing at divergences, elevations are sampled from the ``demfile`` and included in the output DataFrame. Optionally (via the ``narwidth_shapefile`` arguement), remote sensing-based width estimates from the NARWidth Database (Allen and Pavelsky, 2015) can be included.
+    and recomputed arbolate sum attributes. A key part of the preprocessing is handling divergences in the stream network, as described in more detail in the ``Notes`` section. In picking routing at divergences, values are sampled from the ``demfile`` and included in the output DataFrame. Optionally (via the ``narwidth_shapefile`` arguement), remote sensing-based width estimates from the NARWidth Database (Allen and Pavelsky, 2015) can be included.
 
     Parameters
     ----------
@@ -247,7 +249,7 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
     demfile : str
         Path to DEM raster for project area.
     dem_length_units : str, any length unit; e.g. {'m', 'meters', 'ft', etc.}
-        Length units of elevations in ``demfile``. By default, 'meters'.
+        Length units of values in ``demfile``. By default, 'meters'.
     narwidth_shapefile : str, optional
         Path to shapefile from the NARWidth database (Allen and Pavelsky, 2015).
     waterbody_shapefiles : str or list of strings, optional
@@ -315,9 +317,9 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
         **asum_diff**               float             Difference between recomputed and NHDPlus asums
         **width1asum**              float             asum-based estimate for width at line start
         **width2asum**              float             asum-based estimate for width at line end
-        **narwd_n**                 int               number of elevations for line sampled from NARWidth
+        **narwd_n**                 int               number of values for line sampled from NARWidth
         **narwd_mean**              float             mean elevation sampled from NARWidth
-        **narwd_std**               float             standard deviation in elevations sampled from NARWidth
+        **narwd_std**               float             standard deviation in values sampled from NARWidth
         **narwd_min**               float             minimum elevation sampled from NARWidth
         **narwd_max**               float             maximum elevation sampled from NARWidth
         **is_wb**                   bool              Flag for whether the line coincides with a Waterbody
@@ -341,10 +343,10 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
     The following steps are taken to identify the main channel at each divergence:
     
     •	A 50-meter buffer polygon is drawn around each flowline feature. A flat end-cap is used, so that only areas perpendicular to the flowlines are included in each buffer.
-    •	Zonal statistics for the lidar-based DEM elevations within each buffer polygon are computed using the `rasterstats python package <https://pythonhosted.org/rasterstats/>`_. The tenth percentile elevation is selected as a metric for discriminating between the main channel and minor distributaries. Lower elevation percentiles would be more likely to represent areas of overlap between the buffers for the main channel and minor distributaries (resulting in minor distributary elevations that are similar to the main channel), while higher elevation percentiles might miss the lowest parts of the main channel or even represent parts of the channel banks instead.
+    •	Zonal statistics for the lidar-based DEM values within each buffer polygon are computed using the `rasterstats python package <https://pythonhosted.org/rasterstats/>`_. The tenth percentile elevation is selected as a metric for discriminating between the main channel and minor distributaries. Lower elevation percentiles would be more likely to represent areas of overlap between the buffers for the main channel and minor distributaries (resulting in minor distributary values that are similar to the main channel), while higher elevation percentiles might miss the lowest parts of the main channel or even represent parts of the channel banks instead.
     •	At each divergence, the distributary with the lowest tenth percentile elevation is assumed to be the main channel. 
     
-    In the MAP region, comparison of the sampled DEM elevations with the NHDPlus elevation attribute data revealed a high bias in many of the attribute elevations, especially in the vicinity of diversions. This may be a result of the upstream smoothing process described by McKay and others (2012, p 123) when it encounters distributaries of unequal elevations such as the example shown in Figure 5. To remedy this issue, the 10th percentile elevations obtained from the buffer zonal statistics were assigned to each flowline, and then smoothed in the downstream direction to ensure that no flowlines had negative (uphill) slopes. 
+    In the MAP region, comparison of the sampled DEM values with the NHDPlus elevation attribute data revealed a high bias in many of the attribute values, especially in the vicinity of diversions. This may be a result of the upstream smoothing process described by McKay and others (2012, p 123) when it encounters distributaries of unequal values such as the example shown in Figure 5. To remedy this issue, the 10th percentile values obtained from the buffer zonal statistics were assigned to each flowline, and then smoothed in the downstream direction to ensure that no flowlines had negative (uphill) slopes.
     
     Finally, routing connections to minor distributaries are removed, and arbolate sums recomputed for the entire stream network, with arbolate sums at minor distributaries starting at zero. In this way, the minor distributaries are treated like headwater streams in that they will only receive flow if the water table is greater than their assigned elevation, otherwise they are simulated as dry and are not part of the groundwater model solution. Similar to :func:`~sfrmaker.preprocessing.cull_flowlines`, the first ``asum_thresh`` km of minor distributaries are trimmed from the stream network.
 
@@ -436,16 +438,31 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
     with rasterio.open(demfile) as src:
         meta = src.meta
         dem_crs = CRS(meta['crs'])
+        dem_res = src.res[0]
     flbuffers_pr = flbuffers
-    if flowline_crs is not None and dem_crs != flowline_crs:
+    if project_crs is not None and dem_crs != project_crs:
         flbuffers_pr = project(flbuffers, project_crs.proj_str, dem_crs.proj_str)
 
     # run zonal statistics on buffers
     # this step takes at least ~ 20 min for the full 1-mi MERAS model
+    # with large cell sizes, count all cells that are touched by each buffer
+    # (not just the cell centers that are intersected)
+    all_touched = False
+    if buffersize_meters < dem_res:
+        all_touched = True
     results = zonal_stats(flbuffers_pr,
                           demfile,
-                          stats=['min', 'mean', 'percentile_10', 'percentile_20', 'percentile_80'])
+                          stats=['min', 'mean', 'percentile_10', 'percentile_20', 'percentile_80'],
+                          all_touched=all_touched)
     df = pd.DataFrame(results)
+
+    # warn if there are more than 10% nan values
+    n_nan = df.isna().any(axis=1).sum()
+    pct_nan = n_nan/len(df)
+    if pct_nan > 0.1:
+        logger.warn("Warning: {} ({:.1%}) of sampled DEM values are NaNs. "
+                    "Check the extent and resolution of {}".format(n_nan, pct_nan, demfile))
+
     dem_units_to_output_units = convert_length_units(dem_length_units, output_length_units)
     fl['mean'] = df['mean'].values * dem_units_to_output_units
     fl['min'] = df['min'].values * dem_units_to_output_units
@@ -463,9 +480,9 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
            os.path.join(outfolder, 'flowlines_gt{}km_buffers.shp'.format(asum_thresh)),
            index=False, epsg=project_epsg)
 
-    # cull COMIDS with invalid elevations
+    # cull COMIDS with invalid values
     minelev = -10
-    logger.statement('Culling COMIDs with smoothed elevations < {} cm'.format(minelev))
+    logger.statement('Culling COMIDs with smoothed values < {} cm'.format(minelev))
     badstrtop = (elevslope.MAXELEVSMO < minelev) | (elevslope.MINELEVSMO < minelev)
     badstrtop_comids = elevslope.loc[badstrtop].COMID.values
     badstrtop = [True if c in badstrtop_comids else False for c in fl.COMID]
@@ -478,7 +495,7 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
 
     # dictionary with routing info by COMID
     graph = make_graph(pf.FROMCOMID.values, pf.TOCOMID.values)
-    in_model = fl.COMID.tolist()
+    in_model = set(fl.COMID)
     graph = {k: v for k, v in graph.items() if k in in_model}
 
     # use the 10th percentile from zonal_statistics for setting end elevation of each flowline
@@ -489,7 +506,7 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
     # use zonal statistics elevation to determine routing at divergences
     # (many of these do not appear to be coded correctly in NHDPlus)
     # route to the segment with the lowest 20th percentile elevation
-    logger.log('Determining routing at divergences using sampled elevations')
+    logger.log('Determining routing at divergences using sampled values')
     txt = 'Primary distributary determined from lowest {}th percentile '.format(elevcol[-2:]) +\
           'elevation value among distributaries at the confluence.\n'
 
@@ -500,32 +517,55 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
         txt += '{} --> {}\n'.format(k, v)
 
     logger.statement(txt)
-    elevs = dict(zip(flcc.COMID, flcc[elevcol]))
+    # dictionary of values for selecting main channel at diversions
+    div_elevs = dict(zip(flcc.COMID, flcc[elevcol]))
     tocomids = {}
     diversionminorcomids = set()
     for k, v in graph.items():
+
+        # limit distributaries to those still in the dataset
+        v = v.intersection(flcc.index)
+
+        if k in known_connections.keys():
+            # primary dist.
+            tocomids[k] = known_connections[k]
+            # update minorcomids with minor distribs.
+            diversionminorcomids.update(v.difference({tocomids[k]}))
         # comid routes to only one comid
-        if len(v) == 1:
+        elif len(v) == 1:
             tocomids[k] = v.pop()
         # comid is an outlet
         elif len(v) == 0:
             tocomids[k] = 0
-        elif k in known_connections.keys():
-            # primary dist.
-            tocomids[k] = known_connections[k]
-            # update minorcomids
-            diversionminorcomids.update(v.difference({tocomids[k]}))
         # comid routes to multiple comids (diversion)
         else:
             tocomids_c = list(v)
-            dnelevs = [elevs.get(toid, 99999) for toid in tocomids_c]
+            dnelevs = [div_elevs.get(toid, 99999) for toid in tocomids_c]
             # primary distributary
-            tocomids[k] = np.array(tocomids_c)[np.argmin(dnelevs)]
+            # if any of the downstream values are nans
+            # keep the NHD main channel
+            if any(np.isnan(dnelevs)):
+                # Divergence == 1 is the main stemp, Divergence == 2 is minor
+                # (see NHDPlus v2 User's Guide)
+                info = flcc.loc[tocomids_c, 'Divergence'].sort_values()
+                assert info.values[0] == 1
+                tocomids[k] = flcc.loc[tocomids_c, 'Divergence'].sort_values().index[0]
+            else:
+                tocomids[k] = np.array(tocomids_c)[np.nanargmin(dnelevs)]
             # secondary distributaries
             diversionminorcomids.update(v.difference({tocomids[k]}))
 
+    # update the routing graphs
+    # set tocomids to zero if there's no flowline
+    graph = {k: v if v in flcc.index else 0 for k, v in tocomids.items()}
+    graph_r = make_graph(list(graph.values()), list(graph.keys()))
+    flcc['tocomid'] = [graph.get(c, 0) for c in flcc.index]
+
     # drop comids not in the model
     diversionminorcomids = diversionminorcomids.intersection(flcc.index)
+    # drop comids that are routed to
+    # (aren't minor distributaries if they have another trib routing to them)
+    diversionminorcomids = diversionminorcomids.difference(flcc.tocomid)
 
     # label secondary distributaries
     flcc['main_chan'] = True
@@ -533,19 +573,16 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
 
     # verify that all comids only route to one other comid
     assert np.all([np.isscalar(v) for v in tocomids.values()])
+    logger.log('Determining routing at divergences using sampled values')
 
-    # update the routing graphs
-    # set tocomids to zero if there's no flowline
-    graph = {k: v if v in flcc.index else 0 for k, v in tocomids.items()}
-    graph_r = make_graph(list(graph.values()), list(graph.keys()))
-    flcc['tocomid'] = [graph.get(c, 0) for c in flcc.index]
-    logger.log('Determining routing at divergences using sampled elevations')
+    # Update comid start values using new routing
+    logger.log('Updating values')
 
-    # Update comid start elevations using new routing
-    logger.log('Updating elevations')
+    # use minimum values sampled from buffers
+    elevs = dict(zip(flcc.COMID, flcc['min']))
     elevup = {}
     cm_to_output_units = convert_length_units('cm', output_length_units)
-    # dictionary of NHDPlus minimum elevations converted to output units
+    # dictionary of NHDPlus minimum values converted to output units
     elevslope_dict = dict(zip(elevslope.COMID, elevslope.MINELEVSMO * cm_to_output_units))
     # screen for comids outside model
     valid_comids = {k for k, v in elevs.items() if minelev < v < 1e5}
@@ -562,17 +599,17 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
     noelevup = np.isnan(flcc.elevup)
     flcc.loc[noelevup, 'elevup'] = flcc.loc[noelevup, 'elevdn']
 
-    logger.log('Updating elevations')
+    logger.log('Updating values')
 
-    # smooth segment end elevations so that they never rise downstream
+    # smooth segment end values so that they never rise downstream
     elevminsmo, elevmaxsmo = smooth_elevations(flcc.index.values, flcc.tocomid.values,
                                                flcc.elevdn.values, flcc.elevup.values)
     flcc['elevupsmo'] = [elevmaxsmo[c] for c in flcc.index]
     flcc['elevdnsmo'] = [elevminsmo[c] for c in flcc.index]
 
-    # verify that end elevations less than start elevations
+    # verify that end values less than start values
     assert np.all(flcc.elevdnsmo <= flcc.elevupsmo)
-    # verify that elevations don't rise at segment connections
+    # verify that values don't rise at segment connections
     elevupsmo = dict(zip(flcc.index, flcc.elevupsmo))
     nextup = np.array([elevupsmo.get(graph.get(c, -10), -10) for c in flcc.index])
     assert np.all(nextup <= flcc.elevdnsmo.values)
@@ -581,27 +618,22 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
     nhdplus_asums = dict(zip(pfvaa.index, pfvaa.ArbolateSu))
     fl_lengths = fl.LENGTHKM.to_dict()
 
-    logger.log('Recomputing arbolate sums from minor distributaries')
-
-    def recompute_asums_downstream(diversionminorcomids):
-        """Reset arbolate sums for minor distributaries and
-        downstream segments in their path."""
-        asums = {}
-        for c in diversionminorcomids:
-            path = find_path(graph, c)
-            asum_c = 0
-            for cp in path:
-                tribs = graph_r[cp]
-                if cp == 0 or len(tribs) > 1:
-                    break
-                asum_c += fl_lengths[cp]
-                asums[cp] = asum_c
-        return asums
-
+    logger.log('Recomputing arbolate sums')
+    # NHDPlus asums are the default
+    asum_calc = nhdplus_asums.copy()
     # recompute the arbolate sums so that minor distributaries start at 0
-    asum_calc = recompute_asums_downstream(diversionminorcomids)
-    flcc['asum_calc'] = [asum_calc.get(c, nhdplus_asums[c]) for c in flcc.index]
-    logger.log('Recomputing arbolate sums from minor distributaries')
+    # only recompute at minor distributaries because of missing lines (that have already been culled)
+    # also issues with double-counting asums from distributaries along the model edge
+    new_minor_distrib_asums = recompute_asums_for_minor_distribs(diversionminorcomids,
+                                                                 fl_lengths,
+                                                                 graph, graph_r)
+    asum_calc.update(new_minor_distrib_asums)
+    # recompute arbolate sums at and downstream of places where it decreases
+    # decreases are caused by routing connections that were not in NHDPlus
+    fixed_invalid_asums = fix_invalid_asums(asum_calc, fl_lengths, graph, graph_r)
+    asum_calc.update(fixed_invalid_asums)
+    flcc['asum_calc'] = [asum_calc[c] for c in flcc.index]
+    logger.log('Recomputing arbolate sums')
 
     # cull flow paths below minor distributaries
     # until they reach the arbolate sum threshold
@@ -928,3 +960,113 @@ def edit_flowlines(flowlines, config_file,
         df2shp(df, flowlines, prj=prj_file)
         logger.statement('wrote {}'.format(flowlines))
     return df
+
+
+def recompute_asums_for_minor_distribs(minor_distrib_comids, fl_lengths, graph, graph_r):
+    """Reset arbolate sums for minor distributaries and
+    downstream segments in their path, to the next confluence.
+
+    Parameters
+    ----------
+    minor_distrib_comids : sequence
+        Sequence of line identifiers for minor distributaries
+        (that were part of a divergence in NHDPlus).
+    fl_lengths : dict
+        Dictionary of flowline lengths {indentifier (e.g. comid): length values},
+        in same units as asums.
+    graph : dict
+        Dictionary of downstream routing connections {fromcomid: tocomid}
+    graph_r : dict
+        Dictionary of upstream routing connections {tocomid: {fromcomid1, fromcomid2,...}}
+
+    Returns
+    -------
+    new_asums : dict
+        Dictionary of recomputed arbolate sums {comid: asum value}
+    """
+    new_asums = {}
+    for c in minor_distrib_comids:
+        path = find_path(graph, c)
+        asum_c = 0  # current asum
+        # for each comid going downstream
+        for cp in path:
+            tribs = graph_r[cp]
+            # end condition is an outlet or confluence
+            if cp == 0 or len(tribs) > 1:
+                break
+            # increment the asum by the current length
+            asum_c += fl_lengths[cp]
+            new_asums[cp] = asum_c
+    return new_asums
+
+
+def fix_invalid_asums(asums, fl_lengths, graph, graph_r):
+    """Recompute arbolate sum at any places in the network
+    where it decreases going downstream, and then for all lines
+    downstream of those locations. Decreases may be caused by
+    routing connections that weren't in the original NHDPlus data.
+
+    Parameters
+    ----------
+    asums : dict
+        Dictionary of {indentifier (e.g. comid): asum values},
+        in same units as fl_lengths. Includes all lines in the stream network.
+    fl_lengths : dict
+        Dictionary of flowline lengths {indentifier (e.g. comid): length values},
+        in same units as asums.
+    graph : dict
+        Dictionary of downstream routing connections {fromcomid: tocomid}
+    graph_r : dict
+        Dictionary of upstream routing connections {tocomid: {fromcomid1, fromcomid2,...}}
+
+    Returns
+    -------
+    new_asums : dict
+        Dictionary of recomputed arbolate sums {comid: asum value}
+
+    Notes
+    -----
+    This function is only designed to fix instances of breaks in
+    arbolate sum caused by new routing connections. It can't fix
+    all instances of invalid asums, because it is not known whether
+    the arbolate sums from upstream tributaries reflect unique upstream
+    drainages (if the tribs are distributaries coming from the same divergence,
+    there asums will reflect the same upstream drainage, and therefore would
+    be duplicative if summed).
+    """
+    new_asums = asums.copy()
+    for comid, asum in new_asums.items():
+
+        # get the asum at the line start
+        # (tribs themselves might be distributaries,
+        # so might reflect some of the same upstream drainage,
+        # in which case summing the asums would be invalid)
+        tribs = graph_r[comid]
+        max_trib_asum = 0.
+        if len(tribs) > 0:
+            max_trib_asum = np.max([new_asums[trib] for trib in tribs])
+
+        # expected asum is the highest trib asum + line length
+        expected_asum = max_trib_asum + fl_lengths[comid]
+
+        # if the asum is less than expected
+        # assume a break in asum continuity
+        if expected_asum > asum:
+            path = find_path(graph, comid)
+
+            # set the current asum to the max of the tribs + it's line length
+            # (current asum is at end of line)
+            asum_c = expected_asum  # current asum
+            new_asums[comid] = asum_c
+
+            # increment each downstream line by the increase in asum
+            increment = asum_c - asum
+            # for each comid going downstream
+            for cp in path[1:]:
+                # end condition is an outlet
+                if cp == 0:
+                    break
+                old_asum = new_asums[cp]
+                asum_c = old_asum + increment
+                new_asums[cp] = asum_c
+    return new_asums
