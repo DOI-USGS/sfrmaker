@@ -1,3 +1,5 @@
+from sfrmaker.routing import make_graph, get_upsegs
+
 from ..checks import routing_is_circular, valid_nsegs
 from ..routing import (get_next_id_in_subset, renumber_segments)
 
@@ -65,3 +67,15 @@ def test_renumber_segments():
     assert outseg1 == outseg2
     assert not routing_is_circular(nseg1, outseg1)
     assert valid_nsegs(nseg1, outseg1)
+
+
+def test_get_upsegs(sfr_test_numbering):
+    rd, sd = sfr_test_numbering
+    graph = dict(zip(sd.nseg, sd.outseg))
+    graph_r = make_graph(list(graph.values()),
+                         list(graph.keys()))
+    upsegs = []
+    for s in sd.nseg:
+        upsegs.append(get_upsegs(graph_r, s))
+    assert isinstance(upsegs[1], set)
+    assert upsegs[1] == {1, 3, 4, 5, 6, 7, 8, 9}

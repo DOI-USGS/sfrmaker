@@ -1,7 +1,7 @@
 # TODO: add unit tests for utils.py
 import numpy as np
 import pytest
-from sfrmaker.utils import assign_layers, width_from_arbolate_sum
+from sfrmaker.utils import assign_layers, width_from_arbolate_sum, arbolate_sum
 
 
 def test_assign_layers(shellmound_sfrdata, shellmound_model):
@@ -38,3 +38,11 @@ def test_width_from_arbolate_sum(asum, a, b, input_units, output_units, expected
     result = width_from_arbolate_sum(asum, a, b, minimum_width=1,
                                      input_units=input_units, output_units=output_units)
     assert np.allclose(result, expected, rtol=1e-4)
+
+
+def test_asum(sfr_test_numbering):
+    rd, sd = sfr_test_numbering
+    graph = dict(zip(sd.nseg, sd.outseg))
+    lengths = dict(zip(sd.nseg, np.arange(len(sd))))
+    asum = arbolate_sum(sd.nseg, lengths, graph)
+    assert (asum[1] == 6) & (asum[2] == np.arange(len(sd)).sum())
