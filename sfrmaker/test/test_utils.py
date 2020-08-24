@@ -31,8 +31,10 @@ def test_width_from_arbolate_sum_defaults(asum, expected):
                           (1e3, 0.1193, 0.5032, 'km', 'meters', 124.7*.3048),
                           (1e6, 0.0628, 0.5099, 'meters', 'feet', 72.00),
                           (1e3, 0.0628, 0.5099, 'km', 'meters', 72.00*.3048),
+                          (0, 0.0628, 0.5099, 'km', 'meters', 1),
                           ([1e3], 0.0628, 0.5099, 'km', 'meters', [72.00*.3048]),
-                          (np.array([1e3]), 0.0628, 0.5099, 'km', 'meters', [72.00*.3048]))
+                          (np.array([1e3]), 0.0628, 0.5099, 'km', 'meters', [72.00*.3048]),
+                          (np.array([1e3, 0]), 0.0628, 0.5099, 'km', 'meters', [72.00*.3048, 1]))
                          )
 def test_width_from_arbolate_sum(asum, a, b, input_units, output_units, expected):
     result = width_from_arbolate_sum(asum, a, b, minimum_width=1,

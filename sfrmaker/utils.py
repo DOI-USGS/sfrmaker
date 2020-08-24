@@ -312,8 +312,9 @@ def width_from_arbolate_sum(asum, a=0.1193, b=0.5032, minimum_width=1., input_un
     output_unit_conversion = convert_length_units('feet', output_units)
     w = output_unit_conversion * a * (asum * input_unit_conversion) ** b
     if not np.isscalar(asum):
+        w[w < minimum_width] = float(minimum_width)
         w[np.isnan(w)] = float(minimum_width)
-    elif np.isnan(w):
+    elif np.isnan(w) or w < minimum_width:
         w = minimum_width
     else:
         pass
