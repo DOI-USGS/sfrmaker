@@ -253,31 +253,6 @@ def update(d, u):
     return d
 
 
-def width_from_arbolate_sum_old(arbolate_sum, minimum_width=1):
-    """Estimate stream width in feet from arbolate sum in meters, using relationship
-    described by Feinstein et al (2010), Appendix 2, p 266.
-
-    Parameters
-    ----------
-    arbolate: float
-        Arbolate sum in meters.
-
-    Returns
-    -------
-    width: float
-        Estimated width in meters (original formula returned width in ft)
-    """
-    scalar = np.isscalar(arbolate_sum)
-    if scalar:
-        arbolate_sum = np.array([arbolate_sum])
-    w = 0.3048 * 0.1193 * arbolate_sum ** 0.5032
-    fill = np.isnan(w) | (w == 0)
-    w[fill] = minimum_width
-    if scalar:
-        return w[0]
-    return w
-
-
 def width_from_arbolate_sum(asum, a=0.1193, b=0.5032, minimum_width=1., input_units='meters',
                             output_units='meters'):
     """Estimate stream width from arbolate sum, using a power law regression

@@ -194,7 +194,7 @@ def cull_flowlines(NHDPlus_paths,
                                                              len(comids)),
                          log_time=False)
 
-    # write output files; record timestamps in logger
+    # write output files
     logger.statement('writing output')
     results = {'flowlines_file': '{}/flowlines{}.shp'.format(outfolder, version),
                'pfvaa_file': '{}/PlusFlowlineVAA{}.dbf'.format(outfolder, version),
@@ -454,6 +454,11 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
                           demfile,
                           stats=['min', 'mean', 'percentile_10', 'percentile_20', 'percentile_80'],
                           all_touched=all_touched)
+    #results = {'mean': np.zeros(len(fl)),
+    #           'min': np.zeros(len(fl)),
+    #           'percentile_10': np.zeros(len(fl)),
+    #           'percentile_20': np.zeros(len(fl)),
+    #           'percentile_80': np.zeros(len(fl))}
     df = pd.DataFrame(results)
 
     # warn if there are more than 10% nan values
@@ -477,7 +482,7 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
     flccb = fl.copy()
     flccb['geometry'] = flccb.buffpoly
     df2shp(flccb.drop('buffpoly', axis=1),
-           os.path.join(outfolder, 'flowlines_gt{}km_buffers.shp'.format(asum_thresh)),
+           os.path.join(outfolder, 'flowlines_gt{:.0f}km_buffers.shp'.format(asum_thresh)),
            index=False, epsg=project_epsg)
 
     # cull COMIDS with invalid values
@@ -539,12 +544,15 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
             tocomids[k] = 0
         # comid routes to multiple comids (diversion)
         else:
+            # downstream elevations
             tocomids_c = list(v)
             dnelevs = [div_elevs.get(toid, 99999) for toid in tocomids_c]
+            # downstream elevations unique to 2 decimal places
+            unique_dnelevs = set(np.round(dnelevs, 2))
             # primary distributary
-            # if any of the downstream values are nans
+            # if any of the downstream values are nans, or they are all the same
             # keep the NHD main channel
-            if any(np.isnan(dnelevs)):
+            if any(np.isnan(dnelevs)) or len(unique_dnelevs) == 1:
                 # Divergence == 1 is the main stemp, Divergence == 2 is minor
                 # (see NHDPlus v2 User's Guide)
                 info = flcc.loc[tocomids_c, 'Divergence'].sort_values()
@@ -680,6 +688,11 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
         flcc.loc[~np.isnan(flcc.narwd_mean), 'width1'] = flcc.loc[~np.isnan(flcc.narwd_mean), 'narwd_mean']
         flcc.loc[~np.isnan(flcc.narwd_mean), 'width2'] = flcc.loc[~np.isnan(flcc.narwd_mean), 'narwd_mean']
 
+    # write output files; record timestamps in logger
+    logger.statement('writing output')
+    df2shp(flcc.drop('buffpoly', axis=1),
+           '{}/flowlines_gt{:.0f}km_edited.shp'.format(outfolder, asum_thresh),
+           index=False, epsg=project_epsg)
     logger.log('Preprocessing Flowlines')
 
     return flcc
