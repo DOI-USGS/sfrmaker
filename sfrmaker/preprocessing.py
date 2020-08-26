@@ -213,6 +213,7 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
                        pf_file, elevslope_file,
                        demfile,
                        dem_length_units='meters',
+                       active_area=None,
                        narwidth_shapefile=None,
                        waterbody_shapefiles=None,  # for sampling NARWidth
                        buffersize_meters=50,
@@ -250,6 +251,9 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
         Path to DEM raster for project area.
     dem_length_units : str, any length unit; e.g. {'m', 'meters', 'ft', etc.}
         Length units of values in ``demfile``. By default, 'meters'.
+    active_area : str, optional
+        Polygon shapefile of active area that preprocessed lines will be clipped to.
+        By default, None, in which case the flowlines won't be clipped.
     narwidth_shapefile : str, optional
         Path to shapefile from the NARWidth database (Allen and Pavelsky, 2015).
     waterbody_shapefiles : str or list of strings, optional
@@ -688,6 +692,11 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
         flcc.loc[~np.isnan(flcc.narwd_mean), 'width1'] = flcc.loc[~np.isnan(flcc.narwd_mean), 'narwd_mean']
         flcc.loc[~np.isnan(flcc.narwd_mean), 'width2'] = flcc.loc[~np.isnan(flcc.narwd_mean), 'narwd_mean']
 
+    if active_area is not None:
+        flcc = clip_flowlines_to_polygon(flcc, active_area,
+                                         flowlines_epsg=project_epsg,
+                                         simplify_tol=100, logger=logger)
+        
     # write output files; record timestamps in logger
     logger.statement('writing output')
     df2shp(flcc.drop('buffpoly', axis=1),
@@ -698,19 +707,23 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
     return flcc
 
 
-def clip_flowlines_to_polygon(flowlines, polygon_shapefile,
+def clip_flowlines_to_polygon(flowlines, polygon,
+                              flowlines_epsg=None,
                               simplify_tol=100, logger=None):
     """Clip line features in a flowlines DataFrame to polygon
-    features in polygon_shapefile.
+    features in polygon.
 
     Parameters
     ----------
     flowlines : DataFrame
         Output from :func:`~sfrmaker.preprocessing.preprocess_nhdplus`
-    polygon_shapefile : str
-        Shapefile of model active area, in same CRS as flowlines
+    flowlines_epsg : int
+        EPSG code for flowlines
+    polygon : str
+        Polygon shapefile, shapely polygon or list of shapely polygons of model active area. Shapely polygons 
+        must be in the same CRS as flowlines; shapefiles will be automatically reprojected.
     simplify_tol : float
-        Simplification tolerance for ``polygon_shapefile`` to speed clipping.
+        Simplification tolerance for ``polygon`` to speed clipping.
         See :doc:`shapely:manual` for more details.
     logger : Logger instance
 
@@ -722,24 +735,27 @@ def clip_flowlines_to_polygon(flowlines, polygon_shapefile,
     if logger is None:
         logger = Logger()
 
-    with fiona.open(polygon_shapefile) as src:
-        extent_poly_albers = shape(next(src)['geometry'])
+    # read in the active area and reproject to same crs as flowlines
+    flowlines_crs = None
+    if flowlines_epsg is not None:
+        flowlines_crs = CRS(epsg=flowlines_epsg)
+    active_area_polygon = read_polygon_feature(polygon, flowlines_crs)
 
     # simplify polygon vertices to speed intersection testing
     # (can be very slow for polygons generated from rasters)
-    extent_poly_albers = extent_poly_albers.buffer(simplify_tol).simplify(simplify_tol)
+    active_area_polygon = active_area_polygon.buffer(simplify_tol).simplify(simplify_tol)
 
-    logger.log('Culling flowlines outside of {}'.format(polygon_shapefile))
+    logger.log('Culling flowlines outside of {}'.format(polygon))
     lines = flowlines.geometry.tolist()
     print('starting lines: {:,d}'.format(len(lines)))
-    intersects = [g.intersects(extent_poly_albers) for g in lines]
+    intersects = [g.intersects(active_area_polygon) for g in lines]
     flc = flowlines.loc[intersects].copy()
-    flc['geometry'] = [g.intersection(extent_poly_albers) for g in flc.geometry]
+    flc['geometry'] = [g.intersection(active_area_polygon) for g in flc.geometry]
     drop = np.array([g.is_empty for g in flc.geometry.tolist()])
     if len(drop) > 0:
         flc = flc.loc[~drop]
     print('remaining lines: {:,d}'.format(len(flc)))
-    logger.log('Culling flowlines outside of {}'.format(polygon_shapefile))
+    logger.log('Culling flowlines outside of {}'.format(polygon))
     return flc
 
 

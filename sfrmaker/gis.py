@@ -323,7 +323,7 @@ def parse_units_from_proj_str(proj_str):
         pass
 
 
-def read_polygon_feature(feature, dest_crs, feature_crs=None):
+def read_polygon_feature(feature, dest_crs=None, feature_crs=None):
     """Read a geometric feature from a shapefile, shapely geometry object,
     or collection of shapely geometry objects. Reproject to dest_crs
     if the feature is in a different CRS.
@@ -363,7 +363,7 @@ def read_polygon_feature(feature, dest_crs, feature_crs=None):
         pass
     else:
         raise TypeError("Unrecognized feature input.")
-    if feature_crs is not None and feature_crs != dest_crs:
+    if feature_crs is not None and dest_crs is not None and feature_crs != dest_crs:
         feature = project(feature, feature_crs.proj_str, dest_crs.proj_str)
     return feature.buffer(0)
 
