@@ -120,7 +120,11 @@ def sfr_testdata(sfr_test_numbering):
 def shellmound_simulation(testdatapath, outdir):
     sim_data_folder = '{}/shellmound/shellmound'.format(testdatapath)
     sim_ws = os.path.join(outdir, 'shellmound')
-    shutil.copytree(sim_data_folder, sim_ws, dirs_exist_ok=True)
+    #shutil.copytree(sim_data_folder, sim_ws, dirs_exist_ok=True)
+    # dirs_exist_ok new with python 3.8
+    if os.path.exists(sim_ws):
+        shutil.rmtree(sim_ws)
+    shutil.copytree(sim_data_folder, sim_ws)
     sim = flopy.mf6.MFSimulation.load('mfsim', 'mf6', 'mf6', sim_ws=sim_ws)
     #sim.set_sim_path(sim_ws)
     return sim
