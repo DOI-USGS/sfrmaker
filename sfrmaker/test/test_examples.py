@@ -15,7 +15,6 @@ def keep_cwd():
     os.chdir(wd)
 
 
-@pytest.mark.skip(reason="waiting on flopy pull request")
 @pytest.mark.slow
 @pytest.mark.parametrize('script', ('examples/meras/make_sfr.py',))
 def test_meras_example(script):
