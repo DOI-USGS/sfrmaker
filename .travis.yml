@@ -52,7 +52,7 @@ script:
   - coverage run -m pytest -v
   # travis wait to allow > 10 minutes without output for meras example
   # https://docs.travis-ci.com/user/common-build-problems/#build-times-out-because-no-output-was-received
-  - travis_wait 25 pytest sfrmaker/test/test_examples.py::test_meras_example --runslow
+  - travis_wait 15 pytest sfrmaker/test/test_examples.py::test_meras_example --runslow
   - coverage report -m  # Generate test coverage report.
   - set -e
   - make -C docs html  # Build the documentation.
