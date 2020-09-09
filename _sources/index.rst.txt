@@ -27,6 +27,7 @@ SFRmaker |version|
   :maxdepth: 1
   :caption: Reference
 
+   Code reference <api/index>
    Release History <release-history>
    Contributing to SFRmaker <contributing>
 

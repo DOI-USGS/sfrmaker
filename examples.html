@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Using SFRmaker with a configuration file &mdash; SFRmaker 0.5.0.post1.dev0+gf32c45b documentation</title>
+  <title>Using SFRmaker with a configuration file &mdash; SFRmaker 0.5.0.post13.dev0+g114faa0 documentation</title>
   
 
   
@@ -34,6 +34,8 @@
         <script src="_static/clipboard.min.js"></script>
         <script src="_static/copybutton.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -65,7 +67,7 @@
             
             
               <div class="version">
-                0.5.0.post1.dev0+gf32c45b
+                0.5.0.post13.dev0+g114faa0
               </div>
             
           
@@ -129,6 +131,7 @@
 </ul>
 <p class="caption"><span class="caption-text">Reference</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="api/index.html"> Code reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="release-history.html"> Release History</a></li>
 <li class="toctree-l1"><a class="reference internal" href="contributing.html"> Contributing to SFRmaker</a></li>
 </ul>
@@ -272,11 +275,7 @@
 32
 33
 34
-35
-36
-37
-38
-39</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nt">package_version</span><span class="p">:</span> <span class="s">&#39;mf6&#39;</span>
+35</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nt">package_version</span><span class="p">:</span> <span class="s">&#39;mf6&#39;</span>
 <span class="nt">package_name</span><span class="p">:</span> <span class="s">&#39;meras3&#39;</span>
 <span class="nt">output_path</span><span class="p">:</span> <span class="s">&#39;meras3&#39;</span>
 <span class="nt">modelgrid</span><span class="p">:</span>
@@ -300,10 +299,6 @@
   <span class="nt">name_column</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">GNIS_NAME</span>
   <span class="nt">attr_length_units</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">feet</span>  <span class="c1"># units of source data</span>
   <span class="nt">attr_height_units</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">feet</span>  <span class="c1"># units of source data</span>
-<span class="nt">dem</span><span class="p">:</span>
-  <span class="nt">filename</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">dem_min_elevs_1000.tif</span>
-  <span class="nt">elevation_units</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">meters</span>
-<span class="nt">set_streambed_top_elevations_from_dem</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
 <span class="nt">inflows</span><span class="p">:</span>  <span class="c1"># see sfrmaker.data.add_to_perioddata for arguments</span>
   <span class="nt">filename</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">inflows.csv</span>
   <span class="nt">line_id_column</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">line_id</span>
@@ -449,7 +444,7 @@
   <div role="contentinfo">
     <p>
       <span class="lastupdated">
-        Last updated on Aug 11, 2020.
+        Last updated on Sep 09, 2020.
       </span>
 
     </p>

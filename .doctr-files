@@ -18,6 +18,16 @@
 ./_images/notebooks_Streambed_elevation_demo_8_7.png
 ./_images/notebooks_Streambed_elevation_demo_8_8.png
 ./_images/notebooks_Streambed_elevation_demo_8_9.png
+./_modules/index.html
+./_modules/sfrmaker/lines.html
+./_modules/sfrmaker/preprocessing.html
+./_modules/sfrmaker/sfrdata.html
+./_modules/sfrmaker/utils.html
+./_sources/api/index.rst.txt
+./_sources/api/sfrmaker.lines.rst.txt
+./_sources/api/sfrmaker.preprocessing.rst.txt
+./_sources/api/sfrmaker.sfrdata.rst.txt
+./_sources/api/sfrmaker.utils.rst.txt
 ./_sources/contributing.rst.txt
 ./_sources/examples.rst.txt
 ./_sources/index.rst.txt
@@ -69,6 +79,11 @@
 ./_static/searchtools.js
 ./_static/underscore-1.3.1.js
 ./_static/underscore.js
+./api/index.html
+./api/sfrmaker.lines.html
+./api/sfrmaker.preprocessing.html
+./api/sfrmaker.sfrdata.html
+./api/sfrmaker.utils.html
 ./contributing.html
 ./examples.html
 ./genindex.html
@@ -81,6 +96,7 @@
 ./notebooks/Streambed_elevation_demo.ipynb
 ./objects.inv
 ./philosophy.html
+./py-modindex.html
 ./references.html
 ./release-history.html
 ./search.html

@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Demonstration of how sfrmaker handles streambed elevations &mdash; SFRmaker 0.5.0.post1.dev0+gf32c45b documentation</title>
+  <title>Demonstration of how sfrmaker handles streambed elevations &mdash; SFRmaker 0.5.0.post13.dev0+g114faa0 documentation</title>
   
 
   
@@ -34,13 +34,15 @@
         <script src="../_static/clipboard.min.js"></script>
         <script src="../_static/copybutton.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
     
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Release History" href="../release-history.html" />
+    <link rel="next" title="Modules" href="../api/index.html" />
     <link rel="prev" title="Basic usage of SFRmaker in a scripting context" href="SFRmaker_demo.html" /> 
 </head>
 
@@ -65,7 +67,7 @@
             
             
               <div class="version">
-                0.5.0.post1.dev0+gf32c45b
+                0.5.0.post13.dev0+g114faa0
               </div>
             
           
@@ -116,6 +118,7 @@
 </ul>
 <p class="caption"><span class="caption-text">Reference</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html"> Code reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../release-history.html"> Release History</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../contributing.html"> Contributing to SFRmaker</a></li>
 </ul>
@@ -523,11 +526,6 @@ for basins:
 reading ../tylerforks/NHDPlus/NHDSnapshot/Hydrography/NHDFlowline.shp...
 filtering on bounding box -90.624482596925, 46.37886827710283, -90.4625592199325, 46.45832567355404...
 --&gt; building dataframe... (may take a while for large shapefiles)
-
-reading ../tylerforks/NHDPlus/NHDPlusAttributes/PlusFlowlineVAA.dbf...
---&gt; building dataframe... (may take a while for large shapefiles)
-
-reading ../tylerforks/NHDPlus/NHDPlusAttributes/PlusFlow.dbf...
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -546,6 +544,11 @@ reading ../tylerforks/NHDPlus/NHDPlusAttributes/PlusFlow.dbf...
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
+
+reading ../tylerforks/NHDPlus/NHDPlusAttributes/PlusFlowlineVAA.dbf...
+--&gt; building dataframe... (may take a while for large shapefiles)
+
+reading ../tylerforks/NHDPlus/NHDPlusAttributes/PlusFlow.dbf...
 --&gt; building dataframe... (may take a while for large shapefiles)
 
 reading ../tylerforks/NHDPlus/NHDPlusAttributes/elevslope.dbf...
@@ -557,12 +560,12 @@ Getting routing information from NHDPlus Plusflow table...
 finished in 0.02s
 
 
-SFRmaker version 0.5.0.post1.dev0+gf32c45b
+SFRmaker version 0.5.0.post13.dev0+g114faa0
 
 Creating sfr dataset...
 
 Creating grid class instance from flopy Grid instance...
-grid class created in 0.23s
+grid class created in 0.24s
 
 Model grid information
 structured grid
@@ -606,7 +609,7 @@ finished in 0.00s
 Intersecting 17 flowlines with 17,760 grid cells...
 
 Building spatial index...
-finished in 1.66s
+finished in 1.67s
 
 Intersecting 17 features...
 17
@@ -649,7 +652,7 @@ bounds: 682688.00, 5139052.00, 694880.00, 5147510.20
 active area defined by: all cells
 
 
-Time to create sfr dataset: 2.56s
+Time to create sfr dataset: 2.57s
 
 </pre></div></div>
 </div>
@@ -686,14 +689,14 @@ Time to create sfr dataset: 2.56s
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 running rasterstats.zonal_stats on buffered LineStrings...
-finished in 4.30s
+finished in 4.21s
 
 running rasterstats.zonal_stats on buffered LineStrings...
-finished in 4.35s
+finished in 4.26s
 
 
 Smoothing elevations...
-finished in 0.14s
+finished in 0.13s
 </pre></div></div>
 </div>
 </div>
@@ -882,7 +885,7 @@ finished in 0.14s
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="../release-history.html" class="btn btn-neutral float-right" title="Release History" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="../api/index.html" class="btn btn-neutral float-right" title="Modules" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="SFRmaker_demo.html" class="btn btn-neutral float-left" title="Basic usage of SFRmaker in a scripting context" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
@@ -895,7 +898,7 @@ finished in 0.14s
   <div role="contentinfo">
     <p>
       <span class="lastupdated">
-        Last updated on Aug 11, 2020.
+        Last updated on Sep 09, 2020.
       </span>
 
     </p>
