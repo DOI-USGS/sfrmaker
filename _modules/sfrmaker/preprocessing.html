@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>sfrmaker.preprocessing &mdash; SFRmaker 0.5.0.post13.dev0+g114faa0 documentation</title>
+  <title>sfrmaker.preprocessing &mdash; SFRmaker 0.5.0.post14+gc176c1e documentation</title>
   
 
   
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                0.5.0.post13.dev0+g114faa0
+                0.5.0.post14+gc176c1e
               </div>
             
           
@@ -601,7 +601,7 @@
     <span class="n">pf</span> <span class="o">=</span> <span class="n">pf</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">fl</span><span class="o">.</span><span class="n">index</span><span class="p">]</span>
     <span class="n">elevslope</span> <span class="o">=</span> <span class="n">elevslope</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">fl</span><span class="o">.</span><span class="n">index</span><span class="p">]</span>
 
-    <span class="c1"># reproject the flowlines if they are not in project_crs</span>
+    <span class="c1"># to_crs the flowlines if they are not in project_crs</span>
     <span class="k">if</span> <span class="n">project_crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">flowline_crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">project_crs</span> <span class="o">!=</span> <span class="n">flowline_crs</span><span class="p">:</span>
         <span class="n">fl</span><span class="p">[</span><span class="s1">&#39;geometry&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">project</span><span class="p">(</span><span class="n">fl</span><span class="o">.</span><span class="n">geometry</span><span class="p">,</span> <span class="n">flowline_crs</span><span class="o">.</span><span class="n">proj_str</span><span class="p">,</span> <span class="n">project_crs</span><span class="o">.</span><span class="n">proj_str</span><span class="p">)</span>
 
@@ -913,7 +913,7 @@
     <span class="k">if</span> <span class="n">logger</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">()</span>
 
-    <span class="c1"># read in the active area and reproject to same crs as flowlines</span>
+    <span class="c1"># read in the active area and to_crs to same crs as flowlines</span>
     <span class="n">flowlines_crs</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="n">flowlines_epsg</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">flowlines_crs</span> <span class="o">=</span> <span class="n">CRS</span><span class="p">(</span><span class="n">epsg</span><span class="o">=</span><span class="n">flowlines_epsg</span><span class="p">)</span>
@@ -986,7 +986,7 @@
                <span class="s2">&quot;(CRS; i.e. with units of meters).&quot;</span><span class="p">)</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
-    <span class="c1"># read in narwidth shapefile; reproject to flowline CRS</span>
+    <span class="c1"># read in narwidth shapefile; to_crs to flowline CRS</span>
     <span class="n">nw</span> <span class="o">=</span> <span class="n">shp2df</span><span class="p">(</span><span class="n">narwidth_shapefile</span><span class="p">,</span> <span class="nb">filter</span><span class="o">=</span><span class="nb">filter</span><span class="p">)</span>
     <span class="n">narwidth_crs</span> <span class="o">=</span> <span class="n">CRS</span><span class="p">(</span><span class="n">prjfile</span><span class="o">=</span><span class="n">narwidth_shapefile</span><span class="p">[:</span><span class="o">-</span><span class="mi">4</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;.prj&#39;</span><span class="p">)</span>
     <span class="n">nw</span><span class="p">[</span><span class="s1">&#39;geometry&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">project</span><span class="p">(</span><span class="n">nw</span><span class="o">.</span><span class="n">geometry</span><span class="p">,</span> <span class="n">narwidth_crs</span><span class="o">.</span><span class="n">proj_str</span><span class="p">,</span> <span class="n">flowline_crs</span><span class="o">.</span><span class="n">proj_str</span><span class="p">)</span>
@@ -1290,7 +1290,7 @@
   <div role="contentinfo">
     <p>
       <span class="lastupdated">
-        Last updated on Sep 09, 2020.
+        Last updated on Sep 10, 2020.
       </span>
 
     </p>

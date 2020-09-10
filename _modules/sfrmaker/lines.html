@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>sfrmaker.lines &mdash; SFRmaker 0.5.0.post13.dev0+g114faa0 documentation</title>
+  <title>sfrmaker.lines &mdash; SFRmaker 0.5.0.post14+gc176c1e documentation</title>
   
 
   
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                0.5.0.post13.dev0+g114faa0
+                0.5.0.post14+gc176c1e
               </div>
             
           
@@ -183,7 +183,7 @@
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">from</span> <span class="nn">shapely.geometry</span> <span class="kn">import</span> <span class="n">box</span>
 <span class="kn">import</span> <span class="nn">flopy</span>
-<span class="kn">from</span> <span class="nn">gisutils</span> <span class="kn">import</span> <span class="n">shp2df</span><span class="p">,</span> <span class="n">df2shp</span><span class="p">,</span> <span class="n">project</span>
+<span class="kn">from</span> <span class="nn">gisutils</span> <span class="kn">import</span> <span class="n">shp2df</span><span class="p">,</span> <span class="n">df2shp</span><span class="p">,</span> <span class="n">project</span><span class="p">,</span> <span class="n">get_authority_crs</span>
 <span class="kn">import</span> <span class="nn">sfrmaker</span>
 <span class="kn">from</span> <span class="nn">sfrmaker.routing</span> <span class="kn">import</span> <span class="n">pick_toids</span><span class="p">,</span> <span class="n">find_path</span><span class="p">,</span> <span class="n">make_graph</span><span class="p">,</span> <span class="n">renumber_segments</span>
 <span class="kn">from</span> <span class="nn">sfrmaker.checks</span> <span class="kn">import</span> <span class="n">routing_is_circular</span><span class="p">,</span> <span class="n">is_to_one</span>
@@ -204,14 +204,17 @@
 <span class="sd">    df : DataFrame</span>
 <span class="sd">        Dataframe with linestring features and attribute information.</span>
 <span class="sd">        Must have the following columns:</span>
-<span class="sd">        id: sequential integers for identifying each feature</span>
-<span class="sd">        toid: integers representing routing connections</span>
-<span class="sd">        ...</span>
-<span class="sd">        geometry: shapely LineString objects for each feature</span>
-<span class="sd">    attr_length_units : &#39;meters&#39; or &#39;feet&#39;</span>
+<span class="sd">        </span>
+<span class="sd">        ============ =====================================================</span>
+<span class="sd">        **id**       sequential integers for identifying each feature</span>
+<span class="sd">        **toid**     integers representing routing connections</span>
+<span class="sd">        **geometry** shapely :class:`LineString` objects for each feature</span>
+<span class="sd">        ============ =====================================================</span>
+<span class="sd">        </span>
+<span class="sd">    attr_length_units : str, {&#39;meters&#39;, &#39;feet&#39;, ..}</span>
 <span class="sd">        Length units for feature attributes (e.g. width, arbolate sum, etc.)</span>
 <span class="sd">        (default &#39;meters&#39;)</span>
-<span class="sd">    attr_height_units : &#39;meters&#39; or &#39;feet&#39;</span>
+<span class="sd">    attr_height_units : str, {&#39;meters&#39;, &#39;feet&#39;, ..}</span>
 <span class="sd">        Length units for elevation attributes</span>
 <span class="sd">        (default &#39;meters&#39;)</span>
 <span class="sd">    epsg: int</span>
@@ -225,6 +228,10 @@
 <span class="sd">        File path to projection (.prj) file identifying CRS</span>
 <span class="sd">        for features in df.geometry</span>
 <span class="sd">        (optional)</span>
+<span class="sd">        </span>
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    crs : :class:`sfrmaker.gis.CRS` instance</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -248,31 +255,9 @@
 
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">attr_to_m</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">attr_length_units</span> <span class="o">==</span> <span class="s1">&#39;feet&#39;</span><span class="p">:</span>
-            <span class="k">return</span> <span class="mf">0.3048</span>
-        <span class="k">return</span> <span class="mf">1.0</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">attr_to_ft</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">attr_length_units</span> <span class="o">==</span> <span class="s1">&#39;feet&#39;</span><span class="p">:</span>
-            <span class="k">return</span> <span class="mf">1.</span>
-        <span class="k">return</span> <span class="mi">1</span> <span class="o">/</span> <span class="mf">0.3048</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">geometry_to_m</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry_length_units</span> <span class="o">==</span> <span class="s1">&#39;feet&#39;</span><span class="p">:</span>
-            <span class="k">return</span> <span class="mf">0.3048</span>
-        <span class="k">return</span> <span class="mf">1.0</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">geometry_to_ft</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry_length_units</span> <span class="o">==</span> <span class="s1">&#39;feet&#39;</span><span class="p">:</span>
-            <span class="k">return</span> <span class="mf">1.</span>
-        <span class="k">return</span> <span class="mi">1</span> <span class="o">/</span> <span class="mf">0.3048</span>
-
-    <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">geometry_length_units</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Length units of reach LineString geometries.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_geometry_length_units</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">length_units</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_geometry_length_units</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Warning: No length units specified in CRS for input LineStrings; &quot;</span>
@@ -282,6 +267,9 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">routing</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Dictionary of routing connections from ids (keys)</span>
+<span class="sd">        to to_ids (values).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_routing</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_routing_changed</span><span class="p">():</span>
             <span class="n">toid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">toid</span><span class="o">.</span><span class="n">values</span>
             <span class="c1"># check whether or not routing is</span>
@@ -307,6 +295,10 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">paths</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Dictionary of paths, where each value is a list</span>
+<span class="sd">        of downstream lines constituting a flow path to an outlet</span>
+<span class="sd">        for a given line (key).</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_paths</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_set_paths</span><span class="p">()</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_paths</span>
@@ -336,9 +328,37 @@
 <span class="sd">        feature : shapely Polygon, list of Polygons, or shapefile path</span>
 <span class="sd">            Polygons must be in same CRS as linework; shapefile</span>
 <span class="sd">            features will be reprojected if their crs is different.</span>
+<span class="sd">        simplify : bool</span>
+<span class="sd">            Option to simplify the polygon, which can speed intersection </span>
+<span class="sd">            with the lines.</span>
+<span class="sd">        tol: float</span>
+<span class="sd">            Simplification tolerance (distance), in the units of the LineStrings</span>
+<span class="sd">            (usually meters).</span>
+<span class="sd">        feature_crs : obj</span>
+<span class="sd">            A Python int, dict, str, or :py:class:`pyproj.crs.CRS` instance</span>
+<span class="sd">            passed to the :py:meth:`pyproj.crs.CRS.from_user_input`</span>
+<span class="sd">            See http://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input.</span>
+<span class="sd">            Can be any of:</span>
+
+<span class="sd">              - PROJ string</span>
+<span class="sd">              - Dictionary of PROJ parameters</span>
+<span class="sd">              - PROJ keyword arguments for parameters</span>
+<span class="sd">              - JSON string with PROJ parameters</span>
+<span class="sd">              - CRS WKT string</span>
+<span class="sd">              - An authority string [i.e. &#39;epsg:4326&#39;]</span>
+<span class="sd">              - An EPSG integer code [i.e. 4326]</span>
+<span class="sd">              - A tuple of (&quot;auth_name&quot;: &quot;auth_code&quot;) [i.e (&#39;epsg&#39;, &#39;4326&#39;)]</span>
+<span class="sd">              - An object with a `to_wkt` method.</span>
+<span class="sd">              - A :class:`pyproj.crs.CRS` class</span>
 <span class="sd">        inplace : bool</span>
 <span class="sd">            If True, the attribute .df is modified;</span>
 <span class="sd">            if False, a copy of .df is returned.</span>
+<span class="sd">            </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        df : DataFrame</span>
+<span class="sd">            Version of the :py:attr:`Lines.df` DataFrame</span>
+<span class="sd">            containing only the lines that intersect the ``feature``.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Culling hydrography to active area...&#39;</span><span class="p">)</span>
         <span class="n">ta</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
@@ -395,9 +415,9 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span> <span class="nn">.gis</span> <span class="kn">import</span> <span class="n">intersect</span><span class="p">,</span> <span class="n">intersect_rtree</span>
 
-        <span class="c1"># reproject the flowlines if they aren&#39;t in same CRS as grid</span>
+        <span class="c1"># to_crs the flowlines if they aren&#39;t in same CRS as grid</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span> <span class="o">!=</span> <span class="n">grid</span><span class="o">.</span><span class="n">crs</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">reproject</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">proj_str</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">proj_str</span><span class="p">)</span>
 
         <span class="n">grid_polygons</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
         <span class="n">stream_linework</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
@@ -437,19 +457,49 @@
             <span class="n">column_order</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s1">&#39;j&#39;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">reach_data</span><span class="p">[</span><span class="n">column_order</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="Lines.reproject"><a class="viewcode-back" href="../../api/sfrmaker.lines.html#sfrmaker.lines.Lines.reproject">[docs]</a>    <span class="k">def</span> <span class="nf">reproject</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dest_proj_str</span><span class="p">):</span>
-        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">proj_str</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;No proj_str string for flowlines&quot;</span>
-        <span class="k">assert</span> <span class="n">dest_proj_str</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;No destination CRS.&quot;</span>
+<div class="viewcode-block" id="Lines.to_crs"><a class="viewcode-back" href="../../api/sfrmaker.lines.html#sfrmaker.lines.Lines.to_crs">[docs]</a>    <span class="k">def</span> <span class="nf">to_crs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dest_crs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Reproject the LineStrings in :py:attr:`Lines.df` to</span>
+<span class="sd">        a different Coordinate Reference System.</span>
 
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        dest_crs : obj</span>
+<span class="sd">            A Python int, dict, str, or :py:class:`pyproj.crs.CRS` instance</span>
+<span class="sd">            passed to the :py:meth:`pyproj.crs.CRS.from_user_input`</span>
+<span class="sd">            See http://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input.</span>
+<span class="sd">            Can be any of:</span>
+
+<span class="sd">              - PROJ string</span>
+<span class="sd">              - Dictionary of PROJ parameters</span>
+<span class="sd">              - PROJ keyword arguments for parameters</span>
+<span class="sd">              - JSON string with PROJ parameters</span>
+<span class="sd">              - CRS WKT string</span>
+<span class="sd">              - An authority string [i.e. &#39;epsg:4326&#39;]</span>
+<span class="sd">              - An EPSG integer code [i.e. 4326]</span>
+<span class="sd">              - A tuple of (&quot;auth_name&quot;: &quot;auth_code&quot;) [i.e (&#39;epsg&#39;, &#39;4326&#39;)]</span>
+<span class="sd">              - An object with a `to_wkt` method.</span>
+<span class="sd">              - A :class:`pyproj.crs.CRS` class</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">proj_str</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;No proj_str string for flowlines&quot;</span>
+        <span class="k">assert</span> <span class="n">dest_crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;No destination CRS.&quot;</span>
+
+        <span class="n">dest_crs</span> <span class="o">=</span> <span class="n">get_authority_crs</span><span class="p">(</span><span class="n">dest_crs</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">reprojecting hydrography from</span><span class="se">\n</span><span class="si">{}</span><span class="se">\n</span><span class="s1">to</span><span class="se">\n</span><span class="si">{}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">proj_str</span><span class="p">,</span>
-                                                                     <span class="n">dest_proj_str</span><span class="p">))</span>
-        <span class="n">geoms</span> <span class="o">=</span> <span class="n">project</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">geometry</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">proj_str</span><span class="p">,</span> <span class="n">dest_proj_str</span><span class="p">)</span>
+                                                                     <span class="n">dest_crs</span><span class="p">))</span>
+        <span class="n">geoms</span> <span class="o">=</span> <span class="n">project</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">geometry</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">pyproj_crs</span><span class="p">,</span> <span class="n">dest_crs</span><span class="p">)</span>
         <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">geoms</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">xy</span><span class="p">[</span><span class="mi">0</span><span class="p">])),</span> \
             <span class="s2">&quot;Invalid reprojection; check CRS for lines and grid.&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;geometry&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">geoms</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">proj_str</span> <span class="o">=</span> <span class="n">dest_proj_str</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">crs</span> <span class="o">=</span> <span class="n">CRS</span><span class="p">(</span><span class="n">proj_str</span><span class="o">=</span><span class="n">dest_crs</span><span class="o">.</span><span class="n">srs</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Lines.write_shapefile"><a class="viewcode-back" href="../../api/sfrmaker.lines.html#sfrmaker.lines.Lines.write_shapefile">[docs]</a>    <span class="k">def</span> <span class="nf">write_shapefile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outshp</span><span class="o">=</span><span class="s1">&#39;flowlines.shp&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Write a shapefile of :py:attr:`Lines.df`.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        outshp : str, optional</span>
+<span class="sd">            Shapefile name, by default &#39;flowlines.shp&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
         <span class="n">df2shp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">,</span> <span class="n">outshp</span><span class="p">,</span> <span class="n">epsg</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">epsg</span><span class="p">,</span> <span class="n">prj</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">prjfile</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Lines.from_shapefile"><a class="viewcode-back" href="../../api/sfrmaker.lines.html#sfrmaker.lines.Lines.from_shapefile">[docs]</a>    <span class="nd">@classmethod</span>
@@ -465,13 +515,61 @@
                        <span class="n">attr_length_units</span><span class="o">=</span><span class="s1">&#39;meters&#39;</span><span class="p">,</span> <span class="n">attr_height_units</span><span class="o">=</span><span class="s1">&#39;meters&#39;</span><span class="p">,</span>
                        <span class="nb">filter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                        <span class="n">epsg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">proj_str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">prjfile</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Create a Lines instance from a shapefile.</span>
+
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
+<span class="sd">        shapefile : str</span>
+<span class="sd">            Input shapefile</span>
+<span class="sd">        id_column : str, optional</span>
+<span class="sd">            Attribute field with line identifiers, </span>
+<span class="sd">            by default &#39;id&#39;</span>
+<span class="sd">        routing_column : str, optional</span>
+<span class="sd">            Attribute field with downstream routing connections,</span>
+<span class="sd">            by default &#39;toid&#39;</span>
+<span class="sd">        arbolate_sum_column2 : str, optional</span>
+<span class="sd">            Attribute field with arbolate sums at downstream ends of lines, </span>
+<span class="sd">            by default &#39;asum2&#39;</span>
+<span class="sd">        width1_column : str, optional</span>
+<span class="sd">            Attribute field with channel widths at upstream ends of lines,</span>
+<span class="sd">            by default &#39;width1&#39;</span>
+<span class="sd">        width2_column : str, optional</span>
+<span class="sd">            Attribute field with channel widths at downstream ends of lines, </span>
+<span class="sd">            by default &#39;width2&#39;</span>
+<span class="sd">        up_elevation_column : str, optional</span>
+<span class="sd">            Attribute field with elevations at upstream ends of lines, </span>
+<span class="sd">            by default &#39;elevup&#39;</span>
+<span class="sd">        dn_elevation_column : str, optional</span>
+<span class="sd">            Attribute field with elevations at downstream ends of lines,</span>
+<span class="sd">            by default &#39;elevdn&#39;</span>
+<span class="sd">        name_column : str, optional</span>
+<span class="sd">            Attribute field with feature names, </span>
+<span class="sd">            by default &#39;name&#39;</span>
+<span class="sd">        attr_length_units : str, optional</span>
+<span class="sd">            Length units for feature attributes (e.g. width, arbolate sum, etc.)</span>
+<span class="sd">            By default, meters.</span>
+<span class="sd">        attr_height_units : str, optional</span>
+<span class="sd">            Length units for elevation attributes</span>
+<span class="sd">            By default, &#39;meters&#39;.</span>
+<span class="sd">        filter : tuple, optional</span>
+<span class="sd">            (xmin, ymin, xmax, ymax) bounding box to filter which records </span>
+<span class="sd">            are read from the shapefile. By default None.</span>
+<span class="sd">        epsg: int, optional</span>
+<span class="sd">            EPSG code identifying Coordinate Reference System (CRS)</span>
+<span class="sd">            for features in the input shapefile.</span>
+<span class="sd">        proj_str: str, optional</span>
+<span class="sd">            proj_str string identifying CRS for features in the input shapefile.</span>
+<span class="sd">        prjfile: str, optional</span>
+<span class="sd">            File path to projection (.prj) file identifying CRS</span>
+<span class="sd">            for features in the input shapefile. By default,</span>
+<span class="sd">            the projection file included with the input shapefile</span>
+<span class="sd">            will be used.</span>
 
-<span class="sd">        filter : tuple or str</span>
-<span class="sd">            Bounding box (tuple) or shapefile of model stream network area.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        lines : :class:`Lines` instance</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
+        
 
         <span class="k">if</span> <span class="n">prjfile</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">prjfile</span> <span class="o">=</span> <span class="n">shapefile</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.shp&#39;</span><span class="p">,</span> <span class="s1">&#39;.prj&#39;</span><span class="p">)</span>
@@ -513,7 +611,61 @@
                        <span class="n">attr_length_units</span><span class="o">=</span><span class="s1">&#39;meters&#39;</span><span class="p">,</span>
                        <span class="n">attr_height_units</span><span class="o">=</span><span class="s1">&#39;meters&#39;</span><span class="p">,</span>
                        <span class="n">epsg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">proj_str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">prjfile</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;[summary]</span>
 
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        df : DataFrame</span>
+<span class="sd">            Pandas DataFrame with flowline information, including</span>
+<span class="sd">            shapely :class:`LineStrings &lt;LineString&gt;` in a `&#39;geometry&#39;` column.</span>
+<span class="sd">        id_column : str, optional</span>
+<span class="sd">            Attribute field with line identifiers, </span>
+<span class="sd">            by default &#39;id&#39;</span>
+<span class="sd">        routing_column : str, optional</span>
+<span class="sd">            Attribute field with downstream routing connections,</span>
+<span class="sd">            by default &#39;toid&#39;</span>
+<span class="sd">        arbolate_sum_column2 : str, optional</span>
+<span class="sd">            Attribute field with arbolate sums at downstream ends of lines, </span>
+<span class="sd">            by default &#39;asum2&#39;</span>
+<span class="sd">        width1_column : str, optional</span>
+<span class="sd">            Attribute field with channel widths at upstream ends of lines,</span>
+<span class="sd">            by default &#39;width1&#39;</span>
+<span class="sd">        width2_column : str, optional</span>
+<span class="sd">            Attribute field with channel widths at downstream ends of lines, </span>
+<span class="sd">            by default &#39;width2&#39;</span>
+<span class="sd">        up_elevation_column : str, optional</span>
+<span class="sd">            Attribute field with elevations at upstream ends of lines, </span>
+<span class="sd">            by default &#39;elevup&#39;</span>
+<span class="sd">        dn_elevation_column : str, optional</span>
+<span class="sd">            Attribute field with elevations at downstream ends of lines,</span>
+<span class="sd">            by default &#39;elevdn&#39;</span>
+<span class="sd">        name_column : str, optional</span>
+<span class="sd">            Attribute field with feature names, </span>
+<span class="sd">            by default &#39;name&#39;</span>
+<span class="sd">        attr_length_units : str, optional</span>
+<span class="sd">            Length units for feature attributes (e.g. width, arbolate sum, etc.)</span>
+<span class="sd">            By default, meters.</span>
+<span class="sd">        attr_height_units : str, optional</span>
+<span class="sd">            Length units for elevation attributes</span>
+<span class="sd">            By default, &#39;meters&#39;.</span>
+<span class="sd">        filter : tuple, optional</span>
+<span class="sd">            (xmin, ymin, xmax, ymax) bounding box to filter which records </span>
+<span class="sd">            are read from the shapefile. By default None.</span>
+<span class="sd">        epsg: int, optional</span>
+<span class="sd">            EPSG code identifying Coordinate Reference System (CRS)</span>
+<span class="sd">            for features in the input shapefile.</span>
+<span class="sd">        proj_str: str, optional</span>
+<span class="sd">            proj_str string identifying CRS for features in the input shapefile.</span>
+<span class="sd">        prjfile: str, optional</span>
+<span class="sd">            File path to projection (.prj) file identifying CRS</span>
+<span class="sd">            for features in the input shapefile. By default,</span>
+<span class="sd">            the projection file included with the input shapefile</span>
+<span class="sd">            will be used.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        lines : :class:`Lines` instance</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">assert</span> <span class="n">geometry_column</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> \
             <span class="s2">&quot;No feature geometries found: dataframe column &#39;</span><span class="si">{}</span><span class="s2">&#39; doesn&#39;t exist.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">geometry_column</span><span class="p">)</span>
         <span class="k">assert</span> <span class="n">routing_column</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> \
@@ -563,6 +715,15 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Parameters</span>
 <span class="sd">        ==========</span>
+<span class="sd">        NHDPlus_paths : str or list of strings</span>
+<span class="sd">            List of paths to the root folders of NHDPlus drainage basins</span>
+<span class="sd">            to include, assuming the file structure is the same as</span>
+<span class="sd">            downloaded from the NHDPlus version 2 website. For example::</span>
+<span class="sd">            </span>
+<span class="sd">                NHDPlus_paths=[&#39;/NHDPlusGL/NHDPlus04/&#39;,</span>
+<span class="sd">                               &#39;/NHDPlusMS/NHDPlus07/&#39;]    </span>
+<span class="sd">                                     </span>
+<span class="sd">            for the Great Lakes (04) and Upper Mississippi (07) basins.      </span>
 <span class="sd">        NHDFlowlines : str or list of strings.</span>
 <span class="sd">            Shapefile or list of NHDFlowline shapefiles containing</span>
 <span class="sd">            feature geometries (line arcs) for stream network. Must contain</span>
@@ -582,6 +743,20 @@
 <span class="sd">            COMID : common identifier number</span>
 <span class="sd">        filter : tuple or str</span>
 <span class="sd">            Bounding box (tuple) or shapefile of model stream network area.</span>
+<span class="sd">        epsg: int, optional</span>
+<span class="sd">            EPSG code identifying Coordinate Reference System (CRS)</span>
+<span class="sd">            for features in the input shapefile.</span>
+<span class="sd">        proj_str: str, optional</span>
+<span class="sd">            proj_str string identifying CRS for features in the input shapefile.</span>
+<span class="sd">        prjfile: str, optional</span>
+<span class="sd">            File path to projection (.prj) file identifying CRS</span>
+<span class="sd">            for features in the input shapefile. By default,</span>
+<span class="sd">            the projection file included with the input shapefile</span>
+<span class="sd">            will be used.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        lines : :class:`Lines` instance</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">df</span> <span class="o">=</span> <span class="n">load_nhdplus_v2</span><span class="p">(</span><span class="n">NHDPlus_paths</span><span class="o">=</span><span class="n">NHDPlus_paths</span><span class="p">,</span>
                              <span class="n">NHDFlowlines</span><span class="o">=</span><span class="n">NHDFlowlines</span><span class="p">,</span> <span class="n">PlusFlowlineVAA</span><span class="o">=</span><span class="n">PlusFlowlineVAA</span><span class="p">,</span>
@@ -668,7 +843,7 @@
 <span class="sd">            the most downstream reach are dropped.</span>
 <span class="sd">        package_name : str</span>
 <span class="sd">            Base name for writing sfr output.</span>
-<span class="sd">        kwargs : keyword arguments to sfrmaker.SFRData</span>
+<span class="sd">        kwargs : keyword arguments to :class:`SFRData`</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -705,9 +880,9 @@
         <span class="n">mult_h</span> <span class="o">=</span> <span class="n">convert_length_units</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">attr_height_units</span><span class="p">,</span> <span class="n">model_length_units</span><span class="p">)</span>
         <span class="n">gis_mult</span> <span class="o">=</span> <span class="n">convert_length_units</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">geometry_length_units</span><span class="p">,</span> <span class="n">model_length_units</span><span class="p">)</span>
 
-        <span class="c1"># reproject the flowlines if they aren&#39;t in same CRS as grid</span>
+        <span class="c1"># to_crs the flowlines if they aren&#39;t in same CRS as grid</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span> <span class="o">!=</span> <span class="n">grid</span><span class="o">.</span><span class="n">crs</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">reproject</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">proj_str</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">proj_str</span><span class="p">)</span>
         <span class="c1"># cull the flowlines to the active part of the model grid</span>
         <span class="k">if</span> <span class="n">grid</span><span class="o">.</span><span class="n">active_area</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">cull</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">active_area</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">simplify</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mi">2000</span><span class="p">)</span>
@@ -752,11 +927,13 @@
                 <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;Check length unit conversions before using this option.&#39;</span><span class="p">)</span>
                 <span class="n">asums</span> <span class="o">=</span> <span class="n">arbolate_sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
                                      <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
-                                              <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">g</span><span class="o">.</span><span class="n">length</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">geometry</span><span class="p">])</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry_to_m</span>
+                                              <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">g</span><span class="o">.</span><span class="n">length</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">geometry</span><span class="p">])</span> <span class="o">*</span> <span class="n">convert_length_units</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">geometry_length_units</span><span class="p">,</span> <span class="s1">&#39;meters&#39;</span><span class="p">)</span>
                                               <span class="p">)),</span>
                                      <span class="bp">self</span><span class="o">.</span><span class="n">routing</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">asums</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">asum2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">attr_to_m</span><span class="p">))</span>
+                <span class="n">asums</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> 
+                                 <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">asum2</span> <span class="o">*</span> <span class="n">convert_length_units</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">attr_length_units</span><span class="p">,</span> 
+                                                                      <span class="s1">&#39;meters&#39;</span><span class="p">)))</span>
 
             <span class="c1"># populate starting asums (asum1)</span>
             <span class="n">routing_r</span> <span class="o">=</span> <span class="p">{</span><span class="n">v</span><span class="p">:</span> <span class="n">k</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">routing</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">v</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">}</span>
@@ -765,7 +942,7 @@
 
             <span class="c1"># compute arbolate sum at reach midpoints (in meters)</span>
             <span class="n">lengths</span> <span class="o">=</span> <span class="n">rd</span><span class="p">[[</span><span class="s1">&#39;line_id&#39;</span><span class="p">,</span> <span class="s1">&#39;ireach&#39;</span><span class="p">,</span> <span class="s1">&#39;geometry&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-            <span class="n">lengths</span><span class="p">[</span><span class="s1">&#39;rchlen&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">g</span><span class="o">.</span><span class="n">length</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">lengths</span><span class="o">.</span><span class="n">geometry</span><span class="p">])</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry_to_m</span>
+            <span class="n">lengths</span><span class="p">[</span><span class="s1">&#39;rchlen&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">g</span><span class="o">.</span><span class="n">length</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">lengths</span><span class="o">.</span><span class="n">geometry</span><span class="p">])</span> <span class="o">*</span> <span class="n">convert_length_units</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">geometry_length_units</span><span class="p">,</span> <span class="s1">&#39;meters&#39;</span><span class="p">)</span>
             <span class="n">groups</span> <span class="o">=</span> <span class="n">lengths</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;line_id&#39;</span><span class="p">)</span>  <span class="c1"># fragments grouped by parent line</span>
 
             <span class="n">reach_cumsums</span> <span class="o">=</span> <span class="p">[]</span>
@@ -937,7 +1114,7 @@
   <div role="contentinfo">
     <p>
       <span class="lastupdated">
-        Last updated on Sep 09, 2020.
+        Last updated on Sep 10, 2020.
       </span>
 
     </p>

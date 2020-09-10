@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>The SFRData Module &mdash; SFRmaker 0.5.0.post13.dev0+g114faa0 documentation</title>
+  <title>The SFRData Module &mdash; SFRmaker 0.5.0.post14+gc176c1e documentation</title>
   
 
   
@@ -67,7 +67,7 @@
             
             
               <div class="version">
-                0.5.0.post13.dev0+g114faa0
+                0.5.0.post14+gc176c1e
               </div>
             
           
@@ -108,7 +108,9 @@
 <p class="caption"><span class="caption-text">Reference</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="index.html"> Code reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.grid.html">Grid Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="sfrmaker.lines.html">Lines Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.mf5to6.html">MODFLOW-2005 to 6 Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="sfrmaker.preprocessing.html">Preprocessing Module</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">SFRData Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="sfrmaker.utils.html">Utilities Module</a></li>
@@ -522,7 +524,7 @@ using linear interpolation.</p>
 <dl class="py method">
 <dt id="sfrmaker.sfrdata.SFRData.modflow_sfr2">
 <em class="property">property </em><code class="sig-name descname">modflow_sfr2</code><a class="headerlink" href="#sfrmaker.sfrdata.SFRData.modflow_sfr2" title="Permalink to this definition">¶</a></dt>
-<dd><p>Flopy modflow_sfr2 instance.</p>
+<dd><p>A <cite>flopy.modflow.mfsfr2.ModflowSfr2</cite> represenation of the sfr dataset.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -736,7 +738,27 @@ are converted (default).</p>
 <dl class="py method">
 <dt id="sfrmaker.sfrdata.SFRData.write_gage_package">
 <code class="sig-name descname">write_gage_package</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">gage_package_unit</span><span class="o">=</span><span class="default_value">25</span></em>, <em class="sig-param"><span class="n">gage_starting_unit_number</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/sfrdata.html#SFRData.write_gage_package"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sfrmaker.sfrdata.SFRData.write_gage_package" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Write observation input for the MODFLOW-2005 Gage Package.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>filename</strong><span class="classifier">str, optional</span></dt><dd><p>Gage package file, by default None, in which case
+<a class="reference internal" href="#sfrmaker.sfrdata.SFRData.observations_file" title="sfrmaker.sfrdata.SFRData.observations_file"><code class="xref py py-attr docutils literal notranslate"><span class="pre">SFRData.observations_file</span></code></a> is used.</p>
+</dd>
+<dt><strong>gage_package_unit</strong><span class="classifier">int, optional</span></dt><dd><p>Unit number for Gage Package, by default 25</p>
+</dd>
+<dt><strong>gage_starting_unit_number</strong><span class="classifier">int, optional</span></dt><dd><p>Starting unit number for gage output files, 
+by default None</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl>
+<dt><strong>gag</strong><span class="classifier"><a class="reference external" href="https://modflowpy.github.io/flopydoc/mfgage.html#flopy.modflow.mfgage.ModflowGage" title="(in flopy v3.3.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">flopy.modflow.mfgage.ModflowGage</span></code></a> instance</span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt id="sfrmaker.sfrdata.SFRData.write_mf6_sfr_obsfile">
@@ -746,11 +768,37 @@ are converted (default).</p>
 <dl class="py method">
 <dt id="sfrmaker.sfrdata.SFRData.write_package">
 <code class="sig-name descname">write_package</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">version</span><span class="o">=</span><span class="default_value">'mf2005'</span></em>, <em class="sig-param"><span class="n">idomain</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">options</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">run_diagnostics</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">write_observations_input</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">external_files_path</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">gage_starting_unit_number</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/sfrdata.html#SFRData.write_package"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sfrmaker.sfrdata.SFRData.write_package" title="Permalink to this definition">¶</a></dt>
-<dd><p>Write SFR package input.</p>
+<dd><p>Write an SFR package input file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>version</strong><span class="classifier">str</span></dt><dd><p>‘mf2005’ or ‘mf6’</p>
+<dt><strong>filename</strong><span class="classifier">str, optional</span></dt><dd><p>File name for SFR package. By default None, in which
+case the filename of the attached <a class="reference external" href="https://modflowpy.github.io/flopydoc/mfsfr2.html#flopy.modflow.mfsfr2.ModflowSfr2" title="(in flopy v3.3.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">flopy.modflow.mfsfr2.ModflowSfr2</span></code></a> instance
+(<code class="docutils literal notranslate"><span class="pre">SFRData.modflow_sfr2.fn_path</span></code>) is used.</p>
+</dd>
+<dt><strong>version</strong><span class="classifier">str, optional, {‘mf2005’, ‘mfnwt’, ‘mf6’}</span></dt><dd><p>MODFLOW version for the SFR package, by default ‘mf2005’</p>
+</dd>
+<dt><strong>idomain</strong><span class="classifier">ndarray, optional</span></dt><dd><p>3D numpy array designating active cells (idomain==1).
+SFR reaches in inactive cells will be written with ‘none’ in the cellid field.
+by default None</p>
+</dd>
+<dt><strong>options</strong><span class="classifier">list, optional</span></dt><dd><p>List of strings to write to the MODFLOW-6 SFR options block.
+By default None. An appropriate unit_conversion is written by default.
+See MODFLOW-6 documentation for other options.</p>
+</dd>
+<dt><strong>run_diagnostics</strong><span class="classifier">bool, optional</span></dt><dd><p>Option to run the <a class="reference internal" href="../notebooks/SFRmaker_demo.html#Running-diagnostics"><span class="std std-ref">diagnostic checks</span></a>.
+by default True</p>
+</dd>
+<dt><strong>write_observations_input</strong><span class="classifier">bool, optional</span></dt><dd><p>Option to write input to the the MODFLOW-2005 gage package or MODFLOW-6 Observations Process.
+Requires attached observations, as added through the <a class="reference internal" href="#sfrmaker.sfrdata.SFRData.add_observations" title="sfrmaker.sfrdata.SFRData.add_observations"><code class="xref py py-meth docutils literal notranslate"><span class="pre">SFRData.add_observations()</span></code></a> method.
+by default True</p>
+</dd>
+<dt><strong>external_files_path</strong><span class="classifier">str, optional</span></dt><dd><p>Path for writing an external file for packagedata, relative to the location of the SFR package file.
+If specified, an open/close statement referencing the file is written to the packagedata block.
+By default, None (packagedata table is written to the SFR package file)</p>
+</dd>
+<dt><strong>gage_starting_unit_number</strong><span class="classifier">int, optional</span></dt><dd><p>Starting unit number for gage output files, 
+by default None</p>
 </dd>
 </dl>
 </dd>
@@ -760,7 +808,18 @@ are converted (default).</p>
 <dl class="py method">
 <dt id="sfrmaker.sfrdata.SFRData.write_tables">
 <code class="sig-name descname">write_tables</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">basename</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/sfrdata.html#SFRData.write_tables"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sfrmaker.sfrdata.SFRData.write_tables" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Write <code class="xref py py-attr docutils literal notranslate"><span class="pre">reach_data</span></code>, <code class="xref py py-attr docutils literal notranslate"><span class="pre">segment_data</span></code>,
+and <a class="reference internal" href="#sfrmaker.sfrdata.SFRData.period_data" title="sfrmaker.sfrdata.SFRData.period_data"><code class="xref py py-attr docutils literal notranslate"><span class="pre">period_data</span></code></a> (if populated) to csv files.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>basename</strong><span class="classifier">str, optional</span></dt><dd><p>Base name for csv files, by default None, in which case
+<a class="reference internal" href="#sfrmaker.sfrdata.SFRData.package_name" title="sfrmaker.sfrdata.SFRData.package_name"><code class="xref py py-attr docutils literal notranslate"><span class="pre">SFRData.package_name</span></code></a> is used.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 
@@ -787,7 +846,7 @@ are converted (default).</p>
   <div role="contentinfo">
     <p>
       <span class="lastupdated">
-        Last updated on Sep 09, 2020.
+        Last updated on Sep 10, 2020.
       </span>
 
     </p>
