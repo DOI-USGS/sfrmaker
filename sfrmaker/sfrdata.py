@@ -1460,9 +1460,22 @@ class SFRData(DataPackage):
             SFR reaches in inactive cells will be written with 'none' in the cellid field.
             by default None
         options : list, optional
-            List of strings to write to the MODFLOW-6 SFR options block.
-            By default None. An appropriate unit_conversion is written by default.
+            List of strings to write to the MODFLOW-6 SFR options block. For example::
+
+                options=['save_flows',
+                         'BUDGET FILEOUT model.sfr.cbc',
+                         'STAGE FILEOUT model.sfr.stage.bin']
+
+            * An appropriate unit_conversion is written by default.
+            * Cell-by-cell budget and stage output files are also added by default if not specified.
+            * If the :attr:`SFRData.observations` is populated and `write_observations_input=True`,
+              the observation input file is also added.
+            * All files added by default are placed in the same path as the SFR package file. If another
+              location is desired, the file(s) need to be specified explicitly as strings in the options
+              list.
+
             See MODFLOW-6 documentation for other options.
+            By default None.
         run_diagnostics : bool, optional
             Option to run the :ref:`diagnostic checks <Running diagnostics>`.
             by default True
@@ -1493,6 +1506,7 @@ class SFRData(DataPackage):
 
         if filename is None:
             filename = self.modflow_sfr2.fn_path
+
         if gage_starting_unit_number is None:
             gage_starting_unit_number = self.gage_starting_unit_number
         if version in {'mf2005', 'mfnwt'}:
@@ -1511,14 +1525,18 @@ class SFRData(DataPackage):
             from .mf5to6 import Mf6SFR
             if options is None:
                 # save budget and stage output by default
+                # if options weren't specified, assume the output files
+                # should be in the same location as the SFR package file
+                # (do the same for obs below)
+                _, just_the_filename = os.path.split(filename)
                 options = ['save_flows',
-                           'BUDGET FILEOUT {}.cbc'.format(filename),
-                           'STAGE FILEOUT {}.stage.bin'.format(filename),
+                           'BUDGET FILEOUT {}.cbc'.format(just_the_filename),
+                           'STAGE FILEOUT {}.stage.bin'.format(just_the_filename),
                            ]
             if write_observations_input and len(self.observations) > 0:
                 if 'obs6 filein' not in ''.join(options).lower():
                     obs_input_filename = filename + '.obs'
-                    options.append('OBS6 FILEIN {}'.format(obs_input_filename))
+                    options.append('OBS6 FILEIN {}'.format(just_the_filename + '.obs'))
                 else:
                     for entry in options:
                         if 'obs6 filein' in entry.lower():

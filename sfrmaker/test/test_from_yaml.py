@@ -60,9 +60,9 @@ def test_from_yaml(shellmound_config):
     assert os.path.exists('sfrmaker/test/temp/shellmound/tables/shellmound_sfr_reach_data.csv')
     options = read_mf6_block(sfr_package_file, 'options')
     assert 'save_flows' in options
-    assert options['budget'] == ['fileout', '../../temp/shellmound/shellmound.sfr.cbc']
-    assert options['stage'] == ['fileout', '../../temp/shellmound/shellmound.sfr.stage.bin']
-    assert options['obs6'] == ['filein', '../../temp/shellmound/shellmound.sfr.obs']
+    assert options['budget'] == ['fileout', 'shellmound.sfr.cbc']
+    assert options['stage'] == ['fileout', 'shellmound.sfr.stage.bin']
+    assert options['obs6'] == ['filein', 'shellmound.sfr.obs']
 
 
 def get_package_version(sfr_package_file):

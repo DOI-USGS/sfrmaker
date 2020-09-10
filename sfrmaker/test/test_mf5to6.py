@@ -86,11 +86,12 @@ def test_write(shellmound_sfrdata, mf6sfr_instance_SFRdata, outdir, external_fil
         full_external_files_path = os.path.join(outdir, external_files_path)
         if not os.path.isdir(full_external_files_path):
             os.makedirs(full_external_files_path)
-            
+
+    _, outfile2_name = os.path.split(outfile2)
     mf6sfr.write_file(filename=outfile,
                       options=['save_flows',
-                               'BUDGET FILEOUT {}.cbc'.format(outfile2),
-                               'STAGE FILEOUT {}.stage.bin'.format(outfile2),
+                               'BUDGET FILEOUT {}.cbc'.format(outfile2_name),
+                               'STAGE FILEOUT {}.stage.bin'.format(outfile2_name),
                                ],
                       external_files_path=external_files_path
                       )

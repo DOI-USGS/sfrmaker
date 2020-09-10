@@ -11,21 +11,34 @@ from sfrmaker.reaches import interpolate_to_reaches
 
 class Mf6SFR:
     """Class for writing MODFLOW-6 SFR package input
-    from a (MODFLOW-2005 style) flopy.modflow.ModflowSfr2 instance.
+    from a (MODFLOW-2005 style) flopy.modflow.ModflowSfr2 instance or
+    an sfrmaker.SFRData instance.
 
     Parameters
     ----------
-    ModflowSfr2 : flopy.modflow.ModflowSfr2 instance
-    period_data : [type], optional
-        [description], by default None
+    ModflowSfr2 : flopy.modflow.ModflowSfr2 instance, optional
+        Input SFR dataset
+    SFRData : sfrmaker.SFRData instance, optional
+        Input SFR dataset
+    period_data : DataFrame, optional
+        DataFrame of MODFLOW-6-style stress period data, as made by
+        :meth:`SFRData.add_to_perioddata`. Only needed if SFRData isn't supplied,
+        by default None
     idomain : ndarray, optional
         3D numpy array designating active cells (idomain==1).
         SFR reaches in inactive cells will be written with 'none' in the cellid field.
         by default None
     options : list, optional
-        List of strings to write to the MODFLOW-6 SFR options block.
-        By default None. An appropriate unit_conversion is written by default.
+        List of strings to write to the MODFLOW-6 SFR options block. For example::
+
+                options=['save_flows',
+                         'BUDGET FILEOUT model.sfr.cbc',
+                         'STAGE FILEOUT model.sfr.stage.bin']
+
+        An appropriate unit_conversion is written by default.
         See MODFLOW-6 documentation for other options.
+        By default None.
+
     auxiliary_line_numbers : bool, optional
         If true, add 'line_id' as an auxiliary variable to the options block
         and write hydrography line IDs to the packagedata block in the auxiliary
@@ -93,10 +106,13 @@ class Mf6SFR:
         if SFRData is not None:
             self.rd = SFRData.reach_data
             self.sd = SFRData.segment_data
+            self._period_data = SFRData.period_data
         else:
             self.rd = pd.DataFrame(ModflowSfr2.reach_data)
             self.rd.rename(columns={'reachID': 'rno'}, inplace=True)
             self.sd = self._get_segment_dataframe()
+            # period data
+            self._period_data = period_data
 
         # package data
         self._package_data = None
@@ -110,8 +126,7 @@ class Mf6SFR:
         # diversions
         self.diversions = None
 
-        # period data
-        self._period_data = period_data
+
 
         self.dimensions_block = '\nBEGIN Dimensions\n  NREACHES {:d}\nEND Dimensions\n'.format(self.nreaches)
 
@@ -254,9 +269,15 @@ class Mf6SFR:
             Usually this is the simulation workspace. 
             Only used if filename is None.
         options : list, optional
-            List of strings to write to the MODFLOW-6 SFR options block.
-            By default None. An appropriate unit_conversion is written by default.
+            List of strings to write to the MODFLOW-6 SFR options block. For example::
+
+                options=['save_flows',
+                         'BUDGET FILEOUT model.sfr.cbc',
+                         'STAGE FILEOUT model.sfr.stage.bin']
+
+            An appropriate unit_conversion is written by default.
             See MODFLOW-6 documentation for other options.
+            By default None.
         external_files_path : str, optional
             Path for writing an external file for packagedata, relative to the location of the SFR package file.
             If specified, an open/close statement referencing the file is written to the packagedata block.

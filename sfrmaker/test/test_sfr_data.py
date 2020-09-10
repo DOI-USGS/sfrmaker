@@ -186,9 +186,11 @@ def test_write_mf6_package(shellmound_sfrdata, mf6sfr, outdir):
     with open(sfr_package_file) as src:
         for line in src:
             if 'budget' in line.lower() or 'stage' in line.lower():
-                _, _, fname = line.strip().split()
-                path, fname = os.path.split(fname)
-                assert os.path.isdir(path)
+                _, _, fpath = line.strip().split()
+                path, fname = os.path.split(fpath)
+                abspath = os.path.abspath(os.path.join(outdir, fname))
+                # path should be relative
+                assert path == ''
                 assert fname.replace('.cbc', '').replace('.stage.bin', '') == \
                        os.path.split(sfr_package_file)[1]
             elif 'unit_conversion' in line.lower():

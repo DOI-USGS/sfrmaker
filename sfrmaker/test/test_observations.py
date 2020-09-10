@@ -102,7 +102,7 @@ def test_write_mf6_sfr_obsfile(shellmound_sfrdata, flux_observation_data, outdir
         for line in src:
             if 'obs6' in line.lower():
                 _, _, fname = line.strip().split()
-                assert os.path.exists(fname)
+                assert os.path.exists(os.path.join(outdir, fname))
                 break
 
 
