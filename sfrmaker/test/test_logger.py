@@ -4,6 +4,7 @@ Tests for the SFRmaker logger module.
 import os
 import pytest
 from sfrmaker.logger import Logger
+from pathlib import Path
 
 
 @pytest.fixture(autouse=True)
@@ -39,7 +40,7 @@ def test_init(filename, mode, existing_log_file, outfolder):
         logger = Logger(existing_log_file)
     else:
         logger = Logger()
-    assert os.path.abspath(logger.filename) == os.path.join(outfolder, 'sfrmaker.logger')
+    assert Path(logger.filename).resolve() == Path(outfolder) / 'sfrmaker.logger'
     assert not logger.f.closed
     logger.f.close()
     with open(logger.filename) as src:
