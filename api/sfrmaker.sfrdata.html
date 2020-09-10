@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>The SFRData Module &mdash; SFRmaker 0.5.0.post14+gc176c1e documentation</title>
+  <title>The SFRData Module &mdash; SFRmaker 0.5.0.post15+g5788dc7 documentation</title>
   
 
   
@@ -67,7 +67,7 @@
             
             
               <div class="version">
-                0.5.0.post14+gc176c1e
+                0.5.0.post15+g5788dc7
               </div>
             
           
@@ -769,9 +769,9 @@ by default None</p>
 <dt id="sfrmaker.sfrdata.SFRData.write_package">
 <code class="sig-name descname">write_package</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">version</span><span class="o">=</span><span class="default_value">'mf2005'</span></em>, <em class="sig-param"><span class="n">idomain</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">options</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">run_diagnostics</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">write_observations_input</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">external_files_path</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">gage_starting_unit_number</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/sfrdata.html#SFRData.write_package"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sfrmaker.sfrdata.SFRData.write_package" title="Permalink to this definition">¶</a></dt>
 <dd><p>Write an SFR package input file.</p>
-<dl class="field-list simple">
+<dl class="field-list">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
+<dd class="field-odd"><dl>
 <dt><strong>filename</strong><span class="classifier">str, optional</span></dt><dd><p>File name for SFR package. By default None, in which
 case the filename of the attached <a class="reference external" href="https://modflowpy.github.io/flopydoc/mfsfr2.html#flopy.modflow.mfsfr2.ModflowSfr2" title="(in flopy v3.3.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">flopy.modflow.mfsfr2.ModflowSfr2</span></code></a> instance
 (<code class="docutils literal notranslate"><span class="pre">SFRData.modflow_sfr2.fn_path</span></code>) is used.</p>
@@ -782,9 +782,23 @@ case the filename of the attached <a class="reference external" href="https://mo
 SFR reaches in inactive cells will be written with ‘none’ in the cellid field.
 by default None</p>
 </dd>
-<dt><strong>options</strong><span class="classifier">list, optional</span></dt><dd><p>List of strings to write to the MODFLOW-6 SFR options block.
-By default None. An appropriate unit_conversion is written by default.
-See MODFLOW-6 documentation for other options.</p>
+<dt><strong>options</strong><span class="classifier">list, optional</span></dt><dd><p>List of strings to write to the MODFLOW-6 SFR options block. For example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">options</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;save_flows&#39;</span><span class="p">,</span>
+         <span class="s1">&#39;BUDGET FILEOUT model.sfr.cbc&#39;</span><span class="p">,</span>
+         <span class="s1">&#39;STAGE FILEOUT model.sfr.stage.bin&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>An appropriate unit_conversion is written by default.</p></li>
+<li><p>Cell-by-cell budget and stage output files are also added by default if not specified.</p></li>
+<li><p>If the <a class="reference internal" href="#sfrmaker.sfrdata.SFRData.observations" title="sfrmaker.sfrdata.SFRData.observations"><code class="xref py py-attr docutils literal notranslate"><span class="pre">SFRData.observations</span></code></a> is populated and <cite>write_observations_input=True</cite>,
+the observation input file is also added.</p></li>
+<li><p>All files added by default are placed in the same path as the SFR package file. If another
+location is desired, the file(s) need to be specified explicitly as strings in the options
+list.</p></li>
+</ul>
+<p>See MODFLOW-6 documentation for other options.
+By default None.</p>
 </dd>
 <dt><strong>run_diagnostics</strong><span class="classifier">bool, optional</span></dt><dd><p>Option to run the <a class="reference internal" href="../notebooks/SFRmaker_demo.html#Running-diagnostics"><span class="std std-ref">diagnostic checks</span></a>.
 by default True</p>

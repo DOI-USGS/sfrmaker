@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>sfrmaker.sfrdata &mdash; SFRmaker 0.5.0.post14+gc176c1e documentation</title>
+  <title>sfrmaker.sfrdata &mdash; SFRmaker 0.5.0.post15+g5788dc7 documentation</title>
   
 
   
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                0.5.0.post14+gc176c1e
+                0.5.0.post15+g5788dc7
               </div>
             
           
@@ -1638,9 +1638,22 @@
 <span class="sd">            SFR reaches in inactive cells will be written with &#39;none&#39; in the cellid field.</span>
 <span class="sd">            by default None</span>
 <span class="sd">        options : list, optional</span>
-<span class="sd">            List of strings to write to the MODFLOW-6 SFR options block.</span>
-<span class="sd">            By default None. An appropriate unit_conversion is written by default.</span>
+<span class="sd">            List of strings to write to the MODFLOW-6 SFR options block. For example::</span>
+
+<span class="sd">                options=[&#39;save_flows&#39;,</span>
+<span class="sd">                         &#39;BUDGET FILEOUT model.sfr.cbc&#39;,</span>
+<span class="sd">                         &#39;STAGE FILEOUT model.sfr.stage.bin&#39;]</span>
+
+<span class="sd">            * An appropriate unit_conversion is written by default.</span>
+<span class="sd">            * Cell-by-cell budget and stage output files are also added by default if not specified.</span>
+<span class="sd">            * If the :attr:`SFRData.observations` is populated and `write_observations_input=True`,</span>
+<span class="sd">              the observation input file is also added.</span>
+<span class="sd">            * All files added by default are placed in the same path as the SFR package file. If another</span>
+<span class="sd">              location is desired, the file(s) need to be specified explicitly as strings in the options</span>
+<span class="sd">              list.</span>
+
 <span class="sd">            See MODFLOW-6 documentation for other options.</span>
+<span class="sd">            By default None.</span>
 <span class="sd">        run_diagnostics : bool, optional</span>
 <span class="sd">            Option to run the :ref:`diagnostic checks &lt;Running diagnostics&gt;`.</span>
 <span class="sd">            by default True</span>
@@ -1671,6 +1684,7 @@
 
         <span class="k">if</span> <span class="n">filename</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">filename</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">modflow_sfr2</span><span class="o">.</span><span class="n">fn_path</span>
+
         <span class="k">if</span> <span class="n">gage_starting_unit_number</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">gage_starting_unit_number</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gage_starting_unit_number</span>
         <span class="k">if</span> <span class="n">version</span> <span class="ow">in</span> <span class="p">{</span><span class="s1">&#39;mf2005&#39;</span><span class="p">,</span> <span class="s1">&#39;mfnwt&#39;</span><span class="p">}:</span>
@@ -1689,14 +1703,18 @@
             <span class="kn">from</span> <span class="nn">.mf5to6</span> <span class="kn">import</span> <span class="n">Mf6SFR</span>
             <span class="k">if</span> <span class="n">options</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="c1"># save budget and stage output by default</span>
+                <span class="c1"># if options weren&#39;t specified, assume the output files</span>
+                <span class="c1"># should be in the same location as the SFR package file</span>
+                <span class="c1"># (do the same for obs below)</span>
+                <span class="n">_</span><span class="p">,</span> <span class="n">just_the_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
                 <span class="n">options</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;save_flows&#39;</span><span class="p">,</span>
-                           <span class="s1">&#39;BUDGET FILEOUT </span><span class="si">{}</span><span class="s1">.cbc&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">),</span>
-                           <span class="s1">&#39;STAGE FILEOUT </span><span class="si">{}</span><span class="s1">.stage.bin&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">),</span>
+                           <span class="s1">&#39;BUDGET FILEOUT </span><span class="si">{}</span><span class="s1">.cbc&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">just_the_filename</span><span class="p">),</span>
+                           <span class="s1">&#39;STAGE FILEOUT </span><span class="si">{}</span><span class="s1">.stage.bin&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">just_the_filename</span><span class="p">),</span>
                            <span class="p">]</span>
             <span class="k">if</span> <span class="n">write_observations_input</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="k">if</span> <span class="s1">&#39;obs6 filein&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">options</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
                     <span class="n">obs_input_filename</span> <span class="o">=</span> <span class="n">filename</span> <span class="o">+</span> <span class="s1">&#39;.obs&#39;</span>
-                    <span class="n">options</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;OBS6 FILEIN </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">obs_input_filename</span><span class="p">))</span>
+                    <span class="n">options</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;OBS6 FILEIN </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">just_the_filename</span> <span class="o">+</span> <span class="s1">&#39;.obs&#39;</span><span class="p">))</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
                         <span class="k">if</span> <span class="s1">&#39;obs6 filein&#39;</span> <span class="ow">in</span> <span class="n">entry</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>

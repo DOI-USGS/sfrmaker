@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>The MODFLOW-2005 to 6 Module &mdash; SFRmaker 0.5.0.post14+gc176c1e documentation</title>
+  <title>The MODFLOW-2005 to 6 Module &mdash; SFRmaker 0.5.0.post15+g5788dc7 documentation</title>
   
 
   
@@ -67,7 +67,7 @@
             
             
               <div class="version">
-                0.5.0.post14+gc176c1e
+                0.5.0.post15+g5788dc7
               </div>
             
           
@@ -221,20 +221,32 @@
 <em class="property">class </em><code class="sig-prename descclassname">sfrmaker.mf5to6.</code><code class="sig-name descname">Mf6SFR</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ModflowSfr2</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">SFRData</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">period_data</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">idomain</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">options</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">auxiliary_line_numbers</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/mf5to6.html#Mf6SFR"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sfrmaker.mf5to6.Mf6SFR" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Class for writing MODFLOW-6 SFR package input
-from a (MODFLOW-2005 style) flopy.modflow.ModflowSfr2 instance.</p>
-<dl class="field-list simple">
+from a (MODFLOW-2005 style) flopy.modflow.ModflowSfr2 instance or
+an sfrmaker.SFRData instance.</p>
+<dl class="field-list">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>ModflowSfr2</strong><span class="classifier">flopy.modflow.ModflowSfr2 instance</span></dt><dd></dd>
-<dt><strong>period_data</strong><span class="classifier">[type], optional</span></dt><dd><p>[description], by default None</p>
+<dd class="field-odd"><dl>
+<dt><strong>ModflowSfr2</strong><span class="classifier">flopy.modflow.ModflowSfr2 instance, optional</span></dt><dd><p>Input SFR dataset</p>
+</dd>
+<dt><strong>SFRData</strong><span class="classifier">sfrmaker.SFRData instance, optional</span></dt><dd><p>Input SFR dataset</p>
+</dd>
+<dt><strong>period_data</strong><span class="classifier">DataFrame, optional</span></dt><dd><p>DataFrame of MODFLOW-6-style stress period data, as made by
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">SFRData.add_to_perioddata()</span></code>. Only needed if SFRData isn’t supplied,
+by default None</p>
 </dd>
 <dt><strong>idomain</strong><span class="classifier">ndarray, optional</span></dt><dd><p>3D numpy array designating active cells (idomain==1).
 SFR reaches in inactive cells will be written with ‘none’ in the cellid field.
 by default None</p>
 </dd>
-<dt><strong>options</strong><span class="classifier">list, optional</span></dt><dd><p>List of strings to write to the MODFLOW-6 SFR options block.
-By default None. An appropriate unit_conversion is written by default.
-See MODFLOW-6 documentation for other options.</p>
+<dt><strong>options</strong><span class="classifier">list, optional</span></dt><dd><p>List of strings to write to the MODFLOW-6 SFR options block. For example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">options</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;save_flows&#39;</span><span class="p">,</span>
+         <span class="s1">&#39;BUDGET FILEOUT model.sfr.cbc&#39;</span><span class="p">,</span>
+         <span class="s1">&#39;STAGE FILEOUT model.sfr.stage.bin&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>An appropriate unit_conversion is written by default.
+See MODFLOW-6 documentation for other options.
+By default None.</p>
 </dd>
 <dt><strong>auxiliary_line_numbers</strong><span class="classifier">bool, optional</span></dt><dd><p>If true, add ‘line_id’ as an auxiliary variable to the options block
 and write hydrography line IDs to the packagedata block in the auxiliary
@@ -287,9 +299,9 @@ and write hydrography line IDs to the packagedata block in the auxiliary
 <dt id="sfrmaker.mf5to6.Mf6SFR.write_file">
 <code class="sig-name descname">write_file</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">outpath</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">options</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">external_files_path</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/mf5to6.html#Mf6SFR.write_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sfrmaker.mf5to6.Mf6SFR.write_file" title="Permalink to this definition">¶</a></dt>
 <dd><p>Write a MODFLOW-6 format SFR package file.</p>
-<dl class="field-list simple">
+<dl class="field-list">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
+<dd class="field-odd"><dl>
 <dt><strong>filename</strong><span class="classifier">str, optional</span></dt><dd><p>SFR package filename. Default setting is to use the
 ModflowSfr2.file_name attribute for the ModflowSfr2 instance
 entered on init of the Mf6SFR class, by default None.</p>
@@ -298,9 +310,15 @@ entered on init of the Mf6SFR class, by default None.</p>
 Usually this is the simulation workspace. 
 Only used if filename is None.</p>
 </dd>
-<dt><strong>options</strong><span class="classifier">list, optional</span></dt><dd><p>List of strings to write to the MODFLOW-6 SFR options block.
-By default None. An appropriate unit_conversion is written by default.
-See MODFLOW-6 documentation for other options.</p>
+<dt><strong>options</strong><span class="classifier">list, optional</span></dt><dd><p>List of strings to write to the MODFLOW-6 SFR options block. For example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">options</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;save_flows&#39;</span><span class="p">,</span>
+         <span class="s1">&#39;BUDGET FILEOUT model.sfr.cbc&#39;</span><span class="p">,</span>
+         <span class="s1">&#39;STAGE FILEOUT model.sfr.stage.bin&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>An appropriate unit_conversion is written by default.
+See MODFLOW-6 documentation for other options.
+By default None.</p>
 </dd>
 <dt><strong>external_files_path</strong><span class="classifier">str, optional</span></dt><dd><p>Path for writing an external file for packagedata, relative to the location of the SFR package file.
 If specified, an open/close statement referencing the file is written to the packagedata block.

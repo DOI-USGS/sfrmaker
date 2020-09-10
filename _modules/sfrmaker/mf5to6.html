@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>sfrmaker.mf5to6 &mdash; SFRmaker 0.5.0.post14+gc176c1e documentation</title>
+  <title>sfrmaker.mf5to6 &mdash; SFRmaker 0.5.0.post15+g5788dc7 documentation</title>
   
 
   
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                0.5.0.post14+gc176c1e
+                0.5.0.post15+g5788dc7
               </div>
             
           
@@ -189,21 +189,34 @@
 
 <div class="viewcode-block" id="Mf6SFR"><a class="viewcode-back" href="../../api/sfrmaker.mf5to6.html#sfrmaker.mf5to6.Mf6SFR">[docs]</a><span class="k">class</span> <span class="nc">Mf6SFR</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Class for writing MODFLOW-6 SFR package input</span>
-<span class="sd">    from a (MODFLOW-2005 style) flopy.modflow.ModflowSfr2 instance.</span>
+<span class="sd">    from a (MODFLOW-2005 style) flopy.modflow.ModflowSfr2 instance or</span>
+<span class="sd">    an sfrmaker.SFRData instance.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    ModflowSfr2 : flopy.modflow.ModflowSfr2 instance</span>
-<span class="sd">    period_data : [type], optional</span>
-<span class="sd">        [description], by default None</span>
+<span class="sd">    ModflowSfr2 : flopy.modflow.ModflowSfr2 instance, optional</span>
+<span class="sd">        Input SFR dataset</span>
+<span class="sd">    SFRData : sfrmaker.SFRData instance, optional</span>
+<span class="sd">        Input SFR dataset</span>
+<span class="sd">    period_data : DataFrame, optional</span>
+<span class="sd">        DataFrame of MODFLOW-6-style stress period data, as made by</span>
+<span class="sd">        :meth:`SFRData.add_to_perioddata`. Only needed if SFRData isn&#39;t supplied,</span>
+<span class="sd">        by default None</span>
 <span class="sd">    idomain : ndarray, optional</span>
 <span class="sd">        3D numpy array designating active cells (idomain==1).</span>
 <span class="sd">        SFR reaches in inactive cells will be written with &#39;none&#39; in the cellid field.</span>
 <span class="sd">        by default None</span>
 <span class="sd">    options : list, optional</span>
-<span class="sd">        List of strings to write to the MODFLOW-6 SFR options block.</span>
-<span class="sd">        By default None. An appropriate unit_conversion is written by default.</span>
+<span class="sd">        List of strings to write to the MODFLOW-6 SFR options block. For example::</span>
+
+<span class="sd">                options=[&#39;save_flows&#39;,</span>
+<span class="sd">                         &#39;BUDGET FILEOUT model.sfr.cbc&#39;,</span>
+<span class="sd">                         &#39;STAGE FILEOUT model.sfr.stage.bin&#39;]</span>
+
+<span class="sd">        An appropriate unit_conversion is written by default.</span>
 <span class="sd">        See MODFLOW-6 documentation for other options.</span>
+<span class="sd">        By default None.</span>
+
 <span class="sd">    auxiliary_line_numbers : bool, optional</span>
 <span class="sd">        If true, add &#39;line_id&#39; as an auxiliary variable to the options block</span>
 <span class="sd">        and write hydrography line IDs to the packagedata block in the auxiliary</span>
@@ -271,10 +284,13 @@
         <span class="k">if</span> <span class="n">SFRData</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">rd</span> <span class="o">=</span> <span class="n">SFRData</span><span class="o">.</span><span class="n">reach_data</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">sd</span> <span class="o">=</span> <span class="n">SFRData</span><span class="o">.</span><span class="n">segment_data</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_period_data</span> <span class="o">=</span> <span class="n">SFRData</span><span class="o">.</span><span class="n">period_data</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">rd</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">ModflowSfr2</span><span class="o">.</span><span class="n">reach_data</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">rd</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;reachID&#39;</span><span class="p">:</span> <span class="s1">&#39;rno&#39;</span><span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">sd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_segment_dataframe</span><span class="p">()</span>
+            <span class="c1"># period data</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_period_data</span> <span class="o">=</span> <span class="n">period_data</span>
 
         <span class="c1"># package data</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_package_data</span> <span class="o">=</span> <span class="kc">None</span>
@@ -288,8 +304,7 @@
         <span class="c1"># diversions</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">diversions</span> <span class="o">=</span> <span class="kc">None</span>
 
-        <span class="c1"># period data</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_period_data</span> <span class="o">=</span> <span class="n">period_data</span>
+
 
         <span class="bp">self</span><span class="o">.</span><span class="n">dimensions_block</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">BEGIN Dimensions</span><span class="se">\n</span><span class="s1">  NREACHES </span><span class="si">{:d}</span><span class="se">\n</span><span class="s1">END Dimensions</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nreaches</span><span class="p">)</span>
 
@@ -432,9 +447,15 @@
 <span class="sd">            Usually this is the simulation workspace. </span>
 <span class="sd">            Only used if filename is None.</span>
 <span class="sd">        options : list, optional</span>
-<span class="sd">            List of strings to write to the MODFLOW-6 SFR options block.</span>
-<span class="sd">            By default None. An appropriate unit_conversion is written by default.</span>
+<span class="sd">            List of strings to write to the MODFLOW-6 SFR options block. For example::</span>
+
+<span class="sd">                options=[&#39;save_flows&#39;,</span>
+<span class="sd">                         &#39;BUDGET FILEOUT model.sfr.cbc&#39;,</span>
+<span class="sd">                         &#39;STAGE FILEOUT model.sfr.stage.bin&#39;]</span>
+
+<span class="sd">            An appropriate unit_conversion is written by default.</span>
 <span class="sd">            See MODFLOW-6 documentation for other options.</span>
+<span class="sd">            By default None.</span>
 <span class="sd">        external_files_path : str, optional</span>
 <span class="sd">            Path for writing an external file for packagedata, relative to the location of the SFR package file.</span>
 <span class="sd">            If specified, an open/close statement referencing the file is written to the packagedata block.</span>
