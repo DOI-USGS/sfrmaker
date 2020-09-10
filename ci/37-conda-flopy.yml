@@ -31,8 +31,8 @@ dependencies:
   - sphinx-copybutton
   - sphinx_rtd_theme
   - flopy
-  - gis-utils
   - pip
   - pip:
+    - gis-utils
     - pytest-timeout
     - modflow-export

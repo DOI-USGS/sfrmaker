@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 from shapely.geometry import box
 import flopy
-from gisutils import shp2df, df2shp, project
+from gisutils import shp2df, df2shp, project, get_authority_crs
 import sfrmaker
 from sfrmaker.routing import pick_toids, find_path, make_graph, renumber_segments
 from sfrmaker.checks import routing_is_circular, is_to_one
@@ -26,14 +26,17 @@ class Lines:
     df : DataFrame
         Dataframe with linestring features and attribute information.
         Must have the following columns:
-        id: sequential integers for identifying each feature
-        toid: integers representing routing connections
-        ...
-        geometry: shapely LineString objects for each feature
-    attr_length_units : 'meters' or 'feet'
+        
+        ============ =====================================================
+        **id**       sequential integers for identifying each feature
+        **toid**     integers representing routing connections
+        **geometry** shapely :class:`LineString` objects for each feature
+        ============ =====================================================
+        
+    attr_length_units : str, {'meters', 'feet', ..}
         Length units for feature attributes (e.g. width, arbolate sum, etc.)
         (default 'meters')
-    attr_height_units : 'meters' or 'feet'
+    attr_height_units : str, {'meters', 'feet', ..}
         Length units for elevation attributes
         (default 'meters')
     epsg: int
@@ -47,6 +50,10 @@ class Lines:
         File path to projection (.prj) file identifying CRS
         for features in df.geometry
         (optional)
+        
+    Attributes
+    ----------
+    crs : :class:`sfrmaker.gis.CRS` instance
     """
 
     def __init__(self, df=None,
@@ -70,31 +77,9 @@ class Lines:
 
 
     @property
-    def attr_to_m(self):
-        if self.attr_length_units == 'feet':
-            return 0.3048
-        return 1.0
-
-    @property
-    def attr_to_ft(self):
-        if self.attr_length_units == 'feet':
-            return 1.
-        return 1 / 0.3048
-
-    @property
-    def geometry_to_m(self):
-        if self.geometry_length_units == 'feet':
-            return 0.3048
-        return 1.0
-
-    @property
-    def geometry_to_ft(self):
-        if self.geometry_length_units == 'feet':
-            return 1.
-        return 1 / 0.3048
-
-    @property
     def geometry_length_units(self):
+        """Length units of reach LineString geometries.
+        """
         self._geometry_length_units = self.crs.length_units
         if self._geometry_length_units is None:
             print("Warning: No length units specified in CRS for input LineStrings; "
@@ -104,6 +89,9 @@ class Lines:
 
     @property
     def routing(self):
+        """Dictionary of routing connections from ids (keys)
+        to to_ids (values).
+        """
         if self._routing is None or self._routing_changed():
             toid = self.df.toid.values
             # check whether or not routing is
@@ -129,6 +117,10 @@ class Lines:
 
     @property
     def paths(self):
+        """Dictionary of paths, where each value is a list
+        of downstream lines constituting a flow path to an outlet
+        for a given line (key).
+        """        
         if self._paths is None:
             self._set_paths()
             return self._paths
@@ -158,9 +150,37 @@ class Lines:
         feature : shapely Polygon, list of Polygons, or shapefile path
             Polygons must be in same CRS as linework; shapefile
             features will be reprojected if their crs is different.
+        simplify : bool
+            Option to simplify the polygon, which can speed intersection 
+            with the lines.
+        tol: float
+            Simplification tolerance (distance), in the units of the LineStrings
+            (usually meters).
+        feature_crs : obj
+            A Python int, dict, str, or :py:class:`pyproj.crs.CRS` instance
+            passed to the :py:meth:`pyproj.crs.CRS.from_user_input`
+            See http://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input.
+            Can be any of:
+
+              - PROJ string
+              - Dictionary of PROJ parameters
+              - PROJ keyword arguments for parameters
+              - JSON string with PROJ parameters
+              - CRS WKT string
+              - An authority string [i.e. 'epsg:4326']
+              - An EPSG integer code [i.e. 4326]
+              - A tuple of ("auth_name": "auth_code") [i.e ('epsg', '4326')]
+              - An object with a `to_wkt` method.
+              - A :class:`pyproj.crs.CRS` class
         inplace : bool
             If True, the attribute .df is modified;
             if False, a copy of .df is returned.
+            
+        Returns
+        -------
+        df : DataFrame
+            Version of the :py:attr:`Lines.df` DataFrame
+            containing only the lines that intersect the ``feature``.
         """
         print('\nCulling hydrography to active area...')
         ta = time.time()
@@ -217,9 +237,9 @@ class Lines:
         """
         from .gis import intersect, intersect_rtree
 
-        # reproject the flowlines if they aren't in same CRS as grid
+        # to_crs the flowlines if they aren't in same CRS as grid
         if self.crs != grid.crs:
-            self.reproject(grid.crs.proj_str)
+            self.to_crs(grid.crs.proj_str)
 
         grid_polygons = grid.df.geometry.tolist()
         stream_linework = self.df.geometry.tolist()
@@ -259,19 +279,49 @@ class Lines:
             column_order.remove('j')
         return reach_data[column_order].copy()
 
-    def reproject(self, dest_proj_str):
-        assert self.crs.proj_str is not None, "No proj_str string for flowlines"
-        assert dest_proj_str is not None, "No destination CRS."
+    def to_crs(self, dest_crs):
+        """Reproject the LineStrings in :py:attr:`Lines.df` to
+        a different Coordinate Reference System.
 
+        Parameters
+        ----------
+        dest_crs : obj
+            A Python int, dict, str, or :py:class:`pyproj.crs.CRS` instance
+            passed to the :py:meth:`pyproj.crs.CRS.from_user_input`
+            See http://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input.
+            Can be any of:
+
+              - PROJ string
+              - Dictionary of PROJ parameters
+              - PROJ keyword arguments for parameters
+              - JSON string with PROJ parameters
+              - CRS WKT string
+              - An authority string [i.e. 'epsg:4326']
+              - An EPSG integer code [i.e. 4326]
+              - A tuple of ("auth_name": "auth_code") [i.e ('epsg', '4326')]
+              - An object with a `to_wkt` method.
+              - A :class:`pyproj.crs.CRS` class
+        """        
+        assert self.crs.proj_str is not None, "No proj_str string for flowlines"
+        assert dest_crs is not None, "No destination CRS."
+
+        dest_crs = get_authority_crs(dest_crs)
         print('\nreprojecting hydrography from\n{}\nto\n{}\n'.format(self.crs.proj_str,
-                                                                     dest_proj_str))
-        geoms = project(self.df.geometry, self.crs.proj_str, dest_proj_str)
+                                                                     dest_crs))
+        geoms = project(self.df.geometry, self.crs.pyproj_crs, dest_crs)
         assert np.isfinite(np.max(geoms[0].xy[0])), \
             "Invalid reprojection; check CRS for lines and grid."
         self.df['geometry'] = geoms
-        self.crs.proj_str = dest_proj_str
+        self.crs = CRS(proj_str=dest_crs.srs)
 
     def write_shapefile(self, outshp='flowlines.shp'):
+        """Write a shapefile of :py:attr:`Lines.df`.
+
+        Parameters
+        ----------
+        outshp : str, optional
+            Shapefile name, by default 'flowlines.shp'
+        """        
         df2shp(self.df, outshp, epsg=self.crs.epsg, prj=self.crs.prjfile)
 
     @classmethod
@@ -287,13 +337,61 @@ class Lines:
                        attr_length_units='meters', attr_height_units='meters',
                        filter=None,
                        epsg=None, proj_str=None, prjfile=None):
-        """
+        """Create a Lines instance from a shapefile.
+
         Parameters
         ----------
+        shapefile : str
+            Input shapefile
+        id_column : str, optional
+            Attribute field with line identifiers, 
+            by default 'id'
+        routing_column : str, optional
+            Attribute field with downstream routing connections,
+            by default 'toid'
+        arbolate_sum_column2 : str, optional
+            Attribute field with arbolate sums at downstream ends of lines, 
+            by default 'asum2'
+        width1_column : str, optional
+            Attribute field with channel widths at upstream ends of lines,
+            by default 'width1'
+        width2_column : str, optional
+            Attribute field with channel widths at downstream ends of lines, 
+            by default 'width2'
+        up_elevation_column : str, optional
+            Attribute field with elevations at upstream ends of lines, 
+            by default 'elevup'
+        dn_elevation_column : str, optional
+            Attribute field with elevations at downstream ends of lines,
+            by default 'elevdn'
+        name_column : str, optional
+            Attribute field with feature names, 
+            by default 'name'
+        attr_length_units : str, optional
+            Length units for feature attributes (e.g. width, arbolate sum, etc.)
+            By default, meters.
+        attr_height_units : str, optional
+            Length units for elevation attributes
+            By default, 'meters'.
+        filter : tuple, optional
+            (xmin, ymin, xmax, ymax) bounding box to filter which records 
+            are read from the shapefile. By default None.
+        epsg: int, optional
+            EPSG code identifying Coordinate Reference System (CRS)
+            for features in the input shapefile.
+        proj_str: str, optional
+            proj_str string identifying CRS for features in the input shapefile.
+        prjfile: str, optional
+            File path to projection (.prj) file identifying CRS
+            for features in the input shapefile. By default,
+            the projection file included with the input shapefile
+            will be used.
 
-        filter : tuple or str
-            Bounding box (tuple) or shapefile of model stream network area.
-        """
+        Returns
+        -------
+        lines : :class:`Lines` instance
+        """        
+        
 
         if prjfile is None:
             prjfile = shapefile.replace('.shp', '.prj')
@@ -335,7 +433,61 @@ class Lines:
                        attr_length_units='meters',
                        attr_height_units='meters',
                        epsg=None, proj_str=None, prjfile=None):
+        """[summary]
 
+        Parameters
+        ----------
+        df : DataFrame
+            Pandas DataFrame with flowline information, including
+            shapely :class:`LineStrings <LineString>` in a `'geometry'` column.
+        id_column : str, optional
+            Attribute field with line identifiers, 
+            by default 'id'
+        routing_column : str, optional
+            Attribute field with downstream routing connections,
+            by default 'toid'
+        arbolate_sum_column2 : str, optional
+            Attribute field with arbolate sums at downstream ends of lines, 
+            by default 'asum2'
+        width1_column : str, optional
+            Attribute field with channel widths at upstream ends of lines,
+            by default 'width1'
+        width2_column : str, optional
+            Attribute field with channel widths at downstream ends of lines, 
+            by default 'width2'
+        up_elevation_column : str, optional
+            Attribute field with elevations at upstream ends of lines, 
+            by default 'elevup'
+        dn_elevation_column : str, optional
+            Attribute field with elevations at downstream ends of lines,
+            by default 'elevdn'
+        name_column : str, optional
+            Attribute field with feature names, 
+            by default 'name'
+        attr_length_units : str, optional
+            Length units for feature attributes (e.g. width, arbolate sum, etc.)
+            By default, meters.
+        attr_height_units : str, optional
+            Length units for elevation attributes
+            By default, 'meters'.
+        filter : tuple, optional
+            (xmin, ymin, xmax, ymax) bounding box to filter which records 
+            are read from the shapefile. By default None.
+        epsg: int, optional
+            EPSG code identifying Coordinate Reference System (CRS)
+            for features in the input shapefile.
+        proj_str: str, optional
+            proj_str string identifying CRS for features in the input shapefile.
+        prjfile: str, optional
+            File path to projection (.prj) file identifying CRS
+            for features in the input shapefile. By default,
+            the projection file included with the input shapefile
+            will be used.
+
+        Returns
+        -------
+        lines : :class:`Lines` instance
+        """
         assert geometry_column in df.columns, \
             "No feature geometries found: dataframe column '{}' doesn't exist.".format(geometry_column)
         assert routing_column in df.columns, \
@@ -385,6 +537,15 @@ class Lines:
         """
         Parameters
         ==========
+        NHDPlus_paths : str or list of strings
+            List of paths to the root folders of NHDPlus drainage basins
+            to include, assuming the file structure is the same as
+            downloaded from the NHDPlus version 2 website. For example::
+            
+                NHDPlus_paths=['/NHDPlusGL/NHDPlus04/',
+                               '/NHDPlusMS/NHDPlus07/']    
+                                     
+            for the Great Lakes (04) and Upper Mississippi (07) basins.      
         NHDFlowlines : str or list of strings.
             Shapefile or list of NHDFlowline shapefiles containing
             feature geometries (line arcs) for stream network. Must contain
@@ -404,6 +565,20 @@ class Lines:
             COMID : common identifier number
         filter : tuple or str
             Bounding box (tuple) or shapefile of model stream network area.
+        epsg: int, optional
+            EPSG code identifying Coordinate Reference System (CRS)
+            for features in the input shapefile.
+        proj_str: str, optional
+            proj_str string identifying CRS for features in the input shapefile.
+        prjfile: str, optional
+            File path to projection (.prj) file identifying CRS
+            for features in the input shapefile. By default,
+            the projection file included with the input shapefile
+            will be used.
+
+        Returns
+        -------
+        lines : :class:`Lines` instance
         """
         df = load_nhdplus_v2(NHDPlus_paths=NHDPlus_paths,
                              NHDFlowlines=NHDFlowlines, PlusFlowlineVAA=PlusFlowlineVAA,
@@ -490,7 +665,7 @@ class Lines:
             the most downstream reach are dropped.
         package_name : str
             Base name for writing sfr output.
-        kwargs : keyword arguments to sfrmaker.SFRData
+        kwargs : keyword arguments to :class:`SFRData`
 
         Returns
         -------
@@ -527,9 +702,9 @@ class Lines:
         mult_h = convert_length_units(self.attr_height_units, model_length_units)
         gis_mult = convert_length_units(self.geometry_length_units, model_length_units)
 
-        # reproject the flowlines if they aren't in same CRS as grid
+        # to_crs the flowlines if they aren't in same CRS as grid
         if self.crs != grid.crs:
-            self.reproject(grid.crs.proj_str)
+            self.to_crs(grid.crs.proj_str)
         # cull the flowlines to the active part of the model grid
         if grid.active_area is not None:
             self.cull(grid.active_area, inplace=True, simplify=True, tol=2000)
@@ -574,11 +749,13 @@ class Lines:
                 raise NotImplementedError('Check length unit conversions before using this option.')
                 asums = arbolate_sum(self.df.id,
                                      dict(zip(self.df.id,
-                                              np.array([g.length for g in self.df.geometry]) * self.geometry_to_m
+                                              np.array([g.length for g in self.df.geometry]) * convert_length_units(self.geometry_length_units, 'meters')
                                               )),
                                      self.routing)
             else:
-                asums = dict(zip(self.df.id, self.df.asum2 * self.attr_to_m))
+                asums = dict(zip(self.df.id, 
+                                 self.df.asum2 * convert_length_units(self.attr_length_units, 
+                                                                      'meters')))
 
             # populate starting asums (asum1)
             routing_r = {v: k for k, v in self.routing.items() if v != 0}
@@ -587,7 +764,7 @@ class Lines:
 
             # compute arbolate sum at reach midpoints (in meters)
             lengths = rd[['line_id', 'ireach', 'geometry']].copy()
-            lengths['rchlen'] = np.array([g.length for g in lengths.geometry]) * self.geometry_to_m
+            lengths['rchlen'] = np.array([g.length for g in lengths.geometry]) * convert_length_units(self.geometry_length_units, 'meters')
             groups = lengths.groupby('line_id')  # fragments grouped by parent line
 
             reach_cumsums = []

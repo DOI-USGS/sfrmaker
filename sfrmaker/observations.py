@@ -300,7 +300,7 @@ def locate_sites(site_data,
     else:
         raise TypeError('Datatype for site_data not understood: {}'.format(site_data))
 
-    # reproject if crs are available
+    # to_crs if crs are available
     if locsproj4 is not None and sfrproj4 is not None:
         locs['geometry'] = project(locs.geometry.values, locsproj4, sfrproj4)
 
@@ -410,6 +410,7 @@ def write_gage_package(location_data,
     with open(gage_namfile_entries_file, 'w') as output:
         for i, f in enumerate(df.gagefile.values):
             output.write('DATA  {:d} {}\n'.format(gage_data.unit[i], f))
+    return gag
 
 
 def write_mf6_sfr_obsfile(observation_locations,

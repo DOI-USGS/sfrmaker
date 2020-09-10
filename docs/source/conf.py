@@ -205,5 +205,6 @@ intersphinx_mapping = {
     'matplotlib': ('https://matplotlib.org', None),
     'flopy': ('https://modflowpy.github.io/flopydoc/', None),
     'rasterstats': ('https://pythonhosted.org/rasterstats/', None),
-    'shapely': ('https://shapely.readthedocs.io/en/latest/', None)
+    'shapely': ('https://shapely.readthedocs.io/en/latest/', None),
+    'pyproj': ('http://pyproj4.github.io/pyproj/stable/', None)
 }

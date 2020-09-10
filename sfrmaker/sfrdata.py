@@ -268,7 +268,7 @@ class SFRData(DataPackage):
 
     @property
     def modflow_sfr2(self):
-        """Flopy modflow_sfr2 instance."""
+        """A `flopy.modflow.mfsfr2.ModflowSfr2` represenation of the sfr dataset."""
         if self._ModflowSfr2 is None:
             self.create_modflow_sfr2()
         return self._ModflowSfr2
@@ -905,7 +905,7 @@ class SFRData(DataPackage):
             features = self.grid.df.loc[self.reach_data.node, 'geometry'].tolist()
             txt = method
 
-        # reproject features if they're not in the same crs
+        # to_crs features if they're not in the same crs
         if raster_crs != self.crs:
             features = project(features,
                                self.crs.proj_str,
@@ -1445,13 +1445,39 @@ class SFRData(DataPackage):
                       write_observations_input=True,
                       external_files_path=None, gage_starting_unit_number=None,
                       **kwargs):
-        """Write SFR package input.
+        """Write an SFR package input file.
 
         Parameters
         ----------
-        version : str
-            'mf2005' or 'mf6'
-        """
+        filename : str, optional
+            File name for SFR package. By default None, in which
+            case the filename of the attached :py:class:`flopy.modflow.mfsfr2.ModflowSfr2` instance
+            (``SFRData.modflow_sfr2.fn_path``) is used.
+        version : str, optional, {'mf2005', 'mfnwt', 'mf6'}
+            MODFLOW version for the SFR package, by default 'mf2005'
+        idomain : ndarray, optional
+            3D numpy array designating active cells (idomain==1).
+            SFR reaches in inactive cells will be written with 'none' in the cellid field.
+            by default None
+        options : list, optional
+            List of strings to write to the MODFLOW-6 SFR options block.
+            By default None. An appropriate unit_conversion is written by default.
+            See MODFLOW-6 documentation for other options.
+        run_diagnostics : bool, optional
+            Option to run the :ref:`diagnostic checks <Running diagnostics>`.
+            by default True
+        write_observations_input : bool, optional
+            Option to write input to the the MODFLOW-2005 gage package or MODFLOW-6 Observations Process.
+            Requires attached observations, as added through the :py:meth:`SFRData.add_observations` method.
+            by default True
+        external_files_path : str, optional
+            Path for writing an external file for packagedata, relative to the location of the SFR package file.
+            If specified, an open/close statement referencing the file is written to the packagedata block.
+            By default, None (packagedata table is written to the SFR package file)
+        gage_starting_unit_number : int, optional
+            Starting unit number for gage output files, 
+            by default None
+        """        
         print('SFRmaker v. {}'.format(sfrmaker.__version__))
         # run the flopy SFR diagnostics
         if run_diagnostics:
@@ -1509,6 +1535,15 @@ class SFRData(DataPackage):
             sfr6.write_file(filename=filename, external_files_path=external_files_path)
 
     def write_tables(self, basename=None):
+        """Write :py:attr:`~SFRData.reach_data`, :py:attr:`~SFRData.segment_data`,
+        and :py:attr:`~SFRData.period_data` (if populated) to csv files. 
+
+        Parameters
+        ----------
+        basename : str, optional
+            Base name for csv files, by default None, in which case
+            :py:attr:`SFRData.package_name` is used.
+        """
         if basename is None:
             output_path = self._tables_path
             if not os.path.isdir(output_path):
@@ -1531,6 +1566,23 @@ class SFRData(DataPackage):
 
     def write_gage_package(self, filename=None, gage_package_unit=25,
                            gage_starting_unit_number=None):
+        """Write observation input for the MODFLOW-2005 Gage Package.
+
+        Parameters
+        ----------
+        filename : str, optional
+            Gage package file, by default None, in which case
+            :py:attr:`SFRData.observations_file` is used.
+        gage_package_unit : int, optional
+            Unit number for Gage Package, by default 25
+        gage_starting_unit_number : int, optional
+            Starting unit number for gage output files, 
+            by default None
+
+        Returns
+        -------
+        gag : :py:class:`flopy.modflow.mfgage.ModflowGage` instance
+        """        
         if filename is None:
             filename = self.observations_file
         else:

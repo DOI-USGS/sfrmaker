@@ -423,7 +423,7 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
     pf = pf.loc[fl.index]
     elevslope = elevslope.loc[fl.index]
 
-    # reproject the flowlines if they are not in project_crs
+    # to_crs the flowlines if they are not in project_crs
     if project_crs is not None and flowline_crs is not None and project_crs != flowline_crs:
         fl['geometry'] = project(fl.geometry, flowline_crs.proj_str, project_crs.proj_str)
 
@@ -735,7 +735,7 @@ def clip_flowlines_to_polygon(flowlines, polygon,
     if logger is None:
         logger = Logger()
 
-    # read in the active area and reproject to same crs as flowlines
+    # read in the active area and to_crs to same crs as flowlines
     flowlines_crs = None
     if flowlines_epsg is not None:
         flowlines_crs = CRS(epsg=flowlines_epsg)
@@ -808,7 +808,7 @@ def sample_NARWidth(flowlines, narwidth_shapefile, waterbodies,
                "(CRS; i.e. with units of meters).")
         raise ValueError(msg)
 
-    # read in narwidth shapefile; reproject to flowline CRS
+    # read in narwidth shapefile; to_crs to flowline CRS
     nw = shp2df(narwidth_shapefile, filter=filter)
     narwidth_crs = CRS(prjfile=narwidth_shapefile[:-4] + '.prj')
     nw['geometry'] = project(nw.geometry, narwidth_crs.proj_str, flowline_crs.proj_str)

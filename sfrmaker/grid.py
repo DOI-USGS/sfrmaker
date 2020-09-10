@@ -1,3 +1,8 @@
+"""
+Module for working with model grids. For examples of how to easily set
+up a StructuredGrid instance, see :ref:`Basic usage of SFRmaker in a scripting context`.
+"""
+
 import os
 
 import fiona
@@ -18,22 +23,15 @@ fm = flopy.modflow
 
 class Grid:
     """Base class for model grids. Has methods and attributes
-    that are common to both Structured and Unstructured Grids.
-
-    Parameters
-    ----------
-    model_units : str ('feet' or 'meters')
-        Computation units units of model
-    crs_units : str ('feet' or 'meters')
-        Units of coordinate reference system for grid.
-        (optional; otherwise inferred from epsg, proj, or prjfile inputs.
+    that are common to both Structured and Unstructured Grids. Not
+    meant to be called directly.
 
     """
     units_dict = {0: 'undefined', 'feet': 1, 'meters': 2}
 
     def __init__(self, df,
                  model_units='undefined', crs_units=None,
-                 bounds=None, active_area=None,
+                 bounds=None,
                  epsg=None, proj_str=None, prjfile=None, **kwargs):
 
         self.df = df
@@ -213,6 +211,69 @@ class Grid:
 
 class StructuredGrid(Grid):
     """Class representing a model grid that has a row/column structure.
+
+
+    Parameters
+    ----------
+    df : DataFrame
+        Pandas DataFrame that is the primary container for information about the model grid.
+        Must have the following columns:
+
+        ========= ===  ==================================================
+        k         int  model layer (zero-based)
+        i         int  model row (zero-based)
+        j         int  model column (zero-based)
+        isfr      int  flag indicating whether the cell can have SFR reaches
+                       (0=False, 1=True)
+        geometry  obj  shapely :class:`Polygons <Polygon>` of model cells
+        ========= ===  ==================================================
+
+    xul : float, optional
+        Upper left corner of the grid x-coordinate. Only used for creating
+        the :attr:`transform` attribute, by default None
+    yul : [type], optional
+        Upper left corner of the grid y-coordinate.  Only used for creating
+        the :attr:`transform` attribute, by default None
+    dx : float, optional
+        Uniform spacing in the x-direction (if the grid is uniform), 
+        Only used for creating
+        the :attr:`transform` attribute, by default None
+    dy : float, optional
+        Uniform spacing in the x-direction (if the grid is uniform), 
+        Only used for creating
+        the :attr:`transform` attribute, by default None
+    rotation : float, optional
+        Grid rotation angle in degrees, counter-clockwise
+        about the origin, by default 0. Only used for creating
+        the :attr:`transform` attribute, by default None
+    uniform : bool, optional
+        Optional flag indicating the grid is uniform, 
+        by default None
+    model_units : str, optional, {'meters', 'feet', ..}
+        Model length units, by default 'undefined'
+    crs_units : str, optional, {'meters', 'feet', ..}
+        Coordinate reference system length. Usually these
+        are read from the CRS information below,
+        by default None
+    bounds : tuple, optional
+        (left, bottom, top, right) edges of the grid bounding box, if known.
+        Otherwise, the :attr:`bounds` attribute is computed from the
+        shapely :class:`Polygons <Polygon>` in the :attr:`Grid DataFrame <Grid.df>` attribute.
+        by default None
+    active_area : shapely Polygon, list of Polygons, or shapefile path, optional
+        Polygon defining the active portion of the model grid.
+        Polygons must be in same CRS as linework; shapefile features will be reprojected if their crs is different.
+        by default None, in which case the entire grid is assumed to be active.
+    epsg: int, optional
+        EPSG code identifying Coordinate Reference System (CRS)
+        for features in the input shapefile.
+    proj_str: str, optional
+        proj_str string identifying CRS for features in the input shapefile.
+    prjfile: str, optional
+        File path to projection (.prj) file identifying CRS
+        for features in the input shapefile. By default,
+        the projection file included with the input shapefile
+        will be used.
     """
     _structured = True
 
