@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Basic usage of SFRmaker in a scripting context &mdash; SFRmaker 0.5.0.post16.dev0+gf926a83 documentation</title>
+  <title>Basic usage of SFRmaker in a scripting context &mdash; SFRmaker 0.5.0.post17+gb7aa112 documentation</title>
   
 
   
@@ -67,7 +67,7 @@
             
             
               <div class="version">
-                0.5.0.post16.dev0+gf926a83
+                0.5.0.post17+gb7aa112
               </div>
             
           
@@ -458,7 +458,7 @@ div.rendered_html tbody tr:hover {
 <div class="section" id="Basic-usage-of-SFRmaker-in-a-scripting-context">
 <h1>Basic usage of SFRmaker in a scripting context<a class="headerlink" href="#Basic-usage-of-SFRmaker-in-a-scripting-context" title="Permalink to this headline">¶</a></h1>
 <p>This example illustrates basic usage of SFRmaker in a scripting context. For examples of using SFRmaker with a configuration file, see the MERAS and Tyler Forks examples.</p>
-<div class="nbinput docutils container">
+<div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
@@ -469,14 +469,6 @@ div.rendered_html tbody tr:hover {
 <span class="kn">import</span> <span class="nn">sfrmaker</span>
 </pre></div>
 </div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-flopy is installed in /home/travis/miniconda/envs/test/lib/python3.7/site-packages/flopy
-</pre></div></div>
 </div>
 <div class="section" id="Input-requirements">
 <h2>Input requirements<a class="headerlink" href="#Input-requirements" title="Permalink to this headline">¶</a></h2>
@@ -538,9 +530,9 @@ reading ../tylerforks/NHDPlus/NHDSnapshot/Hydrography/NHDFlowline.shp...
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/home/travis/miniconda/envs/test/lib/python3.7/site-packages/pyproj/crs/crs.py:393: FutureWarning: &#39;+init=&lt;authority&gt;:&lt;code&gt;&#39; syntax is deprecated. &#39;&lt;authority&gt;:&lt;code&gt;&#39; is the preferred initialization method. When making the change, be mindful of axis order changes: https://pyproj4.github.io/pyproj/stable/gotchas.html#axis-order-changes-in-proj-6
+/home/travis/miniconda/envs/test/lib/python3.8/site-packages/pyproj/crs/crs.py:393: FutureWarning: &#39;+init=&lt;authority&gt;:&lt;code&gt;&#39; syntax is deprecated. &#39;&lt;authority&gt;:&lt;code&gt;&#39; is the preferred initialization method. When making the change, be mindful of axis order changes: https://pyproj4.github.io/pyproj/stable/gotchas.html#axis-order-changes-in-proj-6
   return CRS(_prepare_from_string(in_crs_string))
-/home/travis/miniconda/envs/test/lib/python3.7/site-packages/pyproj/crs/crs.py:280: FutureWarning: &#39;+init=&lt;authority&gt;:&lt;code&gt;&#39; syntax is deprecated. &#39;&lt;authority&gt;:&lt;code&gt;&#39; is the preferred initialization method. When making the change, be mindful of axis order changes: https://pyproj4.github.io/pyproj/stable/gotchas.html#axis-order-changes-in-proj-6
+/home/travis/miniconda/envs/test/lib/python3.8/site-packages/pyproj/crs/crs.py:280: FutureWarning: &#39;+init=&lt;authority&gt;:&lt;code&gt;&#39; syntax is deprecated. &#39;&lt;authority&gt;:&lt;code&gt;&#39; is the preferred initialization method. When making the change, be mindful of axis order changes: https://pyproj4.github.io/pyproj/stable/gotchas.html#axis-order-changes-in-proj-6
   projstring = _prepare_from_string(projparams)
 </pre></div></div>
 </div>
@@ -549,7 +541,7 @@ reading ../tylerforks/NHDPlus/NHDSnapshot/Hydrography/NHDFlowline.shp...
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-filtering on bounding box -90.624482596925, 46.37886827710283, -90.4625592199325, 46.45832567355404...
+filtering on bounding box -90.624482596925, 46.37886827710284, -90.4625592199325, 46.45832567355404...
 --&gt; building dataframe... (may take a while for large shapefiles)
 
 reading ../tylerforks/NHDPlus/NHDPlusAttributes/PlusFlowlineVAA.dbf...
@@ -561,7 +553,7 @@ reading ../tylerforks/NHDPlus/NHDPlusAttributes/PlusFlow.dbf...
 reading ../tylerforks/NHDPlus/NHDPlusAttributes/elevslope.dbf...
 --&gt; building dataframe... (may take a while for large shapefiles)
 
-load finished in 0.25s
+load finished in 0.24s
 
 Getting routing information from NHDPlus Plusflow table...
 finished in 0.03s
@@ -713,7 +705,7 @@ reading ../tylerforks/active_area.shp...
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.image.AxesImage at 0x7fbd34258c50&gt;
+&lt;matplotlib.image.AxesImage at 0x7f2e2ee05e80&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -770,12 +762,12 @@ MODFLOW 5 layer(s) 111 row(s) 160 column(s) 1 stress period(s)
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 
-SFRmaker version 0.5.0.post16.dev0+gf926a83
+SFRmaker version 0.5.0.post17+gb7aa112
 
 Creating sfr dataset...
 
 Creating grid class instance from flopy Grid instance...
-grid class created in 0.33s
+grid class created in 0.25s
 
 Model grid information
 structured grid
@@ -819,7 +811,7 @@ finished in 0.01s
 Intersecting 17 flowlines with 17,760 grid cells...
 
 Building spatial index...
-finished in 1.75s
+finished in 1.79s
 
 Intersecting 17 features...
 17
@@ -862,7 +854,7 @@ bounds: 682688.00, 5139052.00, 694880.00, 5147510.20
 active area defined by: all cells
 
 
-Time to create sfr dataset: 2.80s
+Time to create sfr dataset: 2.77s
 
 </pre></div></div>
 </div>
@@ -1252,11 +1244,11 @@ Time to create sfr dataset: 2.80s
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 running rasterstats.zonal_stats on buffered LineStrings...
-finished in 4.66s
+finished in 4.30s
 
 
 Smoothing elevations...
-finished in 0.13s
+finished in 0.14s
 </pre></div></div>
 </div>
 </div>
@@ -1478,7 +1470,7 @@ DEM and other data in a GIS environment. * <strong>suprious slopes:</strong> slo
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 
-Running Flopy v. 3.3.1 diagnostics...
+Running Flopy v. 3.3.2 diagnostics...
 wrote tf_SFR.chk
 </pre></div></div>
 </div>
@@ -1500,9 +1492,9 @@ wrote tf_SFR.chk
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-SFRmaker v. 0.5.0.post16.dev0+gf926a83
+SFRmaker v. 0.5.0.post17+gb7aa112
 
-Running Flopy v. 3.3.1 diagnostics...
+Running Flopy v. 3.3.2 diagnostics...
 passed.
 
 Checking for continuity in segment and reach numbering...
@@ -1615,9 +1607,9 @@ wrote ../tylerforks/tylerforks/tf.sfr.
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-SFRmaker v. 0.5.0.post16.dev0+gf926a83
+SFRmaker v. 0.5.0.post17+gb7aa112
 
-Running Flopy v. 3.3.1 diagnostics...
+Running Flopy v. 3.3.2 diagnostics...
 passed.
 
 Checking for continuity in segment and reach numbering...
@@ -1839,7 +1831,7 @@ No non-zero values of flow to export!
   <div role="contentinfo">
     <p>
       <span class="lastupdated">
-        Last updated on Sep 11, 2020.
+        Last updated on Oct 14, 2020.
       </span>
 
     </p>
