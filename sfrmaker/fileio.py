@@ -214,7 +214,7 @@ def load_mf2005_package(f, model=None):
                        options=options)
 
 
-def read_tables(data):
+def read_tables(data, **kwargs):
     # allow input via a list of tables or single table
     input_data = data
     if not isinstance(input_data, list):
@@ -222,8 +222,12 @@ def read_tables(data):
     dfs = []
     for item in input_data:
         if isinstance(item, str):
-            dfs.append(pd.read_csv(item))
+            dfs.append(pd.read_csv(item, **kwargs))
         elif isinstance(item, pd.DataFrame):
+            item = item.copy()
+            if 'dtype' in kwargs:
+                for col, dtype in kwargs['dtype'].items():
+                    item[col] = item[col].astype(dtype)
             dfs.append(item.copy())
         else:
             raise Exception('Unrecognized input type for data:\n{}'.format(item))

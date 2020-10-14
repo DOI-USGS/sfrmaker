@@ -85,7 +85,8 @@ def add_observations(sfrdata, data, flowline_routing=None,
     reach_data = sfrdata.reach_data.copy()
 
     # allow input via a list of tables or single table
-    data = read_tables(data)
+    data = read_tables(data, dtype={obsname_column: object})
+    assert data[obsname_column].dtype == np.object
 
     # read reach geometries from a shapefile
     if sfrlines_shapefile is not None:
