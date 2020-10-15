@@ -2,7 +2,7 @@
 Release History
 ===============
 
-Version 0.6.0 (2020-xx-xx)
+Version 0.6.0 (2020-10-15)
 --------------------------
 * add_outlets argument to :meth:`sfrmaker.lines.Lines.to_sfr` to add outlet conditions (outseg=0) at the locations of specified line IDs
 * add :mod:`sfrmaker.preprocesing` module for culling NHDPlus flowlines, handling divergences, incorporating widths from the North American River Width (NARWidth) database, and reproducible editing of flowlines.
