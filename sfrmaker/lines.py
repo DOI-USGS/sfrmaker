@@ -614,6 +614,7 @@ class Lines:
                width_from_asum_b_param=0.5032,
                minimum_reach_width=1.,
                consolidate_conductance=False, one_reach_per_cell=False,
+               add_outlets=None,
                package_name=None,
                **kwargs):
         """Create a streamflow routing dataset from the information
@@ -663,6 +664,11 @@ class Lines:
             If True, streambed conductance in each reach is consolidated
             (consolidate_conductance = True), and additional reaches besides
             the most downstream reach are dropped.
+        add_outlets : sequence of ints
+            Option to add breaks in routing at specified line ids. For example
+            if controlled flows out of a reservoir are specified as inflows
+            to the SFR network, an outlet can be added above to the dam to
+            prevent double-counting of flow. By default, None
         package_name : str
             Base name for writing sfr output.
         kwargs : keyword arguments to :class:`SFRData`
@@ -861,6 +867,20 @@ class Lines:
             if k not in new_routing.keys():
                 new_routing[k] = 0
 
+        # add any outlets to the stream network
+        if add_outlets is not None:
+            if isinstance(add_outlets, str) or isinstance(add_outlets, int):
+                add_outlets = [add_outlets]
+            for outlet_id in add_outlets:
+                if self.df.id.dtype == np.object:
+                    loc = self.df.id.astype(str) == str(outlet_id)
+                    self.df.loc[loc, 'toid'] = '0'
+                    new_routing[str(outlet_id)] = '0'
+                else:
+                    loc = self.df.id == outlet_id
+                    self.df.loc[loc, 'toid'] = 0
+                    new_routing[outlet_id] = 0
+
         # map remaining_ids to segment numbers
         segment = dict(zip(rd.line_id, rd.iseg))
         line_id = {s: lid for lid, s in segment.items()}
@@ -883,8 +903,6 @@ class Lines:
 
         print('\nSetting up segment data...')
         sd = pd.DataFrame()
-        # sd['nseg'] = [segment2[lid] for lid in remaining_ids]
-        # sd['outseg'] = [segment2.get(new_routing[line_id2[s]], 0) for s in nseg]
         sd['nseg'] = [r[s] for s in nseg]
         sd['outseg'] = [r[s] for s in outseg]
         sd.sort_values(by='nseg', inplace=True)

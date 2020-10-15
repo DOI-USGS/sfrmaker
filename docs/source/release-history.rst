@@ -2,8 +2,13 @@
 Release History
 ===============
 
-Version 0.6.0 (2020-xx-xx)
+Version 0.6.0 (2020-10-15)
 --------------------------
+* add_outlets argument to :meth:`sfrmaker.lines.Lines.to_sfr` to add outlet conditions (outseg=0) at the locations of specified line IDs
+* add :mod:`sfrmaker.preprocesing` module for culling NHDPlus flowlines, handling divergences, incorporating widths from the North American River Width (NARWidth) database, and reproducible editing of flowlines.
+* fix :func:`sfrmaker.utils.width_from_arbolate_sum`: minimum width wasn't being implemented
+* small fix to observations module to treat observation names as strings, even if they are digits
+* small fix to `meth`:`sfrmaker.sfrdata.SFRData.write_package` if no options are supplied, set default fileout and obs6 entries to same location as SFR package file (by just writing the file names; previously, the full path to the SFR package file was written)
 
 Version 0.5.0 (2020-08-10)
 --------------------------

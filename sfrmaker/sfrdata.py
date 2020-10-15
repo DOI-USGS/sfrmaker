@@ -1201,7 +1201,9 @@ class SFRData(DataPackage):
             model = None
 
         # create an SFRData instance
-        to_sfr_kwargs = get_input_arguments(cfg, sfrmaker.Lines.to_sfr)
+        to_sfr_kwargs = cfg.copy()
+        to_sfr_kwargs.update(cfg.get('options', {}))
+        to_sfr_kwargs = get_input_arguments(to_sfr_kwargs, sfrmaker.Lines.to_sfr)
         to_sfr_kwargs['active_area'] = cfg.get('active_area', {}).get('filename')
         to_sfr_kwargs['model'] = model
         to_sfr_kwargs['grid'] = grid
@@ -1212,7 +1214,7 @@ class SFRData(DataPackage):
         sfrdata._shapefiles_path = os.path.join(output_path, sfrdata._shapefiles_path)
 
         # setup elevations
-        if cfg.get('set_streambed_top_elevations_from_dem', False):
+        if cfg.get('options', cfg).get('set_streambed_top_elevations_from_dem', False):
             error_msg = ("set_streambed_top_elevations_from_dem=True "
                          "requires a dem: block.")
             if 'dem' not in cfg:

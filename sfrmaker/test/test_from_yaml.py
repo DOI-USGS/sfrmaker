@@ -117,6 +117,14 @@ def test_from_config(shellmound_config, package_version, model_cfg):
         os.remove('../../temp/shellmound/shellmound.gage')
         os.remove('../../temp/shellmound/shellmound.gage.namefile_entries')
 
+    # check that add_outlets works
+    add_outlets = cfg['options']['add_outlets']
+    if not isinstance(add_outlets, list):
+        add_outlets = [add_outlets]
+    for outlet_id in add_outlets:
+        assert sfrdata.reach_data.loc[sfrdata.reach_data.line_id == outlet_id,
+                                      'outseg'].sum() == 0
+
 
 @pytest.mark.parametrize('config_file,dem', (
         ('examples/tylerforks/tf_sfrmaker_config.yml', True),

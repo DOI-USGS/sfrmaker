@@ -26,11 +26,15 @@ inflows:  # see sfrmaker.data.add_to_perioddata for arguments
   filename: inflows.csv
   line_id_column: line_id
   period_column: per  # column with model stress periods
-  data_column: flow_m3d  # column with flow values
+  data_column: inflow_m3d  # column with flow values
 observations:  # see sfrmaker.observations.add_observations for arguments
   filename: observations.csv
   obstype: downstream-flow  # modflow-6 observation type
   x_location_column: x  # observation locations, in CRS coordinates
   y_location_column: y
   obsname_column: site_no  # column for naming observations
-
+options:
+  one_reach_per_cell: True #  consolidate SFR reaches to one per i, j location
+  # add breaks in routing at the following line ids
+  # (flow downstream is controlled by dams, and specified as an inflow)
+  add_outlets: 18019782, 15276792, 15290344, 15256386

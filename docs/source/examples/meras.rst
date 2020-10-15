@@ -22,9 +22,11 @@ Information on the model grid is specified in the ``modelgrid:`` block of the co
 
 An advantage of specifying a model is that sfmaker will automatically assign stream reaches to the correct layer, based on the layer top and bottom elevations, and account for inactive cells. If the model has correct georeference information in the namefile header as assigned by `FloPy <https://github.com/modflowpy/flopy>`_, the ``modelgrid:`` block is not needed. An optional active_area: allows geographic area for generation of the SFR package input (that may or may not coincide with the active area of the model) to be defined. Otherwise, SFR input will be generated for the extent of the model grid.
 
-While the MERAS hydrography includes elevations, this may not always be the case, or more accurate elevations may be available from a digital elevation model (DEM). If a ``dem:`` block is specified, SFRmaker will sample the DEM to the stream reaches as described in the methods section. The default buffer distance is 100 in the units of the projected CRS, or another buffer distance can be specified with an optional ``buffer_distance:`` argument. 
+While the MERAS hydrography includes elevations, this may not always be the case, or more accurate elevations may be available from a digital elevation model (DEM). If a ``dem:`` block is specified and ``set_streambed_top_elevations_from_dem: True``, SFRmaker will sample the DEM to the stream reaches as described in the methods section. The default buffer distance is 100 in the units of the projected CRS, or another buffer distance can be specified with an optional ``buffer_distance:`` argument.
 
 The ``inflows:`` block allows for specification inflows to the SFR network. Inflow time series must include model stress period information (SFRmaker does not do any resampling) and column names in the input csv file must be specified. Similarly, an observations: block allows observation site locations to be specified in the coordinates of the projected CRS specified for the model grid, or using identifiers corresponding to flowlines in the input hydrography. With this information information, SFRmaker will generate input to the Gage Package (e.g. Prudic, 2004) or Modflow-6 observation utility (Langevin and others, 2017). 
+
+The ``options:`` block can include keyword arguments to :meth:`sfrmaker.lines.Lines.to_sfr`, or other options such as ``set_streambed_top_elevations_from_dem:``.
 
 The above configuration file can be used to generate an SFR package with the following Python code:
 
