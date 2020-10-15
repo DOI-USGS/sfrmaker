@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>sfrmaker.lines &mdash; SFRmaker 0.5.0.post17+gb7aa112 documentation</title>
+  <title>sfrmaker.lines &mdash; SFRmaker 0.5.0.post18+gf8fa820 documentation</title>
   
 
   
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                0.5.0.post17+gb7aa112
+                0.5.0.post18+gf8fa820
               </div>
             
           
@@ -792,6 +792,7 @@
                <span class="n">width_from_asum_b_param</span><span class="o">=</span><span class="mf">0.5032</span><span class="p">,</span>
                <span class="n">minimum_reach_width</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span>
                <span class="n">consolidate_conductance</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">one_reach_per_cell</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+               <span class="n">add_outlets</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">package_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Create a streamflow routing dataset from the information</span>
@@ -841,6 +842,11 @@
 <span class="sd">            If True, streambed conductance in each reach is consolidated</span>
 <span class="sd">            (consolidate_conductance = True), and additional reaches besides</span>
 <span class="sd">            the most downstream reach are dropped.</span>
+<span class="sd">        add_outlets : sequence of ints</span>
+<span class="sd">            Option to add breaks in routing at specified line ids. For example</span>
+<span class="sd">            if controlled flows out of a reservoir are specified as inflows</span>
+<span class="sd">            to the SFR network, an outlet can be added above to the dam to</span>
+<span class="sd">            prevent double-counting of flow. By default, None</span>
 <span class="sd">        package_name : str</span>
 <span class="sd">            Base name for writing sfr output.</span>
 <span class="sd">        kwargs : keyword arguments to :class:`SFRData`</span>
@@ -1039,6 +1045,20 @@
             <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">new_routing</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
                 <span class="n">new_routing</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
 
+        <span class="c1"># add any outlets to the stream network</span>
+        <span class="k">if</span> <span class="n">add_outlets</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">add_outlets</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">add_outlets</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+                <span class="n">add_outlets</span> <span class="o">=</span> <span class="p">[</span><span class="n">add_outlets</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">outlet_id</span> <span class="ow">in</span> <span class="n">add_outlets</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">id</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">object</span><span class="p">:</span>
+                    <span class="n">loc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">id</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">outlet_id</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">loc</span><span class="p">,</span> <span class="s1">&#39;toid&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;0&#39;</span>
+                    <span class="n">new_routing</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">outlet_id</span><span class="p">)]</span> <span class="o">=</span> <span class="s1">&#39;0&#39;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">loc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="n">outlet_id</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">loc</span><span class="p">,</span> <span class="s1">&#39;toid&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="n">new_routing</span><span class="p">[</span><span class="n">outlet_id</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
         <span class="c1"># map remaining_ids to segment numbers</span>
         <span class="n">segment</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">rd</span><span class="o">.</span><span class="n">line_id</span><span class="p">,</span> <span class="n">rd</span><span class="o">.</span><span class="n">iseg</span><span class="p">))</span>
         <span class="n">line_id</span> <span class="o">=</span> <span class="p">{</span><span class="n">s</span><span class="p">:</span> <span class="n">lid</span> <span class="k">for</span> <span class="n">lid</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">segment</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
@@ -1061,8 +1081,6 @@
 
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Setting up segment data...&#39;</span><span class="p">)</span>
         <span class="n">sd</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
-        <span class="c1"># sd[&#39;nseg&#39;] = [segment2[lid] for lid in remaining_ids]</span>
-        <span class="c1"># sd[&#39;outseg&#39;] = [segment2.get(new_routing[line_id2[s]], 0) for s in nseg]</span>
         <span class="n">sd</span><span class="p">[</span><span class="s1">&#39;nseg&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">r</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">nseg</span><span class="p">]</span>
         <span class="n">sd</span><span class="p">[</span><span class="s1">&#39;outseg&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">r</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">outseg</span><span class="p">]</span>
         <span class="n">sd</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s1">&#39;nseg&#39;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -1114,7 +1132,7 @@
   <div role="contentinfo">
     <p>
       <span class="lastupdated">
-        Last updated on Oct 14, 2020.
+        Last updated on Oct 15, 2020.
       </span>
 
     </p>

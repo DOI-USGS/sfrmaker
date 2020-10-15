@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>The Lines Module &mdash; SFRmaker 0.5.0.post17+gb7aa112 documentation</title>
+  <title>The Lines Module &mdash; SFRmaker 0.5.0.post18+gf8fa820 documentation</title>
   
 
   
@@ -67,7 +67,7 @@
             
             
               <div class="version">
-                0.5.0.post17+gb7aa112
+                0.5.0.post18+gf8fa820
               </div>
             
           
@@ -579,7 +579,7 @@ Can be any of:</p>
 
 <dl class="py method">
 <dt id="sfrmaker.lines.Lines.to_sfr">
-<code class="sig-name descname">to_sfr</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">grid</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">active_area</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">isfr</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">model</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">model_length_units</span><span class="o">=</span><span class="default_value">'undefined'</span></em>, <em class="sig-param"><span class="n">minimum_reach_length</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">width_from_asum_a_param</span><span class="o">=</span><span class="default_value">0.1193</span></em>, <em class="sig-param"><span class="n">width_from_asum_b_param</span><span class="o">=</span><span class="default_value">0.5032</span></em>, <em class="sig-param"><span class="n">minimum_reach_width</span><span class="o">=</span><span class="default_value">1.0</span></em>, <em class="sig-param"><span class="n">consolidate_conductance</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">one_reach_per_cell</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">package_name</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/lines.html#Lines.to_sfr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sfrmaker.lines.Lines.to_sfr" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">to_sfr</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">grid</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">active_area</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">isfr</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">model</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">model_length_units</span><span class="o">=</span><span class="default_value">'undefined'</span></em>, <em class="sig-param"><span class="n">minimum_reach_length</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">width_from_asum_a_param</span><span class="o">=</span><span class="default_value">0.1193</span></em>, <em class="sig-param"><span class="n">width_from_asum_b_param</span><span class="o">=</span><span class="default_value">0.5032</span></em>, <em class="sig-param"><span class="n">minimum_reach_width</span><span class="o">=</span><span class="default_value">1.0</span></em>, <em class="sig-param"><span class="n">consolidate_conductance</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">one_reach_per_cell</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">add_outlets</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">package_name</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/lines.html#Lines.to_sfr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sfrmaker.lines.Lines.to_sfr" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a streamflow routing dataset from the information
 in sfrmaker.lines class instance and a supplied sfrmaker.grid class instance.</p>
 <dl class="field-list">
@@ -626,6 +626,11 @@ parameter.</p>
 <dt><strong>one_reach_per_cell</strong><span class="classifier">bool</span></dt><dd><p>If True, streambed conductance in each reach is consolidated
 (consolidate_conductance = True), and additional reaches besides
 the most downstream reach are dropped.</p>
+</dd>
+<dt><strong>add_outlets</strong><span class="classifier">sequence of ints</span></dt><dd><p>Option to add breaks in routing at specified line ids. For example
+if controlled flows out of a reservoir are specified as inflows
+to the SFR network, an outlet can be added above to the dam to
+prevent double-counting of flow. By default, None</p>
 </dd>
 <dt><strong>package_name</strong><span class="classifier">str</span></dt><dd><p>Base name for writing sfr output.</p>
 </dd>
@@ -679,7 +684,7 @@ the most downstream reach are dropped.</p>
   <div role="contentinfo">
     <p>
       <span class="lastupdated">
-        Last updated on Oct 14, 2020.
+        Last updated on Oct 15, 2020.
       </span>
 
     </p>
