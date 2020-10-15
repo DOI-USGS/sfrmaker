@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Release History &mdash; SFRmaker 0.5.0.post18+gf8fa820 documentation</title>
+  <title>Release History &mdash; SFRmaker 0.5.0.post18+gac222dd documentation</title>
   
 
   
@@ -67,7 +67,7 @@
             
             
               <div class="version">
-                0.5.0.post18+gf8fa820
+                0.5.0.post18+gac222dd
               </div>
             
           
@@ -216,6 +216,13 @@
 <h1>Release History<a class="headerlink" href="#release-history" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="version-0-6-0-2020-xx-xx">
 <h2>Version 0.6.0 (2020-xx-xx)<a class="headerlink" href="#version-0-6-0-2020-xx-xx" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>add_outlets argument to <a class="reference internal" href="api/sfrmaker.lines.html#sfrmaker.lines.Lines.to_sfr" title="sfrmaker.lines.Lines.to_sfr"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sfrmaker.lines.Lines.to_sfr()</span></code></a> to add outlet conditions (outseg=0) at the locations of specified line IDs</p></li>
+<li><p>add <code class="xref py py-mod docutils literal notranslate"><span class="pre">sfrmaker.preprocesing</span></code> module for culling NHDPlus flowlines, handling divergences, incorporating widths from the North American River Width (NARWidth) database, and reproducible editing of flowlines.</p></li>
+<li><p>fix <a class="reference internal" href="api/sfrmaker.utils.html#sfrmaker.utils.width_from_arbolate_sum" title="sfrmaker.utils.width_from_arbolate_sum"><code class="xref py py-func docutils literal notranslate"><span class="pre">sfrmaker.utils.width_from_arbolate_sum()</span></code></a>: minimum width wasn’t being implemented</p></li>
+<li><p>small fix to observations module to treat observation names as strings, even if they are digits</p></li>
+<li><p>small fix to <cite>meth</cite>:<cite>sfrmaker.sfrdata.SFRData.write_package</cite> if no options are supplied, set default fileout and obs6 entries to same location as SFR package file (by just writing the file names; previously, the full path to the SFR package file was written)</p></li>
+</ul>
 </div>
 <div class="section" id="version-0-5-0-2020-08-10">
 <h2>Version 0.5.0 (2020-08-10)<a class="headerlink" href="#version-0-5-0-2020-08-10" title="Permalink to this headline">¶</a></h2>

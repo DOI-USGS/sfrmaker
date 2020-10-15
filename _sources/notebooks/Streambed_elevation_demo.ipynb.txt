@@ -12,13 +12,21 @@
    "execution_count": 1,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2020-10-15T19:10:58.393322Z",
-     "iopub.status.busy": "2020-10-15T19:10:58.392612Z",
-     "iopub.status.idle": "2020-10-15T19:10:59.284307Z",
-     "shell.execute_reply": "2020-10-15T19:10:59.283468Z"
+     "iopub.execute_input": "2020-10-15T19:22:17.143553Z",
+     "iopub.status.busy": "2020-10-15T19:22:17.142732Z",
+     "iopub.status.idle": "2020-10-15T19:22:18.029244Z",
+     "shell.execute_reply": "2020-10-15T19:22:18.028351Z"
     }
    },
-   "outputs": [],
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "flopy is installed in /home/travis/miniconda/envs/test/lib/python3.7/site-packages/flopy\n"
+     ]
+    }
+   ],
    "source": [
     "import glob\n",
     "import os\n",
@@ -43,10 +51,10 @@
    "execution_count": 2,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2020-10-15T19:10:59.334949Z",
-     "iopub.status.busy": "2020-10-15T19:10:59.290223Z",
-     "iopub.status.idle": "2020-10-15T19:11:02.249181Z",
-     "shell.execute_reply": "2020-10-15T19:11:02.248007Z"
+     "iopub.execute_input": "2020-10-15T19:22:18.066618Z",
+     "iopub.status.busy": "2020-10-15T19:22:18.035517Z",
+     "iopub.status.idle": "2020-10-15T19:22:21.123233Z",
+     "shell.execute_reply": "2020-10-15T19:22:21.122431Z"
     }
    },
    "outputs": [
@@ -81,9 +89,9 @@
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "/home/travis/miniconda/envs/test/lib/python3.8/site-packages/pyproj/crs/crs.py:393: FutureWarning: '+init=<authority>:<code>' syntax is deprecated. '<authority>:<code>' is the preferred initialization method. When making the change, be mindful of axis order changes: https://pyproj4.github.io/pyproj/stable/gotchas.html#axis-order-changes-in-proj-6\n",
+      "/home/travis/miniconda/envs/test/lib/python3.7/site-packages/pyproj/crs/crs.py:393: FutureWarning: '+init=<authority>:<code>' syntax is deprecated. '<authority>:<code>' is the preferred initialization method. When making the change, be mindful of axis order changes: https://pyproj4.github.io/pyproj/stable/gotchas.html#axis-order-changes-in-proj-6\n",
       "  return CRS(_prepare_from_string(in_crs_string))\n",
-      "/home/travis/miniconda/envs/test/lib/python3.8/site-packages/pyproj/crs/crs.py:280: FutureWarning: '+init=<authority>:<code>' syntax is deprecated. '<authority>:<code>' is the preferred initialization method. When making the change, be mindful of axis order changes: https://pyproj4.github.io/pyproj/stable/gotchas.html#axis-order-changes-in-proj-6\n",
+      "/home/travis/miniconda/envs/test/lib/python3.7/site-packages/pyproj/crs/crs.py:280: FutureWarning: '+init=<authority>:<code>' syntax is deprecated. '<authority>:<code>' is the preferred initialization method. When making the change, be mindful of axis order changes: https://pyproj4.github.io/pyproj/stable/gotchas.html#axis-order-changes-in-proj-6\n",
       "  projstring = _prepare_from_string(projparams)\n"
      ]
     },
@@ -94,12 +102,12 @@
       "finished in 0.02s\n",
       "\n",
       "\n",
-      "SFRmaker version 0.5.0.post18+gf8fa820\n",
+      "SFRmaker version 0.5.0.post18+gac222dd\n",
       "\n",
       "Creating sfr dataset...\n",
       "\n",
       "Creating grid class instance from flopy Grid instance...\n",
-      "grid class created in 0.24s\n",
+      "grid class created in 0.29s\n",
       "\n",
       "Model grid information\n",
       "structured grid\n",
@@ -143,14 +151,14 @@
       "Intersecting 17 flowlines with 17,760 grid cells...\n",
       "\n",
       "Building spatial index...\n",
-      "finished in 1.68s\n",
+      "finished in 1.74s\n",
       "\n",
       "Intersecting 17 features...\n",
       "17\n",
       "finished in 0.09s\n",
       "\n",
       "Setting up reach data... (may take a few minutes for large grids)\n",
-      "finished in 0.27s\n",
+      "finished in 0.28s\n",
       "\n",
       "Computing widths...\n",
       "\n",
@@ -186,7 +194,7 @@
       "active area defined by: all cells\n",
       "\n",
       "\n",
-      "Time to create sfr dataset: 2.57s\n",
+      "Time to create sfr dataset: 2.69s\n",
       "\n"
      ]
     }
@@ -259,10 +267,10 @@
    "execution_count": 3,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2020-10-15T19:11:02.253806Z",
-     "iopub.status.busy": "2020-10-15T19:11:02.253391Z",
-     "iopub.status.idle": "2020-10-15T19:11:10.426496Z",
-     "shell.execute_reply": "2020-10-15T19:11:10.426126Z"
+     "iopub.execute_input": "2020-10-15T19:22:21.127796Z",
+     "iopub.status.busy": "2020-10-15T19:22:21.127382Z",
+     "iopub.status.idle": "2020-10-15T19:22:29.884326Z",
+     "shell.execute_reply": "2020-10-15T19:22:29.883937Z"
     }
    },
    "outputs": [
@@ -271,10 +279,10 @@
      "output_type": "stream",
      "text": [
       "running rasterstats.zonal_stats on buffered LineStrings...\n",
-      "finished in 3.94s\n",
+      "finished in 4.26s\n",
       "\n",
       "running rasterstats.zonal_stats on buffered LineStrings...\n",
-      "finished in 3.92s\n",
+      "finished in 4.17s\n",
       "\n",
       "\n",
       "Smoothing elevations...\n",
@@ -306,10 +314,10 @@
    "execution_count": 4,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2020-10-15T19:11:10.450714Z",
-     "iopub.status.busy": "2020-10-15T19:11:10.444691Z",
-     "iopub.status.idle": "2020-10-15T19:11:10.473842Z",
-     "shell.execute_reply": "2020-10-15T19:11:10.474187Z"
+     "iopub.execute_input": "2020-10-15T19:22:29.899438Z",
+     "iopub.status.busy": "2020-10-15T19:22:29.891452Z",
+     "iopub.status.idle": "2020-10-15T19:22:29.934145Z",
+     "shell.execute_reply": "2020-10-15T19:22:29.933647Z"
     }
    },
    "outputs": [],
@@ -336,10 +344,10 @@
    "execution_count": 5,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2020-10-15T19:11:10.479408Z",
-     "iopub.status.busy": "2020-10-15T19:11:10.479005Z",
-     "iopub.status.idle": "2020-10-15T19:11:13.329654Z",
-     "shell.execute_reply": "2020-10-15T19:11:13.329993Z"
+     "iopub.execute_input": "2020-10-15T19:22:29.944225Z",
+     "iopub.status.busy": "2020-10-15T19:22:29.942349Z",
+     "iopub.status.idle": "2020-10-15T19:22:32.911715Z",
+     "shell.execute_reply": "2020-10-15T19:22:32.912159Z"
     }
    },
    "outputs": [
@@ -579,7 +587,7 @@
    "name": "python",
    "nbconvert_exporter": "python",
    "pygments_lexer": "ipython3",
-   "version": "3.8.6"
+   "version": "3.7.8"
   }
  },
  "nbformat": 4,
