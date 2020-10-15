@@ -459,7 +459,7 @@
       "Creating sfr dataset...\n",
       "\n",
       "Creating grid class instance from flopy Grid instance...\n",
-      "grid class created in 0.25s\n",
+      "grid class created in 0.30s\n",
       "\n",
       "Model grid information\n",
       "structured grid\n",
