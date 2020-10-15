@@ -532,6 +532,13 @@ reading ../tylerforks/NHDPlus/NHDPlusAttributes/PlusFlowlineVAA.dbf...
 
 reading ../tylerforks/NHDPlus/NHDPlusAttributes/PlusFlow.dbf...
 --&gt; building dataframe... (may take a while for large shapefiles)
+
+reading ../tylerforks/NHDPlus/NHDPlusAttributes/elevslope.dbf...
+--&gt; building dataframe... (may take a while for large shapefiles)
+
+load finished in 0.23s
+
+Getting routing information from NHDPlus Plusflow table...
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -550,13 +557,6 @@ reading ../tylerforks/NHDPlus/NHDPlusAttributes/PlusFlow.dbf...
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-
-reading ../tylerforks/NHDPlus/NHDPlusAttributes/elevslope.dbf...
---&gt; building dataframe... (may take a while for large shapefiles)
-
-load finished in 0.22s
-
-Getting routing information from NHDPlus Plusflow table...
 finished in 0.02s
 
 
@@ -565,7 +565,7 @@ SFRmaker version 0.5.0.post18+gf1df575
 Creating sfr dataset...
 
 Creating grid class instance from flopy Grid instance...
-grid class created in 0.22s
+grid class created in 0.24s
 
 Model grid information
 structured grid
@@ -609,14 +609,14 @@ finished in 0.00s
 Intersecting 17 flowlines with 17,760 grid cells...
 
 Building spatial index...
-finished in 1.65s
+finished in 1.68s
 
 Intersecting 17 features...
 17
-finished in 0.09s
+finished in 0.10s
 
 Setting up reach data... (may take a few minutes for large grids)
-finished in 0.27s
+finished in 0.28s
 
 Computing widths...
 
@@ -652,7 +652,7 @@ bounds: 682688.00, 5139052.00, 694880.00, 5147510.20
 active area defined by: all cells
 
 
-Time to create sfr dataset: 2.49s
+Time to create sfr dataset: 2.58s
 
 </pre></div></div>
 </div>
@@ -689,14 +689,14 @@ Time to create sfr dataset: 2.49s
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 running rasterstats.zonal_stats on buffered LineStrings...
-finished in 3.64s
+finished in 4.18s
 
 running rasterstats.zonal_stats on buffered LineStrings...
-finished in 3.63s
+finished in 3.93s
 
 
 Smoothing elevations...
-finished in 0.14s
+finished in 0.13s
 </pre></div></div>
 </div>
 </div>
