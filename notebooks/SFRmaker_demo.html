@@ -458,7 +458,7 @@ div.rendered_html tbody tr:hover {
 <div class="section" id="Basic-usage-of-SFRmaker-in-a-scripting-context">
 <h1>Basic usage of SFRmaker in a scripting context<a class="headerlink" href="#Basic-usage-of-SFRmaker-in-a-scripting-context" title="Permalink to this headline">¶</a></h1>
 <p>This example illustrates basic usage of SFRmaker in a scripting context. For examples of using SFRmaker with a configuration file, see the MERAS and Tyler Forks examples.</p>
-<div class="nbinput nblast docutils container">
+<div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
@@ -469,6 +469,14 @@ div.rendered_html tbody tr:hover {
 <span class="kn">import</span> <span class="nn">sfrmaker</span>
 </pre></div>
 </div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+flopy is installed in /home/travis/miniconda/envs/test/lib/python3.7/site-packages/flopy
+</pre></div></div>
 </div>
 <div class="section" id="Input-requirements">
 <h2>Input requirements<a class="headerlink" href="#Input-requirements" title="Permalink to this headline">¶</a></h2>
@@ -545,9 +553,9 @@ Getting routing information from NHDPlus Plusflow table...
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/home/travis/miniconda/envs/test/lib/python3.8/site-packages/pyproj/crs/crs.py:393: FutureWarning: &#39;+init=&lt;authority&gt;:&lt;code&gt;&#39; syntax is deprecated. &#39;&lt;authority&gt;:&lt;code&gt;&#39; is the preferred initialization method. When making the change, be mindful of axis order changes: https://pyproj4.github.io/pyproj/stable/gotchas.html#axis-order-changes-in-proj-6
+/home/travis/miniconda/envs/test/lib/python3.7/site-packages/pyproj/crs/crs.py:393: FutureWarning: &#39;+init=&lt;authority&gt;:&lt;code&gt;&#39; syntax is deprecated. &#39;&lt;authority&gt;:&lt;code&gt;&#39; is the preferred initialization method. When making the change, be mindful of axis order changes: https://pyproj4.github.io/pyproj/stable/gotchas.html#axis-order-changes-in-proj-6
   return CRS(_prepare_from_string(in_crs_string))
-/home/travis/miniconda/envs/test/lib/python3.8/site-packages/pyproj/crs/crs.py:280: FutureWarning: &#39;+init=&lt;authority&gt;:&lt;code&gt;&#39; syntax is deprecated. &#39;&lt;authority&gt;:&lt;code&gt;&#39; is the preferred initialization method. When making the change, be mindful of axis order changes: https://pyproj4.github.io/pyproj/stable/gotchas.html#axis-order-changes-in-proj-6
+/home/travis/miniconda/envs/test/lib/python3.7/site-packages/pyproj/crs/crs.py:280: FutureWarning: &#39;+init=&lt;authority&gt;:&lt;code&gt;&#39; syntax is deprecated. &#39;&lt;authority&gt;:&lt;code&gt;&#39; is the preferred initialization method. When making the change, be mindful of axis order changes: https://pyproj4.github.io/pyproj/stable/gotchas.html#axis-order-changes-in-proj-6
   projstring = _prepare_from_string(projparams)
 </pre></div></div>
 </div>
@@ -556,7 +564,11 @@ Getting routing information from NHDPlus Plusflow table...
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-finished in 0.02s
+
+load finished in 0.25s
+
+Getting routing information from NHDPlus Plusflow table...
+finished in 0.04s
 
 </pre></div></div>
 </div>
@@ -598,7 +610,7 @@ reading ../tylerforks/NHDPlus/NHDPlusAttributes/elevslope.dbf...
 load finished in 0.09s
 
 Getting routing information from NHDPlus Plusflow table...
-finished in 0.02s
+finished in 0.03s
 
 </pre></div></div>
 </div>
@@ -805,20 +817,20 @@ EPSG:26715
 Culling hydrography to active area...
 starting lines: 17
 remaining lines: 17
-finished in 0.00s
+finished in 0.01s
 
 
 Intersecting 17 flowlines with 17,760 grid cells...
 
 Building spatial index...
-finished in 1.59s
+finished in 1.74s
 
 Intersecting 17 features...
 17
-finished in 0.09s
+finished in 0.10s
 
 Setting up reach data... (may take a few minutes for large grids)
-finished in 0.27s
+finished in 0.29s
 
 Computing widths...
 
@@ -1470,7 +1482,7 @@ DEM and other data in a GIS environment. * <strong>suprious slopes:</strong> slo
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 
-Running Flopy v. 3.3.2 diagnostics...
+Running Flopy v. 3.3.1 diagnostics...
 wrote tf_SFR.chk
 </pre></div></div>
 </div>
@@ -1494,7 +1506,7 @@ wrote tf_SFR.chk
 <div class="highlight"><pre>
 SFRmaker v. 0.5.0.post18+gf1df575
 
-Running Flopy v. 3.3.2 diagnostics...
+Running Flopy v. 3.3.1 diagnostics...
 passed.
 
 Checking for continuity in segment and reach numbering...
@@ -1609,7 +1621,7 @@ wrote ../tylerforks/tylerforks/tf.sfr.
 <div class="highlight"><pre>
 SFRmaker v. 0.5.0.post18+gf1df575
 
-Running Flopy v. 3.3.2 diagnostics...
+Running Flopy v. 3.3.1 diagnostics...
 passed.
 
 Checking for continuity in segment and reach numbering...
