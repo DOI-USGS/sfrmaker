@@ -56,7 +56,8 @@ def get_nextupsegs(graph_r, upsegs):
     """
     nextupsegs = set()
     for s in upsegs:
-        nextupsegs.update(graph_r[s])
+        nextupsegs.update(graph_r.get(s, {}))
+        #nextupsegs.update(graph_r[s])
     return nextupsegs
 
 
@@ -201,6 +202,40 @@ def make_graph(fromcomids, tocomids, one_to_many=True):
     return graph
 
 
+def make_reverse_graph(graph):
+    """Make a reverse routing graph from a forward routing
+    graph of {fromcomid: tocomid} connections.
+
+    Parameters
+    ----------
+    graph : dict
+        {fromcomid: tocomid} connections
+
+    Returns
+    -------
+    graph_r : dict
+        {tocomid: {fromcomid1, fromcomid2,...}} connections. Values
+        are sets because tocomids will often have multiple fromcomids
+        (tributaries).
+
+    Examples
+    --------
+    >>> make_reverse_graph({1:2, 2:4, 3:4})
+    {2: {1}, 4: {2, 3}}
+
+    """
+    graph_r = {}
+    for fromid, toids in graph.items():
+        if np.isscalar(toids):
+            toids = {toids}
+        for toid in toids:
+            if toid not in graph_r:
+                graph_r[toid] = {fromid}
+            else:
+                graph_r[toid].add(fromid)
+    return graph_r
+
+
 def renumber_segments(nseg, outseg):
     """Renumber segments so that segment numbering is continuous, starts at 1, and always increases
         in the downstream direction. Experience suggests that this can substantially speed
@@ -276,6 +311,8 @@ def get_next_id_in_subset(subset, routing, ids):
     """
     subset = set(subset).union({0})
     routing = routing.copy()
+    if np.isscalar(ids):
+        ids = [ids]
     paths = [find_path(routing, i) for i in ids]
     new_ids = []
     for p in paths:
@@ -284,4 +321,46 @@ def get_next_id_in_subset(subset, routing, ids):
                 new_ids.append(id)
                 break
     assert len(new_ids) == len(ids)
+    return new_ids
+
+
+def get_previous_ids_in_subset(subset, routing, ids):
+    """If source linework are consolidated in the creation of
+    SFR reaches (e.g. with lines.to_sfr(one_reach_per_cell=True)),
+    not all line_ids in the source hydrography will be associated
+    with a reach in the SFR dataset. This method finds the previous (upstream)
+    source line(s) that are referenced in the reach data table (line_id column).
+
+    Parameters
+    ----------
+    subset : list of ids that is a subset of the ids in routing
+    routing : dict
+        of id: to_id connections
+    ids : iterable
+        List of ids that are in routing but may not be in subset
+
+    Returns
+    -------
+    ids : revised list of first values upstream of the values in ids (determined by routing)
+        that are also in subset.
+    """
+    subset = set(subset).union({0})
+    routing = routing.copy()
+    if np.isscalar(ids):
+        ids = [ids]
+    else:
+        ids = ids.copy()
+    graph_r = make_reverse_graph(routing)
+
+    new_ids = set()
+    nextupsegs = ids
+    for i in range(len(graph_r)):
+        for upseg in nextupsegs:
+            if upseg in subset:
+                new_ids.add(upseg)
+        if len(new_ids) == len(nextupsegs):
+            break
+        nextupsegs = nextupsegs.difference(new_ids)
+        if len(nextupsegs) > 0:
+            nextupsegs = get_nextupsegs(graph_r, nextupsegs)
     return new_ids

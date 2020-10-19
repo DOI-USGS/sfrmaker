@@ -8,7 +8,11 @@ import fiona
 import rasterio
 from shapely.geometry import shape, MultiLineString, box
 from rasterstats import zonal_stats
-from sfrmaker.gis import shp2df, df2shp, project, intersect_rtree, CRS, get_bbox, read_polygon_feature
+from gisutils import get_shapefile_crs
+from sfrmaker.gis import (shp2df, df2shp, project, intersect_rtree,
+                          get_bbox, read_polygon_feature, get_shapefile_crs,
+                          get_authority_crs,
+                          get_crs)
 from sfrmaker.elevations import smooth_elevations
 from sfrmaker.logger import Logger
 from sfrmaker.nhdplus_utils import get_nhdplus_v2_filepaths, get_prj_file
@@ -87,13 +91,13 @@ def cull_flowlines(NHDPlus_paths,
 
     # get crs information from flowline projection file
     prjfile = get_prj_file(NHDPlus_paths)
-    nhdcrs = CRS(prjfile=prjfile)
+    nhdcrs = get_shapefile_crs(prjfile)
 
     if isinstance(active_area, tuple):
         extent_poly_nhd_crs = box(*active_area)
         filter = active_area
     elif active_area is not None:
-        extent_poly_nhd_crs = read_polygon_feature(active_area, nhdcrs)
+        extent_poly_nhd_crs = read_polygon_feature(active_area, dest_crs=nhdcrs)
         # ensure that filter bbox is in same crs as flowlines
         # get filters from shapefiles, shapley Polygons or GeoJSON polygons
         filter = get_bbox(active_area, dest_crs=nhdcrs)
@@ -224,7 +228,7 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
                        minimum_width=1.,
                        output_length_units='meters',
                        logger=None, outfolder='output/',
-                       project_epsg=None,
+                       project_epsg=None, flowline_crs=None, dest_crs=None,
                        ):
     """Preprocess NHDPlus data to a single DataFrame of flowlines
     that each route to no more than one flowline, with width, elevation
@@ -295,6 +299,27 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
     project_epsg : int
         EPSG code for the output CRS (e.g. 5070 for NAD83 Albers).
         Required if the flowlines are not in a valid Projected CRS.
+    flowline_crs : obj
+        Coordinate reference system of the NHDPlus data. Only needed if
+        the data do not have a valid ESRI projection (.prj) file.
+        A Python int, dict, str, or :class:`pyproj.crs.CRS` instance
+        passed to :meth:`pyproj.crs.CRS.from_user_input`
+
+        Can be any of:
+          - PROJ string
+          - Dictionary of PROJ parameters
+          - PROJ keyword arguments for parameters
+          - JSON string with PROJ parameters
+          - CRS WKT string
+          - An authority string [i.e. 'epsg:4326']
+          - An EPSG integer code [i.e. 4326]
+          - A tuple of ("auth_name": "auth_code") [i.e ('epsg', '4326')]
+          - An object with a `to_wkt` method.
+          - A :class:`pyproj.crs.CRS` class
+    dest_crs : obj
+        Output Coordinate reference system. Same input types
+        as ``flowline_crs``.
+        By default, epsg:5070
 
     Returns
     -------
@@ -385,19 +410,17 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
 
     # get the flowline CRS, if geographic,
     # verify that project_crs is specified
-    flowline_crs = None
-    project_crs = None
     prjfile = os.path.splitext(flowlines_file)[0] + '.prj'
     if os.path.exists(prjfile):
-        flowline_crs = CRS(prjfile=prjfile)
+        flowline_crs = get_shapefile_crs(prjfile)
     else:
         msg = ("{} not found; flowlines must have a valid projection file."
                .format(prjfile))
         logger.lraise(msg)
-    if project_epsg is not None:
-        project_crs = CRS(epsg=project_epsg)
-    if flowline_crs.pyproj_crs.is_geographic:
-        if project_crs is None or project_crs.pyproj_crs.is_geographic:
+    if project_epsg is not None and dest_crs is None:
+        project_crs = get_crs(epsg=project_epsg, crs=dest_crs)
+    if flowline_crs.is_geographic:
+        if project_crs is None or project_crs.is_geographic:
             msg = ("project_epsg for a valid Projected CRS (i.e. in units of meters)\n"
                    " must be specified if flowlines are in a Geographic CRS\n"
                    "specified project_epsg: {}".format(project_epsg))
@@ -425,7 +448,7 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
 
     # to_crs the flowlines if they are not in project_crs
     if project_crs is not None and flowline_crs is not None and project_crs != flowline_crs:
-        fl['geometry'] = project(fl.geometry, flowline_crs.proj_str, project_crs.proj_str)
+        fl['geometry'] = project(fl.geometry, flowline_crs, project_crs)
 
     # draw buffers
     flbuffers = [g.buffer(buffersize_meters, cap_style=2)  # 2 (flat cap) very important!
@@ -441,11 +464,11 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
     # if DEM has different crs, project buffer polygons to DEM crs
     with rasterio.open(demfile) as src:
         meta = src.meta
-        dem_crs = CRS(meta['crs'])
+        dem_crs = get_authority_crs(meta['crs'])
         dem_res = src.res[0]
     flbuffers_pr = flbuffers
     if project_crs is not None and dem_crs != project_crs:
-        flbuffers_pr = project(flbuffers, project_crs.proj_str, dem_crs.proj_str)
+        flbuffers_pr = project(flbuffers, project_crs, dem_crs)
 
     # run zonal statistics on buffers
     # this step takes at least ~ 20 min for the full 1-mi MERAS model
@@ -676,12 +699,12 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
         # sample widths for wider streams from NARWidth
         logger.log('Sampling widths from NARWidth database')
         logger.log_package_version('rtree')
-        narwidth_crs = CRS(prjfile=narwidth_shapefile[:-4] + '.prj')
-        narwidth_bounds = project(flowline_bounds, flowline_crs.proj_str, narwidth_crs.proj_str)
+        narwidth_crs = get_crs(narwidth_shapefile)
+        narwidth_bounds = project(flowline_bounds, flowline_crs, narwidth_crs)
         sample_NARWidth(flcc, narwidth_shapefile,
                         waterbodies=waterbody_shapefiles,
                         filter=narwidth_bounds,
-                        flowlines_epsg=project_crs.epsg,
+                        crs=project_crs,
                         output_width_units=output_length_units)
         logger.log('Sampling widths from NARWidth database')
         flcc['width1'] = flcc.width1asum
@@ -708,7 +731,7 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
 
 
 def clip_flowlines_to_polygon(flowlines, polygon,
-                              flowlines_epsg=None,
+                              flowlines_epsg=None, crs=None,
                               simplify_tol=100, logger=None):
     """Clip line features in a flowlines DataFrame to polygon
     features in polygon.
@@ -717,8 +740,25 @@ def clip_flowlines_to_polygon(flowlines, polygon,
     ----------
     flowlines : DataFrame
         Output from :func:`~sfrmaker.preprocessing.preprocess_nhdplus`
-    flowlines_epsg : int
-        EPSG code for flowlines
+    crs : obj
+        Coordinate reference system of flowlines. Only needed if
+        the data do not have a valid ESRI projection (.prj) file.
+        A Python int, dict, str, or :class:`pyproj.crs.CRS` instance
+        passed to :meth:`pyproj.crs.CRS.from_user_input`
+
+        Can be any of:
+          - PROJ string
+          - Dictionary of PROJ parameters
+          - PROJ keyword arguments for parameters
+          - JSON string with PROJ parameters
+          - CRS WKT string
+          - An authority string [i.e. 'epsg:4326']
+          - An EPSG integer code [i.e. 4326]
+          - A tuple of ("auth_name": "auth_code") [i.e ('epsg', '4326')]
+          - An object with a `to_wkt` method.
+          - A :class:`pyproj.crs.CRS` class
+
+        By default, None
     polygon : str
         Polygon shapefile, shapely polygon or list of shapely polygons of model active area. Shapely polygons 
         must be in the same CRS as flowlines; shapefiles will be automatically reprojected.
@@ -738,7 +778,7 @@ def clip_flowlines_to_polygon(flowlines, polygon,
     # read in the active area and to_crs to same crs as flowlines
     flowlines_crs = None
     if flowlines_epsg is not None:
-        flowlines_crs = CRS(epsg=flowlines_epsg)
+        flowlines_crs = get_crs(epsg=flowlines_epsg, crs=crs)
     active_area_polygon = read_polygon_feature(polygon, flowlines_crs)
 
     # simplify polygon vertices to speed intersection testing
@@ -761,7 +801,7 @@ def clip_flowlines_to_polygon(flowlines, polygon,
 
 def sample_NARWidth(flowlines, narwidth_shapefile, waterbodies,
                     filter=None,
-                    flowlines_epsg=None,
+                    flowlines_epsg=None, crs=None,
                     output_width_units='meters',
                     outpath='shps/'):
     """
@@ -779,8 +819,24 @@ def sample_NARWidth(flowlines, narwidth_shapefile, waterbodies,
     waterbody_shapefiles : str or list of strings, optional
         Path(s) to NHDPlus NHDWaterbody shapefile(s). Only required if a
         ``narwidth_shapefile`` is specified.
-    flowlines_epsg : int
-        EPSG code for Coordinate reference system of flowlines
+    crs : obj
+        Coordinate reference system of flowlines.
+        A Python int, dict, str, or :class:`pyproj.crs.CRS` instance
+        passed to :meth:`pyproj.crs.CRS.from_user_input`
+
+        Can be any of:
+          - PROJ string
+          - Dictionary of PROJ parameters
+          - PROJ keyword arguments for parameters
+          - JSON string with PROJ parameters
+          - CRS WKT string
+          - An authority string [i.e. 'epsg:4326']
+          - An EPSG integer code [i.e. 4326]
+          - A tuple of ("auth_name": "auth_code") [i.e ('epsg', '4326')]
+          - An object with a `to_wkt` method.
+          - A :class:`pyproj.crs.CRS` class
+
+        By default, None
     filter : tuple
         Bounds (most likely in lat/lon) for filtering NARWidth lines that are read in
         (left, bottom, right, top)
@@ -802,16 +858,16 @@ def sample_NARWidth(flowlines, narwidth_shapefile, waterbodies,
     if not os.path.isdir(outpath):
         os.makedirs(outpath)
 
-    flowline_crs = CRS(epsg=flowlines_epsg)
-    if flowline_crs.pyproj_crs.is_geographic:
+    flowline_crs = get_crs(epsg=flowlines_epsg, crs=crs)
+    if flowline_crs.is_geographic:
         msg = ("Flowlines must be in a projected Coordinate Reference System "
                "(CRS; i.e. with units of meters).")
         raise ValueError(msg)
 
     # read in narwidth shapefile; to_crs to flowline CRS
     nw = shp2df(narwidth_shapefile, filter=filter)
-    narwidth_crs = CRS(prjfile=narwidth_shapefile[:-4] + '.prj')
-    nw['geometry'] = project(nw.geometry, narwidth_crs.proj_str, flowline_crs.proj_str)
+    narwidth_crs = get_shapefile_crs(narwidth_shapefile)
+    nw['geometry'] = project(nw.geometry, narwidth_crs, flowline_crs)
 
     # draw buffers around flowlines
     buffdist = 1000  # m

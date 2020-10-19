@@ -1,9 +1,9 @@
 import os
 import time
-
+import warnings
 import pandas as pd
-from gisutils import shp2df
-from .gis import CRS, get_bbox
+from gisutils import shp2df, get_shapefile_crs
+from .gis import get_bbox, get_crs
 
 
 def get_prj_file(NHDPlus_paths=None, NHDFlowlines=None):
@@ -59,7 +59,7 @@ def get_nhdplus_v2_routing(PlusFlow_file,
 
 def load_nhdplus_v2(NHDPlus_paths=None,
                     NHDFlowlines=None, PlusFlowlineVAA=None, PlusFlow=None, elevslope=None,
-                    filter=None,
+                    filter=None, crs=None,
                     epsg=None, proj_str=None, prjfile=None):
     """
     Parameters
@@ -85,6 +85,25 @@ def load_nhdplus_v2(NHDPlus_paths=None,
         Bounding box (tuple) or polygon feature of model stream network area.
         Shapefiles will be reprojected to the CRS of the flowlines; all other
         feature types must be supplied in same CRS as flowlines.
+    crs : obj
+        Coordinate reference system of the NHDPlus data. Only needed if
+        the data do not have a valid ESRI projection (.prj) file.
+        A Python int, dict, str, or :class:`pyproj.crs.CRS` instance
+        passed to :meth:`pyproj.crs.CRS.from_user_input`
+
+        Can be any of:
+          - PROJ string
+          - Dictionary of PROJ parameters
+          - PROJ keyword arguments for parameters
+          - JSON string with PROJ parameters
+          - CRS WKT string
+          - An authority string [i.e. 'epsg:4326']
+          - An EPSG integer code [i.e. 4326]
+          - A tuple of ("auth_name": "auth_code") [i.e ('epsg', '4326')]
+          - An object with a `to_wkt` method.
+          - A :class:`pyproj.crs.CRS` class
+
+        By default, None
     """
     print("\nloading NHDPlus v2 hydrography data...")
     ta = time.time()
@@ -94,9 +113,8 @@ def load_nhdplus_v2(NHDPlus_paths=None,
             get_nhdplus_v2_filepaths(NHDPlus_paths)
 
     # get crs information from flowline projection file
-    if prjfile is None:
-        prjfile = get_prj_file(NHDPlus_paths, NHDFlowlines)
-    nhdcrs = CRS(epsg=epsg, proj_str=proj_str, prjfile=prjfile)
+    crs = get_shapefile_crs(NHDFlowlines)
+    nhdcrs = get_crs(prjfile=prjfile, epsg=epsg, proj_str=proj_str, crs=crs)
 
     # ensure that filter bbox is in same crs as flowlines
     # get filters from shapefiles, shapley Polygons or GeoJSON polygons

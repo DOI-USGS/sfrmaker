@@ -5,7 +5,7 @@ import pytest
 
 import sfrmaker
 from sfrmaker.checks import reach_elevations_decrease_downstream
-from sfrmaker.gis import CRS
+from sfrmaker.gis import get_authority_crs
 from gisutils import project
 from sfrmaker import Lines
 from .test_grid import tyler_forks_grid_from_shapefile
@@ -44,9 +44,9 @@ def test_sample_elevations_different_proj(dem, tylerforks_sfrdata, datapath):
 
     reach1_geom = sfr.reach_data.geometry[0]
     crs1 = sfr.crs
-    crs2 = CRS(epsg=3070)
+    crs2 = get_authority_crs(3070)
     sfr._crs = crs2
-    sfr.reach_data['geometry'] = project(sfr.reach_data['geometry'].values, crs1.proj_str, crs2.proj_str)
+    sfr.reach_data['geometry'] = project(sfr.reach_data['geometry'].values, crs1, crs2)
     reach1_geom_5070 = sfr.reach_data.geometry[0]
 
     # verify that the reaches were reprojected
@@ -57,7 +57,7 @@ def test_sample_elevations_different_proj(dem, tylerforks_sfrdata, datapath):
     assert rms_error < 0.5  # not sure why the elevations don't match better
 
     # verify that at least the first reach is the same
-    reach1_geom_projected_back_100buffer = project(reach1_geom_5070, crs2.proj_str, crs1.proj_str).buffer(100)
+    reach1_geom_projected_back_100buffer = project(reach1_geom_5070, crs2, crs1).buffer(100)
     assert np.allclose(reach1_geom_projected_back_100buffer.area, reach1_geom.buffer(100).area)
 
 

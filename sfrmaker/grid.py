@@ -4,6 +4,7 @@ up a StructuredGrid instance, see :ref:`Basic usage of SFRmaker in a scripting c
 """
 
 import os
+import warnings
 
 import fiona
 import flopy
@@ -13,10 +14,9 @@ from rasterio import Affine
 from rasterio import features
 from shapely.geometry import Polygon, shape
 from shapely.ops import unary_union
-from gisutils import shp2df, df2shp, get_proj_str
-from .gis import CRS, read_polygon_feature, \
+from gisutils import shp2df, df2shp, get_shapefile_crs
+from .gis import get_crs, read_polygon_feature, \
     build_rtree_index, intersect
-from .units import convert_length_units
 
 fm = flopy.modflow
 
@@ -31,16 +31,17 @@ class Grid:
 
     def __init__(self, df,
                  model_units='undefined', crs_units=None,
-                 bounds=None,
+                 bounds=None, crs=None,
                  epsg=None, proj_str=None, prjfile=None, **kwargs):
 
         self.df = df
 
         # coordinate projection stuff
         self.model_units = model_units
-        self.crs = CRS(epsg=epsg, proj_str=proj_str, prjfile=prjfile)
+        self.crs = get_crs(prjfile=prjfile, epsg=epsg, proj_str=proj_str, crs=crs)
         if crs_units is not None:
-            self.crs._length_units = crs_units
+            warnings.warn('The crs_units argument is deprecated. Units are now read '
+                          'from the crs information via the pyproj.crs.CRS class')
 
         # spatial index for intersecting
         self._idx = None
@@ -82,9 +83,8 @@ class Grid:
         if other.size != self.size:
             print('grid sizes not equal!')
             return False
-        if other.crs.length_units != self.crs.length_units:
-            print('crs length units {} are not equal to {}!'.format(other.crs.length_units,
-                                                                    self.crs.length_units))
+        if other.crs != self.crs:
+            print('crs {} is not equal to {}!'.format(other.crs, self.crs))
             return False
         if not np.allclose(other.bounds, self.bounds):
             return False
@@ -203,10 +203,10 @@ class Grid:
             "active area didn't get set correctly (not a shapely Polygon)"
         df = pd.DataFrame({'geometry': [self._active_area],
                            'description': ['Active area where SFR will be applied.']})
-        df2shp(df, outshp, epsg=self.crs.epsg, prj=self.crs.prjfile)
+        df2shp(df, outshp, crs=self.crs)
 
     def write_grid_shapefile(self, outshp='grid.shp'):
-        df2shp(self.df, outshp, epsg=self.crs.epsg, prj=self.crs.prjfile)
+        df2shp(self.df, outshp, crs=self.crs)
 
 
 class StructuredGrid(Grid):
@@ -352,11 +352,11 @@ class StructuredGrid(Grid):
 
     @classmethod
     def from_json(cls, jsonfile, active_area=None, isfr=None,
-                  epsg=None, proj_str=None, prjfile=None):
+                  crs=None, epsg=None, proj_str=None, prjfile=None):
         from sfrmaker.fileio import load_modelgrid
         grid = load_modelgrid(jsonfile)
         return cls.from_modelgrid(grid, active_area=active_area, isfr=isfr,
-                                  epsg=epsg, proj_str=proj_str, prjfile=prjfile)
+                                  crs=crs, epsg=epsg, proj_str=proj_str, prjfile=prjfile)
 
     @classmethod
     def from_sr(cls, sr=None, active_area=None, isfr=None,
@@ -366,7 +366,7 @@ class StructuredGrid(Grid):
 
     @classmethod
     def from_modelgrid(cls, mg=None, active_area=None, isfr=None,
-                       epsg=None, proj_str=None, prjfile=None):
+                       crs=None, epsg=None, proj_str=None, prjfile=None):
         """Create StructureGrid class instance from a
         flopy.discretization.StructuredGrid instance."""
         i, j = np.indices((mg.nrow, mg.ncol))
@@ -379,10 +379,8 @@ class StructuredGrid(Grid):
                            }, columns=['node', 'i', 'j', 'geometry'])
         if epsg is None:
             epsg = mg.epsg
-        if proj_str is None:
-            proj_str = mg.proj4
-        if prjfile is not None:
-            proj_str = get_proj_str(prjfile)
+        crs = get_crs(prjfile=prjfile, epsg=epsg, proj_str=mg.proj4, crs=crs)
+
         if isfr is not None:
             # if a 3D array is supplied for isfr, convert to 2D
             # (retain all i, j locations with at least one active layer;
@@ -413,18 +411,19 @@ class StructuredGrid(Grid):
                                   xul=xul, yul=yul, dx=dx, dy=dy,
                                   rotation=mg.angrot,
                                   bounds=bounds, active_area=active_area,
-                                  epsg=epsg, proj_str=proj_str, prjfile=prjfile)
+                                  crs=crs)
 
     @classmethod
     def from_shapefile(cls, shapefile=None,
                        node_col='node', kcol='k', icol='i', jcol='j',
                        isfr_col='isfr',
                        active_area=None,
-                       epsg=None, proj_str=None, prjfile=None):
+                       crs=None, epsg=None, proj_str=None, prjfile=None):
 
-        if prjfile is None:
-            prjfile = shapefile.replace('.shp', '.prj')
-            prjfile = prjfile if os.path.exists(prjfile) else None
+        if crs is None:
+            crs = get_shapefile_crs(shapefile)
+        crs = get_crs(prjfile=prjfile, epsg=epsg, proj_str=proj_str, crs=crs)
+
         with fiona.open(shapefile) as src:
             bounds = src.bounds
 
@@ -434,7 +433,7 @@ class StructuredGrid(Grid):
         return cls.from_dataframe(df, node_col=node_col, kcol=kcol, icol=icol, jcol=jcol,
                                   isfr_col=isfr_col,
                                   bounds=bounds, active_area=active_area,
-                                  epsg=epsg, proj_str=proj_str, prjfile=prjfile)
+                                  crs=crs)
 
     @classmethod
     def from_dataframe(cls, df=None, uniform=None,
@@ -442,13 +441,15 @@ class StructuredGrid(Grid):
                        isfr_col='isfr',
                        geometry_column='geometry',
                        active_area=None,
-                       epsg=None, proj_str=None, prjfile=None, **kwargs):
+                       crs=None, epsg=None, proj_str=None, prjfile=None, **kwargs):
 
         assert geometry_column in df.columns, \
             "No feature geometries found in dataframe column '{}'".format(geometry_column)
 
         assert icol in df.columns, "No icol='{}' not found".format(icol)
         assert jcol in df.columns, "No jcol='{}' not found".format(jcol)
+
+        crs = get_crs(prjfile=prjfile, epsg=epsg, proj_str=proj_str, crs=crs)
 
         # set layer column
         if kcol in df.columns:
@@ -483,7 +484,7 @@ class StructuredGrid(Grid):
 
         return cls(df, active_area=active_area,
                    uniform=uniform,
-                   epsg=epsg, proj_str=proj_str, prjfile=prjfile, **kwargs)
+                   crs=crs, **kwargs)
 
 
 class UnstructuredGrid(Grid):
@@ -493,10 +494,10 @@ class UnstructuredGrid(Grid):
     def __init__(self, df,
                  model_units='undefined', crs_units=None,
                  bounds=None, active_area=None,
-                 epsg=None, proj_str=None, prjfile=None):
+                 crs=None, epsg=None, proj_str=None, prjfile=None):
         Grid.__init__(self, df, model_units=model_units, crs_units=crs_units,
                       bounds=bounds, active_area=active_area,
-                      epsg=epsg, proj_str=proj_str, prjfile=prjfile)
+                      crs=crs, epsg=epsg, proj_str=proj_str, prjfile=prjfile)
 
         assert 'node' in df.columns, \
             "DataFrame df must have a 'node' column for identifying model cells."
@@ -520,10 +521,12 @@ class UnstructuredGrid(Grid):
                        isfr_col='isfr',
                        geometry_column='geometry',
                        model_units='feet', active_area=None,
-                       epsg=None, proj_str=None, prjfile=None, **kwargs):
+                       crs=None, epsg=None, proj_str=None, prjfile=None, **kwargs):
 
         assert geometry_column in df.columns, \
             "No feature geometries found in dataframe column '{}'".format(geometry_column)
+
+        crs = get_crs(prjfile=prjfile, epsg=epsg, proj_str=proj_str, crs=crs)
 
         if node_col in df.columns:
             df['node'] = df[node_col]
@@ -543,4 +546,4 @@ class UnstructuredGrid(Grid):
             df['isfr'] = 1
         return cls(df, active_area=active_area,
                    model_units=model_units,
-                   epsg=epsg, proj_str=proj_str, prjfile=prjfile, **kwargs)
+                   crs=crs, **kwargs)

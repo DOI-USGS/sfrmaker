@@ -1,7 +1,8 @@
 from sfrmaker.routing import make_graph, get_upsegs
 
 from ..checks import routing_is_circular, valid_nsegs
-from ..routing import (get_next_id_in_subset, renumber_segments)
+from ..routing import (get_next_id_in_subset, renumber_segments, find_path,
+                       get_previous_ids_in_subset)
 
 
 def add_line_sequence(routing, nlines=4):
@@ -39,6 +40,26 @@ def test_get_next_id_in_subset(shellmound_sfrdata):
     assert set(result).difference(rd.line_id) == {0}
     assert set(result) == {0, seq[-1]}
     assert len(result) == len(range(nlines + 2))
+
+
+def test_get_previous_ids_in_subset():
+    routing = {17955471: 17957799,
+               17957799: 17955535,
+               17955535: 17955537,
+               17955537: 17955541,
+               17955541: 17955663,
+               17955663: 17955689,
+               17955543: 17955663,
+               17955689: 10001,
+               10001: 0
+               }
+    # delete some segments
+    remove_ids = {17955663, 17955689, 17955541, 17955471, 10001}
+    subset = set(routing.keys()).difference(remove_ids)
+
+    result = get_previous_ids_in_subset(subset, routing, remove_ids)
+    # verify that the new ids are in the subset
+    assert result == {17955537, 17955543}
 
 
 def test_renumber_segments():

@@ -1,177 +1,38 @@
 import collections
 import os
+from packaging import version
 import warnings
 import time
 import traceback
 import fiona
 import numpy as np
 import pyproj
-from fiona.crs import from_epsg, from_string, to_string
 from shapely.geometry import shape, Polygon, box
 from shapely.ops import unary_union
-from gisutils import get_proj_str, df2shp, shp2df, project
+import gisutils
+from gisutils import df2shp, shp2df, project, get_shapefile_crs, get_authority_crs
 import sfrmaker
 
-
-class CRS:
-
-    def __init__(self, crs_dict=None,
-                 epsg=None, proj_str=None, wkt=None,
-                 prjfile=None):
-
-        self._crs_dict = crs_dict
-        self._epsg = epsg
-        self._proj_str = proj_str
-        self._pyproj_crs = None
-        self._length_units = None
-        self.prjfile = prjfile
-        self._wkt = wkt
-        if not self.is_valid:
-            print("Warning, coordinate reference system {}\nis invalid. "
-                  "\nPlease supply a valid epsg code, proj4 string, "
-                  "or ESRI projection file".format(self.__repr__()))
-
-    @property
-    def crs_dict(self):
-        """todo: refactor this to proj_dict"""
-        if self._crs_dict is None:
-            self._crs_dict = self.pyproj_crs.to_dict()
-        return self._crs_dict
-
-    @property
-    def epsg(self):
-        if self._epsg is None and self.pyproj_crs is not None:
-            self._epsg = self.pyproj_crs.to_epsg()
-        return self._epsg
-
-    @property
-    def is_valid(self):
-        try:
-            if isinstance(self.pyproj_crs, pyproj.CRS):
-                return True
-            else:
-                return False
-        except:
-            return False
-
-    @property
-    def length_units(self):
-        unit_renames = {'metre': 'meters'}
-        if self._length_units is None:
-            units = self.pyproj_crs.axis_info[0].unit_name
-            units = unit_renames.get(units, units)
-            return units # parse_units_from_proj_str(self.proj_str)
-
-    @property
-    def proj_str(self):
-        #if self._proj_str is None and self.crs is not None:
-        #    self._proj_str = to_string(self._crs)
-        #elif self._proj_str is None and self.prjfile is not None:
-        #    self._proj_str = get_proj_str(self.prjfile)
-        return self.pyproj_crs.to_string()
-
-    @property
-    def wkt(self):
-        if self._wkt is None and self.prjfile is not None:
-            if self.prjfile.endswith('.shp'):
-                self.prjfile = self.prjfile[:-4] + '.prj'
-            assert os.path.exists(self.prjfile), \
-                "{} not found.".format(self.prjfile)
-            with open(self.prjfile) as src:
-                self._wkt = src.read()
-        return self._wkt
-
-    @property
-    def pyproj_crs(self):
-        """pyproj crs instance.
-        todo: refactor crs class to use this instead of pyproj.Proj
-        """
-        pyproj_crs = None
-        if self._pyproj_crs is None:
-            if self._crs_dict is not None:
-                pyproj_crs = pyproj.CRS.from_dict(self._crs_dict)
-            elif self._proj_str is not None:
-                pyproj_crs = pyproj.CRS.from_string(self._proj_str)
-            elif self._epsg is not None:
-                pyproj_crs = pyproj.CRS.from_epsg(self._epsg)
-            elif self.wkt is not None:
-                pyproj_crs = pyproj.CRS.from_wkt(self._wkt)
-            # if possible, have pyproj try to find the closest
-            # authority name and code matching the crs
-            # so that input from epsg codes, proj strings, and prjfiles
-            # results in equal pyproj_crs instances
-            if pyproj_crs is not None:
-                try:
-                    authority = pyproj_crs.to_authority()
-                    if authority is not None:
-                        self._pyproj_crs = pyproj.CRS.from_user_input(pyproj_crs.to_authority())
-                    else:
-                        self._pyproj_crs = pyproj_crs
-                except:
-                    j=2
-        return self._pyproj_crs
-
-    @property
-    def pyproj_Proj(self):
-        """pyproj Proj instance. Used for comparing proj4 strings
-        that represent the same CRS in different ways."""
-        warnings.warn("The 'use of the pyproj_Proj' attribute is deprecated,"
-                      "please use pyproj_crs instead. See pyproj documentation"
-                      "about shift to the CRS class in versions 2+ for more details.",
-                      DeprecationWarning)
-        if self.proj_str is not None:
-            try:
-                return pyproj.Proj(self.proj_str)
-            except Exception as ex:
-                traceback.print_exception(type(ex), ex, ex.__traceback__)
-                return
-
-    def __setattr__(self, key, value):
-        if key in ['crs_dict', 'proj_str', 'epgs', 'wkt', 'pyproj_crs']:
-            self._reset()
-            super(CRS, self).__setattr__("_{}".format(key), value)
-        elif key == 'prjfile' and value is not None:
-            self._reset(context='prjfile')
-            super(CRS, self).__setattr__("{}".format(key), value)
-        elif key == "length_units":
-            super(CRS, self).__setattr__("_length_units", value)
-        else:
-            super(CRS, self).__setattr__(key, value)
-
-    def __eq__(self, other):
-        if not isinstance(other, CRS):
-            return False
-        if other.pyproj_crs is not None and \
-                other.pyproj_crs != self.pyproj_crs:
-            return False
-        # if other.epsg is not None and other.epsg == self.epsg:
-        #    return True
-        # if other.proj_str is not None and other.proj_str == self.proj_str:
-        #    return True
-        # if other.proj_str != self.proj_str:
-        #    return False
-        return True
-
-    def __repr__(self):
-        if self.pyproj_crs is None:
-            return 'No CRS'
-        return self.pyproj_crs.__repr__()
-
-    def _reset(self, context='prjfile'):
-        self._crs_dict = None
-        self._proj_str = None
-        self._epsg = None
-        if context != 'prjfile':
-            self.prjfile = None
-        self._wkt = None
-        self._pyproj_crs = None
+if version.parse(gisutils.__version__) < version.parse('0.2.2'):
+    warnings.warn('Automatic reprojection functionality requires gis-utils >= 0.2.2'
+                  '\nPlease pip install --upgrade gis-utils')
 
 
-class crs(CRS):
-    def __init__(self, *args, **kwargs):
-        warnings.warn("The 'crs' class was renamed to CRS to better follow pep 8.",
-                      DeprecationWarning)
-        CRS.__init__(self, *args, **kwargs)
+def get_crs(prjfile=None, epsg=None, proj_str=None, crs=None):
+    if crs is not None:
+        crs = get_authority_crs(crs)
+    if epsg is not None:
+        warnings.warn('The epsg argument is deprecated, use crs instead.')
+        if crs is None:
+            crs = get_authority_crs(epsg)
+    elif prjfile is not None:
+        if crs is None:
+            crs = get_shapefile_crs(prjfile)
+    elif proj_str is not None:
+        warnings.warn('The proj_str argument is deprecated, use crs instead.')
+        if crs is None:
+            crs = get_authority_crs(proj_str)
+    return crs
 
 
 def build_rtree_index(geom):
@@ -211,15 +72,13 @@ def export_reach_data(reach_data, grid, filename,
     assert np.array_equal(grid.df.node.values, np.arange(grid.size))
     assert np.array_equal(grid.df.node.values, grid.df.index.values)
     polygons = grid.df.loc[rd.node, 'geometry'].values
-    epsg = grid.crs.epsg
-    proj_str = grid.crs.proj_str
     if geomtype.lower() == 'polygon':
         rd['geometry'] = polygons
     elif geomtype.lower() == 'point':
         rd['geometry'] = [p.centroid for p in polygons]
     else:
         raise ValueError('Unrecognized geomtype "{}"'.format(geomtype))
-    df2shp(rd, filename, epsg=epsg, proj_str=proj_str)
+    df2shp(rd, filename, crs=grid.crs)
 
 
 def intersect_rtree(geom1, geom2, index=None):
@@ -341,8 +200,7 @@ def read_polygon_feature(feature, dest_crs=None, feature_crs=None):
     feature : shapely geometry object
     """
     if isinstance(feature, str):
-        with fiona.open(feature) as src:
-            feature_crs = CRS(wkt=src.crs_wkt)
+        feature_crs = get_shapefile_crs(feature)
         geoms = shp2df(feature)['geometry'].values
         feature = unary_union(geoms)
     elif isinstance(feature, collections.Iterable):
@@ -364,7 +222,7 @@ def read_polygon_feature(feature, dest_crs=None, feature_crs=None):
     else:
         raise TypeError("Unrecognized feature input.")
     if feature_crs is not None and dest_crs is not None and feature_crs != dest_crs:
-        feature = project(feature, feature_crs.proj_str, dest_crs.proj_str)
+        feature = project(feature, feature_crs, dest_crs)
     return feature.buffer(0)
 
 
@@ -374,21 +232,33 @@ def get_bbox(feature, dest_crs):
     Parameters
     ----------
     feature : str (shapefile path), shapely Polygon or GeoJSON
-    dest_crs : proj str
-        Desired output coordinate system (shapefiles only)
+    dest_crs  : obj
+        Coordinate reference system of the head observation locations.
+        A Python int, dict, str, or :class:`pyproj.crs.CRS` instance
+        passed to :meth:`pyproj.crs.CRS.from_user_input`
+
+        Can be any of:
+          - PROJ string
+          - Dictionary of PROJ parameters
+          - PROJ keyword arguments for parameters
+          - JSON string with PROJ parameters
+          - CRS WKT string
+          - An authority string [i.e. 'epsg:4326']
+          - An EPSG integer code [i.e. 4326]
+          - A tuple of ("auth_name": "auth_code") [i.e ('epsg', '4326')]
+          - An object with a `to_wkt` method.
+          - A :class:`pyproj.crs.CRS` class
+
+        By default, epsg:4269
     """
     if isinstance(feature, str):
         with fiona.open(feature) as src:
             l, b, r, t = src.bounds
-            bbox_src_crs = box(*src.bounds)
-            shpcrs = CRS(proj_str=to_string(src.crs))
+        bbox_src_crs = box(*src.bounds)
+        shpcrs = get_shapefile_crs(feature)
         if dest_crs is not None and shpcrs != dest_crs:
-            bbox_dest_crs = project(bbox_src_crs, shpcrs.proj_str, dest_crs.proj_str)
+            bbox_dest_crs = project(bbox_src_crs, shpcrs, dest_crs)
             l, b, r, t = bbox_dest_crs.bounds
-            # x, y = project([(l, b),
-            #                (r, t)], shpcrs.proj_str, dest_crs.proj_str)
-            # filter = (x[0], y[0], x[1], y[1])
-            # else:
         filter = (l, b, r, t)
     elif isinstance(feature, Polygon):
         filter = feature.bounds

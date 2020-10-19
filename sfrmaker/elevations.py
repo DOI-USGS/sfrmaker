@@ -91,7 +91,10 @@ def smooth_elevations(fromids, toids, elevations, start_elevations=None):  # ele
     segment_levels = get_upseg_levels(0)
     # at each level, reset all of the segment elevations as necessary
     for level in segment_levels:
-        [reset_elevations(s) for s in level]
+        for s in level:
+            if 0 in level:
+                j=2
+            reset_elevations(s)
     print("finished in {:.2f}s".format(time.time() - ta))
     if start_elevations is not None:
         return elevations, elevmax

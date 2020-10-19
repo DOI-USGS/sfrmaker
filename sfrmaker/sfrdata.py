@@ -7,12 +7,12 @@ import pandas as pd
 import rasterio
 from rasterstats import zonal_stats
 from shapely.geometry import LineString
-from gisutils import df2shp
+from gisutils import df2shp, get_authority_crs
 from sfrmaker.routing import find_path, renumber_segments
 from .checks import valid_rnos, valid_nsegs, rno_nseg_routing_consistent
 from .elevations import smooth_elevations
 from .flows import add_to_perioddata, add_to_segment_data
-from .gis import export_reach_data, project, CRS
+from .gis import export_reach_data, project
 from .observations import write_gage_package, write_mf6_sfr_obsfile, add_observations
 from .units import convert_length_units, itmuni_values, lenuni_values
 from .utils import get_sfr_package_format, get_input_arguments, assign_layers, update
@@ -885,9 +885,7 @@ class SFRData(DataPackage):
 
         # get the CRS and pixel size for the DEM
         with rasterio.open(dem) as src:
-            wkt = src.crs.wkt
-            epsg = src.crs.to_epsg()
-            raster_crs = CRS(epsg=epsg, wkt=wkt)
+            raster_crs = get_authority_crs(src.crs)
 
             # make sure buffer is large enough for DEM pixel size
             buffer_distance = np.max([np.sqrt(src.res[0] *
@@ -908,8 +906,8 @@ class SFRData(DataPackage):
         # to_crs features if they're not in the same crs
         if raster_crs != self.crs:
             features = project(features,
-                               self.crs.proj_str,
-                               raster_crs.proj_str)
+                               self.crs,
+                               raster_crs)
 
         print('running rasterstats.zonal_stats on {}...'.format(txt))
         t0 = time.time()
@@ -1673,8 +1671,7 @@ class SFRData(DataPackage):
         lengths = np.array(lengths)
         rd['length'] = lengths
         rd['geometry'] = geoms
-        df2shp(rd, filename, epsg=self.grid.crs.epsg,
-               proj_str=self.grid.crs.proj_str)
+        df2shp(rd, filename, crs=self.grid.crs)
 
     def export_transient_variable(self, varname, filename=None):
         """Export point shapefile showing locations with

@@ -107,8 +107,7 @@ class DataPackage:
         assert 'geometry' in data.columns and \
                isinstance(data.geometry.values[0], LineString), \
             "No LineStrings in reach_data.geometry"
-        df2shp(data, filename, epsg=self.grid.crs.epsg,
-               proj_str=self.grid.crs.proj_str)
+        df2shp(data, filename, crs=self.grid.crs)
 
     def export_period_data(self, filename=None, geomtype='point'):
         """Export point shapefile showing locations of period data

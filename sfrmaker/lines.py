@@ -9,13 +9,14 @@ from gisutils import shp2df, df2shp, project, get_authority_crs
 import sfrmaker
 from sfrmaker.routing import pick_toids, find_path, make_graph, renumber_segments
 from sfrmaker.checks import routing_is_circular, is_to_one
-from sfrmaker.gis import CRS, read_polygon_feature, get_bbox
+from sfrmaker.gis import read_polygon_feature, get_bbox, get_crs
 from sfrmaker.grid import StructuredGrid
 from sfrmaker.nhdplus_utils import load_nhdplus_v2, get_prj_file
 from sfrmaker.sfrdata import SFRData
 from sfrmaker.units import convert_length_units, get_length_units
 from sfrmaker.utils import (width_from_arbolate_sum, arbolate_sum)
 from sfrmaker.reaches import consolidate_reach_conductances, interpolate_to_reaches, setup_reach_data
+from sfrmaker.routing import get_previous_ids_in_subset
 
 
 class Lines:
@@ -39,17 +40,24 @@ class Lines:
     attr_height_units : str, {'meters', 'feet', ..}
         Length units for elevation attributes
         (default 'meters')
-    epsg: int
-        EPSG code identifying Coordinate Reference System (CRS)
-        for features in df.geometry
-        (optional)
-    proj_str: str
-        proj_str string identifying CRS for features in df.geometry
-        (optional)
-    prjfile: str
-        File path to projection (.prj) file identifying CRS
-        for features in df.geometry
-        (optional)
+    crs : obj
+        Coordinate reference system for features on df.geometry.
+        A Python int, dict, str, or :class:`pyproj.crs.CRS` instance
+        passed to :meth:`pyproj.crs.CRS.from_user_input`
+
+        Can be any of:
+          - PROJ string
+          - Dictionary of PROJ parameters
+          - PROJ keyword arguments for parameters
+          - JSON string with PROJ parameters
+          - CRS WKT string
+          - An authority string [i.e. 'epsg:4326']
+          - An EPSG integer code [i.e. 4326]
+          - A tuple of ("auth_name": "auth_code") [i.e ('epsg', '4326')]
+          - An object with a `to_wkt` method.
+          - A :class:`pyproj.crs.CRS` class
+
+        By default, None
         
     Attributes
     ----------
@@ -59,12 +67,12 @@ class Lines:
     def __init__(self, df=None,
                  attr_length_units='meters',
                  attr_height_units='meters',
-                 epsg=None, proj_str=None, prjfile=None):
+                 crs=None, epsg=None, proj_str=None, prjfile=None):
 
         self.df = df
         self.attr_length_units = attr_length_units
         self.attr_height_units = attr_height_units
-        self.crs = CRS(epsg=epsg, proj_str=proj_str, prjfile=prjfile)
+        self.crs = get_crs(prjfile=prjfile, epsg=epsg, proj_str=proj_str, crs=crs)
         self._geometry_length_units = None
 
         self._routing = None  # dictionary of routing connections
@@ -80,9 +88,14 @@ class Lines:
     def geometry_length_units(self):
         """Length units of reach LineString geometries.
         """
-        self._geometry_length_units = self.crs.length_units
+        valid_units = {'feet': 'feet',
+                       'foot': 'feet',
+                       'meters': 'meters',
+                       'metre': 'meters'}
+        self._geometry_length_units = valid_units.get(self.crs.axis_info[0].unit_name)
         if self._geometry_length_units is None:
-            print("Warning: No length units specified in CRS for input LineStrings; "
+            print("Warning: No length units specified in CRS for input LineStrings "
+                  "or length units not recognized"
                   "defaulting to meters.")
             self._geometry_length_units = 'meters'
         return self._geometry_length_units
@@ -239,7 +252,7 @@ class Lines:
 
         # to_crs the flowlines if they aren't in same CRS as grid
         if self.crs != grid.crs:
-            self.to_crs(grid.crs.proj_str)
+            self.to_crs(grid.crs)
 
         grid_polygons = grid.df.geometry.tolist()
         stream_linework = self.df.geometry.tolist()
@@ -302,17 +315,17 @@ class Lines:
               - An object with a `to_wkt` method.
               - A :class:`pyproj.crs.CRS` class
         """        
-        assert self.crs.proj_str is not None, "No proj_str string for flowlines"
+        assert self.crs is not None, "No crs for flowlines"
         assert dest_crs is not None, "No destination CRS."
 
         dest_crs = get_authority_crs(dest_crs)
-        print('\nreprojecting hydrography from\n{}\nto\n{}\n'.format(self.crs.proj_str,
+        print('\nreprojecting hydrography from\n{}\nto\n{}\n'.format(self.crs,
                                                                      dest_crs))
-        geoms = project(self.df.geometry, self.crs.pyproj_crs, dest_crs)
+        geoms = project(self.df.geometry, self.crs, dest_crs)
         assert np.isfinite(np.max(geoms[0].xy[0])), \
             "Invalid reprojection; check CRS for lines and grid."
         self.df['geometry'] = geoms
-        self.crs = CRS(proj_str=dest_crs.srs)
+        self.crs = dest_crs
 
     def write_shapefile(self, outshp='flowlines.shp'):
         """Write a shapefile of :py:attr:`Lines.df`.
@@ -336,7 +349,7 @@ class Lines:
                        name_column='name',
                        attr_length_units='meters', attr_height_units='meters',
                        filter=None,
-                       epsg=None, proj_str=None, prjfile=None):
+                       crs=None, epsg=None, proj_str=None, prjfile=None):
         """Create a Lines instance from a shapefile.
 
         Parameters
@@ -397,7 +410,7 @@ class Lines:
             prjfile = shapefile.replace('.shp', '.prj')
             prjfile = prjfile if os.path.exists(prjfile) else None
 
-        shpfile_crs = CRS(epsg=epsg, proj_str=proj_str, prjfile=prjfile)
+        shpfile_crs = get_crs(prjfile=prjfile, epsg=epsg, proj_str=proj_str, crs=crs)
 
         # ensure that filter bbox is in same crs as flowlines
         if filter is not None and not isinstance(filter, tuple):
@@ -710,7 +723,7 @@ class Lines:
 
         # to_crs the flowlines if they aren't in same CRS as grid
         if self.crs != grid.crs:
-            self.to_crs(grid.crs.proj_str)
+            self.to_crs(grid.crs)
         # cull the flowlines to the active part of the model grid
         if grid.active_area is not None:
             self.cull(grid.active_area, inplace=True, simplify=True, tol=2000)
@@ -868,18 +881,23 @@ class Lines:
                 new_routing[k] = 0
 
         # add any outlets to the stream network
+        # for now handle int or str ids
         if add_outlets is not None:
+            # get the
             if isinstance(add_outlets, str) or isinstance(add_outlets, int):
                 add_outlets = [add_outlets]
             for outlet_id in add_outlets:
                 if self.df.id.dtype == np.object:
-                    loc = self.df.id.astype(str) == str(outlet_id)
-                    self.df.loc[loc, 'toid'] = '0'
-                    new_routing[str(outlet_id)] = '0'
+                    outlet_id = str(outlet_id)
+                    outlet_toid = '0'
                 else:
-                    loc = self.df.id == outlet_id
-                    self.df.loc[loc, 'toid'] = 0
-                    new_routing[outlet_id] = 0
+                    outlet_id = int(outlet_id)
+                    outlet_toid = 0
+                valid_outlet_ids = get_previous_ids_in_subset(self.df.id, new_routing, outlet_id)
+                loc = self.df.id.isin(valid_outlet_ids)
+                self.df.loc[loc, 'toid'] = outlet_toid
+                for valid_outlet_id in valid_outlet_ids:
+                    new_routing[valid_outlet_id] = outlet_toid
 
         # map remaining_ids to segment numbers
         segment = dict(zip(rd.line_id, rd.iseg))

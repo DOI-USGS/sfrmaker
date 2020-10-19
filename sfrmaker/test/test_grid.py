@@ -6,7 +6,7 @@ import pytest
 import sfrmaker
 
 fm = flopy.modflow
-from ..gis import CRS
+from ..gis import get_authority_crs
 from ..grid import StructuredGrid
 from ..units import convert_length_units
 
@@ -31,11 +31,11 @@ def test_structuredgrid_from_flopy_mg():
     assert grd2.yul == 5139052 + mg.delc.sum()
     assert grd2.dx == mg.delr[0]
     assert grd2.dy == mg.delc[0]
-    assert grd2.crs == CRS(epsg=26715)
+    assert grd2.crs == get_authority_crs(26715)
 
 
 def test_grid_epsg(shellmound_sfrmaker_grid):
-    assert shellmound_sfrmaker_grid.crs.epsg == 5070
+    assert shellmound_sfrmaker_grid.crs.srs == 'EPSG:5070'
 
 
 @pytest.fixture(scope='function')

@@ -11,7 +11,7 @@ try:
     fm = flopy.modflow
 except:
     flopy = False
-from .gis import get_proj_str, project
+from .gis import get_shapefile_crs, project
 from .fileio import read_tables
 from .routing import get_next_id_in_subset
 
@@ -276,12 +276,12 @@ def locate_sites(site_data,
     locs : DataFrame
 
     """
-    sfrproj4 = None
-    locsproj4 = None
+    sfr_crs = None
+    locs_crs = None
     # read in sfr lines
     if not isinstance(reach_data, pd.DataFrame):
         sfrlines = shp2df(reach_data)
-        sfrproj4 = get_proj_str(reach_data)
+        sfr_crs = get_shapefile_crs(reach_data)
     elif isinstance(reach_data, pd.DataFrame):
         sfrlines = reach_data.copy()
     else:
@@ -292,9 +292,9 @@ def locate_sites(site_data,
     if not isinstance(site_data, pd.DataFrame):
         locs = shp2df(site_data)
         if isinstance(site_data, list):
-            locsproj4 = get_proj_str(site_data[0])
+            locs_crs = get_shapefile_crs(site_data[0])
         else:
-            locsproj4 = get_proj_str(site_data)
+            locs_crs = get_shapefile_crs(site_data)
         locs['site_no'] = locs[site_number_col]  # str_ids(locs.site_no)
     elif isinstance(site_data, pd.DataFrame):
         locs = site_data.copy()
@@ -302,8 +302,8 @@ def locate_sites(site_data,
         raise TypeError('Datatype for site_data not understood: {}'.format(site_data))
 
     # to_crs if crs are available
-    if locsproj4 is not None and sfrproj4 is not None:
-        locs['geometry'] = project(locs.geometry.values, locsproj4, sfrproj4)
+    if locs_crs is not None and sfr_crs is not None:
+        locs['geometry'] = project(locs.geometry.values, locs_crs, sfr_crs)
 
     # get the x and y coordinates
     if x_column_in_data is not None and y_column_in_data is not None:
