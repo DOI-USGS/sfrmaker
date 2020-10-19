@@ -887,15 +887,15 @@ class Lines:
             if isinstance(add_outlets, str) or isinstance(add_outlets, int):
                 add_outlets = [add_outlets]
             for outlet_id in add_outlets:
-                if self.df.id.dtype == np.object:
+                if rd.line_id.dtype == np.object:
                     outlet_id = str(outlet_id)
                     outlet_toid = '0'
                 else:
                     outlet_id = int(outlet_id)
                     outlet_toid = 0
-                valid_outlet_ids = get_previous_ids_in_subset(self.df.id, new_routing, outlet_id)
-                loc = self.df.id.isin(valid_outlet_ids)
-                self.df.loc[loc, 'toid'] = outlet_toid
+                valid_outlet_ids = get_previous_ids_in_subset(rd.line_id, self.routing, outlet_id)
+                loc = rd.line_id.isin(valid_outlet_ids)
+                rd.loc[loc, 'toid'] = outlet_toid
                 for valid_outlet_id in valid_outlet_ids:
                     new_routing[valid_outlet_id] = outlet_toid
 

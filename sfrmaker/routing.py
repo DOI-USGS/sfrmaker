@@ -360,7 +360,7 @@ def get_previous_ids_in_subset(subset, routing, ids):
                 new_ids.add(upseg)
         if len(new_ids) == len(nextupsegs):
             break
-        nextupsegs = nextupsegs.difference(new_ids)
+        nextupsegs = set(nextupsegs).difference(new_ids)
         if len(nextupsegs) > 0:
             nextupsegs = get_nextupsegs(graph_r, nextupsegs)
     return new_ids
