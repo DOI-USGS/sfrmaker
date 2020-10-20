@@ -37,4 +37,4 @@ options:
   one_reach_per_cell: True #  consolidate SFR reaches to one per i, j location
   # add breaks in routing at the following line ids
   # (flow downstream is controlled by dams, and specified as an inflow)
-  add_outlets: 18019782, 15276792, 15290344, 15256386
+  add_outlets: [18019782, 15276792, 15290344, 15256386]
