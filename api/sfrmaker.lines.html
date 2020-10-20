@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>The Lines Module &mdash; SFRmaker 0.6.0 documentation</title>
+  <title>The Lines Module &mdash; SFRmaker 0.6.0.post2.dev0+g848d476 documentation</title>
   
 
   
@@ -67,7 +67,7 @@
             
             
               <div class="version">
-                0.6.0
+                0.6.0.post2.dev0+g848d476
               </div>
             
           
@@ -217,7 +217,7 @@
 <span id="the-lines-module"></span><h1>The Lines Module<a class="headerlink" href="#module-sfrmaker.lines" title="Permalink to this headline">¶</a></h1>
 <dl class="py class">
 <dt id="sfrmaker.lines.Lines">
-<em class="property">class </em><code class="sig-prename descclassname">sfrmaker.lines.</code><code class="sig-name descname">Lines</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">df</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">attr_length_units</span><span class="o">=</span><span class="default_value">'meters'</span></em>, <em class="sig-param"><span class="n">attr_height_units</span><span class="o">=</span><span class="default_value">'meters'</span></em>, <em class="sig-param"><span class="n">epsg</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">proj_str</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">prjfile</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/lines.html#Lines"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sfrmaker.lines.Lines" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">sfrmaker.lines.</code><code class="sig-name descname">Lines</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">df</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">attr_length_units</span><span class="o">=</span><span class="default_value">'meters'</span></em>, <em class="sig-param"><span class="n">attr_height_units</span><span class="o">=</span><span class="default_value">'meters'</span></em>, <em class="sig-param"><span class="n">crs</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">epsg</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">proj_str</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">prjfile</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/lines.html#Lines"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sfrmaker.lines.Lines" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Class for working with linestring feature input.</p>
 <dl class="field-list">
@@ -249,16 +249,25 @@ Must have the following columns:</p>
 <dt><strong>attr_height_units</strong><span class="classifier">str, {‘meters’, ‘feet’, ..}</span></dt><dd><p>Length units for elevation attributes
 (default ‘meters’)</p>
 </dd>
-<dt><strong>epsg: int</strong></dt><dd><p>EPSG code identifying Coordinate Reference System (CRS)
-for features in df.geometry
-(optional)</p>
+<dt><strong>crs</strong><span class="classifier">obj</span></dt><dd><p>Coordinate reference system for features on df.geometry.
+A Python int, dict, str, or <a class="reference external" href="http://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v2.6.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> instance
+passed to <a class="reference external" href="http://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input" title="(in pyproj v2.6.1)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.crs.CRS.from_user_input()</span></code></a></p>
+<dl class="simple">
+<dt>Can be any of:</dt><dd><ul class="simple">
+<li><p>PROJ string</p></li>
+<li><p>Dictionary of PROJ parameters</p></li>
+<li><p>PROJ keyword arguments for parameters</p></li>
+<li><p>JSON string with PROJ parameters</p></li>
+<li><p>CRS WKT string</p></li>
+<li><p>An authority string [i.e. ‘epsg:4326’]</p></li>
+<li><p>An EPSG integer code [i.e. 4326]</p></li>
+<li><p>A tuple of (“auth_name”: “auth_code”) [i.e (‘epsg’, ‘4326’)]</p></li>
+<li><p>An object with a <cite>to_wkt</cite> method.</p></li>
+<li><p>A <a class="reference external" href="http://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v2.6.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> class</p></li>
+</ul>
 </dd>
-<dt><strong>proj_str: str</strong></dt><dd><p>proj_str string identifying CRS for features in df.geometry
-(optional)</p>
-</dd>
-<dt><strong>prjfile: str</strong></dt><dd><p>File path to projection (.prj) file identifying CRS
-for features in df.geometry
-(optional)</p>
+</dl>
+<p>By default, None</p>
 </dd>
 </dl>
 </dd>
@@ -438,7 +447,7 @@ will be used.</p>
 
 <dl class="py method">
 <dt id="sfrmaker.lines.Lines.from_shapefile">
-<em class="property">classmethod </em><code class="sig-name descname">from_shapefile</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">shapefile</span></em>, <em class="sig-param"><span class="n">id_column</span><span class="o">=</span><span class="default_value">'id'</span></em>, <em class="sig-param"><span class="n">routing_column</span><span class="o">=</span><span class="default_value">'toid'</span></em>, <em class="sig-param"><span class="n">arbolate_sum_column2</span><span class="o">=</span><span class="default_value">'asum2'</span></em>, <em class="sig-param"><span class="n">width1_column</span><span class="o">=</span><span class="default_value">'width1'</span></em>, <em class="sig-param"><span class="n">width2_column</span><span class="o">=</span><span class="default_value">'width2'</span></em>, <em class="sig-param"><span class="n">up_elevation_column</span><span class="o">=</span><span class="default_value">'elevup'</span></em>, <em class="sig-param"><span class="n">dn_elevation_column</span><span class="o">=</span><span class="default_value">'elevdn'</span></em>, <em class="sig-param"><span class="n">name_column</span><span class="o">=</span><span class="default_value">'name'</span></em>, <em class="sig-param"><span class="n">attr_length_units</span><span class="o">=</span><span class="default_value">'meters'</span></em>, <em class="sig-param"><span class="n">attr_height_units</span><span class="o">=</span><span class="default_value">'meters'</span></em>, <em class="sig-param"><span class="n">filter</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">epsg</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">proj_str</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">prjfile</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/lines.html#Lines.from_shapefile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sfrmaker.lines.Lines.from_shapefile" title="Permalink to this definition">¶</a></dt>
+<em class="property">classmethod </em><code class="sig-name descname">from_shapefile</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">shapefile</span></em>, <em class="sig-param"><span class="n">id_column</span><span class="o">=</span><span class="default_value">'id'</span></em>, <em class="sig-param"><span class="n">routing_column</span><span class="o">=</span><span class="default_value">'toid'</span></em>, <em class="sig-param"><span class="n">arbolate_sum_column2</span><span class="o">=</span><span class="default_value">'asum2'</span></em>, <em class="sig-param"><span class="n">width1_column</span><span class="o">=</span><span class="default_value">'width1'</span></em>, <em class="sig-param"><span class="n">width2_column</span><span class="o">=</span><span class="default_value">'width2'</span></em>, <em class="sig-param"><span class="n">up_elevation_column</span><span class="o">=</span><span class="default_value">'elevup'</span></em>, <em class="sig-param"><span class="n">dn_elevation_column</span><span class="o">=</span><span class="default_value">'elevdn'</span></em>, <em class="sig-param"><span class="n">name_column</span><span class="o">=</span><span class="default_value">'name'</span></em>, <em class="sig-param"><span class="n">attr_length_units</span><span class="o">=</span><span class="default_value">'meters'</span></em>, <em class="sig-param"><span class="n">attr_height_units</span><span class="o">=</span><span class="default_value">'meters'</span></em>, <em class="sig-param"><span class="n">filter</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">crs</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">epsg</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">proj_str</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">prjfile</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/lines.html#Lines.from_shapefile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sfrmaker.lines.Lines.from_shapefile" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a Lines instance from a shapefile.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters</dt>
@@ -684,7 +693,7 @@ prevent double-counting of flow. By default, None</p>
   <div role="contentinfo">
     <p>
       <span class="lastupdated">
-        Last updated on Oct 15, 2020.
+        Last updated on Oct 20, 2020.
       </span>
 
     </p>

@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>sfrmaker.lines &mdash; SFRmaker 0.6.0 documentation</title>
+  <title>sfrmaker.lines &mdash; SFRmaker 0.6.0.post2.dev0+g848d476 documentation</title>
   
 
   
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                0.6.0
+                0.6.0.post2.dev0+g848d476
               </div>
             
           
@@ -187,13 +187,14 @@
 <span class="kn">import</span> <span class="nn">sfrmaker</span>
 <span class="kn">from</span> <span class="nn">sfrmaker.routing</span> <span class="kn">import</span> <span class="n">pick_toids</span><span class="p">,</span> <span class="n">find_path</span><span class="p">,</span> <span class="n">make_graph</span><span class="p">,</span> <span class="n">renumber_segments</span>
 <span class="kn">from</span> <span class="nn">sfrmaker.checks</span> <span class="kn">import</span> <span class="n">routing_is_circular</span><span class="p">,</span> <span class="n">is_to_one</span>
-<span class="kn">from</span> <span class="nn">sfrmaker.gis</span> <span class="kn">import</span> <span class="n">CRS</span><span class="p">,</span> <span class="n">read_polygon_feature</span><span class="p">,</span> <span class="n">get_bbox</span>
+<span class="kn">from</span> <span class="nn">sfrmaker.gis</span> <span class="kn">import</span> <span class="n">read_polygon_feature</span><span class="p">,</span> <span class="n">get_bbox</span><span class="p">,</span> <span class="n">get_crs</span>
 <span class="kn">from</span> <span class="nn">sfrmaker.grid</span> <span class="kn">import</span> <span class="n">StructuredGrid</span>
 <span class="kn">from</span> <span class="nn">sfrmaker.nhdplus_utils</span> <span class="kn">import</span> <span class="n">load_nhdplus_v2</span><span class="p">,</span> <span class="n">get_prj_file</span>
 <span class="kn">from</span> <span class="nn">sfrmaker.sfrdata</span> <span class="kn">import</span> <span class="n">SFRData</span>
 <span class="kn">from</span> <span class="nn">sfrmaker.units</span> <span class="kn">import</span> <span class="n">convert_length_units</span><span class="p">,</span> <span class="n">get_length_units</span>
 <span class="kn">from</span> <span class="nn">sfrmaker.utils</span> <span class="kn">import</span> <span class="p">(</span><span class="n">width_from_arbolate_sum</span><span class="p">,</span> <span class="n">arbolate_sum</span><span class="p">)</span>
 <span class="kn">from</span> <span class="nn">sfrmaker.reaches</span> <span class="kn">import</span> <span class="n">consolidate_reach_conductances</span><span class="p">,</span> <span class="n">interpolate_to_reaches</span><span class="p">,</span> <span class="n">setup_reach_data</span>
+<span class="kn">from</span> <span class="nn">sfrmaker.routing</span> <span class="kn">import</span> <span class="n">get_previous_ids_in_subset</span>
 
 
 <div class="viewcode-block" id="Lines"><a class="viewcode-back" href="../../api/sfrmaker.lines.html#sfrmaker.lines.Lines">[docs]</a><span class="k">class</span> <span class="nc">Lines</span><span class="p">:</span>
@@ -217,17 +218,24 @@
 <span class="sd">    attr_height_units : str, {&#39;meters&#39;, &#39;feet&#39;, ..}</span>
 <span class="sd">        Length units for elevation attributes</span>
 <span class="sd">        (default &#39;meters&#39;)</span>
-<span class="sd">    epsg: int</span>
-<span class="sd">        EPSG code identifying Coordinate Reference System (CRS)</span>
-<span class="sd">        for features in df.geometry</span>
-<span class="sd">        (optional)</span>
-<span class="sd">    proj_str: str</span>
-<span class="sd">        proj_str string identifying CRS for features in df.geometry</span>
-<span class="sd">        (optional)</span>
-<span class="sd">    prjfile: str</span>
-<span class="sd">        File path to projection (.prj) file identifying CRS</span>
-<span class="sd">        for features in df.geometry</span>
-<span class="sd">        (optional)</span>
+<span class="sd">    crs : obj</span>
+<span class="sd">        Coordinate reference system for features on df.geometry.</span>
+<span class="sd">        A Python int, dict, str, or :class:`pyproj.crs.CRS` instance</span>
+<span class="sd">        passed to :meth:`pyproj.crs.CRS.from_user_input`</span>
+
+<span class="sd">        Can be any of:</span>
+<span class="sd">          - PROJ string</span>
+<span class="sd">          - Dictionary of PROJ parameters</span>
+<span class="sd">          - PROJ keyword arguments for parameters</span>
+<span class="sd">          - JSON string with PROJ parameters</span>
+<span class="sd">          - CRS WKT string</span>
+<span class="sd">          - An authority string [i.e. &#39;epsg:4326&#39;]</span>
+<span class="sd">          - An EPSG integer code [i.e. 4326]</span>
+<span class="sd">          - A tuple of (&quot;auth_name&quot;: &quot;auth_code&quot;) [i.e (&#39;epsg&#39;, &#39;4326&#39;)]</span>
+<span class="sd">          - An object with a `to_wkt` method.</span>
+<span class="sd">          - A :class:`pyproj.crs.CRS` class</span>
+
+<span class="sd">        By default, None</span>
 <span class="sd">        </span>
 <span class="sd">    Attributes</span>
 <span class="sd">    ----------</span>
@@ -237,12 +245,12 @@
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">attr_length_units</span><span class="o">=</span><span class="s1">&#39;meters&#39;</span><span class="p">,</span>
                  <span class="n">attr_height_units</span><span class="o">=</span><span class="s1">&#39;meters&#39;</span><span class="p">,</span>
-                 <span class="n">epsg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">proj_str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">prjfile</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+                 <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">epsg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">proj_str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">prjfile</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">df</span> <span class="o">=</span> <span class="n">df</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">attr_length_units</span> <span class="o">=</span> <span class="n">attr_length_units</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">attr_height_units</span> <span class="o">=</span> <span class="n">attr_height_units</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">crs</span> <span class="o">=</span> <span class="n">CRS</span><span class="p">(</span><span class="n">epsg</span><span class="o">=</span><span class="n">epsg</span><span class="p">,</span> <span class="n">proj_str</span><span class="o">=</span><span class="n">proj_str</span><span class="p">,</span> <span class="n">prjfile</span><span class="o">=</span><span class="n">prjfile</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">crs</span> <span class="o">=</span> <span class="n">get_crs</span><span class="p">(</span><span class="n">prjfile</span><span class="o">=</span><span class="n">prjfile</span><span class="p">,</span> <span class="n">epsg</span><span class="o">=</span><span class="n">epsg</span><span class="p">,</span> <span class="n">proj_str</span><span class="o">=</span><span class="n">proj_str</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_geometry_length_units</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_routing</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># dictionary of routing connections</span>
@@ -258,9 +266,14 @@
     <span class="k">def</span> <span class="nf">geometry_length_units</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Length units of reach LineString geometries.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_geometry_length_units</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">length_units</span>
+        <span class="n">valid_units</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;feet&#39;</span><span class="p">:</span> <span class="s1">&#39;feet&#39;</span><span class="p">,</span>
+                       <span class="s1">&#39;foot&#39;</span><span class="p">:</span> <span class="s1">&#39;feet&#39;</span><span class="p">,</span>
+                       <span class="s1">&#39;meters&#39;</span><span class="p">:</span> <span class="s1">&#39;meters&#39;</span><span class="p">,</span>
+                       <span class="s1">&#39;metre&#39;</span><span class="p">:</span> <span class="s1">&#39;meters&#39;</span><span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_geometry_length_units</span> <span class="o">=</span> <span class="n">valid_units</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">axis_info</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">unit_name</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_geometry_length_units</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Warning: No length units specified in CRS for input LineStrings; &quot;</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Warning: No length units specified in CRS for input LineStrings &quot;</span>
+                  <span class="s2">&quot;or length units not recognized&quot;</span>
                   <span class="s2">&quot;defaulting to meters.&quot;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_geometry_length_units</span> <span class="o">=</span> <span class="s1">&#39;meters&#39;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_geometry_length_units</span>
@@ -417,7 +430,7 @@
 
         <span class="c1"># to_crs the flowlines if they aren&#39;t in same CRS as grid</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span> <span class="o">!=</span> <span class="n">grid</span><span class="o">.</span><span class="n">crs</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">proj_str</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
 
         <span class="n">grid_polygons</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
         <span class="n">stream_linework</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
@@ -480,17 +493,17 @@
 <span class="sd">              - An object with a `to_wkt` method.</span>
 <span class="sd">              - A :class:`pyproj.crs.CRS` class</span>
 <span class="sd">        &quot;&quot;&quot;</span>        
-        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">proj_str</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;No proj_str string for flowlines&quot;</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;No crs for flowlines&quot;</span>
         <span class="k">assert</span> <span class="n">dest_crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;No destination CRS.&quot;</span>
 
         <span class="n">dest_crs</span> <span class="o">=</span> <span class="n">get_authority_crs</span><span class="p">(</span><span class="n">dest_crs</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">reprojecting hydrography from</span><span class="se">\n</span><span class="si">{}</span><span class="se">\n</span><span class="s1">to</span><span class="se">\n</span><span class="si">{}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">proj_str</span><span class="p">,</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">reprojecting hydrography from</span><span class="se">\n</span><span class="si">{}</span><span class="se">\n</span><span class="s1">to</span><span class="se">\n</span><span class="si">{}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span>
                                                                      <span class="n">dest_crs</span><span class="p">))</span>
-        <span class="n">geoms</span> <span class="o">=</span> <span class="n">project</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">geometry</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">pyproj_crs</span><span class="p">,</span> <span class="n">dest_crs</span><span class="p">)</span>
+        <span class="n">geoms</span> <span class="o">=</span> <span class="n">project</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">geometry</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="n">dest_crs</span><span class="p">)</span>
         <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">geoms</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">xy</span><span class="p">[</span><span class="mi">0</span><span class="p">])),</span> \
             <span class="s2">&quot;Invalid reprojection; check CRS for lines and grid.&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;geometry&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">geoms</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">crs</span> <span class="o">=</span> <span class="n">CRS</span><span class="p">(</span><span class="n">proj_str</span><span class="o">=</span><span class="n">dest_crs</span><span class="o">.</span><span class="n">srs</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">crs</span> <span class="o">=</span> <span class="n">dest_crs</span></div>
 
 <div class="viewcode-block" id="Lines.write_shapefile"><a class="viewcode-back" href="../../api/sfrmaker.lines.html#sfrmaker.lines.Lines.write_shapefile">[docs]</a>    <span class="k">def</span> <span class="nf">write_shapefile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outshp</span><span class="o">=</span><span class="s1">&#39;flowlines.shp&#39;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Write a shapefile of :py:attr:`Lines.df`.</span>
@@ -514,7 +527,7 @@
                        <span class="n">name_column</span><span class="o">=</span><span class="s1">&#39;name&#39;</span><span class="p">,</span>
                        <span class="n">attr_length_units</span><span class="o">=</span><span class="s1">&#39;meters&#39;</span><span class="p">,</span> <span class="n">attr_height_units</span><span class="o">=</span><span class="s1">&#39;meters&#39;</span><span class="p">,</span>
                        <span class="nb">filter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                       <span class="n">epsg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">proj_str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">prjfile</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+                       <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">epsg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">proj_str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">prjfile</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Create a Lines instance from a shapefile.</span>
 
 <span class="sd">        Parameters</span>
@@ -575,7 +588,7 @@
             <span class="n">prjfile</span> <span class="o">=</span> <span class="n">shapefile</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.shp&#39;</span><span class="p">,</span> <span class="s1">&#39;.prj&#39;</span><span class="p">)</span>
             <span class="n">prjfile</span> <span class="o">=</span> <span class="n">prjfile</span> <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">prjfile</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
 
-        <span class="n">shpfile_crs</span> <span class="o">=</span> <span class="n">CRS</span><span class="p">(</span><span class="n">epsg</span><span class="o">=</span><span class="n">epsg</span><span class="p">,</span> <span class="n">proj_str</span><span class="o">=</span><span class="n">proj_str</span><span class="p">,</span> <span class="n">prjfile</span><span class="o">=</span><span class="n">prjfile</span><span class="p">)</span>
+        <span class="n">shpfile_crs</span> <span class="o">=</span> <span class="n">get_crs</span><span class="p">(</span><span class="n">prjfile</span><span class="o">=</span><span class="n">prjfile</span><span class="p">,</span> <span class="n">epsg</span><span class="o">=</span><span class="n">epsg</span><span class="p">,</span> <span class="n">proj_str</span><span class="o">=</span><span class="n">proj_str</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">)</span>
 
         <span class="c1"># ensure that filter bbox is in same crs as flowlines</span>
         <span class="k">if</span> <span class="nb">filter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">filter</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
@@ -888,7 +901,7 @@
 
         <span class="c1"># to_crs the flowlines if they aren&#39;t in same CRS as grid</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span> <span class="o">!=</span> <span class="n">grid</span><span class="o">.</span><span class="n">crs</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">proj_str</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
         <span class="c1"># cull the flowlines to the active part of the model grid</span>
         <span class="k">if</span> <span class="n">grid</span><span class="o">.</span><span class="n">active_area</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">cull</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">active_area</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">simplify</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mi">2000</span><span class="p">)</span>
@@ -1046,18 +1059,23 @@
                 <span class="n">new_routing</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
 
         <span class="c1"># add any outlets to the stream network</span>
+        <span class="c1"># for now handle int or str ids</span>
         <span class="k">if</span> <span class="n">add_outlets</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># get the</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">add_outlets</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">add_outlets</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
                 <span class="n">add_outlets</span> <span class="o">=</span> <span class="p">[</span><span class="n">add_outlets</span><span class="p">]</span>
             <span class="k">for</span> <span class="n">outlet_id</span> <span class="ow">in</span> <span class="n">add_outlets</span><span class="p">:</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">id</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">object</span><span class="p">:</span>
-                    <span class="n">loc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">id</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">outlet_id</span><span class="p">)</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">loc</span><span class="p">,</span> <span class="s1">&#39;toid&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;0&#39;</span>
-                    <span class="n">new_routing</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">outlet_id</span><span class="p">)]</span> <span class="o">=</span> <span class="s1">&#39;0&#39;</span>
+                <span class="k">if</span> <span class="n">rd</span><span class="o">.</span><span class="n">line_id</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">object</span><span class="p">:</span>
+                    <span class="n">outlet_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">outlet_id</span><span class="p">)</span>
+                    <span class="n">outlet_toid</span> <span class="o">=</span> <span class="s1">&#39;0&#39;</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">loc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="n">outlet_id</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">loc</span><span class="p">,</span> <span class="s1">&#39;toid&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
-                    <span class="n">new_routing</span><span class="p">[</span><span class="n">outlet_id</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="n">outlet_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">outlet_id</span><span class="p">)</span>
+                    <span class="n">outlet_toid</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">valid_outlet_ids</span> <span class="o">=</span> <span class="n">get_previous_ids_in_subset</span><span class="p">(</span><span class="n">rd</span><span class="o">.</span><span class="n">line_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">routing</span><span class="p">,</span> <span class="n">outlet_id</span><span class="p">)</span>
+                <span class="n">loc</span> <span class="o">=</span> <span class="n">rd</span><span class="o">.</span><span class="n">line_id</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">valid_outlet_ids</span><span class="p">)</span>
+                <span class="n">rd</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">loc</span><span class="p">,</span> <span class="s1">&#39;toid&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">outlet_toid</span>
+                <span class="k">for</span> <span class="n">valid_outlet_id</span> <span class="ow">in</span> <span class="n">valid_outlet_ids</span><span class="p">:</span>
+                    <span class="n">new_routing</span><span class="p">[</span><span class="n">valid_outlet_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">outlet_toid</span>
 
         <span class="c1"># map remaining_ids to segment numbers</span>
         <span class="n">segment</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">rd</span><span class="o">.</span><span class="n">line_id</span><span class="p">,</span> <span class="n">rd</span><span class="o">.</span><span class="n">iseg</span><span class="p">))</span>
@@ -1132,7 +1150,7 @@
   <div role="contentinfo">
     <p>
       <span class="lastupdated">
-        Last updated on Oct 15, 2020.
+        Last updated on Oct 20, 2020.
       </span>
 
     </p>

@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Basic usage of SFRmaker in a scripting context &mdash; SFRmaker 0.6.0 documentation</title>
+  <title>Basic usage of SFRmaker in a scripting context &mdash; SFRmaker 0.6.0.post2.dev0+g848d476 documentation</title>
   
 
   
@@ -67,7 +67,7 @@
             
             
               <div class="version">
-                0.6.0
+                0.6.0.post2.dev0+g848d476
               </div>
             
           
@@ -520,7 +520,7 @@ flopy is installed in /home/travis/miniconda/envs/test/lib/python3.7/site-packag
 </pre></div>
 </div>
 </div>
-<div class="nboutput docutils container">
+<div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
@@ -543,28 +543,10 @@ reading ../tylerforks/NHDPlus/NHDPlusAttributes/PlusFlow.dbf...
 reading ../tylerforks/NHDPlus/NHDPlusAttributes/elevslope.dbf...
 --&gt; building dataframe... (may take a while for large shapefiles)
 
-load finished in 0.22s
+load finished in 0.19s
 
 Getting routing information from NHDPlus Plusflow table...
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-/home/travis/miniconda/envs/test/lib/python3.7/site-packages/pyproj/crs/crs.py:393: FutureWarning: &#39;+init=&lt;authority&gt;:&lt;code&gt;&#39; syntax is deprecated. &#39;&lt;authority&gt;:&lt;code&gt;&#39; is the preferred initialization method. When making the change, be mindful of axis order changes: https://pyproj4.github.io/pyproj/stable/gotchas.html#axis-order-changes-in-proj-6
-  return CRS(_prepare_from_string(in_crs_string))
-/home/travis/miniconda/envs/test/lib/python3.7/site-packages/pyproj/crs/crs.py:280: FutureWarning: &#39;+init=&lt;authority&gt;:&lt;code&gt;&#39; syntax is deprecated. &#39;&lt;authority&gt;:&lt;code&gt;&#39; is the preferred initialization method. When making the change, be mindful of axis order changes: https://pyproj4.github.io/pyproj/stable/gotchas.html#axis-order-changes-in-proj-6
-  projstring = _prepare_from_string(projparams)
-</pre></div></div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-finished in 0.03s
+finished in 0.02s
 
 </pre></div></div>
 </div>
@@ -603,7 +585,7 @@ reading ../tylerforks/NHDPlus/NHDPlusAttributes/PlusFlow.dbf...
 reading ../tylerforks/NHDPlus/NHDPlusAttributes/elevslope.dbf...
 --&gt; building dataframe... (may take a while for large shapefiles)
 
-load finished in 0.09s
+load finished in 0.08s
 
 Getting routing information from NHDPlus Plusflow table...
 finished in 0.02s
@@ -713,7 +695,7 @@ reading ../tylerforks/active_area.shp...
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.image.AxesImage at 0x7ff6b2ed62d0&gt;
+&lt;matplotlib.image.AxesImage at 0x7ffa1ff73990&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -764,17 +746,33 @@ MODFLOW 5 layer(s) 111 row(s) 160 column(s) 1 stress period(s)
 </pre></div>
 </div>
 </div>
-<div class="nboutput nblast docutils container">
+<div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 
-SFRmaker version 0.6.0
+SFRmaker version 0.6.0.post2.dev0+g848d476
 
 Creating sfr dataset...
 
 Creating grid class instance from flopy Grid instance...
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/home/travis/build/aleaf/sfrmaker/sfrmaker/gis.py:32: UserWarning: The proj_str argument is deprecated, use crs instead.
+  warnings.warn(&#39;The proj_str argument is deprecated, use crs instead.&#39;)
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
 grid class created in 0.23s
 
 Model grid information
@@ -784,25 +782,12 @@ nlay: 1
 nrow: 111
 ncol: 160
 model length units: undefined
-crs: &lt;Projected CRS: EPSG:26715&gt;
-Name: NAD27 / UTM zone 15N
-Axis Info [cartesian]:
-- E[east]: Easting (metre)
-- N[north]: Northing (metre)
-Area of Use:
-- name: North America - 96°W to 90°W and NAD27 by country
-- bounds: (-96.0, 13.63, -90.0, 81.96)
-Coordinate Operation:
-- name: UTM zone 15N
-- method: Transverse Mercator
-Datum: North American Datum 1927
-- Ellipsoid: Clarke 1866
-- Prime Meridian: Greenwich
-
+crs: EPSG:26715
 bounds: 682688.00, 5139052.00, 694880.00, 5147510.20
 active area defined by: all cells
 
 MODFLOW 5 layer(s) 111 row(s) 160 column(s) 1 stress period(s)
+Warning: No length units specified in CRS for input LineStrings or length units not recognizeddefaulting to meters.
 
 reprojecting hydrography from
 EPSG:4269
@@ -819,18 +804,18 @@ finished in 0.00s
 Intersecting 17 flowlines with 17,760 grid cells...
 
 Building spatial index...
-finished in 1.66s
+finished in 1.62s
 
 Intersecting 17 features...
 17
 finished in 0.09s
 
 Setting up reach data... (may take a few minutes for large grids)
-finished in 0.28s
+finished in 0.27s
 
 Computing widths...
 
-Dropping 30 reaches with length &lt; 3.81 feet...
+Dropping 30 reaches with length &lt; 12.50 feet...
 
 Repairing routing connections...
 enforcing best segment numbering...
@@ -843,26 +828,12 @@ nlay: 1
 nrow: 111
 ncol: 160
 model length units: undefined
-crs: &lt;Projected CRS: EPSG:26715&gt;
-Name: NAD27 / UTM zone 15N
-Axis Info [cartesian]:
-- E[east]: Easting (metre)
-- N[north]: Northing (metre)
-Area of Use:
-- name: North America - 96°W to 90°W and NAD27 by country
-- bounds: (-96.0, 13.63, -90.0, 81.96)
-Coordinate Operation:
-- name: UTM zone 15N
-- method: Transverse Mercator
-Datum: North American Datum 1927
-- Ellipsoid: Clarke 1866
-- Prime Meridian: Greenwich
-
+crs: EPSG:26715
 bounds: 682688.00, 5139052.00, 694880.00, 5147510.20
 active area defined by: all cells
 
 
-Time to create sfr dataset: 2.56s
+Time to create sfr dataset: 2.41s
 
 </pre></div></div>
 </div>
@@ -936,9 +907,9 @@ Time to create sfr dataset: 2.56s
       <td>159</td>
       <td>1</td>
       <td>1</td>
-      <td>8.930235</td>
+      <td>29.298670</td>
       <td>1.000000</td>
-      <td>0.152053</td>
+      <td>0.046346</td>
       <td>...</td>
       <td>0.0</td>
       <td>0.0</td>
@@ -960,9 +931,9 @@ Time to create sfr dataset: 2.56s
       <td>158</td>
       <td>1</td>
       <td>2</td>
-      <td>78.856041</td>
+      <td>258.714050</td>
       <td>1.000000</td>
-      <td>0.027948</td>
+      <td>0.008519</td>
       <td>...</td>
       <td>0.0</td>
       <td>0.0</td>
@@ -984,9 +955,9 @@ Time to create sfr dataset: 2.56s
       <td>157</td>
       <td>1</td>
       <td>3</td>
-      <td>63.624538</td>
+      <td>208.741928</td>
       <td>1.324805</td>
-      <td>0.029910</td>
+      <td>0.009116</td>
       <td>...</td>
       <td>0.0</td>
       <td>0.0</td>
@@ -1008,9 +979,9 @@ Time to create sfr dataset: 2.56s
       <td>157</td>
       <td>1</td>
       <td>4</td>
-      <td>59.403706</td>
+      <td>194.894043</td>
       <td>1.632452</td>
-      <td>0.025424</td>
+      <td>0.007749</td>
       <td>...</td>
       <td>0.0</td>
       <td>0.0</td>
@@ -1032,9 +1003,9 @@ Time to create sfr dataset: 2.56s
       <td>156</td>
       <td>1</td>
       <td>5</td>
-      <td>38.234825</td>
+      <td>125.442345</td>
       <td>1.840760</td>
-      <td>0.036704</td>
+      <td>0.011187</td>
       <td>...</td>
       <td>0.0</td>
       <td>0.0</td>
@@ -1252,11 +1223,11 @@ Time to create sfr dataset: 2.56s
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 running rasterstats.zonal_stats on buffered LineStrings...
-finished in 3.98s
+finished in 3.51s
 
 
 Smoothing elevations...
-finished in 0.13s
+finished in 0.15s
 </pre></div></div>
 </div>
 </div>
@@ -1337,9 +1308,9 @@ finished in 0.13s
       <td>159</td>
       <td>1</td>
       <td>1</td>
-      <td>8.930235</td>
+      <td>29.298670</td>
       <td>1.000000</td>
-      <td>0.152053</td>
+      <td>0.046346</td>
       <td>...</td>
       <td>0.0</td>
       <td>0.0</td>
@@ -1361,9 +1332,9 @@ finished in 0.13s
       <td>158</td>
       <td>1</td>
       <td>2</td>
-      <td>78.856041</td>
+      <td>258.714050</td>
       <td>1.000000</td>
-      <td>0.027948</td>
+      <td>0.008519</td>
       <td>...</td>
       <td>0.0</td>
       <td>0.0</td>
@@ -1385,9 +1356,9 @@ finished in 0.13s
       <td>157</td>
       <td>1</td>
       <td>3</td>
-      <td>63.624538</td>
+      <td>208.741928</td>
       <td>1.324805</td>
-      <td>0.029910</td>
+      <td>0.009116</td>
       <td>...</td>
       <td>0.0</td>
       <td>0.0</td>
@@ -1409,9 +1380,9 @@ finished in 0.13s
       <td>157</td>
       <td>1</td>
       <td>4</td>
-      <td>59.403706</td>
+      <td>194.894043</td>
       <td>1.632452</td>
-      <td>0.025424</td>
+      <td>0.007749</td>
       <td>...</td>
       <td>0.0</td>
       <td>0.0</td>
@@ -1433,9 +1404,9 @@ finished in 0.13s
       <td>156</td>
       <td>1</td>
       <td>5</td>
-      <td>38.234825</td>
+      <td>125.442345</td>
       <td>1.840760</td>
-      <td>0.036704</td>
+      <td>0.011187</td>
       <td>...</td>
       <td>0.0</td>
       <td>0.0</td>
@@ -1500,7 +1471,7 @@ wrote tf_SFR.chk
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-SFRmaker v. 0.6.0
+SFRmaker v. 0.6.0.post2.dev0+g848d476
 
 Running Flopy v. 3.3.1 diagnostics...
 passed.
@@ -1521,51 +1492,51 @@ Checking for model cells with multiple non-zero SFR conductances...
 This may lead to circular routing between collocated reaches.
 Nodes with overlapping conductances:
 k       i       j       iseg    ireach  rchlen  strthick        strhc1
-0       87      122     1       54      10.855581283569336      1.0     1.0
-0       87      122     2       34      70.37133026123047       1.0     1.0
-0       76      110     3       47      62.387882232666016      1.0     1.0
-0       87      122     4       1       9.332733154296875       1.0     1.0
-2       84      119     4       7       82.69121551513672       1.0     1.0
-2       84      119     4       9       8.18266773223877        1.0     1.0
-0       76      110     4       27      23.048580169677734      1.0     1.0
-1       58      132     5       25      12.927166938781738      1.0     1.0
-1       58      132     5       27      26.972448348999023      1.0     1.0
-0       48      109     5       64      76.5274658203125        1.0     1.0
-0       76      110     6       1       21.16668128967285       1.0     1.0
-0       48      108     6       40      6.297486305236816       1.0     1.0
-0       48      109     6       41      34.756675720214844      1.0     1.0
-0       48      108     6       42      10.932295799255371      1.0     1.0
-1       80      49      7       70      48.654815673828125      1.0     1.0
-0       48      108     8       1       38.28239822387695       1.0     1.0
-0       47      98      8       22      20.572528839111328      1.0     1.0
-0       47      98      8       24      31.273479461669922      1.0     1.0
-0       54      89      8       39      10.682965278625488      1.0     1.0
-0       54      89      8       41      19.182693481445312      1.0     1.0
-0       53      78      8       57      18.87612533569336       1.0     1.0
-0       53      78      8       59      8.627473831176758       1.0     1.0
-0       52      76      8       62      19.43120574951172       1.0     1.0
-0       52      76      8       64      89.85016632080078       1.0     1.0
-1       54      73      8       69      103.95993041992188      1.0     1.0
-1       54      73      8       71      8.235921859741211       1.0     1.0
-1       80      49      8       125     12.154450416564941      1.0     1.0
-2       108     57      9       8       72.48503112792969       1.0     1.0
-2       108     57      9       9       14.20495319366455       1.0     1.0
-0       94      35      9       45      29.37482261657715       1.0     1.0
-0       94      35      9       47      27.25372314453125       1.0     1.0
-2       91      35      9       50      18.392253875732422      1.0     1.0
-2       91      34      9       51      18.765634536743164      1.0     1.0
-1       80      49      10      1       44.663150787353516      1.0     1.0
-2       91      35      10      26      93.89393615722656       1.0     1.0
-2       91      34      10      27      23.212614059448242      1.0     1.0
-0       38      85      11      8       21.986059188842773      1.0     1.0
-0       38      85      11      9       16.03866195678711       1.0     1.0
-2       25      24      13      42      29.01116180419922       1.0     1.0
-2       25      24      14      47      70.35215759277344       1.0     1.0
-2       19      23      16      47      3.8815841674804688      1.0     1.0
-2       19      23      16      49      33.195369720458984      1.0     1.0
-2       91      34      17      1       39.74642562866211       1.0     1.0
-1       92      30      17      6       20.66020393371582       1.0     1.0
-1       92      30      17      8       76.92083740234375       1.0     1.0
+0       87      122     1       54      35.61542510986328       1.0     1.0
+0       87      122     2       34      230.8770751953125       1.0     1.0
+0       76      110     3       47      204.68466186523438      1.0     1.0
+0       87      122     4       1       30.619203567504883      1.0     1.0
+2       84      119     4       7       271.296630859375        1.0     1.0
+2       84      119     4       9       26.846023559570312      1.0     1.0
+0       76      110     4       27      75.61869812011719       1.0     1.0
+1       58      132     5       25      42.411964416503906      1.0     1.0
+1       58      132     5       27      88.49227905273438       1.0     1.0
+0       48      109     5       64      251.07437133789062      1.0     1.0
+0       76      110     6       1       69.44449615478516       1.0     1.0
+0       48      108     6       40      20.661043167114258      1.0     1.0
+0       48      109     6       41      114.03108978271484      1.0     1.0
+0       48      108     6       42      35.86711502075195       1.0     1.0
+1       80      49      7       70      159.628662109375        1.0     1.0
+0       48      108     8       1       125.59841918945312      1.0     1.0
+0       47      98      8       22      67.49517059326172       1.0     1.0
+0       47      98      8       24      102.60327911376953      1.0     1.0
+0       54      89      8       39      35.04909896850586       1.0     1.0
+0       54      89      8       41      62.93534851074219       1.0     1.0
+0       53      78      8       57      61.92954635620117       1.0     1.0
+0       53      78      8       59      28.305360794067383      1.0     1.0
+0       52      76      8       62      63.750675201416016      1.0     1.0
+0       52      76      8       64      294.7840270996094       1.0     1.0
+1       54      73      8       69      341.07586669921875      1.0     1.0
+1       54      73      8       71      27.020740509033203      1.0     1.0
+1       80      49      8       125     39.87680435180664       1.0     1.0
+2       108     57      9       8       237.81178283691406      1.0     1.0
+2       108     57      9       9       46.60417556762695       1.0     1.0
+0       94      35      9       45      96.37408447265625       1.0     1.0
+0       94      35      9       47      89.41510009765625       1.0     1.0
+2       91      35      9       50      60.342041015625 1.0     1.0
+2       91      34      9       51      61.56704330444336       1.0     1.0
+1       80      49      10      1       146.53265380859375      1.0     1.0
+2       91      35      10      26      308.05096435546875      1.0     1.0
+2       91      34      10      27      76.15687561035156       1.0     1.0
+0       38      85      11      8       72.13273620605469       1.0     1.0
+0       38      85      11      9       52.62028121948242       1.0     1.0
+2       25      24      13      42      95.18097686767578       1.0     1.0
+2       25      24      14      47      230.81414794921875      1.0     1.0
+2       19      23      16      47      12.734856605529785      1.0     1.0
+2       19      23      16      49      108.90869903564453      1.0     1.0
+2       91      34      17      1       130.4016571044922       1.0     1.0
+1       92      30      17      6       67.78282165527344       1.0     1.0
+1       92      30      17      8       252.36495971679688      1.0     1.0
 
 Checking for streambed tops of less than -10...
 passed.
@@ -1615,7 +1586,7 @@ wrote ../tylerforks/tylerforks/tf.sfr.
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-SFRmaker v. 0.6.0
+SFRmaker v. 0.6.0.post2.dev0+g848d476
 
 Running Flopy v. 3.3.1 diagnostics...
 passed.
@@ -1636,51 +1607,51 @@ Checking for model cells with multiple non-zero SFR conductances...
 This may lead to circular routing between collocated reaches.
 Nodes with overlapping conductances:
 k       i       j       iseg    ireach  rchlen  strthick        strhc1
-0       87      122     1       54      10.855581283569336      1.0     1.0
-0       87      122     2       34      70.37133026123047       1.0     1.0
-0       76      110     3       47      62.387882232666016      1.0     1.0
-0       87      122     4       1       9.332733154296875       1.0     1.0
-2       84      119     4       7       82.69121551513672       1.0     1.0
-2       84      119     4       9       8.18266773223877        1.0     1.0
-0       76      110     4       27      23.048580169677734      1.0     1.0
-1       58      132     5       25      12.927166938781738      1.0     1.0
-1       58      132     5       27      26.972448348999023      1.0     1.0
-0       48      109     5       64      76.5274658203125        1.0     1.0
-0       76      110     6       1       21.16668128967285       1.0     1.0
-0       48      108     6       40      6.297486305236816       1.0     1.0
-0       48      109     6       41      34.756675720214844      1.0     1.0
-0       48      108     6       42      10.932295799255371      1.0     1.0
-1       80      49      7       70      48.654815673828125      1.0     1.0
-0       48      108     8       1       38.28239822387695       1.0     1.0
-0       47      98      8       22      20.572528839111328      1.0     1.0
-0       47      98      8       24      31.273479461669922      1.0     1.0
-0       54      89      8       39      10.682965278625488      1.0     1.0
-0       54      89      8       41      19.182693481445312      1.0     1.0
-0       53      78      8       57      18.87612533569336       1.0     1.0
-0       53      78      8       59      8.627473831176758       1.0     1.0
-0       52      76      8       62      19.43120574951172       1.0     1.0
-0       52      76      8       64      89.85016632080078       1.0     1.0
-1       54      73      8       69      103.95993041992188      1.0     1.0
-1       54      73      8       71      8.235921859741211       1.0     1.0
-1       80      49      8       125     12.154450416564941      1.0     1.0
-2       108     57      9       8       72.48503112792969       1.0     1.0
-2       108     57      9       9       14.20495319366455       1.0     1.0
-0       94      35      9       45      29.37482261657715       1.0     1.0
-0       94      35      9       47      27.25372314453125       1.0     1.0
-2       91      35      9       50      18.392253875732422      1.0     1.0
-2       91      34      9       51      18.765634536743164      1.0     1.0
-1       80      49      10      1       44.663150787353516      1.0     1.0
-2       91      35      10      26      93.89393615722656       1.0     1.0
-2       91      34      10      27      23.212614059448242      1.0     1.0
-0       38      85      11      8       21.986059188842773      1.0     1.0
-0       38      85      11      9       16.03866195678711       1.0     1.0
-2       25      24      13      42      29.01116180419922       1.0     1.0
-2       25      24      14      47      70.35215759277344       1.0     1.0
-2       19      23      16      47      3.8815841674804688      1.0     1.0
-2       19      23      16      49      33.195369720458984      1.0     1.0
-2       91      34      17      1       39.74642562866211       1.0     1.0
-1       92      30      17      6       20.66020393371582       1.0     1.0
-1       92      30      17      8       76.92083740234375       1.0     1.0
+0       87      122     1       54      35.61542510986328       1.0     1.0
+0       87      122     2       34      230.8770751953125       1.0     1.0
+0       76      110     3       47      204.68466186523438      1.0     1.0
+0       87      122     4       1       30.619203567504883      1.0     1.0
+2       84      119     4       7       271.296630859375        1.0     1.0
+2       84      119     4       9       26.846023559570312      1.0     1.0
+0       76      110     4       27      75.61869812011719       1.0     1.0
+1       58      132     5       25      42.411964416503906      1.0     1.0
+1       58      132     5       27      88.49227905273438       1.0     1.0
+0       48      109     5       64      251.07437133789062      1.0     1.0
+0       76      110     6       1       69.44449615478516       1.0     1.0
+0       48      108     6       40      20.661043167114258      1.0     1.0
+0       48      109     6       41      114.03108978271484      1.0     1.0
+0       48      108     6       42      35.86711502075195       1.0     1.0
+1       80      49      7       70      159.628662109375        1.0     1.0
+0       48      108     8       1       125.59841918945312      1.0     1.0
+0       47      98      8       22      67.49517059326172       1.0     1.0
+0       47      98      8       24      102.60327911376953      1.0     1.0
+0       54      89      8       39      35.04909896850586       1.0     1.0
+0       54      89      8       41      62.93534851074219       1.0     1.0
+0       53      78      8       57      61.92954635620117       1.0     1.0
+0       53      78      8       59      28.305360794067383      1.0     1.0
+0       52      76      8       62      63.750675201416016      1.0     1.0
+0       52      76      8       64      294.7840270996094       1.0     1.0
+1       54      73      8       69      341.07586669921875      1.0     1.0
+1       54      73      8       71      27.020740509033203      1.0     1.0
+1       80      49      8       125     39.87680435180664       1.0     1.0
+2       108     57      9       8       237.81178283691406      1.0     1.0
+2       108     57      9       9       46.60417556762695       1.0     1.0
+0       94      35      9       45      96.37408447265625       1.0     1.0
+0       94      35      9       47      89.41510009765625       1.0     1.0
+2       91      35      9       50      60.342041015625 1.0     1.0
+2       91      34      9       51      61.56704330444336       1.0     1.0
+1       80      49      10      1       146.53265380859375      1.0     1.0
+2       91      35      10      26      308.05096435546875      1.0     1.0
+2       91      34      10      27      76.15687561035156       1.0     1.0
+0       38      85      11      8       72.13273620605469       1.0     1.0
+0       38      85      11      9       52.62028121948242       1.0     1.0
+2       25      24      13      42      95.18097686767578       1.0     1.0
+2       25      24      14      47      230.81414794921875      1.0     1.0
+2       19      23      16      47      12.734856605529785      1.0     1.0
+2       19      23      16      49      108.90869903564453      1.0     1.0
+2       91      34      17      1       130.4016571044922       1.0     1.0
+1       92      30      17      6       67.78282165527344       1.0     1.0
+1       92      30      17      8       252.36495971679688      1.0     1.0
 
 Checking for streambed tops of less than -10...
 passed.
@@ -1759,21 +1730,7 @@ nlay: 1
 nrow: 111
 ncol: 160
 model length units: undefined
-crs: &lt;Projected CRS: EPSG:26715&gt;
-Name: NAD27 / UTM zone 15N
-Axis Info [cartesian]:
-- E[east]: Easting (metre)
-- N[north]: Northing (metre)
-Area of Use:
-- name: North America - 96°W to 90°W and NAD27 by country
-- bounds: (-96.0, 13.63, -90.0, 81.96)
-Coordinate Operation:
-- name: UTM zone 15N
-- method: Transverse Mercator
-Datum: North American Datum 1927
-- Ellipsoid: Clarke 1866
-- Prime Meridian: Greenwich
-
+crs: EPSG:26715
 bounds: 682688.00, 5139052.00, 694880.00, 5147510.20
 active area defined by: isfr array
 
@@ -1792,13 +1749,45 @@ active area defined by: isfr array
 </pre></div>
 </div>
 </div>
-<div class="nboutput nblast docutils container">
+<div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 writing shps/tf_sfr_cells.shp...
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/home/travis/miniconda/envs/test/lib/python3.7/site-packages/pyproj/crs/crs.py:543: UserWarning: You will likely lose important projection information when converting to a PROJ string from another format. See: https://proj.org/faq.html#what-is-the-best-format-for-describing-coordinate-reference-systems
+  proj_string = self.to_proj4()
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
 writing shps/tf_sfr_outlets.shp...
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/home/travis/miniconda/envs/test/lib/python3.7/site-packages/pyproj/crs/crs.py:543: UserWarning: You will likely lose important projection information when converting to a PROJ string from another format. See: https://proj.org/faq.html#what-is-the-best-format-for-describing-coordinate-reference-systems
+  proj_string = self.to_proj4()
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
 writing shps/tf_sfr_lines.shp...
 writing shps/tf_sfr_routing.shp...
 No period data to export!
@@ -1839,7 +1828,7 @@ No non-zero values of flow to export!
   <div role="contentinfo">
     <p>
       <span class="lastupdated">
-        Last updated on Oct 15, 2020.
+        Last updated on Oct 20, 2020.
       </span>
 
     </p>
