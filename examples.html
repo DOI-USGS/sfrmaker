@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Using SFRmaker with a configuration file &mdash; SFRmaker 0.6.0.post2.dev0+g848d476 documentation</title>
+  <title>Using SFRmaker with a configuration file &mdash; SFRmaker 0.6.0.post3.dev0+g9ab5680 documentation</title>
   
 
   
@@ -67,7 +67,7 @@
             
             
               <div class="version">
-                0.6.0.post2.dev0+g848d476
+                0.6.0.post3.dev0+g9ab5680
               </div>
             
           
@@ -319,7 +319,7 @@
   <span class="nt">one_reach_per_cell</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span> <span class="c1">#  consolidate SFR reaches to one per i, j location</span>
   <span class="c1"># add breaks in routing at the following line ids</span>
   <span class="c1"># (flow downstream is controlled by dams, and specified as an inflow)</span>
-  <span class="nt">add_outlets</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">18019782, 15276792, 15290344, 15256386</span>
+  <span class="nt">add_outlets</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="nv">18019782</span><span class="p p-Indicator">,</span> <span class="nv">15276792</span><span class="p p-Indicator">,</span> <span class="nv">15290344</span><span class="p p-Indicator">,</span> <span class="nv">15256386</span><span class="p p-Indicator">]</span>
 </pre></div>
 </td></tr></table></div>
 <p>Information on the model grid is specified in the <code class="docutils literal notranslate"><span class="pre">modelgrid:</span></code> block of the configuration file. The <code class="docutils literal notranslate"><span class="pre">xoffset</span></code> and <code class="docutils literal notranslate"><span class="pre">yoffset</span></code> arguments are the location of the lower left corner of the model grid, in units of the CRS defined by the EPSG code (typically meters). Since this is a uniform grid, only scalar values are provided for the row and column spacing. Variable row and column spacings can be specified using the list notation in YAML, or more simply by loading a flopy model instance into a Python script. SFRmaker does not require a modflow model as input, but a model can be optionally be specified in the configuration file with the <code class="docutils literal notranslate"><span class="pre">model:</span></code> and <code class="docutils literal notranslate"><span class="pre">simulation:</span></code> blocks (the latter is only needed for MODFLOW-6 models).</p>
