@@ -458,7 +458,7 @@ div.rendered_html tbody tr:hover {
 <div class="section" id="Basic-usage-of-SFRmaker-in-a-scripting-context">
 <h1>Basic usage of SFRmaker in a scripting context<a class="headerlink" href="#Basic-usage-of-SFRmaker-in-a-scripting-context" title="Permalink to this headline">¶</a></h1>
 <p>This example illustrates basic usage of SFRmaker in a scripting context. For examples of using SFRmaker with a configuration file, see the MERAS and Tyler Forks examples.</p>
-<div class="nbinput nblast docutils container">
+<div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
@@ -469,6 +469,14 @@ div.rendered_html tbody tr:hover {
 <span class="kn">import</span> <span class="nn">sfrmaker</span>
 </pre></div>
 </div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+flopy is installed in /home/travis/miniconda/envs/test/lib/python3.7/site-packages/flopy
+</pre></div></div>
 </div>
 <div class="section" id="Input-requirements">
 <h2>Input requirements<a class="headerlink" href="#Input-requirements" title="Permalink to this headline">¶</a></h2>
@@ -535,7 +543,7 @@ reading ../tylerforks/NHDPlus/NHDPlusAttributes/PlusFlow.dbf...
 reading ../tylerforks/NHDPlus/NHDPlusAttributes/elevslope.dbf...
 --&gt; building dataframe... (may take a while for large shapefiles)
 
-load finished in 0.21s
+load finished in 0.23s
 
 Getting routing information from NHDPlus Plusflow table...
 finished in 0.02s
@@ -577,7 +585,7 @@ reading ../tylerforks/NHDPlus/NHDPlusAttributes/PlusFlow.dbf...
 reading ../tylerforks/NHDPlus/NHDPlusAttributes/elevslope.dbf...
 --&gt; building dataframe... (may take a while for large shapefiles)
 
-load finished in 0.09s
+load finished in 0.10s
 
 Getting routing information from NHDPlus Plusflow table...
 finished in 0.02s
@@ -687,7 +695,7 @@ reading ../tylerforks/active_area.shp...
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.image.AxesImage at 0x7f95a01446a0&gt;
+&lt;matplotlib.image.AxesImage at 0x7f8b053effd0&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -765,7 +773,7 @@ Creating grid class instance from flopy Grid instance...
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-grid class created in 0.27s
+grid class created in 0.29s
 
 Model grid information
 structured grid
@@ -796,11 +804,11 @@ finished in 0.00s
 Intersecting 17 flowlines with 17,760 grid cells...
 
 Building spatial index...
-finished in 1.68s
+finished in 1.76s
 
 Intersecting 17 features...
 17
-finished in 0.09s
+finished in 0.10s
 
 Setting up reach data... (may take a few minutes for large grids)
 finished in 0.28s
@@ -825,7 +833,7 @@ bounds: 682688.00, 5139052.00, 694880.00, 5147510.20
 active area defined by: all cells
 
 
-Time to create sfr dataset: 2.65s
+Time to create sfr dataset: 2.70s
 
 </pre></div></div>
 </div>
@@ -1215,7 +1223,7 @@ Time to create sfr dataset: 2.65s
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 running rasterstats.zonal_stats on buffered LineStrings...
-finished in 3.98s
+finished in 4.58s
 
 
 Smoothing elevations...
@@ -1441,7 +1449,7 @@ DEM and other data in a GIS environment. * <strong>suprious slopes:</strong> slo
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 
-Running Flopy v. 3.3.2 diagnostics...
+Running Flopy v. 3.3.1 diagnostics...
 wrote tf_SFR.chk
 </pre></div></div>
 </div>
@@ -1465,7 +1473,7 @@ wrote tf_SFR.chk
 <div class="highlight"><pre>
 SFRmaker v. 0.6.0.post4+gbfb0ec8
 
-Running Flopy v. 3.3.2 diagnostics...
+Running Flopy v. 3.3.1 diagnostics...
 passed.
 
 Checking for continuity in segment and reach numbering...
@@ -1580,7 +1588,7 @@ wrote ../tylerforks/tylerforks/tf.sfr.
 <div class="highlight"><pre>
 SFRmaker v. 0.6.0.post4+gbfb0ec8
 
-Running Flopy v. 3.3.2 diagnostics...
+Running Flopy v. 3.3.1 diagnostics...
 passed.
 
 Checking for continuity in segment and reach numbering...
@@ -1754,9 +1762,9 @@ writing shps/tf_sfr_cells.shp...
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/home/travis/miniconda/envs/test/lib/python3.8/site-packages/pyproj/crs/crs.py:543: UserWarning: You will likely lose important projection information when converting to a PROJ string from another format. See: https://proj.org/faq.html#what-is-the-best-format-for-describing-coordinate-reference-systems
+/home/travis/miniconda/envs/test/lib/python3.7/site-packages/pyproj/crs/crs.py:543: UserWarning: You will likely lose important projection information when converting to a PROJ string from another format. See: https://proj.org/faq.html#what-is-the-best-format-for-describing-coordinate-reference-systems
   proj_string = self.to_proj4()
-/home/travis/miniconda/envs/test/lib/python3.8/site-packages/pyproj/crs/crs.py:543: UserWarning: You will likely lose important projection information when converting to a PROJ string from another format. See: https://proj.org/faq.html#what-is-the-best-format-for-describing-coordinate-reference-systems
+/home/travis/miniconda/envs/test/lib/python3.7/site-packages/pyproj/crs/crs.py:543: UserWarning: You will likely lose important projection information when converting to a PROJ string from another format. See: https://proj.org/faq.html#what-is-the-best-format-for-describing-coordinate-reference-systems
   proj_string = self.to_proj4()
 </pre></div></div>
 </div>
