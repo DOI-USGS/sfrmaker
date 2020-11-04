@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Release History &mdash; SFRmaker 0.6.0.post4+gbfb0ec8 documentation</title>
+  <title>Release History &mdash; SFRmaker 0.6.0.post5.dev0+gffc0c63 documentation</title>
   
 
   
@@ -67,7 +67,7 @@
             
             
               <div class="version">
-                0.6.0.post4+gbfb0ec8
+                0.6.0.post5.dev0+gffc0c63
               </div>
             
           
@@ -109,6 +109,7 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="api/index.html"> Code reference</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#"> Release History</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#version-0-6-1-2020-10-xx">Version 0.6.1 (2020-10-xx)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#version-0-6-0-2020-10-15">Version 0.6.0 (2020-10-15)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#version-0-5-0-2020-08-10">Version 0.5.0 (2020-08-10)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#version-0-4-0-2020-4-25">Version 0.4.0 (2020-4-25)</a></li>
@@ -214,10 +215,19 @@
 </style>
 <div class="section" id="release-history">
 <h1>Release History<a class="headerlink" href="#release-history" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="version-0-6-1-2020-10-xx">
+<h2>Version 0.6.1 (2020-10-xx)<a class="headerlink" href="#version-0-6-1-2020-10-xx" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>deprecate sfrmaker.gis.CRS class in favor of <a class="reference external" href="http://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v2.6.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a></p></li>
+<li><p>add <code class="xref py py-func docutils literal notranslate"><span class="pre">sfrmaker.routing.get_previous_ids_in_subset()</span></code> function that can find outlet locations if the specified line IDs for outlets aren’t in a consolidated (one_reach_per_cell=True) sfr network</p></li>
+<li><p>some bug fixes to the <code class="docutils literal notranslate"><span class="pre">add_outlets</span></code> option</p></li>
+<li><p>some fixes to the input data for the MERAS example</p></li>
+</ul>
+</div>
 <div class="section" id="version-0-6-0-2020-10-15">
 <h2>Version 0.6.0 (2020-10-15)<a class="headerlink" href="#version-0-6-0-2020-10-15" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li><p>add_outlets argument to <a class="reference internal" href="api/sfrmaker.lines.html#sfrmaker.lines.Lines.to_sfr" title="sfrmaker.lines.Lines.to_sfr"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sfrmaker.lines.Lines.to_sfr()</span></code></a> to add outlet conditions (outseg=0) at the locations of specified line IDs</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">add_outlets</span></code> argument to <a class="reference internal" href="api/sfrmaker.lines.html#sfrmaker.lines.Lines.to_sfr" title="sfrmaker.lines.Lines.to_sfr"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sfrmaker.lines.Lines.to_sfr()</span></code></a> to add outlet conditions (outseg=0) at the locations of specified line IDs</p></li>
 <li><p>add <code class="xref py py-mod docutils literal notranslate"><span class="pre">sfrmaker.preprocesing</span></code> module for culling NHDPlus flowlines, handling divergences, incorporating widths from the North American River Width (NARWidth) database, and reproducible editing of flowlines.</p></li>
 <li><p>fix <a class="reference internal" href="api/sfrmaker.utils.html#sfrmaker.utils.width_from_arbolate_sum" title="sfrmaker.utils.width_from_arbolate_sum"><code class="xref py py-func docutils literal notranslate"><span class="pre">sfrmaker.utils.width_from_arbolate_sum()</span></code></a>: minimum width wasn’t being implemented</p></li>
 <li><p>small fix to observations module to treat observation names as strings, even if they are digits</p></li>
@@ -298,7 +308,7 @@
   <div role="contentinfo">
     <p>
       <span class="lastupdated">
-        Last updated on Oct 21, 2020.
+        Last updated on Nov 04, 2020.
       </span>
 
     </p>

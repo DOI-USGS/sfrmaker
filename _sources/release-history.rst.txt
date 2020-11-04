@@ -2,9 +2,16 @@
 Release History
 ===============
 
+Version 0.6.1 (2020-10-xx)
+--------------------------
+* deprecate sfrmaker.gis.CRS class in favor of :class:`pyproj.crs.CRS`
+* add :func:`sfrmaker.routing.get_previous_ids_in_subset` function that can find outlet locations if the specified line IDs for outlets aren't in a consolidated (one_reach_per_cell=True) sfr network
+* some bug fixes to the ``add_outlets`` option
+* some fixes to the input data for the MERAS example
+
 Version 0.6.0 (2020-10-15)
 --------------------------
-* add_outlets argument to :meth:`sfrmaker.lines.Lines.to_sfr` to add outlet conditions (outseg=0) at the locations of specified line IDs
+* ``add_outlets`` argument to :meth:`sfrmaker.lines.Lines.to_sfr` to add outlet conditions (outseg=0) at the locations of specified line IDs
 * add :mod:`sfrmaker.preprocesing` module for culling NHDPlus flowlines, handling divergences, incorporating widths from the North American River Width (NARWidth) database, and reproducible editing of flowlines.
 * fix :func:`sfrmaker.utils.width_from_arbolate_sum`: minimum width wasn't being implemented
 * small fix to observations module to treat observation names as strings, even if they are digits
