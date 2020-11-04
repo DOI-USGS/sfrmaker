@@ -2,7 +2,7 @@
 Release History
 ===============
 
-Version 0.6.1 (2020-10-xx)
+Version 0.6.1 (2020-11-04)
 --------------------------
 * deprecate sfrmaker.gis.CRS class in favor of :class:`pyproj.crs.CRS`
 * add :func:`sfrmaker.routing.get_previous_ids_in_subset` function that can find outlet locations if the specified line IDs for outlets aren't in a consolidated (one_reach_per_cell=True) sfr network
