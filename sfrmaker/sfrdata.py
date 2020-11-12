@@ -725,12 +725,22 @@ class SFRData(DataPackage):
         if flopy_rno_input_is_zero_based and self.modflow_sfr2.reach_data['reachID'].min() == 1:
             packagedata['rno'] -= 1
             zero_based_connectiondata = []
-            for item in connectiondata:
-                zb_items = tuple(i - 1 if i > 0 else i + 1 for i in item)
-                zero_based_connectiondata.append(zb_items)
+            for record in connectiondata:
+                zero_based_record = []
+                for rno in record:
+                    if rno is not None:
+                        if rno > 0:
+                            rno -= 1
+                        elif rno < 0:
+                            rno += 1
+                    zero_based_record.append(rno)
+                #zero_based_record = tuple(i - 1 if i > 0 else i + 1 for i in record)
+                if len(zero_based_record) == 1:
+                    zero_based_record.append(None)
+                zero_based_connectiondata.append(zero_based_record)
             connectiondata = zero_based_connectiondata
         assert packagedata['rno'].min() == 0
-        assert np.min(list(map(np.min, map(np.abs, connectiondata)))) < 1
+        #assert np.min(list(map(np.min, map(np.abs, connectiondata)))) < 1
 
         # set cellids to None for unconnected reaches or where idomain == 0
         # can only do this with flopy versions 3.3.1 and later, otherwise flopy will bomb

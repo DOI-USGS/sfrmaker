@@ -168,16 +168,17 @@ class Mf6SFR:
     def connections(self):
         if self._connections is None:
             connections = {}
-            for k, v in self.graph.items():
+            for rno in np.arange(self.nreaches) + 1:
+                outreach = self.graph.get(rno)
+                #for rno, v in self.graph.items():
                 cnk = []
                 # downstream reach
-                if v != 0:  # outlets aren't explicit in MF6
-                    cnk += [-v]
+                if outreach not in {0, None}:  # outlets aren't explicit in MF6
+                    cnk += [-outreach]
                 # upstream reaches
-                if k in self.graph_r.keys():
-                    cnk += list(self.graph_r[k])
-                if len(cnk) > 0:
-                    connections[k] = cnk
+                if rno in self.graph_r.keys():
+                    cnk += list(self.graph_r[rno])
+                connections[rno] = cnk
             self._connections = connections
         return self._connections
 
@@ -346,9 +347,12 @@ class Mf6SFR:
             output.write('END Packagedata\n')
 
             output.write('\nBEGIN Connectiondata\n')
-            for i in range(1, self.nreaches + 1):
-                if i in self.connections.keys():
-                    output.write('  {} {}\n'.format(i, ' '.join(map(str, self.connections[i]))))
+            #for i in range(1, self.nreaches + 1):
+            #    if i in self.connections.keys():
+            #        output.write('  {} {}\n'.format(i, ' '.join(map(str, self.connections[i]))))
+            for rno, connections in self.connections.items():
+                connections = ' '.join(map(str, self.connections[rno]))
+                output.write(f'  {rno} {connections}\n')
             output.write('END Connectiondata\n')
 
             # skip the diversions block for now

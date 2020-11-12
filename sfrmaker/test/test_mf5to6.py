@@ -1,4 +1,5 @@
 # TODO: add unit tests for mf5to6.py
+import copy
 import filecmp
 import os
 import numpy as np
@@ -48,6 +49,22 @@ def test_init(options, shellmound_ModflowSfr2):
     # verify that there aren't any duplicate entries
     assert len(set(keys)) == len(keys)
     assert keys == expected_keys
+
+
+def test_connectiondata(mf6sfr_instance_SFRdata, outdir):
+    """Test handling of unconnected reaches"""
+    mf6sfr = copy.copy(mf6sfr_instance_SFRdata)
+    # remove a routing connection and then rebuild connectiondata
+    remove_reach = 1
+    del mf6sfr.graph[remove_reach]
+    mf6sfr._connections = None
+    assert remove_reach in mf6sfr.connections
+    # each reach should have an entry in connectiondata
+    # including unconnected reaches
+    expected_connectiondata_entries = np.arange(len(mf6sfr.connections.keys())) + 1
+    assert np.allclose(expected_connectiondata_entries, sorted(mf6sfr.connections.keys()))
+    outfile = os.path.join(outdir, 'junk.sfr')
+    mf6sfr.write_file(filename=outfile)
 
 
 def test_packagedata_aux(mf6sfr_instance_SFRdata):
