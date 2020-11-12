@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>sfrmaker.sfrdata &mdash; SFRmaker 0.6.1.post0.dev0+ga41e1e5 documentation</title>
+  <title>sfrmaker.sfrdata &mdash; SFRmaker 0.6.1.post2.dev0+g5960ea6 documentation</title>
   
 
   
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                0.6.1.post0.dev0+ga41e1e5
+                0.6.1.post2.dev0+g5960ea6
               </div>
             
           
@@ -903,12 +903,22 @@
         <span class="k">if</span> <span class="n">flopy_rno_input_is_zero_based</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">modflow_sfr2</span><span class="o">.</span><span class="n">reach_data</span><span class="p">[</span><span class="s1">&#39;reachID&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">packagedata</span><span class="p">[</span><span class="s1">&#39;rno&#39;</span><span class="p">]</span> <span class="o">-=</span> <span class="mi">1</span>
             <span class="n">zero_based_connectiondata</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">connectiondata</span><span class="p">:</span>
-                <span class="n">zb_items</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">item</span><span class="p">)</span>
-                <span class="n">zero_based_connectiondata</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">zb_items</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">connectiondata</span><span class="p">:</span>
+                <span class="n">zero_based_record</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">rno</span> <span class="ow">in</span> <span class="n">record</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">rno</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">rno</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                            <span class="n">rno</span> <span class="o">-=</span> <span class="mi">1</span>
+                        <span class="k">elif</span> <span class="n">rno</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                            <span class="n">rno</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">zero_based_record</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rno</span><span class="p">)</span>
+                <span class="c1">#zero_based_record = tuple(i - 1 if i &gt; 0 else i + 1 for i in record)</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">zero_based_record</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">zero_based_record</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+                <span class="n">zero_based_connectiondata</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">zero_based_record</span><span class="p">)</span>
             <span class="n">connectiondata</span> <span class="o">=</span> <span class="n">zero_based_connectiondata</span>
         <span class="k">assert</span> <span class="n">packagedata</span><span class="p">[</span><span class="s1">&#39;rno&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span>
-        <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">,</span> <span class="nb">map</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">,</span> <span class="n">connectiondata</span><span class="p">))))</span> <span class="o">&lt;</span> <span class="mi">1</span>
+        <span class="c1">#assert np.min(list(map(np.min, map(np.abs, connectiondata)))) &lt; 1</span>
 
         <span class="c1"># set cellids to None for unconnected reaches or where idomain == 0</span>
         <span class="c1"># can only do this with flopy versions 3.3.1 and later, otherwise flopy will bomb</span>

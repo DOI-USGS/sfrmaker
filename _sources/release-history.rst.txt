@@ -2,6 +2,10 @@
 Release History
 ===============
 
+Version 0.6.2 (2020-xx)
+--------------------------
+* write unconnected reaches to connectiondata, as required by MODFLOW-6 v6.2
+
 Version 0.6.1 (2020-11-04)
 --------------------------
 * deprecate sfrmaker.gis.CRS class in favor of :class:`pyproj.crs.CRS`
