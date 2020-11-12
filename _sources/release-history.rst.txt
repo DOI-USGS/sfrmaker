@@ -2,7 +2,7 @@
 Release History
 ===============
 
-Version 0.6.2 (2020-xx)
+Version 0.6.2 (2020-11-12)
 --------------------------
 * write unconnected reaches to connectiondata, as required by MODFLOW-6 v6.2
 
