@@ -12,10 +12,10 @@
    "execution_count": 1,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2020-11-12T17:27:57.375680Z",
-     "iopub.status.busy": "2020-11-12T17:27:57.374893Z",
-     "iopub.status.idle": "2020-11-12T17:27:58.372862Z",
-     "shell.execute_reply": "2020-11-12T17:27:58.371905Z"
+     "iopub.execute_input": "2020-11-12T22:30:29.480076Z",
+     "iopub.status.busy": "2020-11-12T22:30:29.479323Z",
+     "iopub.status.idle": "2020-11-12T22:30:30.363548Z",
+     "shell.execute_reply": "2020-11-12T22:30:30.363048Z"
     }
    },
    "outputs": [],
@@ -43,10 +43,10 @@
    "execution_count": 2,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2020-11-12T17:27:58.380958Z",
-     "iopub.status.busy": "2020-11-12T17:27:58.380187Z",
-     "iopub.status.idle": "2020-11-12T17:28:01.586241Z",
-     "shell.execute_reply": "2020-11-12T17:28:01.585844Z"
+     "iopub.execute_input": "2020-11-12T22:30:30.383331Z",
+     "iopub.status.busy": "2020-11-12T22:30:30.370982Z",
+     "iopub.status.idle": "2020-11-12T22:30:33.384645Z",
+     "shell.execute_reply": "2020-11-12T22:30:33.384984Z"
     }
    },
    "outputs": [
@@ -75,10 +75,10 @@
       "load finished in 0.21s\n",
       "\n",
       "Getting routing information from NHDPlus Plusflow table...\n",
-      "finished in 0.03s\n",
+      "finished in 0.02s\n",
       "\n",
       "\n",
-      "SFRmaker version 0.6.2.post0.dev0+g45ec491\n",
+      "SFRmaker version 0.6.2.post1.dev0+g2e44c8e\n",
       "\n",
       "Creating sfr dataset...\n",
       "\n",
@@ -97,7 +97,7 @@
      "name": "stdout",
      "output_type": "stream",
      "text": [
-      "grid class created in 0.36s\n",
+      "grid class created in 0.32s\n",
       "\n",
       "Model grid information\n",
       "structured grid\n",
@@ -128,7 +128,7 @@
       "Intersecting 17 flowlines with 17,760 grid cells...\n",
       "\n",
       "Building spatial index...\n",
-      "finished in 1.84s\n",
+      "finished in 1.74s\n",
       "\n",
       "Intersecting 17 features...\n",
       "17\n",
@@ -157,7 +157,7 @@
       "active area defined by: all cells\n",
       "\n",
       "\n",
-      "Time to create sfr dataset: 2.81s\n",
+      "Time to create sfr dataset: 2.65s\n",
       "\n"
      ]
     }
@@ -230,10 +230,10 @@
    "execution_count": 3,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2020-11-12T17:28:01.631994Z",
-     "iopub.status.busy": "2020-11-12T17:28:01.590684Z",
-     "iopub.status.idle": "2020-11-12T17:28:10.104911Z",
-     "shell.execute_reply": "2020-11-12T17:28:10.105343Z"
+     "iopub.execute_input": "2020-11-12T22:30:33.390188Z",
+     "iopub.status.busy": "2020-11-12T22:30:33.389360Z",
+     "iopub.status.idle": "2020-11-12T22:30:42.000013Z",
+     "shell.execute_reply": "2020-11-12T22:30:41.999609Z"
     }
    },
    "outputs": [
@@ -242,14 +242,14 @@
      "output_type": "stream",
      "text": [
       "running rasterstats.zonal_stats on buffered LineStrings...\n",
-      "finished in 4.08s\n",
+      "finished in 4.14s\n",
       "\n",
       "running rasterstats.zonal_stats on buffered LineStrings...\n",
-      "finished in 4.11s\n",
+      "finished in 4.13s\n",
       "\n",
       "\n",
       "Smoothing elevations...\n",
-      "finished in 0.14s\n"
+      "finished in 0.15s\n"
      ]
     }
    ],
@@ -277,10 +277,10 @@
    "execution_count": 4,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2020-11-12T17:28:10.112480Z",
-     "iopub.status.busy": "2020-11-12T17:28:10.111539Z",
-     "iopub.status.idle": "2020-11-12T17:28:10.149264Z",
-     "shell.execute_reply": "2020-11-12T17:28:10.149717Z"
+     "iopub.execute_input": "2020-11-12T22:30:42.021432Z",
+     "iopub.status.busy": "2020-11-12T22:30:42.006506Z",
+     "iopub.status.idle": "2020-11-12T22:30:42.050559Z",
+     "shell.execute_reply": "2020-11-12T22:30:42.049665Z"
     }
    },
    "outputs": [],
@@ -307,10 +307,10 @@
    "execution_count": 5,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2020-11-12T17:28:10.157158Z",
-     "iopub.status.busy": "2020-11-12T17:28:10.154916Z",
-     "iopub.status.idle": "2020-11-12T17:28:13.332257Z",
-     "shell.execute_reply": "2020-11-12T17:28:13.331777Z"
+     "iopub.execute_input": "2020-11-12T22:30:42.058034Z",
+     "iopub.status.busy": "2020-11-12T22:30:42.055877Z",
+     "iopub.status.idle": "2020-11-12T22:30:45.051161Z",
+     "shell.execute_reply": "2020-11-12T22:30:45.051498Z"
     }
    },
    "outputs": [
