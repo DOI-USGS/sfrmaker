@@ -21,7 +21,7 @@ Installing python dependencies with Conda
   * Alternatively, clone (`using git`_) or `download`_ the ``sfrmaker`` repository, which includes the two environment files at the root level.
   * Note that both of these environment files contain a ``pip`` section of packages that will be installed with pip, after the ``conda`` packages are installed.
 
-Creating a `conda environment`_
+Creating a `Conda environment`_
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 If you are on the USGS internal network, see the `Considerations for USGS Users`_ section below first.
 Open an Anaconda Command Prompt on Windows or a terminal window on OSX and point it to the location of ``requirements.yml`` or ``gis.yml`` and enter:
@@ -45,37 +45,97 @@ Building the environment will probably take a while. If the build fails because 
             conda env remove -n sfrmaker
             conda env create -f requirements.yml
 
+Keeping the Conda environment up to date
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+The python packages and other open source software libraries that SFRmaker depends on are continually changing. SFRmaker aims to mostly follow the `Numpy guidelines for package support <https://numpy.org/neps/nep-0029-deprecation_policy.html>`_, which effectively means that the two latest minor versions of Python (e.g. 3.8 and 3.7) and their associated Numpy versions will be supported. However, in some cases backwards compatability with a particular package may be broken in a shorter timeframe, in which case the minimum required version of that package will be specified in the ``requirements.yml`` file. All of this is to say that your Conda environment will eventually get out of date. The `Conda documentation <https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html>`_ has instructions for updating packages within a Conda environment, but at some point (perhaps a few times a year) it is good practice to simply delete the environment and rebuild it from the `.yml` file.
+
 Installing SFRmaker
 ------------------------
-Once a suitable conda environment is made, activate it, so that the version of python in it will be at the top of the system path (i.e. will be the one called when ``python`` is entered at the command line):
+There are several ways to install SFRmaker. Regardless of the method, the installation must be performed in a python
+environment with the required dependencies. In the case of the Conda environment created above, the environment must be activated, so that right version of python is called when ``python`` is entered at the command line:
 
 .. code-block:: bash
 
     conda activate sfrmaker
 
-Clone or `download`_ the ``sfrmaker`` repository. Then with a command window pointed at the root level (containing ``setup.py``):
+Installing and updating SFRmaker from `PyPI <https://pypi.org/>`_
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Once a suitable conda environment (that contains ALL of the dependencies) is made and activated, the simplest way to install SFRmaker is from the Python Package Index using pip.
 
 .. code-block:: bash
 
+    pip install sfrmaker
+
+Subsequent releases of SFRmaker to PyPI can then be installed with
+
+.. code-block:: bash
+
+    pip install --upgrade sfrmaker
+
+Note that in some situations you may have to ``pip uninstall sfrmaker`` and then ``pip install sfrmaker``. You can always check
+what version of sfrmaker you have within a python session with
+
+.. code-block:: python
+
+    import sfrmaker
+    sfrmaker.__version__
+
+Or if you are using Conda, at the command line with
+
+.. code-block:: bash
+
+    conda list
+
+Installing the latest develop version of SFRmaker
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+In some situations you may want bleeding-edge version of SFRmaker that is being actively developed on GitHub. For example,
+to incorporate a bug fix that is not yet in the latest release. Pip can also be used to fetch SFRmaker directly from GitHub:
+
+.. code-block:: bash
+
+    pip install git+git://github.com/aleaf/sfrmaker@develop
+
+(for the develop branch). Subsequent updates can then be made with
+
+.. code-block:: bash
+
+    pip uninstall sfrmaker
+    pip install git+git://github.com/aleaf/sfrmaker@develop
+
+Installing the SFRmaker source code in-place
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Finally, if you intend to contribute to SFRmaker (please do!) or update your install frequently, the best route is probably to clone the source code from git and install it in place.
+
+.. code-block:: bash
+
+    git clone https://github.com/aleaf/sfrmaker.git
+    cd sfrmaker
     pip install -e .
 
-This installs SFRmaker to the active python distribution by linking the source code in-place, making it easier to periodically pull updates using git.
+.. note::
+    Don't forget the ``.`` after ``pip install -e``!
 
-
-Updating SFRmaker using Git
---------------------------------
-To update SFRmaker (if it was cloned using Git), at the root level of the repository:
+Your local copy of the SFRmaker repository can then be subsequently updated with
 
 .. code-block:: bash
 
     git pull origin master
 
-Alternatively, SFRmaker could be updated by downloading the repository again and installing via ``pip install -e .``.
+.. note::
+    If you are making local changes to SFRmaker that you want to contribute, the workflow is slightly different. See the :ref:`Contributing to SFRmaker` page for more details.
+
+
+The advantage of installing the source code in-place is that any changes you make are automatically incorporated into your python environment, without any additional install commands. When debugging in an interactive development environment (IDE) such as Pycharm or VS Code, error tracebacks and inspection features go to the actual source code, not the version installed in the ``site-packages`` folder. Additionally, since this install is done through pip, ``pip uninstall``
+will work to remove the package, and the current version of the package (including the latest commit information) will be visible with ``conda list``.
 
 
 _`Considerations for USGS Users`
 --------------------------------
-Using conda or pip on the USGS network requires SSL verification, which can cause a number of issues. If you are encountering persistant issues with creating the conda environment, you may have better luck trying the install off of the USGS network (e.g. at home). See `here <https://tst.usgs.gov/applications/application-and-script-signing/>`_ for more information about SSL verification on the USGS network, and to download the DOI SSL certificate.
+Using conda or pip on the USGS network requires SSL verification, which can cause a number of issues.
+If you are encountering persistant issues with creating the conda environment,
+you may have better luck trying the install off of the USGS network (e.g. at home).
+See `here <https://tst.usgs.gov/applications/application-and-script-signing/>`_ for more information
+about SSL verification on the USGS network, and to download the DOI SSL certificate.
 
 _`Installing the DOI SSL certificate for use with pip`
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -94,13 +154,49 @@ Note that when you are off the USGS network, you may have to comment out the ``c
 
 Installing the DOI SSL certificate for use with conda
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-See `these instructions <https://docs.conda.io/projects/conda/en/latest/user-guide/configuration/use-condarc.html#ssl-verification-ssl-verify>`_. This may or may not work.
+See `these instructions <https://docs.conda.io/projects/conda/en/latest/user-guide/configuration/use-condarc.html#ssl-verification-ssl-verify>`_.
+This may or may not work. Basically, ``ssl_verify:`` needs to be set in your `condarc`_ file to point
+to a valid SSL certificate, which may be different from the basic ``DOIRootCA2.cer`` file.
+
+You can find the location of your `condarc`_ file with::
+
+    conda info -a
+
+which displays information about how Conda is configured. Note that you may have multiple `condarc`_
+files at the system, user and possibly project levels.
+
+Common issues:
+
+* Conda Install fails on the USGS network without a certificate, or with an incorrectly formatted certificate.
+  Possible solutions are to either get a correctly formatted SSL certificate from your IT person, or try installing off the network.
+* Conda Install fails off the USGS network with a certificate (may or may not be correctly formatted). Solution:
+  open your `condarc`_ file
+  and comment out the SSL certificate file, if it is specified. E.g.::
+
+    ssl_verify: #D:\certificates\DOIRootCA2.cer
+
 
 
 Troubleshooting issues with the USGS network
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-**If you are on the USGS network, using Windows, and you get this error message:**
 
+SSL-related error messages when using conda
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+(with ``SSL`` mentioned in the message and possibly ``bad handshake``)
+
+Make sure that the ``conda`` package installer is configured to use the USGS certificate
+(see :ref:`Installing the DOI SSL certificate for use with conda` above).
+
+
+SSL-related error messages when using pip
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+(something similar to ``SSL: CERTIFICATE_VERIFY_FAILED``).
+
+Make sure that the ``pip`` package installer is configured to use the USGS certificate
+(see `Installing the DOI SSL certificate for use with pip`_ above).
+
+If you are on the USGS network, using Windows, and you get this error message:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ..
 
     CondaHTTPError: HTTP 500 INTERNAL ERROR for url <https://repo.anaconda.com/pkgs/msys2/win-64/m2w64-gettext-0.19.7-2.tar.bz2>
@@ -109,7 +205,7 @@ Troubleshooting issues with the USGS network
     An HTTP error occurred when trying to retrieve this URL.
     HTTP errors are often intermittent, and a simple retry will get you on your way.
 
-Adding the following line to ``requirements.yml`` should work:
+Adding the following line to ``environment.yml`` should work:
 
 .. code-block:: yaml
 
@@ -128,6 +224,7 @@ so it needs to be commented out on other operating systems (normally it wouldn't
 .. _clean uninstall: https://docs.anaconda.com/anaconda/install/uninstall/
 .. _conda: https://docs.conda.io/en/latest/
 .. _conda environment: https://docs.conda.io/projects/conda/en/latest/user-guide/concepts/environments.html
+.. _condarc: https://docs.conda.io/projects/conda/en/latest/user-guide/configuration/use-condarc.html
 .. _download: https://github.com/aleaf/sfrmaker/archive/master.zip
 .. _gis.yml: https://github.com/aleaf/sfrmaker/blob/master/gis.yml
 .. _Download the DOI SSL certificate: https://tst.usgs.gov/applications/application-and-script-signing/
