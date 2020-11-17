@@ -1,3 +1,4 @@
+import numpy as np
 from sfrmaker.routing import make_graph, get_upsegs
 
 from ..checks import routing_is_circular, valid_nsegs
@@ -100,3 +101,14 @@ def test_get_upsegs(sfr_test_numbering):
         upsegs.append(get_upsegs(graph_r, s))
     assert isinstance(upsegs[1], set)
     assert upsegs[1] == {1, 3, 4, 5, 6, 7, 8, 9}
+
+
+def test_find_path():
+    n = 1e5
+    rnos = np.arange(1, n+1)
+    out_rnos = np.arange(2, n+2)
+    out_rnos[-1] = 0
+    routing = dict(zip(rnos, out_rnos))
+    path = find_path(routing, start=1)
+    assert path[0] == 1
+    assert path[-1] == 0

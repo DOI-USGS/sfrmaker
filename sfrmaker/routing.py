@@ -115,30 +115,16 @@ def find_path(graph, start, end=0, limit=None):
     path : list
         List of segment numbers along routing path.
     """
-    graph = graph.copy()
-    return _find_path(graph, start, end=end, limit=limit)
-
-
-def _find_path(graph, start, end=0, path=None, limit=None):
-    """Like find_path, but doesn't copy the routing
-    dictionary (graph) so that the recursion works.
-    """
-    if path is None:
-        path = list()
-    path = path + [start]
-    if limit is not None and len(path) == limit:  # limit recursion depth
-        return path
-    if start == end:
-        return path
-    if start not in graph:
-        return None
-    if not isinstance(graph[start], list):
-        graph[start] = [graph[start]]
-    for node in graph[start]:
-        if node not in path:
-            newpath = _find_path(graph, node, end, path)
-            if newpath: return newpath
-    return None
+    if limit is None:
+        limit = len(graph)
+    path = [start]
+    next = start
+    for i in range(limit):
+        next = graph[next]
+        path.append(next)
+        if next == end:
+            break
+    return path
 
 
 def make_graph(fromcomids, tocomids, one_to_many=True):

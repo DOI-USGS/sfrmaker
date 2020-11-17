@@ -8,7 +8,7 @@ Installing python dependencies with Conda
 -----------------------------------------
 * Download and install the `Anaconda python distribution`_.
 
-  * **Make sure to install Anaconda to your username** (not at the system level). More often than not, installing at the system level (for all users) seems to result in issues with library dependencies (for example, import of ``fiona`` or ``rasterio`` failing because gdal isn't found). It is also good practice to periodically do a `clean uninstall`_ of Anaconda, which requires admin. privileges at the system level.
+  * **Make sure to install Anaconda to your username** (not at the system level). More often than not, installing at the system level (for all users) seems to result in issues with library dependencies (for example, import of ``fiona`` or ``rasterio`` failing because gdal isn't found). It is also good practice to periodically do a `clean uninstall`_ of Anaconda, which at the system level requires admin. privileges.
 
     * In the installer, at the “Destination Select” step, select “Install for me only.” It should say something about how the software will be installed to your home folder.
     * If your installer skips the “Destination Select” step, when you get to "Installation Type", click “Change Install Location” and then “Install for me only.”
@@ -17,7 +17,7 @@ Installing python dependencies with Conda
 * Download an environment file:
 
   * `requirements.yml`_ for a `conda environment`_ with the minimum packages required to run SFRmaker, or
-  * `gis.yml`_ for a more full set of packages in the python geospatial stack, including Jupyter Notebooks and packages needed for testing, documentation and packaging. Note that the environment described by ``requirements.yml`` is called `sfrmaker`, while environment in ``gis.yml`` is called `gis`.
+  * `gis.yml`_ for a more full set of packages in the python geospatial stack, including Jupyter Notebooks and packages needed for testing, documentation and packaging. Note that the environment described by ``requirements.yml`` is called `sfrmaker`, while the environment in ``gis.yml`` is called `gis`.
   * Alternatively, clone (`using git`_) or `download`_ the ``sfrmaker`` repository, which includes the two environment files at the root level.
   * Note that both of these environment files contain a ``pip`` section of packages that will be installed with pip, after the ``conda`` packages are installed.
 
@@ -47,7 +47,7 @@ Building the environment will probably take a while. If the build fails because 
 
 Keeping the Conda environment up to date
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-The python packages and other open source software libraries that SFRmaker depends on are continually changing. SFRmaker aims to mostly follow the `Numpy guidelines for package support <https://numpy.org/neps/nep-0029-deprecation_policy.html>`_, which effectively means that the two latest minor versions of Python (e.g. 3.8 and 3.7) and their associated Numpy versions will be supported. However, in some cases backwards compatability with a particular package may be broken in a shorter timeframe, in which case the minimum required version of that package will be specified in the ``requirements.yml`` file. All of this is to say that your Conda environment will eventually get out of date. The `Conda documentation <https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html>`_ has instructions for updating packages within a Conda environment, but at some point (perhaps a few times a year) it is good practice to simply delete the environment and rebuild it from the `.yml` file.
+The python packages and other open source software libraries that SFRmaker depends on are continually changing. SFRmaker aims to mostly follow the `Numpy guidelines for package support <https://numpy.org/neps/nep-0029-deprecation_policy.html>`_, which effectively means that the two latest minor versions of Python (e.g. 3.8 and 3.7) and their associated Numpy versions will be supported. However, occasionally backwards compatability with a particular package may be broken in a shorter timeframe, in which case the minimum required version of that package will be specified in the ``requirements.yml`` file. All of this to say that your Conda environment will eventually get out of date. The `Conda documentation <https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html>`_ has instructions for updating packages within a Conda environment, but at some point (perhaps a few times a year) it is good practice to simply delete the environment and rebuild it from the `.yml` file. Every so often, you may also want to reinstall Anaconda after a `clean uninstall`_.
 
 Installing SFRmaker
 ------------------------
@@ -88,8 +88,8 @@ Or if you are using Conda, at the command line with
 
 Installing the latest develop version of SFRmaker
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-In some situations you may want bleeding-edge version of SFRmaker that is being actively developed on GitHub. For example,
-to incorporate a bug fix that is not yet in the latest release. Pip can also be used to fetch SFRmaker directly from GitHub:
+In some situations you may want the bleeding-edge version of SFRmaker that is being actively developed on GitHub. For example,
+to incorporate a bug fix that was made after the latest release. Pip can also be used to fetch SFRmaker directly from GitHub:
 
 .. code-block:: bash
 
@@ -214,10 +214,6 @@ Adding the following line to ``environment.yml`` should work:
 
 This tells conda to fetch ``m2w64-gettext`` from the ``msys2`` channel instead. Note that this is only a dependency on Windows,
 so it needs to be commented out on other operating systems (normally it wouldn't need to be listed, but the above HTTP 500 error indicates that installation from the default source location failed.)
-
-**If you are on the USGS network and get an SSL error message**
-(something similar to ``SSL: CERTIFICATE_VERIFY_FAILED``), you need to configure the ``pip`` package installer to use the USGS certificate (see `Installing the DOI SSL certificate for use with pip`_ above).
-
 
 
 .. _Anaconda python distribution: https://www.anaconda.com/distribution/
