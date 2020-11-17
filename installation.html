@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Installation &mdash; SFRmaker 0.6.2.post1.dev0+g2e44c8e documentation</title>
+  <title>Installation &mdash; SFRmaker 0.6.2.post2+g2a0d1bd documentation</title>
   
 
   
@@ -67,7 +67,7 @@
             
             
               <div class="version">
-                0.6.2.post1.dev0+g2e44c8e
+                0.6.2.post2+g2a0d1bd
               </div>
             
           
@@ -235,7 +235,7 @@
 <ul class="simple">
 <li><p>Download and install the <a class="reference external" href="https://www.anaconda.com/distribution/">Anaconda python distribution</a>.</p>
 <ul>
-<li><p><strong>Make sure to install Anaconda to your username</strong> (not at the system level). More often than not, installing at the system level (for all users) seems to result in issues with library dependencies (for example, import of <code class="docutils literal notranslate"><span class="pre">fiona</span></code> or <code class="docutils literal notranslate"><span class="pre">rasterio</span></code> failing because gdal isn’t found). It is also good practice to periodically do a <a class="reference external" href="https://docs.anaconda.com/anaconda/install/uninstall/">clean uninstall</a> of Anaconda, which requires admin. privileges at the system level.</p>
+<li><p><strong>Make sure to install Anaconda to your username</strong> (not at the system level). More often than not, installing at the system level (for all users) seems to result in issues with library dependencies (for example, import of <code class="docutils literal notranslate"><span class="pre">fiona</span></code> or <code class="docutils literal notranslate"><span class="pre">rasterio</span></code> failing because gdal isn’t found). It is also good practice to periodically do a <a class="reference external" href="https://docs.anaconda.com/anaconda/install/uninstall/">clean uninstall</a> of Anaconda, which at the system level requires admin. privileges.</p>
 <ul>
 <li><p>In the installer, at the “Destination Select” step, select “Install for me only.” It should say something about how the software will be installed to your home folder.</p></li>
 <li><p>If your installer skips the “Destination Select” step, when you get to “Installation Type”, click “Change Install Location” and then “Install for me only.”</p></li>
@@ -246,7 +246,7 @@
 <li><p>Download an environment file:</p>
 <ul>
 <li><p><a class="reference external" href="https://github.com/aleaf/sfrmaker/blob/master/requirements.yml">requirements.yml</a> for a <a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/concepts/environments.html">conda environment</a> with the minimum packages required to run SFRmaker, or</p></li>
-<li><p><a class="reference external" href="https://github.com/aleaf/sfrmaker/blob/master/gis.yml">gis.yml</a> for a more full set of packages in the python geospatial stack, including Jupyter Notebooks and packages needed for testing, documentation and packaging. Note that the environment described by <code class="docutils literal notranslate"><span class="pre">requirements.yml</span></code> is called <cite>sfrmaker</cite>, while environment in <code class="docutils literal notranslate"><span class="pre">gis.yml</span></code> is called <cite>gis</cite>.</p></li>
+<li><p><a class="reference external" href="https://github.com/aleaf/sfrmaker/blob/master/gis.yml">gis.yml</a> for a more full set of packages in the python geospatial stack, including Jupyter Notebooks and packages needed for testing, documentation and packaging. Note that the environment described by <code class="docutils literal notranslate"><span class="pre">requirements.yml</span></code> is called <cite>sfrmaker</cite>, while the environment in <code class="docutils literal notranslate"><span class="pre">gis.yml</span></code> is called <cite>gis</cite>.</p></li>
 <li><p>Alternatively, clone (<a class="reference external" href="https://git-scm.com/book/en/v2/Getting-Started-Installing-Git">using git</a>) or <a class="reference external" href="https://github.com/aleaf/sfrmaker/archive/master.zip">download</a> the <code class="docutils literal notranslate"><span class="pre">sfrmaker</span></code> repository, which includes the two environment files at the root level.</p></li>
 <li><p>Note that both of these environment files contain a <code class="docutils literal notranslate"><span class="pre">pip</span></code> section of packages that will be installed with pip, after the <code class="docutils literal notranslate"><span class="pre">conda</span></code> packages are installed.</p></li>
 </ul>
@@ -278,7 +278,7 @@ conda env create -f requirements.yml
 </div>
 <div class="section" id="keeping-the-conda-environment-up-to-date">
 <h3>Keeping the Conda environment up to date<a class="headerlink" href="#keeping-the-conda-environment-up-to-date" title="Permalink to this headline">¶</a></h3>
-<p>The python packages and other open source software libraries that SFRmaker depends on are continually changing. SFRmaker aims to mostly follow the <a class="reference external" href="https://numpy.org/neps/nep-0029-deprecation_policy.html">Numpy guidelines for package support</a>, which effectively means that the two latest minor versions of Python (e.g. 3.8 and 3.7) and their associated Numpy versions will be supported. However, in some cases backwards compatability with a particular package may be broken in a shorter timeframe, in which case the minimum required version of that package will be specified in the <code class="docutils literal notranslate"><span class="pre">requirements.yml</span></code> file. All of this is to say that your Conda environment will eventually get out of date. The <a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html">Conda documentation</a> has instructions for updating packages within a Conda environment, but at some point (perhaps a few times a year) it is good practice to simply delete the environment and rebuild it from the <cite>.yml</cite> file.</p>
+<p>The python packages and other open source software libraries that SFRmaker depends on are continually changing. SFRmaker aims to mostly follow the <a class="reference external" href="https://numpy.org/neps/nep-0029-deprecation_policy.html">Numpy guidelines for package support</a>, which effectively means that the two latest minor versions of Python (e.g. 3.8 and 3.7) and their associated Numpy versions will be supported. However, occasionally backwards compatability with a particular package may be broken in a shorter timeframe, in which case the minimum required version of that package will be specified in the <code class="docutils literal notranslate"><span class="pre">requirements.yml</span></code> file. All of this to say that your Conda environment will eventually get out of date. The <a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html">Conda documentation</a> has instructions for updating packages within a Conda environment, but at some point (perhaps a few times a year) it is good practice to simply delete the environment and rebuild it from the <cite>.yml</cite> file. Every so often, you may also want to reinstall Anaconda after a <a class="reference external" href="https://docs.anaconda.com/anaconda/install/uninstall/">clean uninstall</a>.</p>
 </div>
 </div>
 <div class="section" id="installing-sfrmaker">
@@ -311,8 +311,8 @@ what version of sfrmaker you have within a python session with</p>
 </div>
 <div class="section" id="installing-the-latest-develop-version-of-sfrmaker">
 <h3>Installing the latest develop version of SFRmaker<a class="headerlink" href="#installing-the-latest-develop-version-of-sfrmaker" title="Permalink to this headline">¶</a></h3>
-<p>In some situations you may want bleeding-edge version of SFRmaker that is being actively developed on GitHub. For example,
-to incorporate a bug fix that is not yet in the latest release. Pip can also be used to fetch SFRmaker directly from GitHub:</p>
+<p>In some situations you may want the bleeding-edge version of SFRmaker that is being actively developed on GitHub. For example,
+to incorporate a bug fix that was made after the latest release. Pip can also be used to fetch SFRmaker directly from GitHub:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install git+git://github.com/aleaf/sfrmaker@develop
 </pre></div>
 </div>
@@ -419,8 +419,6 @@ HTTP errors are often intermittent, and a simple retry will get you on your way.
 </div>
 <p>This tells conda to fetch <code class="docutils literal notranslate"><span class="pre">m2w64-gettext</span></code> from the <code class="docutils literal notranslate"><span class="pre">msys2</span></code> channel instead. Note that this is only a dependency on Windows,
 so it needs to be commented out on other operating systems (normally it wouldn’t need to be listed, but the above HTTP 500 error indicates that installation from the default source location failed.)</p>
-<p><strong>If you are on the USGS network and get an SSL error message</strong>
-(something similar to <code class="docutils literal notranslate"><span class="pre">SSL:</span> <span class="pre">CERTIFICATE_VERIFY_FAILED</span></code>), you need to configure the <code class="docutils literal notranslate"><span class="pre">pip</span></code> package installer to use the USGS certificate (see <a class="reference internal" href="#installing-the-doi-ssl-certificate-for-use-with-pip">Installing the DOI SSL certificate for use with pip</a> above).</p>
 </div>
 </div>
 </div>
@@ -447,7 +445,7 @@ so it needs to be commented out on other operating systems (normally it wouldn�
   <div role="contentinfo">
     <p>
       <span class="lastupdated">
-        Last updated on Nov 12, 2020.
+        Last updated on Nov 17, 2020.
       </span>
 
     </p>
