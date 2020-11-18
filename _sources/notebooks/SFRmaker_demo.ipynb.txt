@@ -13,10 +13,10 @@
    "execution_count": 1,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2020-11-17T21:15:41.662618Z",
-     "iopub.status.busy": "2020-11-17T21:15:41.661908Z",
-     "iopub.status.idle": "2020-11-17T21:15:42.579248Z",
-     "shell.execute_reply": "2020-11-17T21:15:42.579609Z"
+     "iopub.execute_input": "2020-11-18T15:29:08.624672Z",
+     "iopub.status.busy": "2020-11-18T15:29:08.623918Z",
+     "iopub.status.idle": "2020-11-18T15:29:09.488622Z",
+     "shell.execute_reply": "2020-11-18T15:29:09.488123Z"
     }
    },
    "outputs": [],
@@ -43,10 +43,10 @@
    "execution_count": 2,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2020-11-17T21:15:42.584329Z",
-     "iopub.status.busy": "2020-11-17T21:15:42.583783Z",
-     "iopub.status.idle": "2020-11-17T21:15:42.587241Z",
-     "shell.execute_reply": "2020-11-17T21:15:42.586805Z"
+     "iopub.execute_input": "2020-11-18T15:29:09.492717Z",
+     "iopub.status.busy": "2020-11-18T15:29:09.492310Z",
+     "iopub.status.idle": "2020-11-18T15:29:09.495708Z",
+     "shell.execute_reply": "2020-11-18T15:29:09.495207Z"
     }
    },
    "outputs": [],
@@ -66,10 +66,10 @@
    "execution_count": 3,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2020-11-17T21:15:42.590930Z",
-     "iopub.status.busy": "2020-11-17T21:15:42.590403Z",
-     "iopub.status.idle": "2020-11-17T21:15:42.592745Z",
-     "shell.execute_reply": "2020-11-17T21:15:42.592310Z"
+     "iopub.execute_input": "2020-11-18T15:29:09.499180Z",
+     "iopub.status.busy": "2020-11-18T15:29:09.498635Z",
+     "iopub.status.idle": "2020-11-18T15:29:09.500911Z",
+     "shell.execute_reply": "2020-11-18T15:29:09.500563Z"
     }
    },
    "outputs": [],
@@ -93,10 +93,10 @@
    "execution_count": 4,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2020-11-17T21:15:42.597545Z",
-     "iopub.status.busy": "2020-11-17T21:15:42.596878Z",
-     "iopub.status.idle": "2020-11-17T21:15:42.860925Z",
-     "shell.execute_reply": "2020-11-17T21:15:42.860507Z"
+     "iopub.execute_input": "2020-11-18T15:29:09.504626Z",
+     "iopub.status.busy": "2020-11-18T15:29:09.504003Z",
+     "iopub.status.idle": "2020-11-18T15:29:09.764331Z",
+     "shell.execute_reply": "2020-11-18T15:29:09.764662Z"
     }
    },
    "outputs": [
@@ -122,7 +122,7 @@
       "reading ../tylerforks/NHDPlus/NHDPlusAttributes/elevslope.dbf...\n",
       "--> building dataframe... (may take a while for large shapefiles)\n",
       "\n",
-      "load finished in 0.21s\n",
+      "load finished in 0.20s\n",
       "\n",
       "Getting routing information from NHDPlus Plusflow table...\n",
       "finished in 0.02s\n",
@@ -147,10 +147,10 @@
    "execution_count": 5,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2020-11-17T21:15:42.889153Z",
-     "iopub.status.busy": "2020-11-17T21:15:42.876312Z",
-     "iopub.status.idle": "2020-11-17T21:15:43.010498Z",
-     "shell.execute_reply": "2020-11-17T21:15:43.010821Z"
+     "iopub.execute_input": "2020-11-18T15:29:09.800465Z",
+     "iopub.status.busy": "2020-11-18T15:29:09.768153Z",
+     "iopub.status.idle": "2020-11-18T15:29:09.909860Z",
+     "shell.execute_reply": "2020-11-18T15:29:09.909335Z"
     }
    },
    "outputs": [
@@ -203,10 +203,10 @@
    "execution_count": 6,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2020-11-17T21:15:43.046837Z",
-     "iopub.status.busy": "2020-11-17T21:15:43.038705Z",
-     "iopub.status.idle": "2020-11-17T21:15:46.555952Z",
-     "shell.execute_reply": "2020-11-17T21:15:46.555088Z"
+     "iopub.execute_input": "2020-11-18T15:29:09.944156Z",
+     "iopub.status.busy": "2020-11-18T15:29:09.914406Z",
+     "iopub.status.idle": "2020-11-18T15:29:13.345604Z",
+     "shell.execute_reply": "2020-11-18T15:29:13.344690Z"
     }
    },
    "outputs": [
@@ -251,10 +251,10 @@
    "execution_count": 7,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2020-11-17T21:15:46.560433Z",
-     "iopub.status.busy": "2020-11-17T21:15:46.559894Z",
-     "iopub.status.idle": "2020-11-17T21:15:46.562365Z",
-     "shell.execute_reply": "2020-11-17T21:15:46.562682Z"
+     "iopub.execute_input": "2020-11-18T15:29:13.349921Z",
+     "iopub.status.busy": "2020-11-18T15:29:13.349500Z",
+     "iopub.status.idle": "2020-11-18T15:29:13.352962Z",
+     "shell.execute_reply": "2020-11-18T15:29:13.352588Z"
     }
    },
    "outputs": [],
@@ -285,10 +285,10 @@
    "execution_count": 8,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2020-11-17T21:15:46.626068Z",
-     "iopub.status.busy": "2020-11-17T21:15:46.602559Z",
-     "iopub.status.idle": "2020-11-17T21:15:47.487983Z",
-     "shell.execute_reply": "2020-11-17T21:15:47.487525Z"
+     "iopub.execute_input": "2020-11-18T15:29:13.412777Z",
+     "iopub.status.busy": "2020-11-18T15:29:13.396451Z",
+     "iopub.status.idle": "2020-11-18T15:29:14.180263Z",
+     "shell.execute_reply": "2020-11-18T15:29:14.179898Z"
     }
    },
    "outputs": [
@@ -325,17 +325,17 @@
    "execution_count": 9,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2020-11-17T21:15:47.505283Z",
-     "iopub.status.busy": "2020-11-17T21:15:47.492103Z",
-     "iopub.status.idle": "2020-11-17T21:15:47.622191Z",
-     "shell.execute_reply": "2020-11-17T21:15:47.621712Z"
+     "iopub.execute_input": "2020-11-18T15:29:14.194792Z",
+     "iopub.status.busy": "2020-11-18T15:29:14.183795Z",
+     "iopub.status.idle": "2020-11-18T15:29:14.314894Z",
+     "shell.execute_reply": "2020-11-18T15:29:14.314525Z"
     }
    },
    "outputs": [
     {
      "data": {
       "text/plain": [
-       "<matplotlib.image.AxesImage at 0x7ff7aaba67c0>"
+       "<matplotlib.image.AxesImage at 0x7ff273bf7450>"
       ]
      },
      "execution_count": 1,
@@ -380,10 +380,10 @@
    "execution_count": 10,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2020-11-17T21:15:47.626353Z",
-     "iopub.status.busy": "2020-11-17T21:15:47.625952Z",
-     "iopub.status.idle": "2020-11-17T21:15:47.723022Z",
-     "shell.execute_reply": "2020-11-17T21:15:47.722588Z"
+     "iopub.execute_input": "2020-11-18T15:29:14.318536Z",
+     "iopub.status.busy": "2020-11-18T15:29:14.318156Z",
+     "iopub.status.idle": "2020-11-18T15:29:14.465570Z",
+     "shell.execute_reply": "2020-11-18T15:29:14.465139Z"
     }
    },
    "outputs": [
@@ -418,10 +418,10 @@
    "execution_count": 11,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2020-11-17T21:15:47.727455Z",
-     "iopub.status.busy": "2020-11-17T21:15:47.726363Z",
-     "iopub.status.idle": "2020-11-17T21:15:50.435049Z",
-     "shell.execute_reply": "2020-11-17T21:15:50.434182Z"
+     "iopub.execute_input": "2020-11-18T15:29:14.469792Z",
+     "iopub.status.busy": "2020-11-18T15:29:14.469106Z",
+     "iopub.status.idle": "2020-11-18T15:29:17.073697Z",
+     "shell.execute_reply": "2020-11-18T15:29:17.074302Z"
     }
    },
    "outputs": [
@@ -430,7 +430,7 @@
      "output_type": "stream",
      "text": [
       "\n",
-      "SFRmaker version 0.6.2.post2+g2a0d1bd\n",
+      "SFRmaker version 0.6.2.post2.dev0+g2a0d1bd\n",
       "\n",
       "Creating sfr dataset...\n",
       "\n",
@@ -449,7 +449,7 @@
      "name": "stdout",
      "output_type": "stream",
      "text": [
-      "grid class created in 0.27s\n",
+      "grid class created in 0.28s\n",
       "\n",
       "Model grid information\n",
       "structured grid\n",
@@ -480,14 +480,14 @@
       "Intersecting 17 flowlines with 17,760 grid cells...\n",
       "\n",
       "Building spatial index...\n",
-      "finished in 1.64s\n",
+      "finished in 1.71s\n",
       "\n",
       "Intersecting 17 features...\n",
       "17\n",
-      "finished in 0.12s\n",
+      "finished in 0.09s\n",
       "\n",
       "Setting up reach data... (may take a few minutes for large grids)\n",
-      "finished in 0.31s\n",
+      "finished in 0.28s\n",
       "\n",
       "Computing widths...\n",
       "\n",
@@ -509,7 +509,7 @@
       "active area defined by: all cells\n",
       "\n",
       "\n",
-      "Time to create sfr dataset: 2.70s\n",
+      "Time to create sfr dataset: 2.60s\n",
       "\n"
      ]
     }
@@ -531,10 +531,10 @@
    "execution_count": 12,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2020-11-17T21:15:50.451664Z",
-     "iopub.status.busy": "2020-11-17T21:15:50.448376Z",
-     "iopub.status.idle": "2020-11-17T21:15:50.464896Z",
-     "shell.execute_reply": "2020-11-17T21:15:50.464374Z"
+     "iopub.execute_input": "2020-11-18T15:29:17.089201Z",
+     "iopub.status.busy": "2020-11-18T15:29:17.085934Z",
+     "iopub.status.idle": "2020-11-18T15:29:17.101138Z",
+     "shell.execute_reply": "2020-11-18T15:29:17.100634Z"
     }
    },
    "outputs": [
@@ -747,10 +747,10 @@
    "execution_count": 13,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2020-11-17T21:15:50.486744Z",
-     "iopub.status.busy": "2020-11-17T21:15:50.486075Z",
-     "iopub.status.idle": "2020-11-17T21:15:50.491394Z",
-     "shell.execute_reply": "2020-11-17T21:15:50.492191Z"
+     "iopub.execute_input": "2020-11-18T15:29:17.120337Z",
+     "iopub.status.busy": "2020-11-18T15:29:17.111494Z",
+     "iopub.status.idle": "2020-11-18T15:29:17.125129Z",
+     "shell.execute_reply": "2020-11-18T15:29:17.125746Z"
     }
    },
    "outputs": [
@@ -971,10 +971,10 @@
    "execution_count": 14,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2020-11-17T21:15:50.553168Z",
-     "iopub.status.busy": "2020-11-17T21:15:50.497188Z",
-     "iopub.status.idle": "2020-11-17T21:15:54.949977Z",
-     "shell.execute_reply": "2020-11-17T21:15:54.950306Z"
+     "iopub.execute_input": "2020-11-18T15:29:17.129939Z",
+     "iopub.status.busy": "2020-11-18T15:29:17.129559Z",
+     "iopub.status.idle": "2020-11-18T15:29:21.238366Z",
+     "shell.execute_reply": "2020-11-18T15:29:21.237986Z"
     }
    },
    "outputs": [
@@ -983,7 +983,7 @@
      "output_type": "stream",
      "text": [
       "running rasterstats.zonal_stats on buffered LineStrings...\n",
-      "finished in 4.19s\n",
+      "finished in 3.85s\n",
       "\n",
       "\n",
       "Smoothing elevations...\n",
@@ -1008,10 +1008,10 @@
    "execution_count": 15,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2020-11-17T21:15:54.955386Z",
-     "iopub.status.busy": "2020-11-17T21:15:54.953819Z",
-     "iopub.status.idle": "2020-11-17T21:15:54.958435Z",
-     "shell.execute_reply": "2020-11-17T21:15:54.958072Z"
+     "iopub.execute_input": "2020-11-18T15:29:21.242359Z",
+     "iopub.status.busy": "2020-11-18T15:29:21.241628Z",
+     "iopub.status.idle": "2020-11-18T15:29:21.246738Z",
+     "shell.execute_reply": "2020-11-18T15:29:21.246319Z"
     }
    },
    "outputs": [],
@@ -1024,10 +1024,10 @@
    "execution_count": 16,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2020-11-17T21:15:54.975419Z",
-     "iopub.status.busy": "2020-11-17T21:15:54.968382Z",
-     "iopub.status.idle": "2020-11-17T21:15:54.981620Z",
-     "shell.execute_reply": "2020-11-17T21:15:54.981244Z"
+     "iopub.execute_input": "2020-11-18T15:29:21.257025Z",
+     "iopub.status.busy": "2020-11-18T15:29:21.256520Z",
+     "iopub.status.idle": "2020-11-18T15:29:21.269893Z",
+     "shell.execute_reply": "2020-11-18T15:29:21.270328Z"
     }
    },
    "outputs": [
@@ -1258,10 +1258,10 @@
    "execution_count": 17,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2020-11-17T21:15:54.991282Z",
-     "iopub.status.busy": "2020-11-17T21:15:54.990546Z",
-     "iopub.status.idle": "2020-11-17T21:15:55.044912Z",
-     "shell.execute_reply": "2020-11-17T21:15:55.044446Z"
+     "iopub.execute_input": "2020-11-18T15:29:21.280383Z",
+     "iopub.status.busy": "2020-11-18T15:29:21.278492Z",
+     "iopub.status.idle": "2020-11-18T15:29:21.336510Z",
+     "shell.execute_reply": "2020-11-18T15:29:21.335939Z"
     }
    },
    "outputs": [
@@ -1270,7 +1270,7 @@
      "output_type": "stream",
      "text": [
       "\n",
-      "Running Flopy v. 3.3.3 diagnostics...\n",
+      "Running Flopy v. 3.3.2 diagnostics...\n",
       "wrote tf_SFR.chk\n"
      ]
     }
@@ -1292,10 +1292,10 @@
    "execution_count": 18,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2020-11-17T21:15:55.055608Z",
-     "iopub.status.busy": "2020-11-17T21:15:55.052654Z",
-     "iopub.status.idle": "2020-11-17T21:15:55.140494Z",
-     "shell.execute_reply": "2020-11-17T21:15:55.139944Z"
+     "iopub.execute_input": "2020-11-18T15:29:21.347517Z",
+     "iopub.status.busy": "2020-11-18T15:29:21.344762Z",
+     "iopub.status.idle": "2020-11-18T15:29:21.439155Z",
+     "shell.execute_reply": "2020-11-18T15:29:21.438666Z"
     }
    },
    "outputs": [
@@ -1303,9 +1303,9 @@
      "name": "stdout",
      "output_type": "stream",
      "text": [
-      "SFRmaker v. 0.6.2.post2+g2a0d1bd\n",
+      "SFRmaker v. 0.6.2.post2.dev0+g2a0d1bd\n",
       "\n",
-      "Running Flopy v. 3.3.3 diagnostics...\n",
+      "Running Flopy v. 3.3.2 diagnostics...\n",
       "passed.\n",
       "\n",
       "Checking for continuity in segment and reach numbering...\n",
@@ -1418,10 +1418,10 @@
    "execution_count": 19,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2020-11-17T21:15:55.149134Z",
-     "iopub.status.busy": "2020-11-17T21:15:55.145157Z",
-     "iopub.status.idle": "2020-11-17T21:15:55.438986Z",
-     "shell.execute_reply": "2020-11-17T21:15:55.438259Z"
+     "iopub.execute_input": "2020-11-18T15:29:21.450247Z",
+     "iopub.status.busy": "2020-11-18T15:29:21.449837Z",
+     "iopub.status.idle": "2020-11-18T15:29:21.782962Z",
+     "shell.execute_reply": "2020-11-18T15:29:21.782225Z"
     }
    },
    "outputs": [
@@ -1429,9 +1429,9 @@
      "name": "stdout",
      "output_type": "stream",
      "text": [
-      "SFRmaker v. 0.6.2.post2+g2a0d1bd\n",
+      "SFRmaker v. 0.6.2.post2.dev0+g2a0d1bd\n",
       "\n",
-      "Running Flopy v. 3.3.3 diagnostics...\n",
+      "Running Flopy v. 3.3.2 diagnostics...\n",
       "passed.\n",
       "\n",
       "Checking for continuity in segment and reach numbering...\n",
@@ -1546,10 +1546,10 @@
    "execution_count": 20,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2020-11-17T21:15:55.444459Z",
-     "iopub.status.busy": "2020-11-17T21:15:55.443059Z",
-     "iopub.status.idle": "2020-11-17T21:15:55.461562Z",
-     "shell.execute_reply": "2020-11-17T21:15:55.461979Z"
+     "iopub.execute_input": "2020-11-18T15:29:21.788476Z",
+     "iopub.status.busy": "2020-11-18T15:29:21.787447Z",
+     "iopub.status.idle": "2020-11-18T15:29:21.804862Z",
+     "shell.execute_reply": "2020-11-18T15:29:21.804431Z"
     }
    },
    "outputs": [
@@ -1578,10 +1578,10 @@
    "execution_count": 21,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2020-11-17T21:15:55.465899Z",
-     "iopub.status.busy": "2020-11-17T21:15:55.465478Z",
-     "iopub.status.idle": "2020-11-17T21:15:55.537165Z",
-     "shell.execute_reply": "2020-11-17T21:15:55.537611Z"
+     "iopub.execute_input": "2020-11-18T15:29:21.808679Z",
+     "iopub.status.busy": "2020-11-18T15:29:21.808078Z",
+     "iopub.status.idle": "2020-11-18T15:29:21.878093Z",
+     "shell.execute_reply": "2020-11-18T15:29:21.878532Z"
     }
    },
    "outputs": [
@@ -1627,10 +1627,10 @@
    "execution_count": 22,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2020-11-17T21:15:55.542572Z",
-     "iopub.status.busy": "2020-11-17T21:15:55.541098Z",
-     "iopub.status.idle": "2020-11-17T21:15:56.211260Z",
-     "shell.execute_reply": "2020-11-17T21:15:56.210858Z"
+     "iopub.execute_input": "2020-11-18T15:29:21.882580Z",
+     "iopub.status.busy": "2020-11-18T15:29:21.881449Z",
+     "iopub.status.idle": "2020-11-18T15:29:22.546558Z",
+     "shell.execute_reply": "2020-11-18T15:29:22.546187Z"
     }
    },
    "outputs": [
@@ -1645,9 +1645,9 @@
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "/home/travis/miniconda/envs/test/lib/python3.9/site-packages/pyproj/crs/crs.py:543: UserWarning: You will likely lose important projection information when converting to a PROJ string from another format. See: https://proj.org/faq.html#what-is-the-best-format-for-describing-coordinate-reference-systems\n",
+      "/home/travis/miniconda/envs/test/lib/python3.7/site-packages/pyproj/crs/crs.py:543: UserWarning: You will likely lose important projection information when converting to a PROJ string from another format. See: https://proj.org/faq.html#what-is-the-best-format-for-describing-coordinate-reference-systems\n",
       "  proj_string = self.to_proj4()\n",
-      "/home/travis/miniconda/envs/test/lib/python3.9/site-packages/pyproj/crs/crs.py:543: UserWarning: You will likely lose important projection information when converting to a PROJ string from another format. See: https://proj.org/faq.html#what-is-the-best-format-for-describing-coordinate-reference-systems\n",
+      "/home/travis/miniconda/envs/test/lib/python3.7/site-packages/pyproj/crs/crs.py:543: UserWarning: You will likely lose important projection information when converting to a PROJ string from another format. See: https://proj.org/faq.html#what-is-the-best-format-for-describing-coordinate-reference-systems\n",
       "  proj_string = self.to_proj4()\n"
      ]
     },
@@ -1692,7 +1692,7 @@
    "name": "python",
    "nbconvert_exporter": "python",
    "pygments_lexer": "ipython3",
-   "version": "3.9.0"
+   "version": "3.7.8"
   }
  },
  "nbformat": 4,
