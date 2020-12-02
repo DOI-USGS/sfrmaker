@@ -535,10 +535,10 @@ reading ../tylerforks/NHDPlus/NHDPlusAttributes/PlusFlow.dbf...
 reading ../tylerforks/NHDPlus/NHDPlusAttributes/elevslope.dbf...
 --&gt; building dataframe... (may take a while for large shapefiles)
 
-load finished in 0.22s
+load finished in 0.20s
 
 Getting routing information from NHDPlus Plusflow table...
-finished in 0.03s
+finished in 0.02s
 
 </pre></div></div>
 </div>
@@ -577,7 +577,7 @@ reading ../tylerforks/NHDPlus/NHDPlusAttributes/PlusFlow.dbf...
 reading ../tylerforks/NHDPlus/NHDPlusAttributes/elevslope.dbf...
 --&gt; building dataframe... (may take a while for large shapefiles)
 
-load finished in 0.10s
+load finished in 0.09s
 
 Getting routing information from NHDPlus Plusflow table...
 finished in 0.02s
@@ -687,7 +687,7 @@ reading ../tylerforks/active_area.shp...
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.image.AxesImage at 0x7f1a81bfea00&gt;
+&lt;matplotlib.image.AxesImage at 0x7f4db7fd03d0&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -765,7 +765,7 @@ Creating grid class instance from flopy Grid instance...
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-grid class created in 0.29s
+grid class created in 0.35s
 
 Model grid information
 structured grid
@@ -796,7 +796,7 @@ finished in 0.00s
 Intersecting 17 flowlines with 17,760 grid cells...
 
 Building spatial index...
-finished in 1.74s
+finished in 1.70s
 
 Intersecting 17 features...
 17
@@ -825,7 +825,7 @@ bounds: 682688.00, 5139052.00, 694880.00, 5147510.20
 active area defined by: all cells
 
 
-Time to create sfr dataset: 2.65s
+Time to create sfr dataset: 2.66s
 
 </pre></div></div>
 </div>
@@ -1215,7 +1215,7 @@ Time to create sfr dataset: 2.65s
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 running rasterstats.zonal_stats on buffered LineStrings...
-finished in 4.88s
+finished in 3.78s
 
 
 Smoothing elevations...
@@ -1441,7 +1441,7 @@ DEM and other data in a GIS environment. * <strong>suprious slopes:</strong> slo
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 
-Running Flopy v. 3.3.3 diagnostics...
+Running Flopy v. 3.3.2 diagnostics...
 wrote tf_SFR.chk
 </pre></div></div>
 </div>
@@ -1465,7 +1465,7 @@ wrote tf_SFR.chk
 <div class="highlight"><pre>
 SFRmaker v. 0.6.2.post2.dev0+g2a0d1bd
 
-Running Flopy v. 3.3.3 diagnostics...
+Running Flopy v. 3.3.2 diagnostics...
 passed.
 
 Checking for continuity in segment and reach numbering...
@@ -1580,7 +1580,7 @@ wrote ../tylerforks/tylerforks/tf.sfr.
 <div class="highlight"><pre>
 SFRmaker v. 0.6.2.post2.dev0+g2a0d1bd
 
-Running Flopy v. 3.3.3 diagnostics...
+Running Flopy v. 3.3.2 diagnostics...
 passed.
 
 Checking for continuity in segment and reach numbering...
@@ -1744,15 +1744,6 @@ active area defined by: isfr array
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-/home/travis/miniconda/envs/test/lib/python3.9/site-packages/pyproj/crs/crs.py:543: UserWarning: You will likely lose important projection information when converting to a PROJ string from another format. See: https://proj.org/faq.html#what-is-the-best-format-for-describing-coordinate-reference-systems
-  proj_string = self.to_proj4()
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 writing shps/tf_sfr_cells.shp...
@@ -1763,7 +1754,9 @@ writing shps/tf_sfr_cells.shp...
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/home/travis/miniconda/envs/test/lib/python3.9/site-packages/pyproj/crs/crs.py:543: UserWarning: You will likely lose important projection information when converting to a PROJ string from another format. See: https://proj.org/faq.html#what-is-the-best-format-for-describing-coordinate-reference-systems
+/home/travis/miniconda/envs/test/lib/python3.7/site-packages/pyproj/crs/crs.py:543: UserWarning: You will likely lose important projection information when converting to a PROJ string from another format. See: https://proj.org/faq.html#what-is-the-best-format-for-describing-coordinate-reference-systems
+  proj_string = self.to_proj4()
+/home/travis/miniconda/envs/test/lib/python3.7/site-packages/pyproj/crs/crs.py:543: UserWarning: You will likely lose important projection information when converting to a PROJ string from another format. See: https://proj.org/faq.html#what-is-the-best-format-for-describing-coordinate-reference-systems
   proj_string = self.to_proj4()
 </pre></div></div>
 </div>
@@ -1813,7 +1806,7 @@ No non-zero values of flow to export!
   <div role="contentinfo">
     <p>
       <span class="lastupdated">
-        Last updated on Nov 25, 2020.
+        Last updated on Dec 02, 2020.
       </span>
 
     </p>
