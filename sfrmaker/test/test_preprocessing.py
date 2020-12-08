@@ -2,6 +2,7 @@
 Test the preprocessing module
 """
 import os
+from pathlib import Path
 import yaml
 import numpy as np
 import pandas as pd
@@ -162,6 +163,35 @@ def test_preprocess_nhdplus(preprocessed_flowlines):
     has_nw = ~fl.narwd_n.isna()
     np.allclose(fl.loc[has_nw, 'width1asum'].mean(),
                 fl.loc[has_nw, 'narwd_mean'].mean(), rtol=0.2)
+
+
+def test_preprocess_nhdplus_no_zonal_stats(culled_flowlines, preprocessed_flowlines,
+                                           test_data_path, outfolder):
+
+    kwargs = culled_flowlines.copy()
+    # kwargs['demfile'] = os.path.join(test_data_path, 'meras_100m_dem.tif')
+    kwargs['run_zonal_statistics'] = False
+    kwargs['flowline_elevations_file'] = Path(outfolder, 'flowlines_gt20km_buffers.shp')
+    kwargs['narwidth_shapefile'] = os.path.join(test_data_path, 'NARwidth.shp')
+    kwargs['waterbody_shapefiles'] = os.path.join(test_data_path,
+                                                  'NHDPlus08/NHDSnapshot/Hydrography/NHDWaterbody.shp')
+    kwargs['asum_thresh'] = 20.
+    kwargs['width_from_asum_a_param'] = 0.0592
+    kwargs['width_from_asum_b_param'] = 0.5127
+    kwargs['known_connections'] = {17955195: 17955197,
+                                   17955197: 17955185,
+                                   17954979: 17954993,
+                                   17954993: 17955075
+                                   }
+    kwargs['logger'] = None
+    kwargs['output_length_units'] = 'meters'
+    kwargs['outfolder'] = outfolder
+    kwargs['project_epsg'] = 5070
+    preprocessed_flowlines2 = preprocess_nhdplus(**kwargs)
+
+    # verify that the same result is produced
+    # when reusing the shapefile output from zonal statistics
+    pd.testing.assert_frame_equal(preprocessed_flowlines, preprocessed_flowlines2)
 
 
 @pytest.mark.timeout(30)  # projection issues will cause zonal stats to hang

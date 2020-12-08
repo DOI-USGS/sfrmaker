@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 import shutil
 import yaml
 import textwrap
@@ -215,8 +216,10 @@ def cull_flowlines(NHDPlus_paths,
 
 def preprocess_nhdplus(flowlines_file, pfvaa_file,
                        pf_file, elevslope_file,
-                       demfile,
+                       demfile=None,
+                       run_zonal_statistics=True,
                        dem_length_units='meters',
+                       flowline_elevations_file=None,
                        active_area=None,
                        narwidth_shapefile=None,
                        waterbody_shapefiles=None,  # for sampling NARWidth
@@ -387,7 +390,9 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
                   pfvaa_file,
                   pf_file,
                   elevslope_file,
-                  demfile]
+                  ]
+    if run_zonal_statistics:
+        files_list.append(demfile)
     if narwidth_shapefile is not None:
         if waterbody_shapefiles is None:
             raise ValueError("NARWidth option ")
@@ -450,67 +455,86 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
     if project_crs is not None and flowline_crs is not None and project_crs != flowline_crs:
         fl['geometry'] = project(fl.geometry, flowline_crs, project_crs)
 
-    # draw buffers
-    flbuffers = [g.buffer(buffersize_meters, cap_style=2)  # 2 (flat cap) very important!
-                 for g in fl.geometry]
+    # option to reuse shapefile from previous run instead of re-running zonal statistics
+    # which can take an hour for large problems
+    if run_zonal_statistics:
+        assert Path(demfile).exists(), \
+            "If run_zonal_statistics=True (default), a demfile is needed."
+        # draw buffers
+        flbuffers = [g.buffer(buffersize_meters, cap_style=2)  # 2 (flat cap) very important!
+                     for g in fl.geometry]
 
-    # Create buffer around flowlines with flat cap, so that ends are flush with ends of lines
-    # compute zonal statistics on buffer
-    logger.log('Creating buffers and running zonal statistics')
-    logger.log_package_version('rasterstats')
-    logger.statement('buffersize: {} m'.format(buffersize_meters), log_time=False)
-    logger.log_file_and_date_modified(demfile, prefix='DEM file: ')
+        # Create buffer around flowlines with flat cap, so that ends are flush with ends of lines
+        # compute zonal statistics on buffer
+        logger.log('Creating buffers and running zonal statistics')
+        logger.log_package_version('rasterstats')
+        logger.statement('buffersize: {} m'.format(buffersize_meters), log_time=False)
+        logger.log_file_and_date_modified(demfile, prefix='DEM file: ')
 
-    # if DEM has different crs, project buffer polygons to DEM crs
-    with rasterio.open(demfile) as src:
-        meta = src.meta
-        dem_crs = get_authority_crs(meta['crs'])
-        dem_res = src.res[0]
-    flbuffers_pr = flbuffers
-    if project_crs is not None and dem_crs != project_crs:
-        flbuffers_pr = project(flbuffers, project_crs, dem_crs)
+        # if DEM has different crs, project buffer polygons to DEM crs
+        with rasterio.open(demfile) as src:
+            meta = src.meta
+            dem_crs = get_authority_crs(meta['crs'])
+            dem_res = src.res[0]
+        flbuffers_pr = flbuffers
+        if project_crs is not None and dem_crs != project_crs:
+            flbuffers_pr = project(flbuffers, project_crs, dem_crs)
 
-    # run zonal statistics on buffers
-    # this step takes at least ~ 20 min for the full 1-mi MERAS model
-    # with large cell sizes, count all cells that are touched by each buffer
-    # (not just the cell centers that are intersected)
-    all_touched = False
-    if buffersize_meters < dem_res:
-        all_touched = True
-    results = zonal_stats(flbuffers_pr,
-                          demfile,
-                          stats=['min', 'mean', 'percentile_10', 'percentile_20', 'percentile_80'],
-                          all_touched=all_touched)
-    #results = {'mean': np.zeros(len(fl)),
-    #           'min': np.zeros(len(fl)),
-    #           'percentile_10': np.zeros(len(fl)),
-    #           'percentile_20': np.zeros(len(fl)),
-    #           'percentile_80': np.zeros(len(fl))}
-    df = pd.DataFrame(results)
+        # run zonal statistics on buffers
+        # this step takes at least ~ 20 min for the full 1-mi MERAS model
+        # with large cell sizes, count all cells that are touched by each buffer
+        # (not just the cell centers that are intersected)
+        all_touched = False
+        if buffersize_meters < dem_res:
+            all_touched = True
+        results = zonal_stats(flbuffers_pr,
+                              demfile,
+                              stats=['min', 'mean', 'std',
+                                     'percentile_1', 'percentile_10',
+                                     'percentile_20', 'percentile_80'],
+                              all_touched=all_touched)
+        #results = {'mean': np.zeros(len(fl)),
+        #           'min': np.zeros(len(fl)),
+        #           'percentile_10': np.zeros(len(fl)),
+        #           'percentile_20': np.zeros(len(fl)),
+        #           'percentile_80': np.zeros(len(fl))}
+        df = pd.DataFrame(results)
 
-    # warn if there are more than 10% nan values
-    n_nan = df.isna().any(axis=1).sum()
-    pct_nan = n_nan/len(df)
-    if pct_nan > 0.1:
-        logger.warn("Warning: {} ({:.1%}) of sampled DEM values are NaNs. "
-                    "Check the extent and resolution of {}".format(n_nan, pct_nan, demfile))
+        # warn if there are more than 10% nan values
+        n_nan = df.isna().any(axis=1).sum()
+        pct_nan = n_nan/len(df)
+        if pct_nan > 0.1:
+            logger.warn("Warning: {} ({:.1%}) of sampled DEM values are NaNs. "
+                        "Check the extent and resolution of {}".format(n_nan, pct_nan, demfile))
 
-    dem_units_to_output_units = convert_length_units(dem_length_units, output_length_units)
-    fl['mean'] = df['mean'].values * dem_units_to_output_units
-    fl['min'] = df['min'].values * dem_units_to_output_units
-    fl['pct10'] = df.percentile_10.values * dem_units_to_output_units
-    fl['pct20'] = df.percentile_20.values * dem_units_to_output_units
-    fl['pct80'] = df.percentile_80.values * dem_units_to_output_units
-    fl['buffpoly'] = flbuffers
-    logger.log('Creating buffers and running zonal statistics')
+        dem_units_to_output_units = convert_length_units(dem_length_units, output_length_units)
+        fl['mean'] = df['mean'].values * dem_units_to_output_units
+        fl['min'] = df['min'].values * dem_units_to_output_units
+        fl['std'] = df['std'].values * dem_units_to_output_units
+        fl['pct01'] = df.percentile_1.values * dem_units_to_output_units
+        fl['pct10'] = df.percentile_10.values * dem_units_to_output_units
+        fl['pct20'] = df.percentile_20.values * dem_units_to_output_units
+        fl['pct80'] = df.percentile_80.values * dem_units_to_output_units
+        fl['buffpoly'] = flbuffers
+        logger.log('Creating buffers and running zonal statistics')
 
-    # write a shapefile of the flowline buffers for GIS visualization
-    logger.statement('Writing shapefile of buffers used to determine distributary routing...')
-    flccb = fl.copy()
-    flccb['geometry'] = flccb.buffpoly
-    df2shp(flccb.drop('buffpoly', axis=1),
-           os.path.join(outfolder, 'flowlines_gt{:.0f}km_buffers.shp'.format(asum_thresh)),
-           index=False, epsg=project_epsg)
+        # write a shapefile of the flowline buffers for GIS visualization
+        logger.statement('Writing shapefile of buffers used to determine distributary routing...')
+        flccb = fl.copy()
+        flccb['geometry'] = flccb.buffpoly
+        df2shp(flccb.drop('buffpoly', axis=1),
+               os.path.join(outfolder, 'flowlines_gt{:.0f}km_buffers.shp'.format(asum_thresh)),
+               index=False, epsg=project_epsg)
+    else:
+        assert Path(flowline_elevations_file).exists(), \
+            ("If run_zonal_statistics=False a flowline_elevations_file produced by"
+             "a previous run of the sfrmaker.preprocessing.preprocess_nhdplus() "
+             "function is needed.")
+        flccb = shp2df(flowline_elevations_file)
+        flccb.index = flccb['COMID']
+        flccb['buffpoly'] = flccb['geometry']
+        merge_cols = [c for c in flccb.columns if c not in fl.columns]
+        fl = fl.join(flccb[merge_cols])
 
     # cull COMIDS with invalid values
     minelev = -10
@@ -538,7 +562,7 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
     # use zonal statistics elevation to determine routing at divergences
     # (many of these do not appear to be coded correctly in NHDPlus)
     # route to the segment with the lowest 20th percentile elevation
-    logger.log('Determining routing at divergences using sampled values')
+    logger.log(f'Determining routing at divergences using elevations sampled from {demfile}')
     txt = 'Primary distributary determined from lowest {}th percentile '.format(elevcol[-2:]) +\
           'elevation value among distributaries at the confluence.\n'
 
@@ -550,20 +574,23 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
 
     logger.statement(txt)
     # dictionary of values for selecting main channel at diversions
+    valid_comids = set(flcc.index)
     div_elevs = dict(zip(flcc.COMID, flcc[elevcol]))
     tocomids = {}
     diversionminorcomids = set()
     for k, v in graph.items():
 
         # limit distributaries to those still in the dataset
-        v = v.intersection(flcc.index)
+        v = v.intersection(valid_comids)
 
+        # known connections have to be handled first
         if k in known_connections.keys():
             # primary dist.
             tocomids[k] = known_connections[k]
             # update minorcomids with minor distribs.
             diversionminorcomids.update(v.difference({tocomids[k]}))
         # comid routes to only one comid
+        # (likely most common case)
         elif len(v) == 1:
             tocomids[k] = v.pop()
         # comid is an outlet
@@ -584,7 +611,8 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
                 # (see NHDPlus v2 User's Guide)
                 info = flcc.loc[tocomids_c, 'Divergence'].sort_values()
                 assert info.values[0] == 1
-                tocomids[k] = flcc.loc[tocomids_c, 'Divergence'].sort_values().index[0]
+                tocomids[k] = info.index[0]
+                #tocomids[k] = flcc.loc[tocomids_c, 'Divergence'].sort_values().index[0]
             else:
                 tocomids[k] = np.array(tocomids_c)[np.nanargmin(dnelevs)]
             # secondary distributaries
@@ -608,13 +636,14 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
 
     # verify that all comids only route to one other comid
     assert np.all([np.isscalar(v) for v in tocomids.values()])
-    logger.log('Determining routing at divergences using sampled values')
+    logger.log('Determining routing at divergences using elevations sampled from the dem')
 
     # Update comid start values using new routing
-    logger.log('Updating values')
 
-    # use minimum values sampled from buffers
-    elevs = dict(zip(flcc.COMID, flcc['min']))
+    # use the 1st percentile elevation values to avoid outliers
+    # (spurious values in the DEM)
+    logger.log('Updating elevation values with 1st percentile sampled from the dem')
+    elevs = dict(zip(flcc.COMID, flcc['pct01']))
     elevup = {}
     cm_to_output_units = convert_length_units('cm', output_length_units)
     # dictionary of NHDPlus minimum values converted to output units
@@ -634,9 +663,10 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
     noelevup = np.isnan(flcc.elevup)
     flcc.loc[noelevup, 'elevup'] = flcc.loc[noelevup, 'elevdn']
 
-    logger.log('Updating values')
+    logger.log('Updating elevation values with 1st percentile sampled from the dem')
 
     # smooth segment end values so that they never rise downstream
+    logger.log('Smoothing updated elevations')
     elevminsmo, elevmaxsmo = smooth_elevations(flcc.index.values, flcc.tocomid.values,
                                                flcc.elevdn.values, flcc.elevup.values)
     flcc['elevupsmo'] = [elevmaxsmo[c] for c in flcc.index]
@@ -648,6 +678,7 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
     elevupsmo = dict(zip(flcc.index, flcc.elevupsmo))
     nextup = np.array([elevupsmo.get(graph.get(c, -10), -10) for c in flcc.index])
     assert np.all(nextup <= flcc.elevdnsmo.values)
+    logger.log('Smoothing updated elevations')
 
     # subtract secondary distributaries
     nhdplus_asums = dict(zip(pfvaa.index, pfvaa.ArbolateSu))
