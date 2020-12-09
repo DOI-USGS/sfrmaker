@@ -12,10 +12,10 @@
    "execution_count": 1,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2020-12-09T15:31:21.737482Z",
-     "iopub.status.busy": "2020-12-09T15:31:21.736564Z",
-     "iopub.status.idle": "2020-12-09T15:31:22.606978Z",
-     "shell.execute_reply": "2020-12-09T15:31:22.606111Z"
+     "iopub.execute_input": "2020-12-09T15:32:35.169325Z",
+     "iopub.status.busy": "2020-12-09T15:32:35.168612Z",
+     "iopub.status.idle": "2020-12-09T15:32:36.063920Z",
+     "shell.execute_reply": "2020-12-09T15:32:36.063396Z"
     }
    },
    "outputs": [],
@@ -43,10 +43,10 @@
    "execution_count": 2,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2020-12-09T15:31:22.614088Z",
-     "iopub.status.busy": "2020-12-09T15:31:22.612686Z",
-     "iopub.status.idle": "2020-12-09T15:31:25.575802Z",
-     "shell.execute_reply": "2020-12-09T15:31:25.576409Z"
+     "iopub.execute_input": "2020-12-09T15:32:36.081846Z",
+     "iopub.status.busy": "2020-12-09T15:32:36.069577Z",
+     "iopub.status.idle": "2020-12-09T15:32:38.913931Z",
+     "shell.execute_reply": "2020-12-09T15:32:38.913524Z"
     }
    },
    "outputs": [
@@ -97,7 +97,7 @@
      "name": "stdout",
      "output_type": "stream",
      "text": [
-      "grid class created in 0.31s\n",
+      "grid class created in 0.25s\n",
       "\n",
       "Model grid information\n",
       "structured grid\n",
@@ -128,7 +128,7 @@
       "Intersecting 17 flowlines with 17,760 grid cells...\n",
       "\n",
       "Building spatial index...\n",
-      "finished in 1.71s\n",
+      "finished in 1.66s\n",
       "\n",
       "Intersecting 17 features...\n",
       "17\n",
@@ -157,7 +157,7 @@
       "active area defined by: all cells\n",
       "\n",
       "\n",
-      "Time to create sfr dataset: 2.60s\n",
+      "Time to create sfr dataset: 2.48s\n",
       "\n"
      ]
     }
@@ -230,10 +230,10 @@
    "execution_count": 3,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2020-12-09T15:31:25.591259Z",
-     "iopub.status.busy": "2020-12-09T15:31:25.580810Z",
-     "iopub.status.idle": "2020-12-09T15:31:33.766701Z",
-     "shell.execute_reply": "2020-12-09T15:31:33.766166Z"
+     "iopub.execute_input": "2020-12-09T15:32:38.918280Z",
+     "iopub.status.busy": "2020-12-09T15:32:38.917903Z",
+     "iopub.status.idle": "2020-12-09T15:32:47.453024Z",
+     "shell.execute_reply": "2020-12-09T15:32:47.452304Z"
     }
    },
    "outputs": [
@@ -242,14 +242,14 @@
      "output_type": "stream",
      "text": [
       "running rasterstats.zonal_stats on buffered LineStrings...\n",
-      "finished in 3.98s\n",
+      "finished in 4.04s\n",
       "\n",
       "running rasterstats.zonal_stats on buffered LineStrings...\n",
-      "finished in 3.88s\n",
+      "finished in 4.17s\n",
       "\n",
       "\n",
       "Smoothing elevations...\n",
-      "finished in 0.15s\n"
+      "finished in 0.13s\n"
      ]
     }
    ],
@@ -277,10 +277,10 @@
    "execution_count": 4,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2020-12-09T15:31:33.785251Z",
-     "iopub.status.busy": "2020-12-09T15:31:33.772605Z",
-     "iopub.status.idle": "2020-12-09T15:31:33.814787Z",
-     "shell.execute_reply": "2020-12-09T15:31:33.814079Z"
+     "iopub.execute_input": "2020-12-09T15:32:47.476241Z",
+     "iopub.status.busy": "2020-12-09T15:32:47.461718Z",
+     "iopub.status.idle": "2020-12-09T15:32:47.501317Z",
+     "shell.execute_reply": "2020-12-09T15:32:47.500520Z"
     }
    },
    "outputs": [],
@@ -307,10 +307,10 @@
    "execution_count": 5,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2020-12-09T15:31:33.822638Z",
-     "iopub.status.busy": "2020-12-09T15:31:33.820169Z",
-     "iopub.status.idle": "2020-12-09T15:31:36.723096Z",
-     "shell.execute_reply": "2020-12-09T15:31:36.722716Z"
+     "iopub.execute_input": "2020-12-09T15:32:47.506693Z",
+     "iopub.status.busy": "2020-12-09T15:32:47.506233Z",
+     "iopub.status.idle": "2020-12-09T15:32:50.295213Z",
+     "shell.execute_reply": "2020-12-09T15:32:50.295652Z"
     }
    },
    "outputs": [
@@ -550,7 +550,7 @@
    "name": "python",
    "nbconvert_exporter": "python",
    "pygments_lexer": "ipython3",
-   "version": "3.7.8"
+   "version": "3.9.0"
   }
  },
  "nbformat": 4,
