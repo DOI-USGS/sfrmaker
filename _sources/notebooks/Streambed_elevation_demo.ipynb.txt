@@ -12,10 +12,10 @@
    "execution_count": 1,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2020-12-09T15:32:35.169325Z",
-     "iopub.status.busy": "2020-12-09T15:32:35.168612Z",
-     "iopub.status.idle": "2020-12-09T15:32:36.063920Z",
-     "shell.execute_reply": "2020-12-09T15:32:36.063396Z"
+     "iopub.execute_input": "2020-12-10T15:19:44.546870Z",
+     "iopub.status.busy": "2020-12-10T15:19:44.546115Z",
+     "iopub.status.idle": "2020-12-10T15:19:45.406919Z",
+     "shell.execute_reply": "2020-12-10T15:19:45.406064Z"
     }
    },
    "outputs": [],
@@ -43,10 +43,10 @@
    "execution_count": 2,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2020-12-09T15:32:36.081846Z",
-     "iopub.status.busy": "2020-12-09T15:32:36.069577Z",
-     "iopub.status.idle": "2020-12-09T15:32:38.913931Z",
-     "shell.execute_reply": "2020-12-09T15:32:38.913524Z"
+     "iopub.execute_input": "2020-12-10T15:19:45.425201Z",
+     "iopub.status.busy": "2020-12-10T15:19:45.412766Z",
+     "iopub.status.idle": "2020-12-10T15:19:48.343400Z",
+     "shell.execute_reply": "2020-12-10T15:19:48.344018Z"
     }
    },
    "outputs": [
@@ -72,13 +72,13 @@
       "reading ../tylerforks/NHDPlus/NHDPlusAttributes/elevslope.dbf...\n",
       "--> building dataframe... (may take a while for large shapefiles)\n",
       "\n",
-      "load finished in 0.21s\n",
+      "load finished in 0.20s\n",
       "\n",
       "Getting routing information from NHDPlus Plusflow table...\n",
       "finished in 0.02s\n",
       "\n",
       "\n",
-      "SFRmaker version 0.6.2.post2.dev0+g2a0d1bd\n",
+      "SFRmaker version 0.6.2.post4.dev0+g64ce5c6\n",
       "\n",
       "Creating sfr dataset...\n",
       "\n",
@@ -97,7 +97,7 @@
      "name": "stdout",
      "output_type": "stream",
      "text": [
-      "grid class created in 0.25s\n",
+      "grid class created in 0.31s\n",
       "\n",
       "Model grid information\n",
       "structured grid\n",
@@ -128,7 +128,7 @@
       "Intersecting 17 flowlines with 17,760 grid cells...\n",
       "\n",
       "Building spatial index...\n",
-      "finished in 1.66s\n",
+      "finished in 1.71s\n",
       "\n",
       "Intersecting 17 features...\n",
       "17\n",
@@ -157,7 +157,7 @@
       "active area defined by: all cells\n",
       "\n",
       "\n",
-      "Time to create sfr dataset: 2.48s\n",
+      "Time to create sfr dataset: 2.58s\n",
       "\n"
      ]
     }
@@ -230,10 +230,10 @@
    "execution_count": 3,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2020-12-09T15:32:38.918280Z",
-     "iopub.status.busy": "2020-12-09T15:32:38.917903Z",
-     "iopub.status.idle": "2020-12-09T15:32:47.453024Z",
-     "shell.execute_reply": "2020-12-09T15:32:47.452304Z"
+     "iopub.execute_input": "2020-12-10T15:19:48.348528Z",
+     "iopub.status.busy": "2020-12-10T15:19:48.348128Z",
+     "iopub.status.idle": "2020-12-10T15:19:56.154300Z",
+     "shell.execute_reply": "2020-12-10T15:19:56.154670Z"
     }
    },
    "outputs": [
@@ -242,14 +242,14 @@
      "output_type": "stream",
      "text": [
       "running rasterstats.zonal_stats on buffered LineStrings...\n",
-      "finished in 4.04s\n",
+      "finished in 3.72s\n",
       "\n",
       "running rasterstats.zonal_stats on buffered LineStrings...\n",
-      "finished in 4.17s\n",
+      "finished in 3.77s\n",
       "\n",
       "\n",
       "Smoothing elevations...\n",
-      "finished in 0.13s\n"
+      "finished in 0.14s\n"
      ]
     }
    ],
@@ -277,10 +277,10 @@
    "execution_count": 4,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2020-12-09T15:32:47.476241Z",
-     "iopub.status.busy": "2020-12-09T15:32:47.461718Z",
-     "iopub.status.idle": "2020-12-09T15:32:47.501317Z",
-     "shell.execute_reply": "2020-12-09T15:32:47.500520Z"
+     "iopub.execute_input": "2020-12-10T15:19:56.165744Z",
+     "iopub.status.busy": "2020-12-10T15:19:56.163544Z",
+     "iopub.status.idle": "2020-12-10T15:19:56.199494Z",
+     "shell.execute_reply": "2020-12-10T15:19:56.199054Z"
     }
    },
    "outputs": [],
@@ -307,10 +307,10 @@
    "execution_count": 5,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2020-12-09T15:32:47.506693Z",
-     "iopub.status.busy": "2020-12-09T15:32:47.506233Z",
-     "iopub.status.idle": "2020-12-09T15:32:50.295213Z",
-     "shell.execute_reply": "2020-12-09T15:32:50.295652Z"
+     "iopub.execute_input": "2020-12-10T15:19:56.206027Z",
+     "iopub.status.busy": "2020-12-10T15:19:56.204503Z",
+     "iopub.status.idle": "2020-12-10T15:19:59.096821Z",
+     "shell.execute_reply": "2020-12-10T15:19:59.097259Z"
     }
    },
    "outputs": [
@@ -550,7 +550,7 @@
    "name": "python",
    "nbconvert_exporter": "python",
    "pygments_lexer": "ipython3",
-   "version": "3.9.0"
+   "version": "3.7.8"
   }
  },
  "nbformat": 4,
