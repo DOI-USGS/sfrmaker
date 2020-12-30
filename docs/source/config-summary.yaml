@@ -1,0 +1,148 @@
+# Summary of SFRmaker configuration file options
+
+package_version: mf6  # mf6, mfnwt or mf2005
+package_name: model  # (defaults to model or simulation name if not specified)
+output_path: "."  # where the output will be written
+
+modelgrid:
+  # Shapefile option (arguments to sfrmaker.grid.StructuredGrid.from_shapefile):
+  shapefile: None
+  node_col: node
+  kcol: k
+  icol: i
+  jcol: j
+  isfr_col: isfr
+  active_area: None
+  crs: None
+  epsg: None
+  proj_str: None
+  prjfile: None
+  # Flopy modelgrid option (arguments to flopy.discretization.StructuredGrid):
+  delc: None
+  delr: None
+  top: None
+  botm: None
+  idomain: None
+  lenuni: None
+  proj4: None
+  prj: None
+  xoff: 0.0
+  yoff: 0.0
+  angrot: 0.0
+  nlay: None
+  nrow: None
+  ncol: None
+  laycbd: None
+
+flowlines:
+  # Custom hydrography option (arguments to sfrmaker.Lines.from_shapefile):
+  shapefile: None
+  id_column: id
+  routing_column: toid
+  arbolate_sum_column2: asum2
+  width1_column: width1
+  width2_column: width2
+  up_elevation_column: elevup
+  dn_elevation_column: elevdn
+  name_column: name
+  attr_length_units: meters
+  attr_height_units: meters
+  filter: None
+  crs: None
+  epsg: None
+  proj_str: None
+  prjfile: None
+  # NHDPlus option (arguments to sfrmaker.Lines.from_nhdplus_v2):
+  NHDPlus_paths: None
+  NHDFlowlines: None
+  PlusFlowlineVAA: None
+  PlusFlow: None
+  elevslope: None
+
+simulation:
+  # Simulation information
+  # (MODFLOW-6 only; arguments to flopy.mf6.MFSimulation.load):
+  sim_name: modflowsim
+  version: mf6
+  exe_name: mf6.exe
+  sim_ws: .
+  strict: True
+  verbosity_level: 1
+  load_only: None
+  verify_data: False
+  write_headers: True
+
+model:
+  # MODFLOW-NWT or MODFLOW-2005 information
+  # (arguments to flopy.modflow.Modflow.load):
+  namefile: None  # "f" argument in flopy
+  version: mf2005
+  exe_name: mf2005.exe
+  verbose: False
+  model_ws: .
+  load_only: None
+  forgive: False
+  check: True
+  # MODFLOW-6 information
+  # (arguments to flopy.mf6.MFSimulation.get_model):
+  model_name: None
+
+dem:
+  # Option to sample streambed top elevations from a DEM
+  # (arguments to sfrmaker.SFRData.set_streambed_top_elevations_from_dem):
+  filename: None
+  elevation_units: None
+  method: buffers
+  # keyword arguments to sfrmaker.SFRData.sample_reach_elevations:
+  buffer_distance: 100
+  smooth: True
+
+inflows:
+  # Option to add specified inflows
+  # (arguments to sfrmaker.SFRData.add_to_perioddata for MODFLOW-6):
+  data: None
+  flowline_routing: None
+  variable: inflow
+  line_id_column: None
+  rno_column: None
+  period_column: per
+  data_column: Q_avg
+  # (arguments to sfrmaker.SFRData.add_to_segment_data for MODFLOW-2005):
+  segment_column: segment
+
+observations:
+  # Option to add SFR observation input
+  # (arguments to sfrmaker.SFRData.add_observations):
+  data: None
+  flowline_routing: None
+  obstype: None
+  sfrlines_shapefile: None
+  x_location_column: None
+  y_location_column: None
+  line_id_column: None
+  rno_column: None
+  obstype_column: None
+  obsname_column: site_no
+  gage_starting_unit_number: 250
+
+to_riv:
+  # Option to convert parts of the SFR network
+  # downstream of specified line_ids to the RIV package:
+  line_ids: None
+  drop_in_sfr: True
+
+options:
+  # SFR options (arguments to sfrmaker.Lines.to_sfr):
+  active_area: None
+  isfr: None
+  model_length_units: undefined
+  model_time_units: days
+  minimum_reach_length: None
+  width_from_asum_a_param: 0.1193
+  width_from_asum_b_param: 0.5032
+  minimum_reach_width: 1.0
+  consolidate_conductance: False
+  one_reach_per_cell: False
+  add_outlets: None
+  # keyword arguments to sfrmaker.SFRData:
+  enforce_increasing_nsegs: True

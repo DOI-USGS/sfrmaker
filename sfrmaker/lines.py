@@ -622,6 +622,7 @@ class Lines:
                active_area=None, isfr=None,
                model=None,
                model_length_units='undefined',
+               model_time_units='days',
                minimum_reach_length=None,
                width_from_asum_a_param=0.1193,
                width_from_asum_b_param=0.5032,
@@ -653,6 +654,8 @@ class Lines:
             Length units of the model. While SFRmaker will try to read these
             from a supplied grid (first) and then a supplied model (second),
             it is good practice to specify them explicitly here.
+        model_time_units : str; e.g. {'d', 'days'}, optional
+            Time units for model. By default, days.
         minimum_reach_length : float, optional
             Minimum reach length to retain. Default is to compute
             an effective mean model cell length by taking the square root
@@ -956,6 +959,7 @@ class Lines:
         rd = rd[[c for c in SFRData.rdcols if c in rd.columns]].copy()
         sfrd = SFRData(reach_data=rd, segment_data=sd, grid=grid,
                        model=model, model_length_units=model_length_units,
+                       model_time_units=model_time_units,
                        package_name=package_name, **kwargs)
         print("\nTime to create sfr dataset: {:.2f}s\n".format(time.time() - totim))
         return sfrd

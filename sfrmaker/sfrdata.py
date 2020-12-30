@@ -1,6 +1,7 @@
 import os
 import time
 from packaging import version
+import warnings
 import yaml
 import numpy as np
 import pandas as pd
@@ -9,13 +10,13 @@ from rasterstats import zonal_stats
 from shapely.geometry import LineString
 from gisutils import df2shp, get_authority_crs
 from sfrmaker.routing import find_path, renumber_segments
-from .checks import valid_rnos, valid_nsegs, rno_nseg_routing_consistent
-from .elevations import smooth_elevations
-from .flows import add_to_perioddata, add_to_segment_data
-from .gis import export_reach_data, project
-from .observations import write_gage_package, write_mf6_sfr_obsfile, add_observations
-from .units import convert_length_units, itmuni_values, lenuni_values
-from .utils import get_sfr_package_format, get_input_arguments, assign_layers, update
+from sfrmaker.checks import valid_rnos, valid_nsegs, rno_nseg_routing_consistent
+from sfrmaker.elevations import smooth_elevations
+from sfrmaker.flows import add_to_perioddata, add_to_segment_data
+from sfrmaker.gis import export_reach_data, project
+from sfrmaker.observations import write_gage_package, write_mf6_sfr_obsfile, add_observations
+from sfrmaker.units import convert_length_units, itmuni_values, lenuni_values
+from sfrmaker.utils import get_sfr_package_format, get_input_arguments, assign_layers, update
 import sfrmaker
 from sfrmaker.base import DataPackage
 from sfrmaker.mf5to6 import segment_data_to_period_data
@@ -124,7 +125,7 @@ class SFRData(DataPackage):
                 'strthick': 1,
                 'strhc1': 1,
                 'istcb2': 223,
-                'gage_starting_unit_number': 228
+                'gage_starting_unit_number': 250
                 }
     package_type = 'sfr'
 
@@ -132,7 +133,7 @@ class SFRData(DataPackage):
                  segment_data=None, grid=None,
                  model=None,
                  isfr=None,
-                 model_length_units="undefined", model_time_units='d',
+                 model_length_units="undefined", model_time_units='days',
                  enforce_increasing_nsegs=True,
                  package_name='model',
                  **kwargs):
@@ -777,29 +778,30 @@ class SFRData(DataPackage):
                          line_id_column=None,
                          rno_column=None,
                          obstype_column=None,
-                         obsname_column='site_no'):
+                         obsname_column='site_no',
+                         gage_starting_unit_number=250):
+        self.gage_starting_unit_number = gage_starting_unit_number
+        added_obs = add_observations(self, data, flowline_routing=flowline_routing,
+                                     obstype=obstype, sfrlines_shapefile=sfrlines_shapefile,
+                                     x_location_column=x_location_column,
+                                     y_location_column=y_location_column,
+                                     line_id_column=line_id_column,
+                                     rno_column=rno_column,
+                                     obstype_column=obstype_column,
+                                     obsname_column=obsname_column)
 
-         added_obs = add_observations(self, data, flowline_routing=flowline_routing,
-                                      obstype=obstype, sfrlines_shapefile=sfrlines_shapefile,
-                                      x_location_column=x_location_column,
-                                      y_location_column=y_location_column,
-                                      line_id_column=line_id_column,
-                                      rno_column=rno_column,
-                                      obstype_column=obstype_column,
-                                      obsname_column=obsname_column)
+        # replace any observations that area already in the observations table
+        if isinstance(self._observations, pd.DataFrame):
+            exists_already = self._observations['obsname'].isin(added_obs['obsname'])
+            self._observations = self._observations.loc[~exists_already]
+        self._observations = self.observations.append(added_obs).reset_index(drop=True)
 
-         # replace any observations that area already in the observations table
-         if isinstance(self._observations, pd.DataFrame):
-             exists_already = self._observations['obsname'].isin(added_obs['obsname'])
-             self._observations = self._observations.loc[~exists_already]
-         self._observations = self.observations.append(added_obs).reset_index(drop=True)
-
-         for df in self._observations, added_obs:
-             # enforce dtypes (pandas doesn't allow an empty dataframe
-             # to be initialized with more than one specified dtype)
-             for col in ['rno', 'iseg', 'ireach']:
-                 df[col] = df[col].astype(int)
-         return added_obs
+        for df in self._observations, added_obs:
+            # enforce dtypes (pandas doesn't allow an empty dataframe
+            # to be initialized with more than one specified dtype)
+            for col in ['rno', 'iseg', 'ireach']:
+                df[col] = df[col].astype(int)
+        return added_obs
 
     def interpolate_to_reaches(self, segvar1, segvar2, per=0):
         """Interpolate values in datasets 6b and 6c to each reach in stream segment
@@ -858,10 +860,9 @@ class SFRData(DataPackage):
                     sd[[*sdcols]].values.sum(axis=(0, 1)) != 0.:
                 self.reach_data[col] = self.interpolate_to_reaches(*sdcols)
 
-    def sample_reach_elevations(self, dem, dem_z_units=None,
+    def sample_reach_elevations(self, dem,
                                 method='buffers',
                                 buffer_distance=100,
-                                statistic='min',
                                 smooth=True
                                 ):
         """Computes zonal statistics on a raster for SFR reaches, using
@@ -872,17 +873,11 @@ class SFRData(DataPackage):
         ----------
         dem : path to valid raster dataset
             Must be in same Coordinate Reference System as model grid.
-        dem_z_units : str
-            Elevation units for DEM ('feet' or 'meters'). If None, units
-            are assumed to be same as model (default).
         method : str; 'buffers' or 'cell polygons'
             If 'buffers', buffers (with flat caps; cap_style=2 in LineString.buffer())
             will be created around the reach LineStrings (geometry column in reach_data).
         buffer_distance : float
             Buffer distance to apply around reach LineStrings, in crs_units.
-        statistic : str
-            "stats" argument to rasterstats.zonal_stats.
-            "min" is recommended for streambed elevations (default).
         smooth : bool
             Run sfrmaker.elevations.smooth_elevations on sampled elevations
             to ensure that they decrease monotonically in the downstream direction
@@ -942,7 +937,8 @@ class SFRData(DataPackage):
             elevs = dict(zip(self.reach_data.rno, elevs))
         return elevs
 
-    def set_streambed_top_elevations_from_dem(self, dem, dem_z_units=None,
+    def set_streambed_top_elevations_from_dem(self, filename, elevation_units=None,
+                                              dem=None, dem_z_units=None,
                                               method='buffers',
                                               **kwargs):
         """Set streambed top elevations from a DEM raster.
@@ -950,9 +946,9 @@ class SFRData(DataPackage):
 
         Parameters
         ----------
-        dem : path to valid raster dataset
+        filename : path to valid raster dataset
             Must be in same Coordinate Reference System as model grid.
-        dem_z_units : str
+        elevation_units : str
             Elevation units for DEM ('feet' or 'meters'). If None, units
             are assumed to be same as model (default).
         method : str; 'buffers' or 'cell polygons'
@@ -964,11 +960,19 @@ class SFRData(DataPackage):
         -------
         updates strtop column of sfrdata.reach_data
         """
-        sampled_elevs = self.sample_reach_elevations(dem=dem, method=method,
+        if dem is not None:
+            warnings.warn('set_streambed_top_elevations_from_dem: dem argument is deprecated. '
+                          'Use filename instead.', DeprecationWarning)
+            filename = dem
+        if dem_z_units is not None:
+            warnings.warn('set_streambed_top_elevations_from_dem: dem_z_units argument is deprecated. '
+                          'Use elevation_units instead.', DeprecationWarning)
+            elevation_units = dem_z_units
+        sampled_elevs = self.sample_reach_elevations(dem=filename, method=method,
                                                      **kwargs)
-        if dem_z_units is None:
-            dem_z_units = self.model_length_units
-        mult = convert_length_units(dem_z_units, self.model_length_units)
+        if elevation_units is None:
+            elevation_units = self.model_length_units
+        mult = convert_length_units(elevation_units, self.model_length_units)
         self.reach_data['strtop'] = [sampled_elevs[rno]
                                      for rno in self.reach_data['rno'].values]
         self.reach_data['strtop'] *= mult
@@ -1120,7 +1124,7 @@ class SFRData(DataPackage):
             defaults = yaml.load(src, Loader=yaml.Loader)
 
         # add defaults to configuration
-        cfg = update(defaults, cfg)
+        #cfg = update(defaults, cfg)
 
         # set the package_name and output paths
         if package_name is not None:
@@ -1133,8 +1137,10 @@ class SFRData(DataPackage):
             package_name, _ = os.path.splitext(cfg['simulation']['sim_name'])
         elif 'model' in cfg:
             package_name, _ = os.path.splitext(cfg['model']['namefile'])
+        else:
+            package_name = 'model'
         if output_path is None:
-            output_path = cfg['output_path']
+            output_path = cfg.get('output_path', '.')
         if not os.path.isdir(output_path):
             os.makedirs(output_path)
 
@@ -1212,7 +1218,10 @@ class SFRData(DataPackage):
         to_sfr_kwargs = cfg.copy()
         to_sfr_kwargs.update(cfg.get('options', {}))
         to_sfr_kwargs = get_input_arguments(to_sfr_kwargs, sfrmaker.Lines.to_sfr)
-        to_sfr_kwargs['active_area'] = cfg.get('active_area', {}).get('filename')
+        if cfg.get('active_area') is not None:
+            warnings.warn('the active_area: block is deprecated. '
+                          'Use active_area: argument in options: block instead.', DeprecationWarning)
+            to_sfr_kwargs['active_area'] = cfg.get('active_area', {}).get('filename')
         to_sfr_kwargs['model'] = model
         to_sfr_kwargs['grid'] = grid
         to_sfr_kwargs['package_name'] = package_name
@@ -1223,13 +1232,23 @@ class SFRData(DataPackage):
 
         # setup elevations
         if cfg.get('options', cfg).get('set_streambed_top_elevations_from_dem', False):
+            warnings.warn(('The set_streambed_top_elevations_from_dem argument '
+                           'is deprecated. This option is now activated by including a dem: '
+                           'block in the configuration file.'), DeprecationWarning)
+        if 'dem' in cfg:
             error_msg = ("set_streambed_top_elevations_from_dem=True "
                          "requires a dem: block.")
-            if 'dem' not in cfg:
-                raise KeyError(error_msg)
-            elevation_units = cfg['dem'].get('elevation_units')
-            sfrdata.set_streambed_top_elevations_from_dem(cfg['dem']['filename'],
-                                                          dem_z_units=elevation_units)
+            #if 'dem' not in cfg:
+            #    raise KeyError(error_msg)
+            # get valid arguments for set_streambed_top_elevations_from_dem
+            # and sample_reach_elevations,
+            # which accepts kwargs from set_streambed_top_elevations_from_dem
+            dem_kwargs = get_input_arguments(cfg['dem'],
+                                             sfrmaker.SFRData.sample_reach_elevations)
+            dem_kwargs2 = get_input_arguments(cfg['dem'],
+                                              sfrmaker.SFRData.set_streambed_top_elevations_from_dem)
+            dem_kwargs.update(dem_kwargs2)
+            sfrdata.set_streambed_top_elevations_from_dem(**dem_kwargs)
         else:
             sfrdata.reach_data['strtop'] = sfrdata.interpolate_to_reaches('elevup', 'elevdn')
 
@@ -1239,8 +1258,8 @@ class SFRData(DataPackage):
 
         # option to convert reaches to the River Package
         if 'to_riv' in cfg:
-            rivdata = sfrdata.to_riv(line_ids=cfg['to_riv'],
-                                     drop_in_sfr=True)
+            to_riv_args = get_input_arguments(cfg['to_riv'], SFRData.to_riv)
+            rivdata = sfrdata.to_riv(**to_riv_args)
             sfrdata.setup_riv(rivdata)
             rivdata.write_table()
             rivdata.write_shapefiles()
@@ -1289,8 +1308,6 @@ class SFRData(DataPackage):
         if 'observations' in cfg:
             if not model:
                 pass #  raise KeyError('Setup of observations input results a model: block')
-            if model_version != 'mf6':
-                sfrdata.gage_starting_unit_number = cfg['gag']['starting_unit_number']
             key = 'filename' if 'filename' in cfg['observations'] else 'filenames'
             cfg['observations']['data'] = cfg['observations'][key]
             kwargs = get_input_arguments(cfg['observations'].copy(), sfrdata.add_observations)

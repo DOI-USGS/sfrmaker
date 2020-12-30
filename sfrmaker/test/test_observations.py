@@ -68,7 +68,7 @@ def test_write_gage_package(tylerforks_sfrdata, flux_observation_data, outdir):
                                               )
     tylerforks_sfrdata.write_gage_package()
     expected = tylerforks_sfrdata.observations.sort_values(by='obsname')[['iseg', 'ireach']].reset_index(drop=True).copy()
-    expected['unit'] = np.arange(228, 228+len(obsdata))
+    expected['unit'] = np.arange(250, 250+len(obsdata))
     expected.columns = list(range(3))
     expected[3] = 0
     tylerforks_sfrdata.model.write_name_file()

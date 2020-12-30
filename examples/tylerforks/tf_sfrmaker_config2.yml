@@ -1,9 +1,6 @@
 package_version: 'mfnwt'
 package_name: 'tf'
 output_path: '.'
-# any arguments to Lines.to_sfr() or SFRData
-# can be supplied as top-level keys
-model_length_units: 'feet'
 modelgrid:
   shapefile: grid.shp
   icol: i  # attribute field with row numbers
@@ -16,4 +13,6 @@ flowlines:
 dem:
   filename: dem_26715.tif
   elevation_units: meters
-set_streambed_top_elevations_from_dem: True
+  buffer_distance: 50.
+options:
+  model_length_units: 'feet'

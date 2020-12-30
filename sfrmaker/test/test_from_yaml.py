@@ -151,7 +151,6 @@ def test_tylerforks_from_config(config_file, dem):
             shutil.rmtree(folder)
     if not dem:
         del cfg['dem']
-        del cfg['set_streambed_top_elevations_from_dem']
     sfrdata = sfrmaker.SFRData.from_yaml(cfg)
     if 'model' in cfg:
         assert os.path.exists('tylerforks/tf.sfr')

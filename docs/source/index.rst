@@ -28,6 +28,7 @@ SFRmaker |version|
   :caption: Reference
 
    Code reference <api/index>
+   Summary of configuration file options <config-summary>
    Release History <release-history>
    Contributing to SFRmaker <contributing>
 
