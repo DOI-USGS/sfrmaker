@@ -21,6 +21,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+      #with:
+      #  fetch-depth: 50
     - uses: conda-incubator/setup-miniconda@v2
       with:
         auto-update-conda: true

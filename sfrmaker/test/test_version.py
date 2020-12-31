@@ -5,7 +5,7 @@ import os
 from packaging import version
 import pandas as pd
 import sfrmaker
-import versioneer
+import pytest
 
 
 def get_readme_version(project_root_path):
@@ -34,6 +34,9 @@ def get_changelog_version(project_root_path):
     return version_info
 
 
+@pytest.mark.skipif(os.environ.get('GITHUB_ACTIONS') == 'true',
+                    reason=("Clone depth of 1 doesn't allow last "
+                            "release number to be detected."))
 def test_version(project_root_path):
     version_info = version.parse(sfrmaker.__version__)
     readme_version = get_readme_version(project_root_path)
