@@ -1,0 +1,770 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>The Preprocessing Module &mdash; SFRmaker 0.post1.dev0+g6b61537 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="The SFRData Module" href="sfrmaker.sfrdata.html" />
+    <link rel="prev" title="The MODFLOW-2005 to 6 Module" href="sfrmaker.mf5to6.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> SFRmaker
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.post1.dev0+g6b61537
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../philosophy.html"> Philosophy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html"> Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html"> Installation</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../inputs.html"> Input Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html"> Using SFRmaker with a configuration file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebooks/SFRmaker_demo.html"> Basic Usage in a scripting context</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebooks/Streambed_elevation_demo.html"> How the streambed elevation sampling works</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html"> Code reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.grid.html">Grid Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.lines.html">Lines Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.mf5to6.html">MODFLOW-2005 to 6 Module</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Preprocessing Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.sfrdata.html">SFRData Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.utils.html">Utilities Module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../config-summary.html"> Summary of configuration file options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../release-history.html"> Release History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html"> Contributing to SFRmaker</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Bibliography</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../references.html"> References cited</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">SFRmaker</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="index.html">Modules</a> &raquo;</li>
+        
+      <li>The Preprocessing Module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/api/sfrmaker.preprocessing.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="module-sfrmaker.preprocessing">
+<span id="the-preprocessing-module"></span><h1>The Preprocessing Module<a class="headerlink" href="#module-sfrmaker.preprocessing" title="Permalink to this headline">¶</a></h1>
+<dl class="py function">
+<dt id="sfrmaker.preprocessing.clip_flowlines_to_polygon">
+<code class="sig-prename descclassname">sfrmaker.preprocessing.</code><code class="sig-name descname">clip_flowlines_to_polygon</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">flowlines</span></em>, <em class="sig-param"><span class="n">polygon</span></em>, <em class="sig-param"><span class="n">flowlines_epsg</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">crs</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">simplify_tol</span><span class="o">=</span><span class="default_value">100</span></em>, <em class="sig-param"><span class="n">logger</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/preprocessing.html#clip_flowlines_to_polygon"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sfrmaker.preprocessing.clip_flowlines_to_polygon" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clip line features in a flowlines DataFrame to polygon
+features in polygon.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>flowlines</strong><span class="classifier">DataFrame</span></dt><dd><p>Output from <a class="reference internal" href="#sfrmaker.preprocessing.preprocess_nhdplus" title="sfrmaker.preprocessing.preprocess_nhdplus"><code class="xref py py-func docutils literal notranslate"><span class="pre">preprocess_nhdplus()</span></code></a></p>
+</dd>
+<dt><strong>crs</strong><span class="classifier">obj</span></dt><dd><p>Coordinate reference system of flowlines. Only needed if
+the data do not have a valid ESRI projection (.prj) file.
+A Python int, dict, str, or <a class="reference external" href="http://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.0.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> instance
+passed to <a class="reference external" href="http://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input" title="(in pyproj v3.0.0)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.crs.CRS.from_user_input()</span></code></a></p>
+<dl class="simple">
+<dt>Can be any of:</dt><dd><ul class="simple">
+<li><p>PROJ string</p></li>
+<li><p>Dictionary of PROJ parameters</p></li>
+<li><p>PROJ keyword arguments for parameters</p></li>
+<li><p>JSON string with PROJ parameters</p></li>
+<li><p>CRS WKT string</p></li>
+<li><p>An authority string [i.e. ‘epsg:4326’]</p></li>
+<li><p>An EPSG integer code [i.e. 4326]</p></li>
+<li><p>A tuple of (“auth_name”: “auth_code”) [i.e (‘epsg’, ‘4326’)]</p></li>
+<li><p>An object with a <cite>to_wkt</cite> method.</p></li>
+<li><p>A <a class="reference external" href="http://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.0.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> class</p></li>
+</ul>
+</dd>
+</dl>
+<p>By default, None</p>
+</dd>
+<dt><strong>polygon</strong><span class="classifier">str</span></dt><dd><p>Polygon shapefile, shapely polygon or list of shapely polygons of model active area. Shapely polygons 
+must be in the same CRS as flowlines; shapefiles will be automatically reprojected.</p>
+</dd>
+<dt><strong>simplify_tol</strong><span class="classifier">float</span></dt><dd><p>Simplification tolerance for <code class="docutils literal notranslate"><span class="pre">polygon</span></code> to speed clipping.
+See <a class="reference external" href="https://shapely.readthedocs.io/en/latest/manual.html" title="(in Shapely v1.8dev)"><span>The Shapely User Manual</span></a> for more details.</p>
+</dd>
+<dt><strong>logger</strong><span class="classifier">Logger instance</span></dt><dd></dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>flc</strong><span class="classifier">clipped flowlines dataframe</span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="sfrmaker.preprocessing.cull_flowlines">
+<code class="sig-prename descclassname">sfrmaker.preprocessing.</code><code class="sig-name descname">cull_flowlines</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">NHDPlus_paths</span></em>, <em class="sig-param"><span class="n">active_area</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">asum_thresh</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">intermittent_streams_asum_thresh</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">cull_invalid</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">cull_isolated</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">outfolder</span><span class="o">=</span><span class="default_value">'clipped_flowlines'</span></em>, <em class="sig-param"><span class="n">logger</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/preprocessing.html#cull_flowlines"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sfrmaker.preprocessing.cull_flowlines" title="Permalink to this definition">¶</a></dt>
+<dd><p>Cull NHDPlus data to an area defined by an <code class="docutils literal notranslate"><span class="pre">active_area</span></code> polygon and
+to flowlines with Arbolate sums greater than specified thresholds. Also remove
+lines that are isolated from the stream network or are missing attribute information.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>NHDPlus_paths</strong><span class="classifier">list of strings</span></dt><dd><p>Paths to the root folder level NHDPlus Drainage Basins, as they were downloaded
+from the NHDPlus website (e.g. NHDPlus04, NHDPlus07, etc.).</p>
+</dd>
+<dt><strong>active_area</strong><span class="classifier">str, shapely polygon or tuple, optional</span></dt><dd><p>A polygon shapefile, or shapely polygon or bounding box tuple
+(left, bottom, top, right) in the NAD83 GCS (EPSG:4269). The active area
+is converted to a bounding box, which is then used to filter the flowlines
+that are read in. If none, no filtering is performed, and the whole
+area encompased by the input NHDPlus data will be retained.
+By default None.</p>
+</dd>
+<dt><strong>asum_thresh</strong><span class="classifier">numeric, optional</span></dt><dd><p>Minimum arbolate sum value (total length of upstream drainage) to
+retain. Any flowlines with arbolate sums less than this value will be dropped.
+By default None.</p>
+</dd>
+<dt><strong>intermittent_streams_asum_thresh</strong><span class="classifier">numeric, optional</span></dt><dd><p>Minimum arbolate sum value (total length of upstream drainage) to
+retain for flowlines coded as intermittent (FCODE == 46003).
+Any intermittent flowlines with arbolate sums less than this value will be dropped.
+By default None.</p>
+</dd>
+<dt><strong>cull_invalid</strong><span class="classifier">bool, optional</span></dt><dd><p>Option to cull flowlines that have incomplete attribute information
+(lacking entries in the PlusFlowVAA, PlusFlow or Elevslope tables), by default False.</p>
+</dd>
+<dt><strong>cull_isolated</strong><span class="classifier">bool, optional</span></dt><dd><p>Culling intermittent streams with intermittent_streams_asum_thresh may result
+in some isolated flowlines that no longer have downstream connections, or
+such isolated flowlines may be present in the raw NHDPlus data.
+SFRmaker identifies isolated flowslines by looking at up to 10 downstream connections
+to lines that are not stream network. Option to drop
+these lines. By default, False.</p>
+</dd>
+<dt><strong>outfolder</strong><span class="classifier">str, optional</span></dt><dd><p>Location for writing output, by default ‘clipped_flowlines’</p>
+</dd>
+<dt><strong>logger</strong><span class="classifier">sfrmaker.logger instance, optional</span></dt><dd><p>Pass an existing sfrmaker.logger instance to logger the preprocessing operations,
+by default None</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="sfrmaker.preprocessing.edit_flowlines">
+<code class="sig-prename descclassname">sfrmaker.preprocessing.</code><code class="sig-name descname">edit_flowlines</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">flowlines</span></em>, <em class="sig-param"><span class="n">config_file</span></em>, <em class="sig-param"><span class="n">id_column</span><span class="o">=</span><span class="default_value">'COMID'</span></em>, <em class="sig-param"><span class="n">toid_column</span><span class="o">=</span><span class="default_value">'tocomid'</span></em>, <em class="sig-param"><span class="n">logger</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/preprocessing.html#edit_flowlines"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sfrmaker.preprocessing.edit_flowlines" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make edits to the flowlines in flowlines_file,
+as described in config_file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>flowlines</strong><span class="classifier">shapefile or DataFrame</span></dt><dd><p>Flowlines to edit. If a shapefile is specified, a backup
+with “.original” before the extension is made, and the
+input shapefile is overwritten by the results.</p>
+</dd>
+<dt><strong>config_file</strong><span class="classifier">yaml file</span></dt><dd><p>e.g. ‘flowline_edits.yml’</p>
+</dd>
+<dt><strong>id_column</strong><span class="classifier">str</span></dt><dd><p>Column in flowlines with unique identifiers (e.g. COMIDs)</p>
+</dd>
+<dt><strong>toid_column</strong><span class="classifier">str</span></dt><dd><p>Column in flowslines with downstream routing connections (identifiers)</p>
+</dd>
+<dt><strong>logger</strong><span class="classifier">sfrmaker logger instance, optional</span></dt><dd><p>Pass a logger file instance to continue writing to an open logger file
+(e.g. after or before other operations)</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>flowlines</strong><span class="classifier">DataFrame</span></dt><dd><p>Edited flowlines.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="sfrmaker.preprocessing.fix_invalid_asums">
+<code class="sig-prename descclassname">sfrmaker.preprocessing.</code><code class="sig-name descname">fix_invalid_asums</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">asums</span></em>, <em class="sig-param"><span class="n">fl_lengths</span></em>, <em class="sig-param"><span class="n">graph</span></em>, <em class="sig-param"><span class="n">graph_r</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/preprocessing.html#fix_invalid_asums"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sfrmaker.preprocessing.fix_invalid_asums" title="Permalink to this definition">¶</a></dt>
+<dd><p>Recompute arbolate sum at any places in the network
+where it decreases going downstream, and then for all lines
+downstream of those locations. Decreases may be caused by
+routing connections that weren’t in the original NHDPlus data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>asums</strong><span class="classifier">dict</span></dt><dd><p>Dictionary of {indentifier (e.g. comid): asum values},
+in same units as fl_lengths. Includes all lines in the stream network.</p>
+</dd>
+<dt><strong>fl_lengths</strong><span class="classifier">dict</span></dt><dd><p>Dictionary of flowline lengths {indentifier (e.g. comid): length values},
+in same units as asums.</p>
+</dd>
+<dt><strong>graph</strong><span class="classifier">dict</span></dt><dd><p>Dictionary of downstream routing connections {fromcomid: tocomid}</p>
+</dd>
+<dt><strong>graph_r</strong><span class="classifier">dict</span></dt><dd><p>Dictionary of upstream routing connections {tocomid: {fromcomid1, fromcomid2,…}}</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>new_asums</strong><span class="classifier">dict</span></dt><dd><p>Dictionary of recomputed arbolate sums {comid: asum value}</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>This function is only designed to fix instances of breaks in
+arbolate sum caused by new routing connections. It can’t fix
+all instances of invalid asums, because it is not known whether
+the arbolate sums from upstream tributaries reflect unique upstream
+drainages (if the tribs are distributaries coming from the same divergence,
+there asums will reflect the same upstream drainage, and therefore would
+be duplicative if summed).</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="sfrmaker.preprocessing.preprocess_nhdplus">
+<code class="sig-prename descclassname">sfrmaker.preprocessing.</code><code class="sig-name descname">preprocess_nhdplus</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">flowlines_file</span></em>, <em class="sig-param"><span class="n">pfvaa_file</span></em>, <em class="sig-param"><span class="n">pf_file</span></em>, <em class="sig-param"><span class="n">elevslope_file</span></em>, <em class="sig-param"><span class="n">demfile</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">run_zonal_statistics</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">dem_length_units</span><span class="o">=</span><span class="default_value">'meters'</span></em>, <em class="sig-param"><span class="n">flowline_elevations_file</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">active_area</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">narwidth_shapefile</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">waterbody_shapefiles</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">buffersize_meters</span><span class="o">=</span><span class="default_value">50</span></em>, <em class="sig-param"><span class="n">asum_thresh</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">known_connections</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">width_from_asum_a_param</span><span class="o">=</span><span class="default_value">0.1193</span></em>, <em class="sig-param"><span class="n">width_from_asum_b_param</span><span class="o">=</span><span class="default_value">0.5032</span></em>, <em class="sig-param"><span class="n">minimum_width</span><span class="o">=</span><span class="default_value">1.0</span></em>, <em class="sig-param"><span class="n">output_length_units</span><span class="o">=</span><span class="default_value">'meters'</span></em>, <em class="sig-param"><span class="n">logger</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">outfolder</span><span class="o">=</span><span class="default_value">'output/'</span></em>, <em class="sig-param"><span class="n">project_epsg</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">flowline_crs</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">dest_crs</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/preprocessing.html#preprocess_nhdplus"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sfrmaker.preprocessing.preprocess_nhdplus" title="Permalink to this definition">¶</a></dt>
+<dd><p>Preprocess NHDPlus data to a single DataFrame of flowlines
+that each route to no more than one flowline, with width, elevation
+and recomputed arbolate sum attributes. A key part of the preprocessing is handling divergences in the stream network, as described in more detail in the <code class="docutils literal notranslate"><span class="pre">Notes</span></code> section. In picking routing at divergences, values are sampled from the <code class="docutils literal notranslate"><span class="pre">demfile</span></code> and included in the output DataFrame. Optionally (via the <code class="docutils literal notranslate"><span class="pre">narwidth_shapefile</span></code> arguement), remote sensing-based width estimates from the NARWidth Database (Allen and Pavelsky, 2015) can be included.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>flowlines_file</strong><span class="classifier">str</span></dt><dd><p>Path to NHDPlus NHDFlowline shapefile. May or maybe not have been
+preprocessed by <a class="reference internal" href="#sfrmaker.preprocessing.cull_flowlines" title="sfrmaker.preprocessing.cull_flowlines"><code class="xref py py-func docutils literal notranslate"><span class="pre">cull_flowlines()</span></code></a>. The flowlines
+must be in a valid projected coorinate reference system (CRS; i.e., with units of meters),
+or a valid projected CRS must be specified with <code class="docutils literal notranslate"><span class="pre">project_epsg</span></code>.</p>
+</dd>
+<dt><strong>pfvaa_file</strong><span class="classifier">str</span></dt><dd><p>Path to NHDPlus PlusFlowlineVAA database (.dbf file). May or maybe not have been
+preprocessed by <a class="reference internal" href="#sfrmaker.preprocessing.cull_flowlines" title="sfrmaker.preprocessing.cull_flowlines"><code class="xref py py-func docutils literal notranslate"><span class="pre">cull_flowlines()</span></code></a>. <code class="docutils literal notranslate"><span class="pre">ArbolateSu</span></code>
+values within this file are assumed to be in km.</p>
+</dd>
+<dt><strong>pf_file</strong><span class="classifier">str</span></dt><dd><p>Path to NHDPlus PlusFlow database (.dbf file). May or maybe not have been
+preprocessed by <a class="reference internal" href="#sfrmaker.preprocessing.cull_flowlines" title="sfrmaker.preprocessing.cull_flowlines"><code class="xref py py-func docutils literal notranslate"><span class="pre">cull_flowlines()</span></code></a></p>
+</dd>
+<dt><strong>elevslope_file</strong><span class="classifier">str</span></dt><dd><p>Path to NHDPlus elevslope database (.dbf file). May or maybe not have been
+preprocessed by <a class="reference internal" href="#sfrmaker.preprocessing.cull_flowlines" title="sfrmaker.preprocessing.cull_flowlines"><code class="xref py py-func docutils literal notranslate"><span class="pre">cull_flowlines()</span></code></a></p>
+</dd>
+<dt><strong>demfile</strong><span class="classifier">str</span></dt><dd><p>Path to DEM raster for project area.</p>
+</dd>
+<dt><strong>dem_length_units</strong><span class="classifier">str, any length unit; e.g. {‘m’, ‘meters’, ‘ft’, etc.}</span></dt><dd><p>Length units of values in <code class="docutils literal notranslate"><span class="pre">demfile</span></code>. By default, ‘meters’.</p>
+</dd>
+<dt><strong>active_area</strong><span class="classifier">str, optional</span></dt><dd><p>Polygon shapefile of active area that preprocessed lines will be clipped to.
+By default, None, in which case the flowlines won’t be clipped.</p>
+</dd>
+<dt><strong>narwidth_shapefile</strong><span class="classifier">str, optional</span></dt><dd><p>Path to shapefile from the NARWidth database (Allen and Pavelsky, 2015).</p>
+</dd>
+<dt><strong>waterbody_shapefiles</strong><span class="classifier">str or list of strings, optional</span></dt><dd><p>Path(s) to NHDPlus NHDWaterbody shapefile(s). Only required if a
+<code class="docutils literal notranslate"><span class="pre">narwidth_shapefile</span></code> is specified.</p>
+</dd>
+<dt><strong>buffersize_meters</strong><span class="classifier">float</span></dt><dd><p>Buffer distance in meters around flowlines to include when sampling DEM.
+By default, 50.</p>
+</dd>
+<dt><strong>asum_thresh</strong><span class="classifier">float</span></dt><dd><p>Arbolate sum threshold for culling minor distributaries
+(that are not the main channel) below divergences.
+In NHDPlus, minor distributaries have the same arbolate sum as the main channel.
+After selecting the main channel, SFRmaker recomputes arbolate sum values
+for the minor distributaries, starting with 0 at the divergence. Lines with
+ending asums less than <code class="docutils literal notranslate"><span class="pre">asum_thresh</span></code> will then be culled.</p>
+</dd>
+<dt><strong>known_connections</strong><span class="classifier">dict, optional</span></dt><dd><p>Dictionary of specified flowline connections {COMID: tocomid},
+which will override the routing selection at distributaries.
+By default None.</p>
+</dd>
+<dt><strong>width_from_asum_a_param</strong><span class="classifier">float, optional</span></dt><dd><p><span class="math notranslate nohighlight">\(a\)</span> parameter used for estimating channel width from arbolate sum.
+Only needed if input flowlines are lacking width information.
+See <code class="xref py py-func docutils literal notranslate"><span class="pre">width_from_arbolate()</span></code>. By default, 0.1193.</p>
+</dd>
+<dt><strong>width_from_asum_b_param</strong><span class="classifier">float, optional</span></dt><dd><p><span class="math notranslate nohighlight">\(b\)</span> parameter used for estimating channel width from arbolate sum.
+Only needed if input flowlines are lacking width information.
+See <code class="xref py py-func docutils literal notranslate"><span class="pre">width_from_arbolate()</span></code>. By default, 0.5032.</p>
+</dd>
+<dt><strong>minimum_width</strong><span class="classifier">float, optional</span></dt><dd><p>Minimum reach width to specify (in model units), if computing widths from
+arbolate sum values. (default = 1)</p>
+</dd>
+<dt><strong>output_length_units</strong><span class="classifier">str, any length unit; e.g. {‘m’, ‘meters’, ‘ft’, etc.}</span></dt><dd><p>Units for width and elevation attribute values included with the output flowlines.
+Output arbolate sum values are specified in kilometers.</p>
+</dd>
+<dt><strong>outfolder</strong><span class="classifier">str, optional</span></dt><dd><p>Location for writing output, by default ‘clipped_flowlines’</p>
+</dd>
+<dt><strong>logger</strong><span class="classifier">sfrmaker.logger instance, optional</span></dt><dd><p>Pass an existing sfrmaker.logger instance to logger the preprocessing operations,
+by default None</p>
+</dd>
+<dt><strong>project_epsg</strong><span class="classifier">int</span></dt><dd><p>EPSG code for the output CRS (e.g. 5070 for NAD83 Albers).
+Required if the flowlines are not in a valid Projected CRS.</p>
+</dd>
+<dt><strong>flowline_crs</strong><span class="classifier">obj</span></dt><dd><p>Coordinate reference system of the NHDPlus data. Only needed if
+the data do not have a valid ESRI projection (.prj) file.
+A Python int, dict, str, or <a class="reference external" href="http://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.0.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> instance
+passed to <a class="reference external" href="http://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input" title="(in pyproj v3.0.0)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.crs.CRS.from_user_input()</span></code></a></p>
+<dl class="simple">
+<dt>Can be any of:</dt><dd><ul class="simple">
+<li><p>PROJ string</p></li>
+<li><p>Dictionary of PROJ parameters</p></li>
+<li><p>PROJ keyword arguments for parameters</p></li>
+<li><p>JSON string with PROJ parameters</p></li>
+<li><p>CRS WKT string</p></li>
+<li><p>An authority string [i.e. ‘epsg:4326’]</p></li>
+<li><p>An EPSG integer code [i.e. 4326]</p></li>
+<li><p>A tuple of (“auth_name”: “auth_code”) [i.e (‘epsg’, ‘4326’)]</p></li>
+<li><p>An object with a <cite>to_wkt</cite> method.</p></li>
+<li><p>A <a class="reference external" href="http://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.0.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> class</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+<dt><strong>dest_crs</strong><span class="classifier">obj</span></dt><dd><p>Output Coordinate reference system. Same input types
+as <code class="docutils literal notranslate"><span class="pre">flowline_crs</span></code>.
+By default, epsg:5070</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl>
+<dt><strong>flowlines</strong><span class="classifier">DataFrame</span></dt><dd><p>DataFrame with preprocessed flowlines. Width and elevation values are specified
+in the <code class="docutils literal notranslate"><span class="pre">output_length_units</span></code>. Output arbolate sum values are specified
+in kilometers. See NHDPlus documentation for description of fields not
+included here. Columns:</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 15%" />
+<col style="width: 60%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><strong>COMID</strong></p></td>
+<td><p>int64</p></td>
+<td><p>NHDPlus Common Identifiers</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>tocomid</strong></p></td>
+<td><p>int64</p></td>
+<td><p>Downstream routing connections (COMIDs)</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>nhd_asum</strong></p></td>
+<td><p>float</p></td>
+<td><p>Arbolate sum from NHDPlus, in km</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>min</strong></p></td>
+<td><p>float</p></td>
+<td><p>minimum elevation sampled within each buffer</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>mean</strong></p></td>
+<td><p>float</p></td>
+<td><p>mean elevation sampled within each buffer</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>pct10,20,80</strong></p></td>
+<td><p>float</p></td>
+<td><p>elevation percentiles sampled within each buffer</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Divergence</strong></p></td>
+<td><p>int</p></td>
+<td><p>NHDPlus Divergence classification</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>main_chan</strong></p></td>
+<td><p>bool</p></td>
+<td><p>Flag indicating whether SFRmaker identified line as main channel</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>elevup</strong></p></td>
+<td><p>float</p></td>
+<td><p>Smoothed elevation at line start (sampled from DEM)</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>elevdn</strong></p></td>
+<td><p>float</p></td>
+<td><p>Smoothed elevation at line end (sampled from DEM)</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>elevupsmo</strong></p></td>
+<td><p>float</p></td>
+<td><p>Smoothed elevation at line start (sampled from DEM)</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>elevdnsmo</strong></p></td>
+<td><p>float</p></td>
+<td><p>Smoothed elevation at line end (sampled from DEM)</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>asum_calc</strong></p></td>
+<td><p>float</p></td>
+<td><p>Recomputed arbolate sum for line (after removing distributaries)</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>asum_diff</strong></p></td>
+<td><p>float</p></td>
+<td><p>Difference between recomputed and NHDPlus asums</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>width1asum</strong></p></td>
+<td><p>float</p></td>
+<td><p>asum-based estimate for width at line start</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>width2asum</strong></p></td>
+<td><p>float</p></td>
+<td><p>asum-based estimate for width at line end</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>narwd_n</strong></p></td>
+<td><p>int</p></td>
+<td><p>number of values for line sampled from NARWidth</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>narwd_mean</strong></p></td>
+<td><p>float</p></td>
+<td><p>mean elevation sampled from NARWidth</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>narwd_std</strong></p></td>
+<td><p>float</p></td>
+<td><p>standard deviation in values sampled from NARWidth</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>narwd_min</strong></p></td>
+<td><p>float</p></td>
+<td><p>minimum elevation sampled from NARWidth</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>narwd_max</strong></p></td>
+<td><p>float</p></td>
+<td><p>maximum elevation sampled from NARWidth</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>is_wb</strong></p></td>
+<td><p>bool</p></td>
+<td><p>Flag for whether the line coincides with a Waterbody</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>width1</strong></p></td>
+<td><p>float</p></td>
+<td><p>estimated width at line start (from NARWidth or asum)</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>width2</strong></p></td>
+<td><p>float</p></td>
+<td><p>estimated width at line end (from NARWidth or asum)</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>geometry</strong></p></td>
+<td><p>obj</p></td>
+<td><p>Shapely LineString for each line</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>buffpoly</strong></p></td>
+<td><p>obj</p></td>
+<td><p>Shapely Polygon (buffer) around each LineString</p></td>
+</tr>
+</tbody>
+</table>
+</dd>
+</dl>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><dl class="simple">
+<dt>ValueError</dt><dd><p>[description]</p>
+</dd>
+<dt>IOError</dt><dd><p>[description]</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>A key part of the preprocessing is handling divergences in the stream network, where flow is routed to two or more distributaries. Distributaries are common in the Mississippi Alluvial Plain (MAP) region, for example, but in reality, most of these features are either non-existent or only carry flow intermittently during high-water events. While distributaries in NHDPlus are classified as “main” and “minor” paths at divergences, inspection against the satellite imagery and the most recent, <a class="reference external" href="https://viewer.nationalmap.gov/basic/">lidar-based DEMs for the MAP area</a> suggested that the NHDPlus classifications are often inaccurate.</p>
+<p>The following steps are taken to identify the main channel at each divergence:</p>
+<ul class="simple">
+<li><p>A 50-meter buffer polygon is drawn around each flowline feature. A flat end-cap is used, so that only areas perpendicular to the flowlines are included in each buffer.</p></li>
+<li><p>Zonal statistics for the lidar-based DEM values within each buffer polygon are computed using the <a class="reference external" href="https://pythonhosted.org/rasterstats/">rasterstats python package</a>. The tenth percentile elevation is selected as a metric for discriminating between the main channel and minor distributaries. Lower elevation percentiles would be more likely to represent areas of overlap between the buffers for the main channel and minor distributaries (resulting in minor distributary values that are similar to the main channel), while higher elevation percentiles might miss the lowest parts of the main channel or even represent parts of the channel banks instead.</p></li>
+<li><p>At each divergence, the distributary with the lowest tenth percentile elevation is assumed to be the main channel.</p></li>
+</ul>
+<p>In the MAP region, comparison of the sampled DEM values with the NHDPlus elevation attribute data revealed a high bias in many of the attribute values, especially in the vicinity of diversions. This may be a result of the upstream smoothing process described by McKay and others (2012, p 123) when it encounters distributaries of unequal values such as the example shown in Figure 5. To remedy this issue, the 10th percentile values obtained from the buffer zonal statistics were assigned to each flowline, and then smoothed in the downstream direction to ensure that no flowlines had negative (uphill) slopes.</p>
+<p>Finally, routing connections to minor distributaries are removed, and arbolate sums recomputed for the entire stream network, with arbolate sums at minor distributaries starting at zero. In this way, the minor distributaries are treated like headwater streams in that they will only receive flow if the water table is greater than their assigned elevation, otherwise they are simulated as dry and are not part of the groundwater model solution. Similar to <a class="reference internal" href="#sfrmaker.preprocessing.cull_flowlines" title="sfrmaker.preprocessing.cull_flowlines"><code class="xref py py-func docutils literal notranslate"><span class="pre">cull_flowlines()</span></code></a>, the first <code class="docutils literal notranslate"><span class="pre">asum_thresh</span></code> km of minor distributaries are trimmed from the stream network.</p>
+<p>If a shapefile is specified for the <code class="docutils literal notranslate"><span class="pre">narwidth_shapefile</span></code> argument, the <code class="xref py py-func docutils literal notranslate"><span class="pre">sample_narwidth()</span></code> function is called.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="sfrmaker.preprocessing.recompute_asums_for_minor_distribs">
+<code class="sig-prename descclassname">sfrmaker.preprocessing.</code><code class="sig-name descname">recompute_asums_for_minor_distribs</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">minor_distrib_comids</span></em>, <em class="sig-param"><span class="n">fl_lengths</span></em>, <em class="sig-param"><span class="n">graph</span></em>, <em class="sig-param"><span class="n">graph_r</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/preprocessing.html#recompute_asums_for_minor_distribs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sfrmaker.preprocessing.recompute_asums_for_minor_distribs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reset arbolate sums for minor distributaries and
+downstream segments in their path, to the next confluence.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>minor_distrib_comids</strong><span class="classifier">sequence</span></dt><dd><p>Sequence of line identifiers for minor distributaries
+(that were part of a divergence in NHDPlus).</p>
+</dd>
+<dt><strong>fl_lengths</strong><span class="classifier">dict</span></dt><dd><p>Dictionary of flowline lengths {indentifier (e.g. comid): length values},
+in same units as asums.</p>
+</dd>
+<dt><strong>graph</strong><span class="classifier">dict</span></dt><dd><p>Dictionary of downstream routing connections {fromcomid: tocomid}</p>
+</dd>
+<dt><strong>graph_r</strong><span class="classifier">dict</span></dt><dd><p>Dictionary of upstream routing connections {tocomid: {fromcomid1, fromcomid2,…}}</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>new_asums</strong><span class="classifier">dict</span></dt><dd><p>Dictionary of recomputed arbolate sums {comid: asum value}</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="sfrmaker.preprocessing.sample_NARWidth">
+<code class="sig-prename descclassname">sfrmaker.preprocessing.</code><code class="sig-name descname">sample_NARWidth</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">flowlines</span></em>, <em class="sig-param"><span class="n">narwidth_shapefile</span></em>, <em class="sig-param"><span class="n">waterbodies</span></em>, <em class="sig-param"><span class="n">filter</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">flowlines_epsg</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">crs</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">output_width_units</span><span class="o">=</span><span class="default_value">'meters'</span></em>, <em class="sig-param"><span class="n">outpath</span><span class="o">=</span><span class="default_value">'shps/'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/preprocessing.html#sample_NARWidth"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sfrmaker.preprocessing.sample_NARWidth" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sample the North American River Width Database by
+doing a spatial join (transfer width information from
+NARWidth shapefile to flowlines shapefile based on proximity).</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>flowlines</strong><span class="classifier">DataFrame</span></dt><dd><p>flowlines dataframe from preprocess_nhdplus().
+Flowlines must be in a projected Coordinate reference system (CRS).</p>
+</dd>
+<dt><strong>narwidth_shapefile</strong><span class="classifier">str</span></dt><dd><p>Path to shapefile from the NARWidth database (Allen and Pavelsky, 2015).</p>
+</dd>
+<dt><strong>waterbody_shapefiles</strong><span class="classifier">str or list of strings, optional</span></dt><dd><p>Path(s) to NHDPlus NHDWaterbody shapefile(s). Only required if a
+<code class="docutils literal notranslate"><span class="pre">narwidth_shapefile</span></code> is specified.</p>
+</dd>
+<dt><strong>crs</strong><span class="classifier">obj</span></dt><dd><p>Coordinate reference system of flowlines.
+A Python int, dict, str, or <a class="reference external" href="http://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.0.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> instance
+passed to <a class="reference external" href="http://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input" title="(in pyproj v3.0.0)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.crs.CRS.from_user_input()</span></code></a></p>
+<dl class="simple">
+<dt>Can be any of:</dt><dd><ul class="simple">
+<li><p>PROJ string</p></li>
+<li><p>Dictionary of PROJ parameters</p></li>
+<li><p>PROJ keyword arguments for parameters</p></li>
+<li><p>JSON string with PROJ parameters</p></li>
+<li><p>CRS WKT string</p></li>
+<li><p>An authority string [i.e. ‘epsg:4326’]</p></li>
+<li><p>An EPSG integer code [i.e. 4326]</p></li>
+<li><p>A tuple of (“auth_name”: “auth_code”) [i.e (‘epsg’, ‘4326’)]</p></li>
+<li><p>An object with a <cite>to_wkt</cite> method.</p></li>
+<li><p>A <a class="reference external" href="http://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.0.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> class</p></li>
+</ul>
+</dd>
+</dl>
+<p>By default, None</p>
+</dd>
+<dt><strong>filter</strong><span class="classifier">tuple</span></dt><dd><p>Bounds (most likely in lat/lon) for filtering NARWidth lines that are read in
+(left, bottom, right, top)</p>
+</dd>
+<dt><strong>output_width_units</strong><span class="classifier">str, any length unit; e.g. {‘m’, ‘meters’, ‘ft’, etc.}</span></dt><dd><p>Units for width and elevation attribute values included with the output flowlines.
+NARWidth widths are assumed to be in meters.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt>This function operates on the fl DataFrame in place.</dt><dd></dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>To avoid erroneous overlap between main-stem NARWidth estimates and minor tributaries, flowlines with arbolate sums less than 500 km only receive widths from NARWidth lines that have at least 50% of their length inside of the 1-km buffer. NARWidth values are generally higher than arbolate sum-based estimates, because the NARWidth estimates represent mean flows and include all reaches of the stream, whereas the arbolate sum estimates are based on field measurements taken at narrower than average, well-behaved channel sections near stream gages, under base flow conditions. Therefore, measured channel widths may be biased low compared to actual widths throughout the stream network (Allen and Pavelsky, 2015; Park, 1977).</p>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="sfrmaker.sfrdata.html" class="btn btn-neutral float-right" title="The SFRData Module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="sfrmaker.mf5to6.html" class="btn btn-neutral float-left" title="The MODFLOW-2005 to 6 Module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+      <span class="lastupdated">
+        Last updated on Dec 31, 2020.
+      </span>
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

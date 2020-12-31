@@ -1,0 +1,565 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>SFRmaker configuration file options &mdash; SFRmaker 0.post1.dev0+g6b61537 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/clipboard.min.js"></script>
+        <script src="_static/copybutton.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Release History" href="release-history.html" />
+    <link rel="prev" title="The Utilities Module" href="api/sfrmaker.utils.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> SFRmaker
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.post1.dev0+g6b61537
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="philosophy.html"> Philosophy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html"> Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html"> Installation</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="inputs.html"> Input Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html"> Using SFRmaker with a configuration file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/SFRmaker_demo.html"> Basic Usage in a scripting context</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/Streambed_elevation_demo.html"> How the streambed elevation sampling works</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Reference</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="api/index.html"> Code reference</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#"> Summary of configuration file options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="release-history.html"> Release History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html"> Contributing to SFRmaker</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Bibliography</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="references.html"> References cited</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">SFRmaker</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>SFRmaker configuration file options</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/config-summary.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="sfrmaker-configuration-file-options">
+<h1>SFRmaker configuration file options<a class="headerlink" href="#sfrmaker-configuration-file-options" title="Permalink to this headline">¶</a></h1>
+<p>Below is a comprehensive summary of the input options supported in the SFRmaker configuration file. Most keys in the YAML blocks represent arguments to methods within SFRmaker or <a class="reference external" href="https://flopy.readthedocs.io/en/latest/source/modules.html#flopy" title="(in flopy Documentation v3.3.3)"><span class="xref std std-ref">Flopy</span></a>. Additional description of method arguments is available in the <a class="reference internal" href="api/index.html#modules"><span class="std std-ref">SFRmaker code reference</span></a> and <a class="reference external" href="https://flopy.readthedocs.io/en/latest/source/modules.html#flopy" title="(in flopy Documentation v3.3.3)"><span class="xref std std-ref">Flopy documentation</span></a>.</p>
+<div class="highlight-yaml notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>  1
+  2
+  3
+  4
+  5
+  6
+  7
+  8
+  9
+ 10
+ 11
+ 12
+ 13
+ 14
+ 15
+ 16
+ 17
+ 18
+ 19
+ 20
+ 21
+ 22
+ 23
+ 24
+ 25
+ 26
+ 27
+ 28
+ 29
+ 30
+ 31
+ 32
+ 33
+ 34
+ 35
+ 36
+ 37
+ 38
+ 39
+ 40
+ 41
+ 42
+ 43
+ 44
+ 45
+ 46
+ 47
+ 48
+ 49
+ 50
+ 51
+ 52
+ 53
+ 54
+ 55
+ 56
+ 57
+ 58
+ 59
+ 60
+ 61
+ 62
+ 63
+ 64
+ 65
+ 66
+ 67
+ 68
+ 69
+ 70
+ 71
+ 72
+ 73
+ 74
+ 75
+ 76
+ 77
+ 78
+ 79
+ 80
+ 81
+ 82
+ 83
+ 84
+ 85
+ 86
+ 87
+ 88
+ 89
+ 90
+ 91
+ 92
+ 93
+ 94
+ 95
+ 96
+ 97
+ 98
+ 99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="c1"># Summary of SFRmaker configuration file options</span>
+
+<span class="nt">package_version</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">mf6</span>  <span class="c1"># mf6, mfnwt or mf2005</span>
+<span class="nt">package_name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">model</span>  <span class="c1"># (defaults to model or simulation name if not specified)</span>
+<span class="nt">output_path</span><span class="p">:</span> <span class="s">&quot;.&quot;</span>  <span class="c1"># where the output will be written</span>
+
+<span class="nt">modelgrid</span><span class="p">:</span>
+  <span class="c1"># Shapefile option (arguments to sfrmaker.grid.StructuredGrid.from_shapefile):</span>
+  <span class="nt">shapefile</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">None</span>
+  <span class="nt">node_col</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">node</span>
+  <span class="nt">kcol</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">k</span>
+  <span class="nt">icol</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">i</span>
+  <span class="nt">jcol</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">j</span>
+  <span class="nt">isfr_col</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">isfr</span>
+  <span class="nt">active_area</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">None</span>
+  <span class="nt">crs</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">None</span>
+  <span class="nt">epsg</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">None</span>
+  <span class="nt">proj_str</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">None</span>
+  <span class="nt">prjfile</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">None</span>
+  <span class="c1"># Flopy modelgrid option (arguments to flopy.discretization.StructuredGrid):</span>
+  <span class="nt">delc</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">None</span>
+  <span class="nt">delr</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">None</span>
+  <span class="nt">top</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">None</span>
+  <span class="nt">botm</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">None</span>
+  <span class="nt">idomain</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">None</span>
+  <span class="nt">lenuni</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">None</span>
+  <span class="nt">proj4</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">None</span>
+  <span class="nt">prj</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">None</span>
+  <span class="nt">xoff</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.0</span>
+  <span class="nt">yoff</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.0</span>
+  <span class="nt">angrot</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.0</span>
+  <span class="nt">nlay</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">None</span>
+  <span class="nt">nrow</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">None</span>
+  <span class="nt">ncol</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">None</span>
+  <span class="nt">laycbd</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">None</span>
+
+<span class="nt">flowlines</span><span class="p">:</span>
+  <span class="c1"># Custom hydrography option (arguments to sfrmaker.Lines.from_shapefile):</span>
+  <span class="nt">shapefile</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">None</span>
+  <span class="nt">id_column</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">id</span>
+  <span class="nt">routing_column</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">toid</span>
+  <span class="nt">arbolate_sum_column2</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">asum2</span>
+  <span class="nt">width1_column</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">width1</span>
+  <span class="nt">width2_column</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">width2</span>
+  <span class="nt">up_elevation_column</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">elevup</span>
+  <span class="nt">dn_elevation_column</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">elevdn</span>
+  <span class="nt">name_column</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">name</span>
+  <span class="nt">attr_length_units</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">meters</span>
+  <span class="nt">attr_height_units</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">meters</span>
+  <span class="nt">filter</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">None</span>
+  <span class="nt">crs</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">None</span>
+  <span class="nt">epsg</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">None</span>
+  <span class="nt">proj_str</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">None</span>
+  <span class="nt">prjfile</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">None</span>
+  <span class="c1"># NHDPlus option (arguments to sfrmaker.Lines.from_nhdplus_v2):</span>
+  <span class="nt">NHDPlus_paths</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">None</span>
+  <span class="nt">NHDFlowlines</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">None</span>
+  <span class="nt">PlusFlowlineVAA</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">None</span>
+  <span class="nt">PlusFlow</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">None</span>
+  <span class="nt">elevslope</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">None</span>
+
+<span class="nt">simulation</span><span class="p">:</span>
+  <span class="c1"># Simulation information</span>
+  <span class="c1"># (MODFLOW-6 only; arguments to flopy.mf6.MFSimulation.load):</span>
+  <span class="nt">sim_name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">modflowsim</span>
+  <span class="nt">version</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">mf6</span>
+  <span class="nt">exe_name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">mf6.exe</span>
+  <span class="nt">sim_ws</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">.</span>
+  <span class="nt">strict</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
+  <span class="nt">verbosity_level</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1</span>
+  <span class="nt">load_only</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">None</span>
+  <span class="nt">verify_data</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">False</span>
+  <span class="nt">write_headers</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
+
+<span class="nt">model</span><span class="p">:</span>
+  <span class="c1"># MODFLOW-NWT or MODFLOW-2005 information</span>
+  <span class="c1"># (arguments to flopy.modflow.Modflow.load):</span>
+  <span class="nt">namefile</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">None</span>  <span class="c1"># &quot;f&quot; argument in flopy</span>
+  <span class="nt">version</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">mf2005</span>
+  <span class="nt">exe_name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">mf2005.exe</span>
+  <span class="nt">verbose</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">False</span>
+  <span class="nt">model_ws</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">.</span>
+  <span class="nt">load_only</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">None</span>
+  <span class="nt">forgive</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">False</span>
+  <span class="nt">check</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
+  <span class="c1"># MODFLOW-6 information</span>
+  <span class="c1"># (arguments to flopy.mf6.MFSimulation.get_model):</span>
+  <span class="nt">model_name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">None</span>
+
+<span class="nt">dem</span><span class="p">:</span>
+  <span class="c1"># Option to sample streambed top elevations from a DEM</span>
+  <span class="c1"># (arguments to sfrmaker.SFRData.set_streambed_top_elevations_from_dem):</span>
+  <span class="nt">filename</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">None</span>
+  <span class="nt">elevation_units</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">None</span>
+  <span class="nt">method</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">buffers</span>
+  <span class="c1"># keyword arguments to sfrmaker.SFRData.sample_reach_elevations:</span>
+  <span class="nt">buffer_distance</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">100</span>
+  <span class="nt">smooth</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
+
+<span class="nt">inflows</span><span class="p">:</span>
+  <span class="c1"># Option to add specified inflows</span>
+  <span class="c1"># (arguments to sfrmaker.SFRData.add_to_perioddata for MODFLOW-6):</span>
+  <span class="nt">data</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">None</span>
+  <span class="nt">flowline_routing</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">None</span>
+  <span class="nt">variable</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">inflow</span>
+  <span class="nt">line_id_column</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">None</span>
+  <span class="nt">rno_column</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">None</span>
+  <span class="nt">period_column</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">per</span>
+  <span class="nt">data_column</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">Q_avg</span>
+  <span class="c1"># (arguments to sfrmaker.SFRData.add_to_segment_data for MODFLOW-2005):</span>
+  <span class="nt">segment_column</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">segment</span>
+
+<span class="nt">observations</span><span class="p">:</span>
+  <span class="c1"># Option to add SFR observation input</span>
+  <span class="c1"># (arguments to sfrmaker.SFRData.add_observations):</span>
+  <span class="nt">data</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">None</span>
+  <span class="nt">flowline_routing</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">None</span>
+  <span class="nt">obstype</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">None</span>
+  <span class="nt">sfrlines_shapefile</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">None</span>
+  <span class="nt">x_location_column</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">None</span>
+  <span class="nt">y_location_column</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">None</span>
+  <span class="nt">line_id_column</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">None</span>
+  <span class="nt">rno_column</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">None</span>
+  <span class="nt">obstype_column</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">None</span>
+  <span class="nt">obsname_column</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">site_no</span>
+  <span class="nt">gage_starting_unit_number</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">250</span>
+
+<span class="nt">to_riv</span><span class="p">:</span>
+  <span class="c1"># Option to convert parts of the SFR network</span>
+  <span class="c1"># downstream of specified line_ids to the RIV package:</span>
+  <span class="nt">line_ids</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">None</span>
+  <span class="nt">drop_in_sfr</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
+
+<span class="nt">options</span><span class="p">:</span>
+  <span class="c1"># SFR options (arguments to sfrmaker.Lines.to_sfr):</span>
+  <span class="nt">active_area</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">None</span>
+  <span class="nt">isfr</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">None</span>
+  <span class="nt">model_length_units</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">undefined</span>
+  <span class="nt">model_time_units</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">days</span>
+  <span class="nt">minimum_reach_length</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">None</span>
+  <span class="nt">width_from_asum_a_param</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.1193</span>
+  <span class="nt">width_from_asum_b_param</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.5032</span>
+  <span class="nt">minimum_reach_width</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1.0</span>
+  <span class="nt">consolidate_conductance</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">False</span>
+  <span class="nt">one_reach_per_cell</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">False</span>
+  <span class="nt">add_outlets</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">None</span>
+  <span class="c1"># keyword arguments to sfrmaker.SFRData:</span>
+  <span class="nt">enforce_increasing_nsegs</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
+</pre></div>
+</td></tr></table></div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="release-history.html" class="btn btn-neutral float-right" title="Release History" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="api/sfrmaker.utils.html" class="btn btn-neutral float-left" title="The Utilities Module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+      <span class="lastupdated">
+        Last updated on Dec 31, 2020.
+      </span>
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
