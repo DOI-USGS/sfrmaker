@@ -5,9 +5,9 @@ name: Tests
 on:
   schedule:
     - cron: '0 9 * * 1' # run every Monday at 9 AM UTC (3 am PST)
-  push:
+  #push:
     #branches: [ $default-branch ]
-  pull_request:
+  #pull_request:
     #branches: [ $default-branch ]
 
 jobs:

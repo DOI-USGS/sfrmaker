@@ -4,9 +4,10 @@ SFRmaker is a python package for automating construction of stream flow routing 
 
 
 ### Version 0.6
-[![Build Status](https://travis-ci.com/aleaf/SFRmaker.svg?branch=master)](https://travis-ci.com/aleaf/SFRmaker)
+
+![Tests](https://github.com/aleaf/sfrmaker/workflows/Tests/badge.svg)
 [![Build status](https://ci.appveyor.com/api/projects/status/0jk596k6osooyx1p/branch/master?svg=true)](https://ci.appveyor.com/project/aleaf/sfrmaker/branch/master)
-[![Coverage Status](https://codecov.io/github/aleaf/SFRmaker/coverage.svg?branch=master)](https://codecov.io/github/aleaf/SFRmaker/coverage.svg?branch=master)
+[![Coverage Status](https://codecov.io/github/aleaf/SFRmaker/coverage.svg?branch=develop)](https://codecov.io/github/aleaf/SFRmaker/coverage.svg?branch=develop)
 [![PyPI version](https://badge.fury.io/py/sfrmaker.svg)](https://badge.fury.io/py/sfrmaker)
 
 

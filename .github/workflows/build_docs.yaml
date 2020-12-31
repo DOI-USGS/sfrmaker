@@ -13,14 +13,22 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-    - uses: conda-incubator/setup-miniconda@v2
+    - name: Checkout source
+      uses: actions/checkout@v2
+      with:
+        persist-credentials: false
+
+    - name: Setup conda environment
+      uses: conda-incubator/setup-miniconda@v2
       with:
         auto-update-conda: true
         activate-environment: sfrmaker_ci
         environment-file: ci/test_environment.yml
-        python-version: ${{ matrix.python-version }}
+        python-version: '3.9'
         auto-activate-base: false
+        # must be false in most cases
+        # https://github.com/JamesIves/github-pages-deploy-action
+
     - name: Conda info
       shell: bash -l {0}
       run: conda info
@@ -66,7 +74,7 @@ jobs:
       with:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         BRANCH: gh-pages
-        FOLDER: docs/_build/
+        FOLDER: docs/build/html
         CLEAN: false
         TARGET_FOLDER: ${{ github.ref }}
 
@@ -76,6 +84,6 @@ jobs:
       with:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         BRANCH: gh-pages
-        FOLDER: docs/_build/
+        FOLDER: docs/build/html
         CLEAN: false
         TARGET_FOLDER: latest
