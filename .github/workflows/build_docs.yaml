@@ -1,0 +1,81 @@
+# from pyproj: https://github.com/pyproj4/pyproj/blob/master/.github/workflows/build_docs.yaml
+name: Publish Docs
+
+on:
+  push:
+    branches: [ master, develop ]
+  release:
+    types: [ created ]
+
+jobs:
+  docs:
+    name: Publish Docs
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: conda-incubator/setup-miniconda@v2
+      with:
+        auto-update-conda: true
+        activate-environment: sfrmaker_ci
+        environment-file: ci/test_environment.yml
+        python-version: ${{ matrix.python-version }}
+        auto-activate-base: false
+    - name: Conda info
+      shell: bash -l {0}
+      run: conda info
+    - name: Install dependencies
+      shell: bash -l {0}
+      run: |
+        if [[ ! -d "$HOME/.local/bin" ]]; then
+            mkdir -p "$HOME/.local/bin";
+        fi
+        # copy modflow bins to local dir to add to PATH later
+        if [ "$RUNNER_OS" == "Windows" ]; then
+            d="win"
+        elif [ "$RUNNER_OS" == "macOS" ]; then
+            d="mac"
+        elif [ "$RUNNER_OS" == "Linux" ]; then
+            d="linux"
+        else
+            d="unexpectedos"
+            exit 1
+        fi
+        echo bin/$d/. >> $GITHUB_PATH
+        echo $GITHUB_PATH
+        pip install -e .
+        python -m ipykernel install --user --name test --display-name "test"
+    - name: Conda list
+      shell: bash -l {0}
+      run: conda list
+
+    - name: Run tests
+      shell: bash -l {0}
+      run: |
+        pytest -v --durations=20
+
+    - name: Build docs
+      shell: bash -l {0}
+      run: |
+        set -e
+        make -C docs html
+
+    - name: Deploy 🚀
+      uses: JamesIves/github-pages-deploy-action@3.7.1
+      if: ${{ github.event_name == 'release' }}
+      with:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        BRANCH: gh-pages
+        FOLDER: docs/_build/
+        CLEAN: false
+        TARGET_FOLDER: ${{ github.ref }}
+
+    - name: Deploy 🚀
+      uses: JamesIves/github-pages-deploy-action@3.7.1
+      if: ${{ github.event_name == 'push' }}
+      with:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        BRANCH: gh-pages
+        FOLDER: docs/_build/
+        CLEAN: false
+        TARGET_FOLDER: latest

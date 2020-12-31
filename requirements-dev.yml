@@ -1,4 +1,4 @@
-name: sfrmaker
+name: sfrmaker_dev
 channels:
   - conda-forge
   - defaults
