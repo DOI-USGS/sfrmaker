@@ -1,0 +1,505 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>The Grid Module &mdash; SFRmaker 0.post1.dev0+g297cf4a documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="The Lines Module" href="sfrmaker.lines.html" />
+    <link rel="prev" title="Modules" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> SFRmaker
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.post1.dev0+g297cf4a
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../philosophy.html"> Philosophy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html"> Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html"> Installation</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../inputs.html"> Input Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html"> Using SFRmaker with a configuration file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebooks/SFRmaker_demo.html"> Basic Usage in a scripting context</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebooks/Streambed_elevation_demo.html"> How the streambed elevation sampling works</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html"> Code reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Grid Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.lines.html">Lines Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.mf5to6.html">MODFLOW-2005 to 6 Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.preprocessing.html">Preprocessing Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.sfrdata.html">SFRData Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.utils.html">Utilities Module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../config-summary.html"> Summary of configuration file options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../release-history.html"> Release History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html"> Contributing to SFRmaker</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Bibliography</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../references.html"> References cited</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">SFRmaker</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="index.html">Modules</a> &raquo;</li>
+        
+      <li>The Grid Module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/api/sfrmaker.grid.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="module-sfrmaker.grid">
+<span id="the-grid-module"></span><h1>The Grid Module<a class="headerlink" href="#module-sfrmaker.grid" title="Permalink to this headline">¶</a></h1>
+<p>Module for working with model grids. For examples of how to easily set
+up a StructuredGrid instance, see <a class="reference internal" href="../notebooks/SFRmaker_demo.html#Basic-usage-of-SFRmaker-in-a-scripting-context"><span class="std std-ref">Basic usage of SFRmaker in a scripting context</span></a>.</p>
+<dl class="py class">
+<dt id="sfrmaker.grid.Grid">
+<em class="property">class </em><code class="sig-prename descclassname">sfrmaker.grid.</code><code class="sig-name descname">Grid</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">df</span></em>, <em class="sig-param"><span class="n">model_units</span><span class="o">=</span><span class="default_value">'undefined'</span></em>, <em class="sig-param"><span class="n">crs_units</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">bounds</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">crs</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">epsg</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">proj_str</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">prjfile</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/grid.html#Grid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sfrmaker.grid.Grid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Base class for model grids. Has methods and attributes
+that are common to both Structured and Unstructured Grids. Not
+meant to be called directly.</p>
+<dl class="py method">
+<dt id="sfrmaker.grid.Grid.active_area">
+<em class="property">property </em><code class="sig-name descname">active_area</code><a class="headerlink" href="#sfrmaker.grid.Grid.active_area" title="Permalink to this definition">¶</a></dt>
+<dd><p>Shapely Polygon delinating area where SFR will be simulated.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="sfrmaker.grid.Grid.bounds">
+<em class="property">property </em><code class="sig-name descname">bounds</code><a class="headerlink" href="#sfrmaker.grid.Grid.bounds" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="sfrmaker.grid.Grid.create_active_area_polygon_from_isfr">
+<code class="sig-name descname">create_active_area_polygon_from_isfr</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/grid.html#Grid.create_active_area_polygon_from_isfr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sfrmaker.grid.Grid.create_active_area_polygon_from_isfr" title="Permalink to this definition">¶</a></dt>
+<dd><p>The StructuredGrid and UnstructuredGrid classes
+have their own ways of doing this.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="sfrmaker.grid.Grid.get_node">
+<code class="sig-name descname">get_node</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">k</span></em>, <em class="sig-param"><span class="n">i</span></em>, <em class="sig-param"><span class="n">j</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/grid.html#Grid.get_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sfrmaker.grid.Grid.get_node" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="sfrmaker.grid.Grid.lenuni">
+<em class="property">property </em><code class="sig-name descname">lenuni</code><a class="headerlink" href="#sfrmaker.grid.Grid.lenuni" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="sfrmaker.grid.Grid.size">
+<em class="property">property </em><code class="sig-name descname">size</code><a class="headerlink" href="#sfrmaker.grid.Grid.size" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="sfrmaker.grid.Grid.spatial_index">
+<em class="property">property </em><code class="sig-name descname">spatial_index</code><a class="headerlink" href="#sfrmaker.grid.Grid.spatial_index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rtree index for intersecting features with model grid.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="sfrmaker.grid.Grid.units_dict">
+<code class="sig-name descname">units_dict</code><em class="property"> = {0: 'undefined', 'feet': 1, 'meters': 2}</em><a class="headerlink" href="#sfrmaker.grid.Grid.units_dict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="sfrmaker.grid.Grid.write_active_area_shapefile">
+<code class="sig-name descname">write_active_area_shapefile</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">outshp</span><span class="o">=</span><span class="default_value">'active_area.shp'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/grid.html#Grid.write_active_area_shapefile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sfrmaker.grid.Grid.write_active_area_shapefile" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="sfrmaker.grid.Grid.write_grid_shapefile">
+<code class="sig-name descname">write_grid_shapefile</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">outshp</span><span class="o">=</span><span class="default_value">'grid.shp'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/grid.html#Grid.write_grid_shapefile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sfrmaker.grid.Grid.write_grid_shapefile" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="sfrmaker.grid.StructuredGrid">
+<em class="property">class </em><code class="sig-prename descclassname">sfrmaker.grid.</code><code class="sig-name descname">StructuredGrid</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">df</span></em>, <em class="sig-param"><span class="n">xul</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">yul</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">dx</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">dy</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">rotation</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">uniform</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">model_units</span><span class="o">=</span><span class="default_value">'undefined'</span></em>, <em class="sig-param"><span class="n">crs_units</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">bounds</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">active_area</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">epsg</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">proj_str</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">prjfile</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/grid.html#StructuredGrid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sfrmaker.grid.StructuredGrid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sfrmaker.grid.Grid" title="sfrmaker.grid.Grid"><code class="xref py py-class docutils literal notranslate"><span class="pre">sfrmaker.grid.Grid</span></code></a></p>
+<p>Class representing a model grid that has a row/column structure.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>df</strong><span class="classifier">DataFrame</span></dt><dd><p>Pandas DataFrame that is the primary container for information about the model grid.
+Must have the following columns:</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 14%" />
+<col style="width: 5%" />
+<col style="width: 82%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>k</p></td>
+<td><p>int</p></td>
+<td><p>model layer (zero-based)</p></td>
+</tr>
+<tr class="row-even"><td><p>i</p></td>
+<td><p>int</p></td>
+<td><p>model row (zero-based)</p></td>
+</tr>
+<tr class="row-odd"><td><p>j</p></td>
+<td><p>int</p></td>
+<td><p>model column (zero-based)</p></td>
+</tr>
+<tr class="row-even"><td><p>isfr</p></td>
+<td><p>int</p></td>
+<td><p>flag indicating whether the cell can have SFR reaches
+(0=False, 1=True)</p></td>
+</tr>
+<tr class="row-odd"><td><p>geometry</p></td>
+<td><p>obj</p></td>
+<td><p>shapely <a class="reference external" href="https://shapely.readthedocs.io/en/latest/manual.html#Polygon" title="(in Shapely v1.8dev)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Polygons</span></code></a> of model cells</p></td>
+</tr>
+</tbody>
+</table>
+</dd>
+<dt><strong>xul</strong><span class="classifier">float, optional</span></dt><dd><p>Upper left corner of the grid x-coordinate. Only used for creating
+the <a class="reference internal" href="#sfrmaker.grid.StructuredGrid.transform" title="sfrmaker.grid.StructuredGrid.transform"><code class="xref py py-attr docutils literal notranslate"><span class="pre">transform</span></code></a> attribute, by default None</p>
+</dd>
+<dt><strong>yul</strong><span class="classifier">[type], optional</span></dt><dd><p>Upper left corner of the grid y-coordinate.  Only used for creating
+the <a class="reference internal" href="#sfrmaker.grid.StructuredGrid.transform" title="sfrmaker.grid.StructuredGrid.transform"><code class="xref py py-attr docutils literal notranslate"><span class="pre">transform</span></code></a> attribute, by default None</p>
+</dd>
+<dt><strong>dx</strong><span class="classifier">float, optional</span></dt><dd><p>Uniform spacing in the x-direction (if the grid is uniform), 
+Only used for creating
+the <a class="reference internal" href="#sfrmaker.grid.StructuredGrid.transform" title="sfrmaker.grid.StructuredGrid.transform"><code class="xref py py-attr docutils literal notranslate"><span class="pre">transform</span></code></a> attribute, by default None</p>
+</dd>
+<dt><strong>dy</strong><span class="classifier">float, optional</span></dt><dd><p>Uniform spacing in the x-direction (if the grid is uniform), 
+Only used for creating
+the <a class="reference internal" href="#sfrmaker.grid.StructuredGrid.transform" title="sfrmaker.grid.StructuredGrid.transform"><code class="xref py py-attr docutils literal notranslate"><span class="pre">transform</span></code></a> attribute, by default None</p>
+</dd>
+<dt><strong>rotation</strong><span class="classifier">float, optional</span></dt><dd><p>Grid rotation angle in degrees, counter-clockwise
+about the origin, by default 0. Only used for creating
+the <a class="reference internal" href="#sfrmaker.grid.StructuredGrid.transform" title="sfrmaker.grid.StructuredGrid.transform"><code class="xref py py-attr docutils literal notranslate"><span class="pre">transform</span></code></a> attribute, by default None</p>
+</dd>
+<dt><strong>uniform</strong><span class="classifier">bool, optional</span></dt><dd><p>Optional flag indicating the grid is uniform, 
+by default None</p>
+</dd>
+<dt><strong>model_units</strong><span class="classifier">str, optional, {‘meters’, ‘feet’, ..}</span></dt><dd><p>Model length units, by default ‘undefined’</p>
+</dd>
+<dt><strong>crs_units</strong><span class="classifier">str, optional, {‘meters’, ‘feet’, ..}</span></dt><dd><p>Coordinate reference system length. Usually these
+are read from the CRS information below,
+by default None</p>
+</dd>
+<dt><strong>bounds</strong><span class="classifier">tuple, optional</span></dt><dd><p>(left, bottom, top, right) edges of the grid bounding box, if known.
+Otherwise, the <code class="xref py py-attr docutils literal notranslate"><span class="pre">bounds</span></code> attribute is computed from the
+shapely <a class="reference external" href="https://shapely.readthedocs.io/en/latest/manual.html#Polygon" title="(in Shapely v1.8dev)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Polygons</span></code></a> in the <code class="xref py py-attr docutils literal notranslate"><span class="pre">Grid</span> <span class="pre">DataFrame</span></code> attribute.
+by default None</p>
+</dd>
+<dt><strong>active_area</strong><span class="classifier">shapely Polygon, list of Polygons, or shapefile path, optional</span></dt><dd><p>Polygon defining the active portion of the model grid.
+Polygons must be in same CRS as linework; shapefile features will be reprojected if their crs is different.
+by default None, in which case the entire grid is assumed to be active.</p>
+</dd>
+<dt><strong>epsg: int, optional</strong></dt><dd><p>EPSG code identifying Coordinate Reference System (CRS)
+for features in the input shapefile.</p>
+</dd>
+<dt><strong>proj_str: str, optional</strong></dt><dd><p>proj_str string identifying CRS for features in the input shapefile.</p>
+</dd>
+<dt><strong>prjfile: str, optional</strong></dt><dd><p>File path to projection (.prj) file identifying CRS
+for features in the input shapefile. By default,
+the projection file included with the input shapefile
+will be used.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="sfrmaker.grid.StructuredGrid.create_active_area_polygon_from_isfr">
+<code class="sig-name descname">create_active_area_polygon_from_isfr</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/grid.html#StructuredGrid.create_active_area_polygon_from_isfr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sfrmaker.grid.StructuredGrid.create_active_area_polygon_from_isfr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert 2D numpy array representing active area where
+SFR will be simulated (isfr) to a polygon (if multiple
+polygons area created, the largest one by area is retained).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="sfrmaker.grid.StructuredGrid.from_dataframe">
+<em class="property">classmethod </em><code class="sig-name descname">from_dataframe</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">df</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">uniform</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">kcol</span><span class="o">=</span><span class="default_value">'k'</span></em>, <em class="sig-param"><span class="n">icol</span><span class="o">=</span><span class="default_value">'i'</span></em>, <em class="sig-param"><span class="n">jcol</span><span class="o">=</span><span class="default_value">'j'</span></em>, <em class="sig-param"><span class="n">isfr_col</span><span class="o">=</span><span class="default_value">'isfr'</span></em>, <em class="sig-param"><span class="n">geometry_column</span><span class="o">=</span><span class="default_value">'geometry'</span></em>, <em class="sig-param"><span class="n">active_area</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">crs</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">epsg</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">proj_str</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">prjfile</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/grid.html#StructuredGrid.from_dataframe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sfrmaker.grid.StructuredGrid.from_dataframe" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="sfrmaker.grid.StructuredGrid.from_json">
+<em class="property">classmethod </em><code class="sig-name descname">from_json</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">jsonfile</span></em>, <em class="sig-param"><span class="n">active_area</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">isfr</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">crs</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">epsg</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">proj_str</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">prjfile</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/grid.html#StructuredGrid.from_json"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sfrmaker.grid.StructuredGrid.from_json" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="sfrmaker.grid.StructuredGrid.from_modelgrid">
+<em class="property">classmethod </em><code class="sig-name descname">from_modelgrid</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">mg</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">active_area</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">isfr</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">crs</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">epsg</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">proj_str</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">prjfile</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/grid.html#StructuredGrid.from_modelgrid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sfrmaker.grid.StructuredGrid.from_modelgrid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create StructureGrid class instance from a
+flopy.discretization.StructuredGrid instance.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="sfrmaker.grid.StructuredGrid.from_shapefile">
+<em class="property">classmethod </em><code class="sig-name descname">from_shapefile</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">shapefile</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">node_col</span><span class="o">=</span><span class="default_value">'node'</span></em>, <em class="sig-param"><span class="n">kcol</span><span class="o">=</span><span class="default_value">'k'</span></em>, <em class="sig-param"><span class="n">icol</span><span class="o">=</span><span class="default_value">'i'</span></em>, <em class="sig-param"><span class="n">jcol</span><span class="o">=</span><span class="default_value">'j'</span></em>, <em class="sig-param"><span class="n">isfr_col</span><span class="o">=</span><span class="default_value">'isfr'</span></em>, <em class="sig-param"><span class="n">active_area</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">crs</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">epsg</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">proj_str</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">prjfile</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/grid.html#StructuredGrid.from_shapefile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sfrmaker.grid.StructuredGrid.from_shapefile" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="sfrmaker.grid.StructuredGrid.from_sr">
+<em class="property">classmethod </em><code class="sig-name descname">from_sr</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">sr</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">active_area</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">isfr</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">epsg</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">proj_str</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">prjfile</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/grid.html#StructuredGrid.from_sr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sfrmaker.grid.StructuredGrid.from_sr" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="sfrmaker.grid.StructuredGrid.isfr">
+<em class="property">property </em><code class="sig-name descname">isfr</code><a class="headerlink" href="#sfrmaker.grid.StructuredGrid.isfr" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="sfrmaker.grid.StructuredGrid.transform">
+<em class="property">property </em><code class="sig-name descname">transform</code><a class="headerlink" href="#sfrmaker.grid.StructuredGrid.transform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rasterio-style affine transform object.
+<a class="reference external" href="https://www.perrygeo.com/python-affine-transforms.html">https://www.perrygeo.com/python-affine-transforms.html</a></p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="sfrmaker.grid.StructuredGrid.uniform">
+<em class="property">property </em><code class="sig-name descname">uniform</code><a class="headerlink" href="#sfrmaker.grid.StructuredGrid.uniform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if cells are uniform by comparing their areas.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="sfrmaker.grid.UnstructuredGrid">
+<em class="property">class </em><code class="sig-prename descclassname">sfrmaker.grid.</code><code class="sig-name descname">UnstructuredGrid</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">df</span></em>, <em class="sig-param"><span class="n">model_units</span><span class="o">=</span><span class="default_value">'undefined'</span></em>, <em class="sig-param"><span class="n">crs_units</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">bounds</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">active_area</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">crs</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">epsg</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">proj_str</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">prjfile</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/grid.html#UnstructuredGrid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sfrmaker.grid.UnstructuredGrid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sfrmaker.grid.Grid" title="sfrmaker.grid.Grid"><code class="xref py py-class docutils literal notranslate"><span class="pre">sfrmaker.grid.Grid</span></code></a></p>
+<p>Class representing an unstructured model grid.</p>
+<dl class="py method">
+<dt id="sfrmaker.grid.UnstructuredGrid.create_active_area_polygon_from_isfr">
+<code class="sig-name descname">create_active_area_polygon_from_isfr</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/grid.html#UnstructuredGrid.create_active_area_polygon_from_isfr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sfrmaker.grid.UnstructuredGrid.create_active_area_polygon_from_isfr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create active area polygon from union of cells where isfr=1.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="sfrmaker.grid.UnstructuredGrid.from_dataframe">
+<em class="property">classmethod </em><code class="sig-name descname">from_dataframe</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">df</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">node_col</span><span class="o">=</span><span class="default_value">'node'</span></em>, <em class="sig-param"><span class="n">isfr_col</span><span class="o">=</span><span class="default_value">'isfr'</span></em>, <em class="sig-param"><span class="n">geometry_column</span><span class="o">=</span><span class="default_value">'geometry'</span></em>, <em class="sig-param"><span class="n">model_units</span><span class="o">=</span><span class="default_value">'feet'</span></em>, <em class="sig-param"><span class="n">active_area</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">crs</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">epsg</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">proj_str</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">prjfile</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/grid.html#UnstructuredGrid.from_dataframe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sfrmaker.grid.UnstructuredGrid.from_dataframe" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="sfrmaker.lines.html" class="btn btn-neutral float-right" title="The Lines Module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral float-left" title="Modules" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+      <span class="lastupdated">
+        Last updated on Dec 31, 2020.
+      </span>
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
