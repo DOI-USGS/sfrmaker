@@ -20,10 +20,14 @@ jobs:
         python-version: ['3.8']  # ['3.8', '3.x']
 
     steps:
-    - uses: actions/checkout@v2
-      #with:
-      #  fetch-depth: 50
-    - uses: conda-incubator/setup-miniconda@v2
+    - name: Checkout source
+      uses: actions/checkout@v2
+      with:
+        persist-credentials: false
+        fetch-depth: 50
+
+    - name: Setup conda environment
+      uses: conda-incubator/setup-miniconda@v2
       with:
         auto-update-conda: true
         activate-environment: sfrmaker_ci
