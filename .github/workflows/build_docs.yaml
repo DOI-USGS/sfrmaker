@@ -21,6 +21,17 @@ jobs:
     - name: Fetch all Git tags
       run: git fetch --prune --unshallow --tags
 
+    - name: Cache Miniconda
+      uses: actions/cache@v2.1.0
+      env:
+        # Increase this value to reset cache if environment.yml has changed
+        CACHE_NUMBER: 0
+      with:
+        path: ~/conda_pkgs_dir
+        key: ${{ runner.os }}-${{ matrix.python-version }}-${{
+             matrix.run-type }}-${{ env.CACHE_NUMBER }}-${{
+             hashFiles('ci/test_environment.yml') }}
+
     - name: Setup conda environment
       uses: conda-incubator/setup-miniconda@v2
       with:

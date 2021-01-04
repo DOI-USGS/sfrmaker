@@ -5,12 +5,11 @@
 
 SFRmaker
 ==================
+version |version|
+
 .. raw:: html
 
    <hr>
-
-version |version|
-
 
 .. toctree::
    :maxdepth: 0

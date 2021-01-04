@@ -5,10 +5,8 @@ name: Tests
 on:
   schedule:
     - cron: '0 9 * * 1' # run every Monday at 9 AM UTC (3 am PST)
-  #push:
-    #branches: [ $default-branch ]
-  #pull_request:
-    #branches: [ $default-branch ]
+  push:
+  pull_request:
 
 jobs:
   build:
@@ -16,15 +14,33 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest]  # [ ubuntu-latest, macos-latest, windows-latest ]
-        python-version: ['3.8']  # ['3.8', '3.x']
+        os: [ ubuntu-latest, macos-latest, windows-latest ]
+        python-version: ['3.9', '3.8']  # ['3.8', '3.x']
+        exclude:
+          # tests with ubuntu-latest, python latest
+          # are executed by build_docs.yaml
+          - os: ubuntu-latest
+            python-version: 3.9
 
     steps:
     - name: Checkout source
       uses: actions/checkout@v2
       with:
         persist-credentials: false
-        fetch-depth: 50
+
+    - name: Fetch all Git tags
+      run: git fetch --prune --unshallow --tags
+
+    - name: Cache Miniconda
+      uses: actions/cache@v2.1.0
+      env:
+        # Increase this value to reset cache if environment.yml has changed
+        CACHE_NUMBER: 0
+      with:
+        path: ~/conda_pkgs_dir
+        key: ${{ runner.os }}-${{ matrix.python-version }}-${{
+             matrix.run-type }}-${{ env.CACHE_NUMBER }}-${{
+             hashFiles('ci/test_environment.yml') }}
 
     - name: Setup conda environment
       uses: conda-incubator/setup-miniconda@v2
@@ -35,6 +51,8 @@ jobs:
         python-version: ${{ matrix.python-version }}
         #condarc-file: ci/example-condarc.yml
         auto-activate-base: false
+        use-only-tar-bz2: true # IMPORTANT: This needs to be set for caching to work properly!
+
     - name: Conda info
       shell: bash -l {0}
       run: conda info
