@@ -2,6 +2,12 @@
 Release History
 ===============
 
+Version 0.6.3 (2021-xx-xx)
+--------------------------
+* major speed-up (and overhead reduction) to finding routing paths (by replacing recursion strategy with simple for loop)
+* in preprocessing module, use 1st percentile elevations sampled from DEM to avoid outliers (bad pixels)
+* in preprocessing module, add option to re-use output from zonal statistics
+
 Version 0.6.2 (2020-11-12)
 --------------------------
 * write unconnected reaches to connectiondata, as required by MODFLOW-6 v6.2
