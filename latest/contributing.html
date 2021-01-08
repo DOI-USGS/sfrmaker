@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Contributing to SFRmaker &mdash; SFRmaker 0.6.2.post14+g97d2762 documentation</title>
+  <title>Contributing to SFRmaker &mdash; SFRmaker 0.6.2.post15+gee788c6 documentation</title>
   
 
   
@@ -69,7 +69,7 @@
             
             
               <div class="version">
-                0.6.2.post14+g97d2762
+                0.6.2.post15+gee788c6
               </div>
             
           
@@ -254,13 +254,23 @@ to see if the issue has already been reported and/or fixed.</p>
 <p>To file a bug report or enhancement request, from the issues tab on the <a class="reference external" href="https://github.com/aleaf/sfrmaker">SFRmaker GitHub page</a>, select “New Issue”.</p>
 <p>Bug reports must:</p>
 <ol class="arabic">
-<li><p>Include a short, self-contained Python snippet reproducing the problem.
+<li><p>Include a short, self-contained Python snippet reproducing the problem, along with the contents of your configuration file (if you are using one) and the full error traceback.
 You can format the code nicely by using <a class="reference external" href="https://github.github.com/github-flavored-markdown/">GitHub Flavored Markdown</a>:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>```python
 &gt;&gt;&gt; import sfrmaker
 &gt;&gt;&gt; lns = sfrmaker.Lines.from_nhdplus_v2(NHDPlus_paths=&#39;../tylerforks/NHDPlus/&#39;,
                                          filter=&#39;../tylerforks/grid.shp&#39;)
 ...
+```
+</pre></div>
+</div>
+<p>e.g.:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>```yaml
+&lt;paste configuration file contents here&gt;
+```
+
+```python
+&lt;paste error traceback here&gt;
 ```
 </pre></div>
 </div>
@@ -323,7 +333,7 @@ imports when necessary in tests. Imports can be sorted automatically using the i
 It can very quickly become overwhelming, but sticking to the guidelines below will help keep the process
 straightforward and mostly trouble free.  As always, if you are having difficulties please
 feel free to ask for help.</p>
-<p>The code is hosted on <a class="reference external" href="https://github.com/sfrmaker/sfrmaker">GitHub</a>. To
+<p>The code is hosted on <a class="reference external" href="https://github.com/aleaf/sfrmaker">GitHub</a>. To
 contribute you will need to sign up for a <a class="reference external" href="https://github.com/signup/free">free GitHub account</a>. We use <a class="reference external" href="http://git-scm.com/">Git</a> for
 version control to allow many people to work together on the project.</p>
 <p>Some great resources for learning Git:</p>

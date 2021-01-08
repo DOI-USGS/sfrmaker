@@ -25,7 +25,7 @@ To file a bug report or enhancement request, from the issues tab on the `SFRmake
 
 Bug reports must:
 
-#. Include a short, self-contained Python snippet reproducing the problem.
+#. Include a short, self-contained Python snippet reproducing the problem, along with the contents of your configuration file (if you are using one) and the full error traceback.
    You can format the code nicely by using `GitHub Flavored Markdown
    <https://github.github.com/github-flavored-markdown/>`_::
 
@@ -34,6 +34,16 @@ Bug reports must:
       >>> lns = sfrmaker.Lines.from_nhdplus_v2(NHDPlus_paths='../tylerforks/NHDPlus/',
                                                filter='../tylerforks/grid.shp')
       ...
+      ```
+      
+   e.g.::
+
+      ```yaml
+      <paste configuration file contents here>
+      ```
+
+      ```python
+      <paste error traceback here>
       ```
 
 #. Include the version of SFRmaker that you are running, which can be obtained with:
@@ -110,7 +120,7 @@ It can very quickly become overwhelming, but sticking to the guidelines below wi
 straightforward and mostly trouble free.  As always, if you are having difficulties please
 feel free to ask for help.
 
-The code is hosted on `GitHub <https://github.com/sfrmaker/sfrmaker>`_. To
+The code is hosted on `GitHub <https://github.com/aleaf/sfrmaker>`_. To
 contribute you will need to sign up for a `free GitHub account
 <https://github.com/signup/free>`_. We use `Git <http://git-scm.com/>`_ for
 version control to allow many people to work together on the project.
