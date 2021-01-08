@@ -146,7 +146,7 @@ about SSL verification on the USGS network, and to download the DOI SSL certific
 
 _`Installing the DOI SSL certificate for use with pip`
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-1) `Download the DOI SSL certificate`_
+1) `Download the DOI SSL certificate (internal DOI network only) <https://tst.usgs.gov/applications/application-and-script-signing/>`_
 2) On Windows, create the file ``C:\Users\<your username>\AppData\Roaming\pip\pip.ini``.
    On OSX, create ``/Users/<your username>/Library/Application Support/pip/pip.conf``.
 
@@ -230,7 +230,6 @@ so it needs to be commented out on other operating systems (normally it wouldn't
 .. _condarc: https://docs.conda.io/projects/conda/en/latest/user-guide/configuration/use-condarc.html
 .. _download: https://github.com/aleaf/sfrmaker/archive/master.zip
 .. _gis.yml: https://raw.githubusercontent.com/aleaf/sfrmaker/master/gis.yml
-.. _Download the DOI SSL certificate: https://tst.usgs.gov/applications/application-and-script-signing/
 .. _pip: https://packaging.python.org/tutorials/installing-packages/#use-pip-for-installing
 .. _Readme file: https://github.com/aleaf/sfrmaker/blob/master/Readme.md
 .. _requirements.yml: https://raw.githubusercontent.com/aleaf/sfrmaker/master/requirements.yml

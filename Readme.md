@@ -18,7 +18,7 @@ See the [SFRmaker documentation](https://aleaf.github.io/sfrmaker/index.html)
 
 Installation
 -----------------------------------------------
-See the [Installation Instructions](https://aleaf.github.io/sfrmaker/installation.html)
+See the [Installation Instructions](https://aleaf.github.io/sfrmaker/latest/installation.html)
 
 
 Disclaimer

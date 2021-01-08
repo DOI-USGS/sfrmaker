@@ -23,3 +23,19 @@ tylerforks/make_sfr.py:
     :linenos:
 
 This will produce an sfr package for MODFLOW-NWT, csv table representations of the SFR input, and shapefiles for visualizing the SFR package.
+
+Running the tylerforks model
+##############################
+The above script can be found in the `examples/tylerforks folder <https://github.com/aleaf/sfrmaker/tree/develop/examples/tylerforks>`_ of the SFRmaker repository. Assuming the script was run from that location, the resulting MODFLOW model can then be run using the MODFLOW executable packaged with SFRmaker (on Windows):
+
+.. code-block:: doscon
+
+    cd tylerforks
+    ../../../bin/win/mfnwt.exe tf.nam
+
+(or on OSX)
+
+.. code-block:: bash
+
+    cd tylerforks
+    ../../../bin/mac/mfnwt tf.nam
