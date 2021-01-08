@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Using SFRmaker with a configuration file &mdash; SFRmaker 0.6.2.post13.dev0+gc13b0a7 documentation</title>
+  <title>Using SFRmaker with a configuration file &mdash; SFRmaker 0.6.2.post14+g97d2762 documentation</title>
   
 
   
@@ -69,7 +69,7 @@
             
             
               <div class="version">
-                0.6.2.post13.dev0+gc13b0a7
+                0.6.2.post14+g97d2762
               </div>
             
           
@@ -106,6 +106,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#the-tyler-forks-watershed-creating-an-sfr-package-from-a-configuration-file-using-nhdplus">The Tyler Forks watershed: Creating an SFR package from a configuration file using NHDPlus</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#tf-sfrmaker-config-yml">tf_sfrmaker_config.yml:</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tylerforks-make-sfr-py">tylerforks/make_sfr.py:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#running-the-tylerforks-model">Running the tylerforks model</a></li>
 </ul>
 </li>
 </ul>
@@ -124,6 +125,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#the-tyler-forks-watershed-creating-an-sfr-package-from-a-configuration-file-using-nhdplus">The Tyler Forks watershed: Creating an SFR package from a configuration file using NHDPlus</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#tf-sfrmaker-config-yml">tf_sfrmaker_config.yml:</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tylerforks-make-sfr-py">tylerforks/make_sfr.py:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#running-the-tylerforks-model">Running the tylerforks model</a></li>
 </ul>
 </li>
 </ul>
@@ -422,13 +424,26 @@
 <div class="highlight-python notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
 2
 3
-4</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Run the MERAS example.</span>
+4</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Run the Tyler Forks example.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">sfrmaker</span>
 <span class="n">sfrdata</span> <span class="o">=</span> <span class="n">sfrmaker</span><span class="o">.</span><span class="n">SFRData</span><span class="o">.</span><span class="n">from_yaml</span><span class="p">(</span><span class="s1">&#39;tf_sfrmaker_config.yml&#39;</span><span class="p">)</span>
 </pre></div>
 </td></tr></table></div>
 <p>This will produce an sfr package for MODFLOW-NWT, csv table representations of the SFR input, and shapefiles for visualizing the SFR package.</p>
+</div>
+<div class="section" id="running-the-tylerforks-model">
+<h3>Running the tylerforks model<a class="headerlink" href="#running-the-tylerforks-model" title="Permalink to this headline">¶</a></h3>
+<p>The above script can be found in the <a class="reference external" href="https://github.com/aleaf/sfrmaker/tree/develop/examples/tylerforks">examples/tylerforks folder</a> of the SFRmaker repository. Assuming the script was run from that location, the resulting MODFLOW model can then be run using the MODFLOW executable packaged with SFRmaker (on Windows):</p>
+<div class="highlight-doscon notranslate"><div class="highlight"><pre><span></span><span class="go">cd tylerforks</span>
+<span class="go">../../../bin/win/mfnwt.exe tf.nam</span>
+</pre></div>
+</div>
+<p>(or on OSX)</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> tylerforks
+../../../bin/mac/mfnwt tf.nam
+</pre></div>
+</div>
 </div>
 </div>
 </div>
@@ -448,7 +463,7 @@
   <div role="contentinfo">
     <p>
       <span class="lastupdated">
-        Last updated on Jan 06, 2021.
+        Last updated on Jan 08, 2021.
       </span>
 
     </p>

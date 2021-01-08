@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Contributing to SFRmaker &mdash; SFRmaker 0.6.2.post13.dev0+gc13b0a7 documentation</title>
+  <title>Contributing to SFRmaker &mdash; SFRmaker 0.6.2.post14+g97d2762 documentation</title>
   
 
   
@@ -69,7 +69,7 @@
             
             
               <div class="version">
-                0.6.2.post13.dev0+gc13b0a7
+                0.6.2.post14+g97d2762
               </div>
             
           
@@ -113,26 +113,28 @@
 <li class="toctree-l1"><a class="reference internal" href="config-summary.html"> Summary of configuration file options</a></li>
 <li class="toctree-l1"><a class="reference internal" href="release-history.html"> Release History</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#"> Contributing to SFRmaker</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#getting-started">Getting started</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#bug-reports-and-enhancement-requests">Bug reports and enhancement requests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#code-contributions">Code contributions</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#seven-steps-for-contributing">Seven Steps for Contributing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#forking-the-sfrmaker-repository-using-git">1) Forking the <em>SFRmaker</em> repository using Git</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#getting-started-with-git">Getting started with Git</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#forking">Forking</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#creating-a-branch">Creating a branch</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#forking-the-sfrmaker-repository-using-git">1) Forking the <em>SFRmaker</em> repository using Git</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#getting-started-with-git">Getting started with Git</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#forking">Forking</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#creating-a-branch">Creating a branch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#creating-a-development-environment-with-the-required-dependencies">2 &amp; 3) Creating a development environment with the required dependencies</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#installing-the-sfrmaker-source-code">4) Installing the SFRmaker source code</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#making-changes-and-writing-tests">5) Making changes and writing tests</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#writing-tests">Writing tests</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#running-the-test-suite">Running the test suite</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#creating-a-development-environment-with-the-required-dependencies">2 &amp; 3) Creating a development environment with the required dependencies</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#installing-the-sfrmaker-source-code">4) Installing the SFRmaker source code</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#making-changes-and-writing-tests">5) Making changes and writing tests</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#writing-tests">Writing tests</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#running-the-test-suite">Running the test suite</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#updating-the-documentation">6) Updating the Documentation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#submitting-a-pull-request">7) Submitting a Pull Request</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#style-guide-linting">Style Guide &amp; Linting</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#updating-the-documentation">6) Updating the Documentation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#submitting-a-pull-request">7) Submitting a Pull Request</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#style-guide-linting">Style Guide &amp; Linting</a></li>
 </ul>
 </li>
 </ul>
@@ -235,21 +237,57 @@
 <p>(Note: much of this page was cribbed from the <a class="reference external" href="https://geopandas.org/">geopandas</a> project,
 which has similar guidelines to <a class="reference external" href="http://pandas.pydata.org/pandas-docs/stable/contributing.html">pandas</a>
 and <a class="reference external" href="http://xarray.pydata.org/en/stable/">xarray</a>.)</p>
-<div class="section" id="overview">
-<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
-<p>Contributions to SFRmaker are very welcome.  They are likely to
+<div class="section" id="getting-started">
+<h2>Getting started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h2>
+<p>All contributions, bug reports, bug fixes, documentation improvements, enhancements, and ideas are welcome. If an issue that interests you isn’t already listed in the <a class="reference external" href="https://github.com/aleaf/sfrmaker/issues">Issues tab</a>, consider <a class="reference external" href="https://docs.github.com/en/free-pro-team&#64;latest/github/managing-your-work-on-github/creating-an-issue">filing an issue</a>.</p>
+</div>
+<div class="section" id="bug-reports-and-enhancement-requests">
+<h2>Bug reports and enhancement requests<a class="headerlink" href="#bug-reports-and-enhancement-requests" title="Permalink to this headline">¶</a></h2>
+<p>Bug reports are an important part of improving SFRmaker. Having a complete bug report
+will allow others to reproduce the bug and provide insight into fixing. See
+<a class="reference external" href="https://stackoverflow.com/help/mcve">this stackoverflow article</a> and
+<a class="reference external" href="https://matthewrocklin.com/blog/work/2018/02/28/minimal-bug-reports">this blogpost</a>
+for tips on writing a good bug report.</p>
+<p>Trying the bug-producing code out on the <em>develop</em> branch is often a worthwhile exercise
+to confirm the bug still exists. It is also worth searching existing bug reports and pull requests
+to see if the issue has already been reported and/or fixed.</p>
+<p>To file a bug report or enhancement request, from the issues tab on the <a class="reference external" href="https://github.com/aleaf/sfrmaker">SFRmaker GitHub page</a>, select “New Issue”.</p>
+<p>Bug reports must:</p>
+<ol class="arabic">
+<li><p>Include a short, self-contained Python snippet reproducing the problem.
+You can format the code nicely by using <a class="reference external" href="https://github.github.com/github-flavored-markdown/">GitHub Flavored Markdown</a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>```python
+&gt;&gt;&gt; import sfrmaker
+&gt;&gt;&gt; lns = sfrmaker.Lines.from_nhdplus_v2(NHDPlus_paths=&#39;../tylerforks/NHDPlus/&#39;,
+                                         filter=&#39;../tylerforks/grid.shp&#39;)
+...
+```
+</pre></div>
+</div>
+</li>
+<li><p>Include the version of SFRmaker that you are running, which can be obtained with:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sfrmaker</span>
+<span class="n">sfrmaker</span><span class="o">.</span><span class="n">__version__</span>
+</pre></div>
+</div>
+<p>Depending on the issue, it may also be helpful to include information about the version
+of python and operating system.</p>
+</li>
+<li><p>Explain why the current behavior is wrong/not desired and what you expect instead.</p></li>
+</ol>
+<p>The issue will then be visible on the <a class="reference external" href="https://github.com/aleaf/sfrmaker/issues">Issues tab</a> and open to comments/ideas from others.</p>
+</div>
+<div class="section" id="code-contributions">
+<h2>Code contributions<a class="headerlink" href="#code-contributions" title="Permalink to this headline">¶</a></h2>
+<p>Code contributions to SFRmaker to fix bugs, implement new features or improve existing code are encouraged. Regardless of the context, consider <a class="reference external" href="https://docs.github.com/en/free-pro-team&#64;latest/github/managing-your-work-on-github/creating-an-issue">filing an issue</a> first to make others aware of the problem and allow for discussion on potential approaches to addressing it.</p>
+<p>In general, SFRmaker trys to follow the conventions of the pandas project where applicable. Contributions to SFRmaker are likely to
 be accepted more quickly if they follow these guidelines.</p>
-<p>In general, SFRmaker follows the conventions of the pandas project
-where applicable.</p>
 <p>In particular, when submitting a pull request:</p>
 <ul class="simple">
 <li><p>All existing tests should pass.  Please make sure that the test
 suite passes, both locally and on
-<a class="reference external" href="https://travis-ci.org/sfrmaker/sfrmaker">Travis CI</a>.  Status on
-Travis will be visible on a pull request.  If you want to enable
-Travis CI on your own fork, please read the pandas guidelines link
-above or the
-<a class="reference external" href="https://docs.travis-ci.com/user/tutorial/">getting started docs</a>.</p></li>
+<a class="reference external" href="https://github.com/aleaf/sfrmaker/actions">GitHub Actions</a>.  Status on
+the GitHub Actions and code coverage checks will be visible on a pull request.</p></li>
 <li><p>New functionality should include tests.  Please write reasonable
 tests for your code and make sure that they pass on your pull request.</p></li>
 <li><p>Classes, methods, functions, etc. should have docstrings.  The first
@@ -279,9 +317,8 @@ imports when necessary in tests. Imports can be sorted automatically using the i
 </ol>
 <p>Each of these 7 steps is detailed below.</p>
 </div>
-</div>
 <div class="section" id="forking-the-sfrmaker-repository-using-git">
-<h2>1) Forking the <em>SFRmaker</em> repository using Git<a class="headerlink" href="#forking-the-sfrmaker-repository-using-git" title="Permalink to this headline">¶</a></h2>
+<h3>1) Forking the <em>SFRmaker</em> repository using Git<a class="headerlink" href="#forking-the-sfrmaker-repository-using-git" title="Permalink to this headline">¶</a></h3>
 <p>To the new user, working with Git is one of the more daunting aspects of contributing to <em>SFRmaker</em>.
 It can very quickly become overwhelming, but sticking to the guidelines below will help keep the process
 straightforward and mostly trouble free.  As always, if you are having difficulties please
@@ -297,13 +334,13 @@ version control to allow many people to work together on the project.</p>
 <li><p>Matthew Brett’s <a class="reference external" href="http://matthew-brett.github.com/pydagogue/">Pydagogue</a>.</p></li>
 </ul>
 <div class="section" id="getting-started-with-git">
-<h3>Getting started with Git<a class="headerlink" href="#getting-started-with-git" title="Permalink to this headline">¶</a></h3>
+<h4>Getting started with Git<a class="headerlink" href="#getting-started-with-git" title="Permalink to this headline">¶</a></h4>
 <p><a class="reference external" href="http://help.github.com/set-up-git-redirect">GitHub has instructions</a> for installing git,
 setting up your SSH key, and configuring git.  All these steps need to be completed before
 you can work seamlessly between your local repository and GitHub.</p>
 </div>
 <div class="section" id="forking">
-<span id="contributing-forking"></span><h3>Forking<a class="headerlink" href="#forking" title="Permalink to this headline">¶</a></h3>
+<span id="contributing-forking"></span><h4>Forking<a class="headerlink" href="#forking" title="Permalink to this headline">¶</a></h4>
 <p>You will need your own fork to work on the code. Go to the <a class="reference external" href="https://github.com/sfrmaker/sfrmaker">SFRmaker project
 page</a> and hit the <code class="docutils literal notranslate"><span class="pre">Fork</span></code> button. You will
 want to clone your fork to your machine:</p>
@@ -314,13 +351,11 @@ want to clone your fork to your machine:</p>
 </div>
 <p>This creates the directory <cite>sfrmaker-yourname</cite> and connects your repository to
 the upstream (main project) <em>SFRmaker</em> repository.</p>
-<p>The testing suite will run automatically on Travis-CI once your pull request is
-submitted.  However, if you wish to run the test suite on a branch prior to
-submitting the pull request, then Travis-CI needs to be hooked up to your
-GitHub repository.  Instructions for doing so are <a class="reference external" href="http://about.travis-ci.org/docs/user/getting-started/">here</a>.</p>
+<p>The testing suite should run automatically on GitHub Actions each time code is pushed to your fork,
+and will also run on submittal of your pull request.</p>
 </div>
 <div class="section" id="creating-a-branch">
-<h3>Creating a branch<a class="headerlink" href="#creating-a-branch" title="Permalink to this headline">¶</a></h3>
+<h4>Creating a branch<a class="headerlink" href="#creating-a-branch" title="Permalink to this headline">¶</a></h4>
 <p>You want your master branch to reflect only production-ready code, so create a
 feature branch for making your changes. For example:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">branch</span> <span class="n">shiny</span><span class="o">-</span><span class="n">new</span><span class="o">-</span><span class="n">feature</span>
@@ -349,7 +384,7 @@ after updating.</p>
 </div>
 </div>
 <div class="section" id="creating-a-development-environment-with-the-required-dependencies">
-<span id="contributing-dev-env"></span><h2>2 &amp; 3) Creating a development environment with the required dependencies<a class="headerlink" href="#creating-a-development-environment-with-the-required-dependencies" title="Permalink to this headline">¶</a></h2>
+<span id="contributing-dev-env"></span><h3>2 &amp; 3) Creating a development environment with the required dependencies<a class="headerlink" href="#creating-a-development-environment-with-the-required-dependencies" title="Permalink to this headline">¶</a></h3>
 <p>A development environment is a virtual space where you can keep an independent installation of <em>SFRmaker</em>.
 This makes it easy to keep both a stable version of python in one place you use for work, and a development
 version (which you may break while playing with code) in another.</p>
@@ -385,14 +420,14 @@ indicate you are in the new development environment.</p>
 <p>At this point you can easily do a <em>development</em> install, as detailed in the next sections.</p>
 </div>
 <div class="section" id="installing-the-sfrmaker-source-code">
-<h2>4) Installing the SFRmaker source code<a class="headerlink" href="#installing-the-sfrmaker-source-code" title="Permalink to this headline">¶</a></h2>
+<h3>4) Installing the SFRmaker source code<a class="headerlink" href="#installing-the-sfrmaker-source-code" title="Permalink to this headline">¶</a></h3>
 <p>Once dependencies are in place, install the SFRmaker source code by navigating to the gitclone of the <em>SFRmaker</em> repository and (with the <code class="docutils literal notranslate"><span class="pre">sfrmaker_dev</span></code> environment activated) running:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">install</span> <span class="o">-</span><span class="n">e</span> <span class="o">.</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="making-changes-and-writing-tests">
-<h2>5) Making changes and writing tests<a class="headerlink" href="#making-changes-and-writing-tests" title="Permalink to this headline">¶</a></h2>
+<h3>5) Making changes and writing tests<a class="headerlink" href="#making-changes-and-writing-tests" title="Permalink to this headline">¶</a></h3>
 <p><em>SFRmaker</em> is serious about testing and strongly encourages contributors to embrace
 <a class="reference external" href="http://en.wikipedia.org/wiki/Test-driven_development">test-driven development (TDD)</a>.
 This development process “relies on the repetition of a very short development cycle:
@@ -406,13 +441,13 @@ it is worth getting in the habit of writing tests ahead of time so this is never
 <p><em>SFRmaker</em> uses the <a class="reference external" href="http://doc.pytest.org/en/latest/">pytest testing system</a> and the convenient
 extensions in <a class="reference external" href="http://docs.scipy.org/doc/numpy/reference/routines.testing.html">numpy.testing</a> and <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/general_utility_functions.html">pandas.testing</a>.</p>
 <div class="section" id="writing-tests">
-<h3>Writing tests<a class="headerlink" href="#writing-tests" title="Permalink to this headline">¶</a></h3>
+<h4>Writing tests<a class="headerlink" href="#writing-tests" title="Permalink to this headline">¶</a></h4>
 <p>All tests should go into the <code class="docutils literal notranslate"><span class="pre">tests</span></code> directory. This folder contains many
 current examples of tests, and we suggest looking to these for inspiration. In general,
 the tests in this folder aim to be organized by module (e.g. <code class="docutils literal notranslate"><span class="pre">test_routing.py</span></code> for the functions in <code class="docutils literal notranslate"><span class="pre">routing.py</span></code>).</p>
 </div>
 <div class="section" id="running-the-test-suite">
-<h3>Running the test suite<a class="headerlink" href="#running-the-test-suite" title="Permalink to this headline">¶</a></h3>
+<h4>Running the test suite<a class="headerlink" href="#running-the-test-suite" title="Permalink to this headline">¶</a></h4>
 <p>The tests can then be run directly inside your Git clone (without having to
 install <em>SFRmaker</em>) by typing:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pytest</span>
@@ -421,7 +456,7 @@ install <em>SFRmaker</em>) by typing:</p>
 </div>
 </div>
 <div class="section" id="updating-the-documentation">
-<h2>6) Updating the Documentation<a class="headerlink" href="#updating-the-documentation" title="Permalink to this headline">¶</a></h2>
+<h3>6) Updating the Documentation<a class="headerlink" href="#updating-the-documentation" title="Permalink to this headline">¶</a></h3>
 <p>The <em>SFRmaker</em> documentation resides in the <cite>docs</cite> folder. Changes to the docs are
 made by modifying the appropriate file in the <cite>source</cite> folder within <cite>docs</cite>.
 The <em>SFRmaker</em> docs use reStructuredText syntax, <a class="reference external" href="http://www.sphinx-doc.org/en/stable/rest.html#rst-primer">which is explained here</a>
@@ -433,13 +468,13 @@ and the docstrings follow the <a class="reference external" href="https://github
 <p>The resulting html pages will be located in <cite>docs/build/html</cite>. It’s a good practice to rebuild the docs often while writing to stay on top of any mistakes. The <a class="reference external" href="https://marketplace.visualstudio.com/items?itemName=lextudio.restructuredtext">reStructuredText extension in VS Code</a> is another way to continuously preview a rendered documentation page while writing.</p>
 </div>
 <div class="section" id="submitting-a-pull-request">
-<h2>7) Submitting a Pull Request<a class="headerlink" href="#submitting-a-pull-request" title="Permalink to this headline">¶</a></h2>
+<h3>7) Submitting a Pull Request<a class="headerlink" href="#submitting-a-pull-request" title="Permalink to this headline">¶</a></h3>
 <p>Once you’ve made changes and pushed them to your forked repository, you then
 submit a pull request to have them integrated into the <em>SFRmaker</em> code base.</p>
 <p>You can find a pull request (or PR) tutorial in the <a class="reference external" href="https://help.github.com/articles/using-pull-requests/">GitHub’s Help Docs</a>.</p>
 </div>
 <div class="section" id="style-guide-linting">
-<span id="contributing-style"></span><h2>Style Guide &amp; Linting<a class="headerlink" href="#style-guide-linting" title="Permalink to this headline">¶</a></h2>
+<span id="contributing-style"></span><h3>Style Guide &amp; Linting<a class="headerlink" href="#style-guide-linting" title="Permalink to this headline">¶</a></h3>
 <p>SFRmaker tries to follow the <a class="reference external" href="http://www.python.org/dev/peps/pep-0008/">PEP8</a> standard. At this point, there’s no enforcement of this, but I am considering implementing <a class="reference external" href="https://black.readthedocs.io/en/stable/">Black</a>, which automates a code style that is PEP8-complient. Many editors perform automatic linting that makes following PEP8 easy.</p>
 <p>SFRmaker does use the <a class="reference external" href="https://github.com/timothycrosley/isort">isort</a> package to automatically organize import statements. isort can installed via pip:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ pip install isort
@@ -464,6 +499,7 @@ can be done by installing <code class="docutils literal notranslate"><span class
 <p>Then <code class="docutils literal notranslate"><span class="pre">isort</span></code> will be run automatically each time you commit changes. You can skip these checks with <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">commit</span> <span class="pre">--no-verify</span></code>.</p>
 </div>
 </div>
+</div>
 
 
            </div>
@@ -480,7 +516,7 @@ can be done by installing <code class="docutils literal notranslate"><span class
   <div role="contentinfo">
     <p>
       <span class="lastupdated">
-        Last updated on Jan 06, 2021.
+        Last updated on Jan 08, 2021.
       </span>
 
     </p>

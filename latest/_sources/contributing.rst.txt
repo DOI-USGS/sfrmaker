@@ -5,24 +5,65 @@ Contributing to SFRmaker
 which has similar guidelines to `pandas <http://pandas.pydata.org/pandas-docs/stable/contributing.html>`_
 and `xarray <http://xarray.pydata.org/en/stable/>`_.)
 
-Overview
---------
+Getting started
+----------------
+All contributions, bug reports, bug fixes, documentation improvements, enhancements, and ideas are welcome. If an issue that interests you isn't already listed in the `Issues tab`_, consider `filing an issue`_.
 
-Contributions to SFRmaker are very welcome.  They are likely to
+Bug reports and enhancement requests
+------------------------------------------------
+Bug reports are an important part of improving SFRmaker. Having a complete bug report
+will allow others to reproduce the bug and provide insight into fixing. See
+`this stackoverflow article <https://stackoverflow.com/help/mcve>`_ and
+`this blogpost <https://matthewrocklin.com/blog/work/2018/02/28/minimal-bug-reports>`_
+for tips on writing a good bug report.
+
+Trying the bug-producing code out on the *develop* branch is often a worthwhile exercise
+to confirm the bug still exists. It is also worth searching existing bug reports and pull requests
+to see if the issue has already been reported and/or fixed.
+
+To file a bug report or enhancement request, from the issues tab on the `SFRmaker GitHub page <https://github.com/aleaf/sfrmaker>`_, select "New Issue".
+
+Bug reports must:
+
+#. Include a short, self-contained Python snippet reproducing the problem.
+   You can format the code nicely by using `GitHub Flavored Markdown
+   <https://github.github.com/github-flavored-markdown/>`_::
+
+      ```python
+      >>> import sfrmaker
+      >>> lns = sfrmaker.Lines.from_nhdplus_v2(NHDPlus_paths='../tylerforks/NHDPlus/',
+                                               filter='../tylerforks/grid.shp')
+      ...
+      ```
+
+#. Include the version of SFRmaker that you are running, which can be obtained with:
+
+   .. code-block:: python
+
+       import sfrmaker
+       sfrmaker.__version__
+
+   Depending on the issue, it may also be helpful to include information about the version
+   of python and operating system.
+
+#. Explain why the current behavior is wrong/not desired and what you expect instead.
+
+The issue will then be visible on the `Issues tab`_ and open to comments/ideas from others.
+
+
+Code contributions
+------------------------------
+Code contributions to SFRmaker to fix bugs, implement new features or improve existing code are encouraged. Regardless of the context, consider `filing an issue`_ first to make others aware of the problem and allow for discussion on potential approaches to addressing it.
+
+In general, SFRmaker trys to follow the conventions of the pandas project where applicable. Contributions to SFRmaker are likely to
 be accepted more quickly if they follow these guidelines.
-
-In general, SFRmaker follows the conventions of the pandas project
-where applicable.
 
 In particular, when submitting a pull request:
 
 - All existing tests should pass.  Please make sure that the test
   suite passes, both locally and on
-  `Travis CI <https://travis-ci.org/sfrmaker/sfrmaker>`_.  Status on
-  Travis will be visible on a pull request.  If you want to enable
-  Travis CI on your own fork, please read the pandas guidelines link
-  above or the
-  `getting started docs <https://docs.travis-ci.com/user/tutorial/>`_.
+  `GitHub Actions <https://github.com/aleaf/sfrmaker/actions>`_.  Status on
+  the GitHub Actions and code coverage checks will be visible on a pull request.
 
 - New functionality should include tests.  Please write reasonable
   tests for your code and make sure that they pass on your pull request.
@@ -62,7 +103,7 @@ Each of these 7 steps is detailed below.
 
 
 1) Forking the *SFRmaker* repository using Git
-------------------------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To the new user, working with Git is one of the more daunting aspects of contributing to *SFRmaker*.
 It can very quickly become overwhelming, but sticking to the guidelines below will help keep the process
@@ -82,7 +123,7 @@ Some great resources for learning Git:
 * Matthew Brett's `Pydagogue <http://matthew-brett.github.com/pydagogue/>`_.
 
 Getting started with Git
-~~~~~~~~~~~~~~~~~~~~~~~~
+*************************
 
 `GitHub has instructions <http://help.github.com/set-up-git-redirect>`__ for installing git,
 setting up your SSH key, and configuring git.  All these steps need to be completed before
@@ -91,7 +132,7 @@ you can work seamlessly between your local repository and GitHub.
 .. _contributing.forking:
 
 Forking
-~~~~~~~
+*************************
 
 You will need your own fork to work on the code. Go to the `SFRmaker project
 page <https://github.com/sfrmaker/sfrmaker>`_ and hit the ``Fork`` button. You will
@@ -104,14 +145,11 @@ want to clone your fork to your machine::
 This creates the directory `sfrmaker-yourname` and connects your repository to
 the upstream (main project) *SFRmaker* repository.
 
-The testing suite will run automatically on Travis-CI once your pull request is
-submitted.  However, if you wish to run the test suite on a branch prior to
-submitting the pull request, then Travis-CI needs to be hooked up to your
-GitHub repository.  Instructions for doing so are `here
-<http://about.travis-ci.org/docs/user/getting-started/>`__.
+The testing suite should run automatically on GitHub Actions each time code is pushed to your fork,
+and will also run on submittal of your pull request.
 
 Creating a branch
-~~~~~~~~~~~~~~~~~~
+*************************
 
 You want your master branch to reflect only production-ready code, so create a
 feature branch for making your changes. For example::
@@ -144,7 +182,7 @@ after updating.
 .. _contributing.dev_env:
 
 2 & 3) Creating a development environment with the required dependencies
----------------------------------------------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 A development environment is a virtual space where you can keep an independent installation of *SFRmaker*.
 This makes it easy to keep both a stable version of python in one place you use for work, and a development
 version (which you may break while playing with code) in another.
@@ -185,7 +223,7 @@ At this point you can easily do a *development* install, as detailed in the next
 
 
 4) Installing the SFRmaker source code
-------------------------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Once dependencies are in place, install the SFRmaker source code by navigating to the gitclone of the *SFRmaker* repository and (with the ``sfrmaker_dev`` environment activated) running::
 
@@ -193,7 +231,7 @@ Once dependencies are in place, install the SFRmaker source code by navigating t
 
 
 5) Making changes and writing tests
--------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 *SFRmaker* is serious about testing and strongly encourages contributors to embrace
 `test-driven development (TDD) <http://en.wikipedia.org/wiki/Test-driven_development>`_.
@@ -213,14 +251,14 @@ extensions in `numpy.testing
 <http://docs.scipy.org/doc/numpy/reference/routines.testing.html>`_ and `pandas.testing <https://pandas.pydata.org/pandas-docs/stable/reference/general_utility_functions.html>`_.
 
 Writing tests
-~~~~~~~~~~~~~
+***************
 
 All tests should go into the ``tests`` directory. This folder contains many
 current examples of tests, and we suggest looking to these for inspiration. In general,
 the tests in this folder aim to be organized by module (e.g. ``test_routing.py`` for the functions in ``routing.py``).
 
 Running the test suite
-~~~~~~~~~~~~~~~~~~~~~~
+******************************
 
 The tests can then be run directly inside your Git clone (without having to
 install *SFRmaker*) by typing::
@@ -228,7 +266,8 @@ install *SFRmaker*) by typing::
     pytest
 
 6) Updating the Documentation
------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 
 The *SFRmaker* documentation resides in the `docs` folder. Changes to the docs are
 made by modifying the appropriate file in the `source` folder within `docs`.
@@ -243,7 +282,7 @@ The resulting html pages will be located in `docs/build/html`. It's a good pract
 
 
 7) Submitting a Pull Request
-------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Once you've made changes and pushed them to your forked repository, you then
 submit a pull request to have them integrated into the *SFRmaker* code base.
@@ -253,7 +292,7 @@ You can find a pull request (or PR) tutorial in the `GitHub's Help Docs <https:/
 .. _contributing_style:
 
 Style Guide & Linting
----------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 SFRmaker tries to follow the `PEP8 <http://www.python.org/dev/peps/pep-0008/>`_ standard. At this point, there's no enforcement of this, but I am considering implementing `Black <https://black.readthedocs.io/en/stable/>`_, which automates a code style that is PEP8-complient. Many editors perform automatic linting that makes following PEP8 easy.
 
@@ -279,3 +318,6 @@ From the root of the SFRmaker repository, you should then install the
    $ pre-commit install
 
 Then ``isort`` will be run automatically each time you commit changes. You can skip these checks with ``git commit --no-verify``.
+
+.. _filing an issue: https://docs.github.com/en/free-pro-team@latest/github/managing-your-work-on-github/creating-an-issue
+.. _Issues tab: https://github.com/aleaf/sfrmaker/issues
