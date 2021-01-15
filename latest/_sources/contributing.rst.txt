@@ -35,7 +35,7 @@ Bug reports must:
                                                filter='../tylerforks/grid.shp')
       ...
       ```
-      
+
    e.g.::
 
       ```yaml
