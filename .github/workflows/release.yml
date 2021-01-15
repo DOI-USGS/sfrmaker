@@ -25,6 +25,7 @@ jobs:
             Changes in this Release:
           draft: false
           prerelease: false
+
   deploy:
     needs: release
     runs-on: ubuntu-latest

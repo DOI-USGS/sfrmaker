@@ -2,7 +2,7 @@
 Release History
 ===============
 
-Version 0.7 (2021-01-15)
+Version 0.7.0 (2021-01-15)
 --------------------------
 * major speed-up (and overhead reduction) to finding routing paths (by replacing recursion strategy with simple for loop)
 * in preprocessing module, use 1st percentile elevations sampled from DEM to avoid outliers (bad pixels)

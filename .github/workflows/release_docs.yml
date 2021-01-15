@@ -1,11 +1,11 @@
 # from pyproj: https://github.com/pyproj4/pyproj/blob/master/.github/workflows/build_docs.yaml
-name: Publish Docs
+name: Publish Release Docs
 
 on:
   push:
-    branches: [ master, develop ]
-  #release:
-  #  types: [ created ]
+    # Sequence of patterns matched against refs/tags
+    tags:
+      - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
 
 jobs:
   docs:
@@ -84,20 +84,9 @@ jobs:
 
     - name: Deploy 🚀
       uses: JamesIves/github-pages-deploy-action@3.7.1
-      if: ${{ github.event_name == 'release' }}
       with:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         BRANCH: gh-pages
         FOLDER: docs/build/html
         CLEAN: false
         TARGET_FOLDER: ${{ github.ref }}
-
-    - name: Deploy 🚀
-      uses: JamesIves/github-pages-deploy-action@3.7.1
-      if: ${{ github.event_name == 'push' }}
-      with:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        BRANCH: gh-pages
-        FOLDER: docs/build/html
-        CLEAN: false
-        TARGET_FOLDER: latest
