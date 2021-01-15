@@ -2,11 +2,12 @@
 Release History
 ===============
 
-Version 0.6.3 (2021-xx-xx)
+Version 0.7 (2021-01-15)
 --------------------------
 * major speed-up (and overhead reduction) to finding routing paths (by replacing recursion strategy with simple for loop)
 * in preprocessing module, use 1st percentile elevations sampled from DEM to avoid outliers (bad pixels)
 * in preprocessing module, add option to re-use output from zonal statistics
+* bug fix: refactor calls to gisutils.df2shp to use crs instead of epsg, etc.
 
 Version 0.6.2 (2020-11-12)
 --------------------------
