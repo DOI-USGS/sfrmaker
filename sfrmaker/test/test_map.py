@@ -12,9 +12,9 @@ def name_path():
 
 
 @pytest.fixture(scope="module")
-def lines(testdatapath, name_path):
+def lines(test_data_path, name_path):
     name, path = name_path
-    lns = sfrmaker.Lines.from_shapefile('{}/{}/flowlines.shp'.format(testdatapath, path),
+    lns = sfrmaker.Lines.from_shapefile('{}/{}/flowlines.shp'.format(test_data_path, path),
                                         id_column='COMID',
                                         routing_column='tocomid',
                                         width1_column='width1',
@@ -29,9 +29,9 @@ def lines(testdatapath, name_path):
 
 
 @pytest.fixture(scope="module")
-def grid(testdatapath, name_path):
+def grid(test_data_path, name_path):
     name, path = name_path
-    grd = sfrmaker.StructuredGrid.from_json('{0}/{1}/{1}/{1}_grid.json'.format(testdatapath, path))
+    grd = sfrmaker.StructuredGrid.from_json('{0}/{1}/{1}/{1}_grid.json'.format(test_data_path, path))
     return grd
 
 

@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 import shutil
 import copy
 import platform
@@ -40,9 +41,9 @@ def datapath():
 
 
 @pytest.fixture(scope="session")
-def testdatapath():
+def test_data_path():
     """Smaller datasets for faster test execution."""
-    return 'sfrmaker/test/data'
+    return Path('sfrmaker/test/data')
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -117,8 +118,8 @@ def sfr_testdata(sfr_test_numbering):
 
 
 @pytest.fixture(scope='module')
-def shellmound_simulation(testdatapath, outdir):
-    sim_data_folder = '{}/shellmound/shellmound'.format(testdatapath)
+def shellmound_simulation(test_data_path, outdir):
+    sim_data_folder = '{}/shellmound/shellmound'.format(test_data_path)
     sim_ws = os.path.join(outdir, 'shellmound')
     #shutil.copytree(sim_data_folder, sim_ws, dirs_exist_ok=True)
     # dirs_exist_ok new with python 3.8
@@ -239,8 +240,8 @@ def tylerforks_sfrdata(tylerforks_model, tylerforks_lines_from_NHDPlus,
 
 
 @pytest.fixture(scope='module')
-def lines_from_shapefile(testdatapath):
-    flowlines_file = '{}/shellmound/flowlines.shp'.format(testdatapath)
+def lines_from_shapefile(test_data_path):
+    flowlines_file = '{}/shellmound/flowlines.shp'.format(test_data_path)
     lns = sfrmaker.Lines.from_shapefile(flowlines_file,
                                         id_column='COMID',
                                         routing_column='tocomid',

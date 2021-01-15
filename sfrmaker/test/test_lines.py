@@ -46,3 +46,10 @@ def test_original_routing_attribute(nhdplus_dataframe, one_to_many, datapath):
                                           prjfile=prjfile)
     # verify that values (to ids) in original routing dictionary are scalars
     assert is_to_one(lines._original_routing)
+
+
+def test_write_shapefile(tylerforks_lines_from_NHDPlus, test_data_path):
+    lines = tylerforks_lines_from_NHDPlus
+    outshp = test_data_path / 'lines.shp'
+    lines.write_shapefile(outshp)
+    assert outshp.exists()

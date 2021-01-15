@@ -3,7 +3,7 @@ import flopy
 import sfrmaker
 
 
-def test_shellmound_simulation(testdatapath, shellmound_simulation):
+def test_shellmound_simulation(test_data_path, shellmound_simulation):
     assert isinstance(shellmound_simulation, flopy.mf6.MFSimulation)
 
 
