@@ -184,7 +184,7 @@ def test_locate_sites(shellmound_sfrdata, outdir):
                        }
                       )
     sites_shapefile = '{}/sites.shp'.format(outdir)
-    df2shp(df, sites_shapefile, epsg=5070)
+    df2shp(df, sites_shapefile, crs=5070)
     sfrlines_shapefile = '{}/shellmound_lines.shp'.format(outdir)
     shellmound_sfrdata.export_lines(sfrlines_shapefile)
     active_area = box(*shellmound_sfrdata.grid.bounds)

@@ -335,7 +335,7 @@ class Lines:
         outshp : str, optional
             Shapefile name, by default 'flowlines.shp'
         """        
-        df2shp(self.df, outshp, epsg=self.crs.epsg, prj=self.crs.prjfile)
+        df2shp(self.df, outshp, crs=self.crs)
 
     @classmethod
     def from_shapefile(cls, shapefile,

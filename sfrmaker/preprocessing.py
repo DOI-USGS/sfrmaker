@@ -206,7 +206,7 @@ def cull_flowlines(NHDPlus_paths,
                'pf_file': '{}/PlusFlow{}.dbf'.format(outfolder, version),
                'elevslope_file': '{}/elevslope{}.dbf'.format(outfolder, version)
                }
-    df2shp(fl, results['flowlines_file'], epsg=4269)
+    df2shp(fl, results['flowlines_file'], crs=4269)
     df2shp(pfvaa, results['pfvaa_file'])
     df2shp(pf, results['pf_file'])
     df2shp(elevslope, results['elevslope_file'])

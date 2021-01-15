@@ -20,7 +20,7 @@ def shellmound_active_area(shellmound_grid, outdir):
     df = pd.DataFrame({'geometry': [bbox],
                        'id': [0]})
     out_shapefile = os.path.join(outdir, 'shellmound', 'shellmound_bbox.shp')
-    gisutils.df2shp(df, out_shapefile, epsg=5070)
+    gisutils.df2shp(df, out_shapefile, crs=5070)
     return out_shapefile
 
 
