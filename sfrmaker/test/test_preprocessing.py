@@ -24,7 +24,7 @@ def active_area(outfolder):
     active_area_poly = box(*active_area_tuple)
     df = pd.DataFrame({'geometry': [active_area_poly], 'id': [0]})
     active_area = os.path.join(outfolder, 'active_area.shp')
-    df2shp(df, active_area, epsg=4269)
+    df2shp(df, active_area, crs=4269)
     return active_area_tuple
 
 
@@ -99,7 +99,7 @@ def preprocessed_flowlines(test_data_path, culled_flowlines, outfolder, project_
         assert preprocessed_flowlines.loc[comid, 'tocomid'] == tocomid
 
     out_shapefile = os.path.join(outfolder, 'preprocessed_flowlines.shp')
-    df2shp(preprocessed_flowlines, out_shapefile, epsg=5070)
+    df2shp(preprocessed_flowlines, out_shapefile, crs=5070)
     return preprocessed_flowlines
 
 
