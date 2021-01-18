@@ -4,8 +4,6 @@ name: Publish Docs
 on:
   push:
     branches: [ master, develop ]
-  #release:
-  #  types: [ created ]
 
 jobs:
   docs:
@@ -42,6 +40,7 @@ jobs:
         auto-activate-base: false
         # must be false in most cases
         # https://github.com/JamesIves/github-pages-deploy-action
+        use-only-tar-bz2: true # IMPORTANT: This needs to be set for caching to work properly!
 
     - name: Conda info
       shell: bash -l {0}
@@ -66,7 +65,7 @@ jobs:
         echo bin/$d/. >> $GITHUB_PATH
         echo $GITHUB_PATH
         pip install -e .
-        python -m ipykernel install --user --name test --display-name "test"
+        python -m ipykernel install --user --name sfrmaker_ci --display-name "sfrmaker_ci"
     - name: Conda list
       shell: bash -l {0}
       run: conda list
@@ -81,16 +80,6 @@ jobs:
       run: |
         set -e
         make -C docs html
-
-    - name: Deploy 🚀
-      uses: JamesIves/github-pages-deploy-action@3.7.1
-      if: ${{ github.event_name == 'release' }}
-      with:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        BRANCH: gh-pages
-        FOLDER: docs/build/html
-        CLEAN: false
-        TARGET_FOLDER: ${{ github.ref }}
 
     - name: Deploy 🚀
       uses: JamesIves/github-pages-deploy-action@3.7.1

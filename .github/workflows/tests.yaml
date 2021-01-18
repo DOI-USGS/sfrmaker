@@ -80,7 +80,7 @@ jobs:
         echo bin/$d/. >> $GITHUB_PATH
         echo $GITHUB_PATH
         pip install -e .
-        python -m ipykernel install --user --name test --display-name "test"
+        python -m ipykernel install --user --name sfrmaker_ci --display-name "sfrmaker_ci"
     - name: Conda list
       shell: bash -l {0}
       run: conda list
