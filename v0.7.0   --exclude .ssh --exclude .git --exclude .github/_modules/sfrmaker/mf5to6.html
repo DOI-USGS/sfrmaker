@@ -1,0 +1,753 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>sfrmaker.mf5to6 &mdash; SFRmaker 0.7.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/copybutton.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/clipboard.min.js"></script>
+        <script src="../../_static/copybutton.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> SFRmaker
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.7.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../philosophy.html"> Philosophy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples.html"> Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html"> Installation</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../inputs.html"> Input Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples.html"> Using SFRmaker with a configuration file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../notebooks/SFRmaker_demo.html"> Basic Usage in a scripting context</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../notebooks/Streambed_elevation_demo.html"> How the streambed elevation sampling works</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api/index.html"> Code reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../config-summary.html"> Summary of configuration file options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../release-history.html"> Release History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html"> Contributing to SFRmaker</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Bibliography</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../references.html"> References cited</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">SFRmaker</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>sfrmaker.mf5to6</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for sfrmaker.mf5to6</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Code for converting MODFLOW-2005 style SFR Package input to MODFLOW-6 style SFR package input.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">copy</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">sfrmaker</span>
+<span class="kn">from</span> <span class="nn">sfrmaker.reaches</span> <span class="kn">import</span> <span class="n">interpolate_to_reaches</span>
+
+
+<div class="viewcode-block" id="Mf6SFR"><a class="viewcode-back" href="../../api/sfrmaker.mf5to6.html#sfrmaker.mf5to6.Mf6SFR">[docs]</a><span class="k">class</span> <span class="nc">Mf6SFR</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Class for writing MODFLOW-6 SFR package input</span>
+<span class="sd">    from a (MODFLOW-2005 style) flopy.modflow.ModflowSfr2 instance or</span>
+<span class="sd">    an sfrmaker.SFRData instance.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    ModflowSfr2 : flopy.modflow.ModflowSfr2 instance, optional</span>
+<span class="sd">        Input SFR dataset</span>
+<span class="sd">    SFRData : sfrmaker.SFRData instance, optional</span>
+<span class="sd">        Input SFR dataset</span>
+<span class="sd">    period_data : DataFrame, optional</span>
+<span class="sd">        DataFrame of MODFLOW-6-style stress period data, as made by</span>
+<span class="sd">        :meth:`SFRData.add_to_perioddata`. Only needed if SFRData isn&#39;t supplied,</span>
+<span class="sd">        by default None</span>
+<span class="sd">    idomain : ndarray, optional</span>
+<span class="sd">        3D numpy array designating active cells (idomain==1).</span>
+<span class="sd">        SFR reaches in inactive cells will be written with &#39;none&#39; in the cellid field.</span>
+<span class="sd">        by default None</span>
+<span class="sd">    options : list, optional</span>
+<span class="sd">        List of strings to write to the MODFLOW-6 SFR options block. For example::</span>
+
+<span class="sd">                options=[&#39;save_flows&#39;,</span>
+<span class="sd">                         &#39;BUDGET FILEOUT model.sfr.cbc&#39;,</span>
+<span class="sd">                         &#39;STAGE FILEOUT model.sfr.stage.bin&#39;]</span>
+
+<span class="sd">        An appropriate unit_conversion is written by default.</span>
+<span class="sd">        See MODFLOW-6 documentation for other options.</span>
+<span class="sd">        By default None.</span>
+
+<span class="sd">    auxiliary_line_numbers : bool, optional</span>
+<span class="sd">        If true, add &#39;line_id&#39; as an auxiliary variable to the options block</span>
+<span class="sd">        and write hydrography line IDs to the packagedata block in the auxiliary</span>
+<span class="sd">        &#39;line_id&#39; column, by default True.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># convert from ModflowSfr to mf6</span>
+    <span class="n">mf6names</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;rno&#39;</span><span class="p">:</span> <span class="s1">&#39;rno&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;node&#39;</span><span class="p">:</span> <span class="s1">&#39;cellid&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;rchlen&#39;</span><span class="p">:</span> <span class="s1">&#39;rlen&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;slope&#39;</span><span class="p">:</span> <span class="s1">&#39;rgrd&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;strtop&#39;</span><span class="p">:</span> <span class="s1">&#39;rtp&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;strthick&#39;</span><span class="p">:</span> <span class="s1">&#39;rbth&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;strhc1&#39;</span><span class="p">:</span> <span class="s1">&#39;rhk&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;roughch&#39;</span><span class="p">:</span> <span class="s1">&#39;man&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;flow&#39;</span><span class="p">:</span> <span class="s1">&#39;inflow&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;pptsw&#39;</span><span class="p">:</span> <span class="s1">&#39;rainfall&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;etsw&#39;</span><span class="p">:</span> <span class="s1">&#39;evaporation&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;runoff&#39;</span><span class="p">:</span> <span class="s1">&#39;runoff&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;depth1&#39;</span><span class="p">:</span> <span class="s1">&#39;depth1&#39;</span><span class="p">,</span>  <span class="c1"># need these for distributing stage</span>
+                <span class="s1">&#39;depth2&#39;</span><span class="p">:</span> <span class="s1">&#39;depth2&#39;</span><span class="p">}</span>
+    <span class="n">mf5names</span> <span class="o">=</span> <span class="p">{</span><span class="n">v</span><span class="p">:</span> <span class="n">k</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">mf6names</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+
+    <span class="n">cols</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;rno&#39;</span><span class="p">,</span> <span class="s1">&#39;cellid&#39;</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="s1">&#39;j&#39;</span><span class="p">,</span> <span class="s1">&#39;rlen&#39;</span><span class="p">,</span> <span class="s1">&#39;rwid&#39;</span><span class="p">,</span> <span class="s1">&#39;rgrd&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;rtp&#39;</span><span class="p">,</span> <span class="s1">&#39;rbth&#39;</span><span class="p">,</span> <span class="s1">&#39;rhk&#39;</span><span class="p">,</span> <span class="s1">&#39;man&#39;</span><span class="p">,</span> <span class="s1">&#39;ncon&#39;</span><span class="p">,</span> <span class="s1">&#39;ustrf&#39;</span><span class="p">,</span> <span class="s1">&#39;ndv&#39;</span><span class="p">,</span> <span class="s1">&#39;idomain&#39;</span><span class="p">,</span> <span class="s1">&#39;line_id&#39;</span><span class="p">]</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ModflowSfr2</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">SFRData</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">period_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">idomain</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">options</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">auxiliary_line_numbers</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+
+        <span class="c1"># instantiate with SFRData instance instead of ModflowSfr2 instance</span>
+        <span class="c1"># allows auxiliary variables from SFRData.reach_data</span>
+        <span class="c1"># (that aren&#39;t allowed in ModflowSfr2.reach_data) to be written</span>
+        <span class="k">if</span> <span class="n">SFRData</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ModflowSfr2</span> <span class="o">=</span> <span class="n">SFRData</span><span class="o">.</span><span class="n">modflow_sfr2</span>
+
+        <span class="c1"># check for other packages</span>
+        <span class="k">if</span> <span class="n">idomain</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">idomain</span> <span class="o">=</span> <span class="n">ModflowSfr2</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">bas6</span><span class="o">.</span><span class="n">ibound</span><span class="o">.</span><span class="n">array</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                <span class="c1"># constant head cells (-1) also made active</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">idomain</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">idomain</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">txt</span> <span class="o">=</span> <span class="s1">&#39;Warning: BAS6 package not found. &#39;</span>
+                <span class="n">txt</span> <span class="o">+=</span> <span class="s1">&#39;Cannot check for reaches in inactive cells. &#39;</span>
+                <span class="n">txt</span> <span class="o">+=</span> <span class="s1">&#39;Converted SFR package may not run with MODFLOW 6.&#39;</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">txt</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">idomain</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">idomain</span> <span class="o">=</span> <span class="n">idomain</span>
+
+        <span class="c1"># copy modflow_sfr2 object and enforce sorting</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ModflowSfr2</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">ModflowSfr2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ModflowSfr2</span><span class="o">.</span><span class="n">segment_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="s1">&#39;nseg&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ModflowSfr2</span><span class="o">.</span><span class="n">reach_data</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;iseg&#39;</span><span class="p">,</span> <span class="s1">&#39;ireach&#39;</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">structured</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ModflowSfr2</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">structured</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unit_conversion</span> <span class="o">=</span> <span class="n">ModflowSfr2</span><span class="o">.</span><span class="n">const</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nreaches</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ModflowSfr2</span><span class="o">.</span><span class="n">reach_data</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nper</span> <span class="o">=</span> <span class="n">ModflowSfr2</span><span class="o">.</span><span class="n">nper</span>
+
+        <span class="c1"># mf6 options block</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">auxiliary_line_numbers</span> <span class="o">=</span> <span class="n">auxiliary_line_numbers</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">options_block</span> <span class="o">=</span> <span class="n">options</span>
+
+        <span class="c1"># dataframes of reach and segment data from modflow_sfr2</span>
+        <span class="k">if</span> <span class="n">SFRData</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rd</span> <span class="o">=</span> <span class="n">SFRData</span><span class="o">.</span><span class="n">reach_data</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sd</span> <span class="o">=</span> <span class="n">SFRData</span><span class="o">.</span><span class="n">segment_data</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_period_data</span> <span class="o">=</span> <span class="n">SFRData</span><span class="o">.</span><span class="n">period_data</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rd</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">ModflowSfr2</span><span class="o">.</span><span class="n">reach_data</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rd</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;reachID&#39;</span><span class="p">:</span> <span class="s1">&#39;rno&#39;</span><span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_segment_dataframe</span><span class="p">()</span>
+            <span class="c1"># period data</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_period_data</span> <span class="o">=</span> <span class="n">period_data</span>
+
+        <span class="c1"># package data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_package_data</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># connection info (doesn&#39;t support diversions)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">graph</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rd</span><span class="o">.</span><span class="n">rno</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rd</span><span class="o">.</span><span class="n">outreach</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_graph_r</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># filled by properties</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">outlets</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_connections</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># diversions</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">diversions</span> <span class="o">=</span> <span class="kc">None</span>
+
+
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">dimensions_block</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">BEGIN Dimensions</span><span class="se">\n</span><span class="s1">  NREACHES </span><span class="si">{:d}</span><span class="se">\n</span><span class="s1">END Dimensions</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nreaches</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">graph_r</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph_r</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">outreaches</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rd</span><span class="o">.</span><span class="n">outreach</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_graph_r</span> <span class="o">=</span> <span class="p">{</span><span class="n">o</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">rd</span><span class="o">.</span><span class="n">rno</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">rd</span><span class="o">.</span><span class="n">outreach</span> <span class="o">==</span> <span class="n">o</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+                             <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">outreaches</span><span class="p">}</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">outlets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph_r</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph_r</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph_r</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">options_block</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_options_block</span>
+    
+    <span class="nd">@options_block</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">options_block</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">options</span><span class="p">):</span>
+        <span class="c1"># stuff to write</span>
+        <span class="n">options_block</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">BEGIN Options</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="k">if</span> <span class="n">options</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">opt</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
+                <span class="n">options_block</span> <span class="o">+=</span> <span class="s1">&#39;  </span><span class="si">{}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">opt</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s1">&#39;unit_conversion&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">options_block</span><span class="p">:</span>
+            <span class="n">options_block</span> <span class="o">+=</span> <span class="s1">&#39;  unit_conversion  </span><span class="si">{}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unit_conversion</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s1">&#39;auxiliary&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">options_block</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">auxiliary_line_numbers</span><span class="p">:</span>
+            <span class="n">options_block</span> <span class="o">+=</span> <span class="s1">&#39;  auxiliary line_id</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="n">options_block</span> <span class="o">+=</span> <span class="s1">&#39;END Options</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_options_block</span> <span class="o">=</span> <span class="n">options_block</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">packagedata</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_package_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_package_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_packagedata</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_package_data</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">connections</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connections</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">connections</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">rno</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nreaches</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">outreach</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">rno</span><span class="p">)</span>
+                <span class="c1">#for rno, v in self.graph.items():</span>
+                <span class="n">cnk</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="c1"># downstream reach</span>
+                <span class="k">if</span> <span class="n">outreach</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">{</span><span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">}:</span>  <span class="c1"># outlets aren&#39;t explicit in MF6</span>
+                    <span class="n">cnk</span> <span class="o">+=</span> <span class="p">[</span><span class="o">-</span><span class="n">outreach</span><span class="p">]</span>
+                <span class="c1"># upstream reaches</span>
+                <span class="k">if</span> <span class="n">rno</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">graph_r</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                    <span class="n">cnk</span> <span class="o">+=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">graph_r</span><span class="p">[</span><span class="n">rno</span><span class="p">])</span>
+                <span class="n">connections</span><span class="p">[</span><span class="n">rno</span><span class="p">]</span> <span class="o">=</span> <span class="n">cnk</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_connections</span> <span class="o">=</span> <span class="n">connections</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connections</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">period_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_period_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_period_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_period_data</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_period_data</span>
+
+    <span class="k">def</span> <span class="nf">_segment_data2reach_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var</span><span class="p">):</span>
+        <span class="n">reach_values</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">sd0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ModflowSfr2</span><span class="o">.</span><span class="n">segment_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">sd0</span><span class="p">[</span><span class="n">var</span><span class="p">]))</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sd0</span><span class="p">)):</span>
+                <span class="n">seg_value</span> <span class="o">=</span> <span class="n">sd0</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">var</span><span class="p">]</span>
+                <span class="n">nreaches</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rd</span><span class="o">.</span><span class="n">iseg</span> <span class="o">==</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="n">reach_values</span> <span class="o">+=</span> <span class="p">[</span><span class="n">seg_value</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">reach_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rd</span><span class="p">))</span> <span class="o">*</span> <span class="n">sd0</span><span class="p">[</span><span class="n">var</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">reach_values</span>
+
+    <span class="k">def</span> <span class="nf">_get_segment_dataframe</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">sd</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ModflowSfr2</span><span class="o">.</span><span class="n">segment_data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+            <span class="n">df</span><span class="p">[</span><span class="s1">&#39;per&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">k</span>
+            <span class="n">sd</span> <span class="o">=</span> <span class="n">sd</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+        <span class="n">keepcols</span> <span class="o">=</span> <span class="p">(</span><span class="n">sd</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">in1d</span><span class="p">(</span><span class="n">sd</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;per&#39;</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">sd</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">keepcols</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">_get_packagedata</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># [rno, cellid, rlen, rwid, rgrd, rtp, rbth, rhk, man, ncon,</span>
+        <span class="c1"># ustrf, ndv, aux, boundname]</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;converting reach and segment data to package data...&#39;</span><span class="p">)</span>
+        <span class="c1"># rwid = self.modflow_sfr2._interpolate_to_reaches(&#39;width1&#39;, &#39;width2&#39;)</span>
+        <span class="n">rwid</span> <span class="o">=</span> <span class="n">interpolate_to_reaches</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rd</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sd</span><span class="p">,</span>
+                                      <span class="s1">&#39;width1&#39;</span><span class="p">,</span> <span class="s1">&#39;width2&#39;</span><span class="p">,</span>
+                                      <span class="n">reach_data_group_col</span><span class="o">=</span><span class="s1">&#39;iseg&#39;</span><span class="p">,</span>
+                                      <span class="n">segment_data_group_col</span><span class="o">=</span><span class="s1">&#39;nseg&#39;</span>
+                                      <span class="p">)</span>
+        <span class="n">man</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_segment_data2reach_data</span><span class="p">(</span><span class="s1">&#39;roughch&#39;</span><span class="p">)</span>
+
+        <span class="n">packagedata</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">mf6names</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">rd</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                <span class="n">packagedata</span><span class="p">[</span><span class="n">v</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rd</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+
+        <span class="n">packagedata</span><span class="p">[</span><span class="s1">&#39;rwid&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rwid</span>
+        <span class="n">packagedata</span><span class="p">[</span><span class="s1">&#39;man&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">man</span>
+        <span class="n">packagedata</span><span class="p">[</span><span class="s1">&#39;ncon&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">connections</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="p">[]))</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">packagedata</span><span class="o">.</span><span class="n">rno</span><span class="p">]</span>
+        <span class="n">packagedata</span><span class="p">[</span><span class="s1">&#39;ustrf&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.</span>
+        <span class="n">packagedata</span><span class="p">[</span><span class="s1">&#39;ndv&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">structured</span><span class="p">:</span>
+            <span class="n">packagedata</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s1">&#39;cellid&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="s1">&#39;j&#39;</span><span class="p">]:</span>
+                <span class="n">packagedata</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rd</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">idomain</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">packagedata</span><span class="p">[</span><span class="s1">&#39;idomain&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">idomain</span><span class="p">[</span><span class="n">packagedata</span><span class="o">.</span><span class="n">k</span><span class="p">,</span> <span class="n">packagedata</span><span class="o">.</span><span class="n">i</span><span class="p">,</span> <span class="n">packagedata</span><span class="o">.</span><span class="n">j</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">packagedata</span><span class="p">[</span><span class="s1">&#39;idomain&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="k">if</span> <span class="s1">&#39;auxiliary&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">options_block</span><span class="p">:</span>
+            <span class="n">aux_variables</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">options_block</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;auxiliary&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">aux_variables</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">var</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">rd</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                    <span class="n">packagedata</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rd</span><span class="p">[</span><span class="n">var</span><span class="p">]</span>
+            
+        <span class="n">cols</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cols</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">packagedata</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">packagedata</span><span class="p">[</span><span class="n">cols</span><span class="p">]</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s1">&#39;rno&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_get_period_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;converting segment data to period data...&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">segment_data_to_period_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sd</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rd</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Mf6SFR.write_file"><a class="viewcode-back" href="../../api/sfrmaker.mf5to6.html#sfrmaker.mf5to6.Mf6SFR.write_file">[docs]</a>    <span class="k">def</span> <span class="nf">write_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">outpath</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                   <span class="n">external_files_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Write a MODFLOW-6 format SFR package file.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        filename : str, optional</span>
+<span class="sd">            SFR package filename. Default setting is to use the</span>
+<span class="sd">            ModflowSfr2.file_name attribute for the ModflowSfr2 instance</span>
+<span class="sd">            entered on init of the Mf6SFR class, by default None.</span>
+<span class="sd">        outpath : str, optional</span>
+<span class="sd">            Path to write sfr file (with ModflowSfr2.file_name) to. </span>
+<span class="sd">            Usually this is the simulation workspace. </span>
+<span class="sd">            Only used if filename is None.</span>
+<span class="sd">        options : list, optional</span>
+<span class="sd">            List of strings to write to the MODFLOW-6 SFR options block. For example::</span>
+
+<span class="sd">                options=[&#39;save_flows&#39;,</span>
+<span class="sd">                         &#39;BUDGET FILEOUT model.sfr.cbc&#39;,</span>
+<span class="sd">                         &#39;STAGE FILEOUT model.sfr.stage.bin&#39;]</span>
+
+<span class="sd">            An appropriate unit_conversion is written by default.</span>
+<span class="sd">            See MODFLOW-6 documentation for other options.</span>
+<span class="sd">            By default None.</span>
+<span class="sd">        external_files_path : str, optional</span>
+<span class="sd">            Path for writing an external file for packagedata, relative to the location of the SFR package file.</span>
+<span class="sd">            If specified, an open/close statement referencing the file is written to the packagedata block.</span>
+<span class="sd">            By default, None (packagedata table is written to the SFR package file)</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        OSError</span>
+<span class="sd">            If an invalid external_files_path is specified.</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
+        <span class="k">if</span> <span class="n">filename</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">outfile</span> <span class="o">=</span> <span class="n">filename</span>
+            <span class="n">outpath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">filename</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">outfile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">outpath</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ModflowSfr2</span><span class="o">.</span><span class="n">file_name</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="n">options</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">options_block</span> <span class="o">=</span> <span class="n">options</span>
+            
+        <span class="k">if</span> <span class="n">external_files_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">full_external_files_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">outpath</span><span class="p">,</span> <span class="n">external_files_path</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">full_external_files_path</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">OSError</span><span class="p">(</span><span class="s2">&quot;external_files_path doesn&#39;t exist:</span><span class="se">\n</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">full_external_files_path</span><span class="p">))</span>
+
+        <span class="n">header</span> <span class="o">=</span> <span class="s2">&quot;# MODFLOW-6 SFR input; created by SFRmaker v. </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">sfrmaker</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">outfile</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="s2">&quot;&quot;</span>
+                  <span class="p">)</span> <span class="k">as</span> <span class="n">output</span><span class="p">:</span>
+            <span class="n">output</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">header</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">output</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">options_block</span><span class="p">)</span>
+            <span class="n">output</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions_block</span><span class="p">)</span>
+
+            <span class="n">output</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">BEGIN Packagedata</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">writepakdata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">packagedata</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;cellid&#39;</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="s1">&#39;j&#39;</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">writepakdata</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                    <span class="n">writepakdata</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>  <span class="c1"># convert indices to 1-based</span>
+                    <span class="n">writepakdata</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">writepakdata</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+            <span class="c1"># fill in NONEs for reaches in inactive cells</span>
+            <span class="n">inactive</span> <span class="o">=</span> <span class="n">writepakdata</span><span class="o">.</span><span class="n">idomain</span> <span class="o">!=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="s1">&#39;cellid&#39;</span> <span class="ow">in</span> <span class="n">writepakdata</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                <span class="n">writepakdata</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">inactive</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+                <span class="n">writepakdata</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">inactive</span><span class="p">,</span> <span class="s1">&#39;i&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;NONE&#39;</span>
+                <span class="n">writepakdata</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">inactive</span><span class="p">,</span> <span class="s1">&#39;j&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">writepakdata</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">inactive</span><span class="p">,</span> <span class="s1">&#39;cellid&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;NONE&#39;</span>
+
+            <span class="n">columns</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">writepakdata</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+            <span class="n">columns</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;#</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">columns</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">writepakdata</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="n">columns</span>
+            <span class="k">if</span> <span class="n">external_files_path</span><span class="p">:</span>
+                
+                <span class="c1"># filename for the external package data file</span>
+                <span class="n">packagedata_outfile</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">_packagedata.dat&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">outfile</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">])[</span><span class="mi">0</span><span class="p">])</span>
+                
+                <span class="c1"># path to package data file relative to sfr file</span>
+                <span class="n">packagedata_rel_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">external_files_path</span><span class="p">,</span> <span class="n">packagedata_outfile</span><span class="p">)</span>
+                <span class="n">output</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  open/close </span><span class="si">{}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">packagedata_rel_path</span><span class="p">))</span>
+                
+                <span class="c1"># path to package data file relative to cwd</span>
+                <span class="n">packagedata_outfile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">full_external_files_path</span><span class="p">,</span> <span class="n">packagedata_outfile</span><span class="p">)</span>
+                <span class="n">writepakdata</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s1">&#39;idomain&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">packagedata_outfile</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;wrote </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">packagedata_outfile</span><span class="p">))</span>
+                
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">writepakdata</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s1">&#39;idomain&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">output</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;END Packagedata</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+            <span class="n">output</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">BEGIN Connectiondata</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="c1">#for i in range(1, self.nreaches + 1):</span>
+            <span class="c1">#    if i in self.connections.keys():</span>
+            <span class="c1">#        output.write(&#39;  {} {}\n&#39;.format(i, &#39; &#39;.join(map(str, self.connections[i]))))</span>
+            <span class="k">for</span> <span class="n">rno</span><span class="p">,</span> <span class="n">connections</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">connections</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">connections</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">connections</span><span class="p">[</span><span class="n">rno</span><span class="p">]))</span>
+                <span class="n">output</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;  </span><span class="si">{</span><span class="n">rno</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">connections</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">output</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;END Connectiondata</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+            <span class="c1"># skip the diversions block for now</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">period_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">periods</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">period_data</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;per&#39;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">per</span><span class="p">,</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">periods</span><span class="p">:</span>
+                    <span class="n">output</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">BEGIN Period </span><span class="si">{}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">per</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+                    <span class="n">group</span> <span class="o">=</span> <span class="n">group</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;ACTIVE&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+                    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="n">group</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">group</span><span class="o">.</span><span class="n">rno</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+                    <span class="n">datacols</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;inflow&#39;</span><span class="p">,</span> <span class="s1">&#39;manning&#39;</span><span class="p">,</span> <span class="s1">&#39;rainfall&#39;</span><span class="p">,</span> <span class="s1">&#39;evaporation&#39;</span><span class="p">,</span> <span class="s1">&#39;runoff&#39;</span><span class="p">,</span> <span class="s1">&#39;stage&#39;</span><span class="p">}</span>
+                    <span class="n">datacols</span> <span class="o">=</span> <span class="n">datacols</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">group</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+                    <span class="n">group</span> <span class="o">=</span> <span class="n">group</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">datacols</span><span class="p">]</span>
+                    <span class="n">group</span><span class="o">.</span><span class="n">stack</span><span class="p">()</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                    <span class="n">output</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;END Period </span><span class="si">{}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">per</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;wrote </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">outfile</span><span class="p">))</span></div></div>
+
+
+<div class="viewcode-block" id="mf6sfr"><a class="viewcode-back" href="../../api/sfrmaker.mf5to6.html#sfrmaker.mf5to6.mf6sfr">[docs]</a><span class="k">class</span> <span class="nc">mf6sfr</span><span class="p">(</span><span class="n">Mf6SFR</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;The &#39;mf6sfr&#39; class was renamed to Mf6SFR to better follow pep 8.&quot;</span><span class="p">,</span>
+                      <span class="ne">DeprecationWarning</span><span class="p">)</span>
+        <span class="n">Mf6SFR</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="segment_data_to_period_data"><a class="viewcode-back" href="../../api/sfrmaker.mf5to6.html#sfrmaker.mf5to6.segment_data_to_period_data">[docs]</a><span class="k">def</span> <span class="nf">segment_data_to_period_data</span><span class="p">(</span><span class="n">segment_data</span><span class="p">,</span> <span class="n">reach_data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convert modflow-2005 style segment data to modflow-6 period data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">idx_cols</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;per&#39;</span><span class="p">,</span> <span class="s1">&#39;iseg&#39;</span><span class="p">,</span> <span class="s1">&#39;ireach&#39;</span><span class="p">,</span> <span class="s1">&#39;rno&#39;</span><span class="p">,</span> <span class="s1">&#39;icalc&#39;</span><span class="p">]</span>
+    <span class="n">variable_cols</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;status&#39;</span><span class="p">,</span> <span class="s1">&#39;evaporation&#39;</span><span class="p">,</span> <span class="s1">&#39;inflow&#39;</span><span class="p">,</span> <span class="s1">&#39;rainfall&#39;</span><span class="p">,</span> <span class="s1">&#39;runoff&#39;</span><span class="p">,</span> <span class="s1">&#39;stage&#39;</span><span class="p">]</span>
+    <span class="n">sd</span> <span class="o">=</span> <span class="n">segment_data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">prd</span> <span class="o">=</span> <span class="n">segment_data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">rd</span> <span class="o">=</span> <span class="n">reach_data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">cols</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">Mf6SFR</span><span class="o">.</span><span class="n">mf6names</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">prd</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
+    <span class="n">cols</span> <span class="o">+=</span> <span class="p">[</span><span class="s1">&#39;per&#39;</span><span class="p">,</span> <span class="s1">&#39;nseg&#39;</span><span class="p">]</span>
+    <span class="n">cols</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s1">&#39;roughch&#39;</span><span class="p">)</span>
+
+    <span class="n">prd</span> <span class="o">=</span> <span class="n">prd</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">cols</span><span class="p">]</span>
+    <span class="c1"># drop all of the zero values from s.p. 0 (default)</span>
+    <span class="n">datacols</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">prd</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">difference</span><span class="p">({</span><span class="s1">&#39;per&#39;</span><span class="p">,</span> <span class="s1">&#39;nseg&#39;</span><span class="p">}))</span>
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">datacols</span><span class="p">:</span>  <span class="c1"># explicitly convert zeros for each data column</span>
+        <span class="n">prd</span><span class="o">.</span><span class="n">loc</span><span class="p">[(</span><span class="n">prd</span><span class="o">.</span><span class="n">per</span> <span class="o">==</span> <span class="mi">0</span><span class="p">),</span> <span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">prd</span><span class="o">.</span><span class="n">loc</span><span class="p">[(</span><span class="n">prd</span><span class="o">.</span><span class="n">per</span> <span class="o">==</span> <span class="mi">0</span><span class="p">),</span> <span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+    <span class="n">prd</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">Mf6SFR</span><span class="o">.</span><span class="n">mf6names</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># drop columns that have no values</span>
+    <span class="n">prd</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># drop rows that have no values</span>
+    <span class="n">cols</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">variable_cols</span><span class="p">)</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">prd</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+    <span class="n">prd</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="n">subset</span><span class="o">=</span><span class="n">cols</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">prd</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">idx_cols</span> <span class="o">+</span> <span class="n">variable_cols</span><span class="p">)</span>
+
+    <span class="c1"># get rno for reach 1s</span>
+    <span class="n">segroups</span> <span class="o">=</span> <span class="n">rd</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;iseg&#39;</span><span class="p">)</span>
+    <span class="n">reach1IDs</span> <span class="o">=</span> <span class="n">segroups</span><span class="o">.</span><span class="n">first</span><span class="p">()[</span><span class="s1">&#39;rno&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+    <span class="n">prd</span><span class="p">[</span><span class="s1">&#39;rno&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">reach1IDs</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">prd</span><span class="o">.</span><span class="n">index</span><span class="p">]</span>
+    <span class="c1"># prd[&#39;rainfall&#39;] = np.random.randn(len(prd))</span>
+
+    <span class="c1">#  distribute other variables to all reaches</span>
+    <span class="n">cols</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;inflow&#39;</span><span class="p">,</span> <span class="s1">&#39;manning&#39;</span><span class="p">,</span> <span class="s1">&#39;rainfall&#39;</span><span class="p">,</span> <span class="s1">&#39;evaporation&#39;</span><span class="p">,</span> <span class="s1">&#39;runoff&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;depth1&#39;</span><span class="p">,</span> <span class="s1">&#39;depth2&#39;</span><span class="p">}</span>
+    <span class="n">cols</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">prd</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">cols</span><span class="p">)</span>
+    <span class="n">icalc</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">sd</span><span class="o">.</span><span class="n">nseg</span><span class="p">,</span> <span class="n">sd</span><span class="o">.</span><span class="n">per</span><span class="p">),</span> <span class="n">sd</span><span class="o">.</span><span class="n">icalc</span><span class="p">))</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cols</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">cols</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;distributing values to reaches:</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">cols</span><span class="o">.</span><span class="n">difference</span><span class="p">({</span><span class="s1">&#39;depth1&#39;</span><span class="p">,</span> <span class="s1">&#39;depth2&#39;</span><span class="p">}):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> -&gt; </span><span class="si">{}</span><span class="s1">...&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">Mf6SFR</span><span class="o">.</span><span class="n">mf5names</span><span class="p">[</span><span class="n">c</span><span class="p">],</span> <span class="n">c</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">icalc</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;strtop, depth1 &amp; depth2 -&gt; stage for icalc&lt;1...&#39;</span><span class="p">)</span>
+        <span class="n">reaches</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># iterate through segments in prd (multiple periods)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">prd</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+            <span class="n">seg</span><span class="p">,</span> <span class="n">per</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">nseg</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">per</span><span class="p">)</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">segroups</span><span class="o">.</span><span class="n">get_group</span><span class="p">(</span><span class="n">seg</span><span class="p">)[[</span><span class="s1">&#39;rno&#39;</span><span class="p">,</span> <span class="s1">&#39;rchlen&#39;</span><span class="p">,</span> <span class="s1">&#39;ireach&#39;</span><span class="p">]])</span>
+            <span class="n">df</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;reachID&#39;</span><span class="p">:</span> <span class="s1">&#39;rno&#39;</span><span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">df</span><span class="p">[</span><span class="s1">&#39;iseg&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">seg</span>
+            <span class="n">df</span><span class="p">[</span><span class="s1">&#39;lenfrac&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">rchlen</span> <span class="o">/</span> <span class="n">df</span><span class="o">.</span><span class="n">rchlen</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+            <span class="n">df</span><span class="p">[</span><span class="s1">&#39;per&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">per</span>
+            <span class="n">df</span><span class="p">[</span><span class="s1">&#39;icalc&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">icalc</span><span class="p">[(</span><span class="n">seg</span><span class="p">,</span> <span class="n">per</span><span class="p">)]</span>
+            <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">cols</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">c</span> <span class="o">==</span> <span class="s1">&#39;runoff&#39;</span><span class="p">:</span>
+                    <span class="n">df</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">r</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">*</span> <span class="n">df</span><span class="o">.</span><span class="n">lenfrac</span>  <span class="c1"># length-weighted mean</span>
+                <span class="k">elif</span> <span class="n">c</span> <span class="o">==</span> <span class="s1">&#39;inflow&#39;</span><span class="p">:</span>  <span class="c1"># only assign to reach1</span>
+                    <span class="n">inflow</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">))</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+                    <span class="n">inflow</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">inflow</span>
+                    <span class="n">df</span><span class="p">[</span><span class="s1">&#39;inflow&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">inflow</span>
+                <span class="k">elif</span> <span class="n">c</span> <span class="ow">in</span> <span class="p">{</span><span class="s1">&#39;manning&#39;</span><span class="p">,</span> <span class="s1">&#39;rainfall&#39;</span><span class="p">,</span> <span class="s1">&#39;evaporation&#39;</span><span class="p">}:</span>
+                    <span class="n">df</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">r</span><span class="p">[</span><span class="n">c</span><span class="p">]</span>  <span class="c1"># values already normalized to area</span>
+
+            <span class="c1"># distribute depth values from stress period data</span>
+            <span class="c1"># this will only populate stages where depth1/depth2 were &gt;0</span>
+            <span class="k">if</span> <span class="n">icalc</span><span class="p">[(</span><span class="n">seg</span><span class="p">,</span> <span class="n">per</span><span class="p">)]</span> <span class="o">&lt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="s1">&#39;depth1&#39;</span> <span class="ow">in</span> <span class="n">cols</span><span class="p">:</span>
+                <span class="n">df</span><span class="p">[</span><span class="s1">&#39;status&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;SIMPLE&#39;</span>
+
+                <span class="c1"># interpolate depth1 and depth2 to reaches</span>
+                <span class="n">dist</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">rchlen</span><span class="p">)</span> <span class="o">-</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">df</span><span class="o">.</span><span class="n">rchlen</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
+                <span class="n">fp</span> <span class="o">=</span> <span class="p">[</span><span class="n">r</span><span class="o">.</span><span class="n">depth1</span><span class="p">,</span> <span class="n">r</span><span class="o">.</span><span class="n">depth2</span><span class="p">]</span>
+                <span class="n">xp</span> <span class="o">=</span> <span class="p">[</span><span class="n">dist</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dist</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span>
+                <span class="n">depth</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">dist</span><span class="p">,</span> <span class="n">xp</span><span class="p">,</span> <span class="n">fp</span><span class="p">)</span>
+                <span class="n">strtop</span> <span class="o">=</span> <span class="n">segroups</span><span class="o">.</span><span class="n">get_group</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">nseg</span><span class="p">)</span><span class="o">.</span><span class="n">strtop</span><span class="o">.</span><span class="n">values</span>
+                <span class="n">df</span><span class="p">[</span><span class="s1">&#39;stage&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">strtop</span> <span class="o">+</span> <span class="n">depth</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">df</span><span class="p">[</span><span class="s1">&#39;status&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;ACTIVE&#39;</span>
+
+            <span class="c1"># drop out rows that didn&#39;t have any data</span>
+            <span class="n">df</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="n">cols</span><span class="o">.</span><span class="n">difference</span><span class="p">({</span><span class="s1">&#39;depth1&#39;</span><span class="p">,</span> <span class="s1">&#39;depth2&#39;</span><span class="p">}),</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">reaches</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+        <span class="n">distributed</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">reaches</span><span class="p">)</span>
+    <span class="n">distributed</span><span class="p">[</span><span class="s1">&#39;per&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">distributed</span><span class="o">.</span><span class="n">per</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">distributed</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">distributed</span><span class="o">.</span><span class="n">rno</span>
+    <span class="n">distributed</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;rno_idx&#39;</span>
+    <span class="n">distributed</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;per&#39;</span><span class="p">,</span> <span class="s1">&#39;rno&#39;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># for icalc=0 reaches with no depth specified in per 0</span>
+    <span class="c1"># set stage from strtop; add to distributed period data</span>
+    <span class="n">strtop</span> <span class="o">=</span> <span class="n">rd</span><span class="p">[[</span><span class="s1">&#39;rno&#39;</span><span class="p">,</span> <span class="s1">&#39;strtop&#39;</span><span class="p">,</span> <span class="s1">&#39;iseg&#39;</span><span class="p">,</span> <span class="s1">&#39;ireach&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">strtop</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span>  <span class="c1"># &#39;reachID&#39;: &#39;rno&#39;,</span>
+        <span class="s1">&#39;strtop&#39;</span><span class="p">:</span> <span class="s1">&#39;stage&#39;</span><span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">strtop</span><span class="p">[</span><span class="s1">&#39;icalc&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">icalc</span><span class="p">[(</span><span class="n">s</span><span class="p">,</span> <span class="mi">0</span><span class="p">)]</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">rd</span><span class="o">.</span><span class="n">iseg</span><span class="p">]</span>
+    <span class="n">strtop</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">strtop</span><span class="o">.</span><span class="n">rno</span>
+    <span class="c1"># cull to only include per=0 reaches where icalc=0 and depth wasn&#39;t specified</span>
+    <span class="n">per0reaches</span> <span class="o">=</span> <span class="n">distributed</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">distributed</span><span class="o">.</span><span class="n">per</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;rno&#39;</span><span class="p">]</span>
+    <span class="n">strtop</span> <span class="o">=</span> <span class="n">strtop</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">~</span><span class="n">strtop</span><span class="o">.</span><span class="n">rno</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">per0reaches</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">strtop</span><span class="o">.</span><span class="n">icalc</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">)]</span>
+    <span class="n">strtop</span><span class="p">[</span><span class="s1">&#39;per&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">strtop</span><span class="p">[</span><span class="s1">&#39;status&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;SIMPLE&#39;</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">strtop</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">distributed</span> <span class="o">=</span> <span class="n">distributed</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">strtop</span><span class="p">)</span>
+    <span class="n">distributed</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;per&#39;</span><span class="p">,</span> <span class="s1">&#39;rno&#39;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># rearrange the columns</span>
+    <span class="n">arrangecols</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;per&#39;</span><span class="p">,</span> <span class="s1">&#39;rno&#39;</span><span class="p">,</span> <span class="s1">&#39;status&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="s1">&#39;stage&#39;</span> <span class="ow">in</span> <span class="n">distributed</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span> <span class="n">arrangecols</span> <span class="o">+=</span> <span class="p">[</span><span class="s1">&#39;stage&#39;</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">cols</span><span class="o">.</span><span class="n">difference</span><span class="p">({</span><span class="s1">&#39;depth1&#39;</span><span class="p">,</span> <span class="s1">&#39;depth2&#39;</span><span class="p">}):</span>
+        <span class="n">arrangecols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">col</span><span class="p">)</span>
+    <span class="n">arrangecols</span> <span class="o">+=</span> <span class="p">[</span><span class="s1">&#39;iseg&#39;</span><span class="p">,</span> <span class="s1">&#39;ireach&#39;</span><span class="p">,</span> <span class="s1">&#39;icalc&#39;</span><span class="p">]</span>
+    <span class="n">distributed</span> <span class="o">=</span> <span class="n">distributed</span><span class="p">[</span><span class="n">arrangecols</span><span class="p">]</span>
+    <span class="n">distributed</span><span class="p">[</span><span class="s1">&#39;iseg&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">distributed</span><span class="o">.</span><span class="n">iseg</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">distributed</span></div>
+
+
+<div class="viewcode-block" id="cellids_to_kij"><a class="viewcode-back" href="../../api/sfrmaker.mf5to6.html#sfrmaker.mf5to6.cellids_to_kij">[docs]</a><span class="k">def</span> <span class="nf">cellids_to_kij</span><span class="p">(</span><span class="n">cellids</span><span class="p">,</span> <span class="n">drop_inactive</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Unpack tuples of MODFLOW-6 cellids (k, i, j) to</span>
+<span class="sd">    lists of k, i, j values; ignoring instances</span>
+<span class="sd">    where cellid is None (unconnected cells).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    cellids : sequence of (k, i, j) tuples</span>
+<span class="sd">    drop_inactive : bool</span>
+<span class="sd">        If True, drop cellids == &#39;none&#39;. If False,</span>
+<span class="sd">        distribute these to k, i, j.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    k, i, j : 1D numpy arrays of integers</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">active</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">cellids</span><span class="p">)</span> <span class="o">!=</span> <span class="s1">&#39;none&#39;</span>
+    <span class="k">if</span> <span class="n">drop_inactive</span><span class="p">:</span>
+        <span class="n">k</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">cellids</span><span class="p">[</span><span class="n">active</span><span class="p">]))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">cid</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">cid</span> <span class="o">!=</span> <span class="s1">&#39;none&#39;</span> <span class="k">else</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">cid</span> <span class="ow">in</span> <span class="n">cellids</span><span class="p">])</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">cid</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="n">cid</span> <span class="o">!=</span> <span class="s1">&#39;none&#39;</span> <span class="k">else</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">cid</span> <span class="ow">in</span> <span class="n">cellids</span><span class="p">])</span>
+        <span class="n">j</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">cid</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">if</span> <span class="n">cid</span> <span class="o">!=</span> <span class="s1">&#39;none&#39;</span> <span class="k">else</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">cid</span> <span class="ow">in</span> <span class="n">cellids</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">k</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+      <span class="lastupdated">
+        Last updated on Jan 18, 2021.
+      </span>
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
