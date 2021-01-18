@@ -18,8 +18,9 @@ jobs:
       with:
         persist-credentials: false
 
-    - name: Fetch all Git tags
-      run: git fetch --prune --unshallow --tags
+    - name: Get the version
+      id: get_version
+      run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
 
     - name: Cache Miniconda
       uses: actions/cache@v2.1.0
@@ -66,7 +67,7 @@ jobs:
         echo bin/$d/. >> $GITHUB_PATH
         echo $GITHUB_PATH
         pip install -e .
-        python -m ipykernel install --user --name test --display-name "test"
+        python -m ipykernel install --user --name sfrmaker_ci --display-name "sfrmaker_ci"
     - name: Conda list
       shell: bash -l {0}
       run: conda list
@@ -74,7 +75,7 @@ jobs:
     - name: Run tests
       shell: bash -l {0}
       run: |
-        pytest -v --durations=20
+        pytest sfrmaker/test/test_notebooks.py
 
     - name: Build docs
       shell: bash -l {0}
@@ -89,4 +90,4 @@ jobs:
         BRANCH: gh-pages
         FOLDER: docs/build/html
         CLEAN: false
-        TARGET_FOLDER: ${{ github.ref }}
+        TARGET_FOLDER: ${{ steps.get_version.outputs.VERSION }}"
