@@ -3,7 +3,7 @@
     "name": "SFRmaker",
     "organization": "U.S. Geological Survey",
     "description": "Rapid construction of MODFLOW SFR Package input from hydrography data.",
-    "version": "0.7.0",
+    "version": "0.7.1",
     "status": "Production",
 
     "permissions": {
@@ -17,8 +17,8 @@
     },
 
     "homepageURL": "https://code.usgs.gov/water/sfrmaker",
-    "downloadURL": "https://code.usgs.gov/water/sfrmaker/-/archive/v0.7.0/sfrmaker-v0.7.0.zip",
-    "disclaimerURL": "https://code.usgs.gov/water/sfrmaker/blob/master/DISCLAIMER.md",
+    "downloadURL": "https://code.usgs.gov/water/sfrmaker/-/archive/v0.7.1/sfrmaker-v0.7.1.zip",
+    "disclaimerURL": "https://code.usgs.gov/water/sfrmaker/raw/master/DISCLAIMER.md",
     "repositoryURL": "https://code.usgs.gov/water/sfrmaker.git",
     "vcs": "git",
 
@@ -33,7 +33,7 @@
     ],
 
     "languages": [
-      "python",
+      "python"
     ],
 
     "contact": {
@@ -42,7 +42,7 @@
     },
 
     "date": {
-      "metadataLastUpdated": "2021-01-19"
+      "metadataLastUpdated": "2021-01-21"
     }
   }
 ]
