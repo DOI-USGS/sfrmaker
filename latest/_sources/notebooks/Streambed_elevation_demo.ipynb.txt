@@ -12,10 +12,10 @@
    "execution_count": 1,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2021-01-28T16:56:27.155011Z",
-     "iopub.status.busy": "2021-01-28T16:56:27.154511Z",
-     "iopub.status.idle": "2021-01-28T16:56:28.098769Z",
-     "shell.execute_reply": "2021-01-28T16:56:28.098097Z"
+     "iopub.execute_input": "2021-01-28T17:00:18.920472Z",
+     "iopub.status.busy": "2021-01-28T17:00:18.919798Z",
+     "iopub.status.idle": "2021-01-28T17:00:19.862116Z",
+     "shell.execute_reply": "2021-01-28T17:00:19.861134Z"
     }
    },
    "outputs": [],
@@ -43,10 +43,10 @@
    "execution_count": 2,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2021-01-28T16:56:28.138434Z",
-     "iopub.status.busy": "2021-01-28T16:56:28.105446Z",
-     "iopub.status.idle": "2021-01-28T16:56:32.151431Z",
-     "shell.execute_reply": "2021-01-28T16:56:32.152251Z"
+     "iopub.execute_input": "2021-01-28T17:00:19.903321Z",
+     "iopub.status.busy": "2021-01-28T17:00:19.889364Z",
+     "iopub.status.idle": "2021-01-28T17:00:24.023763Z",
+     "shell.execute_reply": "2021-01-28T17:00:24.022981Z"
     }
    },
    "outputs": [
@@ -78,7 +78,7 @@
       "finished in 0.04s\n",
       "\n",
       "\n",
-      "SFRmaker version 0.7.0.post12.dev0+g1d90f1d\n",
+      "SFRmaker version 0.7.0.post12.dev0+g998e73f\n",
       "\n",
       "Creating sfr dataset...\n",
       "\n",
@@ -97,7 +97,7 @@
      "name": "stdout",
      "output_type": "stream",
      "text": [
-      "grid class created in 0.30s\n",
+      "grid class created in 0.29s\n",
       "\n",
       "Model grid information\n",
       "structured grid\n",
@@ -122,17 +122,17 @@
       "Culling hydrography to active area...\n",
       "starting lines: 17\n",
       "remaining lines: 17\n",
-      "finished in 0.00s\n",
+      "finished in 0.01s\n",
       "\n",
       "\n",
       "Intersecting 17 flowlines with 17,760 grid cells...\n",
       "\n",
       "Building spatial index...\n",
-      "finished in 2.54s\n",
+      "finished in 2.63s\n",
       "\n",
       "Intersecting 17 features...\n",
       "17\n",
-      "finished in 0.12s\n",
+      "finished in 0.11s\n",
       "\n",
       "Setting up reach data... (may take a few minutes for large grids)\n",
       "finished in 0.35s\n",
@@ -157,7 +157,7 @@
       "active area defined by: all cells\n",
       "\n",
       "\n",
-      "Time to create sfr dataset: 3.60s\n",
+      "Time to create sfr dataset: 3.70s\n",
       "\n"
      ]
     }
@@ -230,10 +230,10 @@
    "execution_count": 3,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2021-01-28T16:56:32.196653Z",
-     "iopub.status.busy": "2021-01-28T16:56:32.157063Z",
-     "iopub.status.idle": "2021-01-28T16:56:40.502885Z",
-     "shell.execute_reply": "2021-01-28T16:56:40.502171Z"
+     "iopub.execute_input": "2021-01-28T17:00:24.043065Z",
+     "iopub.status.busy": "2021-01-28T17:00:24.029098Z",
+     "iopub.status.idle": "2021-01-28T17:00:32.990887Z",
+     "shell.execute_reply": "2021-01-28T17:00:32.989991Z"
     }
    },
    "outputs": [
@@ -242,14 +242,14 @@
      "output_type": "stream",
      "text": [
       "running rasterstats.zonal_stats on buffered LineStrings...\n",
-      "finished in 3.96s\n",
+      "finished in 4.31s\n",
       "\n",
       "running rasterstats.zonal_stats on buffered LineStrings...\n",
-      "finished in 3.98s\n",
+      "finished in 4.21s\n",
       "\n",
       "\n",
       "Smoothing elevations...\n",
-      "finished in 0.18s\n"
+      "finished in 0.21s\n"
      ]
     }
    ],
@@ -277,10 +277,10 @@
    "execution_count": 4,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2021-01-28T16:56:40.516695Z",
-     "iopub.status.busy": "2021-01-28T16:56:40.513364Z",
-     "iopub.status.idle": "2021-01-28T16:56:40.560194Z",
-     "shell.execute_reply": "2021-01-28T16:56:40.560695Z"
+     "iopub.execute_input": "2021-01-28T17:00:33.000899Z",
+     "iopub.status.busy": "2021-01-28T17:00:32.998611Z",
+     "iopub.status.idle": "2021-01-28T17:00:33.053359Z",
+     "shell.execute_reply": "2021-01-28T17:00:33.052788Z"
     }
    },
    "outputs": [],
@@ -307,10 +307,10 @@
    "execution_count": 5,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2021-01-28T16:56:40.567082Z",
-     "iopub.status.busy": "2021-01-28T16:56:40.564963Z",
-     "iopub.status.idle": "2021-01-28T16:56:44.309608Z",
-     "shell.execute_reply": "2021-01-28T16:56:44.309088Z"
+     "iopub.execute_input": "2021-01-28T17:00:33.060573Z",
+     "iopub.status.busy": "2021-01-28T17:00:33.058232Z",
+     "iopub.status.idle": "2021-01-28T17:00:36.971471Z",
+     "shell.execute_reply": "2021-01-28T17:00:36.970845Z"
     }
    },
    "outputs": [
