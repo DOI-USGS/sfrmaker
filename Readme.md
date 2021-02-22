@@ -30,7 +30,7 @@ How to cite
 Leaf, A.T., Fienen, M.N. and Reeves, H.W., 2021. SFRmaker and Linesink-maker: Rapid construction of streamflow routing networks from hydrography data, Groundwater xx (x), xx–xx (in revision). [\<waiting on DOI from journal>](https://doi.org/10.5066/P9U2T031)
 
 ###### Software/Code citation for SFRmaker (IP-122355):
-Leaf, A.T., Fienen, M.N. and Reeves, H.W., 2021, SFRmaker version 0.7.1: U.S. Geological Survey Software Release, xx Jan. 2021, [https://doi.org/10.5066/P9U2T031](https://doi.org/10.5066/P9U2T031)
+Leaf, A.T., Fienen, M.N. and Reeves, H.W., 2021, SFRmaker version 0.7.1: U.S. Geological Survey Software Release, 29 Jan. 2021, [https://doi.org/10.5066/P9U2T031](https://doi.org/10.5066/P9U2T031)
 
 Disclaimer
 ----------
@@ -44,3 +44,5 @@ shall the fact of release constitute any such warranty. Furthermore, the
 software is released on condition that neither the USGS nor the U.S. Government
 shall be held liable for any damages resulting from its authorized or
 unauthorized use.
+
+Any use of trade, firm, or product names is for descriptive purposes only and does not imply endorsement by the U.S. Government.
