@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>sfrmaker.sfrdata &mdash; SFRmaker 0.7.0.post13.dev0+g2ab45b7 documentation</title>
+  <title>sfrmaker.sfrdata &mdash; SFRmaker 0.7.0.post15.dev0+gc6442f3 documentation</title>
   
 
   
@@ -36,8 +36,6 @@
         <script src="../../_static/clipboard.min.js"></script>
         <script src="../../_static/copybutton.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
@@ -67,7 +65,7 @@
             
             
               <div class="version">
-                0.7.0.post13.dev0+g2ab45b7
+                0.7.0.post15.dev0+gc6442f3
               </div>
             
           
@@ -579,13 +577,15 @@
                           <span class="n">line_id_column</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                           <span class="n">rno_column</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                           <span class="n">period_column</span><span class="o">=</span><span class="s1">&#39;per&#39;</span><span class="p">,</span>
-                          <span class="n">data_column</span><span class="o">=</span><span class="s1">&#39;Q_avg&#39;</span><span class="p">):</span>
+                          <span class="n">data_column</span><span class="o">=</span><span class="s1">&#39;Q_avg&#39;</span><span class="p">,</span>
+                          <span class="n">one_inflow_per_path</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">add_to_perioddata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">flowline_routing</span><span class="o">=</span><span class="n">flowline_routing</span><span class="p">,</span>
                                  <span class="n">variable</span><span class="o">=</span><span class="n">variable</span><span class="p">,</span>
                                  <span class="n">line_id_column</span><span class="o">=</span><span class="n">line_id_column</span><span class="p">,</span>
                                  <span class="n">rno_column</span><span class="o">=</span><span class="n">rno_column</span><span class="p">,</span>
                                  <span class="n">period_column</span><span class="o">=</span><span class="n">period_column</span><span class="p">,</span>
-                                 <span class="n">data_column</span><span class="o">=</span><span class="n">data_column</span><span class="p">)</span></div>
+                                 <span class="n">data_column</span><span class="o">=</span><span class="n">data_column</span><span class="p">,</span>
+                                 <span class="n">one_inflow_per_path</span><span class="o">=</span><span class="n">one_inflow_per_path</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="SFRData.add_to_segment_data"><a class="viewcode-back" href="../../api/sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.add_to_segment_data">[docs]</a>    <span class="k">def</span> <span class="nf">add_to_segment_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">flowline_routing</span><span class="p">,</span>
                             <span class="n">variable</span><span class="o">=</span><span class="s1">&#39;flow&#39;</span><span class="p">,</span>
@@ -975,7 +975,10 @@
 
         <span class="c1"># replace any observations that area already in the observations table</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_observations</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
-            <span class="n">exists_already</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_observations</span><span class="p">[</span><span class="s1">&#39;obsname&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">added_obs</span><span class="p">[</span><span class="s1">&#39;obsname&#39;</span><span class="p">])</span>
+            <span class="n">existing_obs</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_observations</span><span class="p">[</span><span class="s1">&#39;obsname&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_observations</span><span class="p">[</span><span class="s1">&#39;obstype&#39;</span><span class="p">]))</span>
+            <span class="n">new_obs</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">added_obs</span><span class="p">[</span><span class="s1">&#39;obsname&#39;</span><span class="p">],</span> <span class="n">added_obs</span><span class="p">[</span><span class="s1">&#39;obstype&#39;</span><span class="p">]))</span>
+            <span class="n">exists_already</span> <span class="o">=</span> <span class="p">{</span><span class="n">obs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">obs</span> <span class="ow">in</span> <span class="n">existing_obs</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">new_obs</span><span class="p">)}</span>
+            <span class="n">exists_already</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_observations</span><span class="p">[</span><span class="s1">&#39;obsname&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">exists_already</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_observations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_observations</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">~</span><span class="n">exists_already</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_observations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">added_obs</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
@@ -1952,7 +1955,7 @@
   <div role="contentinfo">
     <p>
       <span class="lastupdated">
-        Last updated on Jan 28, 2021.
+        Last updated on Feb 23, 2021.
       </span>
 
     </p>

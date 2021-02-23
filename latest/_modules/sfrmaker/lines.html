@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>sfrmaker.lines &mdash; SFRmaker 0.7.0.post13.dev0+g2ab45b7 documentation</title>
+  <title>sfrmaker.lines &mdash; SFRmaker 0.7.0.post15.dev0+gc6442f3 documentation</title>
   
 
   
@@ -36,8 +36,6 @@
         <script src="../../_static/clipboard.min.js"></script>
         <script src="../../_static/copybutton.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
@@ -67,7 +65,7 @@
             
             
               <div class="version">
-                0.7.0.post13.dev0+g2ab45b7
+                0.7.0.post15.dev0+gc6442f3
               </div>
             
           
@@ -537,7 +535,7 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        shapefile : str</span>
+<span class="sd">        shapefile : str or pathlike</span>
 <span class="sd">            Input shapefile</span>
 <span class="sd">        id_column : str, optional</span>
 <span class="sd">            Attribute field with line identifiers, </span>
@@ -590,7 +588,7 @@
         
 
         <span class="k">if</span> <span class="n">prjfile</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">prjfile</span> <span class="o">=</span> <span class="n">shapefile</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.shp&#39;</span><span class="p">,</span> <span class="s1">&#39;.prj&#39;</span><span class="p">)</span>
+            <span class="n">prjfile</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">shapefile</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.shp&#39;</span><span class="p">,</span> <span class="s1">&#39;.prj&#39;</span><span class="p">)</span>
             <span class="n">prjfile</span> <span class="o">=</span> <span class="n">prjfile</span> <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">prjfile</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
 
         <span class="n">shpfile_crs</span> <span class="o">=</span> <span class="n">get_crs</span><span class="p">(</span><span class="n">prjfile</span><span class="o">=</span><span class="n">prjfile</span><span class="p">,</span> <span class="n">epsg</span><span class="o">=</span><span class="n">epsg</span><span class="p">,</span> <span class="n">proj_str</span><span class="o">=</span><span class="n">proj_str</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">)</span>
@@ -1158,7 +1156,7 @@
   <div role="contentinfo">
     <p>
       <span class="lastupdated">
-        Last updated on Jan 28, 2021.
+        Last updated on Feb 23, 2021.
       </span>
 
     </p>
