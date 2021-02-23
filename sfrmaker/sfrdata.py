@@ -396,13 +396,15 @@ class SFRData(DataPackage):
                           line_id_column=None,
                           rno_column=None,
                           period_column='per',
-                          data_column='Q_avg'):
+                          data_column='Q_avg',
+                          one_inflow_per_path=False):
         return add_to_perioddata(self, data, flowline_routing=flowline_routing,
                                  variable=variable,
                                  line_id_column=line_id_column,
                                  rno_column=rno_column,
                                  period_column=period_column,
-                                 data_column=data_column)
+                                 data_column=data_column,
+                                 one_inflow_per_path=one_inflow_per_path)
 
     def add_to_segment_data(self, data, flowline_routing,
                             variable='flow',
@@ -792,7 +794,10 @@ class SFRData(DataPackage):
 
         # replace any observations that area already in the observations table
         if isinstance(self._observations, pd.DataFrame):
-            exists_already = self._observations['obsname'].isin(added_obs['obsname'])
+            existing_obs = set(zip(self._observations['obsname'], self._observations['obstype']))
+            new_obs = set(zip(added_obs['obsname'], added_obs['obstype']))
+            exists_already = {obs[0] for obs in existing_obs.intersection(new_obs)}
+            exists_already = self._observations['obsname'].isin(exists_already)
             self._observations = self._observations.loc[~exists_already]
         self._observations = self.observations.append(added_obs).reset_index(drop=True)
 

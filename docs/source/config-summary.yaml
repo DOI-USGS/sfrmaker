@@ -107,6 +107,7 @@ inflows:
   rno_column: None
   period_column: per
   data_column: Q_avg
+  one_inflow_per_path: False
   # (arguments to sfrmaker.SFRData.add_to_segment_data for MODFLOW-2005):
   segment_column: segment
 

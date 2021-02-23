@@ -207,7 +207,8 @@ def add_to_perioddata(sfrdata, data, flowline_routing=None,
                       line_id_column=None,
                       rno_column=None,
                       period_column='per',
-                      data_column='Q_avg'):
+                      data_column='Q_avg',
+                      one_inflow_per_path=False):
     """Add data to the period data table (sfrdata.period_data)
     for a MODFLOW-6 style sfrpackage.
 
@@ -240,6 +241,9 @@ def add_to_perioddata(sfrdata, data, flowline_routing=None,
         Column with modflow stress period for each inflow value, by default 'per', by default, 'per'.
     data_column : str, optional
         Column with flow values, by default 'Q_avg'
+    one_inflow_per_path : bool, optional
+        Limit inflows to one per (headwater to outlet) routing path, choosing the inflow location 
+        that is furthest downstream. By default, False.
 
     Returns
     -------
@@ -272,7 +276,7 @@ def add_to_perioddata(sfrdata, data, flowline_routing=None,
             "Data to add need reach number or flowline routing information is needed."
 
     # check for duplicate inflows in same path
-    if variable == 'inflow':
+    if variable == 'inflow' and one_inflow_per_path:
         line_ids = set(data[line_id_column])
         drop = set()
         dropped_line_info_file = 'dropped_inflows_locations.csv'

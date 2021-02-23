@@ -81,7 +81,8 @@ def test_add_to_perioddata(shellmound_sfrdata):
                       variable='inflow',
                       line_id_column='line_id',
                       period_column='per',
-                      data_column='Q_avg')
+                      data_column='Q_avg',
+                      one_inflow_per_path=True)
     flows = flows.loc[flows.line_id != 2]
     assert np.allclose(sfrd.period_data['inflow'].values, flows['Q_avg'].values)
     assert np.allclose(sfrd.period_data['per'].values, flows['per'].values)

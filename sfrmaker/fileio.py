@@ -1,4 +1,5 @@
 import json
+from pathlib import Path
 import sys
 
 import numpy as np
@@ -221,7 +222,7 @@ def read_tables(data, **kwargs):
         input_data = [input_data]
     dfs = []
     for item in input_data:
-        if isinstance(item, str):
+        if isinstance(item, str) or isinstance(item, Path):
             dfs.append(pd.read_csv(item, **kwargs))
         elif isinstance(item, pd.DataFrame):
             item = item.copy()
