@@ -354,7 +354,7 @@ class Lines:
 
         Parameters
         ----------
-        shapefile : str
+        shapefile : str or pathlike
             Input shapefile
         id_column : str, optional
             Attribute field with line identifiers, 
@@ -407,7 +407,7 @@ class Lines:
         
 
         if prjfile is None:
-            prjfile = shapefile.replace('.shp', '.prj')
+            prjfile = str(shapefile).replace('.shp', '.prj')
             prjfile = prjfile if os.path.exists(prjfile) else None
 
         shpfile_crs = get_crs(prjfile=prjfile, epsg=epsg, proj_str=proj_str, crs=crs)
