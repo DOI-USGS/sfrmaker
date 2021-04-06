@@ -2,6 +2,10 @@
 Release History
 ===============
 
+Version 0.7.1 (2021-01-29)
+--------------------------
+USGS software release associated with `Groundwater` publication
+
 Version 0.7.0 (2021-01-15)
 --------------------------
 * major speed-up (and overhead reduction) to finding routing paths (by replacing recursion strategy with simple for loop)
