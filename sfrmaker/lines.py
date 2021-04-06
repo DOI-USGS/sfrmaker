@@ -603,6 +603,7 @@ class Lines:
             prjfile = get_prj_file(NHDPlus_paths, NHDFlowlines)
 
         # convert arbolate sums from km to m
+        df['asum1'] = (df.ArbolateSu - df.LENGTHKM) * 1000
         df['asum2'] = df.ArbolateSu * 1000
 
         # convert comid end elevations from cm to m
@@ -775,13 +776,20 @@ class Lines:
                                               )),
                                      self.routing)
             else:
-                asums = dict(zip(self.df.id, 
-                                 self.df.asum2 * convert_length_units(self.attr_length_units, 
-                                                                      'meters')))
+                #asums = dict(zip(self.df.id, 
+                #                 self.df.asum2 * convert_length_units(self.attr_length_units, 
+                #                                                      'meters')))
+                self.df['asum2'] = self.df['asum2'] * convert_length_units(self.attr_length_units, 
+                                                                      'meters')
 
             # populate starting asums (asum1)
-            routing_r = {v: k for k, v in self.routing.items() if v != 0}
-            self.df['asum1'] = [asums.get(routing_r.get(id, 0), 0) for id in self.df.id.values]
+            if 'asum1' not in self.df.columns:
+                length_conversion = convert_length_units(self.geometry_length_units, 'meters')
+                line_lengths = [g.length * length_conversion for g in self.df.geometry]
+                self.df['asum1'] = self.df['asum2'] - line_lengths
+                
+            #routing_r = {v: k for k, v in self.routing.items() if v != 0}
+            #self.df['asum1'] = [asums.get(routing_r.get(id, 0), 0) for id in self.df.id.values]
             asum1s = dict(zip(self.df.id, self.df.asum1))
 
             # compute arbolate sum at reach midpoints (in meters)

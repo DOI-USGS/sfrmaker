@@ -74,6 +74,13 @@ def grid(request,
 
 def test_lines_from_NHDPlus(tylerforks_lines_from_NHDPlus):
     lines = tylerforks_lines_from_NHDPlus
+    
+    tf = lines.df.name == 'Tyler Forks'
+    lines_pr = project(lines.df.geometry, 4269, 26915)
+    line_lengths = np.array([g.length for g in lines_pr])
+    expected_asum1s = lines.df['asum2'] - line_lengths
+    assert np.allclose(lines.df['asum1'].values, expected_asum1s, atol=10)
+    assert np.all(lines.df.loc[tf, 'asum1'] > 95000)
     assert isinstance(lines, Lines)
 
 
@@ -88,6 +95,13 @@ def test_make_sfr(outdir,
                                                model=m)
     sfr.set_streambed_top_elevations_from_dem(dem, dem_z_units='meters')
 
+    # verify that the minimum width on the Tyler Forks
+    # which has substantial drainage upstream of the test case domain
+    # is at least 30 feet (that the first reach in the model was not 
+    # assigned the default width of 1 but was instead computed from a non-zero asum value)
+    min_tf_width = sfr.reach_data.loc[sfr.reach_data.name == 'Tyler Forks', 'width'].min()
+    assert min_tf_width > 30.
+    
     botm = m.dis.botm.array.copy()
     layers, new_botm = sfrmaker.utils.assign_layers(sfr.reach_data, botm_array=botm)
     sfr.reach_data['k'] = layers
