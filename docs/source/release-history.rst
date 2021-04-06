@@ -2,6 +2,16 @@
 Release History
 ===============
 
+Version 0.7.2 (2021-04-06)
+--------------------------
+* Fix issue with starting arbolate sums, that was causing artificially narrow estimated widths on the first segment of any streams originating from outside of the model, by computing starting arbolate sums for each reach from the ending asum minus the line length.
+* Inflows: Allow multiple inflows to be specified along a single headwater to outlet path, via an optional one_inflow_per_path argument (default False; previously was hardcoded as True).
+* Observations: base unique observations on name and type; allowing multiple observation types (e.g. downstream-flow and stage) to be appended to the observations table via add_observations
+
+Version 0.7.1 (2021-01-29)
+--------------------------
+USGS software release associated with `Groundwater` publication
+
 Version 0.7.0 (2021-01-15)
 --------------------------
 * major speed-up (and overhead reduction) to finding routing paths (by replacing recursion strategy with simple for loop)
