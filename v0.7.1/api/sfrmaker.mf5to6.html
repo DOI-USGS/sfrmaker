@@ -1,0 +1,432 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="Docutils 0.17: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>The MODFLOW-2005 to 6 Module &mdash; SFRmaker 0.7.1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="The Preprocessing Module" href="sfrmaker.preprocessing.html" />
+    <link rel="prev" title="The Lines Module" href="sfrmaker.lines.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> SFRmaker
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.7.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../philosophy.html"> Philosophy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html"> Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html"> Installation</a></li>
+</ul>
+<p><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../inputs.html"> Input Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html"> Using SFRmaker with a configuration file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebooks/SFRmaker_demo.html"> Basic Usage in a scripting context</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebooks/Streambed_elevation_demo.html"> How the streambed elevation sampling works</a></li>
+</ul>
+<p><span class="caption-text">Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html"> Code reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.grid.html">Grid Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.lines.html">Lines Module</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">MODFLOW-2005 to 6 Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.preprocessing.html">Preprocessing Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.sfrdata.html">SFRData Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.utils.html">Utilities Module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../config-summary.html"> Summary of configuration file options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../release-history.html"> Release History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html"> Contributing to SFRmaker</a></li>
+</ul>
+<p><span class="caption-text">Bibliography</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../references.html"> References cited</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">SFRmaker</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="index.html">Modules</a> &raquo;</li>
+        
+      <li>The MODFLOW-2005 to 6 Module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/api/sfrmaker.mf5to6.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<section id="module-sfrmaker.mf5to6">
+<span id="the-modflow-2005-to-6-module"></span><h1>The MODFLOW-2005 to 6 Module<a class="headerlink" href="#module-sfrmaker.mf5to6" title="Permalink to this headline">¶</a></h1>
+<p>Code for converting MODFLOW-2005 style SFR Package input to MODFLOW-6 style SFR package input.</p>
+<dl class="py class">
+<dt id="sfrmaker.mf5to6.Mf6SFR">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">sfrmaker.mf5to6.</span></code><code class="sig-name descname"><span class="pre">Mf6SFR</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ModflowSfr2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">SFRData</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">period_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">idomain</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auxiliary_line_numbers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/mf5to6.html#Mf6SFR"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.mf5to6.Mf6SFR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Class for writing MODFLOW-6 SFR package input
+from a (MODFLOW-2005 style) flopy.modflow.ModflowSfr2 instance or
+an sfrmaker.SFRData instance.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>ModflowSfr2</strong><span class="classifier">flopy.modflow.ModflowSfr2 instance, optional</span></dt><dd><p>Input SFR dataset</p>
+</dd>
+<dt><strong>SFRData</strong><span class="classifier">sfrmaker.SFRData instance, optional</span></dt><dd><p>Input SFR dataset</p>
+</dd>
+<dt><strong>period_data</strong><span class="classifier">DataFrame, optional</span></dt><dd><p>DataFrame of MODFLOW-6-style stress period data, as made by
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">SFRData.add_to_perioddata()</span></code>. Only needed if SFRData isn’t supplied,
+by default None</p>
+</dd>
+<dt><strong>idomain</strong><span class="classifier">ndarray, optional</span></dt><dd><p>3D numpy array designating active cells (idomain==1).
+SFR reaches in inactive cells will be written with ‘none’ in the cellid field.
+by default None</p>
+</dd>
+<dt><strong>options</strong><span class="classifier">list, optional</span></dt><dd><p>List of strings to write to the MODFLOW-6 SFR options block. For example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">options</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;save_flows&#39;</span><span class="p">,</span>
+         <span class="s1">&#39;BUDGET FILEOUT model.sfr.cbc&#39;</span><span class="p">,</span>
+         <span class="s1">&#39;STAGE FILEOUT model.sfr.stage.bin&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>An appropriate unit_conversion is written by default.
+See MODFLOW-6 documentation for other options.
+By default None.</p>
+</dd>
+<dt><strong>auxiliary_line_numbers</strong><span class="classifier">bool, optional</span></dt><dd><p>If true, add ‘line_id’ as an auxiliary variable to the options block
+and write hydrography line IDs to the packagedata block in the auxiliary
+‘line_id’ column, by default True.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt id="sfrmaker.mf5to6.Mf6SFR.cols">
+<code class="sig-name descname"><span class="pre">cols</span></code><em class="property"> <span class="pre">=</span> <span class="pre">['rno',</span> <span class="pre">'cellid',</span> <span class="pre">'k',</span> <span class="pre">'i',</span> <span class="pre">'j',</span> <span class="pre">'rlen',</span> <span class="pre">'rwid',</span> <span class="pre">'rgrd',</span> <span class="pre">'rtp',</span> <span class="pre">'rbth',</span> <span class="pre">'rhk',</span> <span class="pre">'man',</span> <span class="pre">'ncon',</span> <span class="pre">'ustrf',</span> <span class="pre">'ndv',</span> <span class="pre">'idomain',</span> <span class="pre">'line_id']</span></em><a class="headerlink" href="#sfrmaker.mf5to6.Mf6SFR.cols" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="sfrmaker.mf5to6.Mf6SFR.connections">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">connections</span></code><a class="headerlink" href="#sfrmaker.mf5to6.Mf6SFR.connections" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="sfrmaker.mf5to6.Mf6SFR.graph_r">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">graph_r</span></code><a class="headerlink" href="#sfrmaker.mf5to6.Mf6SFR.graph_r" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="sfrmaker.mf5to6.Mf6SFR.mf5names">
+<code class="sig-name descname"><span class="pre">mf5names</span></code><em class="property"> <span class="pre">=</span> <span class="pre">{'cellid':</span> <span class="pre">'node',</span> <span class="pre">'depth1':</span> <span class="pre">'depth1',</span> <span class="pre">'depth2':</span> <span class="pre">'depth2',</span> <span class="pre">'evaporation':</span> <span class="pre">'etsw',</span> <span class="pre">'inflow':</span> <span class="pre">'flow',</span> <span class="pre">'man':</span> <span class="pre">'roughch',</span> <span class="pre">'rainfall':</span> <span class="pre">'pptsw',</span> <span class="pre">'rbth':</span> <span class="pre">'strthick',</span> <span class="pre">'rgrd':</span> <span class="pre">'slope',</span> <span class="pre">'rhk':</span> <span class="pre">'strhc1',</span> <span class="pre">'rlen':</span> <span class="pre">'rchlen',</span> <span class="pre">'rno':</span> <span class="pre">'rno',</span> <span class="pre">'rtp':</span> <span class="pre">'strtop',</span> <span class="pre">'runoff':</span> <span class="pre">'runoff'}</span></em><a class="headerlink" href="#sfrmaker.mf5to6.Mf6SFR.mf5names" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="sfrmaker.mf5to6.Mf6SFR.mf6names">
+<code class="sig-name descname"><span class="pre">mf6names</span></code><em class="property"> <span class="pre">=</span> <span class="pre">{'depth1':</span> <span class="pre">'depth1',</span> <span class="pre">'depth2':</span> <span class="pre">'depth2',</span> <span class="pre">'etsw':</span> <span class="pre">'evaporation',</span> <span class="pre">'flow':</span> <span class="pre">'inflow',</span> <span class="pre">'node':</span> <span class="pre">'cellid',</span> <span class="pre">'pptsw':</span> <span class="pre">'rainfall',</span> <span class="pre">'rchlen':</span> <span class="pre">'rlen',</span> <span class="pre">'rno':</span> <span class="pre">'rno',</span> <span class="pre">'roughch':</span> <span class="pre">'man',</span> <span class="pre">'runoff':</span> <span class="pre">'runoff',</span> <span class="pre">'slope':</span> <span class="pre">'rgrd',</span> <span class="pre">'strhc1':</span> <span class="pre">'rhk',</span> <span class="pre">'strthick':</span> <span class="pre">'rbth',</span> <span class="pre">'strtop':</span> <span class="pre">'rtp'}</span></em><a class="headerlink" href="#sfrmaker.mf5to6.Mf6SFR.mf6names" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="sfrmaker.mf5to6.Mf6SFR.options_block">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">options_block</span></code><a class="headerlink" href="#sfrmaker.mf5to6.Mf6SFR.options_block" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="sfrmaker.mf5to6.Mf6SFR.packagedata">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">packagedata</span></code><a class="headerlink" href="#sfrmaker.mf5to6.Mf6SFR.packagedata" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="sfrmaker.mf5to6.Mf6SFR.period_data">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">period_data</span></code><a class="headerlink" href="#sfrmaker.mf5to6.Mf6SFR.period_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="sfrmaker.mf5to6.Mf6SFR.write_file">
+<code class="sig-name descname"><span class="pre">write_file</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outpath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">external_files_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/mf5to6.html#Mf6SFR.write_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.mf5to6.Mf6SFR.write_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write a MODFLOW-6 format SFR package file.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>filename</strong><span class="classifier">str, optional</span></dt><dd><p>SFR package filename. Default setting is to use the
+ModflowSfr2.file_name attribute for the ModflowSfr2 instance
+entered on init of the Mf6SFR class, by default None.</p>
+</dd>
+<dt><strong>outpath</strong><span class="classifier">str, optional</span></dt><dd><p>Path to write sfr file (with ModflowSfr2.file_name) to. 
+Usually this is the simulation workspace. 
+Only used if filename is None.</p>
+</dd>
+<dt><strong>options</strong><span class="classifier">list, optional</span></dt><dd><p>List of strings to write to the MODFLOW-6 SFR options block. For example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">options</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;save_flows&#39;</span><span class="p">,</span>
+         <span class="s1">&#39;BUDGET FILEOUT model.sfr.cbc&#39;</span><span class="p">,</span>
+         <span class="s1">&#39;STAGE FILEOUT model.sfr.stage.bin&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>An appropriate unit_conversion is written by default.
+See MODFLOW-6 documentation for other options.
+By default None.</p>
+</dd>
+<dt><strong>external_files_path</strong><span class="classifier">str, optional</span></dt><dd><p>Path for writing an external file for packagedata, relative to the location of the SFR package file.
+If specified, an open/close statement referencing the file is written to the packagedata block.
+By default, None (packagedata table is written to the SFR package file)</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><dl class="simple">
+<dt>OSError</dt><dd><p>If an invalid external_files_path is specified.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt id="sfrmaker.mf5to6.cellids_to_kij">
+<code class="sig-prename descclassname"><span class="pre">sfrmaker.mf5to6.</span></code><code class="sig-name descname"><span class="pre">cellids_to_kij</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cellids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drop_inactive</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/mf5to6.html#cellids_to_kij"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.mf5to6.cellids_to_kij" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unpack tuples of MODFLOW-6 cellids (k, i, j) to
+lists of k, i, j values; ignoring instances
+where cellid is None (unconnected cells).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>cellids</strong><span class="classifier">sequence of (k, i, j) tuples</span></dt><dd></dd>
+<dt><strong>drop_inactive</strong><span class="classifier">bool</span></dt><dd><p>If True, drop cellids == ‘none’. If False,
+distribute these to k, i, j.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>k, i, j</strong><span class="classifier">1D numpy arrays of integers</span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt id="sfrmaker.mf5to6.mf6sfr">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">sfrmaker.mf5to6.</span></code><code class="sig-name descname"><span class="pre">mf6sfr</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/mf5to6.html#mf6sfr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.mf5to6.mf6sfr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sfrmaker.mf5to6.Mf6SFR" title="sfrmaker.mf5to6.Mf6SFR"><code class="xref py py-class docutils literal notranslate"><span class="pre">sfrmaker.mf5to6.Mf6SFR</span></code></a></p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="sfrmaker.mf5to6.segment_data_to_period_data">
+<code class="sig-prename descclassname"><span class="pre">sfrmaker.mf5to6.</span></code><code class="sig-name descname"><span class="pre">segment_data_to_period_data</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">segment_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reach_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/mf5to6.html#segment_data_to_period_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.mf5to6.segment_data_to_period_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert modflow-2005 style segment data to modflow-6 period data.</p>
+</dd></dl>
+
+</section>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="sfrmaker.preprocessing.html" class="btn btn-neutral float-right" title="The Preprocessing Module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="sfrmaker.lines.html" class="btn btn-neutral float-left" title="The Lines Module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+      <span class="lastupdated">
+        Last updated on Apr 06, 2021.
+      </span>
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,501 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="Docutils 0.17: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>The Utilities Module &mdash; SFRmaker 0.7.1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="SFRmaker configuration file options" href="../config-summary.html" />
+    <link rel="prev" title="The SFRData Module" href="sfrmaker.sfrdata.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> SFRmaker
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.7.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../philosophy.html"> Philosophy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html"> Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html"> Installation</a></li>
+</ul>
+<p><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../inputs.html"> Input Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html"> Using SFRmaker with a configuration file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebooks/SFRmaker_demo.html"> Basic Usage in a scripting context</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebooks/Streambed_elevation_demo.html"> How the streambed elevation sampling works</a></li>
+</ul>
+<p><span class="caption-text">Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html"> Code reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.grid.html">Grid Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.lines.html">Lines Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.mf5to6.html">MODFLOW-2005 to 6 Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.preprocessing.html">Preprocessing Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.sfrdata.html">SFRData Module</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Utilities Module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../config-summary.html"> Summary of configuration file options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../release-history.html"> Release History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html"> Contributing to SFRmaker</a></li>
+</ul>
+<p><span class="caption-text">Bibliography</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../references.html"> References cited</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">SFRmaker</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="index.html">Modules</a> &raquo;</li>
+        
+      <li>The Utilities Module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/api/sfrmaker.utils.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<section id="module-sfrmaker.utils">
+<span id="the-utilities-module"></span><h1>The Utilities Module<a class="headerlink" href="#module-sfrmaker.utils" title="Permalink to this headline">¶</a></h1>
+<dl class="py function">
+<dt id="sfrmaker.utils.arbolate_sum">
+<code class="sig-prename descclassname"><span class="pre">sfrmaker.utils.</span></code><code class="sig-name descname"><span class="pre">arbolate_sum</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">segment</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lengths</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">routing</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">starting_asums</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/utils.html#arbolate_sum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.utils.arbolate_sum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the total length of all tributaries upstream from
+segment, including that segment, using the supplied lengths and
+routing connections.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>segment</strong><span class="classifier">int or list of ints</span></dt><dd><p>Segment or node number that is also a key in the lengths
+and routing dictionaries.</p>
+</dd>
+<dt><strong>lengths</strong><span class="classifier">dict</span></dt><dd><p>Dictionary of lengths keyed by segment (node) numbers,
+including those in segment.</p>
+</dd>
+<dt><strong>routing</strong><span class="classifier">dict</span></dt><dd><p>Dictionary describing routing connections between
+segments (nodes); values represent downstream connections.</p>
+</dd>
+<dt><strong>starting_asums</strong><span class="classifier">dict</span></dt><dd><p>Option to supply starting arbolate sum values for any of
+the segments. By default, None.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>asum</strong><span class="classifier">float or dict</span></dt><dd><p>Arbolate sums for each segment.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="sfrmaker.utils.assign_layers">
+<code class="sig-prename descclassname"><span class="pre">sfrmaker.utils.</span></code><code class="sig-name descname"><span class="pre">assign_layers</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reach_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">botm_array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">idomain</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pad</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inplace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/utils.html#assign_layers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.utils.assign_layers" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Assigns the appropriate layer for each SFR reach,</dt><dd><p>based on cell bottoms at location of reach.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>reach_data</strong><span class="classifier">DataFrame</span></dt><dd><p>Table of reach information, similar to SFRData.reach_data</p>
+</dd>
+<dt><strong>botm</strong><span class="classifier">ndarary</span></dt><dd><p>3D numpy array of layer bottom elevations</p>
+</dd>
+<dt><strong>idomain</strong><span class="classifier">ndarray</span></dt><dd><p>3D integer array of MODFLOW ibound or idomain values. Values &gt;=1
+are considered active. Reaches in cells with values &lt; 1 will be moved
+to the highest active cell if possible.</p>
+</dd>
+<dt><strong>pad</strong><span class="classifier">scalar</span></dt><dd><p>Minimum distance that streambed bottom must be above layer bottom.
+When determining the layer or whether the streambed bottom is below
+the model bottom, streambed bottom - pad is used. Similarly, when
+lowering the model bottom to accomodate the streambed bottom,
+a value of streambed bottom - pad is used.</p>
+</dd>
+<dt><strong>inplace</strong><span class="classifier">bool</span></dt><dd><p>If True, operate on reach_data and botm_array, otherwise,
+return 1D array of layer numbers and 2D array of new model botm elevations</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt>(if inplace=True)</dt><dd></dd>
+<dt><strong>layers</strong><span class="classifier">1D array of layer numbers</span></dt><dd></dd>
+<dt><strong>new_model_botms</strong><span class="classifier">2D array of new model bottom elevations</span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>Streambed bottom = strtop - strthick
+When multiple reaches occur in a cell, the lowest streambed bottom is used
+in determining the layer and any corrections to the model bottom.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="sfrmaker.utils.exe_exists">
+<code class="sig-prename descclassname"><span class="pre">sfrmaker.utils.</span></code><code class="sig-name descname"><span class="pre">exe_exists</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exe_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/utils.html#exe_exists"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.utils.exe_exists" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="sfrmaker.utils.get_input_arguments">
+<code class="sig-prename descclassname"><span class="pre">sfrmaker.utils.</span></code><code class="sig-name descname"><span class="pre">get_input_arguments</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kwargs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">function</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">warn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/utils.html#get_input_arguments"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.utils.get_input_arguments" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return subset of keyword arguments in kwargs dict
+that are valid parameters to a function or method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>kwargs</strong><span class="classifier">dict (parameter names, values)</span></dt><dd></dd>
+<dt><strong>function</strong><span class="classifier">function of class method</span></dt><dd></dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>input_kwargs</strong><span class="classifier">dict</span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="sfrmaker.utils.get_layer">
+<code class="sig-prename descclassname"><span class="pre">sfrmaker.utils.</span></code><code class="sig-name descname"><span class="pre">get_layer</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">botm_array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">j</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elev</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/utils.html#get_layer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.utils.get_layer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the layers for elevations at i, j locations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>botm_array</strong><span class="classifier">3D numpy array of layer bottom elevations</span></dt><dd></dd>
+<dt><strong>i</strong><span class="classifier">scaler or sequence</span></dt><dd><p>row index (zero-based)</p>
+</dd>
+<dt><strong>j</strong><span class="classifier">scaler or sequence</span></dt><dd><p>column index</p>
+</dd>
+<dt><strong>elev</strong><span class="classifier">scaler or sequence</span></dt><dd><p>elevation (in same units as model)</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>k</strong><span class="classifier">np.ndarray (1-D) or scalar</span></dt><dd><p>zero-based layer index</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="sfrmaker.utils.get_method_args_values">
+<code class="sig-prename descclassname"><span class="pre">sfrmaker.utils.</span></code><code class="sig-name descname"><span class="pre">get_method_args_values</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/utils.html#get_method_args_values"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.utils.get_method_args_values" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get arguments for a function or method and their default values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>method</strong><span class="classifier">function or method</span></dt><dd></dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>args</strong><span class="classifier">dict</span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="sfrmaker.utils.get_sfr_package_format">
+<code class="sig-prename descclassname"><span class="pre">sfrmaker.utils.</span></code><code class="sig-name descname"><span class="pre">get_sfr_package_format</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sfr_package_file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/utils.html#get_sfr_package_format"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.utils.get_sfr_package_format" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="sfrmaker.utils.make_config_summary">
+<code class="sig-prename descclassname"><span class="pre">sfrmaker.utils.</span></code><code class="sig-name descname"><span class="pre">make_config_summary</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/utils.html#make_config_summary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.utils.make_config_summary" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="sfrmaker.utils.print_item">
+<code class="sig-prename descclassname"><span class="pre">sfrmaker.utils.</span></code><code class="sig-name descname"><span class="pre">print_item</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">k</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/utils.html#print_item"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.utils.print_item" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="sfrmaker.utils.update">
+<code class="sig-prename descclassname"><span class="pre">sfrmaker.utils.</span></code><code class="sig-name descname"><span class="pre">update</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/utils.html#update"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.utils.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>Recursively update a dictionary of varying depth
+d with items from u.
+from: <a class="reference external" href="https://stackoverflow.com/questions/3232943/update-value-of-a-nested-dictionary-of-varying-depth">https://stackoverflow.com/questions/3232943/update-value-of-a-nested-dictionary-of-varying-depth</a></p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="sfrmaker.utils.which">
+<code class="sig-prename descclassname"><span class="pre">sfrmaker.utils.</span></code><code class="sig-name descname"><span class="pre">which</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">program</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/utils.html#which"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.utils.which" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check for existance of executable.
+<a class="reference external" href="https://stackoverflow.com/questions/377017/test-if-executable-exists-in-python">https://stackoverflow.com/questions/377017/test-if-executable-exists-in-python</a></p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="sfrmaker.utils.width_from_arbolate_sum">
+<code class="sig-prename descclassname"><span class="pre">sfrmaker.utils.</span></code><code class="sig-name descname"><span class="pre">width_from_arbolate_sum</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">asum</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1193</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5032</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimum_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'meters'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'meters'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/utils.html#width_from_arbolate_sum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.utils.width_from_arbolate_sum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Estimate stream width from arbolate sum, using a power law regression
+comparing measured channel widths to arbolate sum.
+(after Leaf, 2020 and Feinstein et al. 2010, Appendix 2, p 266.)</p>
+<div class="math notranslate nohighlight">
+\[width = unit\_conversion * a * {asum_{(meters)}}^b\]</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>asum: float or 1D array</strong></dt><dd><p>Arbolate sum in the input units.</p>
+</dd>
+<dt><strong>a</strong><span class="classifier">float</span></dt><dd><p>Multiplier parameter. Literature values:
+Feinstein et al (2010; Lake MI Basin): 0.1193
+Leaf (2020; Mississippi Embayment): 0.0592</p>
+</dd>
+<dt><strong>b</strong><span class="classifier">float</span></dt><dd><p>Exponent in power law relationship. Literature values:
+Feinstein et al (2010; Lake MI Basin): 0.5032
+Leaf (2020; Mississippi Embayment): 0.5127</p>
+</dd>
+<dt><strong>minimum_width</strong><span class="classifier">float</span></dt><dd><p>Minimum width to be returned. By default, 1.</p>
+</dd>
+<dt><strong>input_units</strong><span class="classifier">str, any length unit; e.g. {‘m’, ‘meters’, ‘km’, etc.}</span></dt><dd><p>Length unit of asum</p>
+</dd>
+<dt><strong>output_units</strong><span class="classifier">str, any length unit; e.g. {‘m’, ‘meters’, ‘ft’, etc.}</span></dt><dd><p>Length unit of output width</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt>width: float</dt><dd><p>Estimated width in feet</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The original relationship described by Feinstein et al (2010) was for arbolate sum in meters
+and output widths in feet. The <span class="math notranslate nohighlight">\(u\)</span> values above reflect this unit conversion. Therefore, the
+<span class="math notranslate nohighlight">\(unit\_conversion\)</span> parameter above includes conversion of the input to meters, and output
+from feet to the specified output units.</p>
+<p>NaN arbolate sums are filled with the specified <code class="docutils literal notranslate"><span class="pre">minimum_width</span></code>.</p>
+<p class="rubric">References</p>
+<p>see <a class="reference internal" href="../references.html"><span class="doc">References Cited</span></a></p>
+<p class="rubric">Examples</p>
+<p>Original equation from Feinstein et al (2010), for arbolate sum of 1,000 km:
+&gt;&gt;&gt; width = width_from_arbolate_sum(1000, 0.1193, 0.5032, input_units=’kilometers’, output_units=’feet’)
+&gt;&gt;&gt; round(width, 2)
+124.69</p>
+</dd></dl>
+
+</section>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="../config-summary.html" class="btn btn-neutral float-right" title="SFRmaker configuration file options" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="sfrmaker.sfrdata.html" class="btn btn-neutral float-left" title="The SFRData Module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+      <span class="lastupdated">
+        Last updated on Apr 06, 2021.
+      </span>
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
