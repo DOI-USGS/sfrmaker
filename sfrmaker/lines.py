@@ -4,6 +4,7 @@ import time
 import numpy as np
 import pandas as pd
 from shapely.geometry import box
+import geopandas as gpd
 import flopy
 from gisutils import shp2df, df2shp, project, get_authority_crs
 import sfrmaker
@@ -11,7 +12,7 @@ from sfrmaker.routing import pick_toids, find_path, make_graph, renumber_segment
 from sfrmaker.checks import routing_is_circular, is_to_one
 from sfrmaker.gis import read_polygon_feature, get_bbox, get_crs
 from sfrmaker.grid import StructuredGrid
-from sfrmaker.nhdplus_utils import load_nhdplus_v2, get_prj_file
+from sfrmaker.nhdplus_utils import load_nhdplus_v2, get_prj_file, load_nhdplus_hr
 from sfrmaker.sfrdata import SFRData
 from sfrmaker.units import convert_length_units, get_length_units
 from sfrmaker.utils import (width_from_arbolate_sum, arbolate_sum)
@@ -322,8 +323,9 @@ class Lines:
         print('\nreprojecting hydrography from\n{}\nto\n{}\n'.format(self.crs,
                                                                      dest_crs))
         geoms = project(self.df.geometry, self.crs, dest_crs)
-        assert np.isfinite(np.max(geoms[0].xy[0])), \
+        assert geoms[0].is_valid, \
             "Invalid reprojection; check CRS for lines and grid."
+
         self.df['geometry'] = geoms
         self.crs = dest_crs
 
@@ -618,6 +620,104 @@ class Lines:
                                   attr_length_units='meters',
                                   attr_height_units='meters',
                                   epsg=epsg, proj_str=proj_str, prjfile=prjfile)
+
+    @classmethod
+    def from_nhdplus_hr(cls, NHDPlusHR_paths, filter=None, 
+                        drop_fcodes=None, crs=None, 
+                        epsg=None, proj_str=None):
+        """
+        Parameters
+        ==========
+        NHDPlusHR_paths : str or list of strings
+            path (or list of paths) to the NHDPlus High Resolution HU-4 Subregion 
+            file geodatabase (.gdb) to include, assuming the file structure is 
+            the same as when downloaded from the USGS National Map Downloader tool 
+            (v2.0) website (https://apps.nationalmap.gov/downloader/#/). For example:
+            
+                NHDPlusHR_paths=['/NHDPLUS_HR_1/NHDPLUS_H_0202_HU4_GDB.gdb',
+                               '/NHDPLUS_HR_2/NHDPLUS_H_0204_HU4_GDB.gdb'] 
+                                               
+                for the 4-digit Hydrologic Units 0202 and 0204.      
+        filter : tuple or str, optional
+            Bounding box (tuple) or shapefile of model stream network area.
+        drop_fcodes: int or list of ints, optional
+            fcode or list of NHDFlowline FCodes to drop from network. 
+            For example, to remove underground aqueducts and general case
+            water pipelines from line network:
+                
+                drop_fcodes = [42803, 42814]
+
+        crs : obj, optional
+            Coordinate reference object to reproject NHDPlus High Resolution 
+            flowlines. A Python int, dict, str, or :class:`pyproj.crs.CRS` 
+            instance passed to :meth:`pyproj.crs.CRS.from_user_input`
+                Can be any of:
+                - PROJ string
+                - Dictionary of PROJ parameters
+                - PROJ keyword arguments for parameters
+                - JSON string with PROJ parameters
+                - CRS WKT string
+                - An authority string [i.e. 'epsg:4326']
+                - An EPSG integer code [i.e. 4326]
+                - A tuple of ("auth_name": "auth_code") [i.e ('epsg', '4326')]
+                - An object with a `to_wkt` method.
+                - A :class:`pyproj.crs.CRS` class
+            By default, None, will use NHDPlus HR fileGDB CRS 
+        epsg: int, optional
+            EPSG code to to reproject NHDPlus High Resolution flowlines.
+            By default, None, will use NHDPlus HR fileGDB CRS 
+        proj_str: str, optional
+            proj_str string to to reproject NHDPlus High Resolution flowlines.
+            By default, None, will use NHDPlus HR fileGDB CRS 
+
+        Returns
+        ==========
+        lines : :class:`Lines` instance
+        """
+        df, gdb_crs = load_nhdplus_hr(NHDPlusHR_paths, filter = filter, drop_fcodes=drop_fcodes)
+
+        #  check to see if flowline geodataframe needs to be reprojected, and get new CRS
+        if crs is not None or epsg is not None or proj_str is not None:
+            if crs is not None:
+                crs = get_authority_crs(crs)
+            if epsg is not None:
+                if crs is None:
+                    crs = get_authority_crs(epsg)
+            elif proj_str is not None:
+                if crs is None:
+                    crs = get_authority_crs(proj_str)
+            epsg = crs.to_epsg()
+            proj_str = crs.to_proj4()
+            
+            #  reproject
+            df = df.to_crs(crs)
+
+        #  if not, use NHDPlus HR CRS
+        else:
+            crs = get_authority_crs(gdb_crs)
+            epsg = crs.to_epsg()
+            proj_str = crs.to_proj4()
+
+        # convert arbolate sums from km to m
+        df['asum2'] = df.ArbolateSu * 1000
+
+        # convert NHDPlusID end elevations from cm to m
+        if 'MaxElevSmo' in df.columns:
+            df['elevup'] = df.MaxElevSmo / 100.
+        if 'MinElevSmo' in df.columns:
+            df['elevdn'] = df.MinElevSmo / 100.
+
+        return cls.from_dataframe(df, id_column='NHDPlusID',
+                                  routing_column='ToNHDPID',
+                                  name_column='GNIS_Name',
+                                  arbolate_sum_column2='asum2',
+                                  up_elevation_column='elevup',
+                                  dn_elevation_column='elevdn',
+                                  geometry_column='geometry',
+                                  attr_length_units='meters',
+                                  attr_height_units='meters',
+                                  epsg=epsg, proj_str=proj_str)
+
 
     def to_sfr(self, grid=None,
                active_area=None, isfr=None,
