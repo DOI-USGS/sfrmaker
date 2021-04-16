@@ -80,9 +80,10 @@ def test_segment_data_to_perioddata(shellmound_sfrdata):
     perdata = shellmound_sfrdata.period_data
     assert isinstance(perdata, pd.DataFrame)
     assert len(perdata) == 1
+    assert perdata.index.names == ['per', 'rno']
     assert set(perdata.columns) == \
-           {'iseg', 'inflow', 'rno', 'status',
-            'ireach', 'icalc', 'per'}
+           {'iseg', 'inflow', 'status',
+            'ireach', 'icalc'}
 
 
 def test_idomain(mf6sfr_instance_ModflowSfr2, shellmound_model):

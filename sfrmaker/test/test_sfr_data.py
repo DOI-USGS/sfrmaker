@@ -16,9 +16,11 @@ def period_data(shellmound_sfrdata):
     # shellmound_sfrdata = copy.deepcopy(shellmound_sfrdata)
     perdata = shellmound_sfrdata.period_data
     rd = shellmound_sfrdata.reach_data
-    perdata['rno'] = [rd.rno.values[0], rd.rno.values[100]] * 2
-    perdata['inflow'] = [100., 1000., 20., 200.]
-    perdata['per'] = [0, 0, 1, 1]
+    df = pd.DataFrame({'per': [0, 0, 1, 1],
+                       'rno': [rd.rno.values[0], rd.rno.values[100]] * 2,
+                       'inflow':[100., 1000., 20., 200.]})
+    df.set_index(['per', 'rno'], inplace=True)
+    perdata['inflow'] = df['inflow']
     return perdata
 
 
@@ -62,10 +64,20 @@ def test_empty_period_data(shellmound_sfrdata):
     assert isinstance(perdata, pd.DataFrame)
     assert len(perdata) == 0
     assert set(perdata.columns) == \
-           {'iseg', 'evaporation', 'inflow', 'rno', 'status',
+           {'iseg', 'evaporation', 'inflow', 'status',
             'stage', 'runoff', 'rainfall',
-            'ireach', 'icalc', 'per'}
+            'ireach', 'icalc'}
+    assert perdata.index.names == ['per', 'rno']
 
+
+def test_perioddata(shellmound_sfrdata_with_period_data):
+    sfrd = shellmound_sfrdata_with_period_data
+    perdata = sfrd.period_data
+    assert perdata.index.names == ['per', 'rno']
+    assert np.array_equal(perdata.index.levels[0], [0, 1])
+    assert np.array_equal(perdata.index.levels[1], [1, 101])
+    assert np.array_equal(perdata.inflow, [100., 1000., 20., 200.])
+    
 
 def test_write_perioddata(shellmound_sfrdata_with_period_data, outdir):
     sfrd = shellmound_sfrdata_with_period_data
@@ -82,7 +94,7 @@ def test_write_perioddata(shellmound_sfrdata_with_period_data, outdir):
                     rno_values.append(int(rno))
                     txt_values.append(txt)
                     q_values.append(float(q))
-    assert np.array_equal(rno_values, sfrd.period_data['rno'].values)
+    assert np.array_equal(rno_values, sfrd.period_data.index.get_level_values(1))
     assert np.allclose(q_values, sfrd.period_data['inflow'].values)
     assert set(txt_values) == {'inflow'}
 
@@ -94,8 +106,8 @@ def test_export_period_data(shellmound_sfrdata_with_period_data, outdir):
     df = shp2df(outfile)
     nodes = dict(zip(sfrd.reach_data.rno, sfrd.reach_data.node))
     pers = [int(c.strip('inflow')) for c in df.columns if 'inflow' in c]
-    assert set(pers) == set(sfrd.period_data.per)
-    assert set(df['rno']) == set(sfrd.period_data.rno)
+    assert set(pers) == set(sfrd.period_data.index.levels[0])
+    assert set(df['rno']) == set(sfrd.period_data.index.levels[1])
     assert np.allclose(df['0inflow'].append(df['1inflow']).values,
                        sfrd.period_data['inflow'].values)
     assert np.array_equal(df.node.values, np.array([nodes[rno] for rno in df.rno], dtype=int))

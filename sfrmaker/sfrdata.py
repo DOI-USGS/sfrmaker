@@ -381,10 +381,9 @@ class SFRData(DataPackage):
     def period_data(self):
         if self._period_data is None:
             self._period_data = self._get_period_data()
-        if not np.array_equal(self._period_data.index.values,
-                              self._period_data.rno.values):
-            self._period_data.index = self._period_data.rno
-            self._period_data.index.name = None
+        # index by period and rno
+        if not self._period_data.index.names == ['per', 'rno']:
+            self._period_data.set_index(['per', 'rno'], inplace=True)
         return self._period_data
 
     def _get_period_data(self):
@@ -397,14 +396,15 @@ class SFRData(DataPackage):
                           rno_column=None,
                           period_column='per',
                           data_column='Q_avg',
-                          one_inflow_per_path=False):
+                          one_inflow_per_path=False, distribute_flows_to_reaches=False):
         return add_to_perioddata(self, data, flowline_routing=flowline_routing,
                                  variable=variable,
                                  line_id_column=line_id_column,
                                  rno_column=rno_column,
                                  period_column=period_column,
                                  data_column=data_column,
-                                 one_inflow_per_path=one_inflow_per_path)
+                                 one_inflow_per_path=one_inflow_per_path,
+                                 distribute_flows_to_reaches=distribute_flows_to_reaches)
 
     def add_to_segment_data(self, data, flowline_routing,
                             variable='flow',

@@ -361,7 +361,9 @@ class Mf6SFR:
                 for per, group in periods:
                     output.write('\nBEGIN Period {}\n'.format(per + 1))
                     group = group.replace('ACTIVE', np.nan)
-                    assert np.array_equal(group.index.values, group.rno.values)
+                    assert np.all(group.index.get_level_values(0) == per)
+                    # drop the period from the index
+                    group.reset_index(level=0, drop=True, inplace=True)
                     datacols = {'inflow', 'manning', 'rainfall', 'evaporation', 'runoff', 'stage'}
                     datacols = datacols.intersection(group.columns)
                     group = group.loc[:, datacols]

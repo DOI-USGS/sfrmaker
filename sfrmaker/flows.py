@@ -1,3 +1,4 @@
+import warnings
 import numpy as np
 import pandas as pd
 from shapely.geometry import box
@@ -208,7 +209,8 @@ def add_to_perioddata(sfrdata, data, flowline_routing=None,
                       rno_column=None,
                       period_column='per',
                       data_column='Q_avg',
-                      one_inflow_per_path=False):
+                      one_inflow_per_path=False,
+                      distribute_flows_to_reaches=False):
     """Add data to the period data table (sfrdata.period_data)
     for a MODFLOW-6 style sfrpackage.
 
@@ -244,6 +246,10 @@ def add_to_perioddata(sfrdata, data, flowline_routing=None,
     one_inflow_per_path : bool, optional
         Limit inflows to one per (headwater to outlet) routing path, choosing the inflow location 
         that is furthest downstream. By default, False.
+    distribute_flows_to_reaches : bool, optional
+        Option to distribute any flows specified by line_id evenly across the reaches
+        associated with that line. Otherwise, all flow is applied to the first reach.
+        By default, False.
 
     Returns
     -------
@@ -263,21 +269,105 @@ def add_to_perioddata(sfrdata, data, flowline_routing=None,
             "Data need an id column so {} locations can be mapped to reach numbers".format(variable)
         # replace ids that are not keys (those outside the network) with zeros
         # (0 is the exit condition for finding paths in get_next_id_in_subset)
-        flowline_routing = {k: v if v in flowline_routing.keys() else 0 for k, v in flowline_routing.items()}
+        flowline_routing = {k: v if v in flowline_routing.keys() else 0 
+                            for k, v in flowline_routing.items()}
         rno_column = 'rno'
         r1 = sfrd.reach_data.loc[sfrd.reach_data.ireach == 1]
         line_id_rno_mapping = dict(zip(r1['line_id'], r1['rno']))
+        
+        # check to make sure that all of the IDs in data
+        # are in the routing information
+        valid_ids = set(r1.line_id).union(flowline_routing.keys()) \
+                                   .union(flowline_routing.values())
+        in_routing = np.array([True if line_id in valid_ids else False 
+                               for line_id in data[line_id_column]])
+        if np.any(~in_routing):
+            msg = ("sfrmaker.flows.add_to_perioddata: The following "
+                   f"{np.sum(~in_routing)} line_ids in data\nare not "
+                   "associated with SFR reaches or in the supplied "
+                   "flowline_routing information:\n"
+                   f"{data[~in_routing]}\n")
+            # don't allow any infow values that are un-routed
+            # (probably a mistake)
+            if variable == 'inflow':
+                raise ValueError(msg)
+            # for runoff or other variables that are widely distributed
+            # (not discrete point locations), the input data may often
+            # contain comids that don't route to anywhere in the model
+            else:
+                msg += f"{variable} for these line_ids will not be applied"
+                warnings.warn(msg)
+        data = data.loc[in_routing]
         line_ids = get_next_id_in_subset(r1.line_id, flowline_routing,
                                          data[line_id_column])
         data['line_id_in_model'] = line_ids
-        data[rno_column] = [line_id_rno_mapping[lid] for lid in line_ids]
+
+        # sum data by line_id_in_model
+        # (might have multiple original line_ids contributing 
+        #  to each line_id_in_model)
+        if len(set(data['line_id_in_model'])) < len(set(data[line_id_column])):
+            by_line_id_in_model = data.groupby(['per', 'line_id_in_model'])
+            sums = by_line_id_in_model.sum()[[data_column]].reset_index()
+            # preserve other columns that were dropped in sum()
+            # (e.g. datetime)
+            other_columns = data.columns.difference(sums.columns).difference({line_id_column})
+            for c in other_columns:
+                sums[c] = by_line_id_in_model.first().reset_index()[c]
+            # reassign to 'data' variable
+            data = sums
+            del sums
+        
+        # the 'data' DataFrame currently has 1 row per line id
+        # optionally expand 'data' to have 1 row per reach
+        # (multiple rows per line id), with the applied value 
+        # evenly split among the reaches for each line id
+        if distribute_flows_to_reaches:
+
+            # get a subset of reach_data that only includes 
+            # the lines in the 'data' DataFrame
+            lines_in_data = sfrd.reach_data['line_id'].isin(data['line_id_in_model'])
+            reach_data = sfrd.reach_data.loc[lines_in_data, 
+                                             ['rno', 'line_id']].copy()
+            # rename line_id column for consistency with 
+            # distribute_flows_to_reaches=False
+            reach_data.rename(columns={'line_id': 'line_id_in_model'}, 
+                              inplace=True)
+            
+            # get the number of reaches associated with each line
+            reach_counts = reach_data.groupby('line_id_in_model').count()['rno'].to_dict()
+            by_period = data.groupby('per')
+            
+            dfs = []
+            for per, group in by_period:
+                values_by_line = dict(zip(group['line_id_in_model'], 
+                                          group[data_column]))
+                perioddata = reach_data.copy()
+                perioddata['per'] = per
+                # transfer other data from group to expanded perioddata dataframe
+                other_columns = [c for c in group.columns if c not in 
+                                 {rno_column, period_column, data_column, 
+                                  line_id_column, 'line_id_in_model'}]
+                for c in other_columns:
+                    other_column_values_by_line = dict(zip(group['line_id_in_model'], group[c]))
+                    perioddata[c] = [other_column_values_by_line[line_id] 
+                                     for line_id in perioddata['line_id_in_model']]
+                # add the flows apportioned to each reach
+                values_by_reach = [values_by_line[line_id]/reach_counts[line_id] 
+                                   for line_id in perioddata['line_id_in_model']]
+                perioddata[data_column] = values_by_reach
+                dfs.append(perioddata)
+            data = pd.concat(dfs)
+        # otherwise, assign value to first reach associated with line
+        else:
+            data[rno_column] = [line_id_rno_mapping.get(lid, 0) 
+                                for lid in data['line_id_in_model']]
     else:
         assert rno_column in data.columns, \
             "Data to add need reach number or flowline routing information is needed."
 
     # check for duplicate inflows in same path
     if variable == 'inflow' and one_inflow_per_path:
-        line_ids = set(data[line_id_column])
+        line_ids = set(data['line_id_in_model'])
         drop = set()
         dropped_line_info_file = 'dropped_inflows_locations.csv'
         for lid in line_ids:
@@ -298,14 +388,37 @@ def add_to_perioddata(sfrdata, data, flowline_routing=None,
 
     # add inflows to period_data
     period_data = sfrd.period_data
-    period_data['rno'] = data[rno_column]
-    period_data['per'] = data[period_column]
-    period_data[variable] = data[data_column]
-    period_data['specified_line_id'] = data[line_id_column]
-    other_columns = [c for c in data.columns
-                     if c not in {rno_column, period_column, data_column, line_id_column}]
-    for c in other_columns:
-        period_data[c] = data[c]
+    # set multiindex on data 
+    # to allow direct assignment of values at period, rnos to perioddata
+    data.set_index(['per', 'rno'], inplace=True)
+    # join data to perioddata
+    # so that index includes existing periods, rnos
+    # and those in data
+    # (df.update doesn't yet support outer joins)
+    original_cols = period_data.columns
+    period_data = period_data.join(data[[data_column]], how='outer', rsuffix='data_')
+    period_data = period_data[original_cols]
+    
+    # add the new values
+    # add any aux columns to period_data if they aren't there
+    # if aux columns already exist, just update the values
+    # (preserving any values already in period_data but not in data)
+    data[variable] = data[data_column]
+    if line_id_column in data:
+        data['specified_line_id'] = data[line_id_column]
+        if 'specified_line_id' not in period_data:
+            period_data['specified_line_id'] = data[line_id_column]
+    update_columns = [c for c in data.columns
+                      if c not in {rno_column, period_column, data_column, line_id_column}]
+    # add any aux columns to period_data if they aren't there
+    for c in update_columns:
+        if c not in period_data.columns:
+            period_data[c] = data[c]
+    # do the update
+    period_data.update(data[update_columns])
+    # explicitly set the variable dtype int float
+    period_data[variable] = period_data[variable].astype(float)
+    sfrd._period_data = period_data
 
 
 def add_to_segment_data(sfrdata, data, flowline_routing=None,

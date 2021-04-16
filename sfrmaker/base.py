@@ -136,8 +136,8 @@ class DataPackage:
                 aggfunc = 'mean'  # how to aggregate multiple instances of rno/per combinations
                 if var in ['inflow', 'runoff']:
                     aggfunc = 'sum'
-                df = data.reset_index(drop=True).pivot_table(index='rno', columns='per', values=var,
-                                                             aggfunc=aggfunc).reset_index()
+                df = data.reset_index().pivot_table(index='rno', columns='per', values=var,
+                                                    aggfunc=aggfunc).reset_index()
                 # rename the columns to indicate stress periods
                 df.columns = ['rno'] + ['{}{}'.format(i, var) for i in range(df.shape[1] - 1)]
                 df['node'] = [nodes[rno] for rno in df['rno']]
