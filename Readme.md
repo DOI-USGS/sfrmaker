@@ -3,7 +3,7 @@ SFRmaker
 SFRmaker is a python package for automating construction of stream flow routing networks from hydrography data. Hydrography are input from a polyline shapefile and intersected with a structured grid defined using a shapefile or a Flopy `StructuredGrid` instance. Attribute data are supplied via `.dbf` files (NHDPlus input option) or via specified fields in the hydrography shapefile. Line fragments representing intersections between the flowlines and model grid cells are converted to SFR reaches using the supplied attribute data. MODFLOW-NWT/2005 or MODFLOW-6 SFR package input can then be written, along with shapefiles for visualizing the SFR package dataset.
 
 
-### Version 0.7
+### Version 0.8
 
 ![Tests](https://github.com/usgs/sfrmaker/workflows/Tests/badge.svg)
 [![Coverage Status](https://codecov.io/github/usgs/SFRmaker/coverage.svg?branch=develop)](https://codecov.io/github/usgs/SFRmaker/coverage.svg?branch=develop)

@@ -1,3 +1,6 @@
+"""
+Functions for getting or adding specified flows or other stress-period-based inputs to the SFR package.
+"""
 import warnings
 import numpy as np
 import pandas as pd

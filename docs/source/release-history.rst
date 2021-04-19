@@ -2,11 +2,18 @@
 Release History
 ===============
 
-Version 0.7.2 (2021-04-06)
+Version 0.8.0 (2021-04-19)
 --------------------------
-* Fix issue with starting arbolate sums, that was causing artificially narrow estimated widths on the first segment of any streams originating from outside of the model, by computing starting arbolate sums for each reach from the ending asum minus the line length.
-* Inflows: Allow multiple inflows to be specified along a single headwater to outlet path, via an optional one_inflow_per_path argument (default False; previously was hardcoded as True).
-* Observations: base unique observations on name and type; allowing multiple observation types (e.g. downstream-flow and stage) to be appended to the observations table via add_observations
+* Inflows: 
+    * Allow multiple inflows to be specified along a single headwater to outlet path, via an optional *one_inflow_per_path argument* (default False; previously was hardcoded as True).
+* Runoff and other stress period data (including inflows)
+    * Add support for specifying runoff (or other stress period inputs), allowing for multiple flows to be specified to a line, via lines IDs that may not be in the SFR package, but which route to lines in the SFR package. Routing information is provided by the ``flowline_routing argument`` to :meth:`sfrmaker.flows.add_to_perioddata` or :meth:`sfrmaker.sfrdata.SFRData.add_to_perioddata`. Line IDs may be missing if the linework was culled (i.e. to higher order streams or streams with a minimum arbolate sum). Runoff generated within the catchments of these culled lines still needs to be routed to the first line in the stream network.
+    * Add option to distribute specified flows evenly among reaches associated with a line.
+    * Refactor :meth:`sfrmaker.sfrdata.SFRData.period_data` to be indexed by stress period and reach number, allowing incremental updating (e.g. via pandas.DataFrame.update()). Previously, each call to :meth:`sfrmaker.flows.add_to_perioddata` would reset :meth:`sfrmaker.sfrdata.SFRData.period_data`. These changes allow for the specification of runoff to the SFR package in addition to specified inflows.
+* Observations: 
+    * base unique observations on name and type; allowing multiple observation types (e.g. downstream-flow and stage) to be appended to the observations table via add_observations
+* Bug fixes:
+    * Fix issue with starting arbolate sums, that was causing artificially narrow estimated widths on the first segment of any streams originating from outside of the model, by computing starting arbolate sums for each reach from the ending asum minus the line length.
 
 Version 0.7.1 (2021-01-29)
 --------------------------
