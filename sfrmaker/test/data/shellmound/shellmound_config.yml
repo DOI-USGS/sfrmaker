@@ -30,7 +30,7 @@ inflows:  # see sfrmaker.data.add_to_perioddata for arguments
   data_column: flow_m3d  # column with flow values
 observations:  # see sfrmaker.observations.add_observations for arguments
   filename: ../../../../examples/meras/observations.csv
-  obstype: downstream-flow  # modflow-6 observation type
+  obstype: [downstream-flow, 'stage']  # modflow-6 observation type
   x_location_column: x  # observation locations, in CRS coordinates
   y_location_column: y
   obsname_column: site_no  # column for naming observations

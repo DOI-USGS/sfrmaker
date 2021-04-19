@@ -42,8 +42,8 @@ def add_observations(sfrdata, data, flowline_routing=None,
         Table with information on the observation sites to be located. Must have
         either reach numbers (rno_column), line_ids (line_id_column),
         or x and y locations (x_column_in_data and y_column_in_data).
-    obstype : str (optional)
-        Type of observation to record, for MODFLOW-6 (default 'downstream-flow'; see
+    obstype : str or list-like (optional)
+        Type(s) of observation to record, for MODFLOW-6 (default 'downstream-flow'; see
         MODFLOW-6 IO documentation for more details). Alternatively, observation
         types can be specified by row in data, using the obstype_column_in_data argument.
     x_location_column : str (optional)
@@ -145,12 +145,34 @@ def add_observations(sfrdata, data, flowline_routing=None,
         obsdata[col] = obsdata[col].astype(int)
 
     if obstype is not None:
-        obsdata['obstype'] = obstype
+        if isinstance(obstype, str):
+            obsdata['obstype'] = obstype
+            obsdata['obsname'] = data[obsname_column].astype(str)
+        else:
+            obstypes = obstype
+            dfs = []
+            for obstype in obstypes:
+                df = obsdata.copy()
+                df['obstype'] = obstype
+                obsnme_suffix = obstype.split('-')[-1]
+                df['obsname'] = [f"{obsnme}-{obsnme_suffix}" 
+                                 for obsnme in data[obsname_column].astype(str)]
+                dfs.append(df)
+            obsdata = pd.concat(dfs)
     elif obstype_column in data.columns:
         obsdata['obstype'] = data[obstype_column]
+        # check if base observation names (with just site info) are unique
+        # if not, formulate name based on type as well
+        site_names = data[obsname_column].astype(str)
+        if len(set(site_names)) < len(data):
+            obsname_suffixes = [obstype.split('-')[-1] for obstype in obsdata['obstype']]
+            obsdata['obsname'] = [f"{obsnme}-{obsnme_suffix}" for obsnme, obsnme_suffix 
+                                  in zip(site_names, obsname_suffixes)]
+        else:
+            obsdata['obsname'] = site_names
     else:
         obsdata['obstype'] = 'downstream-flow'
-    obsdata['obsname'] = data[obsname_column].astype(str)
+        obsdata['obsname'] = data[obsname_column].astype(str)
 
     return obsdata
 

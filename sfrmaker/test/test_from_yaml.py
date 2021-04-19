@@ -64,6 +64,19 @@ def test_from_yaml(shellmound_config):
     assert options['stage'] == ['fileout', 'shellmound.sfr.stage.bin']
     assert options['obs6'] == ['filein', 'shellmound.sfr.obs']
 
+    # test specification of multiple observation types in yaml file
+    sfr_obs_file = 'sfrmaker/test/temp/shellmound/shellmound.sfr.obs'
+    obsdata = read_mf6_block(sfr_obs_file, 'begin continuous fileout')
+    key = list(obsdata.keys())[0]
+    obsdata = obsdata[key]
+    for line in obsdata:
+        if line.startswith('#'):
+            continue
+        if line.endswith('continuous'):
+            break
+        obstype = line.split(' ')[0].split('-')[1]
+        assert obstype in {'flow', 'stage'}
+        
 
 def get_package_version(sfr_package_file):
     with open(sfr_package_file) as src:
