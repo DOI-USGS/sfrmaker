@@ -280,8 +280,10 @@ def add_to_perioddata(sfrdata, data, flowline_routing=None,
         
         # check to make sure that all of the IDs in data
         # are in the routing information
+        # exclude the outlet ID (0)
         valid_ids = set(r1.line_id).union(flowline_routing.keys()) \
-                                   .union(flowline_routing.values())
+                                   .union(flowline_routing.values()) \
+                                   .difference({0})
         in_routing = np.array([True if line_id in valid_ids else False 
                                for line_id in data[line_id_column]])
         if np.any(~in_routing):
@@ -352,10 +354,11 @@ def add_to_perioddata(sfrdata, data, flowline_routing=None,
                                   line_id_column, 'line_id_in_model'}]
                 for c in other_columns:
                     other_column_values_by_line = dict(zip(group['line_id_in_model'], group[c]))
-                    perioddata[c] = [other_column_values_by_line[line_id] 
+                    perioddata[c] = [other_column_values_by_line.get(line_id) 
                                      for line_id in perioddata['line_id_in_model']]
+
                 # add the flows apportioned to each reach
-                values_by_reach = [values_by_line[line_id]/reach_counts[line_id] 
+                values_by_reach = [values_by_line.get(line_id, 0)/reach_counts[line_id] 
                                    for line_id in perioddata['line_id_in_model']]
                 perioddata[data_column] = values_by_reach
                 dfs.append(perioddata)
