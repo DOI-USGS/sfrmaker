@@ -7,12 +7,13 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>The Lines Module &mdash; SFRmaker 0.7.0.post15.dev0+gc6442f3 documentation</title>
+  <title>The Lines Module &mdash; SFRmaker 0.8.0.post2.dev0+gfce00ac documentation</title>
   
 
   
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
   <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
 
   
@@ -69,7 +70,7 @@
             
             
               <div class="version">
-                0.7.0.post15.dev0+gc6442f3
+                0.8.0.post2.dev0+gfce00ac
               </div>
             
           
@@ -110,9 +111,11 @@
 <p class="caption"><span class="caption-text">Reference</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="index.html"> Code reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.flows.html">Flows Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="sfrmaker.grid.html">Grid Module</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Lines Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="sfrmaker.mf5to6.html">MODFLOW-2005 to 6 Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.observations.html">Observations Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="sfrmaker.preprocessing.html">Preprocessing Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="sfrmaker.sfrdata.html">SFRData Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="sfrmaker.utils.html">Utilities Module</a></li>
@@ -243,7 +246,7 @@ Must have the following columns:</p>
 <td><p>integers representing routing connections</p></td>
 </tr>
 <tr class="row-odd"><td><p><strong>geometry</strong></p></td>
-<td><p>shapely <a class="reference external" href="https://shapely.readthedocs.io/en/latest/manual.html#LineString" title="(in Shapely v1.8dev)"><code class="xref py py-class docutils literal notranslate"><span class="pre">LineString</span></code></a> objects for each feature</p></td>
+<td><p>shapely <a class="reference external" href="https://shapely.readthedocs.io/en/latest/manual.html#LineString" title="(in Shapely v1.8a2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">LineString</span></code></a> objects for each feature</p></td>
 </tr>
 </tbody>
 </table>
@@ -255,8 +258,8 @@ Must have the following columns:</p>
 (default ‘meters’)</p>
 </dd>
 <dt><strong>crs</strong><span class="classifier">obj</span></dt><dd><p>Coordinate reference system for features on df.geometry.
-A Python int, dict, str, or <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.0.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> instance
-passed to <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input" title="(in pyproj v3.0.0)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.crs.CRS.from_user_input()</span></code></a></p>
+A Python int, dict, str, or <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.0.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> instance
+passed to <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input" title="(in pyproj v3.0.1)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.crs.CRS.from_user_input()</span></code></a></p>
 <dl class="simple">
 <dt>Can be any of:</dt><dd><ul class="simple">
 <li><p>PROJ string</p></li>
@@ -268,7 +271,7 @@ passed to <a class="reference external" href="https://pyproj4.github.io/pyproj/s
 <li><p>An EPSG integer code [i.e. 4326]</p></li>
 <li><p>A tuple of (“auth_name”: “auth_code”) [i.e (‘epsg’, ‘4326’)]</p></li>
 <li><p>An object with a <cite>to_wkt</cite> method.</p></li>
-<li><p>A <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.0.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> class</p></li>
+<li><p>A <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.0.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> class</p></li>
 </ul>
 </dd>
 </dl>
@@ -299,8 +302,8 @@ with the lines.</p>
 <dt><strong>tol: float</strong></dt><dd><p>Simplification tolerance (distance), in the units of the LineStrings
 (usually meters).</p>
 </dd>
-<dt><strong>feature_crs</strong><span class="classifier">obj</span></dt><dd><p>A Python int, dict, str, or <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.0.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> instance
-passed to the <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input" title="(in pyproj v3.0.0)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.crs.CRS.from_user_input()</span></code></a>
+<dt><strong>feature_crs</strong><span class="classifier">obj</span></dt><dd><p>A Python int, dict, str, or <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.0.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> instance
+passed to the <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input" title="(in pyproj v3.0.1)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.crs.CRS.from_user_input()</span></code></a>
 See <a class="reference external" href="http://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input">http://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input</a>.
 Can be any of:</p>
 <blockquote>
@@ -314,7 +317,7 @@ Can be any of:</p>
 <li><p>An EPSG integer code [i.e. 4326]</p></li>
 <li><p>A tuple of (“auth_name”: “auth_code”) [i.e (‘epsg’, ‘4326’)]</p></li>
 <li><p>An object with a <cite>to_wkt</cite> method.</p></li>
-<li><p>A <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.0.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> class</p></li>
+<li><p>A <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.0.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> class</p></li>
 </ul>
 </div></blockquote>
 </dd>
@@ -341,7 +344,7 @@ containing only the lines that intersect the <code class="docutils literal notra
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><dl class="simple">
 <dt><strong>df</strong><span class="classifier">DataFrame</span></dt><dd><p>Pandas DataFrame with flowline information, including
-shapely <a class="reference external" href="https://shapely.readthedocs.io/en/latest/manual.html#LineString" title="(in Shapely v1.8dev)"><code class="xref py py-class docutils literal notranslate"><span class="pre">LineStrings</span></code></a> in a <cite>‘geometry’</cite> column.</p>
+shapely <a class="reference external" href="https://shapely.readthedocs.io/en/latest/manual.html#LineString" title="(in Shapely v1.8a2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">LineStrings</span></code></a> in a <cite>‘geometry’</cite> column.</p>
 </dd>
 <dt><strong>id_column</strong><span class="classifier">str, optional</span></dt><dd><p>Attribute field with line identifiers, 
 by default ‘id’</p>
@@ -567,8 +570,8 @@ a different Coordinate Reference System.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><dl>
-<dt><strong>dest_crs</strong><span class="classifier">obj</span></dt><dd><p>A Python int, dict, str, or <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.0.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> instance
-passed to the <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input" title="(in pyproj v3.0.0)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.crs.CRS.from_user_input()</span></code></a>
+<dt><strong>dest_crs</strong><span class="classifier">obj</span></dt><dd><p>A Python int, dict, str, or <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.0.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> instance
+passed to the <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input" title="(in pyproj v3.0.1)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.crs.CRS.from_user_input()</span></code></a>
 See <a class="reference external" href="http://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input">http://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input</a>.
 Can be any of:</p>
 <blockquote>
@@ -582,7 +585,7 @@ Can be any of:</p>
 <li><p>An EPSG integer code [i.e. 4326]</p></li>
 <li><p>A tuple of (“auth_name”: “auth_code”) [i.e (‘epsg’, ‘4326’)]</p></li>
 <li><p>An object with a <cite>to_wkt</cite> method.</p></li>
-<li><p>A <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.0.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> class</p></li>
+<li><p>A <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.0.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> class</p></li>
 </ul>
 </div></blockquote>
 </dd>
@@ -694,7 +697,7 @@ prevent double-counting of flow. By default, None</p>
   <div role="contentinfo">
     <p>
       <span class="lastupdated">
-        Last updated on Feb 23, 2021.
+        Last updated on Apr 23, 2021.
       </span>
 
     </p>
