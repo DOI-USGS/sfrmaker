@@ -691,6 +691,12 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
         txt += '{} --> {}\n'.format(k, v)
 
     logger.statement(txt)
+
+    # logger statement if no elevations are available and
+    # there is no downstream COMID with Divergence == 1
+    no_main_stem_warning = 'warning: no distributaries downstream of COMID {} '
+    no_main_stem_warning += 'with Divergence == 1. Picking the first one: {}'
+
     # dictionary of values for selecting main channel at diversions
     valid_comids = set(flcc.index)
     div_elevs = dict(zip(flcc.COMID, flcc[elevcol]))
@@ -728,9 +734,10 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
                 # Divergence == 1 is the main stemp, Divergence == 2 is minor
                 # (see NHDPlus v2 User's Guide)
                 info = flcc.loc[tocomids_c, 'Divergence'].sort_values()
-                assert info.values[0] == 1
-                tocomids[k] = info.index[0]
-                #tocomids[k] = flcc.loc[tocomids_c, 'Divergence'].sort_values().index[0]
+                selected_tocomid = info.index[0]
+                if info.values[0] != 1:
+                    logger.statement(no_main_stem_warning.format(k, selected_tocomid))
+                tocomids[k] = selected_tocomid
             else:
                 tocomids[k] = np.array(tocomids_c)[np.nanargmin(dnelevs)]
             # secondary distributaries
