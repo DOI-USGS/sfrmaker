@@ -7,12 +7,13 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>The Grid Module &mdash; SFRmaker 0.7.0.post15.dev0+gebe9af1 documentation</title>
+  <title>The Grid Module &mdash; SFRmaker 0.8.0.post2.dev0+gfce00ac documentation</title>
   
 
   
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
   <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
 
   
@@ -43,7 +44,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="The Lines Module" href="sfrmaker.lines.html" />
-    <link rel="prev" title="Modules" href="index.html" /> 
+    <link rel="prev" title="The Flows Module" href="sfrmaker.flows.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -67,7 +68,7 @@
             
             
               <div class="version">
-                0.7.0.post15.dev0+gebe9af1
+                0.8.0.post2.dev0+gfce00ac
               </div>
             
           
@@ -108,9 +109,11 @@
 <p class="caption"><span class="caption-text">Reference</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="index.html"> Code reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.flows.html">Flows Module</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Grid Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="sfrmaker.lines.html">Lines Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="sfrmaker.mf5to6.html">MODFLOW-2005 to 6 Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.observations.html">Observations Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="sfrmaker.preprocessing.html">Preprocessing Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="sfrmaker.sfrdata.html">SFRData Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="sfrmaker.utils.html">Utilities Module</a></li>
@@ -319,7 +322,7 @@ Must have the following columns:</p>
 </tr>
 <tr class="row-odd"><td><p>geometry</p></td>
 <td><p>obj</p></td>
-<td><p>shapely <a class="reference external" href="https://shapely.readthedocs.io/en/latest/manual.html#Polygon" title="(in Shapely v1.8dev)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Polygons</span></code></a> of model cells</p></td>
+<td><p>shapely <a class="reference external" href="https://shapely.readthedocs.io/en/latest/manual.html#Polygon" title="(in Shapely v1.8a2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Polygons</span></code></a> of model cells</p></td>
 </tr>
 </tbody>
 </table>
@@ -353,7 +356,7 @@ by default None</p>
 </dd>
 <dt><strong>bounds</strong><span class="classifier">tuple, optional</span></dt><dd><p>(left, bottom, top, right) edges of the grid bounding box, if known.
 Otherwise, the <code class="xref py py-attr docutils literal notranslate"><span class="pre">bounds</span></code> attribute is computed from the
-shapely <a class="reference external" href="https://shapely.readthedocs.io/en/latest/manual.html#Polygon" title="(in Shapely v1.8dev)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Polygons</span></code></a> in the <code class="xref py py-attr docutils literal notranslate"><span class="pre">Grid</span> <span class="pre">DataFrame</span></code> attribute.
+shapely <a class="reference external" href="https://shapely.readthedocs.io/en/latest/manual.html#Polygon" title="(in Shapely v1.8a2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Polygons</span></code></a> in the <code class="xref py py-attr docutils literal notranslate"><span class="pre">Grid</span> <span class="pre">DataFrame</span></code> attribute.
 by default None</p>
 </dd>
 <dt><strong>active_area</strong><span class="classifier">shapely Polygon, list of Polygons, or shapefile path, optional</span></dt><dd><p>Polygon defining the active portion of the model grid.
@@ -455,7 +458,7 @@ flopy.discretization.StructuredGrid instance.</p>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
         <a href="sfrmaker.lines.html" class="btn btn-neutral float-right" title="The Lines Module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="index.html" class="btn btn-neutral float-left" title="Modules" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="sfrmaker.flows.html" class="btn btn-neutral float-left" title="The Flows Module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>
@@ -463,7 +466,7 @@ flopy.discretization.StructuredGrid instance.</p>
   <div role="contentinfo">
     <p>
       <span class="lastupdated">
-        Last updated on Feb 23, 2021.
+        Last updated on Apr 23, 2021.
       </span>
 
     </p>

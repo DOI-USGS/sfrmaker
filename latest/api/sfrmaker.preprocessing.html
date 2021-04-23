@@ -7,12 +7,13 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>The Preprocessing Module &mdash; SFRmaker 0.7.0.post15.dev0+gebe9af1 documentation</title>
+  <title>The Preprocessing Module &mdash; SFRmaker 0.8.0.post2.dev0+gfce00ac documentation</title>
   
 
   
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
   <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
 
   
@@ -45,7 +46,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="The SFRData Module" href="sfrmaker.sfrdata.html" />
-    <link rel="prev" title="The MODFLOW-2005 to 6 Module" href="sfrmaker.mf5to6.html" /> 
+    <link rel="prev" title="The Observations Module" href="sfrmaker.observations.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -69,7 +70,7 @@
             
             
               <div class="version">
-                0.7.0.post15.dev0+gebe9af1
+                0.8.0.post2.dev0+gfce00ac
               </div>
             
           
@@ -110,9 +111,11 @@
 <p class="caption"><span class="caption-text">Reference</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="index.html"> Code reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.flows.html">Flows Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="sfrmaker.grid.html">Grid Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="sfrmaker.lines.html">Lines Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="sfrmaker.mf5to6.html">MODFLOW-2005 to 6 Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.observations.html">Observations Module</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Preprocessing Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="sfrmaker.sfrdata.html">SFRData Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="sfrmaker.utils.html">Utilities Module</a></li>
@@ -232,8 +235,8 @@ features in polygon.</p>
 </dd>
 <dt><strong>crs</strong><span class="classifier">obj</span></dt><dd><p>Coordinate reference system of flowlines. Only needed if
 the data do not have a valid ESRI projection (.prj) file.
-A Python int, dict, str, or <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.0.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> instance
-passed to <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input" title="(in pyproj v3.0.0)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.crs.CRS.from_user_input()</span></code></a></p>
+A Python int, dict, str, or <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.0.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> instance
+passed to <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input" title="(in pyproj v3.0.1)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.crs.CRS.from_user_input()</span></code></a></p>
 <dl class="simple">
 <dt>Can be any of:</dt><dd><ul class="simple">
 <li><p>PROJ string</p></li>
@@ -245,7 +248,7 @@ passed to <a class="reference external" href="https://pyproj4.github.io/pyproj/s
 <li><p>An EPSG integer code [i.e. 4326]</p></li>
 <li><p>A tuple of (“auth_name”: “auth_code”) [i.e (‘epsg’, ‘4326’)]</p></li>
 <li><p>An object with a <cite>to_wkt</cite> method.</p></li>
-<li><p>A <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.0.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> class</p></li>
+<li><p>A <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.0.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> class</p></li>
 </ul>
 </dd>
 </dl>
@@ -255,7 +258,7 @@ passed to <a class="reference external" href="https://pyproj4.github.io/pyproj/s
 must be in the same CRS as flowlines; shapefiles will be automatically reprojected.</p>
 </dd>
 <dt><strong>simplify_tol</strong><span class="classifier">float</span></dt><dd><p>Simplification tolerance for <code class="docutils literal notranslate"><span class="pre">polygon</span></code> to speed clipping.
-See <a class="reference external" href="https://shapely.readthedocs.io/en/latest/manual.html" title="(in Shapely v1.8dev)"><span>The Shapely User Manual</span></a> for more details.</p>
+See <a class="reference external" href="https://shapely.readthedocs.io/en/latest/manual.html" title="(in Shapely v1.8a2)"><span>The Shapely User Manual</span></a> for more details.</p>
 </dd>
 <dt><strong>logger</strong><span class="classifier">Logger instance</span></dt><dd></dd>
 </dl>
@@ -461,8 +464,8 @@ Required if the flowlines are not in a valid Projected CRS.</p>
 </dd>
 <dt><strong>flowline_crs</strong><span class="classifier">obj</span></dt><dd><p>Coordinate reference system of the NHDPlus data. Only needed if
 the data do not have a valid ESRI projection (.prj) file.
-A Python int, dict, str, or <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.0.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> instance
-passed to <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input" title="(in pyproj v3.0.0)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.crs.CRS.from_user_input()</span></code></a></p>
+A Python int, dict, str, or <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.0.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> instance
+passed to <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input" title="(in pyproj v3.0.1)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.crs.CRS.from_user_input()</span></code></a></p>
 <dl class="simple">
 <dt>Can be any of:</dt><dd><ul class="simple">
 <li><p>PROJ string</p></li>
@@ -474,7 +477,7 @@ passed to <a class="reference external" href="https://pyproj4.github.io/pyproj/s
 <li><p>An EPSG integer code [i.e. 4326]</p></li>
 <li><p>A tuple of (“auth_name”: “auth_code”) [i.e (‘epsg’, ‘4326’)]</p></li>
 <li><p>An object with a <cite>to_wkt</cite> method.</p></li>
-<li><p>A <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.0.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> class</p></li>
+<li><p>A <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.0.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> class</p></li>
 </ul>
 </dd>
 </dl>
@@ -676,8 +679,8 @@ Flowlines must be in a projected Coordinate reference system (CRS).</p>
 <code class="docutils literal notranslate"><span class="pre">narwidth_shapefile</span></code> is specified.</p>
 </dd>
 <dt><strong>crs</strong><span class="classifier">obj</span></dt><dd><p>Coordinate reference system of flowlines.
-A Python int, dict, str, or <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.0.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> instance
-passed to <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input" title="(in pyproj v3.0.0)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.crs.CRS.from_user_input()</span></code></a></p>
+A Python int, dict, str, or <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.0.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> instance
+passed to <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input" title="(in pyproj v3.0.1)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.crs.CRS.from_user_input()</span></code></a></p>
 <dl class="simple">
 <dt>Can be any of:</dt><dd><ul class="simple">
 <li><p>PROJ string</p></li>
@@ -689,7 +692,7 @@ passed to <a class="reference external" href="https://pyproj4.github.io/pyproj/s
 <li><p>An EPSG integer code [i.e. 4326]</p></li>
 <li><p>A tuple of (“auth_name”: “auth_code”) [i.e (‘epsg’, ‘4326’)]</p></li>
 <li><p>An object with a <cite>to_wkt</cite> method.</p></li>
-<li><p>A <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.0.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> class</p></li>
+<li><p>A <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.0.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> class</p></li>
 </ul>
 </dd>
 </dl>
@@ -722,7 +725,7 @@ NARWidth widths are assumed to be in meters.</p>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
         <a href="sfrmaker.sfrdata.html" class="btn btn-neutral float-right" title="The SFRData Module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="sfrmaker.mf5to6.html" class="btn btn-neutral float-left" title="The MODFLOW-2005 to 6 Module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="sfrmaker.observations.html" class="btn btn-neutral float-left" title="The Observations Module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>
@@ -730,7 +733,7 @@ NARWidth widths are assumed to be in meters.</p>
   <div role="contentinfo">
     <p>
       <span class="lastupdated">
-        Last updated on Feb 23, 2021.
+        Last updated on Apr 23, 2021.
       </span>
 
     </p>

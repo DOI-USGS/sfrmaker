@@ -7,12 +7,13 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>sfrmaker.mf5to6 &mdash; SFRmaker 0.7.0.post15.dev0+gebe9af1 documentation</title>
+  <title>sfrmaker.mf5to6 &mdash; SFRmaker 0.8.0.post2.dev0+gfce00ac documentation</title>
   
 
   
   <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
   <link rel="stylesheet" href="../../_static/copybutton.css" type="text/css" />
 
   
@@ -65,7 +66,7 @@
             
             
               <div class="version">
-                0.7.0.post15.dev0+gebe9af1
+                0.8.0.post2.dev0+gfce00ac
               </div>
             
           
@@ -542,7 +543,9 @@
                 <span class="k">for</span> <span class="n">per</span><span class="p">,</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">periods</span><span class="p">:</span>
                     <span class="n">output</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">BEGIN Period </span><span class="si">{}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">per</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
                     <span class="n">group</span> <span class="o">=</span> <span class="n">group</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;ACTIVE&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
-                    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="n">group</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">group</span><span class="o">.</span><span class="n">rno</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+                    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">group</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">==</span> <span class="n">per</span><span class="p">)</span>
+                    <span class="c1"># drop the period from the index</span>
+                    <span class="n">group</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
                     <span class="n">datacols</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;inflow&#39;</span><span class="p">,</span> <span class="s1">&#39;manning&#39;</span><span class="p">,</span> <span class="s1">&#39;rainfall&#39;</span><span class="p">,</span> <span class="s1">&#39;evaporation&#39;</span><span class="p">,</span> <span class="s1">&#39;runoff&#39;</span><span class="p">,</span> <span class="s1">&#39;stage&#39;</span><span class="p">}</span>
                     <span class="n">datacols</span> <span class="o">=</span> <span class="n">datacols</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">group</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
                     <span class="n">group</span> <span class="o">=</span> <span class="n">group</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">datacols</span><span class="p">]</span>
@@ -713,7 +716,7 @@
   <div role="contentinfo">
     <p>
       <span class="lastupdated">
-        Last updated on Feb 23, 2021.
+        Last updated on Apr 23, 2021.
       </span>
 
     </p>

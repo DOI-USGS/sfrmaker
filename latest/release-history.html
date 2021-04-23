@@ -7,12 +7,13 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Release History &mdash; SFRmaker 0.7.0.post15.dev0+gebe9af1 documentation</title>
+  <title>Release History &mdash; SFRmaker 0.8.0.post2.dev0+gfce00ac documentation</title>
   
 
   
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
   <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
 
   
@@ -67,7 +68,7 @@
             
             
               <div class="version">
-                0.7.0.post15.dev0+gebe9af1
+                0.8.0.post2.dev0+gfce00ac
               </div>
             
           
@@ -110,6 +111,8 @@
 <li class="toctree-l1"><a class="reference internal" href="api/index.html"> Code reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="config-summary.html"> Summary of configuration file options</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#"> Release History</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#version-0-8-0-2021-04-19">Version 0.8.0 (2021-04-19)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#version-0-7-1-2021-01-29">Version 0.7.1 (2021-01-29)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#version-0-7-0-2021-01-15">Version 0.7.0 (2021-01-15)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#version-0-6-2-2020-11-12">Version 0.6.2 (2020-11-12)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#version-0-6-1-2020-11-04">Version 0.6.1 (2020-11-04)</a></li>
@@ -220,6 +223,45 @@
 </style>
 <div class="section" id="release-history">
 <h1>Release History<a class="headerlink" href="#release-history" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="version-0-8-0-2021-04-19">
+<h2>Version 0.8.0 (2021-04-19)<a class="headerlink" href="#version-0-8-0-2021-04-19" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><dl class="simple">
+<dt>Inflows:</dt><dd><ul>
+<li><p>Allow multiple inflows to be specified along a single headwater to outlet path, via an optional <em>one_inflow_per_path argument</em> (default False; previously was hardcoded as True).</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Runoff and other stress period data (including inflows)</dt><dd><ul>
+<li><p>Add support for specifying runoff (or other stress period inputs), allowing for multiple flows to be specified to a line, via lines IDs that may not be in the SFR package, but which route to lines in the SFR package. Routing information is provided by the <code class="docutils literal notranslate"><span class="pre">flowline_routing</span> <span class="pre">argument</span></code> to <a class="reference internal" href="api/sfrmaker.flows.html#sfrmaker.flows.add_to_perioddata" title="sfrmaker.flows.add_to_perioddata"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sfrmaker.flows.add_to_perioddata()</span></code></a> or <a class="reference internal" href="api/sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.add_to_perioddata" title="sfrmaker.sfrdata.SFRData.add_to_perioddata"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sfrmaker.sfrdata.SFRData.add_to_perioddata()</span></code></a>. Line IDs may be missing if the linework was culled (i.e. to higher order streams or streams with a minimum arbolate sum). Runoff generated within the catchments of these culled lines still needs to be routed to the first line in the stream network.</p></li>
+<li><p>Add option to distribute specified flows evenly among reaches associated with a line.</p></li>
+<li><p>Refactor <a class="reference internal" href="api/sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.period_data" title="sfrmaker.sfrdata.SFRData.period_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sfrmaker.sfrdata.SFRData.period_data()</span></code></a> to be indexed by stress period and reach number, allowing incremental updating (e.g. via pandas.DataFrame.update()). Previously, each call to <a class="reference internal" href="api/sfrmaker.flows.html#sfrmaker.flows.add_to_perioddata" title="sfrmaker.flows.add_to_perioddata"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sfrmaker.flows.add_to_perioddata()</span></code></a> would reset <a class="reference internal" href="api/sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.period_data" title="sfrmaker.sfrdata.SFRData.period_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sfrmaker.sfrdata.SFRData.period_data()</span></code></a>. These changes allow for the specification of runoff to the SFR package in addition to specified inflows.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Observations:</dt><dd><ul>
+<li><p>base unique observations on name and type; allowing multiple observation types (e.g. downstream-flow and stage) to be appended to the observations table via add_observations</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Bug fixes:</dt><dd><ul>
+<li><p>Fix issue with starting arbolate sums, that was causing artificially narrow estimated widths on the first segment of any streams originating from outside of the model, by computing starting arbolate sums for each reach from the ending asum minus the line length.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</div>
+<div class="section" id="version-0-7-1-2021-01-29">
+<h2>Version 0.7.1 (2021-01-29)<a class="headerlink" href="#version-0-7-1-2021-01-29" title="Permalink to this headline">¶</a></h2>
+<p>USGS software release associated with <cite>Groundwater</cite> publication</p>
+</div>
 <div class="section" id="version-0-7-0-2021-01-15">
 <h2>Version 0.7.0 (2021-01-15)<a class="headerlink" href="#version-0-7-0-2021-01-15" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
@@ -238,7 +280,7 @@
 <div class="section" id="version-0-6-1-2020-11-04">
 <h2>Version 0.6.1 (2020-11-04)<a class="headerlink" href="#version-0-6-1-2020-11-04" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li><p>deprecate sfrmaker.gis.CRS class in favor of <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.0.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a></p></li>
+<li><p>deprecate sfrmaker.gis.CRS class in favor of <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.0.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a></p></li>
 <li><p>add <code class="xref py py-func docutils literal notranslate"><span class="pre">sfrmaker.routing.get_previous_ids_in_subset()</span></code> function that can find outlet locations if the specified line IDs for outlets aren’t in a consolidated (one_reach_per_cell=True) sfr network</p></li>
 <li><p>some bug fixes to the <code class="docutils literal notranslate"><span class="pre">add_outlets</span></code> option</p></li>
 <li><p>some fixes to the input data for the MERAS example</p></li>
@@ -322,7 +364,7 @@
   <div role="contentinfo">
     <p>
       <span class="lastupdated">
-        Last updated on Feb 23, 2021.
+        Last updated on Apr 23, 2021.
       </span>
 
     </p>
