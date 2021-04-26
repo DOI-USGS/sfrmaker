@@ -258,6 +258,7 @@ def add_to_perioddata(sfrdata, data, flowline_routing=None,
     -------
     Updates the sfrdata.perioddata DataFrame.
     """
+    print(f'adding {variable} to the SFR package stress period data...')
     sfrd = sfrdata
 
     # allow input via a list of tables or single table
@@ -292,7 +293,7 @@ def add_to_perioddata(sfrdata, data, flowline_routing=None,
                    "associated with SFR reaches or in the supplied "
                    "flowline_routing information:\n"
                    f"{data[~in_routing]}\n")
-            # don't allow any infow values that are un-routed
+            # don't allow any inflow values that are un-routed
             # (probably a mistake)
             if variable == 'inflow':
                 raise ValueError(msg)
@@ -344,6 +345,10 @@ def add_to_perioddata(sfrdata, data, flowline_routing=None,
             
             dfs = []
             for per, group in by_period:
+                
+                # line_ids should be unique at this point
+                assert len(group['line_id_in_model'].unique()) == len(group)
+                
                 values_by_line = dict(zip(group['line_id_in_model'], 
                                           group[data_column]))
                 perioddata = reach_data.copy()
@@ -361,6 +366,11 @@ def add_to_perioddata(sfrdata, data, flowline_routing=None,
                 values_by_reach = [values_by_line.get(line_id, 0)/reach_counts[line_id] 
                                    for line_id in perioddata['line_id_in_model']]
                 perioddata[data_column] = values_by_reach
+                
+                # check the sum
+                group_lines_in_model = group['line_id_in_model'].isin(perioddata['line_id_in_model'])
+                expected_sum = group.loc[group_lines_in_model, data_column].sum()
+                assert np.allclose(perioddata[data_column].sum(), expected_sum)
                 dfs.append(perioddata)
             data = pd.concat(dfs)
         # otherwise, assign value to first reach associated with line
@@ -397,6 +407,16 @@ def add_to_perioddata(sfrdata, data, flowline_routing=None,
     # set multiindex on data 
     # to allow direct assignment of values at period, rnos to perioddata
     data.set_index(['per', 'rno'], inplace=True)
+    # drop any references to line_id 0 (values not in model)
+    data_period_mean_to_zero = data.loc[data['line_id_in_model'] == 0] \
+        .groupby('per')[data_column].sum().mean()
+    if np.isnan(data_period_mean_to_zero):
+        data_period_mean_to_zero = 0.
+    data_period_mean_in_model = data.loc[data['line_id_in_model'] != 0] \
+        .groupby('per')[data_column].sum().mean()
+    data_period_mean_tot = data_period_mean_in_model+data_period_mean_to_zero
+    pct_routed = data_period_mean_in_model/data_period_mean_tot
+    
     # join data to perioddata
     # so that index includes existing periods, rnos
     # and those in data
@@ -424,7 +444,22 @@ def add_to_perioddata(sfrdata, data, flowline_routing=None,
     period_data.update(data[update_columns])
     # explicitly set the variable dtype int float
     period_data[variable] = period_data[variable].astype(float)
+    
+    # report mean value by period in input data vs SFR period data
+    period_data_period_mean = period_data.groupby('per')[variable].sum().mean()
+    pct_in_model = period_data_period_mean/data_period_mean_tot
+    text = (f"Stress period mean {variable} in input data routing to a"
+            f" model SFR segment: {data_period_mean_in_model:,g}"
+            f" ({pct_routed:.1%})\n")
+    text += (f"Stress period mean {variable} in input data not routing to a"
+             f" model SFR segment: {data_period_mean_to_zero:,g}\n")
+    text += (f"Stress period mean {variable} in SFR package Period Data:"
+             f" {period_data_period_mean:,g}"
+             f" ({pct_in_model:.1%})\n")
+    print(text)
+    
     sfrd._period_data = period_data
+    print('done')
 
 
 def add_to_segment_data(sfrdata, data, flowline_routing=None,
