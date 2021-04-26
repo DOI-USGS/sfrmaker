@@ -10,7 +10,12 @@ from shapely.geometry import box
 import pytest
 from gisutils import df2shp, shp2df
 from sfrmaker.checks import check_monotonicity
-from sfrmaker.preprocessing import cull_flowlines, preprocess_nhdplus, clip_flowlines_to_polygon, edit_flowlines
+from sfrmaker.preprocessing import (get_flowline_routing,
+                                    cull_flowlines, 
+                                    preprocess_nhdplus, 
+                                    clip_flowlines_to_polygon, 
+                                    edit_flowlines
+                                    )
 
 
 @pytest.fixture(scope='module')
@@ -234,3 +239,22 @@ def test_edit_flowlines(flowlines, preprocessed_flowlines, test_data_path):
     assert not any(set(add_flowlines.comid).difference(edited_flowlines.index))
     if isinstance(flowlines, str):
         assert os.path.exists(flowlines[:-4] + '.prj')
+        
+
+def test_get_flowline_routing(datapath, project_root_path):
+    
+    # change the directory to the root level
+    # (other tests in this module use the output folder)
+    wd = os.getcwd()
+    os.chdir(project_root_path)
+    NHDPlus_paths = [f'{datapath}/tylerforks/NHDPlus/']
+    plusflow_files = [f'{datapath}/tylerforks/NHDPlus/NHDPlusAttributes/PlusFlow.dbf']
+
+    mask = f'{datapath}/tylerforks/grid.shp'
+    df = get_flowline_routing(NHDPlus_paths=NHDPlus_paths,
+                              mask=mask)
+    assert np.array_equal(df.columns, ['FROMCOMID', 'TOCOMID'])
+    df2 = get_flowline_routing(PlusFlow=plusflow_files)
+    pd.testing.assert_frame_equal(df2.loc[df2['FROMCOMID'].isin(df['FROMCOMID'])].head(),
+                                  df.head())
+    os.chdir(wd)

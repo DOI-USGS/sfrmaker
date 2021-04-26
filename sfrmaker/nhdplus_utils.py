@@ -17,7 +17,8 @@ def get_prj_file(NHDPlus_paths=None, NHDFlowlines=None):
         return NHDFlowlines[0][:-4] + '.prj'
 
 
-def get_nhdplus_v2_filepaths(NHDPlus_paths):
+def get_nhdplus_v2_filepaths(NHDPlus_paths, 
+                             raise_not_exist_error=True):
     print('for basins:')
     if isinstance(NHDPlus_paths, str):
         NHDPlus_paths = [NHDPlus_paths]
@@ -33,7 +34,7 @@ def get_nhdplus_v2_filepaths(NHDPlus_paths):
                  for f in NHDPlus_paths]
     for paths in NHDFlowlines, PlusFlowlineVAA, PlusFlow, elevslope:
         for f in paths:
-            if not os.path.exists(f):
+            if raise_not_exist_error and not os.path.exists(f):
                 raise FileNotFoundError(f)
     return NHDFlowlines, PlusFlowlineVAA, PlusFlow, elevslope
 

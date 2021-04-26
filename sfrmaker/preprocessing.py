@@ -22,6 +22,70 @@ from sfrmaker.units import convert_length_units
 from sfrmaker.utils import width_from_arbolate_sum, arbolate_sum
 
 
+def get_flowline_routing(NHDPlus_paths=None, PlusFlow=None, mask=None,
+                         mask_crs=None, nhdplus_crs=4269):
+    """Read a collection of NHDPlus version 2 PlusFlow (routing)
+    tables from one or more drainage basins and consolidate into a 
+    single pandas DataFrame, returning the `FROMCOMID` and `TOCOMID` 
+    columns.
+
+    Parameters
+    ----------
+    NHDPlus_paths : sequence
+        Sequence of paths to the top level folder for each drainage basin.
+        For example: 
+        
+        .. code-block:: python
+        
+            ['NHDPlus/NHDPlusGL/NHDPlus04', 
+             'NHDPlus/NHDPlusMS/NHDPlus07']
+             
+        by default None
+    PlusFlow : string or sequence
+        Single path to a PlusFlow table or sequence of PlusFlow table 
+        filepaths, by default None
+
+    Returns
+    -------
+    flowline_routing : DataFrame
+        [description]
+
+    Raises
+    ------
+    ValueError
+        [description]
+    """
+    if NHDPlus_paths is not None:
+        flowlines_files, pfvaa_files, pf_files, elevslope_files = \
+        get_nhdplus_v2_filepaths(NHDPlus_paths, raise_not_exist_error=False)
+        pf = shp2df(pf_files)
+        
+        if mask is not None:
+            if isinstance(mask, tuple):
+                extent_poly_nhd_crs = box(*mask)
+                filter = mask
+            elif mask is not None:
+                extent_poly_nhd_crs = read_polygon_feature(mask, 
+                                                           feature_crs=mask_crs,
+                                                           dest_crs=nhdplus_crs)
+                # ensure that filter bbox is in same crs as flowlines
+                # get filters from shapefiles, shapley Polygons or GeoJSON polygons
+                filter = get_bbox(extent_poly_nhd_crs, dest_crs=nhdplus_crs)
+            else:
+                filter = None
+            flowlines = shp2df(flowlines_files, filter=filter)
+            keep_comids = pf['FROMCOMID'].isin(flowlines['COMID']) | \
+                          pf['TOCOMID'].isin(flowlines['COMID'])
+            pf = pf.loc[keep_comids]
+    elif PlusFlow is not None:
+        pf = shp2df(PlusFlow)
+    else:
+        raise ValueError(("get_flowline_routing: Must provide one of more" 
+                          " NHDPlus_path or PlusFlow table."))
+    pf = pf.loc[pf['FROMCOMID'] != 0]
+    return pf[['FROMCOMID', 'TOCOMID']]
+        
+    
 def cull_flowlines(NHDPlus_paths,
                    active_area=None,
                    asum_thresh=None,
