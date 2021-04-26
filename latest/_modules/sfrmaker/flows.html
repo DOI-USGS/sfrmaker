@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>sfrmaker.flows &mdash; SFRmaker 0.8.0.post2.dev0+gfce00ac documentation</title>
+  <title>sfrmaker.flows &mdash; SFRmaker 0.8.0.post4.dev0+g81788d6 documentation</title>
   
 
   
@@ -66,7 +66,7 @@
             
             
               <div class="version">
-                0.8.0.post2.dev0+gfce00ac
+                0.8.0.post4.dev0+g81788d6
               </div>
             
           
@@ -440,6 +440,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    Updates the sfrdata.perioddata DataFrame.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;adding </span><span class="si">{</span><span class="n">variable</span><span class="si">}</span><span class="s1"> to the SFR package stress period data...&#39;</span><span class="p">)</span>
     <span class="n">sfrd</span> <span class="o">=</span> <span class="n">sfrdata</span>
 
     <span class="c1"># allow input via a list of tables or single table</span>
@@ -474,7 +475,7 @@
                    <span class="s2">&quot;associated with SFR reaches or in the supplied &quot;</span>
                    <span class="s2">&quot;flowline_routing information:</span><span class="se">\n</span><span class="s2">&quot;</span>
                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">data</span><span class="p">[</span><span class="o">~</span><span class="n">in_routing</span><span class="p">]</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="c1"># don&#39;t allow any infow values that are un-routed</span>
+            <span class="c1"># don&#39;t allow any inflow values that are un-routed</span>
             <span class="c1"># (probably a mistake)</span>
             <span class="k">if</span> <span class="n">variable</span> <span class="o">==</span> <span class="s1">&#39;inflow&#39;</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
@@ -526,6 +527,10 @@
             
             <span class="n">dfs</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">for</span> <span class="n">per</span><span class="p">,</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">by_period</span><span class="p">:</span>
+                
+                <span class="c1"># line_ids should be unique at this point</span>
+                <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">group</span><span class="p">[</span><span class="s1">&#39;line_id_in_model&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">group</span><span class="p">)</span>
+                
                 <span class="n">values_by_line</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">group</span><span class="p">[</span><span class="s1">&#39;line_id_in_model&#39;</span><span class="p">],</span> 
                                           <span class="n">group</span><span class="p">[</span><span class="n">data_column</span><span class="p">]))</span>
                 <span class="n">perioddata</span> <span class="o">=</span> <span class="n">reach_data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
@@ -543,6 +548,11 @@
                 <span class="n">values_by_reach</span> <span class="o">=</span> <span class="p">[</span><span class="n">values_by_line</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">line_id</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span><span class="o">/</span><span class="n">reach_counts</span><span class="p">[</span><span class="n">line_id</span><span class="p">]</span> 
                                    <span class="k">for</span> <span class="n">line_id</span> <span class="ow">in</span> <span class="n">perioddata</span><span class="p">[</span><span class="s1">&#39;line_id_in_model&#39;</span><span class="p">]]</span>
                 <span class="n">perioddata</span><span class="p">[</span><span class="n">data_column</span><span class="p">]</span> <span class="o">=</span> <span class="n">values_by_reach</span>
+                
+                <span class="c1"># check the sum</span>
+                <span class="n">group_lines_in_model</span> <span class="o">=</span> <span class="n">group</span><span class="p">[</span><span class="s1">&#39;line_id_in_model&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">perioddata</span><span class="p">[</span><span class="s1">&#39;line_id_in_model&#39;</span><span class="p">])</span>
+                <span class="n">expected_sum</span> <span class="o">=</span> <span class="n">group</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">group_lines_in_model</span><span class="p">,</span> <span class="n">data_column</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+                <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">perioddata</span><span class="p">[</span><span class="n">data_column</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">(),</span> <span class="n">expected_sum</span><span class="p">)</span>
                 <span class="n">dfs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">perioddata</span><span class="p">)</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">dfs</span><span class="p">)</span>
         <span class="c1"># otherwise, assign value to first reach associated with line</span>
@@ -579,6 +589,16 @@
     <span class="c1"># set multiindex on data </span>
     <span class="c1"># to allow direct assignment of values at period, rnos to perioddata</span>
     <span class="n">data</span><span class="o">.</span><span class="n">set_index</span><span class="p">([</span><span class="s1">&#39;per&#39;</span><span class="p">,</span> <span class="s1">&#39;rno&#39;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="c1"># drop any references to line_id 0 (values not in model)</span>
+    <span class="n">data_period_mean_to_zero</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;line_id_in_model&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span> \
+        <span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;per&#39;</span><span class="p">)[</span><span class="n">data_column</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">data_period_mean_to_zero</span><span class="p">):</span>
+        <span class="n">data_period_mean_to_zero</span> <span class="o">=</span> <span class="mf">0.</span>
+    <span class="n">data_period_mean_in_model</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;line_id_in_model&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">]</span> \
+        <span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;per&#39;</span><span class="p">)[</span><span class="n">data_column</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+    <span class="n">data_period_mean_tot</span> <span class="o">=</span> <span class="n">data_period_mean_in_model</span><span class="o">+</span><span class="n">data_period_mean_to_zero</span>
+    <span class="n">pct_routed</span> <span class="o">=</span> <span class="n">data_period_mean_in_model</span><span class="o">/</span><span class="n">data_period_mean_tot</span>
+    
     <span class="c1"># join data to perioddata</span>
     <span class="c1"># so that index includes existing periods, rnos</span>
     <span class="c1"># and those in data</span>
@@ -606,7 +626,22 @@
     <span class="n">period_data</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">update_columns</span><span class="p">])</span>
     <span class="c1"># explicitly set the variable dtype int float</span>
     <span class="n">period_data</span><span class="p">[</span><span class="n">variable</span><span class="p">]</span> <span class="o">=</span> <span class="n">period_data</span><span class="p">[</span><span class="n">variable</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
-    <span class="n">sfrd</span><span class="o">.</span><span class="n">_period_data</span> <span class="o">=</span> <span class="n">period_data</span></div>
+    
+    <span class="c1"># report mean value by period in input data vs SFR period data</span>
+    <span class="n">period_data_period_mean</span> <span class="o">=</span> <span class="n">period_data</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;per&#39;</span><span class="p">)[</span><span class="n">variable</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+    <span class="n">pct_in_model</span> <span class="o">=</span> <span class="n">period_data_period_mean</span><span class="o">/</span><span class="n">data_period_mean_tot</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Stress period mean </span><span class="si">{</span><span class="n">variable</span><span class="si">}</span><span class="s2"> in input data routing to a&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot; model SFR segment: </span><span class="si">{</span><span class="n">data_period_mean_in_model</span><span class="si">:</span><span class="s2">,g</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot; (</span><span class="si">{</span><span class="n">pct_routed</span><span class="si">:</span><span class="s2">.1%</span><span class="si">}</span><span class="s2">)</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">text</span> <span class="o">+=</span> <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Stress period mean </span><span class="si">{</span><span class="n">variable</span><span class="si">}</span><span class="s2"> in input data not routing to a&quot;</span>
+             <span class="sa">f</span><span class="s2">&quot; model SFR segment: </span><span class="si">{</span><span class="n">data_period_mean_to_zero</span><span class="si">:</span><span class="s2">,g</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">text</span> <span class="o">+=</span> <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Stress period mean </span><span class="si">{</span><span class="n">variable</span><span class="si">}</span><span class="s2"> in SFR package Period Data:&quot;</span>
+             <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">period_data_period_mean</span><span class="si">:</span><span class="s2">,g</span><span class="si">}</span><span class="s2">&quot;</span>
+             <span class="sa">f</span><span class="s2">&quot; (</span><span class="si">{</span><span class="n">pct_in_model</span><span class="si">:</span><span class="s2">.1%</span><span class="si">}</span><span class="s2">)</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+    
+    <span class="n">sfrd</span><span class="o">.</span><span class="n">_period_data</span> <span class="o">=</span> <span class="n">period_data</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;done&#39;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="add_to_segment_data"><a class="viewcode-back" href="../../api/sfrmaker.flows.html#sfrmaker.flows.add_to_segment_data">[docs]</a><span class="k">def</span> <span class="nf">add_to_segment_data</span><span class="p">(</span><span class="n">sfrdata</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">flowline_routing</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -695,7 +730,7 @@
   <div role="contentinfo">
     <p>
       <span class="lastupdated">
-        Last updated on Apr 23, 2021.
+        Last updated on Apr 26, 2021.
       </span>
 
     </p>
