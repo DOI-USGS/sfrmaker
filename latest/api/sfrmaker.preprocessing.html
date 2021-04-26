@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>The Preprocessing Module &mdash; SFRmaker 0.8.0.post2.dev0+gfce00ac documentation</title>
+  <title>The Preprocessing Module &mdash; SFRmaker 0.8.0.post4.dev0+g81788d6 documentation</title>
   
 
   
@@ -70,7 +70,7 @@
             
             
               <div class="version">
-                0.8.0.post2.dev0+gfce00ac
+                0.8.0.post4.dev0+g81788d6
               </div>
             
           
@@ -388,6 +388,44 @@ the arbolate sums from upstream tributaries reflect unique upstream
 drainages (if the tribs are distributaries coming from the same divergence,
 there asums will reflect the same upstream drainage, and therefore would
 be duplicative if summed).</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="sfrmaker.preprocessing.get_flowline_routing">
+<code class="sig-prename descclassname"><span class="pre">sfrmaker.preprocessing.</span></code><code class="sig-name descname"><span class="pre">get_flowline_routing</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">NHDPlus_paths</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">PlusFlow</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask_crs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nhdplus_crs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4269</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/preprocessing.html#get_flowline_routing"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.preprocessing.get_flowline_routing" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read a collection of NHDPlus version 2 PlusFlow (routing)
+tables from one or more drainage basins and consolidate into a 
+single pandas DataFrame, returning the <cite>FROMCOMID</cite> and <cite>TOCOMID</cite> 
+columns.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>NHDPlus_paths</strong><span class="classifier">sequence</span></dt><dd><p>Sequence of paths to the top level folder for each drainage basin.
+For example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="s1">&#39;NHDPlus/NHDPlusGL/NHDPlus04&#39;</span><span class="p">,</span> 
+ <span class="s1">&#39;NHDPlus/NHDPlusMS/NHDPlus07&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>by default None</p>
+</dd>
+<dt><strong>PlusFlow</strong><span class="classifier">string or sequence</span></dt><dd><p>Single path to a PlusFlow table or sequence of PlusFlow table 
+filepaths, by default None</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>flowline_routing</strong><span class="classifier">DataFrame</span></dt><dd><p>[description]</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><dl class="simple">
+<dt>ValueError</dt><dd><p>[description]</p>
+</dd>
+</dl>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -733,7 +771,7 @@ NARWidth widths are assumed to be in meters.</p>
   <div role="contentinfo">
     <p>
       <span class="lastupdated">
-        Last updated on Apr 23, 2021.
+        Last updated on Apr 26, 2021.
       </span>
 
     </p>
