@@ -17,11 +17,12 @@ will allow others to reproduce the bug and provide insight into fixing. See
 `this blogpost <https://matthewrocklin.com/blog/work/2018/02/28/minimal-bug-reports>`_
 for tips on writing a good bug report.
 
-Trying the bug-producing code out on the *develop* branch is often a worthwhile exercise
-to confirm the bug still exists. It is also worth searching existing bug reports and pull requests
-to see if the issue has already been reported and/or fixed.
+Before doing anything else, check the :ref:`Troubleshooting` page for solutions to common issues.
 
-To file a bug report or enhancement request, from the issues tab on the `SFRmaker GitHub page <https://github.com/aleaf/sfrmaker>`_, select "New Issue".
+Trying the bug-producing code out on the *develop* branch is often a worthwhile exercise
+to confirm the bug still exists. It is also worth searching existing bug reports and pull requests to see if the issue has already been reported and/or fixed.
+
+To file a bug report or enhancement request, from the issues tab on the `SFRmaker GitHub page <https://github.com/usgs/sfrmaker>`_, select "New Issue".
 
 Bug reports must:
 
@@ -72,7 +73,7 @@ In particular, when submitting a pull request:
 
 - All existing tests should pass.  Please make sure that the test
   suite passes, both locally and on
-  `GitHub Actions <https://github.com/aleaf/sfrmaker/actions>`_.  Status on
+  `GitHub Actions <https://github.com/usgs/sfrmaker/actions>`_.  Status on
   the GitHub Actions and code coverage checks will be visible on a pull request.
 
 - New functionality should include tests.  Please write reasonable
@@ -120,7 +121,7 @@ It can very quickly become overwhelming, but sticking to the guidelines below wi
 straightforward and mostly trouble free.  As always, if you are having difficulties please
 feel free to ask for help.
 
-The code is hosted on `GitHub <https://github.com/aleaf/sfrmaker>`_. To
+The code is hosted on `GitHub <https://github.com/usgs/sfrmaker>`_. To
 contribute you will need to sign up for a `free GitHub account
 <https://github.com/signup/free>`_. We use `Git <http://git-scm.com/>`_ for
 version control to allow many people to work together on the project.
@@ -330,4 +331,4 @@ From the root of the SFRmaker repository, you should then install the
 Then ``isort`` will be run automatically each time you commit changes. You can skip these checks with ``git commit --no-verify``.
 
 .. _filing an issue: https://docs.github.com/en/free-pro-team@latest/github/managing-your-work-on-github/creating-an-issue
-.. _Issues tab: https://github.com/aleaf/sfrmaker/issues
+.. _Issues tab: https://github.com/usgs/sfrmaker/issues
