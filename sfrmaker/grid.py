@@ -12,7 +12,7 @@ import numpy as np
 import pandas as pd
 from rasterio import Affine
 from rasterio import features
-from shapely.geometry import Polygon, shape
+from shapely.geometry import Polygon, shape, box
 from shapely.ops import unary_union
 from gisutils import shp2df, df2shp, get_shapefile_crs
 from .gis import get_crs, read_polygon_feature, \
@@ -465,6 +465,21 @@ class StructuredGrid(Grid):
             if df[dim].min() == 1:
                 df[dim] -= 1
         nrow, ncol = df.i.max() + 1, df.j.max() + 1
+        # add missing cells if the grid is incomplete
+        if len(df) < (nrow * ncol):
+            df.index = ncol * df.i + df.j
+            df = df.reindex(np.arange(nrow * ncol))
+            i, j = np.indices((nrow, ncol))
+            df['k'] = 0
+            df['i'] = i.ravel()
+            df['j'] = j.ravel()
+            missing_cells = df['geometry'].isnull()
+            df.loc[missing_cells, 'geometry'] = box(0, 0, 0, 0)
+            if isfr_col in df.columns:
+                df.loc[missing_cells, isfr_col] = 0
+            else:
+                df['isfr'] = 1
+                df.loc[missing_cells, 'isfr'] = 0
         df.sort_values(by=['k', 'i', 'j'], inplace=True)
         df['node'] = ncol * df.i + df.j
 
