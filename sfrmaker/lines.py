@@ -760,6 +760,18 @@ class Lines:
         # intersect lines with model grid to get preliminary reaches
         rd = self.intersect(grid)
 
+        # cull the dataframe of lines to only those with reaches
+        # (if grid is rotated, the bounding box of lines will include lines
+        #  that are not in the rotated area of reaches; need lines data
+        #  to be consistent with reach data because it becomes the basis for 
+        #  segment data)
+        self.df = self.df.loc[self.df['id'].isin(rd['line_id'])].copy()
+        new_outlets = ~self.df['toid'].isin(self.df['id'])
+        self.df.loc[new_outlets, 'toid'] = 0
+        
+        # update the routing again
+        routing = self.routing.copy()
+        
         # length of intersected line fragments (in model units)
         rd['rchlen'] = np.array([g.length for g in rd.geometry]) * gis_mult
 
