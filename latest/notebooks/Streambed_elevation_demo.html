@@ -7,12 +7,14 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Demonstration of how sfrmaker handles streambed elevations &mdash; SFRmaker 0.8.0.post4.dev0+g81788d6 documentation</title>
+  <title>Demonstration of how sfrmaker handles streambed elevations &mdash; SFRmaker 0.8.0.post6.dev0+g91f0db4 documentation</title>
   
 
   
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
   <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
 
@@ -31,12 +33,15 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/clipboard.min.js"></script>
         <script src="../_static/copybutton.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "document", "processHtmlClass": "math|output_area"}}</script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -68,7 +73,7 @@
             
             
               <div class="version">
-                0.8.0.post4.dev0+g81788d6
+                0.8.0.post6.dev0+g91f0db4
               </div>
             
           
@@ -511,8 +516,8 @@ div.rendered_html tbody tr:hover {
 <span class="c1"># Make a flopy StructuredGrid instance</span>
 <span class="c1"># delr and delc have to specified in meters (consistent with projected CRS)</span>
 <span class="c1"># the model has length units of feet</span>
-<span class="n">mg</span> <span class="o">=</span> <span class="n">flopy</span><span class="o">.</span><span class="n">discretization</span><span class="o">.</span><span class="n">StructuredGrid</span><span class="p">(</span><span class="n">delr</span><span class="o">=</span><span class="n">m</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">delr</span><span class="o">.</span><span class="n">array</span> <span class="o">*</span> <span class="o">.</span><span class="mi">3048</span><span class="p">,</span>  <span class="c1"># cell spacing along a row</span>
-                                         <span class="n">delc</span><span class="o">=</span><span class="n">m</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">delc</span><span class="o">.</span><span class="n">array</span> <span class="o">*</span> <span class="o">.</span><span class="mi">3048</span><span class="p">,</span>  <span class="c1"># cell spacing along a column</span>
+<span class="n">mg</span> <span class="o">=</span> <span class="n">flopy</span><span class="o">.</span><span class="n">discretization</span><span class="o">.</span><span class="n">StructuredGrid</span><span class="p">(</span><span class="n">delr</span><span class="o">=</span><span class="n">m</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">delr</span><span class="o">.</span><span class="n">array</span> <span class="o">*</span> <span class="mf">.3048</span><span class="p">,</span>  <span class="c1"># cell spacing along a row</span>
+                                         <span class="n">delc</span><span class="o">=</span><span class="n">m</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">delc</span><span class="o">.</span><span class="n">array</span> <span class="o">*</span> <span class="mf">.3048</span><span class="p">,</span>  <span class="c1"># cell spacing along a column</span>
                                          <span class="n">xoff</span><span class="o">=</span><span class="mi">682688</span><span class="p">,</span> <span class="n">yoff</span><span class="o">=</span><span class="mi">5139052</span><span class="p">,</span>  <span class="c1"># lower left corner of model grid</span>
                                          <span class="n">angrot</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>  <span class="c1"># grid is unrotated</span>
                                          <span class="c1"># projected coordinate system of model (UTM NAD27 zone 15 North)</span>
@@ -558,10 +563,10 @@ reading ../tylerforks/NHDPlus/NHDPlusAttributes/elevslope.dbf...
 load finished in 0.24s
 
 Getting routing information from NHDPlus Plusflow table...
-finished in 0.04s
+finished in 0.03s
 
 
-SFRmaker version 0.8.0.post4.dev0+g81788d6
+SFRmaker version 0.8.0.post6.dev0+g91f0db4
 
 Creating sfr dataset...
 
@@ -582,7 +587,7 @@ Creating grid class instance from flopy Grid instance...
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-grid class created in 0.32s
+grid class created in 0.30s
 
 Model grid information
 structured grid
@@ -613,14 +618,14 @@ finished in 0.00s
 Intersecting 17 flowlines with 17,760 grid cells...
 
 Building spatial index...
-finished in 2.53s
+finished in 2.01s
 
 Intersecting 17 features...
 17
 finished in 0.10s
 
 Setting up reach data... (may take a few minutes for large grids)
-finished in 0.31s
+finished in 0.24s
 
 Computing widths...
 
@@ -642,7 +647,7 @@ bounds: 682688.00, 5139052.00, 694880.00, 5147510.20
 active area defined by: all cells
 
 
-Time to create sfr dataset: 3.54s
+Time to create sfr dataset: 2.90s
 
 </pre></div></div>
 </div>
@@ -679,14 +684,14 @@ For each level:
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 running rasterstats.zonal_stats on buffered LineStrings...
-finished in 4.30s
+finished in 4.80s
 
 running rasterstats.zonal_stats on buffered LineStrings...
-finished in 4.14s
+finished in 4.50s
 
 
 Smoothing elevations...
-finished in 0.18s
+finished in 0.15s
 </pre></div></div>
 </div>
 </div>
@@ -720,8 +725,8 @@ finished in 0.18s
                               <span class="k">for</span> <span class="n">rno</span> <span class="ow">in</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;rno&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">]</span>
 <span class="n">df</span><span class="p">[</span><span class="s1">&#39;smoothed sampled elevations&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">smooth_sampled_elevs</span><span class="p">[</span><span class="n">rno</span><span class="p">]</span>
                               <span class="k">for</span> <span class="n">rno</span> <span class="ow">in</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;rno&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">]</span>
-<span class="n">df</span><span class="p">[</span><span class="s1">&#39;smoothed sampled elevations&#39;</span><span class="p">]</span> <span class="o">/=</span> <span class="o">.</span><span class="mi">3048</span> <span class="c1"># convert from meters to feet</span>
-<span class="n">df</span><span class="p">[</span><span class="s1">&#39;raw sampled elevations&#39;</span><span class="p">]</span> <span class="o">/=</span> <span class="o">.</span><span class="mi">3048</span>
+<span class="n">df</span><span class="p">[</span><span class="s1">&#39;smoothed sampled elevations&#39;</span><span class="p">]</span> <span class="o">/=</span> <span class="mf">.3048</span> <span class="c1"># convert from meters to feet</span>
+<span class="n">df</span><span class="p">[</span><span class="s1">&#39;raw sampled elevations&#39;</span><span class="p">]</span> <span class="o">/=</span> <span class="mf">.3048</span>
 </pre></div>
 </div>
 </div>
@@ -891,7 +896,7 @@ finished in 0.18s
   <div role="contentinfo">
     <p>
       <span class="lastupdated">
-        Last updated on Apr 26, 2021.
+        Last updated on May 11, 2021.
       </span>
 
     </p>
