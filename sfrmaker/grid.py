@@ -331,7 +331,7 @@ class StructuredGrid(Grid):
                           'specification of xul, yul, dx, dy, and rotation.')
                     return
             return Affine(self.dx, 0., self.xul,
-                          0., -self.dy, self.yul) * Affine.rotation(self.rotation)
+                          0., -self.dy, self.yul) * Affine.rotation(-self.rotation)
 
     def create_active_area_polygon_from_isfr(self):
         """Convert 2D numpy array representing active area where
