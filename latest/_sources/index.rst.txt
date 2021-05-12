@@ -27,6 +27,7 @@ version |version|
    Using SFRmaker with a configuration file <examples>
    Basic Usage in a scripting context <notebooks/SFRmaker_demo>
    How the streambed elevation sampling works <notebooks/Streambed_elevation_demo>
+   Troubleshooting <troubleshooting>
 
 .. toctree::
   :maxdepth: 1

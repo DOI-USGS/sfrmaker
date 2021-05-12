@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Demonstration of how sfrmaker handles streambed elevations &mdash; SFRmaker 0.8.0.post6.dev0+g91f0db4 documentation</title>
+  <title>Demonstration of how sfrmaker handles streambed elevations &mdash; SFRmaker 0.8.0.post9.dev0+g029dc4a documentation</title>
   
 
   
@@ -48,7 +48,7 @@
     
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Modules" href="../api/index.html" />
+    <link rel="next" title="Troubleshooting" href="../troubleshooting.html" />
     <link rel="prev" title="Basic usage of SFRmaker in a scripting context" href="SFRmaker_demo.html" /> 
 </head>
 
@@ -73,7 +73,7 @@
             
             
               <div class="version">
-                0.8.0.post6.dev0+g91f0db4
+                0.8.0.post9.dev0+g029dc4a
               </div>
             
           
@@ -121,6 +121,7 @@
 </li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../troubleshooting.html"> Troubleshooting</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Reference</span></p>
 <ul>
@@ -560,13 +561,13 @@ reading ../tylerforks/NHDPlus/NHDPlusAttributes/PlusFlow.dbf...
 reading ../tylerforks/NHDPlus/NHDPlusAttributes/elevslope.dbf...
 --&gt; building dataframe... (may take a while for large shapefiles)
 
-load finished in 0.22s
+load finished in 0.23s
 
 Getting routing information from NHDPlus Plusflow table...
-finished in 0.03s
+finished in 0.04s
 
 
-SFRmaker version 0.8.0.post6.dev0+g91f0db4
+SFRmaker version 0.8.0.post9.dev0+g029dc4a
 
 Creating sfr dataset...
 
@@ -587,7 +588,7 @@ Creating grid class instance from flopy Grid instance...
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-grid class created in 0.31s
+grid class created in 0.33s
 
 Model grid information
 structured grid
@@ -618,14 +619,14 @@ finished in 0.00s
 Intersecting 17 flowlines with 17,760 grid cells...
 
 Building spatial index...
-finished in 2.03s
+finished in 2.47s
 
 Intersecting 17 features...
 17
-finished in 0.11s
+finished in 0.10s
 
 Setting up reach data... (may take a few minutes for large grids)
-finished in 0.25s
+finished in 0.29s
 
 Computing widths...
 
@@ -647,7 +648,7 @@ bounds: 682688.00, 5139052.00, 694880.00, 5147510.20
 active area defined by: all cells
 
 
-Time to create sfr dataset: 2.95s
+Time to create sfr dataset: 3.48s
 
 </pre></div></div>
 </div>
@@ -684,14 +685,14 @@ For each level:
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 running rasterstats.zonal_stats on buffered LineStrings...
-finished in 4.70s
+finished in 4.44s
 
 running rasterstats.zonal_stats on buffered LineStrings...
-finished in 4.56s
+finished in 4.32s
 
 
 Smoothing elevations...
-finished in 0.15s
+finished in 0.16s
 </pre></div></div>
 </div>
 </div>
@@ -887,7 +888,7 @@ finished in 0.15s
           </div>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="../api/index.html" class="btn btn-neutral float-right" title="Modules" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="../troubleshooting.html" class="btn btn-neutral float-right" title="Troubleshooting" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
         <a href="SFRmaker_demo.html" class="btn btn-neutral float-left" title="Basic usage of SFRmaker in a scripting context" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
@@ -896,7 +897,7 @@ finished in 0.15s
   <div role="contentinfo">
     <p>
       <span class="lastupdated">
-        Last updated on May 11, 2021.
+        Last updated on May 12, 2021.
       </span>
 
     </p>
