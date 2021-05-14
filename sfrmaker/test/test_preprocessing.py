@@ -6,6 +6,7 @@ from pathlib import Path
 import yaml
 import numpy as np
 import pandas as pd
+import geopandas as gpd
 from shapely.geometry import box
 import pytest
 from gisutils import df2shp, shp2df
@@ -14,7 +15,8 @@ from sfrmaker.preprocessing import (get_flowline_routing,
                                     cull_flowlines, 
                                     preprocess_nhdplus, 
                                     clip_flowlines_to_polygon, 
-                                    edit_flowlines
+                                    edit_flowlines,
+                                    swb_runoff_to_csv
                                     )
 
 
@@ -258,3 +260,31 @@ def test_get_flowline_routing(datapath, project_root_path):
     pd.testing.assert_frame_equal(df2.loc[df2['FROMCOMID'].isin(df['FROMCOMID'])].head(),
                                   df.head())
     os.chdir(wd)
+    
+    
+def test_swb_runoff_to_csv(test_data_path, outdir):
+    test_data_path = Path(test_data_path)
+    swb_netcdf_output = test_data_path / 'runoff__1999-01-01_to_2018-12-31__989_by_661.nc'
+    nhdplus_catchments_file = test_data_path / 'NHDPlus08/NHDPlusCatchment/Catchment.shp'
+    outfile = Path(outdir, 'swb_runoff_by_nhdplus_comid.csv')
+    swb_runoff_to_csv(swb_netcdf_output, nhdplus_catchments_file,
+                      netcdf_output_variable='runoff', 
+                      catchment_id_col='FEATUREID',
+                      output_length_units='meters',
+                      outfile=outfile)
+    df = pd.read_csv(outfile)
+    df['time'] = pd.to_datetime(df['time'])
+    #cat = gpd.read_file(nhdplus_catchments_file)
+    # model bounds
+    xoffset, yoffset = 500955, 1176285
+    nrow, ncol = 30, 35
+    dxy = 1000
+    x1 = xoffset + ncol * dxy
+    y1 = yoffset + nrow * dxy
+    within_model = (df.x.values > xoffset) & (df.x.values < x1) & \
+                   (df.y.values > yoffset) & (df.y.values < y1)
+    df = df.loc[within_model]
+    mean_monthly_runoff = df.groupby(df['time'].dt.year)['runoff_m3d'].sum().mean()/12
+    # no idea if this is the right number but similar to test results for modflow-setup
+    # and serves as a benchmark in case the output changes
+    assert np.allclose(mean_monthly_runoff, 5e5, rtol=0.2)

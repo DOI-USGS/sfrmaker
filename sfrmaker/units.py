@@ -23,6 +23,15 @@ lenuni_values = {'unknown': 0,
                  'meter': 2
                  }
 
+unit_abbreviations = {                 
+                 'feet': 'ft',
+                 'meters': 'm',
+                 'centimeters': 'cm',
+                 'millimeters': 'mm',
+                 'kilometers': 'km',
+                 'inches': 'in',
+                 'miles': 'mi',}
+
 fullnames = {'unknown', 'undefined', 'feet', 'meters', 'centimeters',
              'millimeters', 'inches', 'miles', 'kilometers',
              'seconds', 'minutes', 'hours', 'days', 'years'}
