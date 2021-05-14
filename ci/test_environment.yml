@@ -12,6 +12,8 @@ dependencies:
   - pyyaml
   - numpy
   - pandas
+  - xarray
+  - geopandas
   - gdal
   - fiona
   - rasterio>=1.0

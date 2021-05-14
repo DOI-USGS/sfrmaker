@@ -3,13 +3,17 @@ from pathlib import Path
 import shutil
 import yaml
 import textwrap
+import affine
 import numpy as np
 import pandas as pd
+import xarray as xr
+import geopandas as gpd
 import fiona
 import rasterio
 from shapely.geometry import shape, MultiLineString, box
 from rasterstats import zonal_stats
-from gisutils import get_shapefile_crs
+import matplotlib.pyplot as plt
+from gisutils import get_shapefile_crs, write_raster
 from sfrmaker.gis import (shp2df, df2shp, project, intersect_rtree,
                           get_bbox, read_polygon_feature, get_shapefile_crs,
                           get_authority_crs,
@@ -18,7 +22,7 @@ from sfrmaker.elevations import smooth_elevations
 from sfrmaker.logger import Logger
 from sfrmaker.nhdplus_utils import get_nhdplus_v2_filepaths, get_prj_file
 from sfrmaker.routing import find_path, make_graph
-from sfrmaker.units import convert_length_units
+from sfrmaker.units import convert_length_units, unit_abbreviations
 from sfrmaker.utils import width_from_arbolate_sum, arbolate_sum
 
 
@@ -1250,3 +1254,107 @@ def fix_invalid_asums(asums, fl_lengths, graph, graph_r):
                 asum_c = old_asum + increment
                 new_asums[cp] = asum_c
     return new_asums
+
+
+def swb_runoff_to_csv(swb_netcdf_output, nhdplus_catchments_file,
+                      netcdf_output_variable='runoff', 
+                      catchment_id_col='FEATUREID',
+                      output_length_units='meters',
+                      outfile='swb_runoff_by_nhdplus_comid.csv'):
+    """Convert gridded runoff estimates from the USGS Soil Water Balance Code (SWB)
+    to a CSV format, associating each runoff value with a catchment ID. For the runoff to
+    be successfully mapped to the SFR network, the catchment IDs must correspond to line IDs
+    in the stream network, and each catchment must either be associated with a line, or
+    be referenced in the flowline_routing dataset. See the documentation for 
+    :func:`sfrmaker.flows.add_to_perioddata` for more details.
+
+    Parameters
+    ----------
+    swb_netcdf_output : str or path-like
+        NetCDF file with gridded SWB runoff estimates. Runoff values are assumed
+        to be in units of length/time (normalized to area). The CRS for the runoff
+        dataset is read from the 'proj4_string' attribute, and is assumed to have
+        length units of meters.
+    nhdplus_catchments_file : str or path-like
+        Shapefile of catchments with IDs (catchment_id_col). The catchments are rasterized
+        to the grid in swb_netcdf_output, so that each runoff value can be associated with
+        a catchment ID.
+    catchment_id_col : str, optional
+        Field in nhdplus_catchments_file with ID, by default 'FEATUREID'. For the 
+    netcdf_output_variable : str, optional
+        Variable in swb_netcdf_output with runoff data, by default 'runoff'
+    output_length_units : str, optional
+        Input units are read from the 'units' attribute of the netcdf_output_variable 
+        in swb_netcdf_output; specify output length units so that the output CSV
+        file is in the same length units as the model. No time unit conversion is perfo
+        by default 'meters'
+    outfile : str, optional
+        [description], by default 'swb_runoff_by_nhdplus_comid.csv'
+    """    
+    outfile = Path(outfile)
+    # get an affine.Affine representation and shape 
+    # of the grid in the culled NetCDF file
+    with xr.open_dataset(swb_netcdf_output) as ds:
+        xul = np.min(ds['x'].values)
+        yul = np.max(ds['y'].values)
+        dx = ds['x'].diff(dim='x').values[0]
+        dy = ds['y'].diff(dim='y').values[0]
+        ntimes, nrow, ncol = ds[netcdf_output_variable].shape
+        nc_crs = get_authority_crs(ds['crs'].attrs['proj4_string'])
+        nc_bounds = (xul, np.min(ds['y'].values),
+                     np.max(ds['x'].values), yul)
+        nc_bbox = box(*nc_bounds)
+        nc_units = ds[netcdf_output_variable].attrs['units']
+    nc_trans = affine.Affine(dx, 0., xul, 0., dy, yul)
+    
+    # Read in the NHDPlus catchments 
+    # first reproject the SWB netcdf bounding box to lat/lon (NAD83)
+    # with a 10 km buffer
+    nc_bbox_4269 = project(nc_bbox.buffer(1e4), nc_crs, 4269)
+    # read the catchments intersecting the buffered bbox
+    catchments = gpd.read_file(nhdplus_catchments_file, bbox=nc_bbox_4269.bounds)
+    #  reproject to the SWB output CRS (probably 5070)
+    #  this assumes the SWB output has a valid crs!
+    catchments.to_crs(nc_crs, inplace=True)
+    #catchments.to_file(outpath / nhdplus_catchments.name)
+    
+    # rasterize the catchments unto the NetCDF file grid
+    features_list = list(zip(catchments['geometry'], catchments[catchment_id_col]))
+    rasterized = rasterio.features.rasterize(features_list, out_shape=(nrow, ncol), 
+                                    transform=nc_trans)
+    out_text_array = outfile.parent / 'nhdplus_catchments.dat'
+    np.savetxt(out_text_array, rasterized, fmt='%d')
+    write_raster(out_text_array.with_suffix('.tif'), rasterized, nodata=0, 
+                 xul=xul, yul=yul, dx=dx, dy=dy, crs=nc_crs)
+    masked = np.ma.masked_array(rasterized, mask=rasterized==0)
+    plt.imshow(masked)
+    plt.title('Rasterized NHDPlus catchments')
+    plt.savefig(outfile.with_suffix('.pdf'))
+    plt.close()
+    
+    # transpose the SWB runoff results from xarray DataSet to DataFrame
+    df = ds['runoff'].to_dataframe().reset_index()
+    df['comid'] = rasterized.ravel().tolist() * ntimes
+    # SWB runoff is in average daily inches over each cell
+    # convert to average daily volume for each cell
+    # then sum by comid to get average daily volume by comid
+    # (which can subsequently be distributed equally to reaches)
+    L = unit_abbreviations[output_length_units]
+    df[f'area_{L}2'] = abs(dx * dy)  # cell area in m3
+    df[f'runoff_{L}d'] = df['runoff'] * convert_length_units(nc_units, output_length_units)
+    df[f'runoff_{L}3d'] = df[f'runoff_{L}d'] * df[f'area_{L}2']
+    bycomid_month = df.groupby(['time', 'comid'])
+    data = bycomid_month.first()  # preserve times
+    aggregated = bycomid_month.sum()
+    data_cols = ['x', 'y', 'lat', 'lon']
+    for col in data_cols:
+        aggregated[col] = data[col]
+    # drop comids with zero total runoff
+    # (keep intermittent zero values; 
+    #  otherwise SFR package will continue previous value)
+    comid_runoff_totals = aggregated.groupby('comid').runoff.sum()
+    drop_comids = comid_runoff_totals.loc[comid_runoff_totals == 0].index
+    keep_rows = ~aggregated.index.get_level_values(1).isin(drop_comids)
+    aggregated = aggregated.loc[keep_rows]
+    aggregated = aggregated[['x', 'y', f'runoff_{L}3d', f'area_{L}2']]
+    aggregated.to_csv(outfile, index=True, float_format='%g')

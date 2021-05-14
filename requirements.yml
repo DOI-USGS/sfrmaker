@@ -9,6 +9,8 @@ dependencies:
   - pyyaml
   - numpy
   - pandas
+  - xarray
+  - geopandas
   - gdal
   - fiona
   - rasterio
