@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Installation &mdash; SFRmaker 0.8.0.post6.dev0+g91f0db4 documentation</title>
+  <title>Installation &mdash; SFRmaker 0.8.0.post9.dev0+g029dc4a documentation</title>
   
 
   
@@ -71,7 +71,7 @@
             
             
               <div class="version">
-                0.8.0.post6.dev0+g91f0db4
+                0.8.0.post9.dev0+g029dc4a
               </div>
             
           
@@ -134,6 +134,7 @@
 <li class="toctree-l1"><a class="reference internal" href="examples.html"> Using SFRmaker with a configuration file</a></li>
 <li class="toctree-l1"><a class="reference internal" href="notebooks/SFRmaker_demo.html"> Basic Usage in a scripting context</a></li>
 <li class="toctree-l1"><a class="reference internal" href="notebooks/Streambed_elevation_demo.html"> How the streambed elevation sampling works</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html"> Troubleshooting</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Reference</span></p>
 <ul>
@@ -298,7 +299,7 @@ conda env create -f requirements.yml
 </div>
 <div class="section" id="keeping-the-conda-environment-up-to-date">
 <h3>Keeping the Conda environment up to date<a class="headerlink" href="#keeping-the-conda-environment-up-to-date" title="Permalink to this headline">¶</a></h3>
-<p>The python packages and other open source software libraries that SFRmaker depends on are continually changing. SFRmaker aims to mostly follow the <a class="reference external" href="https://numpy.org/neps/nep-0029-deprecation_policy.html">Numpy guidelines for package support</a>, which effectively means that the two latest minor versions of Python (e.g. 3.8 and 3.7) and their associated Numpy versions will be supported. However, occasionally backwards compatability with a particular package may be broken in a shorter timeframe, in which case the minimum required version of that package will be specified in the <code class="docutils literal notranslate"><span class="pre">requirements.yml</span></code> file. All of this to say that your Conda environment will eventually get out of date. The <a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html">Conda documentation</a> has instructions for updating packages within a Conda environment, but at some point (perhaps a few times a year) it is good practice to simply delete the environment and rebuild it from the <cite>.yml</cite> file. Every so often, you may also want to reinstall Anaconda after a <a class="reference external" href="https://docs.anaconda.com/anaconda/install/uninstall/">clean uninstall</a>.</p>
+<p>The python packages and other open source software libraries that SFRmaker depends on are continually changing. SFRmaker aims to mostly follow the <a class="reference external" href="https://numpy.org/neps/nep-0029-deprecation_policy.html">Numpy guidelines for package support</a>, which effectively means that the two latest minor versions of Python (e.g. 3.9 and 3.8) and their associated Numpy versions will be supported. However, occasionally backwards compatability with a particular package may be broken in a shorter timeframe, in which case the minimum required version of that package will be specified in the <code class="docutils literal notranslate"><span class="pre">requirements.yml</span></code> file. All of this to say that your Conda environment will eventually get out of date. The <a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html">Conda documentation</a> has instructions for updating packages within a Conda environment, but at some point (perhaps a few times a year) it is good practice to simply delete the environment and rebuild it from the <cite>.yml</cite> file. Every so often, you may also want to reinstall Anaconda after a <a class="reference external" href="https://docs.anaconda.com/anaconda/install/uninstall/">clean uninstall</a>.</p>
 </div>
 </div>
 <div class="section" id="installing-sfrmaker">
@@ -333,19 +334,19 @@ what version of sfrmaker you have within a python session with</p>
 <h3>Installing the latest develop version of SFRmaker<a class="headerlink" href="#installing-the-latest-develop-version-of-sfrmaker" title="Permalink to this headline">¶</a></h3>
 <p>In some situations you may want the bleeding-edge version of SFRmaker that is being actively developed on GitHub. For example,
 to incorporate a bug fix that was made after the latest release. Pip can also be used to fetch SFRmaker directly from GitHub:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install git+git://github.com/aleaf/sfrmaker@develop
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install git+git://github.com/usgs/sfrmaker@develop
 </pre></div>
 </div>
 <p>(for the develop branch). Subsequent updates can then be made with</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip uninstall sfrmaker
-pip install git+git://github.com/aleaf/sfrmaker@develop
+pip install git+git://github.com/usgs/sfrmaker@develop
 </pre></div>
 </div>
 </div>
 <div class="section" id="installing-the-sfrmaker-source-code-in-place">
 <h3>Installing the SFRmaker source code in-place<a class="headerlink" href="#installing-the-sfrmaker-source-code-in-place" title="Permalink to this headline">¶</a></h3>
 <p>Finally, if you intend to contribute to SFRmaker (please do!) or update your install frequently, the best route is probably to clone the source code from git and install it in place.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/aleaf/sfrmaker.git
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/usgs/sfrmaker.git
 <span class="nb">cd</span> sfrmaker
 pip install -e .
 </pre></div>
@@ -459,7 +460,7 @@ so it needs to be commented out on other operating systems (normally it wouldn�
   <div role="contentinfo">
     <p>
       <span class="lastupdated">
-        Last updated on May 11, 2021.
+        Last updated on May 14, 2021.
       </span>
 
     </p>

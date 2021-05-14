@@ -54,7 +54,7 @@ Building the environment will probably take a while. If the build fails because 
 
 Keeping the Conda environment up to date
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-The python packages and other open source software libraries that SFRmaker depends on are continually changing. SFRmaker aims to mostly follow the `Numpy guidelines for package support <https://numpy.org/neps/nep-0029-deprecation_policy.html>`_, which effectively means that the two latest minor versions of Python (e.g. 3.8 and 3.7) and their associated Numpy versions will be supported. However, occasionally backwards compatability with a particular package may be broken in a shorter timeframe, in which case the minimum required version of that package will be specified in the ``requirements.yml`` file. All of this to say that your Conda environment will eventually get out of date. The `Conda documentation <https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html>`_ has instructions for updating packages within a Conda environment, but at some point (perhaps a few times a year) it is good practice to simply delete the environment and rebuild it from the `.yml` file. Every so often, you may also want to reinstall Anaconda after a `clean uninstall`_.
+The python packages and other open source software libraries that SFRmaker depends on are continually changing. SFRmaker aims to mostly follow the `Numpy guidelines for package support <https://numpy.org/neps/nep-0029-deprecation_policy.html>`_, which effectively means that the two latest minor versions of Python (e.g. 3.9 and 3.8) and their associated Numpy versions will be supported. However, occasionally backwards compatability with a particular package may be broken in a shorter timeframe, in which case the minimum required version of that package will be specified in the ``requirements.yml`` file. All of this to say that your Conda environment will eventually get out of date. The `Conda documentation <https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html>`_ has instructions for updating packages within a Conda environment, but at some point (perhaps a few times a year) it is good practice to simply delete the environment and rebuild it from the `.yml` file. Every so often, you may also want to reinstall Anaconda after a `clean uninstall`_.
 
 Installing SFRmaker
 ------------------------
@@ -100,14 +100,14 @@ to incorporate a bug fix that was made after the latest release. Pip can also be
 
 .. code-block:: bash
 
-    pip install git+git://github.com/aleaf/sfrmaker@develop
+    pip install git+git://github.com/usgs/sfrmaker@develop
 
 (for the develop branch). Subsequent updates can then be made with
 
 .. code-block:: bash
 
     pip uninstall sfrmaker
-    pip install git+git://github.com/aleaf/sfrmaker@develop
+    pip install git+git://github.com/usgs/sfrmaker@develop
 
 Installing the SFRmaker source code in-place
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -115,7 +115,7 @@ Finally, if you intend to contribute to SFRmaker (please do!) or update your ins
 
 .. code-block:: bash
 
-    git clone https://github.com/aleaf/sfrmaker.git
+    git clone https://github.com/usgs/sfrmaker.git
     cd sfrmaker
     pip install -e .
 

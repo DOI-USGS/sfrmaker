@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>sfrmaker.lines &mdash; SFRmaker 0.8.0.post6.dev0+g91f0db4 documentation</title>
+  <title>sfrmaker.lines &mdash; SFRmaker 0.8.0.post9.dev0+g029dc4a documentation</title>
   
 
   
@@ -69,7 +69,7 @@
             
             
               <div class="version">
-                0.8.0.post6.dev0+g91f0db4
+                0.8.0.post9.dev0+g029dc4a
               </div>
             
           
@@ -106,6 +106,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../examples.html"> Using SFRmaker with a configuration file</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../notebooks/SFRmaker_demo.html"> Basic Usage in a scripting context</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../notebooks/Streambed_elevation_demo.html"> How the streambed elevation sampling works</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../troubleshooting.html"> Troubleshooting</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Reference</span></p>
 <ul>
@@ -945,6 +946,18 @@
         <span class="c1"># intersect lines with model grid to get preliminary reaches</span>
         <span class="n">rd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">intersect</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
 
+        <span class="c1"># cull the dataframe of lines to only those with reaches</span>
+        <span class="c1"># (if grid is rotated, the bounding box of lines will include lines</span>
+        <span class="c1">#  that are not in the rotated area of reaches; need lines data</span>
+        <span class="c1">#  to be consistent with reach data because it becomes the basis for </span>
+        <span class="c1">#  segment data)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">rd</span><span class="p">[</span><span class="s1">&#39;line_id&#39;</span><span class="p">])]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">new_outlets</span> <span class="o">=</span> <span class="o">~</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;toid&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">new_outlets</span><span class="p">,</span> <span class="s1">&#39;toid&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        
+        <span class="c1"># update the routing again</span>
+        <span class="n">routing</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">routing</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        
         <span class="c1"># length of intersected line fragments (in model units)</span>
         <span class="n">rd</span><span class="p">[</span><span class="s1">&#39;rchlen&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">g</span><span class="o">.</span><span class="n">length</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">rd</span><span class="o">.</span><span class="n">geometry</span><span class="p">])</span> <span class="o">*</span> <span class="n">gis_mult</span>
 
@@ -1168,7 +1181,7 @@
   <div role="contentinfo">
     <p>
       <span class="lastupdated">
-        Last updated on May 11, 2021.
+        Last updated on May 14, 2021.
       </span>
 
     </p>

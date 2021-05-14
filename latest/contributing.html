@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Contributing to SFRmaker &mdash; SFRmaker 0.8.0.post6.dev0+g91f0db4 documentation</title>
+  <title>Contributing to SFRmaker &mdash; SFRmaker 0.8.0.post9.dev0+g029dc4a documentation</title>
   
 
   
@@ -71,7 +71,7 @@
             
             
               <div class="version">
-                0.8.0.post6.dev0+g91f0db4
+                0.8.0.post9.dev0+g029dc4a
               </div>
             
           
@@ -108,6 +108,7 @@
 <li class="toctree-l1"><a class="reference internal" href="examples.html"> Using SFRmaker with a configuration file</a></li>
 <li class="toctree-l1"><a class="reference internal" href="notebooks/SFRmaker_demo.html"> Basic Usage in a scripting context</a></li>
 <li class="toctree-l1"><a class="reference internal" href="notebooks/Streambed_elevation_demo.html"> How the streambed elevation sampling works</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html"> Troubleshooting</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Reference</span></p>
 <ul class="current">
@@ -241,7 +242,7 @@ which has similar guidelines to <a class="reference external" href="http://panda
 and <a class="reference external" href="http://xarray.pydata.org/en/stable/">xarray</a>.)</p>
 <div class="section" id="getting-started">
 <h2>Getting started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h2>
-<p>All contributions, bug reports, bug fixes, documentation improvements, enhancements, and ideas are welcome. If an issue that interests you isn’t already listed in the <a class="reference external" href="https://github.com/aleaf/sfrmaker/issues">Issues tab</a>, consider <a class="reference external" href="https://docs.github.com/en/free-pro-team&#64;latest/github/managing-your-work-on-github/creating-an-issue">filing an issue</a>.</p>
+<p>All contributions, bug reports, bug fixes, documentation improvements, enhancements, and ideas are welcome. If an issue that interests you isn’t already listed in the <a class="reference external" href="https://github.com/usgs/sfrmaker/issues">Issues tab</a>, consider <a class="reference external" href="https://docs.github.com/en/free-pro-team&#64;latest/github/managing-your-work-on-github/creating-an-issue">filing an issue</a>.</p>
 </div>
 <div class="section" id="bug-reports-and-enhancement-requests">
 <h2>Bug reports and enhancement requests<a class="headerlink" href="#bug-reports-and-enhancement-requests" title="Permalink to this headline">¶</a></h2>
@@ -250,10 +251,10 @@ will allow others to reproduce the bug and provide insight into fixing. See
 <a class="reference external" href="https://stackoverflow.com/help/mcve">this stackoverflow article</a> and
 <a class="reference external" href="https://matthewrocklin.com/blog/work/2018/02/28/minimal-bug-reports">this blogpost</a>
 for tips on writing a good bug report.</p>
+<p>Before doing anything else, check the <a class="reference internal" href="troubleshooting.html#troubleshooting"><span class="std std-ref">Troubleshooting</span></a> page for solutions to common issues.</p>
 <p>Trying the bug-producing code out on the <em>develop</em> branch is often a worthwhile exercise
-to confirm the bug still exists. It is also worth searching existing bug reports and pull requests
-to see if the issue has already been reported and/or fixed.</p>
-<p>To file a bug report or enhancement request, from the issues tab on the <a class="reference external" href="https://github.com/aleaf/sfrmaker">SFRmaker GitHub page</a>, select “New Issue”.</p>
+to confirm the bug still exists. It is also worth searching existing bug reports and pull requests to see if the issue has already been reported and/or fixed.</p>
+<p>To file a bug report or enhancement request, from the issues tab on the <a class="reference external" href="https://github.com/usgs/sfrmaker">SFRmaker GitHub page</a>, select “New Issue”.</p>
 <p>Bug reports must:</p>
 <ol class="arabic">
 <li><p>Include a short, self-contained Python snippet reproducing the problem, along with the contents of your configuration file (if you are using one) and the full error traceback.
@@ -287,7 +288,7 @@ of python and operating system.</p>
 </li>
 <li><p>Explain why the current behavior is wrong/not desired and what you expect instead.</p></li>
 </ol>
-<p>The issue will then be visible on the <a class="reference external" href="https://github.com/aleaf/sfrmaker/issues">Issues tab</a> and open to comments/ideas from others.</p>
+<p>The issue will then be visible on the <a class="reference external" href="https://github.com/usgs/sfrmaker/issues">Issues tab</a> and open to comments/ideas from others.</p>
 </div>
 <div class="section" id="code-contributions">
 <h2>Code contributions<a class="headerlink" href="#code-contributions" title="Permalink to this headline">¶</a></h2>
@@ -298,7 +299,7 @@ be accepted more quickly if they follow these guidelines.</p>
 <ul class="simple">
 <li><p>All existing tests should pass.  Please make sure that the test
 suite passes, both locally and on
-<a class="reference external" href="https://github.com/aleaf/sfrmaker/actions">GitHub Actions</a>.  Status on
+<a class="reference external" href="https://github.com/usgs/sfrmaker/actions">GitHub Actions</a>.  Status on
 the GitHub Actions and code coverage checks will be visible on a pull request.</p></li>
 <li><p>New functionality should include tests.  Please write reasonable
 tests for your code and make sure that they pass on your pull request.</p></li>
@@ -335,7 +336,7 @@ imports when necessary in tests. Imports can be sorted automatically using the i
 It can very quickly become overwhelming, but sticking to the guidelines below will help keep the process
 straightforward and mostly trouble free.  As always, if you are having difficulties please
 feel free to ask for help.</p>
-<p>The code is hosted on <a class="reference external" href="https://github.com/aleaf/sfrmaker">GitHub</a>. To
+<p>The code is hosted on <a class="reference external" href="https://github.com/usgs/sfrmaker">GitHub</a>. To
 contribute you will need to sign up for a <a class="reference external" href="https://github.com/signup/free">free GitHub account</a>. We use <a class="reference external" href="http://git-scm.com/">Git</a> for
 version control to allow many people to work together on the project.</p>
 <p>Some great resources for learning Git:</p>
@@ -528,7 +529,7 @@ can be done by installing <code class="docutils literal notranslate"><span class
   <div role="contentinfo">
     <p>
       <span class="lastupdated">
-        Last updated on May 11, 2021.
+        Last updated on May 14, 2021.
       </span>
 
     </p>
