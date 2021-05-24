@@ -1324,13 +1324,15 @@ def swb_runoff_to_csv(swb_netcdf_output, nhdplus_catchments_file,
                                     transform=nc_trans)
     out_text_array = outfile.parent / 'nhdplus_catchments.dat'
     np.savetxt(out_text_array, rasterized, fmt='%d')
+    print(f'wrote {out_text_array}')
     write_raster(out_text_array.with_suffix('.tif'), rasterized, nodata=0, 
                  xul=xul, yul=yul, dx=dx, dy=dy, crs=nc_crs)
     masked = np.ma.masked_array(rasterized, mask=rasterized==0)
     plt.imshow(masked)
     plt.title('Rasterized NHDPlus catchments')
-    plt.savefig(outfile.with_suffix('.pdf'))
+    plt.savefig(out_text_array.with_suffix('.pdf'))
     plt.close()
+    print(f"wrote {out_text_array.with_suffix('.pdf')}")
     
     # transpose the SWB runoff results from xarray DataSet to DataFrame
     df = ds['runoff'].to_dataframe().reset_index()
@@ -1358,3 +1360,4 @@ def swb_runoff_to_csv(swb_netcdf_output, nhdplus_catchments_file,
     aggregated = aggregated.loc[keep_rows]
     aggregated = aggregated[['x', 'y', f'runoff_{L}3d', f'area_{L}2']]
     aggregated.to_csv(outfile, index=True, float_format='%g')
+    print(f'wrote {outfile}')

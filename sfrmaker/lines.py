@@ -775,52 +775,52 @@ class Lines:
         # length of intersected line fragments (in model units)
         rd['rchlen'] = np.array([g.length for g in rd.geometry]) * gis_mult
 
+        # compute arbolate sums for original LineStrings if they weren't provided
+        if 'asum2' not in self.df.columns:
+            raise NotImplementedError('Check length unit conversions before using this option.')
+            asums = arbolate_sum(self.df.id,
+                                    dict(zip(self.df.id,
+                                            np.array([g.length for g in self.df.geometry]) * convert_length_units(self.geometry_length_units, 'meters')
+                                            )),
+                                    self.routing)
+        else:
+            #asums = dict(zip(self.df.id, 
+            #                 self.df.asum2 * convert_length_units(self.attr_length_units, 
+            #                                                      'meters')))
+            self.df['asum2'] = self.df['asum2'] * convert_length_units(self.attr_length_units, 
+                                                                    'meters')
+
+        # populate starting asums (asum1)
+        if 'asum1' not in self.df.columns:
+            length_conversion = convert_length_units(self.geometry_length_units, 'meters')
+            line_lengths = [g.length * length_conversion for g in self.df.geometry]
+            self.df['asum1'] = self.df['asum2'] - line_lengths
+            
+        #routing_r = {v: k for k, v in self.routing.items() if v != 0}
+        #self.df['asum1'] = [asums.get(routing_r.get(id, 0), 0) for id in self.df.id.values]
+        asum1s = dict(zip(self.df.id, self.df.asum1))
+
+        # compute arbolate sum at reach midpoints (in meters)
+        lengths = rd[['line_id', 'ireach', 'geometry']].copy()
+        lengths['rchlen'] = np.array([g.length for g in lengths.geometry]) * convert_length_units(self.geometry_length_units, 'meters')
+        groups = lengths.groupby('line_id')  # fragments grouped by parent line
+
+        reach_cumsums = []
+        ordered_ids = rd.line_id.loc[rd.line_id.diff() != 0].values
+        for id in ordered_ids:
+            grp = groups.get_group(id).sort_values(by='ireach')
+            dist = np.cumsum(grp.rchlen.values) - 0.5 * grp.rchlen.values
+            reach_cumsums.append(dist)
+        reach_cumsums = np.concatenate(reach_cumsums)
+        segment_asums = [asum1s[id] for id in lengths.line_id]
+        reach_asums = segment_asums + reach_cumsums
+        # maintain positive asums; lengths in NHD often aren't exactly equal to feature lengths
+        # reach_asums[reach_asums < 0.] = 0
+        rd['asum'] = reach_asums
+            
         # estimate widths if they aren't supplied
         if self.df.width1.sum() == 0:
             print("Computing widths...")
-
-            # compute arbolate sums for original LineStrings if they weren't provided
-            if 'asum2' not in self.df.columns:
-                raise NotImplementedError('Check length unit conversions before using this option.')
-                asums = arbolate_sum(self.df.id,
-                                     dict(zip(self.df.id,
-                                              np.array([g.length for g in self.df.geometry]) * convert_length_units(self.geometry_length_units, 'meters')
-                                              )),
-                                     self.routing)
-            else:
-                #asums = dict(zip(self.df.id, 
-                #                 self.df.asum2 * convert_length_units(self.attr_length_units, 
-                #                                                      'meters')))
-                self.df['asum2'] = self.df['asum2'] * convert_length_units(self.attr_length_units, 
-                                                                      'meters')
-
-            # populate starting asums (asum1)
-            if 'asum1' not in self.df.columns:
-                length_conversion = convert_length_units(self.geometry_length_units, 'meters')
-                line_lengths = [g.length * length_conversion for g in self.df.geometry]
-                self.df['asum1'] = self.df['asum2'] - line_lengths
-                
-            #routing_r = {v: k for k, v in self.routing.items() if v != 0}
-            #self.df['asum1'] = [asums.get(routing_r.get(id, 0), 0) for id in self.df.id.values]
-            asum1s = dict(zip(self.df.id, self.df.asum1))
-
-            # compute arbolate sum at reach midpoints (in meters)
-            lengths = rd[['line_id', 'ireach', 'geometry']].copy()
-            lengths['rchlen'] = np.array([g.length for g in lengths.geometry]) * convert_length_units(self.geometry_length_units, 'meters')
-            groups = lengths.groupby('line_id')  # fragments grouped by parent line
-
-            reach_cumsums = []
-            ordered_ids = rd.line_id.loc[rd.line_id.diff() != 0].values
-            for id in ordered_ids:
-                grp = groups.get_group(id).sort_values(by='ireach')
-                dist = np.cumsum(grp.rchlen.values) - 0.5 * grp.rchlen.values
-                reach_cumsums.append(dist)
-            reach_cumsums = np.concatenate(reach_cumsums)
-            segment_asums = [asum1s[id] for id in lengths.line_id]
-            reach_asums = segment_asums + reach_cumsums
-            # maintain positive asums; lengths in NHD often aren't exactly equal to feature lengths
-            # reach_asums[reach_asums < 0.] = 0
-            rd['asum'] = reach_asums
             width = width_from_arbolate_sum(reach_asums,
                                             a=width_from_asum_a_param,
                                             b=width_from_asum_b_param,

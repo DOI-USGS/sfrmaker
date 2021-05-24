@@ -1611,7 +1611,7 @@ class SFRData(DataPackage):
 
         if self.period_data is not None and len(self.period_data) > 0:
             pd_file = os.path.normpath('{}/{}_sfr_period_data.csv'.format(output_path, basename))
-            self.period_data.dropna(axis=1, how='all').to_csv(pd_file, index=False)
+            self.period_data.dropna(axis=1, how='all').to_csv(pd_file)
             print('wrote {}'.format(pd_file))
 
     def write_gage_package(self, filename=None, gage_package_unit=25,

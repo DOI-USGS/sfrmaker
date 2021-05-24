@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 import copy
 import io
 from packaging import version
@@ -97,6 +98,11 @@ def test_write_perioddata(shellmound_sfrdata_with_period_data, outdir):
     assert np.array_equal(rno_values, sfrd.period_data.index.get_level_values(1))
     assert np.allclose(q_values, sfrd.period_data['inflow'].values)
     assert set(txt_values) == {'inflow'}
+    out_tables = Path(outdir + 'tables')
+    out_tables.mkdir(exist_ok=True, parents=True)
+    sfrd.write_tables(basename=outdir + 'tables/shellmound')
+    written_pd = pd.read_csv(outdir + 'tables/shellmound_sfr_period_data.csv')
+    assert 'rno' in written_pd.columns and 'per' in written_pd.columns
 
 
 def test_export_period_data(shellmound_sfrdata_with_period_data, outdir):
@@ -291,3 +297,10 @@ def test_run_diagnostics(sfrdata):
     checkfile = os.path.join(sfrdata.model.model_ws,
                              '{}_SFR.chk'.format(sfrdata.package_name))
     assert os.path.getsize(checkfile) > 0
+    
+    
+def test_reach_asum(sfrdata):
+    # note: asums will only be greater than zero if an arbolate sum field 
+    # is supplied as input to Lines class
+    assert sfrdata.reach_data.asum.sum() > 0
+    assert np.all(sfrdata.reach_data.asum >= 0)
