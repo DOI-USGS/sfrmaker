@@ -245,6 +245,7 @@ def lines_from_shapefile(test_data_path):
     lns = sfrmaker.Lines.from_shapefile(flowlines_file,
                                         id_column='COMID',
                                         routing_column='tocomid',
+                                        arbolate_sum_column2='asum_calc',
                                         width1_column='width1',
                                         width2_column='width2',
                                         up_elevation_column='elevupsmo',
