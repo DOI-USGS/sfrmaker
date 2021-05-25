@@ -11,6 +11,7 @@ dependencies:
   - matplotlib
   - pyyaml
   - numpy
+  - scipy
   - pandas
   - xarray
   - geopandas
@@ -22,6 +23,7 @@ dependencies:
   - rtree
   - pyproj>=2.2
   - pyshp
+  - netcdf4
   - codecov
   - coverage
   - flake8

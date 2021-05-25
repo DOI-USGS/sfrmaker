@@ -2,6 +2,7 @@
 # the documentation) but not necessarily required for _using_ it.
 pyyaml
 numpy
+scipy
 pandas
 xarray
 geopandas
@@ -16,6 +17,7 @@ rtree
 flopy
 gis-utils
 modflow-export
+netcdf4
 codecov
 coverage
 flake8
