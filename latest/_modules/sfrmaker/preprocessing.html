@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>sfrmaker.preprocessing &mdash; SFRmaker 0.8.0.post9.dev0+g029dc4a documentation</title>
+  <title>sfrmaker.preprocessing &mdash; SFRmaker 0.8.0.post12.dev0+g06d55d0 documentation</title>
   
 
   
@@ -69,7 +69,7 @@
             
             
               <div class="version">
-                0.8.0.post9.dev0+g029dc4a
+                0.8.0.post12.dev0+g06d55d0
               </div>
             
           
@@ -189,13 +189,17 @@
 <span class="kn">import</span> <span class="nn">shutil</span>
 <span class="kn">import</span> <span class="nn">yaml</span>
 <span class="kn">import</span> <span class="nn">textwrap</span>
+<span class="kn">import</span> <span class="nn">affine</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">xarray</span> <span class="k">as</span> <span class="nn">xr</span>
+<span class="kn">import</span> <span class="nn">geopandas</span> <span class="k">as</span> <span class="nn">gpd</span>
 <span class="kn">import</span> <span class="nn">fiona</span>
 <span class="kn">import</span> <span class="nn">rasterio</span>
 <span class="kn">from</span> <span class="nn">shapely.geometry</span> <span class="kn">import</span> <span class="n">shape</span><span class="p">,</span> <span class="n">MultiLineString</span><span class="p">,</span> <span class="n">box</span>
 <span class="kn">from</span> <span class="nn">rasterstats</span> <span class="kn">import</span> <span class="n">zonal_stats</span>
-<span class="kn">from</span> <span class="nn">gisutils</span> <span class="kn">import</span> <span class="n">get_shapefile_crs</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">gisutils</span> <span class="kn">import</span> <span class="n">get_shapefile_crs</span><span class="p">,</span> <span class="n">write_raster</span>
 <span class="kn">from</span> <span class="nn">sfrmaker.gis</span> <span class="kn">import</span> <span class="p">(</span><span class="n">shp2df</span><span class="p">,</span> <span class="n">df2shp</span><span class="p">,</span> <span class="n">project</span><span class="p">,</span> <span class="n">intersect_rtree</span><span class="p">,</span>
                           <span class="n">get_bbox</span><span class="p">,</span> <span class="n">read_polygon_feature</span><span class="p">,</span> <span class="n">get_shapefile_crs</span><span class="p">,</span>
                           <span class="n">get_authority_crs</span><span class="p">,</span>
@@ -204,7 +208,7 @@
 <span class="kn">from</span> <span class="nn">sfrmaker.logger</span> <span class="kn">import</span> <span class="n">Logger</span>
 <span class="kn">from</span> <span class="nn">sfrmaker.nhdplus_utils</span> <span class="kn">import</span> <span class="n">get_nhdplus_v2_filepaths</span><span class="p">,</span> <span class="n">get_prj_file</span>
 <span class="kn">from</span> <span class="nn">sfrmaker.routing</span> <span class="kn">import</span> <span class="n">find_path</span><span class="p">,</span> <span class="n">make_graph</span>
-<span class="kn">from</span> <span class="nn">sfrmaker.units</span> <span class="kn">import</span> <span class="n">convert_length_units</span>
+<span class="kn">from</span> <span class="nn">sfrmaker.units</span> <span class="kn">import</span> <span class="n">convert_length_units</span><span class="p">,</span> <span class="n">unit_abbreviations</span>
 <span class="kn">from</span> <span class="nn">sfrmaker.utils</span> <span class="kn">import</span> <span class="n">width_from_arbolate_sum</span><span class="p">,</span> <span class="n">arbolate_sum</span>
 
 
@@ -1436,6 +1440,113 @@
                 <span class="n">asum_c</span> <span class="o">=</span> <span class="n">old_asum</span> <span class="o">+</span> <span class="n">increment</span>
                 <span class="n">new_asums</span><span class="p">[</span><span class="n">cp</span><span class="p">]</span> <span class="o">=</span> <span class="n">asum_c</span>
     <span class="k">return</span> <span class="n">new_asums</span></div>
+
+
+<div class="viewcode-block" id="swb_runoff_to_csv"><a class="viewcode-back" href="../../api/sfrmaker.preprocessing.html#sfrmaker.preprocessing.swb_runoff_to_csv">[docs]</a><span class="k">def</span> <span class="nf">swb_runoff_to_csv</span><span class="p">(</span><span class="n">swb_netcdf_output</span><span class="p">,</span> <span class="n">nhdplus_catchments_file</span><span class="p">,</span>
+                      <span class="n">netcdf_output_variable</span><span class="o">=</span><span class="s1">&#39;runoff&#39;</span><span class="p">,</span> 
+                      <span class="n">catchment_id_col</span><span class="o">=</span><span class="s1">&#39;FEATUREID&#39;</span><span class="p">,</span>
+                      <span class="n">output_length_units</span><span class="o">=</span><span class="s1">&#39;meters&#39;</span><span class="p">,</span>
+                      <span class="n">outfile</span><span class="o">=</span><span class="s1">&#39;swb_runoff_by_nhdplus_comid.csv&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convert gridded runoff estimates from the USGS Soil Water Balance Code (SWB)</span>
+<span class="sd">    to a CSV format, associating each runoff value with a catchment ID. For the runoff to</span>
+<span class="sd">    be successfully mapped to the SFR network, the catchment IDs must correspond to line IDs</span>
+<span class="sd">    in the stream network, and each catchment must either be associated with a line, or</span>
+<span class="sd">    be referenced in the flowline_routing dataset. See the documentation for </span>
+<span class="sd">    :func:`sfrmaker.flows.add_to_perioddata` for more details.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    swb_netcdf_output : str or path-like</span>
+<span class="sd">        NetCDF file with gridded SWB runoff estimates. Runoff values are assumed</span>
+<span class="sd">        to be in units of length/time (normalized to area). The CRS for the runoff</span>
+<span class="sd">        dataset is read from the &#39;proj4_string&#39; attribute, and is assumed to have</span>
+<span class="sd">        length units of meters.</span>
+<span class="sd">    nhdplus_catchments_file : str or path-like</span>
+<span class="sd">        Shapefile of catchments with IDs (catchment_id_col). The catchments are rasterized</span>
+<span class="sd">        to the grid in swb_netcdf_output, so that each runoff value can be associated with</span>
+<span class="sd">        a catchment ID.</span>
+<span class="sd">    catchment_id_col : str, optional</span>
+<span class="sd">        Field in nhdplus_catchments_file with ID, by default &#39;FEATUREID&#39;. For the </span>
+<span class="sd">    netcdf_output_variable : str, optional</span>
+<span class="sd">        Variable in swb_netcdf_output with runoff data, by default &#39;runoff&#39;</span>
+<span class="sd">    output_length_units : str, optional</span>
+<span class="sd">        Input units are read from the &#39;units&#39; attribute of the netcdf_output_variable </span>
+<span class="sd">        in swb_netcdf_output; specify output length units so that the output CSV</span>
+<span class="sd">        file is in the same length units as the model. No time unit conversion is perfo</span>
+<span class="sd">        by default &#39;meters&#39;</span>
+<span class="sd">    outfile : str, optional</span>
+<span class="sd">        [description], by default &#39;swb_runoff_by_nhdplus_comid.csv&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>    
+    <span class="n">outfile</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">outfile</span><span class="p">)</span>
+    <span class="c1"># get an affine.Affine representation and shape </span>
+    <span class="c1"># of the grid in the culled NetCDF file</span>
+    <span class="k">with</span> <span class="n">xr</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span><span class="n">swb_netcdf_output</span><span class="p">)</span> <span class="k">as</span> <span class="n">ds</span><span class="p">:</span>
+        <span class="n">xul</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">ds</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+        <span class="n">yul</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">ds</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+        <span class="n">dx</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">dy</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">ntimes</span><span class="p">,</span> <span class="n">nrow</span><span class="p">,</span> <span class="n">ncol</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[</span><span class="n">netcdf_output_variable</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">nc_crs</span> <span class="o">=</span> <span class="n">get_authority_crs</span><span class="p">(</span><span class="n">ds</span><span class="p">[</span><span class="s1">&#39;crs&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;proj4_string&#39;</span><span class="p">])</span>
+        <span class="n">nc_bounds</span> <span class="o">=</span> <span class="p">(</span><span class="n">xul</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">ds</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">),</span>
+                     <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">ds</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">),</span> <span class="n">yul</span><span class="p">)</span>
+        <span class="n">nc_bbox</span> <span class="o">=</span> <span class="n">box</span><span class="p">(</span><span class="o">*</span><span class="n">nc_bounds</span><span class="p">)</span>
+        <span class="n">nc_units</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[</span><span class="n">netcdf_output_variable</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;units&#39;</span><span class="p">]</span>
+    <span class="n">nc_trans</span> <span class="o">=</span> <span class="n">affine</span><span class="o">.</span><span class="n">Affine</span><span class="p">(</span><span class="n">dx</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="n">xul</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="n">dy</span><span class="p">,</span> <span class="n">yul</span><span class="p">)</span>
+    
+    <span class="c1"># Read in the NHDPlus catchments </span>
+    <span class="c1"># first reproject the SWB netcdf bounding box to lat/lon (NAD83)</span>
+    <span class="c1"># with a 10 km buffer</span>
+    <span class="n">nc_bbox_4269</span> <span class="o">=</span> <span class="n">project</span><span class="p">(</span><span class="n">nc_bbox</span><span class="o">.</span><span class="n">buffer</span><span class="p">(</span><span class="mf">1e4</span><span class="p">),</span> <span class="n">nc_crs</span><span class="p">,</span> <span class="mi">4269</span><span class="p">)</span>
+    <span class="c1"># read the catchments intersecting the buffered bbox</span>
+    <span class="n">catchments</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">nhdplus_catchments_file</span><span class="p">,</span> <span class="n">bbox</span><span class="o">=</span><span class="n">nc_bbox_4269</span><span class="o">.</span><span class="n">bounds</span><span class="p">)</span>
+    <span class="c1">#  reproject to the SWB output CRS (probably 5070)</span>
+    <span class="c1">#  this assumes the SWB output has a valid crs!</span>
+    <span class="n">catchments</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">nc_crs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="c1">#catchments.to_file(outpath / nhdplus_catchments.name)</span>
+    
+    <span class="c1"># rasterize the catchments unto the NetCDF file grid</span>
+    <span class="n">features_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">catchments</span><span class="p">[</span><span class="s1">&#39;geometry&#39;</span><span class="p">],</span> <span class="n">catchments</span><span class="p">[</span><span class="n">catchment_id_col</span><span class="p">]))</span>
+    <span class="n">rasterized</span> <span class="o">=</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">features</span><span class="o">.</span><span class="n">rasterize</span><span class="p">(</span><span class="n">features_list</span><span class="p">,</span> <span class="n">out_shape</span><span class="o">=</span><span class="p">(</span><span class="n">nrow</span><span class="p">,</span> <span class="n">ncol</span><span class="p">),</span> 
+                                    <span class="n">transform</span><span class="o">=</span><span class="n">nc_trans</span><span class="p">)</span>
+    <span class="n">out_text_array</span> <span class="o">=</span> <span class="n">outfile</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s1">&#39;nhdplus_catchments.dat&#39;</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">out_text_array</span><span class="p">,</span> <span class="n">rasterized</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;wrote </span><span class="si">{</span><span class="n">out_text_array</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">write_raster</span><span class="p">(</span><span class="n">out_text_array</span><span class="o">.</span><span class="n">with_suffix</span><span class="p">(</span><span class="s1">&#39;.tif&#39;</span><span class="p">),</span> <span class="n">rasterized</span><span class="p">,</span> <span class="n">nodata</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> 
+                 <span class="n">xul</span><span class="o">=</span><span class="n">xul</span><span class="p">,</span> <span class="n">yul</span><span class="o">=</span><span class="n">yul</span><span class="p">,</span> <span class="n">dx</span><span class="o">=</span><span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="o">=</span><span class="n">dy</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="n">nc_crs</span><span class="p">)</span>
+    <span class="n">masked</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">masked_array</span><span class="p">(</span><span class="n">rasterized</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">rasterized</span><span class="o">==</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">masked</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Rasterized NHDPlus catchments&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">out_text_array</span><span class="o">.</span><span class="n">with_suffix</span><span class="p">(</span><span class="s1">&#39;.pdf&#39;</span><span class="p">))</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;wrote </span><span class="si">{</span><span class="n">out_text_array</span><span class="o">.</span><span class="n">with_suffix</span><span class="p">(</span><span class="s1">&#39;.pdf&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    
+    <span class="c1"># transpose the SWB runoff results from xarray DataSet to DataFrame</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[</span><span class="s1">&#39;runoff&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">()</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+    <span class="n">df</span><span class="p">[</span><span class="s1">&#39;comid&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rasterized</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span> <span class="o">*</span> <span class="n">ntimes</span>
+    <span class="c1"># SWB runoff is in average daily inches over each cell</span>
+    <span class="c1"># convert to average daily volume for each cell</span>
+    <span class="c1"># then sum by comid to get average daily volume by comid</span>
+    <span class="c1"># (which can subsequently be distributed equally to reaches)</span>
+    <span class="n">L</span> <span class="o">=</span> <span class="n">unit_abbreviations</span><span class="p">[</span><span class="n">output_length_units</span><span class="p">]</span>
+    <span class="n">df</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;area_</span><span class="si">{</span><span class="n">L</span><span class="si">}</span><span class="s1">2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">dx</span> <span class="o">*</span> <span class="n">dy</span><span class="p">)</span>  <span class="c1"># cell area in m3</span>
+    <span class="n">df</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;runoff_</span><span class="si">{</span><span class="n">L</span><span class="si">}</span><span class="s1">d&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;runoff&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">convert_length_units</span><span class="p">(</span><span class="n">nc_units</span><span class="p">,</span> <span class="n">output_length_units</span><span class="p">)</span>
+    <span class="n">df</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;runoff_</span><span class="si">{</span><span class="n">L</span><span class="si">}</span><span class="s1">3d&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;runoff_</span><span class="si">{</span><span class="n">L</span><span class="si">}</span><span class="s1">d&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">df</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;area_</span><span class="si">{</span><span class="n">L</span><span class="si">}</span><span class="s1">2&#39;</span><span class="p">]</span>
+    <span class="n">bycomid_month</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s1">&#39;time&#39;</span><span class="p">,</span> <span class="s1">&#39;comid&#39;</span><span class="p">])</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">bycomid_month</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>  <span class="c1"># preserve times</span>
+    <span class="n">aggregated</span> <span class="o">=</span> <span class="n">bycomid_month</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="n">data_cols</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;lat&#39;</span><span class="p">,</span> <span class="s1">&#39;lon&#39;</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">data_cols</span><span class="p">:</span>
+        <span class="n">aggregated</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">col</span><span class="p">]</span>
+    <span class="c1"># drop comids with zero total runoff</span>
+    <span class="c1"># (keep intermittent zero values; </span>
+    <span class="c1">#  otherwise SFR package will continue previous value)</span>
+    <span class="n">comid_runoff_totals</span> <span class="o">=</span> <span class="n">aggregated</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;comid&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">runoff</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="n">drop_comids</span> <span class="o">=</span> <span class="n">comid_runoff_totals</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">comid_runoff_totals</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">index</span>
+    <span class="n">keep_rows</span> <span class="o">=</span> <span class="o">~</span><span class="n">aggregated</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">drop_comids</span><span class="p">)</span>
+    <span class="n">aggregated</span> <span class="o">=</span> <span class="n">aggregated</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">keep_rows</span><span class="p">]</span>
+    <span class="n">aggregated</span> <span class="o">=</span> <span class="n">aggregated</span><span class="p">[[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;runoff_</span><span class="si">{</span><span class="n">L</span><span class="si">}</span><span class="s1">3d&#39;</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;area_</span><span class="si">{</span><span class="n">L</span><span class="si">}</span><span class="s1">2&#39;</span><span class="p">]]</span>
+    <span class="n">aggregated</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">outfile</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">float_format</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%g</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;wrote </span><span class="si">{</span><span class="n">outfile</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span></div>
 </pre></div>
 
            </div>
@@ -1448,7 +1559,7 @@
   <div role="contentinfo">
     <p>
       <span class="lastupdated">
-        Last updated on May 12, 2021.
+        Last updated on May 25, 2021.
       </span>
 
     </p>

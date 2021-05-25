@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>sfrmaker.lines &mdash; SFRmaker 0.8.0.post9.dev0+g029dc4a documentation</title>
+  <title>sfrmaker.lines &mdash; SFRmaker 0.8.0.post12.dev0+g06d55d0 documentation</title>
   
 
   
@@ -69,7 +69,7 @@
             
             
               <div class="version">
-                0.8.0.post9.dev0+g029dc4a
+                0.8.0.post12.dev0+g06d55d0
               </div>
             
           
@@ -961,52 +961,52 @@
         <span class="c1"># length of intersected line fragments (in model units)</span>
         <span class="n">rd</span><span class="p">[</span><span class="s1">&#39;rchlen&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">g</span><span class="o">.</span><span class="n">length</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">rd</span><span class="o">.</span><span class="n">geometry</span><span class="p">])</span> <span class="o">*</span> <span class="n">gis_mult</span>
 
+        <span class="c1"># compute arbolate sums for original LineStrings if they weren&#39;t provided</span>
+        <span class="k">if</span> <span class="s1">&#39;asum2&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;Check length unit conversions before using this option.&#39;</span><span class="p">)</span>
+            <span class="n">asums</span> <span class="o">=</span> <span class="n">arbolate_sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+                                    <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+                                            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">g</span><span class="o">.</span><span class="n">length</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">geometry</span><span class="p">])</span> <span class="o">*</span> <span class="n">convert_length_units</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">geometry_length_units</span><span class="p">,</span> <span class="s1">&#39;meters&#39;</span><span class="p">)</span>
+                                            <span class="p">)),</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">routing</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1">#asums = dict(zip(self.df.id, </span>
+            <span class="c1">#                 self.df.asum2 * convert_length_units(self.attr_length_units, </span>
+            <span class="c1">#                                                      &#39;meters&#39;)))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;asum2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;asum2&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">convert_length_units</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">attr_length_units</span><span class="p">,</span> 
+                                                                    <span class="s1">&#39;meters&#39;</span><span class="p">)</span>
+
+        <span class="c1"># populate starting asums (asum1)</span>
+        <span class="k">if</span> <span class="s1">&#39;asum1&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="n">length_conversion</span> <span class="o">=</span> <span class="n">convert_length_units</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">geometry_length_units</span><span class="p">,</span> <span class="s1">&#39;meters&#39;</span><span class="p">)</span>
+            <span class="n">line_lengths</span> <span class="o">=</span> <span class="p">[</span><span class="n">g</span><span class="o">.</span><span class="n">length</span> <span class="o">*</span> <span class="n">length_conversion</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">geometry</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;asum1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;asum2&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">line_lengths</span>
+            
+        <span class="c1">#routing_r = {v: k for k, v in self.routing.items() if v != 0}</span>
+        <span class="c1">#self.df[&#39;asum1&#39;] = [asums.get(routing_r.get(id, 0), 0) for id in self.df.id.values]</span>
+        <span class="n">asum1s</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">asum1</span><span class="p">))</span>
+
+        <span class="c1"># compute arbolate sum at reach midpoints (in meters)</span>
+        <span class="n">lengths</span> <span class="o">=</span> <span class="n">rd</span><span class="p">[[</span><span class="s1">&#39;line_id&#39;</span><span class="p">,</span> <span class="s1">&#39;ireach&#39;</span><span class="p">,</span> <span class="s1">&#39;geometry&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">lengths</span><span class="p">[</span><span class="s1">&#39;rchlen&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">g</span><span class="o">.</span><span class="n">length</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">lengths</span><span class="o">.</span><span class="n">geometry</span><span class="p">])</span> <span class="o">*</span> <span class="n">convert_length_units</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">geometry_length_units</span><span class="p">,</span> <span class="s1">&#39;meters&#39;</span><span class="p">)</span>
+        <span class="n">groups</span> <span class="o">=</span> <span class="n">lengths</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;line_id&#39;</span><span class="p">)</span>  <span class="c1"># fragments grouped by parent line</span>
+
+        <span class="n">reach_cumsums</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">ordered_ids</span> <span class="o">=</span> <span class="n">rd</span><span class="o">.</span><span class="n">line_id</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">rd</span><span class="o">.</span><span class="n">line_id</span><span class="o">.</span><span class="n">diff</span><span class="p">()</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+        <span class="k">for</span> <span class="nb">id</span> <span class="ow">in</span> <span class="n">ordered_ids</span><span class="p">:</span>
+            <span class="n">grp</span> <span class="o">=</span> <span class="n">groups</span><span class="o">.</span><span class="n">get_group</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s1">&#39;ireach&#39;</span><span class="p">)</span>
+            <span class="n">dist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">grp</span><span class="o">.</span><span class="n">rchlen</span><span class="o">.</span><span class="n">values</span><span class="p">)</span> <span class="o">-</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">grp</span><span class="o">.</span><span class="n">rchlen</span><span class="o">.</span><span class="n">values</span>
+            <span class="n">reach_cumsums</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dist</span><span class="p">)</span>
+        <span class="n">reach_cumsums</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">reach_cumsums</span><span class="p">)</span>
+        <span class="n">segment_asums</span> <span class="o">=</span> <span class="p">[</span><span class="n">asum1s</span><span class="p">[</span><span class="nb">id</span><span class="p">]</span> <span class="k">for</span> <span class="nb">id</span> <span class="ow">in</span> <span class="n">lengths</span><span class="o">.</span><span class="n">line_id</span><span class="p">]</span>
+        <span class="n">reach_asums</span> <span class="o">=</span> <span class="n">segment_asums</span> <span class="o">+</span> <span class="n">reach_cumsums</span>
+        <span class="c1"># maintain positive asums; lengths in NHD often aren&#39;t exactly equal to feature lengths</span>
+        <span class="c1"># reach_asums[reach_asums &lt; 0.] = 0</span>
+        <span class="n">rd</span><span class="p">[</span><span class="s1">&#39;asum&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">reach_asums</span>
+            
         <span class="c1"># estimate widths if they aren&#39;t supplied</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">width1</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Computing widths...&quot;</span><span class="p">)</span>
-
-            <span class="c1"># compute arbolate sums for original LineStrings if they weren&#39;t provided</span>
-            <span class="k">if</span> <span class="s1">&#39;asum2&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;Check length unit conversions before using this option.&#39;</span><span class="p">)</span>
-                <span class="n">asums</span> <span class="o">=</span> <span class="n">arbolate_sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
-                                     <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
-                                              <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">g</span><span class="o">.</span><span class="n">length</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">geometry</span><span class="p">])</span> <span class="o">*</span> <span class="n">convert_length_units</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">geometry_length_units</span><span class="p">,</span> <span class="s1">&#39;meters&#39;</span><span class="p">)</span>
-                                              <span class="p">)),</span>
-                                     <span class="bp">self</span><span class="o">.</span><span class="n">routing</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="c1">#asums = dict(zip(self.df.id, </span>
-                <span class="c1">#                 self.df.asum2 * convert_length_units(self.attr_length_units, </span>
-                <span class="c1">#                                                      &#39;meters&#39;)))</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;asum2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;asum2&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">convert_length_units</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">attr_length_units</span><span class="p">,</span> 
-                                                                      <span class="s1">&#39;meters&#39;</span><span class="p">)</span>
-
-            <span class="c1"># populate starting asums (asum1)</span>
-            <span class="k">if</span> <span class="s1">&#39;asum1&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
-                <span class="n">length_conversion</span> <span class="o">=</span> <span class="n">convert_length_units</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">geometry_length_units</span><span class="p">,</span> <span class="s1">&#39;meters&#39;</span><span class="p">)</span>
-                <span class="n">line_lengths</span> <span class="o">=</span> <span class="p">[</span><span class="n">g</span><span class="o">.</span><span class="n">length</span> <span class="o">*</span> <span class="n">length_conversion</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">geometry</span><span class="p">]</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;asum1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;asum2&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">line_lengths</span>
-                
-            <span class="c1">#routing_r = {v: k for k, v in self.routing.items() if v != 0}</span>
-            <span class="c1">#self.df[&#39;asum1&#39;] = [asums.get(routing_r.get(id, 0), 0) for id in self.df.id.values]</span>
-            <span class="n">asum1s</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">asum1</span><span class="p">))</span>
-
-            <span class="c1"># compute arbolate sum at reach midpoints (in meters)</span>
-            <span class="n">lengths</span> <span class="o">=</span> <span class="n">rd</span><span class="p">[[</span><span class="s1">&#39;line_id&#39;</span><span class="p">,</span> <span class="s1">&#39;ireach&#39;</span><span class="p">,</span> <span class="s1">&#39;geometry&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-            <span class="n">lengths</span><span class="p">[</span><span class="s1">&#39;rchlen&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">g</span><span class="o">.</span><span class="n">length</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">lengths</span><span class="o">.</span><span class="n">geometry</span><span class="p">])</span> <span class="o">*</span> <span class="n">convert_length_units</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">geometry_length_units</span><span class="p">,</span> <span class="s1">&#39;meters&#39;</span><span class="p">)</span>
-            <span class="n">groups</span> <span class="o">=</span> <span class="n">lengths</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;line_id&#39;</span><span class="p">)</span>  <span class="c1"># fragments grouped by parent line</span>
-
-            <span class="n">reach_cumsums</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="n">ordered_ids</span> <span class="o">=</span> <span class="n">rd</span><span class="o">.</span><span class="n">line_id</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">rd</span><span class="o">.</span><span class="n">line_id</span><span class="o">.</span><span class="n">diff</span><span class="p">()</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
-            <span class="k">for</span> <span class="nb">id</span> <span class="ow">in</span> <span class="n">ordered_ids</span><span class="p">:</span>
-                <span class="n">grp</span> <span class="o">=</span> <span class="n">groups</span><span class="o">.</span><span class="n">get_group</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s1">&#39;ireach&#39;</span><span class="p">)</span>
-                <span class="n">dist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">grp</span><span class="o">.</span><span class="n">rchlen</span><span class="o">.</span><span class="n">values</span><span class="p">)</span> <span class="o">-</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">grp</span><span class="o">.</span><span class="n">rchlen</span><span class="o">.</span><span class="n">values</span>
-                <span class="n">reach_cumsums</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dist</span><span class="p">)</span>
-            <span class="n">reach_cumsums</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">reach_cumsums</span><span class="p">)</span>
-            <span class="n">segment_asums</span> <span class="o">=</span> <span class="p">[</span><span class="n">asum1s</span><span class="p">[</span><span class="nb">id</span><span class="p">]</span> <span class="k">for</span> <span class="nb">id</span> <span class="ow">in</span> <span class="n">lengths</span><span class="o">.</span><span class="n">line_id</span><span class="p">]</span>
-            <span class="n">reach_asums</span> <span class="o">=</span> <span class="n">segment_asums</span> <span class="o">+</span> <span class="n">reach_cumsums</span>
-            <span class="c1"># maintain positive asums; lengths in NHD often aren&#39;t exactly equal to feature lengths</span>
-            <span class="c1"># reach_asums[reach_asums &lt; 0.] = 0</span>
-            <span class="n">rd</span><span class="p">[</span><span class="s1">&#39;asum&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">reach_asums</span>
             <span class="n">width</span> <span class="o">=</span> <span class="n">width_from_arbolate_sum</span><span class="p">(</span><span class="n">reach_asums</span><span class="p">,</span>
                                             <span class="n">a</span><span class="o">=</span><span class="n">width_from_asum_a_param</span><span class="p">,</span>
                                             <span class="n">b</span><span class="o">=</span><span class="n">width_from_asum_b_param</span><span class="p">,</span>
@@ -1181,7 +1181,7 @@
   <div role="contentinfo">
     <p>
       <span class="lastupdated">
-        Last updated on May 12, 2021.
+        Last updated on May 25, 2021.
       </span>
 
     </p>
