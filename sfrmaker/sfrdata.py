@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 import time
 from packaging import version
 import warnings
@@ -577,17 +578,33 @@ class SFRData(DataPackage):
         """
         if self.model is not None and hasattr(self.model, 'dis'):
             botm = self.model.dis.botm.array.copy()
+            idomain = None
+            if self.model.version == 'mf6':
+                idomain = self.model.dis.idomain.array.copy()
+            else:
+                bas6 = getattr(self.model, 'bas6')
+                if bas6 is not None:
+                    idomain = bas6.ibound.array
+                    
             nlay = botm.shape[0] + 1
-            layers, new_botm = assign_layers(self.reach_data, botm_array=botm)
+            layers, new_botm = assign_layers(self.reach_data, botm_array=botm, idomain=idomain)
             self.reach_data['k'] = layers
             if new_botm is not None:
-                outfile = '{}_layer_{}_new_botm_elevations.dat'.format(self.package_name,
-                                                                       nlay)
-                outfile = os.path.join(adjusted_botm_output_path, outfile)
-                np.savetxt(outfile, new_botm, fmt='%.2f')
+                outfiles = []
+                if len(new_botm.shape) == 2:
+                    write_layers = [nlay - 1]
+                else:
+                    write_layers = list(range(nlay))
+                outpath = Path(adjusted_botm_output_path)
+                for k in write_layers:
+                    outfile = outpath / f'{self.package_name}_layer_{nlay}_new_botm_elevations.dat'
+                    np.savetxt(outfile, new_botm[-1], fmt='%.2f')
+                    outfiles.append(outfile)
                 msg = ('Sfrmaker pushed some model botm elevations downward'
                        'to accomodate streambed bottoms. New botm elevations'
-                       'for layer {} written to {}'.format(nlay, outfile))
+                       'written to:\n')
+                for f in outfiles:
+                    msg += f'{f}\n'
                 print(msg)
         else:
             print('Need a model instance with a discretization package to assign layers. '
