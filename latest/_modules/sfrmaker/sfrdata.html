@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>sfrmaker.sfrdata &mdash; SFRmaker 0.8.0.post13.dev0+g76cac90 documentation</title>
+  <title>sfrmaker.sfrdata &mdash; SFRmaker 0.8.0.post14+g8a4c5de documentation</title>
   
 
   
@@ -69,7 +69,7 @@
             
             
               <div class="version">
-                0.8.0.post13.dev0+g76cac90
+                0.8.0.post14+g8a4c5de
               </div>
             
           
@@ -322,6 +322,8 @@
                  <span class="n">isfr</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">model_length_units</span><span class="o">=</span><span class="s2">&quot;undefined&quot;</span><span class="p">,</span> <span class="n">model_time_units</span><span class="o">=</span><span class="s1">&#39;days&#39;</span><span class="p">,</span>
                  <span class="n">enforce_increasing_nsegs</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                 <span class="n">default_slope</span><span class="o">=</span><span class="mf">0.001</span><span class="p">,</span> <span class="n">minimum_slope</span><span class="o">=</span><span class="mf">0.0001</span><span class="p">,</span>
+                 <span class="n">maximum_slope</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span>
                  <span class="n">package_name</span><span class="o">=</span><span class="s1">&#39;model&#39;</span><span class="p">,</span>
                  <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">DataPackage</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="n">grid</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">isfr</span><span class="o">=</span><span class="n">isfr</span><span class="p">,</span>
@@ -359,7 +361,8 @@
         <span class="c1"># not the ideal logic for MODFLOW 6 case where only</span>
         <span class="c1"># rno and connections are supplied</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_outreaches</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">get_slopes</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_slopes</span><span class="p">(</span><span class="n">default_slope</span><span class="o">=</span><span class="n">default_slope</span><span class="p">,</span> <span class="n">minimum_slope</span><span class="o">=</span><span class="n">minimum_slope</span><span class="p">,</span>
+                        <span class="n">maximum_slope</span><span class="o">=</span><span class="n">maximum_slope</span><span class="p">)</span>
 
         <span class="c1"># have to set the model last, because it also sets up a flopy sfr package instance</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>  <span class="c1"># attached flopy model instance</span>
@@ -1977,7 +1980,7 @@
   <div role="contentinfo">
     <p>
       <span class="lastupdated">
-        Last updated on May 28, 2021.
+        Last updated on Jun 01, 2021.
       </span>
 
     </p>
