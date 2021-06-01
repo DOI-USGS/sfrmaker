@@ -136,6 +136,8 @@ class SFRData(DataPackage):
                  isfr=None,
                  model_length_units="undefined", model_time_units='days',
                  enforce_increasing_nsegs=True,
+                 default_slope=0.001, minimum_slope=0.0001,
+                 maximum_slope=1.,
                  package_name='model',
                  **kwargs):
         DataPackage.__init__(self, grid=grid, model=model, isfr=isfr,
@@ -173,7 +175,8 @@ class SFRData(DataPackage):
         # not the ideal logic for MODFLOW 6 case where only
         # rno and connections are supplied
         self.set_outreaches()
-        self.get_slopes()
+        self.get_slopes(default_slope=default_slope, minimum_slope=minimum_slope,
+                        maximum_slope=maximum_slope)
 
         # have to set the model last, because it also sets up a flopy sfr package instance
         self.model = model  # attached flopy model instance
