@@ -148,3 +148,6 @@ options:
   add_outlets: None
   # keyword arguments to sfrmaker.SFRData:
   enforce_increasing_nsegs: True
+  default_slope: 0.001
+  minimum_slope: 0.0001
+  maximum_slope: 1.0

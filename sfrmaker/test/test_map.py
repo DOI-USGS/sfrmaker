@@ -1,3 +1,5 @@
+import copy
+import numpy as np
 import pandas as pd
 import pytest
 
@@ -78,3 +80,28 @@ def test_shapefile_export(sfr, outdir, name_path):
     sfr.export_transient_variable('flow', '{}/{}_inlets.shp'.format(outdir, name))
     sfr.export_lines('{}/{}_lines.shp'.format(outdir, name))
     sfr.export_routing('{}/{}_lines.shp'.format(outdir, name))
+    
+
+def test_lines_to_sfr(lines, grid):
+    #lines = copy.deepcopy(lines)
+    lines.df.loc[lines.df.id == 17955281, 'elevup'] = 0
+    lines.elevup[17955281] = 0
+    lines.df.loc[lines.df.id == 17955281, 'elevdn'] = 0
+    #lines.df.loc[lines.df.id == 17955273, 'elevup'] = 0
+    lines.elevup[17955273] = 0
+    lines.df.loc[lines.df.id == 17955273, 'elevdn'] = 0
+    #lines.df.loc[lines.df.id == 17955371, 'elevup'] = 0
+    lines.elevup[17955371] = 0
+    lines.df.loc[lines.df.id == 17955371, 'elevdn'] = 0
+    sfr = lines.to_sfr(grid=grid,
+                       isfr=None,
+                       cull_flowlines_to_active_area=True,
+                       one_reach_per_cell=True,
+                       default_slope=0.011, minimum_slope=0.01,
+                       maximum_slope=0.012,
+                       )
+    assert np.all(sfr.reach_data.loc[sfr.reach_data.outreach == 0, \
+                                     'slope'] == 0.011)
+    assert sfr.reach_data.slope.min() == 0.01
+    assert sfr.reach_data.slope.max() == 0.012
+    
