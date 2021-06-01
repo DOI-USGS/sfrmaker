@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>The Utilities Module &mdash; SFRmaker 0.8.0.post12.dev0+g06d55d0 documentation</title>
+  <title>The Utilities Module &mdash; SFRmaker 0.8.0.post14+gc1e38e3 documentation</title>
   
 
   
@@ -73,7 +73,7 @@
             
             
               <div class="version">
-                0.8.0.post12.dev0+g06d55d0
+                0.8.0.post14+gc1e38e3
               </div>
             
           
@@ -261,7 +261,7 @@ the segments. By default, None.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="sfrmaker.utils.assign_layers">
-<span class="sig-prename descclassname"><span class="pre">sfrmaker.utils.</span></span><span class="sig-name descname"><span class="pre">assign_layers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reach_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">botm_array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">idomain</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pad</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inplace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/utils.html#assign_layers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.utils.assign_layers" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">sfrmaker.utils.</span></span><span class="sig-name descname"><span class="pre">assign_layers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reach_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">botm_array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strtop_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'strtop'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strthick_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'strthick'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">idomain</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pad</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inplace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/utils.html#assign_layers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.utils.assign_layers" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="simple">
 <dt>Assigns the appropriate layer for each SFR reach,</dt><dd><p>based on cell bottoms at location of reach.</p>
 </dd>
@@ -271,11 +271,18 @@ the segments. By default, None.</p>
 <dd class="field-odd"><dl class="simple">
 <dt><strong>reach_data</strong><span class="classifier">DataFrame</span></dt><dd><p>Table of reach information, similar to SFRData.reach_data</p>
 </dd>
-<dt><strong>botm</strong><span class="classifier">ndarary</span></dt><dd><p>3D numpy array of layer bottom elevations</p>
+<dt><strong>botm_array</strong><span class="classifier">ndarary</span></dt><dd><p>3D numpy array of layer bottom elevations</p>
 </dd>
-<dt><strong>idomain</strong><span class="classifier">ndarray</span></dt><dd><p>3D integer array of MODFLOW ibound or idomain values. Values &gt;=1
+<dt><strong>strtop_col</strong><span class="classifier">str</span></dt><dd><p>Column name of streambed top elevations in reach_data.
+by default, ‘strtop’.</p>
+</dd>
+<dt><strong>strthick_col</strong><span class="classifier">str</span></dt><dd><p>Column name of streambed bottom thickness in reach_data.
+by default, ‘strthick’</p>
+</dd>
+<dt><strong>idomain</strong><span class="classifier">ndarray  (optional)</span></dt><dd><p>3D integer array of MODFLOW ibound or idomain values. Values &gt; 0
 are considered active. Reaches in cells with values &lt; 1 will be moved
-to the highest active cell if possible.</p>
+to the highest active cell if possible.
+by default, None (all cells are assumed to be active)</p>
 </dd>
 <dt><strong>pad</strong><span class="classifier">scalar</span></dt><dd><p>Minimum distance that streambed bottom must be above layer bottom.
 When determining the layer or whether the streambed bottom is below
@@ -292,7 +299,12 @@ return 1D array of layer numbers and 2D array of new model botm elevations</p>
 <dd class="field-even"><dl class="simple">
 <dt>(if inplace=True)</dt><dd></dd>
 <dt><strong>layers</strong><span class="classifier">1D array of layer numbers</span></dt><dd></dd>
-<dt><strong>new_model_botms</strong><span class="classifier">2D array of new model bottom elevations</span></dt><dd></dd>
+<dt><strong>new_model_botms</strong><span class="classifier">ndarray or None</span></dt><dd><p>New model bottom elevations. If no cell bottoms require adjustment, None
+is returned. If one or more cells require adjustment and <code class="docutils literal notranslate"><span class="pre">idomain=None</span></code> (not supplied), 
+a 2D array is returned, for backward compatibility with previous versions of SFRmaker.
+Otherwise, a 3D array of new bottom elevations is returned. In the future,
+a 3D array will always be returned.</p>
+</dd>
 </dl>
 </dd>
 </dl>
@@ -468,7 +480,7 @@ from feet to the specified output units.</p>
   <div role="contentinfo">
     <p>
       <span class="lastupdated">
-        Last updated on May 25, 2021.
+        Last updated on Jun 01, 2021.
       </span>
 
     </p>
