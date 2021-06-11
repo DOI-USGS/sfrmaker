@@ -10,10 +10,10 @@ from ..units import (convert_flux_units, convert_length_units,
 def test_convert_flux():
     result = convert_flux_units('inches', 'years',
                                 'feet', 'days')
-    assert np.allclose(result, 1 / 12 * 1 / 365.25)
-    result = convert_flux_units('inches', 'years',
-                                'feet', 'days')
-    assert np.allclose(result, 1 / 12 * 1 / 365.25)
+    assert np.allclose(result, 1/12 * 1/365.25)
+    result = convert_flux_units('feet', 'second',
+                                'meters', 'days')
+    assert np.allclose(result, 0.3048 * 86400)
 
 
 def test_convert_length_units():
@@ -37,9 +37,9 @@ def test_convert_time_units():
     assert np.allclose(convert_time_units('d', 's'), 86400)
     assert np.allclose(convert_time_units(1, 4), 1/86400)
     assert np.allclose(convert_time_units(None, 'd'), 1.)
-    assert np.allclose(convert_time_units(5, 4), 1/365.25)
-    assert np.allclose(convert_time_units(4, 5), 365.25)
-    assert np.allclose(convert_time_units('years', 'days'), 1/365.25)
+    assert np.allclose(convert_time_units(5, 4), 365.25)
+    assert np.allclose(convert_time_units(4, 5), 1/365.25)
+    assert np.allclose(convert_time_units('years', 'days'), 365.25)
 
 
 def test_get_model_length_units():
