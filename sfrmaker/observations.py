@@ -393,9 +393,9 @@ def write_gage_package(location_data,
                        gage_package_filename=None,
                        gage_namfile_entries_file=None,
                        model=None,
-                       obsname_col='obsname',
+                       sitename_col='site_no',
                        gage_package_unit=25,
-                       start_gage_unit=228):
+                       start_gage_unit=200):
     """
 
     Parameters
@@ -404,13 +404,32 @@ def write_gage_package(location_data,
         Table of observation locations. Must have columns:
         'iseg': segment number
         'ireach': reach number
-        obsname_col: specified by obsname_col argument (default 'obsname')
-    gage_package_filename :
-    gage_namfile_entries_file :
-    model :
-    obsname_col :
-    gage_package_unit :
-    start_gage_unit :
+        sitename_col: specified by sitename_col argument (default 'site_no')
+    gage_package_filename : str or pathlike
+        Name for the gage package file, which will be written to the 
+        model workspace (``model.model_ws``) of the supplied flopy model instance. 
+        This must also be manually added to the MODFLOW .nam file, for example::
+        
+            GAGE          25 br_trans.gage
+            
+        Or, a new namefile can be written from the supplied flopy model instance.
+    gage_namfile_entries_file : str or pathlike
+        Namefile entries for the gage package output files will be written
+        to this file. The contents of this file must then be manually
+        copied and pasted into the MODFLOW .nam file.
+        By default, None, in which case this file is named after gage_package_filename.
+    model : flopy model instance
+        Used for writing the gage package input file via flopy.
+    sitename_col : str
+        Unique name or number for each gage site.
+        By default, 'site_no'
+    gage_package_unit : int
+        MODFLOW unit number to assign to gage package.
+        By default, 25
+    start_gage_unit : int
+        Modflow unit numbers for each gage package output file 
+        will be assigned sequentially starting at this number.
+        By default, 200
 
     Returns
     -------
@@ -430,8 +449,8 @@ def write_gage_package(location_data,
                                                  os.path.split(gage_namfile_entries_file)[1])
     # read in stream gage observation locations from locate_flux_targets_in_SFR.py
     df = location_data.copy()
-    df.sort_values(by=[obsname_col], inplace=True)
-    df['gagefile'] = ['{}.ggo'.format(obsname) for obsname in df.obsname]
+    df.sort_values(by=[sitename_col], inplace=True)
+    df['gagefile'] = [f'{sitename}.ggo' for sitename in df[sitename_col]]
 
     if model is not None and flopy:
         # create flopy gage package object
@@ -443,10 +462,10 @@ def write_gage_package(location_data,
                              gage_data=gage_data, files=df.gagefile.tolist(),
                              unitnumber=gage_package_unit
                              )
-        gag.fn_path = gage_package_filename
+        gag.fn_path = str(gage_package_filename)
         gag.write_file()
     else:
-        j=2
+        raise NotImplementedError('writing a gage package without Flopy')
 
     with open(gage_namfile_entries_file, 'w') as output:
         for i, f in enumerate(df.gagefile.values):

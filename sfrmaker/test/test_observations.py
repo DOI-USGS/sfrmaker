@@ -208,7 +208,7 @@ def test_locate_sites(shellmound_sfrdata, reach_id_col, outdir):
                         perimeter_buffer=1000,
                         distance_threshold=1600
                          )
-    assert locs.rno.equals(locs.site_no)
+    assert np.array_equal(locs.rno.values, locs.site_no.values)
     # check that iseg and ireach columns are in the located sites table
     # (for modflow-2005 style sfr packages)
     assert 'iseg' in locs.columns
