@@ -4,6 +4,7 @@ Functions for handling observations of SFR package output.
 import os
 import numpy as np
 import pandas as pd
+import geopandas as gpd
 from shapely.geometry import Polygon
 from gisutils import shp2df
 try:
@@ -248,6 +249,8 @@ def locate_sites(site_data,
                  x_column_in_data=None,
                  y_column_in_data=None,
                  reach_id_col='rno',
+                 ireach_col='ireach',
+                 iseg_col='iseg',
                  site_number_col='site_no',
                  keep_columns=None,
                  perimeter_buffer=1000,
@@ -258,17 +261,21 @@ def locate_sites(site_data,
 
     Parameters
     ----------
-    site_data: ESRI shapefile
+    site_data: (Geo)DataFrame or shapefile
         DataFrame or shapefile with point locations and attribute data for
         stream flow observation sites. Point locations can be specified
         in a DataFrame by either x_column_in_data and y_column_in_data, or
-        a 'geometry' column of shapely points. If shapefiles are provided
-        for both site_data and reach_data, they can be in any CRS, but both must have .prj files.
-    reach_data: ESRI shapefile
+        a 'geometry' column of shapely points. If shapefiles or GeoDataFrames are provided
+        for both site_data and reach_data, they can be in any CRS, but both must have valid
+        CRS references (.prj file or .crs attribute); otherwise site_data and
+        reach_data are assumed to be in the same CRS.
+    reach_data: (Geo)DataFrame or shapefile
         SFRData.reach_data DataFrame, or shapefile equivalent
         with line-arcs representing all segments and/or reaches.
-        If shapefiles are provided for both site_data and reach_data,
-        they can be in any CRS, but both must have .prj files.
+        If shapefiles or GeoDataFrames are provided
+        for both site_data and reach_data, they can be in any CRS, but both must have valid
+        CRS references (.prj file or .crs attribute); otherwise site_data and
+        reach_data are assumed to be in the same CRS.
     active_area_shapefile: ESRI shapefile or shapely polygon (optional)
         Shapefile or polygon, in same CRS as sfr_lines_shapefile,
         defining areal extent (perimeter) of SFR network.
@@ -277,7 +284,13 @@ def locate_sites(site_data,
     y_column_in_data : str (optional)
         Column in data with site y-coordinates (in same CRS as SFR network).
     reach_id_col: str
-        Column with unique number for each stream line-arc. default "rno"
+        Column with 1-based unique number for each stream line-arc. default "rno"
+    ireach_col: str
+        Column with 1-based reach number within segment (i.e. in the modflow-2005 SFR data model),
+        by default, 'ireach'
+    iseg_col: str
+        Column with 1-based reach segment number (i.e. in the modflow-2005 SFR data model),
+        by default, 'iseg'
     site_number_col : str
         Name of column in sites_shapefile with number identifying each
         site to be located. default "site_no"
@@ -302,17 +315,20 @@ def locate_sites(site_data,
     locs_crs = None
     # read in sfr lines
     if not isinstance(reach_data, pd.DataFrame):
-        sfrlines = shp2df(reach_data)
-        sfr_crs = get_shapefile_crs(reach_data)
+        sfrlines = gpd.read_file(reach_data)
+        sfr_crs = sfrlines.crs
     elif isinstance(reach_data, pd.DataFrame):
         sfrlines = reach_data.copy()
+        sfr_crs = getattr(sfrlines, 'crs', None)
     else:
         raise TypeError('Datatype for reach_data not understood: {}'.format(reach_data))
-    sfrlines.index = sfrlines[reach_id_col]
+    if reach_id_col not in sfrlines.columns:
+        sfrlines.index = np.arange(len(sfrlines)) + 1
+        sfrlines[reach_id_col] = np.arange(len(sfrlines)) + 1
 
     # sites to locate
     if not isinstance(site_data, pd.DataFrame):
-        locs = shp2df(site_data)
+        locs = gpd.read_file(site_data)
         if isinstance(site_data, list):
             locs_crs = get_shapefile_crs(site_data[0])
         else:
@@ -320,6 +336,7 @@ def locate_sites(site_data,
         locs['site_no'] = locs[site_number_col]  # str_ids(locs.site_no)
     elif isinstance(site_data, pd.DataFrame):
         locs = site_data.copy()
+        locs_crs = getattr(locs, 'crs', None)
     else:
         raise TypeError('Datatype for site_data not understood: {}'.format(site_data))
 
@@ -340,17 +357,18 @@ def locate_sites(site_data,
     reach_id_col = reach_id_col.lower()
     locs[reach_id_col] = ids
     locs['distance'] = distances
-    if 'iseg' in sfrlines.columns:
-        locs['segment'] = sfrlines.loc[ids, 'iseg'].values
-        locs['reach'] = sfrlines.loc[ids, 'ireach'].values
-    locs = locs.loc[locs.distance <= distance_threshold]
+    if iseg_col in sfrlines.columns:
+        locs[iseg_col] = sfrlines.loc[ids, iseg_col].values
+    if ireach_col in sfrlines.columns:
+        locs[ireach_col] = sfrlines.loc[ids, ireach_col].values
+    locs = locs.loc[locs['distance'] <= distance_threshold]
 
     # cull observations at or outside of model perimeter
     # to only those along model perimeter
     if active_area_shapefile is not None:
         active_area = active_area_shapefile
         if not isinstance(active_area_shapefile, Polygon):
-            active_area = shp2df(active_area_shapefile).geometry[0]
+            active_area = gpd.read_file(active_area_shapefile).geometry[0]
         perimeter = active_area.exterior.buffer(perimeter_buffer)
         perimeter_inside_buffer = Polygon(perimeter.interiors[0])
 
@@ -363,7 +381,7 @@ def locate_sites(site_data,
 
     if keep_columns is None:
         keep_columns = locs.columns.tolist()
-    for c in [reach_id_col, 'segment', 'reach', 'geometry']:
+    for c in [reach_id_col, iseg_col, ireach_col, 'geometry']:
         if c not in keep_columns and c in locs.columns:
             keep_columns.append(c)
 
