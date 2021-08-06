@@ -53,3 +53,9 @@ def test_write_shapefile(tylerforks_lines_from_NHDPlus, test_data_path):
     outshp = test_data_path / 'lines.shp'
     lines.write_shapefile(outshp)
     assert outshp.exists()
+
+
+def test_load_nhdplus_hr(neversink_lines_from_nhdplus_hr):
+    lines = neversink_lines_from_nhdplus_hr
+    assert isinstance(lines, sfrmaker.lines.Lines)
+    assert is_to_one(lines._original_routing)
