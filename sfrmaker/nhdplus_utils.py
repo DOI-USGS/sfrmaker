@@ -266,7 +266,6 @@ def get_hr_routing(pf, fl):
     ta = time.time()
     
     # merge divergence data info to Plusflow dataframe
-<<<<<<< HEAD
     pf = pf.merge(fl[['Divergence', 'NHDPlusID']], left_on='ToNHDPID', 
                       right_on = 'NHDPlusID', how='outer')
     pf.rename(columns={'Divergence':'Divergence_ToNHDPID'}, inplace=True)
@@ -274,25 +273,13 @@ def get_hr_routing(pf, fl):
     # build routing dict excluding Divergece to == 2 (minor divergence path)
     pf_routing_dict = dict(zip(pf.loc[pf.Divergence_ToNHDPID != 2, 'FromNHDPID'], 
                                pf.loc[pf.Divergence_ToNHDPID != 2, 'ToNHDPID']))
-=======
-    pf = pf.merge(fl[['Divergence', 'NHDPlusID']], left_on='ToNHDPID', right_on = 'NHDPlusID', how='outer')
-    pf.rename(columns={'Divergence':'Divergence_ToNHDPID'}, inplace=True)
-
-    # build routing dict excluding Divergece to == 2 (minor divergence path)
-    pf_routing_dict = dict(zip(pf.loc[pf.Divergence_ToNHDPID != 2, 'FromNHDPID'], pf.loc[pf.Divergence_ToNHDPID != 2, 'ToNHDPID']))
->>>>>>> 7f2161efb42450231c7a28c16d7aa0d25d405254
     
     print("finished in {:.2f}s\n".format(time.time() - ta))
     return pf_routing_dict
 
 
 def load_nhdplus_hr(NHDPlusHR_paths, filter=None, 
-<<<<<<< HEAD
                     drop_fcodes=None):
-=======
-                    drop_fcodes=None, crs=None, 
-                    epsg=None, proj_str=None, prjfile=None):
->>>>>>> 7f2161efb42450231c7a28c16d7aa0d25d405254
     """
     Parameters
     ==========
