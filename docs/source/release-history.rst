@@ -2,6 +2,25 @@
 Release History
 ===============
 
+Version 0.9.0 (2021-xx-xx)
+--------------------------
+* Added support for NHDPlus High Resolution
+* Add preprocessing.get_flowline_routing function to get consolidated routing table in CSV format, for all flowlines in a set of NHDPlus v2 drainage basins
+* Add preprocessing.swb_runoff_to_csv function to associate gridded runoff estimates from Soil Water Balance Code with NHDPlus COMIDs (catchments), so that it can be input to sfrmaker.flows.add_to_perioddata()
+* Features added to utils.assign_layers:
+  * add arguments for streambed top and bottom thickness column names; 
+  * add idomain argument to only adjust layer bottoms at active model locations. 
+  * In places where the lowest active layer is not the bottom layer, the lowest active layer bottom will be pushed down, and the (inactive) layers beneath will be given zero-thickness
+* Add arguments to set min/max streambed slope
+* Bug fixes:
+  * flows.add_to_perioddata: when distributing flows to reaches, handle comids that are in reach_data but not in the input data
+  * handle structured grids with missing cells
+  * fix some issues with rotated grid support, including the rotation sign and how lines outside of the model are culled
+  * fix issue with how arbolate sums are computed in lines.to_sfr
+  * fix issue with days to years unit conversion
+  * fix an issue with observations.locate_sites when reaches are specified by segment and reach
+
+
 Version 0.8.0 (2021-04-19)
 --------------------------
 * Inflows: 
