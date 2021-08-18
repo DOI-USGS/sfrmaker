@@ -219,8 +219,8 @@ def read_nhdplus(shpfiles, bbox_filter=None,
 def read_nhdplus_hr(NHDPlusHR_path, filter=None, drop_fcodes=None):
     ta = time.time()
     print('reading {}...'.format(NHDPlusHR_path))
-    #  read NHDFLowlines from NHDPlusHR_path (NHDPlus HR FileGDB)
-    fl = gpd.read_file(NHDPlusHR_path, driver='FileGDB', layer='NHDFlowline')
+    #  read NHDFLowlines from NHDPlusHR_path (NHDPlus HR OpenFileGDB)
+    fl = gpd.read_file(NHDPlusHR_path, driver='OpenFileGDB', layer='NHDFlowline')
     #  get crs information from flowlines
     fl_crs = fl.crs
     
@@ -236,14 +236,14 @@ def read_nhdplus_hr(NHDPlusHR_path, filter=None, drop_fcodes=None):
         #  filter to bbox using geopandas spatial indexing
         fl = fl.cx[filter[0]:filter[2], filter[1]:filter[3]]
         
-    #  read NHDPlusFlowlineVAA file from NHDPlusHR_path (NHDPlus HR FileGDB) and merge with flowlines
-    flvaa = gpd.read_file(NHDPlusHR_path, driver='FileGDB', layer='NHDPlusFlowlineVAA')
+    #  read NHDPlusFlowlineVAA file from NHDPlusHR_path (NHDPlus HR OpenFileGDB) and merge with flowlines
+    flvaa = gpd.read_file(NHDPlusHR_path, driver='OpenFileGDB', layer='NHDPlusFlowlineVAA')
     fl = fl.merge(flvaa[['NHDPlusID', 'ArbolateSu','StreamOrde', 'MaxElevSmo', 'MinElevSmo', 'Divergence']],
                   on='NHDPlusID', how='left'
                )
     
-    # read NHDPlusFlow file from NHDPlusHR_path (NHDPlus HR FileGDB) 
-    pf = gpd.read_file(NHDPlusHR_path, driver='FileGDB', layer='NHDPlusFlow')
+    # read NHDPlusFlow file from NHDPlusHR_path (NHDPlus HR OpenFileGDB) 
+    pf = gpd.read_file(NHDPlusHR_path, driver='OpenFileGDB', layer='NHDPlusFlow')
     
     #  Remove features classified as minor divergence pathways (Divergence == 2)
     #  from PlusFlow table
@@ -329,20 +329,20 @@ def load_nhdplus_hr(NHDPlusHR_paths, filter=None,
     print("loading NHDPlus HR hydrography data...")
     ta = time.time()
     
-    #  Read if using more than one HUC-4 FileGDB or one passed as list
+    #  Read if using more than one HUC-4 OpenFileGDB or one passed as list
     if isinstance(NHDPlusHR_paths, list):
         dfs = [read_nhdplus_hr(p, filter = filter) for p in NHDPlusHR_paths]
         #  make sure that all FLowlines have the same CRS
-        assert all(df.crs == dfs[0].crs for df in dfs), 'NHDPlusHR FileGDBs have have different CRSs'
+        assert all(df.crs == dfs[0].crs for df in dfs), 'NHDPlusHR OpenFileGDBs have have different CRSs'
         #  concat into single df
         df = gpd.GeoDataFrame(pd.concat(dfs, ignore_index=True), crs=dfs[0].crs)
-        #  get fileGDB crs
+        #  get OpenFileGDB crs
         crs = df.crs
     
     #  Read if using one HUC-4 FileGDP passed as str
     if isinstance(NHDPlusHR_paths, str):
         df = read_nhdplus_hr(NHDPlusHR_paths, filter = filter)
-        #  get fileGDB crs
+        #  get OpenFileGDB crs
         crs = df.crs
    
     #  Option to drop specified FCodes
