@@ -169,7 +169,7 @@ def make_graph(fromcomids, tocomids, one_to_many=True):
     #    return graph121
     # return graph
     from collections import defaultdict
-    fromcomids = np.array(fromcomids).astype(int)
+    fromcomids = np.array([int(i) for i in fromcomids])
     scalar_tocomids = np.all([np.isscalar(v) for v in tocomids])
     if scalar_tocomids:
         tocomid_sets = [{int(v)} for v in tocomids]
