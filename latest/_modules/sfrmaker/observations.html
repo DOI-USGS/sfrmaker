@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>sfrmaker.observations &mdash; SFRmaker 0.8.0.post15.dev0+g28a15c8 documentation</title>
+  <title>sfrmaker.observations &mdash; SFRmaker 0.8.0.post18+g6f68eb6 documentation</title>
   
 
   
@@ -69,7 +69,7 @@
             
             
               <div class="version">
-                0.8.0.post15.dev0+g28a15c8
+                0.8.0.post18+g6f68eb6
               </div>
             
           
@@ -94,13 +94,13 @@
               
             
             
-              <p class="caption"><span class="caption-text">Getting Started</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../philosophy.html"> Philosophy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../examples.html"> Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html"> Installation</a></li>
 </ul>
-<p class="caption"><span class="caption-text">User Guide</span></p>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../inputs.html"> Input Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../examples.html"> Using SFRmaker with a configuration file</a></li>
@@ -108,14 +108,14 @@
 <li class="toctree-l1"><a class="reference internal" href="../../notebooks/Streambed_elevation_demo.html"> How the streambed elevation sampling works</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../troubleshooting.html"> Troubleshooting</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Reference</span></p>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../api/index.html"> Code reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../config-summary.html"> Summary of configuration file options</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../release-history.html"> Release History</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../contributing.html"> Contributing to SFRmaker</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Bibliography</span></p>
+<p class="caption" role="heading"><span class="caption-text">Bibliography</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../references.html"> References cited</a></li>
 </ul>
@@ -190,6 +190,7 @@
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">geopandas</span> <span class="k">as</span> <span class="nn">gpd</span>
 <span class="kn">from</span> <span class="nn">shapely.geometry</span> <span class="kn">import</span> <span class="n">Polygon</span>
 <span class="kn">from</span> <span class="nn">gisutils</span> <span class="kn">import</span> <span class="n">shp2df</span>
 <span class="k">try</span><span class="p">:</span>
@@ -434,6 +435,8 @@
                  <span class="n">x_column_in_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">y_column_in_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">reach_id_col</span><span class="o">=</span><span class="s1">&#39;rno&#39;</span><span class="p">,</span>
+                 <span class="n">ireach_col</span><span class="o">=</span><span class="s1">&#39;ireach&#39;</span><span class="p">,</span>
+                 <span class="n">iseg_col</span><span class="o">=</span><span class="s1">&#39;iseg&#39;</span><span class="p">,</span>
                  <span class="n">site_number_col</span><span class="o">=</span><span class="s1">&#39;site_no&#39;</span><span class="p">,</span>
                  <span class="n">keep_columns</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">perimeter_buffer</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
@@ -444,17 +447,21 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    site_data: ESRI shapefile</span>
+<span class="sd">    site_data: (Geo)DataFrame or shapefile</span>
 <span class="sd">        DataFrame or shapefile with point locations and attribute data for</span>
 <span class="sd">        stream flow observation sites. Point locations can be specified</span>
 <span class="sd">        in a DataFrame by either x_column_in_data and y_column_in_data, or</span>
-<span class="sd">        a &#39;geometry&#39; column of shapely points. If shapefiles are provided</span>
-<span class="sd">        for both site_data and reach_data, they can be in any CRS, but both must have .prj files.</span>
-<span class="sd">    reach_data: ESRI shapefile</span>
+<span class="sd">        a &#39;geometry&#39; column of shapely points. If shapefiles or GeoDataFrames are provided</span>
+<span class="sd">        for both site_data and reach_data, they can be in any CRS, but both must have valid</span>
+<span class="sd">        CRS references (.prj file or .crs attribute); otherwise site_data and</span>
+<span class="sd">        reach_data are assumed to be in the same CRS.</span>
+<span class="sd">    reach_data: (Geo)DataFrame or shapefile</span>
 <span class="sd">        SFRData.reach_data DataFrame, or shapefile equivalent</span>
 <span class="sd">        with line-arcs representing all segments and/or reaches.</span>
-<span class="sd">        If shapefiles are provided for both site_data and reach_data,</span>
-<span class="sd">        they can be in any CRS, but both must have .prj files.</span>
+<span class="sd">        If shapefiles or GeoDataFrames are provided</span>
+<span class="sd">        for both site_data and reach_data, they can be in any CRS, but both must have valid</span>
+<span class="sd">        CRS references (.prj file or .crs attribute); otherwise site_data and</span>
+<span class="sd">        reach_data are assumed to be in the same CRS.</span>
 <span class="sd">    active_area_shapefile: ESRI shapefile or shapely polygon (optional)</span>
 <span class="sd">        Shapefile or polygon, in same CRS as sfr_lines_shapefile,</span>
 <span class="sd">        defining areal extent (perimeter) of SFR network.</span>
@@ -463,7 +470,13 @@
 <span class="sd">    y_column_in_data : str (optional)</span>
 <span class="sd">        Column in data with site y-coordinates (in same CRS as SFR network).</span>
 <span class="sd">    reach_id_col: str</span>
-<span class="sd">        Column with unique number for each stream line-arc. default &quot;rno&quot;</span>
+<span class="sd">        Column with 1-based unique number for each stream line-arc. default &quot;rno&quot;</span>
+<span class="sd">    ireach_col: str</span>
+<span class="sd">        Column with 1-based reach number within segment (i.e. in the modflow-2005 SFR data model),</span>
+<span class="sd">        by default, &#39;ireach&#39;</span>
+<span class="sd">    iseg_col: str</span>
+<span class="sd">        Column with 1-based reach segment number (i.e. in the modflow-2005 SFR data model),</span>
+<span class="sd">        by default, &#39;iseg&#39;</span>
 <span class="sd">    site_number_col : str</span>
 <span class="sd">        Name of column in sites_shapefile with number identifying each</span>
 <span class="sd">        site to be located. default &quot;site_no&quot;</span>
@@ -488,17 +501,20 @@
     <span class="n">locs_crs</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="c1"># read in sfr lines</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">reach_data</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
-        <span class="n">sfrlines</span> <span class="o">=</span> <span class="n">shp2df</span><span class="p">(</span><span class="n">reach_data</span><span class="p">)</span>
-        <span class="n">sfr_crs</span> <span class="o">=</span> <span class="n">get_shapefile_crs</span><span class="p">(</span><span class="n">reach_data</span><span class="p">)</span>
+        <span class="n">sfrlines</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">reach_data</span><span class="p">)</span>
+        <span class="n">sfr_crs</span> <span class="o">=</span> <span class="n">sfrlines</span><span class="o">.</span><span class="n">crs</span>
     <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">reach_data</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
         <span class="n">sfrlines</span> <span class="o">=</span> <span class="n">reach_data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">sfr_crs</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">sfrlines</span><span class="p">,</span> <span class="s1">&#39;crs&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Datatype for reach_data not understood: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">reach_data</span><span class="p">))</span>
-    <span class="n">sfrlines</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">sfrlines</span><span class="p">[</span><span class="n">reach_id_col</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">reach_id_col</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sfrlines</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+        <span class="n">sfrlines</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sfrlines</span><span class="p">))</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">sfrlines</span><span class="p">[</span><span class="n">reach_id_col</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sfrlines</span><span class="p">))</span> <span class="o">+</span> <span class="mi">1</span>
 
     <span class="c1"># sites to locate</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">site_data</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
-        <span class="n">locs</span> <span class="o">=</span> <span class="n">shp2df</span><span class="p">(</span><span class="n">site_data</span><span class="p">)</span>
+        <span class="n">locs</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">site_data</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">site_data</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
             <span class="n">locs_crs</span> <span class="o">=</span> <span class="n">get_shapefile_crs</span><span class="p">(</span><span class="n">site_data</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
         <span class="k">else</span><span class="p">:</span>
@@ -506,6 +522,7 @@
         <span class="n">locs</span><span class="p">[</span><span class="s1">&#39;site_no&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">locs</span><span class="p">[</span><span class="n">site_number_col</span><span class="p">]</span>  <span class="c1"># str_ids(locs.site_no)</span>
     <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">site_data</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
         <span class="n">locs</span> <span class="o">=</span> <span class="n">site_data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">locs_crs</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">locs</span><span class="p">,</span> <span class="s1">&#39;crs&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Datatype for site_data not understood: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">site_data</span><span class="p">))</span>
 
@@ -526,17 +543,18 @@
     <span class="n">reach_id_col</span> <span class="o">=</span> <span class="n">reach_id_col</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
     <span class="n">locs</span><span class="p">[</span><span class="n">reach_id_col</span><span class="p">]</span> <span class="o">=</span> <span class="n">ids</span>
     <span class="n">locs</span><span class="p">[</span><span class="s1">&#39;distance&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">distances</span>
-    <span class="k">if</span> <span class="s1">&#39;iseg&#39;</span> <span class="ow">in</span> <span class="n">sfrlines</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
-        <span class="n">locs</span><span class="p">[</span><span class="s1">&#39;segment&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sfrlines</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">ids</span><span class="p">,</span> <span class="s1">&#39;iseg&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
-        <span class="n">locs</span><span class="p">[</span><span class="s1">&#39;reach&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sfrlines</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">ids</span><span class="p">,</span> <span class="s1">&#39;ireach&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
-    <span class="n">locs</span> <span class="o">=</span> <span class="n">locs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">locs</span><span class="o">.</span><span class="n">distance</span> <span class="o">&lt;=</span> <span class="n">distance_threshold</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">iseg_col</span> <span class="ow">in</span> <span class="n">sfrlines</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+        <span class="n">locs</span><span class="p">[</span><span class="n">iseg_col</span><span class="p">]</span> <span class="o">=</span> <span class="n">sfrlines</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">ids</span><span class="p">,</span> <span class="n">iseg_col</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+    <span class="k">if</span> <span class="n">ireach_col</span> <span class="ow">in</span> <span class="n">sfrlines</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+        <span class="n">locs</span><span class="p">[</span><span class="n">ireach_col</span><span class="p">]</span> <span class="o">=</span> <span class="n">sfrlines</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">ids</span><span class="p">,</span> <span class="n">ireach_col</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+    <span class="n">locs</span> <span class="o">=</span> <span class="n">locs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">locs</span><span class="p">[</span><span class="s1">&#39;distance&#39;</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">distance_threshold</span><span class="p">]</span>
 
     <span class="c1"># cull observations at or outside of model perimeter</span>
     <span class="c1"># to only those along model perimeter</span>
     <span class="k">if</span> <span class="n">active_area_shapefile</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">active_area</span> <span class="o">=</span> <span class="n">active_area_shapefile</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">active_area_shapefile</span><span class="p">,</span> <span class="n">Polygon</span><span class="p">):</span>
-            <span class="n">active_area</span> <span class="o">=</span> <span class="n">shp2df</span><span class="p">(</span><span class="n">active_area_shapefile</span><span class="p">)</span><span class="o">.</span><span class="n">geometry</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">active_area</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">active_area_shapefile</span><span class="p">)</span><span class="o">.</span><span class="n">geometry</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">perimeter</span> <span class="o">=</span> <span class="n">active_area</span><span class="o">.</span><span class="n">exterior</span><span class="o">.</span><span class="n">buffer</span><span class="p">(</span><span class="n">perimeter_buffer</span><span class="p">)</span>
         <span class="n">perimeter_inside_buffer</span> <span class="o">=</span> <span class="n">Polygon</span><span class="p">(</span><span class="n">perimeter</span><span class="o">.</span><span class="n">interiors</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 
@@ -549,7 +567,7 @@
 
     <span class="k">if</span> <span class="n">keep_columns</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">keep_columns</span> <span class="o">=</span> <span class="n">locs</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="p">[</span><span class="n">reach_id_col</span><span class="p">,</span> <span class="s1">&#39;segment&#39;</span><span class="p">,</span> <span class="s1">&#39;reach&#39;</span><span class="p">,</span> <span class="s1">&#39;geometry&#39;</span><span class="p">]:</span>
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="p">[</span><span class="n">reach_id_col</span><span class="p">,</span> <span class="n">iseg_col</span><span class="p">,</span> <span class="n">ireach_col</span><span class="p">,</span> <span class="s1">&#39;geometry&#39;</span><span class="p">]:</span>
         <span class="k">if</span> <span class="n">c</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">keep_columns</span> <span class="ow">and</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">locs</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
             <span class="n">keep_columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
 
@@ -561,9 +579,9 @@
                        <span class="n">gage_package_filename</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                        <span class="n">gage_namfile_entries_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                        <span class="n">model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                       <span class="n">obsname_col</span><span class="o">=</span><span class="s1">&#39;obsname&#39;</span><span class="p">,</span>
+                       <span class="n">sitename_col</span><span class="o">=</span><span class="s1">&#39;site_no&#39;</span><span class="p">,</span>
                        <span class="n">gage_package_unit</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span>
-                       <span class="n">start_gage_unit</span><span class="o">=</span><span class="mi">228</span><span class="p">):</span>
+                       <span class="n">start_gage_unit</span><span class="o">=</span><span class="mi">200</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">    Parameters</span>
@@ -572,13 +590,32 @@
 <span class="sd">        Table of observation locations. Must have columns:</span>
 <span class="sd">        &#39;iseg&#39;: segment number</span>
 <span class="sd">        &#39;ireach&#39;: reach number</span>
-<span class="sd">        obsname_col: specified by obsname_col argument (default &#39;obsname&#39;)</span>
-<span class="sd">    gage_package_filename :</span>
-<span class="sd">    gage_namfile_entries_file :</span>
-<span class="sd">    model :</span>
-<span class="sd">    obsname_col :</span>
-<span class="sd">    gage_package_unit :</span>
-<span class="sd">    start_gage_unit :</span>
+<span class="sd">        sitename_col: specified by sitename_col argument (default &#39;site_no&#39;)</span>
+<span class="sd">    gage_package_filename : str or pathlike</span>
+<span class="sd">        Name for the gage package file, which will be written to the </span>
+<span class="sd">        model workspace (``model.model_ws``) of the supplied flopy model instance. </span>
+<span class="sd">        This must also be manually added to the MODFLOW .nam file, for example::</span>
+<span class="sd">        </span>
+<span class="sd">            GAGE          25 br_trans.gage</span>
+<span class="sd">            </span>
+<span class="sd">        Or, a new namefile can be written from the supplied flopy model instance.</span>
+<span class="sd">    gage_namfile_entries_file : str or pathlike</span>
+<span class="sd">        Namefile entries for the gage package output files will be written</span>
+<span class="sd">        to this file. The contents of this file must then be manually</span>
+<span class="sd">        copied and pasted into the MODFLOW .nam file.</span>
+<span class="sd">        By default, None, in which case this file is named after gage_package_filename.</span>
+<span class="sd">    model : flopy model instance</span>
+<span class="sd">        Used for writing the gage package input file via flopy.</span>
+<span class="sd">    sitename_col : str</span>
+<span class="sd">        Unique name or number for each gage site.</span>
+<span class="sd">        By default, &#39;site_no&#39;</span>
+<span class="sd">    gage_package_unit : int</span>
+<span class="sd">        MODFLOW unit number to assign to gage package.</span>
+<span class="sd">        By default, 25</span>
+<span class="sd">    start_gage_unit : int</span>
+<span class="sd">        Modflow unit numbers for each gage package output file </span>
+<span class="sd">        will be assigned sequentially starting at this number.</span>
+<span class="sd">        By default, 200</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -598,8 +635,8 @@
                                                  <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">gage_namfile_entries_file</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
     <span class="c1"># read in stream gage observation locations from locate_flux_targets_in_SFR.py</span>
     <span class="n">df</span> <span class="o">=</span> <span class="n">location_data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-    <span class="n">df</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="p">[</span><span class="n">obsname_col</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">df</span><span class="p">[</span><span class="s1">&#39;gagefile&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">.ggo&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">obsname</span><span class="p">)</span> <span class="k">for</span> <span class="n">obsname</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">obsname</span><span class="p">]</span>
+    <span class="n">df</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="p">[</span><span class="n">sitename_col</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">df</span><span class="p">[</span><span class="s1">&#39;gagefile&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">sitename</span><span class="si">}</span><span class="s1">.ggo&#39;</span> <span class="k">for</span> <span class="n">sitename</span> <span class="ow">in</span> <span class="n">df</span><span class="p">[</span><span class="n">sitename_col</span><span class="p">]]</span>
 
     <span class="k">if</span> <span class="n">model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">flopy</span><span class="p">:</span>
         <span class="c1"># create flopy gage package object</span>
@@ -611,10 +648,10 @@
                              <span class="n">gage_data</span><span class="o">=</span><span class="n">gage_data</span><span class="p">,</span> <span class="n">files</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">gagefile</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
                              <span class="n">unitnumber</span><span class="o">=</span><span class="n">gage_package_unit</span>
                              <span class="p">)</span>
-        <span class="n">gag</span><span class="o">.</span><span class="n">fn_path</span> <span class="o">=</span> <span class="n">gage_package_filename</span>
+        <span class="n">gag</span><span class="o">.</span><span class="n">fn_path</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">gage_package_filename</span><span class="p">)</span>
         <span class="n">gag</span><span class="o">.</span><span class="n">write_file</span><span class="p">()</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">j</span><span class="o">=</span><span class="mi">2</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;writing a gage package without Flopy&#39;</span><span class="p">)</span>
 
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">gage_namfile_entries_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">output</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">gagefile</span><span class="o">.</span><span class="n">values</span><span class="p">):</span>
@@ -674,7 +711,7 @@
   <div role="contentinfo">
     <p>
       <span class="lastupdated">
-        Last updated on Jun 11, 2021.
+        Last updated on Aug 18, 2021.
       </span>
 
     </p>

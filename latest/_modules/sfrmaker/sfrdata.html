@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>sfrmaker.sfrdata &mdash; SFRmaker 0.8.0.post15.dev0+g28a15c8 documentation</title>
+  <title>sfrmaker.sfrdata &mdash; SFRmaker 0.8.0.post18+g6f68eb6 documentation</title>
   
 
   
@@ -69,7 +69,7 @@
             
             
               <div class="version">
-                0.8.0.post15.dev0+g28a15c8
+                0.8.0.post18+g6f68eb6
               </div>
             
           
@@ -94,13 +94,13 @@
               
             
             
-              <p class="caption"><span class="caption-text">Getting Started</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../philosophy.html"> Philosophy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../examples.html"> Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html"> Installation</a></li>
 </ul>
-<p class="caption"><span class="caption-text">User Guide</span></p>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../inputs.html"> Input Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../examples.html"> Using SFRmaker with a configuration file</a></li>
@@ -108,14 +108,14 @@
 <li class="toctree-l1"><a class="reference internal" href="../../notebooks/Streambed_elevation_demo.html"> How the streambed elevation sampling works</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../troubleshooting.html"> Troubleshooting</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Reference</span></p>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../api/index.html"> Code reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../config-summary.html"> Summary of configuration file options</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../release-history.html"> Release History</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../contributing.html"> Contributing to SFRmaker</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Bibliography</span></p>
+<p class="caption" role="heading"><span class="caption-text">Bibliography</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../references.html"> References cited</a></li>
 </ul>
@@ -1820,7 +1820,8 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">period_data</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">pd_file</span><span class="p">)</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;wrote </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pd_file</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="SFRData.write_gage_package"><a class="viewcode-back" href="../../api/sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.write_gage_package">[docs]</a>    <span class="k">def</span> <span class="nf">write_gage_package</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">gage_package_unit</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span>
+<div class="viewcode-block" id="SFRData.write_gage_package"><a class="viewcode-back" href="../../api/sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.write_gage_package">[docs]</a>    <span class="k">def</span> <span class="nf">write_gage_package</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sitename_col</span><span class="o">=</span><span class="s1">&#39;obsname&#39;</span><span class="p">,</span>
+                           <span class="n">gage_package_unit</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span>
                            <span class="n">gage_starting_unit_number</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Write observation input for the MODFLOW-2005 Gage Package.</span>
 
@@ -1829,6 +1830,11 @@
 <span class="sd">        filename : str, optional</span>
 <span class="sd">            Gage package file, by default None, in which case</span>
 <span class="sd">            :py:attr:`SFRData.observations_file` is used.</span>
+<span class="sd">        sitename_col : str</span>
+<span class="sd">            Unique name or number for each gage site.</span>
+<span class="sd">            By default, &#39;obsname&#39;, which is the default field in the </span>
+<span class="sd">            :attr:`SFRData.observations` table containing either </span>
+<span class="sd">            site numbers or site number-variable pairs.</span>
 <span class="sd">        gage_package_unit : int, optional</span>
 <span class="sd">            Unit number for Gage Package, by default 25</span>
 <span class="sd">        gage_starting_unit_number : int, optional</span>
@@ -1854,6 +1860,7 @@
                                   <span class="n">gage_package_filename</span><span class="o">=</span><span class="n">filename</span><span class="p">,</span>
                                   <span class="n">gage_namfile_entries_file</span><span class="o">=</span><span class="n">gage_namfile_entries_file</span><span class="p">,</span>
                                   <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
+                                  <span class="n">sitename_col</span><span class="o">=</span><span class="n">sitename_col</span><span class="p">,</span>
                                   <span class="n">gage_package_unit</span><span class="o">=</span><span class="n">gage_package_unit</span><span class="p">,</span>
                                   <span class="n">start_gage_unit</span><span class="o">=</span><span class="n">gage_starting_unit_number</span><span class="p">)</span></div>
 
@@ -1980,7 +1987,7 @@
   <div role="contentinfo">
     <p>
       <span class="lastupdated">
-        Last updated on Jun 11, 2021.
+        Last updated on Aug 18, 2021.
       </span>
 
     </p>

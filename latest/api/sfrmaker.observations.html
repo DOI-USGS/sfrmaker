@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>The Observations Module &mdash; SFRmaker 0.8.0.post15.dev0+g28a15c8 documentation</title>
+  <title>The Observations Module &mdash; SFRmaker 0.8.0.post18+g6f68eb6 documentation</title>
   
 
   
@@ -71,7 +71,7 @@
             
             
               <div class="version">
-                0.8.0.post15.dev0+g28a15c8
+                0.8.0.post18+g6f68eb6
               </div>
             
           
@@ -96,13 +96,13 @@
               
             
             
-              <p class="caption"><span class="caption-text">Getting Started</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../philosophy.html"> Philosophy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples.html"> Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html"> Installation</a></li>
 </ul>
-<p class="caption"><span class="caption-text">User Guide</span></p>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../inputs.html"> Input Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples.html"> Using SFRmaker with a configuration file</a></li>
@@ -110,7 +110,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../notebooks/Streambed_elevation_demo.html"> How the streambed elevation sampling works</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../troubleshooting.html"> Troubleshooting</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Reference</span></p>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="index.html"> Code reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="sfrmaker.flows.html">Flows Module</a></li>
@@ -127,7 +127,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../release-history.html"> Release History</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../contributing.html"> Contributing to SFRmaker</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Bibliography</span></p>
+<p class="caption" role="heading"><span class="caption-text">Bibliography</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../references.html"> References cited</a></li>
 </ul>
@@ -318,22 +318,26 @@ defined by x, y.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="sfrmaker.observations.locate_sites">
-<span class="sig-prename descclassname"><span class="pre">sfrmaker.observations.</span></span><span class="sig-name descname"><span class="pre">locate_sites</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">site_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reach_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">active_area_shapefile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_column_in_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_column_in_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reach_id_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rno'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site_number_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'site_no'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_columns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">perimeter_buffer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/observations.html#locate_sites"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.observations.locate_sites" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">sfrmaker.observations.</span></span><span class="sig-name descname"><span class="pre">locate_sites</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">site_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reach_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">active_area_shapefile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_column_in_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_column_in_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reach_id_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rno'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ireach_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ireach'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iseg_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'iseg'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site_number_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'site_no'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_columns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">perimeter_buffer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/observations.html#locate_sites"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.observations.locate_sites" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get SFR reach locations corresponding to x, y points
 (e.g. measurement site locations).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>site_data: ESRI shapefile</strong></dt><dd><p>DataFrame or shapefile with point locations and attribute data for
+<dt><strong>site_data: (Geo)DataFrame or shapefile</strong></dt><dd><p>DataFrame or shapefile with point locations and attribute data for
 stream flow observation sites. Point locations can be specified
 in a DataFrame by either x_column_in_data and y_column_in_data, or
-a ‘geometry’ column of shapely points. If shapefiles are provided
-for both site_data and reach_data, they can be in any CRS, but both must have .prj files.</p>
+a ‘geometry’ column of shapely points. If shapefiles or GeoDataFrames are provided
+for both site_data and reach_data, they can be in any CRS, but both must have valid
+CRS references (.prj file or .crs attribute); otherwise site_data and
+reach_data are assumed to be in the same CRS.</p>
 </dd>
-<dt><strong>reach_data: ESRI shapefile</strong></dt><dd><p>SFRData.reach_data DataFrame, or shapefile equivalent
+<dt><strong>reach_data: (Geo)DataFrame or shapefile</strong></dt><dd><p>SFRData.reach_data DataFrame, or shapefile equivalent
 with line-arcs representing all segments and/or reaches.
-If shapefiles are provided for both site_data and reach_data,
-they can be in any CRS, but both must have .prj files.</p>
+If shapefiles or GeoDataFrames are provided
+for both site_data and reach_data, they can be in any CRS, but both must have valid
+CRS references (.prj file or .crs attribute); otherwise site_data and
+reach_data are assumed to be in the same CRS.</p>
 </dd>
 <dt><strong>active_area_shapefile: ESRI shapefile or shapely polygon (optional)</strong></dt><dd><p>Shapefile or polygon, in same CRS as sfr_lines_shapefile,
 defining areal extent (perimeter) of SFR network.</p>
@@ -342,7 +346,13 @@ defining areal extent (perimeter) of SFR network.</p>
 </dd>
 <dt><strong>y_column_in_data</strong><span class="classifier">str (optional)</span></dt><dd><p>Column in data with site y-coordinates (in same CRS as SFR network).</p>
 </dd>
-<dt><strong>reach_id_col: str</strong></dt><dd><p>Column with unique number for each stream line-arc. default “rno”</p>
+<dt><strong>reach_id_col: str</strong></dt><dd><p>Column with 1-based unique number for each stream line-arc. default “rno”</p>
+</dd>
+<dt><strong>ireach_col: str</strong></dt><dd><p>Column with 1-based reach number within segment (i.e. in the modflow-2005 SFR data model),
+by default, ‘ireach’</p>
+</dd>
+<dt><strong>iseg_col: str</strong></dt><dd><p>Column with 1-based reach segment number (i.e. in the modflow-2005 SFR data model),
+by default, ‘iseg’</p>
 </dd>
 <dt><strong>site_number_col</strong><span class="classifier">str</span></dt><dd><p>Name of column in sites_shapefile with number identifying each
 site to be located. default “site_no”</p>
@@ -369,21 +379,40 @@ be included.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="sfrmaker.observations.write_gage_package">
-<span class="sig-prename descclassname"><span class="pre">sfrmaker.observations.</span></span><span class="sig-name descname"><span class="pre">write_gage_package</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">location_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gage_package_filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gage_namfile_entries_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obsname_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'obsname'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gage_package_unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">25</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_gage_unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">228</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/observations.html#write_gage_package"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.observations.write_gage_package" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
+<span class="sig-prename descclassname"><span class="pre">sfrmaker.observations.</span></span><span class="sig-name descname"><span class="pre">write_gage_package</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">location_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gage_package_filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gage_namfile_entries_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sitename_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'site_no'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gage_package_unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">25</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_gage_unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">200</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/observations.html#write_gage_package"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.observations.write_gage_package" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
+<dd class="field-odd"><dl>
 <dt><strong>location_data</strong><span class="classifier">pandas.DataFrame</span></dt><dd><p>Table of observation locations. Must have columns:
 ‘iseg’: segment number
 ‘ireach’: reach number
-obsname_col: specified by obsname_col argument (default ‘obsname’)</p>
+sitename_col: specified by sitename_col argument (default ‘site_no’)</p>
 </dd>
-<dt><strong>gage_package_filename :</strong></dt><dd></dd>
-<dt><strong>gage_namfile_entries_file :</strong></dt><dd></dd>
-<dt><strong>model :</strong></dt><dd></dd>
-<dt><strong>obsname_col :</strong></dt><dd></dd>
-<dt><strong>gage_package_unit :</strong></dt><dd></dd>
-<dt><strong>start_gage_unit :</strong></dt><dd></dd>
+<dt><strong>gage_package_filename</strong><span class="classifier">str or pathlike</span></dt><dd><p>Name for the gage package file, which will be written to the 
+model workspace (<code class="docutils literal notranslate"><span class="pre">model.model_ws</span></code>) of the supplied flopy model instance. 
+This must also be manually added to the MODFLOW .nam file, for example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">GAGE</span>          <span class="mi">25</span> <span class="n">br_trans</span><span class="o">.</span><span class="n">gage</span>
+</pre></div>
+</div>
+<p>Or, a new namefile can be written from the supplied flopy model instance.</p>
+</dd>
+<dt><strong>gage_namfile_entries_file</strong><span class="classifier">str or pathlike</span></dt><dd><p>Namefile entries for the gage package output files will be written
+to this file. The contents of this file must then be manually
+copied and pasted into the MODFLOW .nam file.
+By default, None, in which case this file is named after gage_package_filename.</p>
+</dd>
+<dt><strong>model</strong><span class="classifier">flopy model instance</span></dt><dd><p>Used for writing the gage package input file via flopy.</p>
+</dd>
+<dt><strong>sitename_col</strong><span class="classifier">str</span></dt><dd><p>Unique name or number for each gage site.
+By default, ‘site_no’</p>
+</dd>
+<dt><strong>gage_package_unit</strong><span class="classifier">int</span></dt><dd><p>MODFLOW unit number to assign to gage package.
+By default, 25</p>
+</dd>
+<dt><strong>start_gage_unit</strong><span class="classifier">int</span></dt><dd><p>Modflow unit numbers for each gage package output file 
+will be assigned sequentially starting at this number.
+By default, 200</p>
+</dd>
 </dl>
 </dd>
 </dl>
@@ -435,7 +464,7 @@ will be written to the listing file immediately after it is read.</p>
   <div role="contentinfo">
     <p>
       <span class="lastupdated">
-        Last updated on Jun 11, 2021.
+        Last updated on Aug 18, 2021.
       </span>
 
     </p>
