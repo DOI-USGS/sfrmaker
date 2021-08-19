@@ -105,7 +105,8 @@ def test_make_sfr(outdir,
     # which has substantial drainage upstream of the test case domain
     # is at least 30 feet (that the first reach in the model was not 
     # assigned the default width of 1 but was instead computed from a non-zero asum value)
-    min_tf_width = sfr.reach_data.loc[sfr.reach_data.name == 'Tyler Forks', 'width'].min()
+    rd = sfr.reach_data.dropna(subset=['asum'], axis=0)
+    min_tf_width = rd.loc[rd.name == 'Tyler Forks', 'width'].min()
     assert min_tf_width > 30.
     
     botm = m.dis.botm.array.copy()

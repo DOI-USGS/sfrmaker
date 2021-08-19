@@ -113,7 +113,7 @@ class SFRData(DataPackage):
               'iseg': int, 'ireach': int, 'outreach': int, 'line_id': int,
               'per': int, 'nseg': int, 'icalc': int, 'outseg': int,
               'iupseg': int, 'iprior': int, 'nstrpts': int,
-              'name': np.object, 'geometry': np.object}
+              'name': object, 'geometry': object}
 
     # LENUNI = {"u": 0, "f": 1, "m": 2, "c": 3}
     len_const = {0: 1.0, 1: 1.486, 2: 1.0, 3: 100.}
