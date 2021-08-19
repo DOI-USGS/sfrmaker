@@ -309,7 +309,7 @@ class StructuredGrid(Grid):
     @property
     def isfr(self):
         return np.reshape(self.df.isfr.values,
-                          (self.nrow, self.ncol)).astype(np.int32)
+                          (self.nrow, self.ncol)).astype(int)
 
     @property
     def uniform(self):
