@@ -176,5 +176,6 @@ def test_tylerforks_from_config(config_file, dem):
     assert os.path.exists('shps/tf_sfr_outlets.shp')
     assert os.path.exists('shps/tf_sfr_routing.shp')
     assert len(sfrdata.reach_data) >= 155  # number of reaches with active area defined
-    assert np.allclose(sfrdata.reach_data.strtop.values.min(), 1125, rtol=0.01)
+    rd = sfrdata.reach_data.dropna(subset=['asum'], axis=0)
+    assert np.allclose(rd.strtop.values.min(), 1125, rtol=0.01)
     assert sfrdata.grid.crs.srs == 'EPSG:26715'

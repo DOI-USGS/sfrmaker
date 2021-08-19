@@ -340,7 +340,7 @@ class StructuredGrid(Grid):
         """
         if self.transform is not None:
             # vectorize the raster
-            shapes = features.shapes(self.isfr, transform=self.transform)
+            shapes = features.shapes(self.isfr.astype(np.int32), transform=self.transform)
             # convert the shapes corresponding to raster values of 1 to shapely objects
             shapes = list(shapes)
             shapes = [shape(s[0]) for s in list(shapes) if s[1] == 1]

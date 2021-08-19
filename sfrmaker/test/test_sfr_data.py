@@ -151,7 +151,7 @@ def test_create_mf6sfr(mf6sfr, shellmound_sfrdata, shellmound_model):
     packagedata['j'] = j
     packagedata.drop('cellid', axis=1, inplace=True)
     for col in packagedata.columns:
-        if packagedata[col].dtype == np.object:
+        if packagedata[col].dtype == object:
             packagedata[col] = pd.to_numeric(packagedata[col])
     reach_data = shellmound_sfrdata.reach_data
     assert np.array_equal(packagedata['rno'].values + 1, reach_data['rno'].values)
@@ -181,7 +181,7 @@ def test_flopy_mf6sfr_outfile(mf6sfr, mf6sfr_outfile):
     for col in pkdata1.dtype.names:
         if col == 'cellid':
             continue
-        elif pkdata1[col].dtype == np.object:
+        elif pkdata1[col].dtype == object:
             c1 = pd.to_numeric(pkdata1[col])
             c2 = pd.to_numeric(mf6sfr.packagedata.array[col])
         else:
@@ -302,5 +302,6 @@ def test_run_diagnostics(sfrdata):
 def test_reach_asum(sfrdata):
     # note: asums will only be greater than zero if an arbolate sum field 
     # is supplied as input to Lines class
-    assert sfrdata.reach_data.asum.sum() > 0
-    assert np.all(sfrdata.reach_data.asum >= 0)
+    rd = sfrdata.reach_data.dropna(subset=['asum'], axis=0)
+    assert rd.asum.sum() > 0
+    assert np.all(rd.asum >= 0)
