@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Basic usage of SFRmaker in a scripting context &mdash; SFRmaker 0.8.0.post15.dev0+g62ca6da documentation</title>
+  <title>Basic usage of SFRmaker in a scripting context &mdash; SFRmaker 0.8.0.post20+gdb67d41 documentation</title>
   
 
   
@@ -41,14 +41,14 @@
         <script src="../_static/copybutton.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "document", "processHtmlClass": "math|output_area"}}</script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
     
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Demonstration of how sfrmaker handles streambed elevations" href="Streambed_elevation_demo.html" />
+    <link rel="next" title="Using SFRmaker with NHDPlus High Resolution" href="lines_from_NHDPlusHR_demo.html" />
     <link rel="prev" title="Input data requirements" href="../inputs.html" /> 
 </head>
 
@@ -73,7 +73,7 @@
             
             
               <div class="version">
-                0.8.0.post15.dev0+g62ca6da
+                0.8.0.post20+gdb67d41
               </div>
             
           
@@ -98,13 +98,13 @@
               
             
             
-              <p class="caption"><span class="caption-text">Getting Started</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../philosophy.html"> Philosophy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples.html"> Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html"> Installation</a></li>
 </ul>
-<p class="caption"><span class="caption-text">User Guide</span></p>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../inputs.html"> Input Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples.html"> Using SFRmaker with a configuration file</a></li>
@@ -130,17 +130,18 @@
 <li class="toctree-l2"><a class="reference internal" href="#Writing-shapefiles">Writing shapefiles</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="Streambed_elevation_demo.html"> How the streambed elevation sampling works</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lines_from_NHDPlusHR_demo.html"> Using SFRmaker with NHDPlus High Resolution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../concepts.html"> Concepts and methods</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../troubleshooting.html"> Troubleshooting</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Reference</span></p>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../api/index.html"> Code reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../config-summary.html"> Summary of configuration file options</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../release-history.html"> Release History</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../contributing.html"> Contributing to SFRmaker</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Bibliography</span></p>
+<p class="caption" role="heading"><span class="caption-text">Bibliography</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../references.html"> References cited</a></li>
 </ul>
@@ -560,10 +561,10 @@ reading ../tylerforks/NHDPlus/NHDPlusAttributes/PlusFlow.dbf...
 reading ../tylerforks/NHDPlus/NHDPlusAttributes/elevslope.dbf...
 --&gt; building dataframe... (may take a while for large shapefiles)
 
-load finished in 0.28s
+load finished in 0.34s
 
 Getting routing information from NHDPlus Plusflow table...
-finished in 0.02s
+finished in 0.06s
 
 </pre></div></div>
 </div>
@@ -602,10 +603,10 @@ reading ../tylerforks/NHDPlus/NHDPlusAttributes/PlusFlow.dbf...
 reading ../tylerforks/NHDPlus/NHDPlusAttributes/elevslope.dbf...
 --&gt; building dataframe... (may take a while for large shapefiles)
 
-load finished in 0.09s
+load finished in 0.11s
 
 Getting routing information from NHDPlus Plusflow table...
-finished in 0.02s
+finished in 0.06s
 
 </pre></div></div>
 </div>
@@ -712,7 +713,7 @@ reading ../tylerforks/active_area.shp...
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.image.AxesImage at 0x7fdcb2f785e0&gt;
+&lt;matplotlib.image.AxesImage at 0x7f0496bde1f0&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -763,34 +764,18 @@ MODFLOW 5 layer(s) 111 row(s) 160 column(s) 1 stress period(s)
 </pre></div>
 </div>
 </div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-
-SFRmaker version 0.8.0.post15.dev0+g62ca6da
-
-Creating sfr dataset...
-
-Creating grid class instance from flopy Grid instance...
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-/home/runner/work/sfrmaker/sfrmaker/sfrmaker/gis.py:32: UserWarning: The proj_str argument is deprecated, use crs instead.
-  warnings.warn(&#39;The proj_str argument is deprecated, use crs instead.&#39;)
-</pre></div></div>
-</div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-grid class created in 0.32s
+
+SFRmaker version 0.8.0.post20+gdb67d41
+
+Creating sfr dataset...
+
+Creating grid class instance from flopy Grid instance...
+grid class created in 0.47s
 
 Model grid information
 structured grid
@@ -813,26 +798,26 @@ EPSG:26715
 
 
 Culling hydrography to active area...
-starting lines: 17
-remaining lines: 17
-finished in 0.00s
+starting lines: 45
+remaining lines: 42
+finished in 0.01s
 
 
-Intersecting 17 flowlines with 17,760 grid cells...
+Intersecting 42 flowlines with 17,760 grid cells...
 
 Building spatial index...
-finished in 1.68s
+finished in 2.57s
 
-Intersecting 17 features...
-17
-finished in 0.08s
+Intersecting 42 features...
+42
+finished in 0.13s
 
 Setting up reach data... (may take a few minutes for large grids)
-finished in 0.21s
+finished in 0.40s
 
 Computing widths...
 
-Dropping 30 reaches with length &lt; 12.50 feet...
+Dropping 46 reaches with length &lt; 12.50 feet...
 
 Repairing routing connections...
 enforcing best segment numbering...
@@ -850,7 +835,7 @@ bounds: 682688.00, 5139052.00, 694880.00, 5147510.20
 active area defined by: all cells
 
 
-Time to create sfr dataset: 2.64s
+Time to create sfr dataset: 4.03s
 
 </pre></div></div>
 </div>
@@ -916,17 +901,17 @@ Time to create sfr dataset: 2.64s
   </thead>
   <tbody>
     <tr>
-      <th>465</th>
+      <th>512</th>
       <td>1</td>
-      <td>13279</td>
+      <td>17714</td>
       <td>0</td>
-      <td>82</td>
-      <td>159</td>
+      <td>110</td>
+      <td>114</td>
       <td>1</td>
       <td>1</td>
-      <td>29.298670</td>
-      <td>1.000000</td>
-      <td>0.046346</td>
+      <td>208.786560</td>
+      <td>1.0</td>
+      <td>0.0001</td>
       <td>...</td>
       <td>0.0</td>
       <td>0.0</td>
@@ -934,23 +919,23 @@ Time to create sfr dataset: 2.64s
       <td>0.0</td>
       <td>2</td>
       <td>4</td>
-      <td>4.465117</td>
-      <td>1815711</td>
+      <td>NaN</td>
+      <td>1815013</td>
       <td>None</td>
-      <td>LINESTRING Z (694812.4654293101 5141215.339454...</td>
+      <td>LINESTRING Z (691394.6266907752 5139052 0, 691...</td>
     </tr>
     <tr>
-      <th>466</th>
+      <th>513</th>
       <td>2</td>
-      <td>13278</td>
+      <td>17715</td>
       <td>0</td>
-      <td>82</td>
-      <td>158</td>
+      <td>110</td>
+      <td>115</td>
       <td>1</td>
       <td>2</td>
-      <td>258.714050</td>
-      <td>1.000000</td>
-      <td>0.008519</td>
+      <td>294.110107</td>
+      <td>1.0</td>
+      <td>0.0001</td>
       <td>...</td>
       <td>0.0</td>
       <td>0.0</td>
@@ -958,23 +943,23 @@ Time to create sfr dataset: 2.64s
       <td>0.0</td>
       <td>3</td>
       <td>4</td>
-      <td>48.358253</td>
-      <td>1815711</td>
+      <td>NaN</td>
+      <td>1815013</td>
       <td>None</td>
-      <td>LINESTRING Z (694803.8 5141213.18088425 0, 694...</td>
+      <td>LINESTRING Z (691451 5139078.992958551 0, 6914...</td>
     </tr>
     <tr>
-      <th>467</th>
+      <th>514</th>
       <td>3</td>
-      <td>13277</td>
+      <td>17716</td>
       <td>0</td>
-      <td>82</td>
-      <td>157</td>
+      <td>110</td>
+      <td>116</td>
       <td>1</td>
       <td>3</td>
-      <td>208.741928</td>
-      <td>1.324805</td>
-      <td>0.009116</td>
+      <td>41.835766</td>
+      <td>1.0</td>
+      <td>0.0001</td>
       <td>...</td>
       <td>0.0</td>
       <td>0.0</td>
@@ -982,23 +967,23 @@ Time to create sfr dataset: 2.64s
       <td>0.0</td>
       <td>4</td>
       <td>4</td>
-      <td>119.598541</td>
-      <td>1815711</td>
+      <td>NaN</td>
+      <td>1815013</td>
       <td>None</td>
-      <td>LINESTRING Z (694727.6 5141219.032934831 0, 69...</td>
+      <td>LINESTRING Z (691527.2 5139123.038141218 0, 69...</td>
     </tr>
     <tr>
-      <th>468</th>
+      <th>515</th>
       <td>4</td>
-      <td>13437</td>
+      <td>17556</td>
       <td>0</td>
-      <td>83</td>
-      <td>157</td>
+      <td>109</td>
+      <td>116</td>
       <td>1</td>
       <td>4</td>
-      <td>194.894043</td>
-      <td>1.632452</td>
-      <td>0.007749</td>
+      <td>220.128555</td>
+      <td>1.0</td>
+      <td>0.0001</td>
       <td>...</td>
       <td>0.0</td>
       <td>0.0</td>
@@ -1006,23 +991,23 @@ Time to create sfr dataset: 2.64s
       <td>0.0</td>
       <td>5</td>
       <td>4</td>
-      <td>181.112671</td>
-      <td>1815711</td>
+      <td>NaN</td>
+      <td>1815013</td>
       <td>None</td>
-      <td>LINESTRING Z (694678.3688327055 5141185.6 0, 6...</td>
+      <td>LINESTRING Z (691538.8600608129 5139128.2 0, 6...</td>
     </tr>
     <tr>
-      <th>469</th>
+      <th>516</th>
       <td>5</td>
-      <td>13436</td>
+      <td>17557</td>
       <td>0</td>
-      <td>83</td>
-      <td>156</td>
+      <td>109</td>
+      <td>117</td>
       <td>1</td>
       <td>5</td>
-      <td>125.442345</td>
-      <td>1.840760</td>
-      <td>0.011187</td>
+      <td>161.999496</td>
+      <td>1.0</td>
+      <td>0.0001</td>
       <td>...</td>
       <td>0.0</td>
       <td>0.0</td>
@@ -1030,10 +1015,10 @@ Time to create sfr dataset: 2.64s
       <td>0.0</td>
       <td>6</td>
       <td>4</td>
-      <td>229.931931</td>
-      <td>1815711</td>
+      <td>NaN</td>
+      <td>1815013</td>
       <td>None</td>
-      <td>LINESTRING Z (694651.4 5141132.737158341 0, 69...</td>
+      <td>LINESTRING Z (691603.4 5139143.608205146 0, 69...</td>
     </tr>
   </tbody>
 </table>
@@ -1112,8 +1097,8 @@ Time to create sfr dataset: 2.64s
       <td>0.0</td>
       <td>0.0</td>
       <td>0.0</td>
-      <td>1278.149658</td>
-      <td>23.194326</td>
+      <td>0.000000</td>
+      <td>3.280840</td>
       <td>0.0</td>
       <td>0.0</td>
       <td>0.0</td>
@@ -1136,8 +1121,8 @@ Time to create sfr dataset: 2.64s
       <td>0.0</td>
       <td>0.0</td>
       <td>0.0</td>
-      <td>1278.149658</td>
-      <td>126.765388</td>
+      <td>0.000000</td>
+      <td>3.280840</td>
       <td>0.0</td>
       <td>0.0</td>
       <td>0.0</td>
@@ -1160,8 +1145,8 @@ Time to create sfr dataset: 2.64s
       <td>0.0</td>
       <td>0.0</td>
       <td>0.0</td>
-      <td>1211.286133</td>
-      <td>21.228680</td>
+      <td>1278.149658</td>
+      <td>23.194326</td>
       <td>0.0</td>
       <td>0.0</td>
       <td>0.0</td>
@@ -1184,8 +1169,8 @@ Time to create sfr dataset: 2.64s
       <td>0.0</td>
       <td>0.0</td>
       <td>0.0</td>
-      <td>1211.286133</td>
-      <td>129.970474</td>
+      <td>1278.149658</td>
+      <td>126.765388</td>
       <td>0.0</td>
       <td>0.0</td>
       <td>0.0</td>
@@ -1197,7 +1182,7 @@ Time to create sfr dataset: 2.64s
       <td>0</td>
       <td>5</td>
       <td>1</td>
-      <td>8</td>
+      <td>10</td>
       <td>0</td>
       <td>0</td>
       <td>0</td>
@@ -1208,8 +1193,8 @@ Time to create sfr dataset: 2.64s
       <td>0.0</td>
       <td>0.0</td>
       <td>0.0</td>
-      <td>1162.926514</td>
-      <td>25.381979</td>
+      <td>1211.286133</td>
+      <td>21.228680</td>
       <td>0.0</td>
       <td>0.0</td>
       <td>0.0</td>
@@ -1240,11 +1225,11 @@ Time to create sfr dataset: 2.64s
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 running rasterstats.zonal_stats on buffered LineStrings...
-finished in 3.89s
+finished in 5.89s
 
 
 Smoothing elevations...
-finished in 0.13s
+finished in 0.20s
 </pre></div></div>
 </div>
 </div>
@@ -1317,17 +1302,17 @@ finished in 0.13s
   </thead>
   <tbody>
     <tr>
-      <th>465</th>
+      <th>512</th>
       <td>1</td>
-      <td>13279</td>
+      <td>17714</td>
       <td>2</td>
-      <td>82</td>
-      <td>159</td>
+      <td>110</td>
+      <td>114</td>
       <td>1</td>
       <td>1</td>
-      <td>29.298670</td>
-      <td>1.000000</td>
-      <td>0.046346</td>
+      <td>208.786560</td>
+      <td>1.0</td>
+      <td>0.0001</td>
       <td>...</td>
       <td>0.0</td>
       <td>0.0</td>
@@ -1335,23 +1320,23 @@ finished in 0.13s
       <td>0.0</td>
       <td>2</td>
       <td>4</td>
-      <td>4.465117</td>
-      <td>1815711</td>
+      <td>NaN</td>
+      <td>1815013</td>
       <td>None</td>
-      <td>LINESTRING Z (694812.4654293101 5141215.339454...</td>
+      <td>LINESTRING Z (691394.6266907752 5139052 0, 691...</td>
     </tr>
     <tr>
-      <th>466</th>
+      <th>513</th>
       <td>2</td>
-      <td>13278</td>
+      <td>17715</td>
       <td>2</td>
-      <td>82</td>
-      <td>158</td>
+      <td>110</td>
+      <td>115</td>
       <td>1</td>
       <td>2</td>
-      <td>258.714050</td>
-      <td>1.000000</td>
-      <td>0.008519</td>
+      <td>294.110107</td>
+      <td>1.0</td>
+      <td>0.0001</td>
       <td>...</td>
       <td>0.0</td>
       <td>0.0</td>
@@ -1359,23 +1344,23 @@ finished in 0.13s
       <td>0.0</td>
       <td>3</td>
       <td>4</td>
-      <td>48.358253</td>
-      <td>1815711</td>
+      <td>NaN</td>
+      <td>1815013</td>
       <td>None</td>
-      <td>LINESTRING Z (694803.8 5141213.18088425 0, 694...</td>
+      <td>LINESTRING Z (691451 5139078.992958551 0, 6914...</td>
     </tr>
     <tr>
-      <th>467</th>
+      <th>514</th>
       <td>3</td>
-      <td>13277</td>
+      <td>17716</td>
       <td>2</td>
-      <td>82</td>
-      <td>157</td>
+      <td>110</td>
+      <td>116</td>
       <td>1</td>
       <td>3</td>
-      <td>208.741928</td>
-      <td>1.324805</td>
-      <td>0.009116</td>
+      <td>41.835766</td>
+      <td>1.0</td>
+      <td>0.0001</td>
       <td>...</td>
       <td>0.0</td>
       <td>0.0</td>
@@ -1383,23 +1368,23 @@ finished in 0.13s
       <td>0.0</td>
       <td>4</td>
       <td>4</td>
-      <td>119.598541</td>
-      <td>1815711</td>
+      <td>NaN</td>
+      <td>1815013</td>
       <td>None</td>
-      <td>LINESTRING Z (694727.6 5141219.032934831 0, 69...</td>
+      <td>LINESTRING Z (691527.2 5139123.038141218 0, 69...</td>
     </tr>
     <tr>
-      <th>468</th>
+      <th>515</th>
       <td>4</td>
-      <td>13437</td>
+      <td>17556</td>
       <td>2</td>
-      <td>83</td>
-      <td>157</td>
+      <td>109</td>
+      <td>116</td>
       <td>1</td>
       <td>4</td>
-      <td>194.894043</td>
-      <td>1.632452</td>
-      <td>0.007749</td>
+      <td>220.128555</td>
+      <td>1.0</td>
+      <td>0.0001</td>
       <td>...</td>
       <td>0.0</td>
       <td>0.0</td>
@@ -1407,23 +1392,23 @@ finished in 0.13s
       <td>0.0</td>
       <td>5</td>
       <td>4</td>
-      <td>181.112671</td>
-      <td>1815711</td>
+      <td>NaN</td>
+      <td>1815013</td>
       <td>None</td>
-      <td>LINESTRING Z (694678.3688327055 5141185.6 0, 6...</td>
+      <td>LINESTRING Z (691538.8600608129 5139128.2 0, 6...</td>
     </tr>
     <tr>
-      <th>469</th>
+      <th>516</th>
       <td>5</td>
-      <td>13436</td>
+      <td>17557</td>
       <td>2</td>
-      <td>83</td>
-      <td>156</td>
+      <td>109</td>
+      <td>117</td>
       <td>1</td>
       <td>5</td>
-      <td>125.442345</td>
-      <td>1.840760</td>
-      <td>0.011187</td>
+      <td>161.999496</td>
+      <td>1.0</td>
+      <td>0.0001</td>
       <td>...</td>
       <td>0.0</td>
       <td>0.0</td>
@@ -1431,10 +1416,10 @@ finished in 0.13s
       <td>0.0</td>
       <td>6</td>
       <td>4</td>
-      <td>229.931931</td>
-      <td>1815711</td>
+      <td>NaN</td>
+      <td>1815013</td>
       <td>None</td>
-      <td>LINESTRING Z (694651.4 5141132.737158341 0, 69...</td>
+      <td>LINESTRING Z (691603.4 5139143.608205146 0, 69...</td>
     </tr>
   </tbody>
 </table>
@@ -1466,7 +1451,7 @@ DEM and other data in a GIS environment. * <strong>suprious slopes:</strong> slo
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 
-Running Flopy v. 3.3.4 diagnostics...
+Running Flopy v. 3.3.5 diagnostics...
 wrote tf_SFR.chk
 </pre></div></div>
 </div>
@@ -1488,9 +1473,9 @@ wrote tf_SFR.chk
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-SFRmaker v. 0.8.0.post15.dev0+g62ca6da
+SFRmaker v. 0.8.0.post20+gdb67d41
 
-Running Flopy v. 3.3.4 diagnostics...
+Running Flopy v. 3.3.5 diagnostics...
 passed.
 
 Checking for continuity in segment and reach numbering...
@@ -1502,58 +1487,79 @@ passed.
 Checking for circular routing...
 passed.
 
-No DIS package or SpatialReference object; cannot check reach proximities.
+Checking reach connections for proximity...
+5 segments with non-adjacent reaches found.
+At segments:
+41 20 21 22 23
+
+5 segments with non-adjacent reaches found.
+At segments:
+41 20 21 22 23
+
 
 Checking for model cells with multiple non-zero SFR conductances...
-20 model cells with multiple non-zero SFR conductances found.
+25 model cells with multiple non-zero SFR conductances found.
 This may lead to circular routing between collocated reaches.
 Nodes with overlapping conductances:
 k       i       j       iseg    ireach  rchlen  strthick        strhc1
-0       87      122     1       54      35.61542510986328       1.0     1.0
-0       87      122     2       34      230.8770751953125       1.0     1.0
-0       76      110     3       47      204.68466186523438      1.0     1.0
-0       87      122     4       1       30.619203567504883      1.0     1.0
-2       84      119     4       7       271.296630859375        1.0     1.0
-2       84      119     4       9       26.846023559570312      1.0     1.0
-0       76      110     4       27      75.61869812011719       1.0     1.0
-1       58      132     5       25      42.411964416503906      1.0     1.0
-1       58      132     5       27      88.49227905273438       1.0     1.0
-0       48      109     5       64      251.07437133789062      1.0     1.0
-0       76      110     6       1       69.44449615478516       1.0     1.0
-0       48      108     6       40      20.661043167114258      1.0     1.0
-0       48      109     6       41      114.03108978271484      1.0     1.0
-0       48      108     6       42      35.86711502075195       1.0     1.0
-1       80      49      7       70      159.628662109375        1.0     1.0
-0       48      108     8       1       125.59841918945312      1.0     1.0
-0       47      98      8       22      67.49517059326172       1.0     1.0
-0       47      98      8       24      102.60327911376953      1.0     1.0
-0       54      89      8       39      35.04909896850586       1.0     1.0
-0       54      89      8       41      62.93534851074219       1.0     1.0
-0       53      78      8       57      61.92954635620117       1.0     1.0
-0       53      78      8       59      28.305360794067383      1.0     1.0
-0       52      76      8       62      63.750675201416016      1.0     1.0
-0       52      76      8       64      294.7840270996094       1.0     1.0
-1       54      73      8       69      341.07586669921875      1.0     1.0
-1       54      73      8       71      27.020740509033203      1.0     1.0
-1       80      49      8       125     39.87680435180664       1.0     1.0
-2       108     57      9       8       237.81178283691406      1.0     1.0
-2       108     57      9       9       46.60417556762695       1.0     1.0
-0       94      35      9       45      96.37408447265625       1.0     1.0
-0       94      35      9       47      89.41510009765625       1.0     1.0
-2       91      35      9       50      60.342041015625 1.0     1.0
-2       91      34      9       51      61.56704330444336       1.0     1.0
-1       80      49      10      1       146.53265380859375      1.0     1.0
-2       91      35      10      26      308.05096435546875      1.0     1.0
-2       91      34      10      27      76.15687561035156       1.0     1.0
-0       38      85      11      8       72.13273620605469       1.0     1.0
-0       38      85      11      9       52.62028121948242       1.0     1.0
-2       25      24      13      42      95.18097686767578       1.0     1.0
-2       25      24      14      47      230.81414794921875      1.0     1.0
-2       19      23      16      47      12.734856605529785      1.0     1.0
-2       19      23      16      49      108.90869903564453      1.0     1.0
-2       91      34      17      1       130.4016571044922       1.0     1.0
-1       92      30      17      6       67.78282165527344       1.0     1.0
-1       92      30      17      8       252.36495971679688      1.0     1.0
+2       110     119     1       8       268.3089904785156       1.0     1.0
+2       110     119     2       1       72.39283752441406       1.0     1.0
+0       87      122     3       54      35.61542510986328       1.0     1.0
+2       110     119     4       1       12.818351745605469      1.0     1.0
+0       87      122     4       34      230.8770751953125       1.0     1.0
+0       76      110     5       47      204.68466186523438      1.0     1.0
+0       87      122     6       1       30.619203567504883      1.0     1.0
+2       84      119     6       7       271.296630859375        1.0     1.0
+2       84      119     6       9       26.846023559570312      1.0     1.0
+0       76      110     6       27      75.61869812011719       1.0     1.0
+2       25      24      7       42      95.18097686767578       1.0     1.0
+2       25      24      8       47      230.81414794921875      1.0     1.0
+1       58      132     9       25      42.411964416503906      1.0     1.0
+1       58      132     9       27      88.49227905273438       1.0     1.0
+0       48      109     9       64      251.07437133789062      1.0     1.0
+0       76      110     10      1       69.44449615478516       1.0     1.0
+0       48      108     10      40      20.661043167114258      1.0     1.0
+0       48      109     10      41      114.03108978271484      1.0     1.0
+0       48      108     10      42      35.86711502075195       1.0     1.0
+2       25      24      11      1       21.262147903442383      1.0     1.0
+2       18      17      11      15      148.88375854492188      1.0     1.0
+2       19      23      12      47      12.734856605529785      1.0     1.0
+2       19      23      12      49      108.90869903564453      1.0     1.0
+2       18      17      12      58      77.02336120605469       1.0     1.0
+1       80      49      13      70      159.628662109375        1.0     1.0
+0       48      108     14      1       125.59841918945312      1.0     1.0
+0       47      98      14      22      67.49517059326172       1.0     1.0
+0       47      98      14      24      102.60327911376953      1.0     1.0
+0       54      89      14      39      35.04909896850586       1.0     1.0
+0       54      89      14      41      62.93534851074219       1.0     1.0
+0       53      78      14      57      61.92954635620117       1.0     1.0
+0       53      78      14      59      28.305360794067383      1.0     1.0
+0       52      76      14      62      63.750675201416016      1.0     1.0
+0       52      76      14      64      294.7840270996094       1.0     1.0
+1       54      73      14      69      341.07586669921875      1.0     1.0
+1       54      73      14      71      27.020740509033203      1.0     1.0
+1       80      49      14      125     39.87680435180664       1.0     1.0
+2       18      17      16      1       185.31173706054688      1.0     1.0
+2       15      3       16      21      32.886505126953125      1.0     1.0
+2       36      11      17      38      58.1950798034668        1.0     1.0
+2       110     159     19      2       201.7003936767578       1.0     1.0
+0       38      85      21      8       72.13273620605469       1.0     1.0
+0       38      85      21      9       52.62028121948242       1.0     1.0
+2       108     57      24      8       237.81178283691406      1.0     1.0
+2       108     57      24      9       46.60417556762695       1.0     1.0
+0       94      35      24      45      96.37408447265625       1.0     1.0
+0       94      35      24      47      89.41510009765625       1.0     1.0
+2       91      35      24      50      60.342041015625 1.0     1.0
+2       91      34      24      51      61.56704330444336       1.0     1.0
+1       80      49      25      1       146.53265380859375      1.0     1.0
+2       91      35      25      26      308.05096435546875      1.0     1.0
+2       91      34      25      27      76.15687561035156       1.0     1.0
+2       15      3       31      1       273.3369445800781       1.0     1.0
+2       36      11      36      1       262.8287048339844       1.0     1.0
+2       110     159     38      1       23.601938247680664      1.0     1.0
+2       91      34      42      1       130.4016571044922       1.0     1.0
+1       92      30      42      6       67.78282165527344       1.0     1.0
+1       92      30      42      8       252.36495971679688      1.0     1.0
 
 Checking for streambed tops of less than -10...
 passed.
@@ -1562,17 +1568,21 @@ Checking for streambed tops of greater than 15000...
 passed.
 
 Checking segment_data for downstream rises in streambed elevation...
-Segment elevup and elevdn not specified for nstrm=-965 and isfropt=1
+Segment elevup and elevdn not specified for nstrm=-1441 and isfropt=1
 passed.
 
 Checking reach_data for downstream rises in streambed elevation...
 passed.
 
 Checking reach_data for inconsistencies between streambed elevations and the model grid...
-passed.
+1 reaches encountered with streambed above model top.
+Model top violations:
+i j iseg ireach strtop modeltop strhc1 reachID diff
+49 15 18 19 922.1929321289062 920.3099975585938 1.0 788 -1.8829345703125
+
 
 Checking segment_data for inconsistencies between segment end elevations and the model grid...
-Segment elevup and elevdn not specified for nstrm=-965 and isfropt=1
+Segment elevup and elevdn not specified for nstrm=-1441 and isfropt=1
 passed.
 
 Checking for streambed slopes of less than 0.0001...
@@ -1603,9 +1613,9 @@ wrote ../tylerforks/tylerforks/tf.sfr.
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-SFRmaker v. 0.8.0.post15.dev0+g62ca6da
+SFRmaker v. 0.8.0.post20+gdb67d41
 
-Running Flopy v. 3.3.4 diagnostics...
+Running Flopy v. 3.3.5 diagnostics...
 passed.
 
 Checking for continuity in segment and reach numbering...
@@ -1617,58 +1627,79 @@ passed.
 Checking for circular routing...
 passed.
 
-No DIS package or SpatialReference object; cannot check reach proximities.
+Checking reach connections for proximity...
+5 segments with non-adjacent reaches found.
+At segments:
+41 20 21 22 23
+
+5 segments with non-adjacent reaches found.
+At segments:
+41 20 21 22 23
+
 
 Checking for model cells with multiple non-zero SFR conductances...
-20 model cells with multiple non-zero SFR conductances found.
+25 model cells with multiple non-zero SFR conductances found.
 This may lead to circular routing between collocated reaches.
 Nodes with overlapping conductances:
 k       i       j       iseg    ireach  rchlen  strthick        strhc1
-0       87      122     1       54      35.61542510986328       1.0     1.0
-0       87      122     2       34      230.8770751953125       1.0     1.0
-0       76      110     3       47      204.68466186523438      1.0     1.0
-0       87      122     4       1       30.619203567504883      1.0     1.0
-2       84      119     4       7       271.296630859375        1.0     1.0
-2       84      119     4       9       26.846023559570312      1.0     1.0
-0       76      110     4       27      75.61869812011719       1.0     1.0
-1       58      132     5       25      42.411964416503906      1.0     1.0
-1       58      132     5       27      88.49227905273438       1.0     1.0
-0       48      109     5       64      251.07437133789062      1.0     1.0
-0       76      110     6       1       69.44449615478516       1.0     1.0
-0       48      108     6       40      20.661043167114258      1.0     1.0
-0       48      109     6       41      114.03108978271484      1.0     1.0
-0       48      108     6       42      35.86711502075195       1.0     1.0
-1       80      49      7       70      159.628662109375        1.0     1.0
-0       48      108     8       1       125.59841918945312      1.0     1.0
-0       47      98      8       22      67.49517059326172       1.0     1.0
-0       47      98      8       24      102.60327911376953      1.0     1.0
-0       54      89      8       39      35.04909896850586       1.0     1.0
-0       54      89      8       41      62.93534851074219       1.0     1.0
-0       53      78      8       57      61.92954635620117       1.0     1.0
-0       53      78      8       59      28.305360794067383      1.0     1.0
-0       52      76      8       62      63.750675201416016      1.0     1.0
-0       52      76      8       64      294.7840270996094       1.0     1.0
-1       54      73      8       69      341.07586669921875      1.0     1.0
-1       54      73      8       71      27.020740509033203      1.0     1.0
-1       80      49      8       125     39.87680435180664       1.0     1.0
-2       108     57      9       8       237.81178283691406      1.0     1.0
-2       108     57      9       9       46.60417556762695       1.0     1.0
-0       94      35      9       45      96.37408447265625       1.0     1.0
-0       94      35      9       47      89.41510009765625       1.0     1.0
-2       91      35      9       50      60.342041015625 1.0     1.0
-2       91      34      9       51      61.56704330444336       1.0     1.0
-1       80      49      10      1       146.53265380859375      1.0     1.0
-2       91      35      10      26      308.05096435546875      1.0     1.0
-2       91      34      10      27      76.15687561035156       1.0     1.0
-0       38      85      11      8       72.13273620605469       1.0     1.0
-0       38      85      11      9       52.62028121948242       1.0     1.0
-2       25      24      13      42      95.18097686767578       1.0     1.0
-2       25      24      14      47      230.81414794921875      1.0     1.0
-2       19      23      16      47      12.734856605529785      1.0     1.0
-2       19      23      16      49      108.90869903564453      1.0     1.0
-2       91      34      17      1       130.4016571044922       1.0     1.0
-1       92      30      17      6       67.78282165527344       1.0     1.0
-1       92      30      17      8       252.36495971679688      1.0     1.0
+2       110     119     1       8       268.3089904785156       1.0     1.0
+2       110     119     2       1       72.39283752441406       1.0     1.0
+0       87      122     3       54      35.61542510986328       1.0     1.0
+2       110     119     4       1       12.818351745605469      1.0     1.0
+0       87      122     4       34      230.8770751953125       1.0     1.0
+0       76      110     5       47      204.68466186523438      1.0     1.0
+0       87      122     6       1       30.619203567504883      1.0     1.0
+2       84      119     6       7       271.296630859375        1.0     1.0
+2       84      119     6       9       26.846023559570312      1.0     1.0
+0       76      110     6       27      75.61869812011719       1.0     1.0
+2       25      24      7       42      95.18097686767578       1.0     1.0
+2       25      24      8       47      230.81414794921875      1.0     1.0
+1       58      132     9       25      42.411964416503906      1.0     1.0
+1       58      132     9       27      88.49227905273438       1.0     1.0
+0       48      109     9       64      251.07437133789062      1.0     1.0
+0       76      110     10      1       69.44449615478516       1.0     1.0
+0       48      108     10      40      20.661043167114258      1.0     1.0
+0       48      109     10      41      114.03108978271484      1.0     1.0
+0       48      108     10      42      35.86711502075195       1.0     1.0
+2       25      24      11      1       21.262147903442383      1.0     1.0
+2       18      17      11      15      148.88375854492188      1.0     1.0
+2       19      23      12      47      12.734856605529785      1.0     1.0
+2       19      23      12      49      108.90869903564453      1.0     1.0
+2       18      17      12      58      77.02336120605469       1.0     1.0
+1       80      49      13      70      159.628662109375        1.0     1.0
+0       48      108     14      1       125.59841918945312      1.0     1.0
+0       47      98      14      22      67.49517059326172       1.0     1.0
+0       47      98      14      24      102.60327911376953      1.0     1.0
+0       54      89      14      39      35.04909896850586       1.0     1.0
+0       54      89      14      41      62.93534851074219       1.0     1.0
+0       53      78      14      57      61.92954635620117       1.0     1.0
+0       53      78      14      59      28.305360794067383      1.0     1.0
+0       52      76      14      62      63.750675201416016      1.0     1.0
+0       52      76      14      64      294.7840270996094       1.0     1.0
+1       54      73      14      69      341.07586669921875      1.0     1.0
+1       54      73      14      71      27.020740509033203      1.0     1.0
+1       80      49      14      125     39.87680435180664       1.0     1.0
+2       18      17      16      1       185.31173706054688      1.0     1.0
+2       15      3       16      21      32.886505126953125      1.0     1.0
+2       36      11      17      38      58.1950798034668        1.0     1.0
+2       110     159     19      2       201.7003936767578       1.0     1.0
+0       38      85      21      8       72.13273620605469       1.0     1.0
+0       38      85      21      9       52.62028121948242       1.0     1.0
+2       108     57      24      8       237.81178283691406      1.0     1.0
+2       108     57      24      9       46.60417556762695       1.0     1.0
+0       94      35      24      45      96.37408447265625       1.0     1.0
+0       94      35      24      47      89.41510009765625       1.0     1.0
+2       91      35      24      50      60.342041015625 1.0     1.0
+2       91      34      24      51      61.56704330444336       1.0     1.0
+1       80      49      25      1       146.53265380859375      1.0     1.0
+2       91      35      25      26      308.05096435546875      1.0     1.0
+2       91      34      25      27      76.15687561035156       1.0     1.0
+2       15      3       31      1       273.3369445800781       1.0     1.0
+2       36      11      36      1       262.8287048339844       1.0     1.0
+2       110     159     38      1       23.601938247680664      1.0     1.0
+2       91      34      42      1       130.4016571044922       1.0     1.0
+1       92      30      42      6       67.78282165527344       1.0     1.0
+1       92      30      42      8       252.36495971679688      1.0     1.0
 
 Checking for streambed tops of less than -10...
 passed.
@@ -1677,17 +1708,21 @@ Checking for streambed tops of greater than 15000...
 passed.
 
 Checking segment_data for downstream rises in streambed elevation...
-Segment elevup and elevdn not specified for nstrm=-965 and isfropt=1
+Segment elevup and elevdn not specified for nstrm=-1441 and isfropt=1
 passed.
 
 Checking reach_data for downstream rises in streambed elevation...
 passed.
 
 Checking reach_data for inconsistencies between streambed elevations and the model grid...
-passed.
+1 reaches encountered with streambed above model top.
+Model top violations:
+i j iseg ireach strtop modeltop strhc1 reachID diff
+49 15 18 19 922.1929321289062 920.3099975585938 1.0 788 -1.8829345703125
+
 
 Checking segment_data for inconsistencies between segment end elevations and the model grid...
-Segment elevup and elevdn not specified for nstrm=-965 and isfropt=1
+Segment elevup and elevdn not specified for nstrm=-1441 and isfropt=1
 passed.
 
 Checking for streambed slopes of less than 0.0001...
@@ -1798,7 +1833,7 @@ No non-zero values of flow to export!
           </div>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="Streambed_elevation_demo.html" class="btn btn-neutral float-right" title="Demonstration of how sfrmaker handles streambed elevations" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="lines_from_NHDPlusHR_demo.html" class="btn btn-neutral float-right" title="Using SFRmaker with NHDPlus High Resolution" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
         <a href="../inputs.html" class="btn btn-neutral float-left" title="Input data requirements" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
@@ -1807,7 +1842,7 @@ No non-zero values of flow to export!
   <div role="contentinfo">
     <p>
       <span class="lastupdated">
-        Last updated on Jun 11, 2021.
+        Last updated on Aug 19, 2021.
       </span>
 
     </p>

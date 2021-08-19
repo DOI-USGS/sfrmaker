@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Demonstration of how sfrmaker handles streambed elevations &mdash; SFRmaker 0.8.0.post15.dev0+g62ca6da documentation</title>
+  <title>Demonstration of how sfrmaker handles streambed elevations &mdash; SFRmaker 0.8.0.post20+gdb67d41 documentation</title>
   
 
   
@@ -41,7 +41,7 @@
         <script src="../_static/copybutton.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "document", "processHtmlClass": "math|output_area"}}</script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -49,7 +49,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Troubleshooting" href="../troubleshooting.html" />
-    <link rel="prev" title="Basic usage of SFRmaker in a scripting context" href="SFRmaker_demo.html" /> 
+    <link rel="prev" title="Sfrmaker concepts and methods" href="../concepts.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -73,7 +73,7 @@
             
             
               <div class="version">
-                0.8.0.post15.dev0+g62ca6da
+                0.8.0.post20+gdb67d41
               </div>
             
           
@@ -98,39 +98,43 @@
               
             
             
-              <p class="caption"><span class="caption-text">Getting Started</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../philosophy.html"> Philosophy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples.html"> Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html"> Installation</a></li>
 </ul>
-<p class="caption"><span class="caption-text">User Guide</span></p>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../inputs.html"> Input Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples.html"> Using SFRmaker with a configuration file</a></li>
 <li class="toctree-l1"><a class="reference internal" href="SFRmaker_demo.html"> Basic Usage in a scripting context</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#"> How the streambed elevation sampling works</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#Run-the-first-part-of-the-Tyler-Forks-example-problem-to-get-an-SFRData-instance">Run the first part of the Tyler Forks example problem to get an <code class="docutils literal notranslate"><span class="pre">SFRData</span></code> instance</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#Sample-elevations-from-the-DEM">Sample elevations from the DEM</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#pseudo-code-for-the-smoothing-algoritm:">pseudo code for the smoothing algoritm:</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lines_from_NHDPlusHR_demo.html"> Using SFRmaker with NHDPlus High Resolution</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../concepts.html"> Concepts and methods</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#"> How the streambed elevation sampling works</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#Run-the-first-part-of-the-Tyler-Forks-example-problem-to-get-an-SFRData-instance">Run the first part of the Tyler Forks example problem to get an <code class="docutils literal notranslate"><span class="pre">SFRData</span></code> instance</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Sample-elevations-from-the-DEM">Sample elevations from the DEM</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pseudo-code-for-the-smoothing-algoritm:">pseudo code for the smoothing algoritm:</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#Make-comparison-plots-of-the-elevations-in-each-segment">Make comparison plots of the elevations in each segment</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#Note:">Note:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Make-comparison-plots-of-the-elevations-in-each-segment">Make comparison plots of the elevations in each segment</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#Note:">Note:</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../troubleshooting.html"> Troubleshooting</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Reference</span></p>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../api/index.html"> Code reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../config-summary.html"> Summary of configuration file options</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../release-history.html"> Release History</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../contributing.html"> Contributing to SFRmaker</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Bibliography</span></p>
+<p class="caption" role="heading"><span class="caption-text">Bibliography</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../references.html"> References cited</a></li>
 </ul>
@@ -180,6 +184,8 @@
   <ul class="wy-breadcrumbs">
     
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../concepts.html">Sfrmaker concepts and methods</a> &raquo;</li>
         
       <li>Demonstration of how <code class="docutils literal notranslate"><span class="pre">sfrmaker</span></code> handles streambed elevations</li>
     
@@ -538,7 +544,7 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 </div>
-<div class="nboutput docutils container">
+<div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
@@ -561,34 +567,18 @@ reading ../tylerforks/NHDPlus/NHDPlusAttributes/PlusFlow.dbf...
 reading ../tylerforks/NHDPlus/NHDPlusAttributes/elevslope.dbf...
 --&gt; building dataframe... (may take a while for large shapefiles)
 
-load finished in 0.28s
+load finished in 0.34s
 
 Getting routing information from NHDPlus Plusflow table...
-finished in 0.02s
+finished in 0.06s
 
 
-SFRmaker version 0.8.0.post15.dev0+g62ca6da
+SFRmaker version 0.8.0.post20+gdb67d41
 
 Creating sfr dataset...
 
 Creating grid class instance from flopy Grid instance...
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-/home/runner/work/sfrmaker/sfrmaker/sfrmaker/gis.py:32: UserWarning: The proj_str argument is deprecated, use crs instead.
-  warnings.warn(&#39;The proj_str argument is deprecated, use crs instead.&#39;)
-</pre></div></div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-grid class created in 0.25s
+grid class created in 0.45s
 
 Model grid information
 structured grid
@@ -611,26 +601,26 @@ EPSG:26715
 
 
 Culling hydrography to active area...
-starting lines: 17
-remaining lines: 17
-finished in 0.00s
+starting lines: 43
+remaining lines: 42
+finished in 0.01s
 
 
-Intersecting 17 flowlines with 17,760 grid cells...
+Intersecting 42 flowlines with 17,760 grid cells...
 
 Building spatial index...
-finished in 1.72s
+finished in 2.43s
 
-Intersecting 17 features...
-17
-finished in 0.08s
+Intersecting 42 features...
+42
+finished in 0.12s
 
 Setting up reach data... (may take a few minutes for large grids)
-finished in 0.21s
+finished in 0.40s
 
 Computing widths...
 
-Dropping 30 reaches with length &lt; 12.50 feet...
+Dropping 46 reaches with length &lt; 12.50 feet...
 
 Repairing routing connections...
 enforcing best segment numbering...
@@ -648,7 +638,7 @@ bounds: 682688.00, 5139052.00, 694880.00, 5147510.20
 active area defined by: all cells
 
 
-Time to create sfr dataset: 2.57s
+Time to create sfr dataset: 3.85s
 
 </pre></div></div>
 </div>
@@ -685,14 +675,14 @@ For each level:
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 running rasterstats.zonal_stats on buffered LineStrings...
-finished in 4.01s
+finished in 6.04s
 
 running rasterstats.zonal_stats on buffered LineStrings...
-finished in 3.93s
+finished in 5.56s
 
 
 Smoothing elevations...
-finished in 0.13s
+finished in 0.19s
 </pre></div></div>
 </div>
 </div>
@@ -862,11 +852,186 @@ finished in 0.13s
 <img alt="../_images/notebooks_Streambed_elevation_demo_8_15.png" src="../_images/notebooks_Streambed_elevation_demo_8_15.png" />
 </div>
 </div>
-<div class="nboutput nblast docutils container">
+<div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
 <img alt="../_images/notebooks_Streambed_elevation_demo_8_16.png" src="../_images/notebooks_Streambed_elevation_demo_8_16.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_Streambed_elevation_demo_8_17.png" src="../_images/notebooks_Streambed_elevation_demo_8_17.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_Streambed_elevation_demo_8_18.png" src="../_images/notebooks_Streambed_elevation_demo_8_18.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_Streambed_elevation_demo_8_19.png" src="../_images/notebooks_Streambed_elevation_demo_8_19.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_Streambed_elevation_demo_8_20.png" src="../_images/notebooks_Streambed_elevation_demo_8_20.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_Streambed_elevation_demo_8_21.png" src="../_images/notebooks_Streambed_elevation_demo_8_21.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_Streambed_elevation_demo_8_22.png" src="../_images/notebooks_Streambed_elevation_demo_8_22.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_Streambed_elevation_demo_8_23.png" src="../_images/notebooks_Streambed_elevation_demo_8_23.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_Streambed_elevation_demo_8_24.png" src="../_images/notebooks_Streambed_elevation_demo_8_24.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_Streambed_elevation_demo_8_25.png" src="../_images/notebooks_Streambed_elevation_demo_8_25.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_Streambed_elevation_demo_8_26.png" src="../_images/notebooks_Streambed_elevation_demo_8_26.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_Streambed_elevation_demo_8_27.png" src="../_images/notebooks_Streambed_elevation_demo_8_27.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_Streambed_elevation_demo_8_28.png" src="../_images/notebooks_Streambed_elevation_demo_8_28.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_Streambed_elevation_demo_8_29.png" src="../_images/notebooks_Streambed_elevation_demo_8_29.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_Streambed_elevation_demo_8_30.png" src="../_images/notebooks_Streambed_elevation_demo_8_30.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_Streambed_elevation_demo_8_31.png" src="../_images/notebooks_Streambed_elevation_demo_8_31.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_Streambed_elevation_demo_8_32.png" src="../_images/notebooks_Streambed_elevation_demo_8_32.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_Streambed_elevation_demo_8_33.png" src="../_images/notebooks_Streambed_elevation_demo_8_33.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_Streambed_elevation_demo_8_34.png" src="../_images/notebooks_Streambed_elevation_demo_8_34.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_Streambed_elevation_demo_8_35.png" src="../_images/notebooks_Streambed_elevation_demo_8_35.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_Streambed_elevation_demo_8_36.png" src="../_images/notebooks_Streambed_elevation_demo_8_36.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_Streambed_elevation_demo_8_37.png" src="../_images/notebooks_Streambed_elevation_demo_8_37.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_Streambed_elevation_demo_8_38.png" src="../_images/notebooks_Streambed_elevation_demo_8_38.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_Streambed_elevation_demo_8_39.png" src="../_images/notebooks_Streambed_elevation_demo_8_39.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_Streambed_elevation_demo_8_40.png" src="../_images/notebooks_Streambed_elevation_demo_8_40.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_Streambed_elevation_demo_8_41.png" src="../_images/notebooks_Streambed_elevation_demo_8_41.png" />
 </div>
 </div>
 <div class="nbinput nblast docutils container">
@@ -889,7 +1054,7 @@ finished in 0.13s
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
         <a href="../troubleshooting.html" class="btn btn-neutral float-right" title="Troubleshooting" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="SFRmaker_demo.html" class="btn btn-neutral float-left" title="Basic usage of SFRmaker in a scripting context" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../concepts.html" class="btn btn-neutral float-left" title="Sfrmaker concepts and methods" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>
@@ -897,7 +1062,7 @@ finished in 0.13s
   <div role="contentinfo">
     <p>
       <span class="lastupdated">
-        Last updated on Jun 11, 2021.
+        Last updated on Aug 19, 2021.
       </span>
 
     </p>

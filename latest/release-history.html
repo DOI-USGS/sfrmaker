@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Release History &mdash; SFRmaker 0.8.0.post15.dev0+g62ca6da documentation</title>
+  <title>Release History &mdash; SFRmaker 0.8.0.post20+gdb67d41 documentation</title>
   
 
   
@@ -71,7 +71,7 @@
             
             
               <div class="version">
-                0.8.0.post15.dev0+g62ca6da
+                0.8.0.post20+gdb67d41
               </div>
             
           
@@ -96,25 +96,27 @@
               
             
             
-              <p class="caption"><span class="caption-text">Getting Started</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="philosophy.html"> Philosophy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples.html"> Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html"> Installation</a></li>
 </ul>
-<p class="caption"><span class="caption-text">User Guide</span></p>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="inputs.html"> Input Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples.html"> Using SFRmaker with a configuration file</a></li>
 <li class="toctree-l1"><a class="reference internal" href="notebooks/SFRmaker_demo.html"> Basic Usage in a scripting context</a></li>
-<li class="toctree-l1"><a class="reference internal" href="notebooks/Streambed_elevation_demo.html"> How the streambed elevation sampling works</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/lines_from_NHDPlusHR_demo.html"> Using SFRmaker with NHDPlus High Resolution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="concepts.html"> Concepts and methods</a></li>
 <li class="toctree-l1"><a class="reference internal" href="troubleshooting.html"> Troubleshooting</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Reference</span></p>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="api/index.html"> Code reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="config-summary.html"> Summary of configuration file options</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#"> Release History</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#version-0-9-0-2021-xx-xx">Version 0.9.0 (2021-xx-xx)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#version-0-8-0-2021-04-19">Version 0.8.0 (2021-04-19)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#version-0-7-1-2021-01-29">Version 0.7.1 (2021-01-29)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#version-0-7-0-2021-01-15">Version 0.7.0 (2021-01-15)</a></li>
@@ -131,7 +133,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="contributing.html"> Contributing to SFRmaker</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Bibliography</span></p>
+<p class="caption" role="heading"><span class="caption-text">Bibliography</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="references.html"> References cited</a></li>
 </ul>
@@ -227,6 +229,26 @@
 </style>
 <div class="section" id="release-history">
 <h1>Release History<a class="headerlink" href="#release-history" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="version-0-9-0-2021-xx-xx">
+<h2>Version 0.9.0 (2021-xx-xx)<a class="headerlink" href="#version-0-9-0-2021-xx-xx" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>Added support for NHDPlus High Resolution</p></li>
+<li><p>Add preprocessing.get_flowline_routing function to get consolidated routing table in CSV format, for all flowlines in a set of NHDPlus v2 drainage basins</p></li>
+<li><p>Add preprocessing.swb_runoff_to_csv function to associate gridded runoff estimates from Soil Water Balance Code with NHDPlus COMIDs (catchments), so that it can be input to sfrmaker.flows.add_to_perioddata()</p></li>
+<li><p>Features added to utils.assign_layers:
+* add arguments for streambed top and bottom thickness column names;
+* add idomain argument to only adjust layer bottoms at active model locations.
+* In places where the lowest active layer is not the bottom layer, the lowest active layer bottom will be pushed down, and the (inactive) layers beneath will be given zero-thickness</p></li>
+<li><p>Add arguments to set min/max streambed slope</p></li>
+<li><p>Bug fixes:
+* flows.add_to_perioddata: when distributing flows to reaches, handle comids that are in reach_data but not in the input data
+* handle structured grids with missing cells
+* fix some issues with rotated grid support, including the rotation sign and how lines outside of the model are culled
+* fix issue with how arbolate sums are computed in lines.to_sfr
+* fix issue with days to years unit conversion
+* fix an issue with observations.locate_sites when reaches are specified by segment and reach</p></li>
+</ul>
+</div>
 <div class="section" id="version-0-8-0-2021-04-19">
 <h2>Version 0.8.0 (2021-04-19)<a class="headerlink" href="#version-0-8-0-2021-04-19" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
@@ -368,7 +390,7 @@
   <div role="contentinfo">
     <p>
       <span class="lastupdated">
-        Last updated on Jun 11, 2021.
+        Last updated on Aug 19, 2021.
       </span>
 
     </p>
