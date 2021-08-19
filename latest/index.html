@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>SFRmaker &mdash; SFRmaker 0.8.0.post18+gc65f7de documentation</title>
+  <title>SFRmaker &mdash; SFRmaker 0.8.0.post20+g4113114 documentation</title>
   
 
   
@@ -70,7 +70,7 @@
             
             
               <div class="version">
-                0.8.0.post18+gc65f7de
+                0.8.0.post20+g4113114
               </div>
             
           
@@ -106,7 +106,8 @@
 <li class="toctree-l1"><a class="reference internal" href="inputs.html"> Input Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples.html"> Using SFRmaker with a configuration file</a></li>
 <li class="toctree-l1"><a class="reference internal" href="notebooks/SFRmaker_demo.html"> Basic Usage in a scripting context</a></li>
-<li class="toctree-l1"><a class="reference internal" href="notebooks/Streambed_elevation_demo.html"> How the streambed elevation sampling works</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/lines_from_NHDPlusHR_demo.html"> Using SFRmaker with NHDPlus High Resolution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="concepts.html"> Concepts and methods</a></li>
 <li class="toctree-l1"><a class="reference internal" href="troubleshooting.html"> Troubleshooting</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
@@ -212,7 +213,7 @@
 </style>
 <div class="section" id="sfrmaker">
 <h1>SFRmaker<a class="headerlink" href="#sfrmaker" title="Permalink to this headline">¶</a></h1>
-<p>version 0.8.0.post18+gc65f7de</p>
+<p>version 0.8.0.post20+g4113114</p>
 <hr><div class="toctree-wrapper compound">
 <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
 <ul>
@@ -297,10 +298,16 @@
 <li class="toctree-l2"><a class="reference internal" href="notebooks/SFRmaker_demo.html#Writing-shapefiles">Writing shapefiles</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="notebooks/Streambed_elevation_demo.html"> How the streambed elevation sampling works</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/Streambed_elevation_demo.html#Run-the-first-part-of-the-Tyler-Forks-example-problem-to-get-an-SFRData-instance">Run the first part of the Tyler Forks example problem to get an <code class="docutils literal notranslate"><span class="pre">SFRData</span></code> instance</a></li>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/Streambed_elevation_demo.html#Sample-elevations-from-the-DEM">Sample elevations from the DEM</a></li>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/Streambed_elevation_demo.html#Make-comparison-plots-of-the-elevations-in-each-segment">Make comparison plots of the elevations in each segment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/lines_from_NHDPlusHR_demo.html"> Using SFRmaker with NHDPlus High Resolution</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/lines_from_NHDPlusHR_demo.html#1.-Preview-NHDPlusHR-geodatabases">1. Preview NHDPlusHR geodatabases</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/lines_from_NHDPlusHR_demo.html#2.-Filter-network-using-shapefile-boundary">2. Filter network using shapefile boundary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/lines_from_NHDPlusHR_demo.html#3.-Option-to-remove-reaches-with-unwated-FCodes">3. Option to remove reaches with unwated FCodes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/lines_from_NHDPlusHR_demo.html#4.-Make-an-sfrmaker.lines-instance-using-from_nhdplus_hr">4. Make an <code class="docutils literal notranslate"><span class="pre">sfrmaker.lines</span></code> instance using <code class="docutils literal notranslate"><span class="pre">from_nhdplus_hr</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/lines_from_NHDPlusHR_demo.html#5.-Create-a-streamflow-routing-dataset-and-write-an-SFR-package-input-file-for-MODDLOW">5. Create a streamflow routing dataset and write an SFR package input file for MODDLOW</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="concepts.html"> Concepts and methods</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/Streambed_elevation_demo.html"> How the streambed elevation sampling works</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="troubleshooting.html"> Troubleshooting</a><ul>
@@ -340,7 +347,7 @@
   <div role="contentinfo">
     <p>
       <span class="lastupdated">
-        Last updated on Aug 18, 2021.
+        Last updated on Aug 19, 2021.
       </span>
 
     </p>

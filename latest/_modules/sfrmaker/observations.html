@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>sfrmaker.observations &mdash; SFRmaker 0.8.0.post18+gc65f7de documentation</title>
+  <title>sfrmaker.observations &mdash; SFRmaker 0.8.0.post20+g4113114 documentation</title>
   
 
   
@@ -69,7 +69,7 @@
             
             
               <div class="version">
-                0.8.0.post18+gc65f7de
+                0.8.0.post20+g4113114
               </div>
             
           
@@ -105,7 +105,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../../inputs.html"> Input Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../examples.html"> Using SFRmaker with a configuration file</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../notebooks/SFRmaker_demo.html"> Basic Usage in a scripting context</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../notebooks/Streambed_elevation_demo.html"> How the streambed elevation sampling works</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../notebooks/lines_from_NHDPlusHR_demo.html"> Using SFRmaker with NHDPlus High Resolution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../concepts.html"> Concepts and methods</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../troubleshooting.html"> Troubleshooting</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
@@ -273,7 +274,7 @@
 
     <span class="c1"># allow input via a list of tables or single table</span>
     <span class="n">data</span> <span class="o">=</span> <span class="n">read_tables</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="p">{</span><span class="n">obsname_column</span><span class="p">:</span> <span class="nb">object</span><span class="p">})</span>
-    <span class="k">assert</span> <span class="n">data</span><span class="p">[</span><span class="n">obsname_column</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">object</span>
+    <span class="k">assert</span> <span class="n">data</span><span class="p">[</span><span class="n">obsname_column</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="nb">object</span>
 
     <span class="c1"># read reach geometries from a shapefile</span>
     <span class="k">if</span> <span class="n">sfrlines_shapefile</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -711,7 +712,7 @@
   <div role="contentinfo">
     <p>
       <span class="lastupdated">
-        Last updated on Aug 18, 2021.
+        Last updated on Aug 19, 2021.
       </span>
 
     </p>

@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>sfrmaker.lines &mdash; SFRmaker 0.8.0.post18+gc65f7de documentation</title>
+  <title>sfrmaker.lines &mdash; SFRmaker 0.8.0.post20+g4113114 documentation</title>
   
 
   
@@ -69,7 +69,7 @@
             
             
               <div class="version">
-                0.8.0.post18+gc65f7de
+                0.8.0.post20+g4113114
               </div>
             
           
@@ -105,7 +105,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../../inputs.html"> Input Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../examples.html"> Using SFRmaker with a configuration file</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../notebooks/SFRmaker_demo.html"> Basic Usage in a scripting context</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../notebooks/Streambed_elevation_demo.html"> How the streambed elevation sampling works</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../notebooks/lines_from_NHDPlusHR_demo.html"> Using SFRmaker with NHDPlus High Resolution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../concepts.html"> Concepts and methods</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../troubleshooting.html"> Troubleshooting</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
@@ -190,6 +191,7 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">from</span> <span class="nn">shapely.geometry</span> <span class="kn">import</span> <span class="n">box</span>
+<span class="kn">import</span> <span class="nn">geopandas</span> <span class="k">as</span> <span class="nn">gpd</span>
 <span class="kn">import</span> <span class="nn">flopy</span>
 <span class="kn">from</span> <span class="nn">gisutils</span> <span class="kn">import</span> <span class="n">shp2df</span><span class="p">,</span> <span class="n">df2shp</span><span class="p">,</span> <span class="n">project</span><span class="p">,</span> <span class="n">get_authority_crs</span>
 <span class="kn">import</span> <span class="nn">sfrmaker</span>
@@ -197,7 +199,7 @@
 <span class="kn">from</span> <span class="nn">sfrmaker.checks</span> <span class="kn">import</span> <span class="n">routing_is_circular</span><span class="p">,</span> <span class="n">is_to_one</span>
 <span class="kn">from</span> <span class="nn">sfrmaker.gis</span> <span class="kn">import</span> <span class="n">read_polygon_feature</span><span class="p">,</span> <span class="n">get_bbox</span><span class="p">,</span> <span class="n">get_crs</span>
 <span class="kn">from</span> <span class="nn">sfrmaker.grid</span> <span class="kn">import</span> <span class="n">StructuredGrid</span>
-<span class="kn">from</span> <span class="nn">sfrmaker.nhdplus_utils</span> <span class="kn">import</span> <span class="n">load_nhdplus_v2</span><span class="p">,</span> <span class="n">get_prj_file</span>
+<span class="kn">from</span> <span class="nn">sfrmaker.nhdplus_utils</span> <span class="kn">import</span> <span class="n">load_nhdplus_v2</span><span class="p">,</span> <span class="n">get_prj_file</span><span class="p">,</span> <span class="n">load_nhdplus_hr</span>
 <span class="kn">from</span> <span class="nn">sfrmaker.sfrdata</span> <span class="kn">import</span> <span class="n">SFRData</span>
 <span class="kn">from</span> <span class="nn">sfrmaker.units</span> <span class="kn">import</span> <span class="n">convert_length_units</span><span class="p">,</span> <span class="n">get_length_units</span>
 <span class="kn">from</span> <span class="nn">sfrmaker.utils</span> <span class="kn">import</span> <span class="p">(</span><span class="n">width_from_arbolate_sum</span><span class="p">,</span> <span class="n">arbolate_sum</span><span class="p">)</span>
@@ -508,8 +510,9 @@
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">reprojecting hydrography from</span><span class="se">\n</span><span class="si">{}</span><span class="se">\n</span><span class="s1">to</span><span class="se">\n</span><span class="si">{}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span>
                                                                      <span class="n">dest_crs</span><span class="p">))</span>
         <span class="n">geoms</span> <span class="o">=</span> <span class="n">project</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">geometry</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="n">dest_crs</span><span class="p">)</span>
-        <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">geoms</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">xy</span><span class="p">[</span><span class="mi">0</span><span class="p">])),</span> \
+        <span class="k">assert</span> <span class="n">geoms</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">is_valid</span><span class="p">,</span> \
             <span class="s2">&quot;Invalid reprojection; check CRS for lines and grid.&quot;</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;geometry&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">geoms</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">crs</span> <span class="o">=</span> <span class="n">dest_crs</span></div>
 
@@ -805,6 +808,104 @@
                                   <span class="n">attr_height_units</span><span class="o">=</span><span class="s1">&#39;meters&#39;</span><span class="p">,</span>
                                   <span class="n">epsg</span><span class="o">=</span><span class="n">epsg</span><span class="p">,</span> <span class="n">proj_str</span><span class="o">=</span><span class="n">proj_str</span><span class="p">,</span> <span class="n">prjfile</span><span class="o">=</span><span class="n">prjfile</span><span class="p">)</span></div>
 
+<div class="viewcode-block" id="Lines.from_nhdplus_hr"><a class="viewcode-back" href="../../api/sfrmaker.lines.html#sfrmaker.lines.Lines.from_nhdplus_hr">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_nhdplus_hr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">NHDPlusHR_paths</span><span class="p">,</span> <span class="nb">filter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+                        <span class="n">drop_fcodes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+                        <span class="n">epsg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">proj_str</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ==========</span>
+<span class="sd">        NHDPlusHR_paths : str or list of strings</span>
+<span class="sd">            path (or list of paths) to the NHDPlus High Resolution HU-4 Subregion </span>
+<span class="sd">            file geodatabase (.gdb) to include, assuming the file structure is </span>
+<span class="sd">            the same as when downloaded from the USGS National Map Downloader tool </span>
+<span class="sd">            (v2.0) website (https://apps.nationalmap.gov/downloader/#/). For example::</span>
+<span class="sd">            </span>
+<span class="sd">                NHDPlusHR_paths=[&#39;/NHDPLUS_HR_1/NHDPLUS_H_0202_HU4_GDB.gdb&#39;,</span>
+<span class="sd">                                    &#39;/NHDPLUS_HR_2/NHDPLUS_H_0204_HU4_GDB.gdb&#39;] </span>
+<span class="sd">                                                </span>
+<span class="sd">            for the 4-digit Hydrologic Units 0202 and 0204.      </span>
+<span class="sd">        filter : tuple or str, optional</span>
+<span class="sd">            Bounding box (tuple) or shapefile of model stream network area.</span>
+<span class="sd">        drop_fcodes : int or list of ints, optional</span>
+<span class="sd">            fcode or list of NHDFlowline FCodes to drop from network. </span>
+<span class="sd">            For example, to remove underground aqueducts and general case</span>
+<span class="sd">            water pipelines from line network::</span>
+<span class="sd">                </span>
+<span class="sd">                drop_fcodes = [42803, 42814]</span>
+<span class="sd">                </span>
+<span class="sd">        crs : obj, optional</span>
+<span class="sd">            Coordinate reference object to reproject NHDPlus High Resolution </span>
+<span class="sd">            flowlines. A Python int, dict, str, or :class:`pyproj.crs.CRS` </span>
+<span class="sd">            instance passed to :meth:`pyproj.crs.CRS.from_user_input`</span>
+<span class="sd">            Can be any of:</span>
+<span class="sd">            - PROJ string</span>
+<span class="sd">            - Dictionary of PROJ parameters</span>
+<span class="sd">            - PROJ keyword arguments for parameters</span>
+<span class="sd">            - JSON string with PROJ parameters</span>
+<span class="sd">            - CRS WKT string</span>
+<span class="sd">            - An authority string [i.e. &#39;epsg:4326&#39;]</span>
+<span class="sd">            - An EPSG integer code [i.e. 4326]</span>
+<span class="sd">            - A tuple of (&quot;auth_name&quot;: &quot;auth_code&quot;) [i.e (&#39;epsg&#39;, &#39;4326&#39;)]</span>
+<span class="sd">            - An object with a `to_wkt` method.</span>
+<span class="sd">            - A :class:`pyproj.crs.CRS` class</span>
+<span class="sd">                </span>
+<span class="sd">        epsg : int, optional</span>
+<span class="sd">            EPSG code to to reproject NHDPlus High Resolution flowlines.</span>
+<span class="sd">            By default, None, will use NHDPlus HR fileGDB CRS </span>
+<span class="sd">        proj_str : str, optional</span>
+<span class="sd">            proj_str string to to reproject NHDPlus High Resolution flowlines.</span>
+<span class="sd">            By default, None, will use NHDPlus HR fileGDB CRS </span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        ==========</span>
+<span class="sd">        lines : :class:`Lines` instance</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">df</span><span class="p">,</span> <span class="n">gdb_crs</span> <span class="o">=</span> <span class="n">load_nhdplus_hr</span><span class="p">(</span><span class="n">NHDPlusHR_paths</span><span class="p">,</span> <span class="nb">filter</span> <span class="o">=</span> <span class="nb">filter</span><span class="p">,</span> <span class="n">drop_fcodes</span><span class="o">=</span><span class="n">drop_fcodes</span><span class="p">)</span>
+
+        <span class="c1">#  check to see if flowline geodataframe needs to be reprojected, and get new CRS</span>
+        <span class="k">if</span> <span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">epsg</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">proj_str</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">crs</span> <span class="o">=</span> <span class="n">get_authority_crs</span><span class="p">(</span><span class="n">crs</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">epsg</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">crs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">crs</span> <span class="o">=</span> <span class="n">get_authority_crs</span><span class="p">(</span><span class="n">epsg</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">proj_str</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">crs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">crs</span> <span class="o">=</span> <span class="n">get_authority_crs</span><span class="p">(</span><span class="n">proj_str</span><span class="p">)</span>
+            <span class="n">epsg</span> <span class="o">=</span> <span class="n">crs</span><span class="o">.</span><span class="n">to_epsg</span><span class="p">()</span>
+            <span class="n">proj_str</span> <span class="o">=</span> <span class="n">crs</span><span class="o">.</span><span class="n">to_proj4</span><span class="p">()</span>
+            
+            <span class="c1">#  reproject</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">crs</span><span class="p">)</span>
+
+        <span class="c1">#  if not, use NHDPlus HR CRS</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">crs</span> <span class="o">=</span> <span class="n">get_authority_crs</span><span class="p">(</span><span class="n">gdb_crs</span><span class="p">)</span>
+            <span class="n">epsg</span> <span class="o">=</span> <span class="n">crs</span><span class="o">.</span><span class="n">to_epsg</span><span class="p">()</span>
+            <span class="n">proj_str</span> <span class="o">=</span> <span class="n">crs</span><span class="o">.</span><span class="n">to_proj4</span><span class="p">()</span>
+
+        <span class="c1"># convert arbolate sums from km to m</span>
+        <span class="n">df</span><span class="p">[</span><span class="s1">&#39;asum2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">ArbolateSu</span> <span class="o">*</span> <span class="mi">1000</span>
+
+        <span class="c1"># convert NHDPlusID end elevations from cm to m</span>
+        <span class="k">if</span> <span class="s1">&#39;MaxElevSmo&#39;</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="n">df</span><span class="p">[</span><span class="s1">&#39;elevup&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">MaxElevSmo</span> <span class="o">/</span> <span class="mf">100.</span>
+        <span class="k">if</span> <span class="s1">&#39;MinElevSmo&#39;</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="n">df</span><span class="p">[</span><span class="s1">&#39;elevdn&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">MinElevSmo</span> <span class="o">/</span> <span class="mf">100.</span>
+
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_dataframe</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">id_column</span><span class="o">=</span><span class="s1">&#39;NHDPlusID&#39;</span><span class="p">,</span>
+                                  <span class="n">routing_column</span><span class="o">=</span><span class="s1">&#39;ToNHDPID&#39;</span><span class="p">,</span>
+                                  <span class="n">name_column</span><span class="o">=</span><span class="s1">&#39;GNIS_Name&#39;</span><span class="p">,</span>
+                                  <span class="n">arbolate_sum_column2</span><span class="o">=</span><span class="s1">&#39;asum2&#39;</span><span class="p">,</span>
+                                  <span class="n">up_elevation_column</span><span class="o">=</span><span class="s1">&#39;elevup&#39;</span><span class="p">,</span>
+                                  <span class="n">dn_elevation_column</span><span class="o">=</span><span class="s1">&#39;elevdn&#39;</span><span class="p">,</span>
+                                  <span class="n">geometry_column</span><span class="o">=</span><span class="s1">&#39;geometry&#39;</span><span class="p">,</span>
+                                  <span class="n">attr_length_units</span><span class="o">=</span><span class="s1">&#39;meters&#39;</span><span class="p">,</span>
+                                  <span class="n">attr_height_units</span><span class="o">=</span><span class="s1">&#39;meters&#39;</span><span class="p">,</span>
+                                  <span class="n">epsg</span><span class="o">=</span><span class="n">epsg</span><span class="p">,</span> <span class="n">proj_str</span><span class="o">=</span><span class="n">proj_str</span><span class="p">)</span></div>
+
+
 <div class="viewcode-block" id="Lines.to_sfr"><a class="viewcode-back" href="../../api/sfrmaker.lines.html#sfrmaker.lines.Lines.to_sfr">[docs]</a>    <span class="k">def</span> <span class="nf">to_sfr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">active_area</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">isfr</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -1096,7 +1197,7 @@
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">add_outlets</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">add_outlets</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
                 <span class="n">add_outlets</span> <span class="o">=</span> <span class="p">[</span><span class="n">add_outlets</span><span class="p">]</span>
             <span class="k">for</span> <span class="n">outlet_id</span> <span class="ow">in</span> <span class="n">add_outlets</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">rd</span><span class="o">.</span><span class="n">line_id</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">object</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">rd</span><span class="o">.</span><span class="n">line_id</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="nb">object</span><span class="p">:</span>
                     <span class="n">outlet_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">outlet_id</span><span class="p">)</span>
                     <span class="n">outlet_toid</span> <span class="o">=</span> <span class="s1">&#39;0&#39;</span>
                 <span class="k">else</span><span class="p">:</span>
@@ -1181,7 +1282,7 @@
   <div role="contentinfo">
     <p>
       <span class="lastupdated">
-        Last updated on Aug 18, 2021.
+        Last updated on Aug 19, 2021.
       </span>
 
     </p>

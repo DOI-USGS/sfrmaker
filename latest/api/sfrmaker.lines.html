@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>The Lines Module &mdash; SFRmaker 0.8.0.post18+gc65f7de documentation</title>
+  <title>The Lines Module &mdash; SFRmaker 0.8.0.post20+g4113114 documentation</title>
   
 
   
@@ -73,7 +73,7 @@
             
             
               <div class="version">
-                0.8.0.post18+gc65f7de
+                0.8.0.post20+g4113114
               </div>
             
           
@@ -109,7 +109,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../inputs.html"> Input Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples.html"> Using SFRmaker with a configuration file</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../notebooks/SFRmaker_demo.html"> Basic Usage in a scripting context</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../notebooks/Streambed_elevation_demo.html"> How the streambed elevation sampling works</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebooks/lines_from_NHDPlusHR_demo.html"> Using SFRmaker with NHDPlus High Resolution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../concepts.html"> Concepts and methods</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../troubleshooting.html"> Troubleshooting</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
@@ -392,6 +393,62 @@ for features in the input shapefile.</p>
 for features in the input shapefile. By default,
 the projection file included with the input shapefile
 will be used.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl>
+<dt><strong>lines</strong><span class="classifier"><a class="reference internal" href="#sfrmaker.lines.Lines" title="sfrmaker.lines.Lines"><code class="xref py py-class docutils literal notranslate"><span class="pre">Lines</span></code></a> instance</span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sfrmaker.lines.Lines.from_nhdplus_hr">
+<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">from_nhdplus_hr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">NHDPlusHR_paths</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drop_fcodes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">crs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proj_str</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/lines.html#Lines.from_nhdplus_hr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.lines.Lines.from_nhdplus_hr" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>NHDPlusHR_paths</strong><span class="classifier">str or list of strings</span></dt><dd><p>path (or list of paths) to the NHDPlus High Resolution HU-4 Subregion 
+file geodatabase (.gdb) to include, assuming the file structure is 
+the same as when downloaded from the USGS National Map Downloader tool 
+(v2.0) website (<a class="reference external" href="https://apps.nationalmap.gov/downloader/#/">https://apps.nationalmap.gov/downloader/#/</a>). For example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NHDPlusHR_paths</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;/NHDPLUS_HR_1/NHDPLUS_H_0202_HU4_GDB.gdb&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;/NHDPLUS_HR_2/NHDPLUS_H_0204_HU4_GDB.gdb&#39;</span><span class="p">]</span> 
+</pre></div>
+</div>
+<p>for the 4-digit Hydrologic Units 0202 and 0204.</p>
+</dd>
+<dt><strong>filter</strong><span class="classifier">tuple or str, optional</span></dt><dd><p>Bounding box (tuple) or shapefile of model stream network area.</p>
+</dd>
+<dt><strong>drop_fcodes</strong><span class="classifier">int or list of ints, optional</span></dt><dd><p>fcode or list of NHDFlowline FCodes to drop from network. 
+For example, to remove underground aqueducts and general case
+water pipelines from line network:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">drop_fcodes</span> <span class="o">=</span> <span class="p">[</span><span class="mi">42803</span><span class="p">,</span> <span class="mi">42814</span><span class="p">]</span>
+</pre></div>
+</div>
+</dd>
+<dt><strong>crs</strong><span class="classifier">obj, optional</span></dt><dd><p>Coordinate reference object to reproject NHDPlus High Resolution 
+flowlines. A Python int, dict, str, or <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.1.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> 
+instance passed to <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input" title="(in pyproj v3.1.0)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.crs.CRS.from_user_input()</span></code></a>
+Can be any of:
+- PROJ string
+- Dictionary of PROJ parameters
+- PROJ keyword arguments for parameters
+- JSON string with PROJ parameters
+- CRS WKT string
+- An authority string [i.e. ‘epsg:4326’]
+- An EPSG integer code [i.e. 4326]
+- A tuple of (“auth_name”: “auth_code”) [i.e (‘epsg’, ‘4326’)]
+- An object with a <cite>to_wkt</cite> method.
+- A <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.1.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> class</p>
+</dd>
+<dt><strong>epsg</strong><span class="classifier">int, optional</span></dt><dd><p>EPSG code to to reproject NHDPlus High Resolution flowlines.
+By default, None, will use NHDPlus HR fileGDB CRS</p>
+</dd>
+<dt><strong>proj_str</strong><span class="classifier">str, optional</span></dt><dd><p>proj_str string to to reproject NHDPlus High Resolution flowlines.
+By default, None, will use NHDPlus HR fileGDB CRS</p>
 </dd>
 </dl>
 </dd>
@@ -701,7 +758,7 @@ prevent double-counting of flow. By default, None</p>
   <div role="contentinfo">
     <p>
       <span class="lastupdated">
-        Last updated on Aug 18, 2021.
+        Last updated on Aug 19, 2021.
       </span>
 
     </p>
