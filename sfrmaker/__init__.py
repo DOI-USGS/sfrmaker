@@ -1,3 +1,6 @@
+import warnings
+warnings.filterwarnings("ignore")
+
 from ._version import get_versions
 from sfrmaker.grid import StructuredGrid, UnstructuredGrid
 from sfrmaker.lines import Lines

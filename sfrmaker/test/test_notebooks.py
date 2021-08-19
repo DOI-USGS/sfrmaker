@@ -40,9 +40,6 @@ def kernel_name():
                    reason="jupyter kernel has timeout issue on appveyor for some reason")
 def test_notebook(notebook, kernel_name, tmpdir, project_root_path):
     
-    # skip this test on linux due to fiona driver issue
-    if ('lines_from_NHDPlusHR_demo.ipynb' in notebook) and (platform.system() == 'Linux'):
-        return
     # run autotest on each notebook
     notebook = os.path.join(project_root_path, notebook)
     path, fname = os.path.split(notebook)
@@ -52,7 +49,13 @@ def test_notebook(notebook, kernel_name, tmpdir, project_root_path):
     # the docs get built when the tests are run on travis
     # so successful execution of this test will build the notebooks for the docs
     output_folder = os.path.join(project_root_path, 'docs/source/notebooks')
-
+    
+    # skip this test on linux due to fiona driver issue
+    if ('lines_from_NHDPlusHR_demo.ipynb' in notebook) and (platform.system() == 'Linux'):
+        # copy the notebook to the docs folder so it still gets rendered by nbsphinx
+        shutil.copy(notebook, output_folder)
+        return
+    
     cmd = ('jupyter ' + 'nbconvert '
            '--ExecutePreprocessor.timeout=600 '
            '--ExecutePreprocessor.kernel_name={} '.format(kernel_name) +

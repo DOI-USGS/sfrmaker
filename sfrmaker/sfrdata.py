@@ -109,10 +109,10 @@ class SFRData(DataPackage):
               'hcond2', 'thickm2', 'elevdn', 'width2', 'depth2',
               'thts2', 'thti2', 'eps2', 'uhc2']
 
-    dtypes = {'rno': np.int, 'node': np.int, 'k': np.int, 'i': np.int, 'j': np.int,
-              'iseg': np.int, 'ireach': np.int, 'outreach': np.int, 'line_id': np.int,
-              'per': np.int, 'nseg': np.int, 'icalc': np.int, 'outseg': np.int,
-              'iupseg': np.int, 'iprior': np.int, 'nstrpts': np.int,
+    dtypes = {'rno': int, 'node': int, 'k': int, 'i': int, 'j': int,
+              'iseg': int, 'ireach': int, 'outreach': int, 'line_id': int,
+              'per': int, 'nseg': int, 'icalc': int, 'outseg': int,
+              'iupseg': int, 'iprior': int, 'nstrpts': int,
               'name': np.object, 'geometry': np.object}
 
     # LENUNI = {"u": 0, "f": 1, "m": 2, "c": 3}

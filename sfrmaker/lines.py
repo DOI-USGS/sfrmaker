@@ -632,41 +632,41 @@ class Lines:
             path (or list of paths) to the NHDPlus High Resolution HU-4 Subregion 
             file geodatabase (.gdb) to include, assuming the file structure is 
             the same as when downloaded from the USGS National Map Downloader tool 
-            (v2.0) website (https://apps.nationalmap.gov/downloader/#/). For example:
+            (v2.0) website (https://apps.nationalmap.gov/downloader/#/). For example::
             
                 NHDPlusHR_paths=['/NHDPLUS_HR_1/NHDPLUS_H_0202_HU4_GDB.gdb',
-                               '/NHDPLUS_HR_2/NHDPLUS_H_0204_HU4_GDB.gdb'] 
-                                               
-                for the 4-digit Hydrologic Units 0202 and 0204.      
+                                    '/NHDPLUS_HR_2/NHDPLUS_H_0204_HU4_GDB.gdb'] 
+                                                
+            for the 4-digit Hydrologic Units 0202 and 0204.      
         filter : tuple or str, optional
             Bounding box (tuple) or shapefile of model stream network area.
-        drop_fcodes: int or list of ints, optional
+        drop_fcodes : int or list of ints, optional
             fcode or list of NHDFlowline FCodes to drop from network. 
             For example, to remove underground aqueducts and general case
-            water pipelines from line network:
+            water pipelines from line network::
                 
                 drop_fcodes = [42803, 42814]
-
+                
         crs : obj, optional
             Coordinate reference object to reproject NHDPlus High Resolution 
             flowlines. A Python int, dict, str, or :class:`pyproj.crs.CRS` 
             instance passed to :meth:`pyproj.crs.CRS.from_user_input`
-                Can be any of:
-                - PROJ string
-                - Dictionary of PROJ parameters
-                - PROJ keyword arguments for parameters
-                - JSON string with PROJ parameters
-                - CRS WKT string
-                - An authority string [i.e. 'epsg:4326']
-                - An EPSG integer code [i.e. 4326]
-                - A tuple of ("auth_name": "auth_code") [i.e ('epsg', '4326')]
-                - An object with a `to_wkt` method.
-                - A :class:`pyproj.crs.CRS` class
-            By default, None, will use NHDPlus HR fileGDB CRS 
-        epsg: int, optional
+            Can be any of:
+            - PROJ string
+            - Dictionary of PROJ parameters
+            - PROJ keyword arguments for parameters
+            - JSON string with PROJ parameters
+            - CRS WKT string
+            - An authority string [i.e. 'epsg:4326']
+            - An EPSG integer code [i.e. 4326]
+            - A tuple of ("auth_name": "auth_code") [i.e ('epsg', '4326')]
+            - An object with a `to_wkt` method.
+            - A :class:`pyproj.crs.CRS` class
+                
+        epsg : int, optional
             EPSG code to to reproject NHDPlus High Resolution flowlines.
             By default, None, will use NHDPlus HR fileGDB CRS 
-        proj_str: str, optional
+        proj_str : str, optional
             proj_str string to to reproject NHDPlus High Resolution flowlines.
             By default, None, will use NHDPlus HR fileGDB CRS 
 
@@ -1010,7 +1010,7 @@ class Lines:
             if isinstance(add_outlets, str) or isinstance(add_outlets, int):
                 add_outlets = [add_outlets]
             for outlet_id in add_outlets:
-                if rd.line_id.dtype == np.object:
+                if rd.line_id.dtype == object:
                     outlet_id = str(outlet_id)
                     outlet_toid = '0'
                 else:

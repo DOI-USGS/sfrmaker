@@ -21,7 +21,11 @@ def test_attribute_units(tylerforks_lines_from_NHDPlus, tylerforks_sfrdata):
     assert tylerforks_lines_from_NHDPlus.attr_length_units == 'meters'
     assert tylerforks_sfrdata.model_length_units == 'feet'
     lines_mean_strtop = tylerforks_lines_from_NHDPlus.df[['elevup', 'elevdn']].mean().mean()
-    sfrdata_mean_strtop = tylerforks_sfrdata.reach_data.strtop.mean()
+    rd = tylerforks_sfrdata.reach_data
+    # some lines along the model boundary aren't included 
+    # in the test subset of the elevslope database
+    # since this case isn't using the DEM, they end up with elevations of 0
+    sfrdata_mean_strtop = rd.loc[rd['strtop'] != 0, 'strtop'].mean()
     assert np.allclose(sfrdata_mean_strtop / lines_mean_strtop, 3.28, rtol=0.02)
 
 
@@ -79,8 +83,10 @@ def test_lines_from_NHDPlus(tylerforks_lines_from_NHDPlus):
     lines_pr = project(lines.df.geometry, 4269, 26915)
     line_lengths = np.array([g.length for g in lines_pr])
     expected_asum1s = lines.df['asum2'] - line_lengths
-    assert np.allclose(lines.df['asum1'].values, expected_asum1s, atol=10)
-    assert np.all(lines.df.loc[tf, 'asum1'] > 95000)
+    # add dropna due to some lines along boundary 
+    # not being in the PFVAA subset used for the test
+    assert np.allclose(lines.df['asum1'].dropna(), expected_asum1s.dropna(), atol=10)
+    assert np.all(lines.df.loc[tf, 'asum1'].dropna() > 95000)
     assert isinstance(lines, Lines)
 
 
