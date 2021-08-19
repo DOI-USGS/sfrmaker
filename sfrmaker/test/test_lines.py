@@ -1,3 +1,4 @@
+import platform
 import pytest
 import sfrmaker
 from sfrmaker.checks import is_to_one
@@ -55,6 +56,7 @@ def test_write_shapefile(tylerforks_lines_from_NHDPlus, test_data_path):
     assert outshp.exists()
 
 
+@pytest.mark.skipif(platform.system() == 'Linux', reason="Fiona FileGDB driver error")
 def test_load_nhdplus_hr(neversink_lines_from_nhdplus_hr):
     lines = neversink_lines_from_nhdplus_hr
     assert isinstance(lines, sfrmaker.lines.Lines)

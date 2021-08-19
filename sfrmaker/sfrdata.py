@@ -1634,7 +1634,8 @@ class SFRData(DataPackage):
             self.period_data.dropna(axis=1, how='all').to_csv(pd_file)
             print('wrote {}'.format(pd_file))
 
-    def write_gage_package(self, filename=None, gage_package_unit=25,
+    def write_gage_package(self, filename=None, sitename_col='obsname',
+                           gage_package_unit=25,
                            gage_starting_unit_number=None):
         """Write observation input for the MODFLOW-2005 Gage Package.
 
@@ -1643,6 +1644,11 @@ class SFRData(DataPackage):
         filename : str, optional
             Gage package file, by default None, in which case
             :py:attr:`SFRData.observations_file` is used.
+        sitename_col : str
+            Unique name or number for each gage site.
+            By default, 'obsname', which is the default field in the 
+            :attr:`SFRData.observations` table containing either 
+            site numbers or site number-variable pairs.
         gage_package_unit : int, optional
             Unit number for Gage Package, by default 25
         gage_starting_unit_number : int, optional
@@ -1668,6 +1674,7 @@ class SFRData(DataPackage):
                                   gage_package_filename=filename,
                                   gage_namfile_entries_file=gage_namfile_entries_file,
                                   model=model,
+                                  sitename_col=sitename_col,
                                   gage_package_unit=gage_package_unit,
                                   start_gage_unit=gage_starting_unit_number)
 
