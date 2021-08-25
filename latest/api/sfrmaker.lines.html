@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>The Lines Module &mdash; SFRmaker 0.8.0.post20+g4113114 documentation</title>
+  <title>The Lines Module &mdash; SFRmaker 0.8.0.post21.dev0+ga4d7038 documentation</title>
   
 
   
@@ -73,7 +73,7 @@
             
             
               <div class="version">
-                0.8.0.post20+g4113114
+                0.8.0.post21.dev0+ga4d7038
               </div>
             
           
@@ -111,6 +111,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../notebooks/SFRmaker_demo.html"> Basic Usage in a scripting context</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../notebooks/lines_from_NHDPlusHR_demo.html"> Using SFRmaker with NHDPlus High Resolution</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../concepts.html"> Concepts and methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebooks/sfrmaker_tools.html"> Stand-alone tools</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../troubleshooting.html"> Troubleshooting</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
@@ -251,7 +252,7 @@ Must have the following columns:</p>
 <td><p>integers representing routing connections</p></td>
 </tr>
 <tr class="row-odd"><td><p><strong>geometry</strong></p></td>
-<td><p>shapely <a class="reference external" href="https://shapely.readthedocs.io/en/latest/manual.html#LineString" title="(in Shapely v1.8a2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">LineString</span></code></a> objects for each feature</p></td>
+<td><p>shapely <a class="reference external" href="https://shapely.readthedocs.io/en/latest/manual.html#LineString" title="(in Shapely v1.8a3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">LineString</span></code></a> objects for each feature</p></td>
 </tr>
 </tbody>
 </table>
@@ -349,7 +350,7 @@ containing only the lines that intersect the <code class="docutils literal notra
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><dl class="simple">
 <dt><strong>df</strong><span class="classifier">DataFrame</span></dt><dd><p>Pandas DataFrame with flowline information, including
-shapely <a class="reference external" href="https://shapely.readthedocs.io/en/latest/manual.html#LineString" title="(in Shapely v1.8a2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">LineStrings</span></code></a> in a <cite>‘geometry’</cite> column.</p>
+shapely <a class="reference external" href="https://shapely.readthedocs.io/en/latest/manual.html#LineString" title="(in Shapely v1.8a3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">LineStrings</span></code></a> in a <cite>‘geometry’</cite> column.</p>
 </dd>
 <dt><strong>id_column</strong><span class="classifier">str, optional</span></dt><dd><p>Attribute field with line identifiers, 
 by default ‘id’</p>
@@ -758,7 +759,7 @@ prevent double-counting of flow. By default, None</p>
   <div role="contentinfo">
     <p>
       <span class="lastupdated">
-        Last updated on Aug 19, 2021.
+        Last updated on Aug 25, 2021.
       </span>
 
     </p>
