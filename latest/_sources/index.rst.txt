@@ -28,6 +28,7 @@ version |version|
    Basic Usage in a scripting context <notebooks/SFRmaker_demo>
    Using SFRmaker with NHDPlus High Resolution <notebooks/lines_from_NHDPlusHR_demo>
    Concepts and methods <concepts.rst>
+   Stand-alone tools <notebooks/sfrmaker_tools>
    Troubleshooting <troubleshooting>
 
 .. toctree::
