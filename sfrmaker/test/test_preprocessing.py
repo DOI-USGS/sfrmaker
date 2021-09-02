@@ -199,6 +199,23 @@ def test_preprocess_nhdplus_no_zonal_stats(culled_flowlines, preprocessed_flowli
     # verify that the same result is produced
     # when reusing the shapefile output from zonal statistics
     pd.testing.assert_frame_equal(preprocessed_flowlines, preprocessed_flowlines2)
+    
+    # test manual updating of COMID end elevations
+    # (e.g. from measured stage data)
+    # assume mean stage at the Money, MS gage
+    # (near the upstream end of COMID 17991438)
+    # has been measured at 37.1 m (~1.2 meters above the min DEM elevation)
+    kwargs['update_up_elevations'] = {17991438: 37.1,
+                                }
+    # and that mean stage near Greenwood
+    # (near the downstream end of COMID 18047242)
+    # has been measured at 37.0 m (~1.1 meters above the min DEM elevation)
+    kwargs['update_dn_elevations'] = {18047242: 37.0,
+                                }
+    preprocessed_flowlines3 = preprocess_nhdplus(**kwargs)
+    
+    assert preprocessed_flowlines3.loc[17991438, 'elevupsmo'] == 37.1
+    assert preprocessed_flowlines3.loc[18047242, 'elevdnsmo'] == 37.0
 
 
 @pytest.mark.timeout(30)  # projection issues will cause zonal stats to hang
