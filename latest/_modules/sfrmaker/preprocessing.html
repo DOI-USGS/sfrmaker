@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>sfrmaker.preprocessing &mdash; SFRmaker 0.8.0.post21.dev0+g7f573b3 documentation</title>
+  <title>sfrmaker.preprocessing &mdash; SFRmaker 0.8.0.post22.dev0+g3caae92 documentation</title>
   
 
   
@@ -69,7 +69,7 @@
             
             
               <div class="version">
-                0.8.0.post21.dev0+g7f573b3
+                0.8.0.post22.dev0+g3caae92
               </div>
             
           
@@ -209,7 +209,7 @@
 <span class="kn">from</span> <span class="nn">sfrmaker.elevations</span> <span class="kn">import</span> <span class="n">smooth_elevations</span>
 <span class="kn">from</span> <span class="nn">sfrmaker.logger</span> <span class="kn">import</span> <span class="n">Logger</span>
 <span class="kn">from</span> <span class="nn">sfrmaker.nhdplus_utils</span> <span class="kn">import</span> <span class="n">get_nhdplus_v2_filepaths</span><span class="p">,</span> <span class="n">get_prj_file</span>
-<span class="kn">from</span> <span class="nn">sfrmaker.routing</span> <span class="kn">import</span> <span class="n">find_path</span><span class="p">,</span> <span class="n">make_graph</span>
+<span class="kn">from</span> <span class="nn">sfrmaker.routing</span> <span class="kn">import</span> <span class="n">find_path</span><span class="p">,</span> <span class="n">make_graph</span><span class="p">,</span> <span class="n">get_upsegs</span>
 <span class="kn">from</span> <span class="nn">sfrmaker.units</span> <span class="kn">import</span> <span class="n">convert_length_units</span><span class="p">,</span> <span class="n">unit_abbreviations</span>
 <span class="kn">from</span> <span class="nn">sfrmaker.utils</span> <span class="kn">import</span> <span class="n">width_from_arbolate_sum</span><span class="p">,</span> <span class="n">arbolate_sum</span>
 
@@ -482,6 +482,8 @@
                        <span class="n">buffersize_meters</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
                        <span class="n">asum_thresh</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                        <span class="n">known_connections</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                       <span class="n">update_up_elevations</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                       <span class="n">update_dn_elevations</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                        <span class="n">width_from_asum_a_param</span><span class="o">=</span><span class="mf">0.1193</span><span class="p">,</span>
                        <span class="n">width_from_asum_b_param</span><span class="o">=</span><span class="mf">0.5032</span><span class="p">,</span>
                        <span class="n">minimum_width</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span>
@@ -535,6 +537,32 @@
 <span class="sd">    known_connections : dict, optional</span>
 <span class="sd">        Dictionary of specified flowline connections {COMID: tocomid},</span>
 <span class="sd">        which will override the routing selection at distributaries.</span>
+<span class="sd">        By default None.</span>
+<span class="sd">    update_up_elevations : dict, optional</span>
+<span class="sd">        Dictionary of specified stage or streambed top elevations </span>
+<span class="sd">        {COMID: elevation} at the upstream end of flowlines, for example,</span>
+<span class="sd">        based on field measurements of streambed elevation or stage. The distinction between</span>
+<span class="sd">        streambed elevation and stage depends on the context of the other elevations. </span>
+<span class="sd">        For example, DEM elevations for larger streams typically reflect stage</span>
+<span class="sd">        at the time data for the DEM (e.g. lidar) were collected. If all other COMID elevations</span>
+<span class="sd">        represent stage, then the elevations supplied to `update_up_elevations`</span>
+<span class="sd">        and `update_dn_elevations` should be stages. Streambed top is </span>
+<span class="sd">        often poorly characterized and difficult to measure in the field. </span>
+<span class="sd">        But if the SFR package is simulating stage (specified streambed bottom plus a </span>
+<span class="sd">        simulated depth based on flow), appropriate streambed bottom input is needed</span>
+<span class="sd">        to produce reasonable stages. The user may start with DEM elevations and then </span>
+<span class="sd">        later subtract off simulated stream depths(from the SFR package output) </span>
+<span class="sd">        to arrive at simulated stages that are close to those observed in the field.</span>
+<span class="sd">        </span>
+<span class="sd">        `update_up_elevations` and `update_dn_elevations` input will override any other values </span>
+<span class="sd">        (from NHDPlus or the DEM), and will be incorporated into the elevation smoothing.</span>
+<span class="sd">        By default None.</span>
+<span class="sd">    update_dn_elevations : dict, optional</span>
+<span class="sd">        Dictionary of specified elevations {COMID: elevation} at the downstream </span>
+<span class="sd">        end of flowlines. See the `update_up_elevations` description for more details.</span>
+<span class="sd">        </span>
+<span class="sd">        `update_up_elevations` and `update_dn_elevations` input will override any other values </span>
+<span class="sd">        (from NHDPlus or the DEM), and will be incorporated into the elevation smoothing.</span>
 <span class="sd">        By default None.</span>
 <span class="sd">    width_from_asum_a_param : float, optional</span>
 <span class="sd">        :math:`a` parameter used for estimating channel width from arbolate sum.</span>
@@ -900,6 +928,36 @@
     <span class="c1"># (spurious values in the DEM)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s1">&#39;Updating elevation values with 1st percentile sampled from the dem&#39;</span><span class="p">)</span>
     <span class="n">elevs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">flcc</span><span class="o">.</span><span class="n">COMID</span><span class="p">,</span> <span class="n">flcc</span><span class="p">[</span><span class="s1">&#39;pct01&#39;</span><span class="p">]))</span>
+    
+    <span class="c1"># update the elevations with any specified elevations</span>
+    <span class="c1"># for up elevations, update the elevations of the next lines upstream</span>
+    <span class="k">if</span> <span class="n">update_up_elevations</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">comid</span><span class="p">,</span> <span class="n">elev</span> <span class="ow">in</span> <span class="n">update_up_elevations</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">fromcomids</span> <span class="o">=</span> <span class="n">graph_r</span><span class="p">[</span><span class="n">comid</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">comid</span> <span class="ow">in</span> <span class="n">fromcomids</span><span class="p">:</span>
+                <span class="n">elevs</span><span class="p">[</span><span class="n">comid</span><span class="p">]</span> <span class="o">=</span> <span class="n">elev</span>
+            <span class="c1"># ensure that there aren&#39;t any lower elevations upstream</span>
+            <span class="n">all_upstream_comids</span> <span class="o">=</span> <span class="n">get_upsegs</span><span class="p">(</span><span class="n">graph_r</span><span class="p">,</span> <span class="n">comid</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">comid</span> <span class="ow">in</span> <span class="n">all_upstream_comids</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">elevs</span><span class="p">[</span><span class="n">comid</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">elev</span><span class="p">:</span>
+                    <span class="n">elevs</span><span class="p">[</span><span class="n">comid</span><span class="p">]</span> <span class="o">=</span> <span class="n">elev</span>
+    <span class="c1"># for dn elevations, update the elevation for that line</span>
+    <span class="k">if</span> <span class="n">update_dn_elevations</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">comid</span><span class="p">,</span> <span class="n">elev</span> <span class="ow">in</span> <span class="n">update_dn_elevations</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">elevs</span><span class="p">[</span><span class="n">comid</span><span class="p">]</span> <span class="o">=</span> <span class="n">elev</span>
+            <span class="c1"># ensure that there aren&#39;t any lower elevations upstream</span>
+            <span class="c1"># include any co-tributaries</span>
+            <span class="n">tocomid</span> <span class="o">=</span> <span class="n">flcc</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">comid</span><span class="p">,</span> <span class="s1">&#39;tocomid&#39;</span><span class="p">]</span>
+            <span class="n">cotribs</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">flcc</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">flcc</span><span class="p">[</span><span class="s1">&#39;tocomid&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">tocomid</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+            <span class="n">all_upstream_comids</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">comid</span> <span class="ow">in</span> <span class="n">cotribs</span><span class="p">:</span>
+                <span class="n">elevs</span><span class="p">[</span><span class="n">comid</span><span class="p">]</span> <span class="o">=</span> <span class="n">elev</span>
+                <span class="n">cotribs_upstream_comids</span> <span class="o">=</span> <span class="n">get_upsegs</span><span class="p">(</span><span class="n">graph_r</span><span class="p">,</span> <span class="n">comid</span><span class="p">)</span>
+                <span class="n">all_upstream_comids</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">cotribs_upstream_comids</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">comid</span> <span class="ow">in</span> <span class="n">all_upstream_comids</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">elevs</span><span class="p">[</span><span class="n">comid</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">elev</span><span class="p">:</span>
+                    <span class="n">elevs</span><span class="p">[</span><span class="n">comid</span><span class="p">]</span> <span class="o">=</span> <span class="n">elev</span>
+                
     <span class="n">elevup</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">cm_to_output_units</span> <span class="o">=</span> <span class="n">convert_length_units</span><span class="p">(</span><span class="s1">&#39;cm&#39;</span><span class="p">,</span> <span class="n">output_length_units</span><span class="p">)</span>
     <span class="c1"># dictionary of NHDPlus minimum values converted to output units</span>
@@ -920,6 +978,7 @@
     <span class="n">flcc</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">noelevup</span><span class="p">,</span> <span class="s1">&#39;elevup&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">flcc</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">noelevup</span><span class="p">,</span> <span class="s1">&#39;elevdn&#39;</span><span class="p">]</span>
 
     <span class="n">logger</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s1">&#39;Updating elevation values with 1st percentile sampled from the dem&#39;</span><span class="p">)</span>
+
 
     <span class="c1"># smooth segment end values so that they never rise downstream</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s1">&#39;Smoothing updated elevations&#39;</span><span class="p">)</span>
@@ -1561,7 +1620,7 @@
   <div role="contentinfo">
     <p>
       <span class="lastupdated">
-        Last updated on Aug 25, 2021.
+        Last updated on Sep 02, 2021.
       </span>
 
     </p>
