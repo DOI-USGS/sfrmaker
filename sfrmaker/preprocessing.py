@@ -21,7 +21,7 @@ from sfrmaker.gis import (shp2df, df2shp, project, intersect_rtree,
 from sfrmaker.elevations import smooth_elevations
 from sfrmaker.logger import Logger
 from sfrmaker.nhdplus_utils import get_nhdplus_v2_filepaths, get_prj_file
-from sfrmaker.routing import find_path, make_graph
+from sfrmaker.routing import find_path, make_graph, get_upsegs
 from sfrmaker.units import convert_length_units, unit_abbreviations
 from sfrmaker.utils import width_from_arbolate_sum, arbolate_sum
 
@@ -294,6 +294,8 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
                        buffersize_meters=50,
                        asum_thresh=None,
                        known_connections=None,
+                       update_up_elevations=None,
+                       update_dn_elevations=None,
                        width_from_asum_a_param=0.1193,
                        width_from_asum_b_param=0.5032,
                        minimum_width=1.,
@@ -347,6 +349,32 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
     known_connections : dict, optional
         Dictionary of specified flowline connections {COMID: tocomid},
         which will override the routing selection at distributaries.
+        By default None.
+    update_up_elevations : dict, optional
+        Dictionary of specified stage or streambed top elevations 
+        {COMID: elevation} at the upstream end of flowlines, for example,
+        based on field measurements of streambed elevation or stage. The distinction between
+        streambed elevation and stage depends on the context of the other elevations. 
+        For example, DEM elevations for larger streams typically reflect stage
+        at the time data for the DEM (e.g. lidar) were collected. If all other COMID elevations
+        represent stage, then the elevations supplied to `update_up_elevations`
+        and `update_dn_elevations` should be stages. Streambed top is 
+        often poorly characterized and difficult to measure in the field. 
+        But if the SFR package is simulating stage (specified streambed bottom plus a 
+        simulated depth based on flow), appropriate streambed bottom input is needed
+        to produce reasonable stages. The user may start with DEM elevations and then 
+        later subtract off simulated stream depths(from the SFR package output) 
+        to arrive at simulated stages that are close to those observed in the field.
+        
+        `update_up_elevations` and `update_dn_elevations` input will override any other values 
+        (from NHDPlus or the DEM), and will be incorporated into the elevation smoothing.
+        By default None.
+    update_dn_elevations : dict, optional
+        Dictionary of specified elevations {COMID: elevation} at the downstream 
+        end of flowlines. See the `update_up_elevations` description for more details.
+        
+        `update_up_elevations` and `update_dn_elevations` input will override any other values 
+        (from NHDPlus or the DEM), and will be incorporated into the elevation smoothing.
         By default None.
     width_from_asum_a_param : float, optional
         :math:`a` parameter used for estimating channel width from arbolate sum.
@@ -712,6 +740,36 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
     # (spurious values in the DEM)
     logger.log('Updating elevation values with 1st percentile sampled from the dem')
     elevs = dict(zip(flcc.COMID, flcc['pct01']))
+    
+    # update the elevations with any specified elevations
+    # for up elevations, update the elevations of the next lines upstream
+    if update_up_elevations is not None:
+        for comid, elev in update_up_elevations.items():
+            fromcomids = graph_r[comid]
+            for comid in fromcomids:
+                elevs[comid] = elev
+            # ensure that there aren't any lower elevations upstream
+            all_upstream_comids = get_upsegs(graph_r, comid)
+            for comid in all_upstream_comids:
+                if elevs[comid] < elev:
+                    elevs[comid] = elev
+    # for dn elevations, update the elevation for that line
+    if update_dn_elevations is not None:
+        for comid, elev in update_dn_elevations.items():
+            elevs[comid] = elev
+            # ensure that there aren't any lower elevations upstream
+            # include any co-tributaries
+            tocomid = flcc.loc[comid, 'tocomid']
+            cotribs = set(flcc.loc[flcc['tocomid'] == tocomid].index)
+            all_upstream_comids = set()
+            for comid in cotribs:
+                elevs[comid] = elev
+                cotribs_upstream_comids = get_upsegs(graph_r, comid)
+                all_upstream_comids.update(cotribs_upstream_comids)
+            for comid in all_upstream_comids:
+                if elevs[comid] < elev:
+                    elevs[comid] = elev
+                
     elevup = {}
     cm_to_output_units = convert_length_units('cm', output_length_units)
     # dictionary of NHDPlus minimum values converted to output units
@@ -732,6 +790,7 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
     flcc.loc[noelevup, 'elevup'] = flcc.loc[noelevup, 'elevdn']
 
     logger.log('Updating elevation values with 1st percentile sampled from the dem')
+
 
     # smooth segment end values so that they never rise downstream
     logger.log('Smoothing updated elevations')
