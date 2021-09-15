@@ -325,6 +325,8 @@ def locate_sites(site_data,
     if reach_id_col not in sfrlines.columns:
         sfrlines.index = np.arange(len(sfrlines)) + 1
         sfrlines[reach_id_col] = np.arange(len(sfrlines)) + 1
+    else:
+        sfrlines.index = sfrlines[reach_id_col]
 
     # sites to locate
     if not isinstance(site_data, pd.DataFrame):
