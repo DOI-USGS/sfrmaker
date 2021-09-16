@@ -104,8 +104,7 @@ def test_write_mf6_sfr_obsfile(shellmound_sfrdata, flux_observation_data, outdir
             if 'obs6' in line.lower():
                 _, _, fname = line.strip().split()
                 assert os.path.exists(os.path.join(outdir, fname))
-                break
-
+                break                                              
 
 def test_add_observations_from_line_ids(shellmound_sfrdata, flux_observation_data, outdir):
     obs = shellmound_sfrdata.add_observations(flux_observation_data,
@@ -134,6 +133,23 @@ def test_add_observations_from_line_ids(shellmound_sfrdata, flux_observation_dat
                                   check_dtype=False
                                   )
 
+    # test line_id and obsname same column
+    obs = shellmound_sfrdata.add_observations(flux_observation_data,
+                                              obstype='downstream-flow',
+                                              line_id_column='line_id',
+                                              obsname_column='line_id'
+                                              )
+    assert set(obs.obsname) == set([str(i) for i in flux_observation_data.line_id])
+
+    # test rno_column and obsname same column
+    obs = shellmound_sfrdata.add_observations(flux_observation_data,
+                                              obstype='downstream-flow',
+                                              rno_column='junk',
+                                              obsname_column='junk'
+                                              )
+    assert set(obs.obsname) == set([str(i) for i in flux_observation_data.junk])
+
+    
     # test assigning obs from custom reach number column?
     obs = shellmound_sfrdata.add_observations(flux_observation_data,
                                               obstype='downstream-flow',
