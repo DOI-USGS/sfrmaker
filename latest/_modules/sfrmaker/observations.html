@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>sfrmaker.observations &mdash; SFRmaker 0.8.0.post23.dev0+g4ba2177 documentation</title>
+  <title>sfrmaker.observations &mdash; SFRmaker 0.8.0.post24.dev0+g7e66d67 documentation</title>
   
 
   
@@ -69,7 +69,7 @@
             
             
               <div class="version">
-                0.8.0.post23.dev0+g4ba2177
+                0.8.0.post24.dev0+g7e66d67
               </div>
             
           
@@ -274,8 +274,17 @@
     <span class="n">reach_data</span> <span class="o">=</span> <span class="n">sfrdata</span><span class="o">.</span><span class="n">reach_data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 
     <span class="c1"># allow input via a list of tables or single table</span>
-    <span class="n">data</span> <span class="o">=</span> <span class="n">read_tables</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="p">{</span><span class="n">obsname_column</span><span class="p">:</span> <span class="nb">object</span><span class="p">})</span>
-    <span class="k">assert</span> <span class="n">data</span><span class="p">[</span><span class="n">obsname_column</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="nb">object</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">read_tables</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="c1">#, dtype={obsname_column: object})</span>
+    <span class="c1"># need a special case if allowing obsname_column to also be identifier</span>
+    <span class="k">if</span> <span class="n">obsname_column</span> <span class="o">==</span> <span class="n">rno_column</span><span class="p">:</span>
+        <span class="n">obsname_column</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;obsnamecol_</span><span class="si">{</span><span class="n">obsname_column</span><span class="si">}</span><span class="s1">&#39;</span>
+        <span class="n">data</span><span class="p">[</span><span class="n">obsname_column</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">rno_column</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">obsname_column</span> <span class="o">==</span> <span class="n">line_id_column</span><span class="p">:</span>
+        <span class="n">obsname_column</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;obsnamecol_</span><span class="si">{</span><span class="n">obsname_column</span><span class="si">}</span><span class="s1">&#39;</span>
+        <span class="n">data</span><span class="p">[</span><span class="n">obsname_column</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">line_id_column</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">data</span><span class="p">[</span><span class="n">obsname_column</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">obsname_column</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">data</span><span class="p">[</span><span class="n">obsname_column</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">object</span>
 
     <span class="c1"># read reach geometries from a shapefile</span>
     <span class="k">if</span> <span class="n">sfrlines_shapefile</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -715,7 +724,7 @@
   <div role="contentinfo">
     <p>
       <span class="lastupdated">
-        Last updated on Sep 15, 2021.
+        Last updated on Sep 16, 2021.
       </span>
 
     </p>
