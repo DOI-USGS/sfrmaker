@@ -13,11 +13,17 @@ import rasterio
 from shapely.geometry import shape, MultiLineString, box
 from rasterstats import zonal_stats
 import matplotlib.pyplot as plt
-from gisutils import get_shapefile_crs, write_raster
-from sfrmaker.gis import (shp2df, df2shp, project, intersect_rtree,
-                          get_bbox, read_polygon_feature, get_shapefile_crs,
-                          get_authority_crs,
-                          get_crs)
+from gisutils import (
+    get_shapefile_crs, 
+    write_raster, 
+    project, 
+    shp2df, 
+    df2shp, 
+    get_shapefile_crs,
+    get_authority_crs
+    )
+from sfrmaker.gis import (intersect_rtree, get_crs,
+                          get_bbox, read_polygon_feature)
 from sfrmaker.elevations import smooth_elevations
 from sfrmaker.logger import Logger
 from sfrmaker.nhdplus_utils import get_nhdplus_v2_filepaths, get_prj_file
@@ -96,6 +102,7 @@ def cull_flowlines(NHDPlus_paths,
                    intermittent_streams_asum_thresh=None,
                    cull_invalid=True,
                    cull_isolated=True,
+                   keep_comids=None,
                    outfolder='clipped_flowlines', logger=None):
     """Cull NHDPlus data to an area defined by an ``active_area`` polygon and
     to flowlines with Arbolate sums greater than specified thresholds. Also remove
@@ -132,6 +139,8 @@ def cull_flowlines(NHDPlus_paths,
         SFRmaker identifies isolated flowslines by looking at up to 10 downstream connections
         to lines that are not stream network. Option to drop
         these lines. By default, False.
+    keep_comids : sequence
+        List-like of COMIDs to retain, regardless of culling criteria.
     outfolder : str, optional
         Location for writing output, by default 'clipped_flowlines'
     logger : sfrmaker.logger instance, optional
@@ -154,6 +163,11 @@ def cull_flowlines(NHDPlus_paths,
     flowlines_files, pfvaa_files, pf_files, elevslope_files = \
         get_nhdplus_v2_filepaths(NHDPlus_paths)
 
+    if keep_comids is not None:
+        keep_comids = set(keep_comids)
+    else:
+        keep_comids = set()
+        
     # logger the date modified timestamps for the NHDPlus files
     for f in flowlines_files + pfvaa_files + pf_files + elevslope_files:
         logger.log_file_and_date_modified(f)
@@ -189,27 +203,33 @@ def cull_flowlines(NHDPlus_paths,
     pf.index = pf.FROMCOMID.astype(int)
     elevslope.index = elevslope.COMID.astype(int)
 
+    original_comids = set(fl.index)
     if cull_invalid:
         logger.statement('Dropping flowlines without attribute information')
         # only retain comids that have information in all of the tables
-        original_comids = set(fl.index)
-        valid_comids = set(fl.index).intersection(pfvaa.index).\
+        
+        valid_comids = original_comids.intersection(pfvaa.index).\
             intersection(pf.index).intersection(elevslope.index)
+        
         # order the same as flowlines
         valid_comids = [c for c in fl.index if c in valid_comids]
-        fl = fl.loc[valid_comids]
-        pfvaa = pfvaa.loc[valid_comids]
-        pf = pf.loc[valid_comids]
-        elevslope = elevslope.loc[valid_comids]
+        fl = fl.loc[valid_comids].copy()
+        pfvaa = pfvaa.loc[valid_comids].copy()
+        pf = pf.loc[valid_comids].copy()
+        elevslope = elevslope.loc[valid_comids].copy()
         dropped = original_comids.difference(valid_comids)
         if any(dropped):
             logger.statement('Dropping {} of {} lines'.format(len(dropped),
                                                               len(original_comids)),
                              log_time=False)
     else:
-        pfvaa = pfvaa.loc[[True if c in fl.index else False for c in pfvaa.index]]
-        pf = pf.loc[[True if c in fl.index else False for c in pf.index]]
-        elevslope = elevslope.loc[[True if c in fl.index else False for c in elevslope.index]]
+        valid_comids = original_comids.union(keep_comids)
+        pfvaa = pfvaa.loc[[True if c in original_comids
+                           else False for c in pfvaa.index]]
+        pf = pf.loc[[True if c in original_comids
+                     else False for c in pf.index]]
+        elevslope = elevslope.loc[[True if c in original_comids
+                                   else False for c in elevslope.index]]
     fl['nhd_asum'] = pfvaa.ArbolateSu
 
     # cull by arbolate sum first
@@ -217,13 +237,15 @@ def cull_flowlines(NHDPlus_paths,
         logger.statement('Dropping Flowlines with arbolate sum less than {}km'.format(asum_thresh))
         # exclude streams classified as perennial from threshold
         criteria = (fl.FCODE == 46006) | (fl.nhd_asum >= asum_thresh)
+        criteria = criteria | fl['COMID'].isin(keep_comids)
         fl = fl.loc[criteria]
 
     # then cull intermittent streams
     if intermittent_streams_asum_thresh is not None:
         logger.statement('Dropping intermittent streams with arbolate sum less than {}km'.format(intermittent_streams_asum_thresh))
         drop_intermittent = (fl.nhd_asum < intermittent_streams_asum_thresh) & (fl.FCODE == 46003)
-        fl = fl.loc[~drop_intermittent]
+        criteria = ~drop_intermittent | fl['COMID'].isin(keep_comids)
+        fl = fl.loc[criteria]
 
     if cull_isolated:
         # drop any remaining stream segments that are isolated
@@ -259,8 +281,8 @@ def cull_flowlines(NHDPlus_paths,
                         # drop current comid and all upstream comids
                         drop_comids.update(set(path[:j+1]))
                         break
-
-        fl = fl.loc[~fl.COMID.isin(drop_comids)]
+        criteria = ~fl.COMID.isin(drop_comids) | fl['COMID'].isin(keep_comids)
+        fl = fl.loc[criteria]
 
         logger.log('Removing isolated flowlines that are no longer in the network')
         logger.statement('Removed {} of {} flowlines'.format(len(drop_comids) - 1,
@@ -529,7 +551,7 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
 
     # get bounds of flowlines
     with fiona.open(flowlines_file) as src:
-        flowline_bounds = src.bounds
+        flowline_bbox = box(*src.bounds)
 
     fl = shp2df(flowlines_file) # flowlines clipped to model area
     pfvaa = shp2df(pfvaa_file)
@@ -858,10 +880,10 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
         logger.log('Sampling widths from NARWidth database')
         logger.log_package_version('rtree')
         narwidth_crs = get_crs(narwidth_shapefile)
-        narwidth_bounds = project(flowline_bounds, flowline_crs, narwidth_crs)
+        narwidth_bbox = project(flowline_bbox, flowline_crs, narwidth_crs)
         sample_NARWidth(flcc, narwidth_shapefile,
                         waterbodies=waterbody_shapefiles,
-                        filter=narwidth_bounds,
+                        filter=narwidth_bbox.bounds,
                         crs=project_crs,
                         output_width_units=output_length_units)
         logger.log('Sampling widths from NARWidth database')
