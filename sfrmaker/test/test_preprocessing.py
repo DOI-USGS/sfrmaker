@@ -285,7 +285,7 @@ def test_swb_runoff_to_csv(test_data_path, outdir):
     nhdplus_catchments_file = test_data_path / 'NHDPlus08/NHDPlusCatchment/Catchment.shp'
     outfile = Path(outdir, 'swb_runoff_by_nhdplus_comid.csv')
     swb_runoff_to_csv(swb_netcdf_output, nhdplus_catchments_file,
-                      netcdf_output_variable='runoff', 
+                      runoff_output_variable='runoff', 
                       catchment_id_col='FEATUREID',
                       output_length_units='meters',
                       outfile=outfile)
@@ -305,3 +305,22 @@ def test_swb_runoff_to_csv(test_data_path, outdir):
     # no idea if this is the right number but similar to test results for modflow-setup
     # and serves as a benchmark in case the output changes
     assert np.allclose(mean_monthly_runoff, 5e5, rtol=0.2)
+    
+    # test with "rejected net infiltration added"
+    swb_rejected_net_inf_output = test_data_path / \
+        'irrtest_1000mrejected_net_infiltration__1999-01-01_to_2020-12-31__989_by_661.nc'
+    outfile2 = Path(outdir, 'swb_runoff_w_netinf_by_nhdplus_comid.csv')
+    swb_runoff_to_csv(swb_netcdf_output, nhdplus_catchments_file,
+                      runoff_output_variable='runoff', 
+                      swb_rejected_net_inf_output=swb_rejected_net_inf_output,
+                      catchment_id_col='FEATUREID',
+                      output_length_units='meters',
+                      outfile=outfile2)
+    df2 = pd.read_csv(outfile2)
+    df2['time'] = pd.to_datetime(df2['time'])
+    mean_monthly_runoff2 = df2.groupby(df2['time'].dt.year)['runoff_m3d'].sum().mean()/12
+    # similar to above; should be a bigger number 
+    # with the rejected net inf added
+    # not sure if this is right but will fail if the input 
+    # or the code changes substantially
+    assert np.allclose(mean_monthly_runoff2, 9e5, rtol=0.2)
