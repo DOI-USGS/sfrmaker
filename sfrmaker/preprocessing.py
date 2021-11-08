@@ -1337,8 +1337,10 @@ def fix_invalid_asums(asums, fl_lengths, graph, graph_r):
     return new_asums
 
 
-def swb_runoff_to_csv(swb_netcdf_output, nhdplus_catchments_file,
-                      netcdf_output_variable='runoff', 
+def swb_runoff_to_csv(swb_runoff_netcdf_output, nhdplus_catchments_file,
+                      runoff_output_variable='runoff',
+                      swb_rejected_net_inf_output=None,
+                      rejected_net_inf_variable='rejected_net_infiltration',
                       catchment_id_col='FEATUREID',
                       output_length_units='meters',
                       outfile='swb_runoff_by_nhdplus_comid.csv'):
@@ -1351,7 +1353,7 @@ def swb_runoff_to_csv(swb_netcdf_output, nhdplus_catchments_file,
 
     Parameters
     ----------
-    swb_netcdf_output : str or path-like
+    swb_runoff_netcdf_output : str or path-like
         NetCDF file with gridded SWB runoff estimates. Runoff values are assumed
         to be in units of length/time (normalized to area). The CRS for the runoff
         dataset is read from the 'proj4_string' attribute, and is assumed to have
@@ -1362,8 +1364,19 @@ def swb_runoff_to_csv(swb_netcdf_output, nhdplus_catchments_file,
         a catchment ID.
     catchment_id_col : str, optional
         Field in nhdplus_catchments_file with ID, by default 'FEATUREID'. For the 
-    netcdf_output_variable : str, optional
-        Variable in swb_netcdf_output with runoff data, by default 'runoff'
+    runoff_output_variable : str, optional
+        Variable in swb_runoff_netcdf_output with runoff data, by default 'runoff'
+    swb_rejected_net_inf_output : str or path-like
+        NetCDF file with gridded SWB estimates of "rejected net infiltration". 
+        This is infiltration in the SWB simulation in excess of the specified max
+        infiltration rate. In reality this may represent a component of runoff
+        or 'quick' overland flow, depending on the timescale of the simulation.
+        Values are assumed to be in units of length/time (normalized to area). 
+        The CRS for the runoff dataset is read from the 'proj4_string' attribute, 
+        and is assumed to have length units of meters.
+    rejected_net_inf_variable : str, optional
+        Variable in swb_runoff_netcdf_output with runoff data, 
+        by default 'rejected_net_infiltration'
     output_length_units : str, optional
         Input units are read from the 'units' attribute of the netcdf_output_variable 
         in swb_netcdf_output; specify output length units so that the output CSV
@@ -1375,19 +1388,27 @@ def swb_runoff_to_csv(swb_netcdf_output, nhdplus_catchments_file,
     outfile = Path(outfile)
     # get an affine.Affine representation and shape 
     # of the grid in the culled NetCDF file
-    with xr.open_dataset(swb_netcdf_output) as ds:
+    with xr.open_dataset(swb_runoff_netcdf_output) as ds:
         xul = np.min(ds['x'].values)
         yul = np.max(ds['y'].values)
         dx = ds['x'].diff(dim='x').values[0]
         dy = ds['y'].diff(dim='y').values[0]
-        ntimes, nrow, ncol = ds[netcdf_output_variable].shape
+        ntimes, nrow, ncol = ds[runoff_output_variable].shape
         nc_crs = get_authority_crs(ds['crs'].attrs['proj4_string'])
         nc_bounds = (xul, np.min(ds['y'].values),
                      np.max(ds['x'].values), yul)
         nc_bbox = box(*nc_bounds)
-        nc_units = ds[netcdf_output_variable].attrs['units']
+        nc_units = ds[runoff_output_variable].attrs['units']
     nc_trans = affine.Affine(dx, 0., xul, 0., dy, yul)
     
+    # combine monthly runoff with monthly "rejected_net_infiltration"
+    if swb_rejected_net_inf_output is not None:
+        with xr.open_dataset(swb_rejected_net_inf_output) as ds2: 
+            total_runoff = ds['runoff'] + ds2[rejected_net_inf_variable]
+            total_runoff.name = 'runoff'
+    else:
+        total_runoff = ds['runoff']
+        
     # Read in the NHDPlus catchments 
     # first reproject the SWB netcdf bounding box to lat/lon (NAD83)
     # with a 10 km buffer
@@ -1416,7 +1437,7 @@ def swb_runoff_to_csv(swb_netcdf_output, nhdplus_catchments_file,
     print(f"wrote {out_text_array.with_suffix('.pdf')}")
     
     # transpose the SWB runoff results from xarray DataSet to DataFrame
-    df = ds['runoff'].to_dataframe().reset_index()
+    df = total_runoff.to_dataframe().reset_index()
     df['comid'] = rasterized.ravel().tolist() * ntimes
     # SWB runoff is in average daily inches over each cell
     # convert to average daily volume for each cell
