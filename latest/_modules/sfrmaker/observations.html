@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>sfrmaker.observations &mdash; SFRmaker 0.8.0.post24.dev0+g5e90414 documentation</title>
+  <title>sfrmaker.observations &mdash; SFRmaker 0.8.0.post26.dev0+gb6d093c documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
@@ -32,7 +32,7 @@
             <a href="../../index.html" class="icon icon-home"> SFRmaker
           </a>
               <div class="version">
-                0.8.0.post24.dev0+g5e90414
+                0.8.0.post26.dev0+gb6d093c
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -183,8 +183,17 @@
     <span class="n">reach_data</span> <span class="o">=</span> <span class="n">sfrdata</span><span class="o">.</span><span class="n">reach_data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 
     <span class="c1"># allow input via a list of tables or single table</span>
-    <span class="n">data</span> <span class="o">=</span> <span class="n">read_tables</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="p">{</span><span class="n">obsname_column</span><span class="p">:</span> <span class="nb">object</span><span class="p">})</span>
-    <span class="k">assert</span> <span class="n">data</span><span class="p">[</span><span class="n">obsname_column</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="nb">object</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">read_tables</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="c1">#, dtype={obsname_column: object})</span>
+    <span class="c1"># need a special case if allowing obsname_column to also be identifier</span>
+    <span class="k">if</span> <span class="n">obsname_column</span> <span class="o">==</span> <span class="n">rno_column</span><span class="p">:</span>
+        <span class="n">obsname_column</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;obsnamecol_</span><span class="si">{</span><span class="n">obsname_column</span><span class="si">}</span><span class="s1">&#39;</span>
+        <span class="n">data</span><span class="p">[</span><span class="n">obsname_column</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">rno_column</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">obsname_column</span> <span class="o">==</span> <span class="n">line_id_column</span><span class="p">:</span>
+        <span class="n">obsname_column</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;obsnamecol_</span><span class="si">{</span><span class="n">obsname_column</span><span class="si">}</span><span class="s1">&#39;</span>
+        <span class="n">data</span><span class="p">[</span><span class="n">obsname_column</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">line_id_column</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">data</span><span class="p">[</span><span class="n">obsname_column</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">obsname_column</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">data</span><span class="p">[</span><span class="n">obsname_column</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">object</span>
 
     <span class="c1"># read reach geometries from a shapefile</span>
     <span class="k">if</span> <span class="n">sfrlines_shapefile</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -622,7 +631,7 @@
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Nov 06, 2021.
+      <span class="lastupdated">Last updated on Nov 22, 2021.
       </span></p>
   </div>
 

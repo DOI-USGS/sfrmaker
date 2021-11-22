@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>The Preprocessing Module &mdash; SFRmaker 0.8.0.post24.dev0+g5e90414 documentation</title>
+  <title>The Preprocessing Module &mdash; SFRmaker 0.8.0.post26.dev0+gb6d093c documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
@@ -20,7 +20,7 @@
         <script src="../_static/clipboard.min.js"></script>
         <script src="../_static/copybutton.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
         <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -37,7 +37,7 @@
             <a href="../index.html" class="icon icon-home"> SFRmaker
           </a>
               <div class="version">
-                0.8.0.post24.dev0+g5e90414
+                0.8.0.post26.dev0+gb6d093c
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -148,8 +148,8 @@ features in polygon.</p>
 </dd>
 <dt><strong>crs</strong><span class="classifier">obj</span></dt><dd><p>Coordinate reference system of flowlines. Only needed if
 the data do not have a valid ESRI projection (.prj) file.
-A Python int, dict, str, or <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.2.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> instance
-passed to <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input" title="(in pyproj v3.2.1)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.crs.CRS.from_user_input()</span></code></a></p>
+A Python int, dict, str, or <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.3.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> instance
+passed to <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input" title="(in pyproj v3.3.0)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.crs.CRS.from_user_input()</span></code></a></p>
 <dl class="simple">
 <dt>Can be any of:</dt><dd><ul class="simple">
 <li><p>PROJ string</p></li>
@@ -161,7 +161,7 @@ passed to <a class="reference external" href="https://pyproj4.github.io/pyproj/s
 <li><p>An EPSG integer code [i.e. 4326]</p></li>
 <li><p>A tuple of (“auth_name”: “auth_code”) [i.e (‘epsg’, ‘4326’)]</p></li>
 <li><p>An object with a <cite>to_wkt</cite> method.</p></li>
-<li><p>A <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.2.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> class</p></li>
+<li><p>A <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.3.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> class</p></li>
 </ul>
 </dd>
 </dl>
@@ -441,8 +441,8 @@ Required if the flowlines are not in a valid Projected CRS.</p>
 </dd>
 <dt><strong>flowline_crs</strong><span class="classifier">obj</span></dt><dd><p>Coordinate reference system of the NHDPlus data. Only needed if
 the data do not have a valid ESRI projection (.prj) file.
-A Python int, dict, str, or <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.2.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> instance
-passed to <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input" title="(in pyproj v3.2.1)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.crs.CRS.from_user_input()</span></code></a></p>
+A Python int, dict, str, or <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.3.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> instance
+passed to <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input" title="(in pyproj v3.3.0)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.crs.CRS.from_user_input()</span></code></a></p>
 <dl class="simple">
 <dt>Can be any of:</dt><dd><ul class="simple">
 <li><p>PROJ string</p></li>
@@ -454,7 +454,7 @@ passed to <a class="reference external" href="https://pyproj4.github.io/pyproj/s
 <li><p>An EPSG integer code [i.e. 4326]</p></li>
 <li><p>A tuple of (“auth_name”: “auth_code”) [i.e (‘epsg’, ‘4326’)]</p></li>
 <li><p>An object with a <cite>to_wkt</cite> method.</p></li>
-<li><p>A <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.2.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> class</p></li>
+<li><p>A <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.3.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> class</p></li>
 </ul>
 </dd>
 </dl>
@@ -656,8 +656,8 @@ Flowlines must be in a projected Coordinate reference system (CRS).</p>
 <code class="docutils literal notranslate"><span class="pre">narwidth_shapefile</span></code> is specified.</p>
 </dd>
 <dt><strong>crs</strong><span class="classifier">obj</span></dt><dd><p>Coordinate reference system of flowlines.
-A Python int, dict, str, or <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.2.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> instance
-passed to <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input" title="(in pyproj v3.2.1)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.crs.CRS.from_user_input()</span></code></a></p>
+A Python int, dict, str, or <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.3.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> instance
+passed to <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input" title="(in pyproj v3.3.0)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.crs.CRS.from_user_input()</span></code></a></p>
 <dl class="simple">
 <dt>Can be any of:</dt><dd><ul class="simple">
 <li><p>PROJ string</p></li>
@@ -669,7 +669,7 @@ passed to <a class="reference external" href="https://pyproj4.github.io/pyproj/s
 <li><p>An EPSG integer code [i.e. 4326]</p></li>
 <li><p>A tuple of (“auth_name”: “auth_code”) [i.e (‘epsg’, ‘4326’)]</p></li>
 <li><p>An object with a <cite>to_wkt</cite> method.</p></li>
-<li><p>A <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.2.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> class</p></li>
+<li><p>A <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.3.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> class</p></li>
 </ul>
 </dd>
 </dl>
@@ -695,7 +695,7 @@ NARWidth widths are assumed to be in meters.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="sfrmaker.preprocessing.swb_runoff_to_csv">
-<span class="sig-prename descclassname"><span class="pre">sfrmaker.preprocessing.</span></span><span class="sig-name descname"><span class="pre">swb_runoff_to_csv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">swb_netcdf_output</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nhdplus_catchments_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">netcdf_output_variable</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'runoff'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">catchment_id_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'FEATUREID'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_length_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'meters'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'swb_runoff_by_nhdplus_comid.csv'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/preprocessing.html#swb_runoff_to_csv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.preprocessing.swb_runoff_to_csv" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">sfrmaker.preprocessing.</span></span><span class="sig-name descname"><span class="pre">swb_runoff_to_csv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">swb_runoff_netcdf_output</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nhdplus_catchments_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">runoff_output_variable</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'runoff'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">swb_rejected_net_inf_output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rejected_net_inf_variable</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rejected_net_infiltration'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">catchment_id_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'FEATUREID'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_length_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'meters'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'swb_runoff_by_nhdplus_comid.csv'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/preprocessing.html#swb_runoff_to_csv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.preprocessing.swb_runoff_to_csv" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convert gridded runoff estimates from the USGS Soil Water Balance Code (SWB)
 to a CSV format, associating each runoff value with a catchment ID. For the runoff to
 be successfully mapped to the SFR network, the catchment IDs must correspond to line IDs
@@ -705,7 +705,7 @@ be referenced in the flowline_routing dataset. See the documentation for
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>swb_netcdf_output</strong><span class="classifier">str or path-like</span></dt><dd><p>NetCDF file with gridded SWB runoff estimates. Runoff values are assumed
+<dt><strong>swb_runoff_netcdf_output</strong><span class="classifier">str or path-like</span></dt><dd><p>NetCDF file with gridded SWB runoff estimates. Runoff values are assumed
 to be in units of length/time (normalized to area). The CRS for the runoff
 dataset is read from the ‘proj4_string’ attribute, and is assumed to have
 length units of meters.</p>
@@ -716,7 +716,18 @@ a catchment ID.</p>
 </dd>
 <dt><strong>catchment_id_col</strong><span class="classifier">str, optional</span></dt><dd><p>Field in nhdplus_catchments_file with ID, by default ‘FEATUREID’. For the</p>
 </dd>
-<dt><strong>netcdf_output_variable</strong><span class="classifier">str, optional</span></dt><dd><p>Variable in swb_netcdf_output with runoff data, by default ‘runoff’</p>
+<dt><strong>runoff_output_variable</strong><span class="classifier">str, optional</span></dt><dd><p>Variable in swb_runoff_netcdf_output with runoff data, by default ‘runoff’</p>
+</dd>
+<dt><strong>swb_rejected_net_inf_output</strong><span class="classifier">str or path-like</span></dt><dd><p>NetCDF file with gridded SWB estimates of “rejected net infiltration”. 
+This is infiltration in the SWB simulation in excess of the specified max
+infiltration rate. In reality this may represent a component of runoff
+or ‘quick’ overland flow, depending on the timescale of the simulation.
+Values are assumed to be in units of length/time (normalized to area). 
+The CRS for the runoff dataset is read from the ‘proj4_string’ attribute, 
+and is assumed to have length units of meters.</p>
+</dd>
+<dt><strong>rejected_net_inf_variable</strong><span class="classifier">str, optional</span></dt><dd><p>Variable in swb_runoff_netcdf_output with runoff data, 
+by default ‘rejected_net_infiltration’</p>
 </dd>
 <dt><strong>output_length_units</strong><span class="classifier">str, optional</span></dt><dd><p>Input units are read from the ‘units’ attribute of the netcdf_output_variable 
 in swb_netcdf_output; specify output length units so that the output CSV
@@ -744,7 +755,7 @@ by default ‘meters’</p>
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Nov 06, 2021.
+      <span class="lastupdated">Last updated on Nov 22, 2021.
       </span></p>
   </div>
 

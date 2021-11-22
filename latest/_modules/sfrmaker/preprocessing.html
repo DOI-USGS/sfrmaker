@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>sfrmaker.preprocessing &mdash; SFRmaker 0.8.0.post24.dev0+g5e90414 documentation</title>
+  <title>sfrmaker.preprocessing &mdash; SFRmaker 0.8.0.post26.dev0+gb6d093c documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
@@ -32,7 +32,7 @@
             <a href="../../index.html" class="icon icon-home"> SFRmaker
           </a>
               <div class="version">
-                0.8.0.post24.dev0+g5e90414
+                0.8.0.post26.dev0+gb6d093c
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -1434,8 +1434,10 @@
     <span class="k">return</span> <span class="n">new_asums</span></div>
 
 
-<div class="viewcode-block" id="swb_runoff_to_csv"><a class="viewcode-back" href="../../api/sfrmaker.preprocessing.html#sfrmaker.preprocessing.swb_runoff_to_csv">[docs]</a><span class="k">def</span> <span class="nf">swb_runoff_to_csv</span><span class="p">(</span><span class="n">swb_netcdf_output</span><span class="p">,</span> <span class="n">nhdplus_catchments_file</span><span class="p">,</span>
-                      <span class="n">netcdf_output_variable</span><span class="o">=</span><span class="s1">&#39;runoff&#39;</span><span class="p">,</span> 
+<div class="viewcode-block" id="swb_runoff_to_csv"><a class="viewcode-back" href="../../api/sfrmaker.preprocessing.html#sfrmaker.preprocessing.swb_runoff_to_csv">[docs]</a><span class="k">def</span> <span class="nf">swb_runoff_to_csv</span><span class="p">(</span><span class="n">swb_runoff_netcdf_output</span><span class="p">,</span> <span class="n">nhdplus_catchments_file</span><span class="p">,</span>
+                      <span class="n">runoff_output_variable</span><span class="o">=</span><span class="s1">&#39;runoff&#39;</span><span class="p">,</span>
+                      <span class="n">swb_rejected_net_inf_output</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                      <span class="n">rejected_net_inf_variable</span><span class="o">=</span><span class="s1">&#39;rejected_net_infiltration&#39;</span><span class="p">,</span>
                       <span class="n">catchment_id_col</span><span class="o">=</span><span class="s1">&#39;FEATUREID&#39;</span><span class="p">,</span>
                       <span class="n">output_length_units</span><span class="o">=</span><span class="s1">&#39;meters&#39;</span><span class="p">,</span>
                       <span class="n">outfile</span><span class="o">=</span><span class="s1">&#39;swb_runoff_by_nhdplus_comid.csv&#39;</span><span class="p">):</span>
@@ -1448,7 +1450,7 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    swb_netcdf_output : str or path-like</span>
+<span class="sd">    swb_runoff_netcdf_output : str or path-like</span>
 <span class="sd">        NetCDF file with gridded SWB runoff estimates. Runoff values are assumed</span>
 <span class="sd">        to be in units of length/time (normalized to area). The CRS for the runoff</span>
 <span class="sd">        dataset is read from the &#39;proj4_string&#39; attribute, and is assumed to have</span>
@@ -1459,8 +1461,19 @@
 <span class="sd">        a catchment ID.</span>
 <span class="sd">    catchment_id_col : str, optional</span>
 <span class="sd">        Field in nhdplus_catchments_file with ID, by default &#39;FEATUREID&#39;. For the </span>
-<span class="sd">    netcdf_output_variable : str, optional</span>
-<span class="sd">        Variable in swb_netcdf_output with runoff data, by default &#39;runoff&#39;</span>
+<span class="sd">    runoff_output_variable : str, optional</span>
+<span class="sd">        Variable in swb_runoff_netcdf_output with runoff data, by default &#39;runoff&#39;</span>
+<span class="sd">    swb_rejected_net_inf_output : str or path-like</span>
+<span class="sd">        NetCDF file with gridded SWB estimates of &quot;rejected net infiltration&quot;. </span>
+<span class="sd">        This is infiltration in the SWB simulation in excess of the specified max</span>
+<span class="sd">        infiltration rate. In reality this may represent a component of runoff</span>
+<span class="sd">        or &#39;quick&#39; overland flow, depending on the timescale of the simulation.</span>
+<span class="sd">        Values are assumed to be in units of length/time (normalized to area). </span>
+<span class="sd">        The CRS for the runoff dataset is read from the &#39;proj4_string&#39; attribute, </span>
+<span class="sd">        and is assumed to have length units of meters.</span>
+<span class="sd">    rejected_net_inf_variable : str, optional</span>
+<span class="sd">        Variable in swb_runoff_netcdf_output with runoff data, </span>
+<span class="sd">        by default &#39;rejected_net_infiltration&#39;</span>
 <span class="sd">    output_length_units : str, optional</span>
 <span class="sd">        Input units are read from the &#39;units&#39; attribute of the netcdf_output_variable </span>
 <span class="sd">        in swb_netcdf_output; specify output length units so that the output CSV</span>
@@ -1472,19 +1485,27 @@
     <span class="n">outfile</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">outfile</span><span class="p">)</span>
     <span class="c1"># get an affine.Affine representation and shape </span>
     <span class="c1"># of the grid in the culled NetCDF file</span>
-    <span class="k">with</span> <span class="n">xr</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span><span class="n">swb_netcdf_output</span><span class="p">)</span> <span class="k">as</span> <span class="n">ds</span><span class="p">:</span>
+    <span class="k">with</span> <span class="n">xr</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span><span class="n">swb_runoff_netcdf_output</span><span class="p">)</span> <span class="k">as</span> <span class="n">ds</span><span class="p">:</span>
         <span class="n">xul</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">ds</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
         <span class="n">yul</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">ds</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
         <span class="n">dx</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">dy</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">ntimes</span><span class="p">,</span> <span class="n">nrow</span><span class="p">,</span> <span class="n">ncol</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[</span><span class="n">netcdf_output_variable</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">ntimes</span><span class="p">,</span> <span class="n">nrow</span><span class="p">,</span> <span class="n">ncol</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[</span><span class="n">runoff_output_variable</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span>
         <span class="n">nc_crs</span> <span class="o">=</span> <span class="n">get_authority_crs</span><span class="p">(</span><span class="n">ds</span><span class="p">[</span><span class="s1">&#39;crs&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;proj4_string&#39;</span><span class="p">])</span>
         <span class="n">nc_bounds</span> <span class="o">=</span> <span class="p">(</span><span class="n">xul</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">ds</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">),</span>
                      <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">ds</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">),</span> <span class="n">yul</span><span class="p">)</span>
         <span class="n">nc_bbox</span> <span class="o">=</span> <span class="n">box</span><span class="p">(</span><span class="o">*</span><span class="n">nc_bounds</span><span class="p">)</span>
-        <span class="n">nc_units</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[</span><span class="n">netcdf_output_variable</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;units&#39;</span><span class="p">]</span>
+        <span class="n">nc_units</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[</span><span class="n">runoff_output_variable</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;units&#39;</span><span class="p">]</span>
     <span class="n">nc_trans</span> <span class="o">=</span> <span class="n">affine</span><span class="o">.</span><span class="n">Affine</span><span class="p">(</span><span class="n">dx</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="n">xul</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="n">dy</span><span class="p">,</span> <span class="n">yul</span><span class="p">)</span>
     
+    <span class="c1"># combine monthly runoff with monthly &quot;rejected_net_infiltration&quot;</span>
+    <span class="k">if</span> <span class="n">swb_rejected_net_inf_output</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">xr</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span><span class="n">swb_rejected_net_inf_output</span><span class="p">)</span> <span class="k">as</span> <span class="n">ds2</span><span class="p">:</span> 
+            <span class="n">total_runoff</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[</span><span class="s1">&#39;runoff&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">ds2</span><span class="p">[</span><span class="n">rejected_net_inf_variable</span><span class="p">]</span>
+            <span class="n">total_runoff</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;runoff&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">total_runoff</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[</span><span class="s1">&#39;runoff&#39;</span><span class="p">]</span>
+        
     <span class="c1"># Read in the NHDPlus catchments </span>
     <span class="c1"># first reproject the SWB netcdf bounding box to lat/lon (NAD83)</span>
     <span class="c1"># with a 10 km buffer</span>
@@ -1513,7 +1534,7 @@
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;wrote </span><span class="si">{</span><span class="n">out_text_array</span><span class="o">.</span><span class="n">with_suffix</span><span class="p">(</span><span class="s1">&#39;.pdf&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
     
     <span class="c1"># transpose the SWB runoff results from xarray DataSet to DataFrame</span>
-    <span class="n">df</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[</span><span class="s1">&#39;runoff&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">()</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">total_runoff</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">()</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
     <span class="n">df</span><span class="p">[</span><span class="s1">&#39;comid&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rasterized</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span> <span class="o">*</span> <span class="n">ntimes</span>
     <span class="c1"># SWB runoff is in average daily inches over each cell</span>
     <span class="c1"># convert to average daily volume for each cell</span>
@@ -1549,7 +1570,7 @@
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Nov 06, 2021.
+      <span class="lastupdated">Last updated on Nov 22, 2021.
       </span></p>
   </div>
 

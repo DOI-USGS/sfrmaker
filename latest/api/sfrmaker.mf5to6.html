@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>The MODFLOW-2005 to 6 Module &mdash; SFRmaker 0.8.0.post24.dev0+g5e90414 documentation</title>
+  <title>The MODFLOW-2005 to 6 Module &mdash; SFRmaker 0.8.0.post26.dev0+gb6d093c documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
@@ -35,7 +35,7 @@
             <a href="../index.html" class="icon icon-home"> SFRmaker
           </a>
               <div class="version">
-                0.8.0.post24.dev0+g5e90414
+                0.8.0.post26.dev0+gb6d093c
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -137,7 +137,7 @@
 <p>Code for converting MODFLOW-2005 style SFR Package input to MODFLOW-6 style SFR package input.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="sfrmaker.mf5to6.Mf6SFR">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">sfrmaker.mf5to6.</span></span><span class="sig-name descname"><span class="pre">Mf6SFR</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ModflowSfr2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">SFRData</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">period_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">idomain</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auxiliary_line_numbers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/mf5to6.html#Mf6SFR"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.mf5to6.Mf6SFR" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sfrmaker.mf5to6.</span></span><span class="sig-name descname"><span class="pre">Mf6SFR</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ModflowSfr2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">SFRData</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">period_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">idomain</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auxiliary_line_numbers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/mf5to6.html#Mf6SFR"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.mf5to6.Mf6SFR" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Class for writing MODFLOW-6 SFR package input
 from a (MODFLOW-2005 style) flopy.modflow.ModflowSfr2 instance or
@@ -176,42 +176,42 @@ and write hydrography line IDs to the packagedata block in the auxiliary
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="sfrmaker.mf5to6.Mf6SFR.cols">
-<span class="sig-name descname"><span class="pre">cols</span></span><em class="property"> <span class="pre">=</span> <span class="pre">['rno',</span> <span class="pre">'cellid',</span> <span class="pre">'k',</span> <span class="pre">'i',</span> <span class="pre">'j',</span> <span class="pre">'rlen',</span> <span class="pre">'rwid',</span> <span class="pre">'rgrd',</span> <span class="pre">'rtp',</span> <span class="pre">'rbth',</span> <span class="pre">'rhk',</span> <span class="pre">'man',</span> <span class="pre">'ncon',</span> <span class="pre">'ustrf',</span> <span class="pre">'ndv',</span> <span class="pre">'idomain',</span> <span class="pre">'line_id']</span></em><a class="headerlink" href="#sfrmaker.mf5to6.Mf6SFR.cols" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">cols</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['rno',</span> <span class="pre">'cellid',</span> <span class="pre">'k',</span> <span class="pre">'i',</span> <span class="pre">'j',</span> <span class="pre">'rlen',</span> <span class="pre">'rwid',</span> <span class="pre">'rgrd',</span> <span class="pre">'rtp',</span> <span class="pre">'rbth',</span> <span class="pre">'rhk',</span> <span class="pre">'man',</span> <span class="pre">'ncon',</span> <span class="pre">'ustrf',</span> <span class="pre">'ndv',</span> <span class="pre">'idomain',</span> <span class="pre">'line_id']</span></em><a class="headerlink" href="#sfrmaker.mf5to6.Mf6SFR.cols" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="sfrmaker.mf5to6.Mf6SFR.connections">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">connections</span></span><a class="headerlink" href="#sfrmaker.mf5to6.Mf6SFR.connections" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">connections</span></span><a class="headerlink" href="#sfrmaker.mf5to6.Mf6SFR.connections" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="sfrmaker.mf5to6.Mf6SFR.graph_r">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">graph_r</span></span><a class="headerlink" href="#sfrmaker.mf5to6.Mf6SFR.graph_r" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">graph_r</span></span><a class="headerlink" href="#sfrmaker.mf5to6.Mf6SFR.graph_r" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="sfrmaker.mf5to6.Mf6SFR.mf5names">
-<span class="sig-name descname"><span class="pre">mf5names</span></span><em class="property"> <span class="pre">=</span> <span class="pre">{'cellid':</span> <span class="pre">'node',</span> <span class="pre">'depth1':</span> <span class="pre">'depth1',</span> <span class="pre">'depth2':</span> <span class="pre">'depth2',</span> <span class="pre">'evaporation':</span> <span class="pre">'etsw',</span> <span class="pre">'inflow':</span> <span class="pre">'flow',</span> <span class="pre">'man':</span> <span class="pre">'roughch',</span> <span class="pre">'rainfall':</span> <span class="pre">'pptsw',</span> <span class="pre">'rbth':</span> <span class="pre">'strthick',</span> <span class="pre">'rgrd':</span> <span class="pre">'slope',</span> <span class="pre">'rhk':</span> <span class="pre">'strhc1',</span> <span class="pre">'rlen':</span> <span class="pre">'rchlen',</span> <span class="pre">'rno':</span> <span class="pre">'rno',</span> <span class="pre">'rtp':</span> <span class="pre">'strtop',</span> <span class="pre">'runoff':</span> <span class="pre">'runoff'}</span></em><a class="headerlink" href="#sfrmaker.mf5to6.Mf6SFR.mf5names" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">mf5names</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'cellid':</span> <span class="pre">'node',</span> <span class="pre">'depth1':</span> <span class="pre">'depth1',</span> <span class="pre">'depth2':</span> <span class="pre">'depth2',</span> <span class="pre">'evaporation':</span> <span class="pre">'etsw',</span> <span class="pre">'inflow':</span> <span class="pre">'flow',</span> <span class="pre">'man':</span> <span class="pre">'roughch',</span> <span class="pre">'rainfall':</span> <span class="pre">'pptsw',</span> <span class="pre">'rbth':</span> <span class="pre">'strthick',</span> <span class="pre">'rgrd':</span> <span class="pre">'slope',</span> <span class="pre">'rhk':</span> <span class="pre">'strhc1',</span> <span class="pre">'rlen':</span> <span class="pre">'rchlen',</span> <span class="pre">'rno':</span> <span class="pre">'rno',</span> <span class="pre">'rtp':</span> <span class="pre">'strtop',</span> <span class="pre">'runoff':</span> <span class="pre">'runoff'}</span></em><a class="headerlink" href="#sfrmaker.mf5to6.Mf6SFR.mf5names" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="sfrmaker.mf5to6.Mf6SFR.mf6names">
-<span class="sig-name descname"><span class="pre">mf6names</span></span><em class="property"> <span class="pre">=</span> <span class="pre">{'depth1':</span> <span class="pre">'depth1',</span> <span class="pre">'depth2':</span> <span class="pre">'depth2',</span> <span class="pre">'etsw':</span> <span class="pre">'evaporation',</span> <span class="pre">'flow':</span> <span class="pre">'inflow',</span> <span class="pre">'node':</span> <span class="pre">'cellid',</span> <span class="pre">'pptsw':</span> <span class="pre">'rainfall',</span> <span class="pre">'rchlen':</span> <span class="pre">'rlen',</span> <span class="pre">'rno':</span> <span class="pre">'rno',</span> <span class="pre">'roughch':</span> <span class="pre">'man',</span> <span class="pre">'runoff':</span> <span class="pre">'runoff',</span> <span class="pre">'slope':</span> <span class="pre">'rgrd',</span> <span class="pre">'strhc1':</span> <span class="pre">'rhk',</span> <span class="pre">'strthick':</span> <span class="pre">'rbth',</span> <span class="pre">'strtop':</span> <span class="pre">'rtp'}</span></em><a class="headerlink" href="#sfrmaker.mf5to6.Mf6SFR.mf6names" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">mf6names</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'depth1':</span> <span class="pre">'depth1',</span> <span class="pre">'depth2':</span> <span class="pre">'depth2',</span> <span class="pre">'etsw':</span> <span class="pre">'evaporation',</span> <span class="pre">'flow':</span> <span class="pre">'inflow',</span> <span class="pre">'node':</span> <span class="pre">'cellid',</span> <span class="pre">'pptsw':</span> <span class="pre">'rainfall',</span> <span class="pre">'rchlen':</span> <span class="pre">'rlen',</span> <span class="pre">'rno':</span> <span class="pre">'rno',</span> <span class="pre">'roughch':</span> <span class="pre">'man',</span> <span class="pre">'runoff':</span> <span class="pre">'runoff',</span> <span class="pre">'slope':</span> <span class="pre">'rgrd',</span> <span class="pre">'strhc1':</span> <span class="pre">'rhk',</span> <span class="pre">'strthick':</span> <span class="pre">'rbth',</span> <span class="pre">'strtop':</span> <span class="pre">'rtp'}</span></em><a class="headerlink" href="#sfrmaker.mf5to6.Mf6SFR.mf6names" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="sfrmaker.mf5to6.Mf6SFR.options_block">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">options_block</span></span><a class="headerlink" href="#sfrmaker.mf5to6.Mf6SFR.options_block" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">options_block</span></span><a class="headerlink" href="#sfrmaker.mf5to6.Mf6SFR.options_block" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="sfrmaker.mf5to6.Mf6SFR.packagedata">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">packagedata</span></span><a class="headerlink" href="#sfrmaker.mf5to6.Mf6SFR.packagedata" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">packagedata</span></span><a class="headerlink" href="#sfrmaker.mf5to6.Mf6SFR.packagedata" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="sfrmaker.mf5to6.Mf6SFR.period_data">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">period_data</span></span><a class="headerlink" href="#sfrmaker.mf5to6.Mf6SFR.period_data" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">period_data</span></span><a class="headerlink" href="#sfrmaker.mf5to6.Mf6SFR.period_data" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -281,7 +281,7 @@ distribute these to k, i, j.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="sfrmaker.mf5to6.mf6sfr">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">sfrmaker.mf5to6.</span></span><span class="sig-name descname"><span class="pre">mf6sfr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/mf5to6.html#mf6sfr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.mf5to6.mf6sfr" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sfrmaker.mf5to6.</span></span><span class="sig-name descname"><span class="pre">mf6sfr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/mf5to6.html#mf6sfr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.mf5to6.mf6sfr" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#sfrmaker.mf5to6.Mf6SFR" title="sfrmaker.mf5to6.Mf6SFR"><code class="xref py py-class docutils literal notranslate"><span class="pre">sfrmaker.mf5to6.Mf6SFR</span></code></a></p>
 </dd></dl>
 
@@ -305,7 +305,7 @@ distribute these to k, i, j.</p>
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Nov 06, 2021.
+      <span class="lastupdated">Last updated on Nov 22, 2021.
       </span></p>
   </div>
 
