@@ -1,38 +1,18 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
-  
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
-  <title>The Preprocessing Module &mdash; SFRmaker 0.8.0.post24.dev0+g7e66d67 documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
+  <title>The Preprocessing Module &mdash; SFRmaker 0.8.0.post27.dev0+gb0b54f7 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
@@ -40,45 +20,25 @@
         <script src="../_static/clipboard.min.js"></script>
         <script src="../_static/copybutton.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
         <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
-    
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-
-    
+    <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="The SFRData Module" href="sfrmaker.sfrdata.html" />
     <link rel="prev" title="The Observations Module" href="sfrmaker.observations.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
             <a href="../index.html" class="icon icon-home"> SFRmaker
-          
-
-          
           </a>
-
-          
-            
-            
               <div class="version">
-                0.8.0.post24.dev0+g7e66d67
+                0.8.0.post27.dev0+gb0b54f7
               </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -86,18 +46,7 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../philosophy.html"> Philosophy</a></li>
@@ -136,73 +85,31 @@
 <li class="toctree-l1"><a class="reference internal" href="../references.html"> References cited</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">SFRmaker</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-        
           <li><a href="index.html">Modules</a> &raquo;</li>
-        
       <li>The Preprocessing Module</li>
-    
-    
       <li class="wy-breadcrumbs-aside">
-        
-          
             <a href="../_sources/api/sfrmaker.preprocessing.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   
 <style>
 /* CSS overrides for sphinx_rtd_theme */
@@ -227,7 +134,7 @@
     text-align: unset;
 }
 </style>
-<div class="section" id="module-sfrmaker.preprocessing">
+<section id="module-sfrmaker.preprocessing">
 <span id="the-preprocessing-module"></span><h1>The Preprocessing Module<a class="headerlink" href="#module-sfrmaker.preprocessing" title="Permalink to this headline">¶</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="sfrmaker.preprocessing.clip_flowlines_to_polygon">
@@ -241,8 +148,8 @@ features in polygon.</p>
 </dd>
 <dt><strong>crs</strong><span class="classifier">obj</span></dt><dd><p>Coordinate reference system of flowlines. Only needed if
 the data do not have a valid ESRI projection (.prj) file.
-A Python int, dict, str, or <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.2.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> instance
-passed to <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input" title="(in pyproj v3.2.0)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.crs.CRS.from_user_input()</span></code></a></p>
+A Python int, dict, str, or <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.3.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> instance
+passed to <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input" title="(in pyproj v3.3.0)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.crs.CRS.from_user_input()</span></code></a></p>
 <dl class="simple">
 <dt>Can be any of:</dt><dd><ul class="simple">
 <li><p>PROJ string</p></li>
@@ -254,7 +161,7 @@ passed to <a class="reference external" href="https://pyproj4.github.io/pyproj/s
 <li><p>An EPSG integer code [i.e. 4326]</p></li>
 <li><p>A tuple of (“auth_name”: “auth_code”) [i.e (‘epsg’, ‘4326’)]</p></li>
 <li><p>An object with a <cite>to_wkt</cite> method.</p></li>
-<li><p>A <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.2.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> class</p></li>
+<li><p>A <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.3.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> class</p></li>
 </ul>
 </dd>
 </dl>
@@ -264,7 +171,7 @@ passed to <a class="reference external" href="https://pyproj4.github.io/pyproj/s
 must be in the same CRS as flowlines; shapefiles will be automatically reprojected.</p>
 </dd>
 <dt><strong>simplify_tol</strong><span class="classifier">float</span></dt><dd><p>Simplification tolerance for <code class="docutils literal notranslate"><span class="pre">polygon</span></code> to speed clipping.
-See <a class="reference external" href="https://shapely.readthedocs.io/en/latest/manual.html" title="(in Shapely v1.8a3)"><span>The Shapely User Manual</span></a> for more details.</p>
+See <a class="reference external" href="https://shapely.readthedocs.io/en/latest/manual.html" title="(in Shapely v1.8.0)"><span>The Shapely User Manual</span></a> for more details.</p>
 </dd>
 <dt><strong>logger</strong><span class="classifier">Logger instance</span></dt><dd></dd>
 </dl>
@@ -279,7 +186,7 @@ See <a class="reference external" href="https://shapely.readthedocs.io/en/latest
 
 <dl class="py function">
 <dt class="sig sig-object py" id="sfrmaker.preprocessing.cull_flowlines">
-<span class="sig-prename descclassname"><span class="pre">sfrmaker.preprocessing.</span></span><span class="sig-name descname"><span class="pre">cull_flowlines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">NHDPlus_paths</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">active_area</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">asum_thresh</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">intermittent_streams_asum_thresh</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cull_invalid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cull_isolated</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfolder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'clipped_flowlines'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/preprocessing.html#cull_flowlines"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.preprocessing.cull_flowlines" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">sfrmaker.preprocessing.</span></span><span class="sig-name descname"><span class="pre">cull_flowlines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">NHDPlus_paths</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">active_area</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">asum_thresh</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">intermittent_streams_asum_thresh</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cull_invalid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cull_isolated</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_comids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfolder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'clipped_flowlines'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/preprocessing.html#cull_flowlines"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.preprocessing.cull_flowlines" title="Permalink to this definition">¶</a></dt>
 <dd><p>Cull NHDPlus data to an area defined by an <code class="docutils literal notranslate"><span class="pre">active_area</span></code> polygon and
 to flowlines with Arbolate sums greater than specified thresholds. Also remove
 lines that are isolated from the stream network or are missing attribute information.</p>
@@ -314,6 +221,8 @@ such isolated flowlines may be present in the raw NHDPlus data.
 SFRmaker identifies isolated flowslines by looking at up to 10 downstream connections
 to lines that are not stream network. Option to drop
 these lines. By default, False.</p>
+</dd>
+<dt><strong>keep_comids</strong><span class="classifier">sequence</span></dt><dd><p>List-like of COMIDs to retain, regardless of culling criteria.</p>
 </dd>
 <dt><strong>outfolder</strong><span class="classifier">str, optional</span></dt><dd><p>Location for writing output, by default ‘clipped_flowlines’</p>
 </dd>
@@ -532,8 +441,8 @@ Required if the flowlines are not in a valid Projected CRS.</p>
 </dd>
 <dt><strong>flowline_crs</strong><span class="classifier">obj</span></dt><dd><p>Coordinate reference system of the NHDPlus data. Only needed if
 the data do not have a valid ESRI projection (.prj) file.
-A Python int, dict, str, or <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.2.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> instance
-passed to <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input" title="(in pyproj v3.2.0)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.crs.CRS.from_user_input()</span></code></a></p>
+A Python int, dict, str, or <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.3.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> instance
+passed to <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input" title="(in pyproj v3.3.0)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.crs.CRS.from_user_input()</span></code></a></p>
 <dl class="simple">
 <dt>Can be any of:</dt><dd><ul class="simple">
 <li><p>PROJ string</p></li>
@@ -545,7 +454,7 @@ passed to <a class="reference external" href="https://pyproj4.github.io/pyproj/s
 <li><p>An EPSG integer code [i.e. 4326]</p></li>
 <li><p>A tuple of (“auth_name”: “auth_code”) [i.e (‘epsg’, ‘4326’)]</p></li>
 <li><p>An object with a <cite>to_wkt</cite> method.</p></li>
-<li><p>A <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.2.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> class</p></li>
+<li><p>A <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.3.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> class</p></li>
 </ul>
 </dd>
 </dl>
@@ -747,8 +656,8 @@ Flowlines must be in a projected Coordinate reference system (CRS).</p>
 <code class="docutils literal notranslate"><span class="pre">narwidth_shapefile</span></code> is specified.</p>
 </dd>
 <dt><strong>crs</strong><span class="classifier">obj</span></dt><dd><p>Coordinate reference system of flowlines.
-A Python int, dict, str, or <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.2.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> instance
-passed to <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input" title="(in pyproj v3.2.0)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.crs.CRS.from_user_input()</span></code></a></p>
+A Python int, dict, str, or <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.3.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> instance
+passed to <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input" title="(in pyproj v3.3.0)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.crs.CRS.from_user_input()</span></code></a></p>
 <dl class="simple">
 <dt>Can be any of:</dt><dd><ul class="simple">
 <li><p>PROJ string</p></li>
@@ -760,7 +669,7 @@ passed to <a class="reference external" href="https://pyproj4.github.io/pyproj/s
 <li><p>An EPSG integer code [i.e. 4326]</p></li>
 <li><p>A tuple of (“auth_name”: “auth_code”) [i.e (‘epsg’, ‘4326’)]</p></li>
 <li><p>An object with a <cite>to_wkt</cite> method.</p></li>
-<li><p>A <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.2.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> class</p></li>
+<li><p>A <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.3.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> class</p></li>
 </ul>
 </dd>
 </dl>
@@ -786,7 +695,7 @@ NARWidth widths are assumed to be in meters.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="sfrmaker.preprocessing.swb_runoff_to_csv">
-<span class="sig-prename descclassname"><span class="pre">sfrmaker.preprocessing.</span></span><span class="sig-name descname"><span class="pre">swb_runoff_to_csv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">swb_netcdf_output</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nhdplus_catchments_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">netcdf_output_variable</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'runoff'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">catchment_id_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'FEATUREID'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_length_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'meters'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'swb_runoff_by_nhdplus_comid.csv'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/preprocessing.html#swb_runoff_to_csv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.preprocessing.swb_runoff_to_csv" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">sfrmaker.preprocessing.</span></span><span class="sig-name descname"><span class="pre">swb_runoff_to_csv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">swb_runoff_netcdf_output</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nhdplus_catchments_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">runoff_output_variable</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'runoff'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">swb_rejected_net_inf_output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rejected_net_inf_variable</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rejected_net_infiltration'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">catchment_id_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'FEATUREID'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_length_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'meters'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'swb_runoff_by_nhdplus_comid.csv'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/preprocessing.html#swb_runoff_to_csv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.preprocessing.swb_runoff_to_csv" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convert gridded runoff estimates from the USGS Soil Water Balance Code (SWB)
 to a CSV format, associating each runoff value with a catchment ID. For the runoff to
 be successfully mapped to the SFR network, the catchment IDs must correspond to line IDs
@@ -796,7 +705,7 @@ be referenced in the flowline_routing dataset. See the documentation for
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>swb_netcdf_output</strong><span class="classifier">str or path-like</span></dt><dd><p>NetCDF file with gridded SWB runoff estimates. Runoff values are assumed
+<dt><strong>swb_runoff_netcdf_output</strong><span class="classifier">str or path-like</span></dt><dd><p>NetCDF file with gridded SWB runoff estimates. Runoff values are assumed
 to be in units of length/time (normalized to area). The CRS for the runoff
 dataset is read from the ‘proj4_string’ attribute, and is assumed to have
 length units of meters.</p>
@@ -807,7 +716,18 @@ a catchment ID.</p>
 </dd>
 <dt><strong>catchment_id_col</strong><span class="classifier">str, optional</span></dt><dd><p>Field in nhdplus_catchments_file with ID, by default ‘FEATUREID’. For the</p>
 </dd>
-<dt><strong>netcdf_output_variable</strong><span class="classifier">str, optional</span></dt><dd><p>Variable in swb_netcdf_output with runoff data, by default ‘runoff’</p>
+<dt><strong>runoff_output_variable</strong><span class="classifier">str, optional</span></dt><dd><p>Variable in swb_runoff_netcdf_output with runoff data, by default ‘runoff’</p>
+</dd>
+<dt><strong>swb_rejected_net_inf_output</strong><span class="classifier">str or path-like</span></dt><dd><p>NetCDF file with gridded SWB estimates of “rejected net infiltration”. 
+This is infiltration in the SWB simulation in excess of the specified max
+infiltration rate. In reality this may represent a component of runoff
+or ‘quick’ overland flow, depending on the timescale of the simulation.
+Values are assumed to be in units of length/time (normalized to area). 
+The CRS for the runoff dataset is read from the ‘proj4_string’ attribute, 
+and is assumed to have length units of meters.</p>
+</dd>
+<dt><strong>rejected_net_inf_variable</strong><span class="classifier">str, optional</span></dt><dd><p>Variable in swb_runoff_netcdf_output with runoff data, 
+by default ‘rejected_net_infiltration’</p>
 </dd>
 <dt><strong>output_length_units</strong><span class="classifier">str, optional</span></dt><dd><p>Input units are read from the ‘units’ attribute of the netcdf_output_variable 
 in swb_netcdf_output; specify output length units so that the output CSV
@@ -821,56 +741,39 @@ by default ‘meters’</p>
 </dl>
 </dd></dl>
 
-</div>
+</section>
 
 
            </div>
-           
           </div>
-          <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="sfrmaker.sfrdata.html" class="btn btn-neutral float-right" title="The SFRData Module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="sfrmaker.observations.html" class="btn btn-neutral float-left" title="The Observations Module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="sfrmaker.sfrdata.html" class="btn btn-neutral float-right" title="The SFRData Module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">
-        Last updated on Sep 16, 2021.
-      </span>
-
-    </p>
+      <span class="lastupdated">Last updated on Dec 09, 2021.
+      </span></p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

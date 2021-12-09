@@ -1,38 +1,17 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
-  
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
-  <title>sfrmaker.preprocessing &mdash; SFRmaker 0.8.0.post24.dev0+g7e66d67 documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/copybutton.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
+  <title>sfrmaker.preprocessing &mdash; SFRmaker 0.8.0.post27.dev0+gb0b54f7 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/copybutton.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
@@ -40,41 +19,21 @@
         <script src="../../_static/clipboard.min.js"></script>
         <script src="../../_static/copybutton.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    
-    <script type="text/javascript" src="../../_static/js/theme.js"></script>
-
-    
+    <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
             <a href="../../index.html" class="icon icon-home"> SFRmaker
-          
-
-          
           </a>
-
-          
-            
-            
               <div class="version">
-                0.8.0.post24.dev0+g7e66d67
+                0.8.0.post27.dev0+gb0b54f7
               </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -82,18 +41,7 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../philosophy.html"> Philosophy</a></li>
@@ -122,69 +70,30 @@
 <li class="toctree-l1"><a class="reference internal" href="../../references.html"> References cited</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../index.html">SFRmaker</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
       <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
-        
           <li><a href="../index.html">Module code</a> &raquo;</li>
-        
       <li>sfrmaker.preprocessing</li>
-    
-    
       <li class="wy-breadcrumbs-aside">
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <h1>Source code for sfrmaker.preprocessing</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
@@ -201,11 +110,17 @@
 <span class="kn">from</span> <span class="nn">shapely.geometry</span> <span class="kn">import</span> <span class="n">shape</span><span class="p">,</span> <span class="n">MultiLineString</span><span class="p">,</span> <span class="n">box</span>
 <span class="kn">from</span> <span class="nn">rasterstats</span> <span class="kn">import</span> <span class="n">zonal_stats</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">from</span> <span class="nn">gisutils</span> <span class="kn">import</span> <span class="n">get_shapefile_crs</span><span class="p">,</span> <span class="n">write_raster</span>
-<span class="kn">from</span> <span class="nn">sfrmaker.gis</span> <span class="kn">import</span> <span class="p">(</span><span class="n">shp2df</span><span class="p">,</span> <span class="n">df2shp</span><span class="p">,</span> <span class="n">project</span><span class="p">,</span> <span class="n">intersect_rtree</span><span class="p">,</span>
-                          <span class="n">get_bbox</span><span class="p">,</span> <span class="n">read_polygon_feature</span><span class="p">,</span> <span class="n">get_shapefile_crs</span><span class="p">,</span>
-                          <span class="n">get_authority_crs</span><span class="p">,</span>
-                          <span class="n">get_crs</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">gisutils</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">get_shapefile_crs</span><span class="p">,</span> 
+    <span class="n">write_raster</span><span class="p">,</span> 
+    <span class="n">project</span><span class="p">,</span> 
+    <span class="n">shp2df</span><span class="p">,</span> 
+    <span class="n">df2shp</span><span class="p">,</span> 
+    <span class="n">get_shapefile_crs</span><span class="p">,</span>
+    <span class="n">get_authority_crs</span>
+    <span class="p">)</span>
+<span class="kn">from</span> <span class="nn">sfrmaker.gis</span> <span class="kn">import</span> <span class="p">(</span><span class="n">intersect_rtree</span><span class="p">,</span> <span class="n">get_crs</span><span class="p">,</span>
+                          <span class="n">get_bbox</span><span class="p">,</span> <span class="n">read_polygon_feature</span><span class="p">)</span>
 <span class="kn">from</span> <span class="nn">sfrmaker.elevations</span> <span class="kn">import</span> <span class="n">smooth_elevations</span>
 <span class="kn">from</span> <span class="nn">sfrmaker.logger</span> <span class="kn">import</span> <span class="n">Logger</span>
 <span class="kn">from</span> <span class="nn">sfrmaker.nhdplus_utils</span> <span class="kn">import</span> <span class="n">get_nhdplus_v2_filepaths</span><span class="p">,</span> <span class="n">get_prj_file</span>
@@ -284,6 +199,7 @@
                    <span class="n">intermittent_streams_asum_thresh</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                    <span class="n">cull_invalid</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                    <span class="n">cull_isolated</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                   <span class="n">keep_comids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                    <span class="n">outfolder</span><span class="o">=</span><span class="s1">&#39;clipped_flowlines&#39;</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Cull NHDPlus data to an area defined by an ``active_area`` polygon and</span>
 <span class="sd">    to flowlines with Arbolate sums greater than specified thresholds. Also remove</span>
@@ -320,6 +236,8 @@
 <span class="sd">        SFRmaker identifies isolated flowslines by looking at up to 10 downstream connections</span>
 <span class="sd">        to lines that are not stream network. Option to drop</span>
 <span class="sd">        these lines. By default, False.</span>
+<span class="sd">    keep_comids : sequence</span>
+<span class="sd">        List-like of COMIDs to retain, regardless of culling criteria.</span>
 <span class="sd">    outfolder : str, optional</span>
 <span class="sd">        Location for writing output, by default &#39;clipped_flowlines&#39;</span>
 <span class="sd">    logger : sfrmaker.logger instance, optional</span>
@@ -342,6 +260,11 @@
     <span class="n">flowlines_files</span><span class="p">,</span> <span class="n">pfvaa_files</span><span class="p">,</span> <span class="n">pf_files</span><span class="p">,</span> <span class="n">elevslope_files</span> <span class="o">=</span> \
         <span class="n">get_nhdplus_v2_filepaths</span><span class="p">(</span><span class="n">NHDPlus_paths</span><span class="p">)</span>
 
+    <span class="k">if</span> <span class="n">keep_comids</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">keep_comids</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">keep_comids</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">keep_comids</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        
     <span class="c1"># logger the date modified timestamps for the NHDPlus files</span>
     <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">flowlines_files</span> <span class="o">+</span> <span class="n">pfvaa_files</span> <span class="o">+</span> <span class="n">pf_files</span> <span class="o">+</span> <span class="n">elevslope_files</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">log_file_and_date_modified</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
@@ -377,27 +300,33 @@
     <span class="n">pf</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">pf</span><span class="o">.</span><span class="n">FROMCOMID</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
     <span class="n">elevslope</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">elevslope</span><span class="o">.</span><span class="n">COMID</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
 
+    <span class="n">original_comids</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">fl</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">cull_invalid</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">statement</span><span class="p">(</span><span class="s1">&#39;Dropping flowlines without attribute information&#39;</span><span class="p">)</span>
         <span class="c1"># only retain comids that have information in all of the tables</span>
-        <span class="n">original_comids</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">fl</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
-        <span class="n">valid_comids</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">fl</span><span class="o">.</span><span class="n">index</span><span class="p">)</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">pfvaa</span><span class="o">.</span><span class="n">index</span><span class="p">)</span><span class="o">.</span>\
+        
+        <span class="n">valid_comids</span> <span class="o">=</span> <span class="n">original_comids</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">pfvaa</span><span class="o">.</span><span class="n">index</span><span class="p">)</span><span class="o">.</span>\
             <span class="n">intersection</span><span class="p">(</span><span class="n">pf</span><span class="o">.</span><span class="n">index</span><span class="p">)</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">elevslope</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+        
         <span class="c1"># order the same as flowlines</span>
         <span class="n">valid_comids</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">fl</span><span class="o">.</span><span class="n">index</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">valid_comids</span><span class="p">]</span>
-        <span class="n">fl</span> <span class="o">=</span> <span class="n">fl</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">valid_comids</span><span class="p">]</span>
-        <span class="n">pfvaa</span> <span class="o">=</span> <span class="n">pfvaa</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">valid_comids</span><span class="p">]</span>
-        <span class="n">pf</span> <span class="o">=</span> <span class="n">pf</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">valid_comids</span><span class="p">]</span>
-        <span class="n">elevslope</span> <span class="o">=</span> <span class="n">elevslope</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">valid_comids</span><span class="p">]</span>
+        <span class="n">fl</span> <span class="o">=</span> <span class="n">fl</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">valid_comids</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">pfvaa</span> <span class="o">=</span> <span class="n">pfvaa</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">valid_comids</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">pf</span> <span class="o">=</span> <span class="n">pf</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">valid_comids</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">elevslope</span> <span class="o">=</span> <span class="n">elevslope</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">valid_comids</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="n">dropped</span> <span class="o">=</span> <span class="n">original_comids</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">valid_comids</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">dropped</span><span class="p">):</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">statement</span><span class="p">(</span><span class="s1">&#39;Dropping </span><span class="si">{}</span><span class="s1"> of </span><span class="si">{}</span><span class="s1"> lines&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">dropped</span><span class="p">),</span>
                                                               <span class="nb">len</span><span class="p">(</span><span class="n">original_comids</span><span class="p">)),</span>
                              <span class="n">log_time</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">pfvaa</span> <span class="o">=</span> <span class="n">pfvaa</span><span class="o">.</span><span class="n">loc</span><span class="p">[[</span><span class="kc">True</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">fl</span><span class="o">.</span><span class="n">index</span> <span class="k">else</span> <span class="kc">False</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">pfvaa</span><span class="o">.</span><span class="n">index</span><span class="p">]]</span>
-        <span class="n">pf</span> <span class="o">=</span> <span class="n">pf</span><span class="o">.</span><span class="n">loc</span><span class="p">[[</span><span class="kc">True</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">fl</span><span class="o">.</span><span class="n">index</span> <span class="k">else</span> <span class="kc">False</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">pf</span><span class="o">.</span><span class="n">index</span><span class="p">]]</span>
-        <span class="n">elevslope</span> <span class="o">=</span> <span class="n">elevslope</span><span class="o">.</span><span class="n">loc</span><span class="p">[[</span><span class="kc">True</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">fl</span><span class="o">.</span><span class="n">index</span> <span class="k">else</span> <span class="kc">False</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">elevslope</span><span class="o">.</span><span class="n">index</span><span class="p">]]</span>
+        <span class="n">valid_comids</span> <span class="o">=</span> <span class="n">original_comids</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">keep_comids</span><span class="p">)</span>
+        <span class="n">pfvaa</span> <span class="o">=</span> <span class="n">pfvaa</span><span class="o">.</span><span class="n">loc</span><span class="p">[[</span><span class="kc">True</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">original_comids</span>
+                           <span class="k">else</span> <span class="kc">False</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">pfvaa</span><span class="o">.</span><span class="n">index</span><span class="p">]]</span>
+        <span class="n">pf</span> <span class="o">=</span> <span class="n">pf</span><span class="o">.</span><span class="n">loc</span><span class="p">[[</span><span class="kc">True</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">original_comids</span>
+                     <span class="k">else</span> <span class="kc">False</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">pf</span><span class="o">.</span><span class="n">index</span><span class="p">]]</span>
+        <span class="n">elevslope</span> <span class="o">=</span> <span class="n">elevslope</span><span class="o">.</span><span class="n">loc</span><span class="p">[[</span><span class="kc">True</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">original_comids</span>
+                                   <span class="k">else</span> <span class="kc">False</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">elevslope</span><span class="o">.</span><span class="n">index</span><span class="p">]]</span>
     <span class="n">fl</span><span class="p">[</span><span class="s1">&#39;nhd_asum&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pfvaa</span><span class="o">.</span><span class="n">ArbolateSu</span>
 
     <span class="c1"># cull by arbolate sum first</span>
@@ -405,13 +334,15 @@
         <span class="n">logger</span><span class="o">.</span><span class="n">statement</span><span class="p">(</span><span class="s1">&#39;Dropping Flowlines with arbolate sum less than </span><span class="si">{}</span><span class="s1">km&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">asum_thresh</span><span class="p">))</span>
         <span class="c1"># exclude streams classified as perennial from threshold</span>
         <span class="n">criteria</span> <span class="o">=</span> <span class="p">(</span><span class="n">fl</span><span class="o">.</span><span class="n">FCODE</span> <span class="o">==</span> <span class="mi">46006</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">fl</span><span class="o">.</span><span class="n">nhd_asum</span> <span class="o">&gt;=</span> <span class="n">asum_thresh</span><span class="p">)</span>
+        <span class="n">criteria</span> <span class="o">=</span> <span class="n">criteria</span> <span class="o">|</span> <span class="n">fl</span><span class="p">[</span><span class="s1">&#39;COMID&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">keep_comids</span><span class="p">)</span>
         <span class="n">fl</span> <span class="o">=</span> <span class="n">fl</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">criteria</span><span class="p">]</span>
 
     <span class="c1"># then cull intermittent streams</span>
     <span class="k">if</span> <span class="n">intermittent_streams_asum_thresh</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">statement</span><span class="p">(</span><span class="s1">&#39;Dropping intermittent streams with arbolate sum less than </span><span class="si">{}</span><span class="s1">km&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">intermittent_streams_asum_thresh</span><span class="p">))</span>
         <span class="n">drop_intermittent</span> <span class="o">=</span> <span class="p">(</span><span class="n">fl</span><span class="o">.</span><span class="n">nhd_asum</span> <span class="o">&lt;</span> <span class="n">intermittent_streams_asum_thresh</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">fl</span><span class="o">.</span><span class="n">FCODE</span> <span class="o">==</span> <span class="mi">46003</span><span class="p">)</span>
-        <span class="n">fl</span> <span class="o">=</span> <span class="n">fl</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">~</span><span class="n">drop_intermittent</span><span class="p">]</span>
+        <span class="n">criteria</span> <span class="o">=</span> <span class="o">~</span><span class="n">drop_intermittent</span> <span class="o">|</span> <span class="n">fl</span><span class="p">[</span><span class="s1">&#39;COMID&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">keep_comids</span><span class="p">)</span>
+        <span class="n">fl</span> <span class="o">=</span> <span class="n">fl</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">criteria</span><span class="p">]</span>
 
     <span class="k">if</span> <span class="n">cull_isolated</span><span class="p">:</span>
         <span class="c1"># drop any remaining stream segments that are isolated</span>
@@ -447,8 +378,8 @@
                         <span class="c1"># drop current comid and all upstream comids</span>
                         <span class="n">drop_comids</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">path</span><span class="p">[:</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">]))</span>
                         <span class="k">break</span>
-
-        <span class="n">fl</span> <span class="o">=</span> <span class="n">fl</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">~</span><span class="n">fl</span><span class="o">.</span><span class="n">COMID</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">drop_comids</span><span class="p">)]</span>
+        <span class="n">criteria</span> <span class="o">=</span> <span class="o">~</span><span class="n">fl</span><span class="o">.</span><span class="n">COMID</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">drop_comids</span><span class="p">)</span> <span class="o">|</span> <span class="n">fl</span><span class="p">[</span><span class="s1">&#39;COMID&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">keep_comids</span><span class="p">)</span>
+        <span class="n">fl</span> <span class="o">=</span> <span class="n">fl</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">criteria</span><span class="p">]</span>
 
         <span class="n">logger</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s1">&#39;Removing isolated flowlines that are no longer in the network&#39;</span><span class="p">)</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">statement</span><span class="p">(</span><span class="s1">&#39;Removed </span><span class="si">{}</span><span class="s1"> of </span><span class="si">{}</span><span class="s1"> flowlines&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">drop_comids</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>
@@ -717,7 +648,7 @@
 
     <span class="c1"># get bounds of flowlines</span>
     <span class="k">with</span> <span class="n">fiona</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">flowlines_file</span><span class="p">)</span> <span class="k">as</span> <span class="n">src</span><span class="p">:</span>
-        <span class="n">flowline_bounds</span> <span class="o">=</span> <span class="n">src</span><span class="o">.</span><span class="n">bounds</span>
+        <span class="n">flowline_bbox</span> <span class="o">=</span> <span class="n">box</span><span class="p">(</span><span class="o">*</span><span class="n">src</span><span class="o">.</span><span class="n">bounds</span><span class="p">)</span>
 
     <span class="n">fl</span> <span class="o">=</span> <span class="n">shp2df</span><span class="p">(</span><span class="n">flowlines_file</span><span class="p">)</span> <span class="c1"># flowlines clipped to model area</span>
     <span class="n">pfvaa</span> <span class="o">=</span> <span class="n">shp2df</span><span class="p">(</span><span class="n">pfvaa_file</span><span class="p">)</span>
@@ -1046,10 +977,10 @@
         <span class="n">logger</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s1">&#39;Sampling widths from NARWidth database&#39;</span><span class="p">)</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">log_package_version</span><span class="p">(</span><span class="s1">&#39;rtree&#39;</span><span class="p">)</span>
         <span class="n">narwidth_crs</span> <span class="o">=</span> <span class="n">get_crs</span><span class="p">(</span><span class="n">narwidth_shapefile</span><span class="p">)</span>
-        <span class="n">narwidth_bounds</span> <span class="o">=</span> <span class="n">project</span><span class="p">(</span><span class="n">flowline_bounds</span><span class="p">,</span> <span class="n">flowline_crs</span><span class="p">,</span> <span class="n">narwidth_crs</span><span class="p">)</span>
+        <span class="n">narwidth_bbox</span> <span class="o">=</span> <span class="n">project</span><span class="p">(</span><span class="n">flowline_bbox</span><span class="p">,</span> <span class="n">flowline_crs</span><span class="p">,</span> <span class="n">narwidth_crs</span><span class="p">)</span>
         <span class="n">sample_NARWidth</span><span class="p">(</span><span class="n">flcc</span><span class="p">,</span> <span class="n">narwidth_shapefile</span><span class="p">,</span>
                         <span class="n">waterbodies</span><span class="o">=</span><span class="n">waterbody_shapefiles</span><span class="p">,</span>
-                        <span class="nb">filter</span><span class="o">=</span><span class="n">narwidth_bounds</span><span class="p">,</span>
+                        <span class="nb">filter</span><span class="o">=</span><span class="n">narwidth_bbox</span><span class="o">.</span><span class="n">bounds</span><span class="p">,</span>
                         <span class="n">crs</span><span class="o">=</span><span class="n">project_crs</span><span class="p">,</span>
                         <span class="n">output_width_units</span><span class="o">=</span><span class="n">output_length_units</span><span class="p">)</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s1">&#39;Sampling widths from NARWidth database&#39;</span><span class="p">)</span>
@@ -1503,8 +1434,10 @@
     <span class="k">return</span> <span class="n">new_asums</span></div>
 
 
-<div class="viewcode-block" id="swb_runoff_to_csv"><a class="viewcode-back" href="../../api/sfrmaker.preprocessing.html#sfrmaker.preprocessing.swb_runoff_to_csv">[docs]</a><span class="k">def</span> <span class="nf">swb_runoff_to_csv</span><span class="p">(</span><span class="n">swb_netcdf_output</span><span class="p">,</span> <span class="n">nhdplus_catchments_file</span><span class="p">,</span>
-                      <span class="n">netcdf_output_variable</span><span class="o">=</span><span class="s1">&#39;runoff&#39;</span><span class="p">,</span> 
+<div class="viewcode-block" id="swb_runoff_to_csv"><a class="viewcode-back" href="../../api/sfrmaker.preprocessing.html#sfrmaker.preprocessing.swb_runoff_to_csv">[docs]</a><span class="k">def</span> <span class="nf">swb_runoff_to_csv</span><span class="p">(</span><span class="n">swb_runoff_netcdf_output</span><span class="p">,</span> <span class="n">nhdplus_catchments_file</span><span class="p">,</span>
+                      <span class="n">runoff_output_variable</span><span class="o">=</span><span class="s1">&#39;runoff&#39;</span><span class="p">,</span>
+                      <span class="n">swb_rejected_net_inf_output</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                      <span class="n">rejected_net_inf_variable</span><span class="o">=</span><span class="s1">&#39;rejected_net_infiltration&#39;</span><span class="p">,</span>
                       <span class="n">catchment_id_col</span><span class="o">=</span><span class="s1">&#39;FEATUREID&#39;</span><span class="p">,</span>
                       <span class="n">output_length_units</span><span class="o">=</span><span class="s1">&#39;meters&#39;</span><span class="p">,</span>
                       <span class="n">outfile</span><span class="o">=</span><span class="s1">&#39;swb_runoff_by_nhdplus_comid.csv&#39;</span><span class="p">):</span>
@@ -1517,7 +1450,7 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    swb_netcdf_output : str or path-like</span>
+<span class="sd">    swb_runoff_netcdf_output : str or path-like</span>
 <span class="sd">        NetCDF file with gridded SWB runoff estimates. Runoff values are assumed</span>
 <span class="sd">        to be in units of length/time (normalized to area). The CRS for the runoff</span>
 <span class="sd">        dataset is read from the &#39;proj4_string&#39; attribute, and is assumed to have</span>
@@ -1528,8 +1461,19 @@
 <span class="sd">        a catchment ID.</span>
 <span class="sd">    catchment_id_col : str, optional</span>
 <span class="sd">        Field in nhdplus_catchments_file with ID, by default &#39;FEATUREID&#39;. For the </span>
-<span class="sd">    netcdf_output_variable : str, optional</span>
-<span class="sd">        Variable in swb_netcdf_output with runoff data, by default &#39;runoff&#39;</span>
+<span class="sd">    runoff_output_variable : str, optional</span>
+<span class="sd">        Variable in swb_runoff_netcdf_output with runoff data, by default &#39;runoff&#39;</span>
+<span class="sd">    swb_rejected_net_inf_output : str or path-like</span>
+<span class="sd">        NetCDF file with gridded SWB estimates of &quot;rejected net infiltration&quot;. </span>
+<span class="sd">        This is infiltration in the SWB simulation in excess of the specified max</span>
+<span class="sd">        infiltration rate. In reality this may represent a component of runoff</span>
+<span class="sd">        or &#39;quick&#39; overland flow, depending on the timescale of the simulation.</span>
+<span class="sd">        Values are assumed to be in units of length/time (normalized to area). </span>
+<span class="sd">        The CRS for the runoff dataset is read from the &#39;proj4_string&#39; attribute, </span>
+<span class="sd">        and is assumed to have length units of meters.</span>
+<span class="sd">    rejected_net_inf_variable : str, optional</span>
+<span class="sd">        Variable in swb_runoff_netcdf_output with runoff data, </span>
+<span class="sd">        by default &#39;rejected_net_infiltration&#39;</span>
 <span class="sd">    output_length_units : str, optional</span>
 <span class="sd">        Input units are read from the &#39;units&#39; attribute of the netcdf_output_variable </span>
 <span class="sd">        in swb_netcdf_output; specify output length units so that the output CSV</span>
@@ -1541,19 +1485,27 @@
     <span class="n">outfile</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">outfile</span><span class="p">)</span>
     <span class="c1"># get an affine.Affine representation and shape </span>
     <span class="c1"># of the grid in the culled NetCDF file</span>
-    <span class="k">with</span> <span class="n">xr</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span><span class="n">swb_netcdf_output</span><span class="p">)</span> <span class="k">as</span> <span class="n">ds</span><span class="p">:</span>
+    <span class="k">with</span> <span class="n">xr</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span><span class="n">swb_runoff_netcdf_output</span><span class="p">)</span> <span class="k">as</span> <span class="n">ds</span><span class="p">:</span>
         <span class="n">xul</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">ds</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
         <span class="n">yul</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">ds</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
         <span class="n">dx</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">dy</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">ntimes</span><span class="p">,</span> <span class="n">nrow</span><span class="p">,</span> <span class="n">ncol</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[</span><span class="n">netcdf_output_variable</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">ntimes</span><span class="p">,</span> <span class="n">nrow</span><span class="p">,</span> <span class="n">ncol</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[</span><span class="n">runoff_output_variable</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span>
         <span class="n">nc_crs</span> <span class="o">=</span> <span class="n">get_authority_crs</span><span class="p">(</span><span class="n">ds</span><span class="p">[</span><span class="s1">&#39;crs&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;proj4_string&#39;</span><span class="p">])</span>
         <span class="n">nc_bounds</span> <span class="o">=</span> <span class="p">(</span><span class="n">xul</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">ds</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">),</span>
                      <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">ds</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">),</span> <span class="n">yul</span><span class="p">)</span>
         <span class="n">nc_bbox</span> <span class="o">=</span> <span class="n">box</span><span class="p">(</span><span class="o">*</span><span class="n">nc_bounds</span><span class="p">)</span>
-        <span class="n">nc_units</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[</span><span class="n">netcdf_output_variable</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;units&#39;</span><span class="p">]</span>
+        <span class="n">nc_units</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[</span><span class="n">runoff_output_variable</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;units&#39;</span><span class="p">]</span>
     <span class="n">nc_trans</span> <span class="o">=</span> <span class="n">affine</span><span class="o">.</span><span class="n">Affine</span><span class="p">(</span><span class="n">dx</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="n">xul</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="n">dy</span><span class="p">,</span> <span class="n">yul</span><span class="p">)</span>
     
+    <span class="c1"># combine monthly runoff with monthly &quot;rejected_net_infiltration&quot;</span>
+    <span class="k">if</span> <span class="n">swb_rejected_net_inf_output</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">xr</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span><span class="n">swb_rejected_net_inf_output</span><span class="p">)</span> <span class="k">as</span> <span class="n">ds2</span><span class="p">:</span> 
+            <span class="n">total_runoff</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[</span><span class="s1">&#39;runoff&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">ds2</span><span class="p">[</span><span class="n">rejected_net_inf_variable</span><span class="p">]</span>
+            <span class="n">total_runoff</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;runoff&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">total_runoff</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[</span><span class="s1">&#39;runoff&#39;</span><span class="p">]</span>
+        
     <span class="c1"># Read in the NHDPlus catchments </span>
     <span class="c1"># first reproject the SWB netcdf bounding box to lat/lon (NAD83)</span>
     <span class="c1"># with a 10 km buffer</span>
@@ -1582,7 +1534,7 @@
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;wrote </span><span class="si">{</span><span class="n">out_text_array</span><span class="o">.</span><span class="n">with_suffix</span><span class="p">(</span><span class="s1">&#39;.pdf&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
     
     <span class="c1"># transpose the SWB runoff results from xarray DataSet to DataFrame</span>
-    <span class="n">df</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[</span><span class="s1">&#39;runoff&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">()</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">total_runoff</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">()</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
     <span class="n">df</span><span class="p">[</span><span class="s1">&#39;comid&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rasterized</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span> <span class="o">*</span> <span class="n">ntimes</span>
     <span class="c1"># SWB runoff is in average daily inches over each cell</span>
     <span class="c1"># convert to average daily volume for each cell</span>
@@ -1611,7 +1563,6 @@
 </pre></div>
 
            </div>
-           
           </div>
           <footer>
 
@@ -1619,40 +1570,25 @@
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">
-        Last updated on Sep 16, 2021.
-      </span>
-
-    </p>
+      <span class="lastupdated">Last updated on Dec 09, 2021.
+      </span></p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>
