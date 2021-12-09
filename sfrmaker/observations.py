@@ -86,7 +86,7 @@ def add_observations(sfrdata, data, flowline_routing=None,
     reach_data = sfrdata.reach_data.copy()
 
     # allow input via a list of tables or single table
-    data = read_tables(data)#, dtype={obsname_column: object})
+    data = read_tables(data, dtype={obsname_column: object})#, dtype={obsname_column: object})
     # need a special case if allowing obsname_column to also be identifier
     if obsname_column == rno_column:
         obsname_column = f'obsnamecol_{obsname_column}'
