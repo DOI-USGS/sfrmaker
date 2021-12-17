@@ -963,7 +963,7 @@ class SFRData(DataPackage):
         return elevs
 
     def set_streambed_top_elevations_from_dem(self, filename, elevation_units=None,
-                                              dem=None, dem_z_units=None,
+                                              dem=None,
                                               method='buffers',
                                               **kwargs):
         """Set streambed top elevations from a DEM raster.
@@ -989,7 +989,7 @@ class SFRData(DataPackage):
             warnings.warn('set_streambed_top_elevations_from_dem: dem argument is deprecated. '
                           'Use filename instead.', DeprecationWarning)
             filename = dem
-        if dem_z_units is not None:
+        if 'dem_z_units' in kwargs:
             warnings.warn('set_streambed_top_elevations_from_dem: dem_z_units argument is deprecated. '
                           'Use elevation_units instead.', DeprecationWarning)
             elevation_units = dem_z_units
