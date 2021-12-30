@@ -8,7 +8,7 @@ SFRmaker is a python package for automating construction of stream flow routing 
 ![Tests](https://github.com/usgs/sfrmaker/workflows/Tests/badge.svg)
 [![Coverage Status](https://codecov.io/github/usgs/SFRmaker/coverage.svg?branch=develop)](https://codecov.io/github/usgs/SFRmaker/coverage.svg?branch=develop)
 [![PyPI version](https://badge.fury.io/py/sfrmaker.svg)](https://badge.fury.io/py/sfrmaker)
-
+[![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 
 Getting Started
 ----------------------------------------------- 
