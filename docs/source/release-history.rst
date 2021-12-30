@@ -2,11 +2,13 @@
 Release History
 ===============
 
-Version 0.9.0 (2021-xx-xx)
+Version 0.9.0 (2021-12-30)
 --------------------------
 * Added support for NHDPlus High Resolution
-* Add preprocessing.get_flowline_routing function to get consolidated routing table in CSV format, for all flowlines in a set of NHDPlus v2 drainage basins
-* Add preprocessing.swb_runoff_to_csv function to associate gridded runoff estimates from Soil Water Balance Code with NHDPlus COMIDs (catchments), so that it can be input to sfrmaker.flows.add_to_perioddata()
+* Features added to preprocessing:
+  * Add get_flowline_routing function to get consolidated routing table in CSV format, for all flowlines in a set of NHDPlus v2 drainage basins
+  * Add swb_runoff_to_csv function to associate gridded runoff estimates from Soil Water Balance Code with NHDPlus COMIDs (catchments), so that it can be input to sfrmaker.flows.add_to_perioddata()
+  * Add keep_comids argument to cull_flowlines to retain specified COMIDs regardless of whether they meet culling criteria (asum, etc.)
 * Features added to utils.assign_layers:
   * add arguments for streambed top and bottom thickness column names; 
   * add idomain argument to only adjust layer bottoms at active model locations. 
@@ -19,7 +21,11 @@ Version 0.9.0 (2021-xx-xx)
   * fix issue with how arbolate sums are computed in lines.to_sfr
   * fix issue with days to years unit conversion
   * fix an issue with observations.locate_sites when reaches are specified by segment and reach
-
+  * preprocessing.preprocess_nhdplus: fix issue with auto reprojection and filtering for NARWidth data
+  * observations.add_observations: force observation name column to object dtype on read_csv, so that USGS site numbers with leading 0s are preserved, for example
+  * SFRData.sample_reach_elevations: ignore nan elevations sampled from DEM (or from beyond DEM extent)
+* Refactoring:
+  * sfrdata.set_streambed_top_elevations_from_dem: deprecate dem_z_units arg; replaced with 'elevation_units'
 
 Version 0.8.0 (2021-04-19)
 --------------------------
