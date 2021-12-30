@@ -11,7 +11,10 @@ dependencies:
   - matplotlib
   - pyyaml
   - numpy
+  - scipy
   - pandas
+  - xarray
+  - geopandas
   - gdal
   - fiona
   - rasterio>=1.0
@@ -20,6 +23,7 @@ dependencies:
   - rtree
   - pyproj>=2.2
   - pyshp
+  - netcdf4
   - codecov
   - coverage
   - flake8

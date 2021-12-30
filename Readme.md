@@ -3,7 +3,7 @@ SFRmaker
 SFRmaker is a python package for automating construction of stream flow routing networks from hydrography data. Hydrography are input from a polyline shapefile and intersected with a structured grid defined using a shapefile or a Flopy `StructuredGrid` instance. Attribute data are supplied via `.dbf` files (NHDPlus input option) or via specified fields in the hydrography shapefile. Line fragments representing intersections between the flowlines and model grid cells are converted to SFR reaches using the supplied attribute data. MODFLOW-NWT/2005 or MODFLOW-6 SFR package input can then be written, along with shapefiles for visualizing the SFR package dataset.
 
 
-### Version 0.8
+### Version 0.9
 
 ![Tests](https://github.com/usgs/sfrmaker/workflows/Tests/badge.svg)
 [![Coverage Status](https://codecov.io/github/usgs/SFRmaker/coverage.svg?branch=develop)](https://codecov.io/github/usgs/SFRmaker/coverage.svg?branch=develop)
@@ -23,7 +23,7 @@ How to cite
 --------------
 ###### Citation for SFRmaker
 
-Leaf, A.T., Fienen, M.N. and Reeves, H.W. (2021), SFRmaker and Linesink‐maker: Rapid construction of streamflow routing networks from hydrography data. Groundwater. Accepted Author Manuscript. [https://doi.org/10.1111/gwat.13095](https://doi.org/10.1111/gwat.13095)
+Leaf, A.T., Fienen, M.N. and Reeves, H.W. (2021), SFRmaker and Linesink-maker: Rapid construction of streamflow routing networks from hydrography data. Groundwater. Accepted Author Manuscript. [https://doi.org/10.1111/gwat.13095](https://doi.org/10.1111/gwat.13095)
 
 ###### Software/Code citation for SFRmaker (IP-122355):
 Leaf, A.T., Fienen, M.N. and Reeves, H.W., 2021, SFRmaker version 0.7.1: U.S. Geological Survey Software Release, 29 Jan. 2021, [https://doi.org/10.5066/P9U2T031](https://doi.org/10.5066/P9U2T031)

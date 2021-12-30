@@ -2,6 +2,7 @@ import os
 import time
 import warnings
 import pandas as pd
+import geopandas as gpd
 from gisutils import shp2df, get_shapefile_crs
 from .gis import get_bbox, get_crs
 
@@ -17,7 +18,8 @@ def get_prj_file(NHDPlus_paths=None, NHDFlowlines=None):
         return NHDFlowlines[0][:-4] + '.prj'
 
 
-def get_nhdplus_v2_filepaths(NHDPlus_paths):
+def get_nhdplus_v2_filepaths(NHDPlus_paths, 
+                             raise_not_exist_error=True):
     print('for basins:')
     if isinstance(NHDPlus_paths, str):
         NHDPlus_paths = [NHDPlus_paths]
@@ -33,7 +35,7 @@ def get_nhdplus_v2_filepaths(NHDPlus_paths):
                  for f in NHDPlus_paths]
     for paths in NHDFlowlines, PlusFlowlineVAA, PlusFlow, elevslope:
         for f in paths:
-            if not os.path.exists(f):
+            if raise_not_exist_error and not os.path.exists(f):
                 raise FileNotFoundError(f)
     return NHDFlowlines, PlusFlowlineVAA, PlusFlow, elevslope
 
@@ -141,8 +143,8 @@ def load_nhdplus_v2(NHDPlus_paths=None,
     fl.columns = [c.upper() for c in list(fl)]  # added this, switch all to upper case
     fl = fl.rename(columns={"GEOMETRY": "geometry"})  # added this (switch GEOMETRY back to lower case)
     df = fl[fl_cols].copy()
-    df = df.join(pfvaa[pfvaa_cols], how='inner')
-    df = df.join(elevs[elevs_cols], how='inner')
+    df = df.join(pfvaa[pfvaa_cols], how='left')
+    df = df.join(elevs[elevs_cols], how='left')
     print("\nload finished in {:.2f}s".format(time.time() - ta))
 
     # add routing information from PlusFlow table;
@@ -212,3 +214,148 @@ def read_nhdplus(shpfiles, bbox_filter=None,
         else:
             df.index = df[index_col[0]]
         return df
+
+
+def read_nhdplus_hr(NHDPlusHR_path, filter=None, drop_fcodes=None):
+    ta = time.time()
+    print('reading {}...'.format(NHDPlusHR_path))
+    #  read NHDFLowlines from NHDPlusHR_path (NHDPlus HR OpenFileGDB)
+    fl = gpd.read_file(NHDPlusHR_path, driver='OpenFileGDB', layer='NHDFlowline')
+    #  get crs information from flowlines
+    fl_crs = fl.crs
+    
+    if filter is not None:
+        print('filtering flowlines...')
+    
+    #  ensure that filter bbox is in same crs as flowlines
+    #  get filters from shapefiles, shapley Polygons or GeoJSON polygons
+    if filter is not None:
+        if filter is not isinstance(filter, tuple):
+            filter = get_bbox(filter, dest_crs=fl_crs)
+        
+        #  filter to bbox using geopandas spatial indexing
+        fl = fl.cx[filter[0]:filter[2], filter[1]:filter[3]]
+        
+    #  read NHDPlusFlowlineVAA file from NHDPlusHR_path (NHDPlus HR OpenFileGDB) and merge with flowlines
+    flvaa = gpd.read_file(NHDPlusHR_path, driver='OpenFileGDB', layer='NHDPlusFlowlineVAA')
+    fl = fl.merge(flvaa[['NHDPlusID', 'ArbolateSu','StreamOrde', 'MaxElevSmo', 'MinElevSmo', 'Divergence']],
+                  on='NHDPlusID', how='left'
+               )
+    
+    # read NHDPlusFlow file from NHDPlusHR_path (NHDPlus HR OpenFileGDB) 
+    pf = gpd.read_file(NHDPlusHR_path, driver='OpenFileGDB', layer='NHDPlusFlow')
+    
+    #  Remove features classified as minor divergence pathways (Divergence == 2)
+    #  from PlusFlow table
+    pf_routing_dict = get_hr_routing(pf, fl)
+    
+    #  Add routing information from PlusFlow table.
+    #  Set any remaining comids not in fromcomid_list to zero
+    #  (outlets or inlets from outside model)
+    fl['ToNHDPID'] = [pf_routing_dict[i] if i in pf_routing_dict else 0.0 for i in fl.NHDPlusID]
+    print("finished in {:.2f}s\n".format(time.time() - ta))
+    return fl
+
+
+def get_hr_routing(pf, fl):
+    '''
+    build NHDPlus HR routing dictionary for connecting FromNHDPID with ToNHDPID
+    using NHDPlusFlow and NH
+    '''
+    print('\nGetting routing information from NHDPlus HR Plusflow table...')
+    ta = time.time()
+    
+    # merge divergence data info to Plusflow dataframe
+    pf = pf.merge(fl[['Divergence', 'NHDPlusID']], left_on='ToNHDPID', 
+                      right_on = 'NHDPlusID', how='outer')
+    pf.rename(columns={'Divergence':'Divergence_ToNHDPID'}, inplace=True)
+
+    # build routing dict excluding Divergece to == 2 (minor divergence path)
+    pf_routing_dict = dict(zip(pf.loc[pf.Divergence_ToNHDPID != 2, 'FromNHDPID'], 
+                               pf.loc[pf.Divergence_ToNHDPID != 2, 'ToNHDPID']))
+    
+    print("finished in {:.2f}s\n".format(time.time() - ta))
+    return pf_routing_dict
+
+
+def load_nhdplus_hr(NHDPlusHR_paths, filter=None, 
+                    drop_fcodes=None):
+    """
+    Parameters
+    ==========
+    NHDPlusHR_paths : path (or list of paths) to the NHDPlus High Resolution HU-4 
+        Subregion  file geodatabase (.gdb) to include, assuming the file structure 
+        is the same as when downloaded from the USGS National Map Downloader tool 
+        (v2.0) website (https://apps.nationalmap.gov/downloader/#/).
+    filter : tuple, str (filepath), shapely Polygon or GeoJSON polygon
+        Bounding box (tuple) or polygon feature of model stream network area.
+        Shapefiles will be reprojected to the CRS of the flowlines; all other
+        feature types must be supplied in same CRS as flowlines.
+    drop_fcodes: int or list of ints, optional
+            fcode or list of NHDFlowline FCodes to drop from network. 
+    crs : obj
+        Coordinate reference system of the NHDPlus data. Only needed if
+        the data do not have a valid ESRI projection (.prj) file.
+        A Python int, dict, str, or :class:`pyproj.crs.CRS` instance
+        passed to :meth:`pyproj.crs.CRS.from_user_input`
+
+        Can be any of:
+          - PROJ string
+          - Dictionary of PROJ parameters
+          - PROJ keyword arguments for parameters
+          - JSON string with PROJ parameters
+          - CRS WKT string
+          - An authority string [i.e. 'epsg:4326']
+          - An EPSG integer code [i.e. 4326]
+          - A tuple of ("auth_name": "auth_code") [i.e ('epsg', '4326')]
+          - An object with a `to_wkt` method.
+          - A :class:`pyproj.crs.CRS` class
+        By default, None
+        epsg: int, optional
+            EPSG code identifying Coordinate Reference System (CRS)
+            for features in the input shapefile.
+        proj_str: str, optional
+            proj_str string identifying CRS for features in the input shapefile.
+        prjfile: str, optional
+            File path to projection (.prj) file identifying CRS
+            for features in the input shapefile. By default,
+            the projection file included with the input shapefile
+            will be used.
+
+    Returns
+    ==========
+    df : dataframe
+    """
+    print("loading NHDPlus HR hydrography data...")
+    ta = time.time()
+    
+    #  Read if using more than one HUC-4 OpenFileGDB or one passed as list
+    if isinstance(NHDPlusHR_paths, list):
+        dfs = [read_nhdplus_hr(p, filter = filter) for p in NHDPlusHR_paths]
+        #  make sure that all FLowlines have the same CRS
+        assert all(df.crs == dfs[0].crs for df in dfs), 'NHDPlusHR OpenFileGDBs have have different CRSs'
+        #  concat into single df
+        df = gpd.GeoDataFrame(pd.concat(dfs, ignore_index=True), crs=dfs[0].crs)
+        #  get OpenFileGDB crs
+        crs = df.crs
+    
+    #  Read if using one HUC-4 FileGDP passed as str
+    if isinstance(NHDPlusHR_paths, str):
+        df = read_nhdplus_hr(NHDPlusHR_paths, filter = filter)
+        #  get OpenFileGDB crs
+        crs = df.crs
+   
+    #  Option to drop specified FCodes
+    if drop_fcodes is not None:    
+        df = df.loc[~df.FCode.isin(drop_fcodes)]
+        
+    keep_cols = ['NHDPlusID', 'ToNHDPID', 'ArbolateSu',
+               'geometry', 'StreamOrde',
+               'MaxElevSmo', 'MinElevSmo', 'GNIS_Name']
+    
+    #  Make final dataframe with only the info needed for lines
+    df = df[keep_cols].copy()
+
+    print("\nload finished in {:.2f}s\n".format(time.time() - ta))
+
+    return df, crs

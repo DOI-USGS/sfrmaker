@@ -26,7 +26,10 @@ version |version|
    Input Requirements <inputs>
    Using SFRmaker with a configuration file <examples>
    Basic Usage in a scripting context <notebooks/SFRmaker_demo>
-   How the streambed elevation sampling works <notebooks/Streambed_elevation_demo>
+   Using SFRmaker with NHDPlus High Resolution <notebooks/lines_from_NHDPlusHR_demo>
+   Concepts and methods <concepts.rst>
+   Stand-alone tools <notebooks/sfrmaker_tools>
+   Troubleshooting <troubleshooting>
 
 .. toctree::
   :maxdepth: 1

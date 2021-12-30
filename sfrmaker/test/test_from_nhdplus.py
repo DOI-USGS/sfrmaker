@@ -21,7 +21,11 @@ def test_attribute_units(tylerforks_lines_from_NHDPlus, tylerforks_sfrdata):
     assert tylerforks_lines_from_NHDPlus.attr_length_units == 'meters'
     assert tylerforks_sfrdata.model_length_units == 'feet'
     lines_mean_strtop = tylerforks_lines_from_NHDPlus.df[['elevup', 'elevdn']].mean().mean()
-    sfrdata_mean_strtop = tylerforks_sfrdata.reach_data.strtop.mean()
+    rd = tylerforks_sfrdata.reach_data
+    # some lines along the model boundary aren't included 
+    # in the test subset of the elevslope database
+    # since this case isn't using the DEM, they end up with elevations of 0
+    sfrdata_mean_strtop = rd.loc[rd['strtop'] != 0, 'strtop'].mean()
     assert np.allclose(sfrdata_mean_strtop / lines_mean_strtop, 3.28, rtol=0.02)
 
 
@@ -79,8 +83,10 @@ def test_lines_from_NHDPlus(tylerforks_lines_from_NHDPlus):
     lines_pr = project(lines.df.geometry, 4269, 26915)
     line_lengths = np.array([g.length for g in lines_pr])
     expected_asum1s = lines.df['asum2'] - line_lengths
-    assert np.allclose(lines.df['asum1'].values, expected_asum1s, atol=10)
-    assert np.all(lines.df.loc[tf, 'asum1'] > 95000)
+    # add dropna due to some lines along boundary 
+    # not being in the PFVAA subset used for the test
+    assert np.allclose(lines.df['asum1'].dropna(), expected_asum1s.dropna(), atol=10)
+    assert np.all(lines.df.loc[tf, 'asum1'].dropna() > 95000)
     assert isinstance(lines, Lines)
 
 
@@ -93,13 +99,14 @@ def test_make_sfr(outdir,
     m = tylerforks_model
     sfr = tylerforks_lines_from_NHDPlus.to_sfr(grid=grid,
                                                model=m)
-    sfr.set_streambed_top_elevations_from_dem(dem, dem_z_units='meters')
+    sfr.set_streambed_top_elevations_from_dem(dem, elevation_units='meters')
 
     # verify that the minimum width on the Tyler Forks
     # which has substantial drainage upstream of the test case domain
     # is at least 30 feet (that the first reach in the model was not 
     # assigned the default width of 1 but was instead computed from a non-zero asum value)
-    min_tf_width = sfr.reach_data.loc[sfr.reach_data.name == 'Tyler Forks', 'width'].min()
+    rd = sfr.reach_data.dropna(subset=['asum'], axis=0)
+    min_tf_width = rd.loc[rd.name == 'Tyler Forks', 'width'].min()
     assert min_tf_width > 30.
     
     botm = m.dis.botm.array.copy()

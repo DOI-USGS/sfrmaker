@@ -3,6 +3,7 @@ import os
 import inspect
 from pathlib import Path
 import pprint
+import warnings
 
 import numpy as np
 import flopy
@@ -14,7 +15,10 @@ unit_conversion = {'feetmeters': 0.3048,
                    'metersfeet': 1 / .3048}
 
 
-def assign_layers(reach_data, botm_array, idomain=None, pad=1., inplace=False):
+def assign_layers(reach_data, botm_array, 
+                  strtop_col='strtop', strthick_col='strthick',
+                  idomain=None, pad=1., 
+                  inplace=False):
     """Assigns the appropriate layer for each SFR reach,
             based on cell bottoms at location of reach.
 
@@ -22,12 +26,19 @@ def assign_layers(reach_data, botm_array, idomain=None, pad=1., inplace=False):
     ----------
     reach_data : DataFrame
         Table of reach information, similar to SFRData.reach_data
-    botm : ndarary
+    botm_array : ndarary
         3D numpy array of layer bottom elevations
-    idomain : ndarray
-        3D integer array of MODFLOW ibound or idomain values. Values >=1
+    strtop_col : str
+        Column name of streambed top elevations in reach_data.
+        by default, 'strtop'.
+    strthick_col : str
+        Column name of streambed bottom thickness in reach_data.
+        by default, 'strthick'
+    idomain : ndarray  (optional)
+        3D integer array of MODFLOW ibound or idomain values. Values > 0
         are considered active. Reaches in cells with values < 1 will be moved
         to the highest active cell if possible.
+        by default, None (all cells are assumed to be active)
     pad : scalar
         Minimum distance that streambed bottom must be above layer bottom.
         When determining the layer or whether the streambed bottom is below
@@ -42,7 +53,12 @@ def assign_layers(reach_data, botm_array, idomain=None, pad=1., inplace=False):
     -------
     (if inplace=True)
     layers : 1D array of layer numbers
-    new_model_botms : 2D array of new model bottom elevations
+    new_model_botms : ndarray or None
+        New model bottom elevations. If no cell bottoms require adjustment, None
+        is returned. If one or more cells require adjustment and ``idomain=None`` (not supplied), 
+        a 2D array is returned, for backward compatibility with previous versions of SFRmaker.
+        Otherwise, a 3D array of new bottom elevations is returned. In the future,
+        a 3D array will always be returned.
 
     Notes
     -----
@@ -52,28 +68,49 @@ def assign_layers(reach_data, botm_array, idomain=None, pad=1., inplace=False):
 
     """
     i, j = reach_data.i.values, reach_data.j.values
-    streambotms = reach_data.strtop.values - reach_data.strthick.values
-    layers = get_layer(botm_array, i, j, streambotms - pad)
+    streambed_botm = reach_data[strtop_col].values - reach_data[strthick_col].values
+    layers = get_layer(botm_array, i, j, streambed_botm - pad)
 
     # check against model bottom
     model_botm = botm_array[-1, i, j]
-    below = streambotms - pad <= model_botm
-    below_i = i[below]
-    below_j = j[below]
-    new_model_botm = None
+    # only adjust bottoms in i, j locations with at least one active cell
+    in_active_area = np.array([True] * len(model_botm), dtype=bool)
+    return_3d = True
+    if idomain is None:
+        return_3d = False
+        idomain = np.ones_like(botm_array, dtype=int)
+    in_active_area = (idomain.sum(axis=0) > 0)[i, j]
+    below = (streambed_botm - pad <= model_botm) & in_active_area
+    below_inds = np.where(below)[0]
+    nlay = idomain.shape[0]
+    new_botm_array = None
     if np.any(below):
-        new_model_botm = botm_array[-1].copy()
-        for ib, jb in zip(below_i, below_j):
-            inds = (reach_data.i == ib) & (
-                    reach_data.j == jb)
-            new_model_botm[ib, jb] = streambotms[inds].min() - pad
-        assert not np.any(streambotms <= new_model_botm[i, j])
+        new_botm_array = botm_array.copy()
+        for pos in below_inds:
+        #for n, (ib, jb) in enumerate(zip(below_i, below_j)):
+            inds = (reach_data.i == i[pos]) & (
+                    reach_data.j == j[pos])
+            # reset the bottom of the lowest active layer
+            # to accomodate the streambed bottom
+            lowest_active_layer = nlay - np.argmax(idomain[:, i[pos], j[pos]][::-1]) - 1
+            new_botm = streambed_botm[inds].min() - pad
+            new_botm_array[lowest_active_layer:, i[pos], j[pos]] = new_botm
+            layers[pos] = lowest_active_layer
+        # check only reaches in active i, j locations
+        assert not np.any(streambed_botm[in_active_area] <= \
+            new_botm_array[-1, i, j][in_active_area])
     if inplace:
-        if new_model_botm is not None:
-            botm_array[-1] = new_model_botm
+        if new_botm_array is not None:
+            botm_array = new_botm_array
         reach_data['k'] = layers
+    elif return_3d or new_botm_array is None:
+        return layers, new_botm_array
     else:
-        return layers, new_model_botm
+        warnings.warn('Previously, assign_layers has returned a 2D (model bottom) array. '
+                      'Now, if idomain is specified, a 3D array of model cell bottoms is returned. '
+                      'In the future, a 3D array of model cell bottoms will always be returned.',
+                      FutureWarning)
+        return layers, new_botm_array[-1]
 
 
 def get_layer(botm_array, i, j, elev):

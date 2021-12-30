@@ -11,7 +11,10 @@ dependencies:
   - matplotlib
   - pyyaml
   - numpy
+  - scipy
   - pandas
+  - xarray
+  - geopandas
   - gdal
   - fiona
   - rasterio
@@ -20,6 +23,7 @@ dependencies:
   - rtree
   - pyproj>=2.2
   - pyshp
+  - netcdf4
   - codecov
   - coverage
   - flake8
@@ -35,5 +39,3 @@ dependencies:
     - pytest-timeout
     - git+git://github.com/modflowpy/flopy@develop
     - git+git://github.com/aleaf/modflow-export@develop
-
-

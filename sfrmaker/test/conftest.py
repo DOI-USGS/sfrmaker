@@ -245,6 +245,7 @@ def lines_from_shapefile(test_data_path):
     lns = sfrmaker.Lines.from_shapefile(flowlines_file,
                                         id_column='COMID',
                                         routing_column='tocomid',
+                                        arbolate_sum_column2='asum_calc',
                                         width1_column='width1',
                                         width2_column='width2',
                                         up_elevation_column='elevupsmo',
@@ -274,3 +275,18 @@ def sfrdata(request,
             tylerforks_sfrdata):
     return {'shellmound_sfrdata': shellmound_sfrdata,
             'tylerforks_sfrdata': tylerforks_sfrdata}[request.param]
+
+
+@pytest.fixture(scope='function')
+def neversink_lines_from_nhdplus_hr(datapath):
+    NHDPlusHR_paths = [f'{datapath}/neversink_rondout/NHDPLUS_HR_1.gdb', 
+                       f'{datapath}/neversink_rondout/NHDPLUS_HR_2.gdb']
+    boundary_file = f'{datapath}/neversink_rondout/Model_Extent.shp'
+    drop_fcodes = [42803]
+    nhdhr_epsg = 4269
+
+    lns = sfrmaker.Lines.from_nhdplus_hr(NHDPlusHR_paths,
+                                        filter=boundary_file,
+                                        drop_fcodes=drop_fcodes,
+                                        epsg=nhdhr_epsg)
+    return lns

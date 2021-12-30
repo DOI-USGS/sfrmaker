@@ -9,6 +9,9 @@ dependencies:
   - pyyaml
   - numpy
   - pandas
+  - scipy
+  - xarray
+  - geopandas
   - gdal
   - fiona
   - rasterio
@@ -17,6 +20,7 @@ dependencies:
   - rtree
   - pyproj>=2.2
   - pyshp
+  - netcdf4
   - pytest
   - pip
   - pip:

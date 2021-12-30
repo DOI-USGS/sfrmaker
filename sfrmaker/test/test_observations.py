@@ -2,6 +2,7 @@ import io
 import os
 import numpy as np
 import pandas as pd
+import geopandas as gpd
 from shapely.geometry import Point, box
 import pytest
 from gisutils import shp2df, df2shp
@@ -103,8 +104,7 @@ def test_write_mf6_sfr_obsfile(shellmound_sfrdata, flux_observation_data, outdir
             if 'obs6' in line.lower():
                 _, _, fname = line.strip().split()
                 assert os.path.exists(os.path.join(outdir, fname))
-                break
-
+                break                                              
 
 def test_add_observations_from_line_ids(shellmound_sfrdata, flux_observation_data, outdir):
     obs = shellmound_sfrdata.add_observations(flux_observation_data,
@@ -133,6 +133,23 @@ def test_add_observations_from_line_ids(shellmound_sfrdata, flux_observation_dat
                                   check_dtype=False
                                   )
 
+    # test line_id and obsname same column
+    obs = shellmound_sfrdata.add_observations(flux_observation_data,
+                                              obstype='downstream-flow',
+                                              line_id_column='line_id',
+                                              obsname_column='line_id'
+                                              )
+    assert set(obs.obsname) == set([str(i) for i in flux_observation_data.line_id])
+
+    # test rno_column and obsname same column
+    obs = shellmound_sfrdata.add_observations(flux_observation_data,
+                                              obstype='downstream-flow',
+                                              rno_column='junk',
+                                              obsname_column='junk'
+                                              )
+    assert set(obs.obsname) == set([str(i) for i in flux_observation_data.junk])
+
+    
     # test assigning obs from custom reach number column?
     obs = shellmound_sfrdata.add_observations(flux_observation_data,
                                               obstype='downstream-flow',
@@ -175,7 +192,8 @@ def test_get_closest_reach(shellmound_sfrdata, x, y, expected, outdir):
     assert 0 < dist < shellmound_sfrdata.grid.dx
 
 
-def test_locate_sites(shellmound_sfrdata, outdir):
+@pytest.mark.parametrize('reach_id_col', (None, 'rno'))
+def test_locate_sites(shellmound_sfrdata, reach_id_col, outdir):
 
     X, Y, rno = zip(*((515459.9, 1189906.1, 202),
                       (515375.2, 1189942.5, 204)))
@@ -187,14 +205,27 @@ def test_locate_sites(shellmound_sfrdata, outdir):
     df2shp(df, sites_shapefile, crs=5070)
     sfrlines_shapefile = '{}/shellmound_lines.shp'.format(outdir)
     shellmound_sfrdata.export_lines(sfrlines_shapefile)
+    # test reading sfrlines as a dataframe
+    # and sfrlines without a reach number column
+    if reach_id_col is None:
+        reach_id_col = 'rno'
+        sfrlines = gpd.read_file(sfrlines_shapefile)
+        sfrlines.drop('rno', axis=1, inplace=True)
+        sfrlines_shapefile = sfrlines
     active_area = box(*shellmound_sfrdata.grid.bounds)
     locs = locate_sites(sites_shapefile,
                         sfrlines_shapefile,
                         active_area,
                         keep_columns=None,
-                        reach_id_col='rno',
+                        reach_id_col=reach_id_col,
+                        ireach_col='ireach',
+                        iseg_col='iseg',
                         site_number_col='site_no',
                         perimeter_buffer=1000,
                         distance_threshold=1600
                          )
-    assert locs.rno.equals(locs.site_no)
+    assert np.array_equal(locs.rno.values, locs.site_no.values)
+    # check that iseg and ireach columns are in the located sites table
+    # (for modflow-2005 style sfr packages)
+    assert 'iseg' in locs.columns
+    assert 'ireach' in locs.columns

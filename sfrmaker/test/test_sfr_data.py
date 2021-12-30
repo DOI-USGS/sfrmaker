@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 import copy
 import io
 from packaging import version
@@ -97,6 +98,11 @@ def test_write_perioddata(shellmound_sfrdata_with_period_data, outdir):
     assert np.array_equal(rno_values, sfrd.period_data.index.get_level_values(1))
     assert np.allclose(q_values, sfrd.period_data['inflow'].values)
     assert set(txt_values) == {'inflow'}
+    out_tables = Path(outdir + 'tables')
+    out_tables.mkdir(exist_ok=True, parents=True)
+    sfrd.write_tables(basename=outdir + 'tables/shellmound')
+    written_pd = pd.read_csv(outdir + 'tables/shellmound_sfr_period_data.csv')
+    assert 'rno' in written_pd.columns and 'per' in written_pd.columns
 
 
 def test_export_period_data(shellmound_sfrdata_with_period_data, outdir):
@@ -112,7 +118,7 @@ def test_export_period_data(shellmound_sfrdata_with_period_data, outdir):
                        sfrd.period_data['inflow'].values)
     assert np.array_equal(df.node.values, np.array([nodes[rno] for rno in df.rno], dtype=int))
 
-    # check export still works if there are multiple items in a reach
+    # check that export still works if there are multiple items in a reach
     sfrd._period_data = sfrd.period_data.append(sfrd.period_data)
     sfrd.export_period_data(outfile)
     df = shp2df(outfile)
@@ -145,7 +151,7 @@ def test_create_mf6sfr(mf6sfr, shellmound_sfrdata, shellmound_model):
     packagedata['j'] = j
     packagedata.drop('cellid', axis=1, inplace=True)
     for col in packagedata.columns:
-        if packagedata[col].dtype == np.object:
+        if packagedata[col].dtype == object:
             packagedata[col] = pd.to_numeric(packagedata[col])
     reach_data = shellmound_sfrdata.reach_data
     assert np.array_equal(packagedata['rno'].values + 1, reach_data['rno'].values)
@@ -175,7 +181,7 @@ def test_flopy_mf6sfr_outfile(mf6sfr, mf6sfr_outfile):
     for col in pkdata1.dtype.names:
         if col == 'cellid':
             continue
-        elif pkdata1[col].dtype == np.object:
+        elif pkdata1[col].dtype == object:
             c1 = pd.to_numeric(pkdata1[col])
             c2 = pd.to_numeric(mf6sfr.packagedata.array[col])
         else:
@@ -291,3 +297,11 @@ def test_run_diagnostics(sfrdata):
     checkfile = os.path.join(sfrdata.model.model_ws,
                              '{}_SFR.chk'.format(sfrdata.package_name))
     assert os.path.getsize(checkfile) > 0
+    
+    
+def test_reach_asum(sfrdata):
+    # note: asums will only be greater than zero if an arbolate sum field 
+    # is supplied as input to Lines class
+    rd = sfrdata.reach_data.dropna(subset=['asum'], axis=0)
+    assert rd.asum.sum() > 0
+    assert np.all(rd.asum >= 0)

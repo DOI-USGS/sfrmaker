@@ -3,31 +3,106 @@ from pathlib import Path
 import shutil
 import yaml
 import textwrap
+import affine
 import numpy as np
 import pandas as pd
+import xarray as xr
+import geopandas as gpd
 import fiona
 import rasterio
 from shapely.geometry import shape, MultiLineString, box
 from rasterstats import zonal_stats
-from gisutils import get_shapefile_crs
-from sfrmaker.gis import (shp2df, df2shp, project, intersect_rtree,
-                          get_bbox, read_polygon_feature, get_shapefile_crs,
-                          get_authority_crs,
-                          get_crs)
+import matplotlib.pyplot as plt
+from gisutils import (
+    get_shapefile_crs, 
+    write_raster, 
+    project, 
+    shp2df, 
+    df2shp, 
+    get_shapefile_crs,
+    get_authority_crs
+    )
+from sfrmaker.gis import (intersect_rtree, get_crs,
+                          get_bbox, read_polygon_feature)
 from sfrmaker.elevations import smooth_elevations
 from sfrmaker.logger import Logger
 from sfrmaker.nhdplus_utils import get_nhdplus_v2_filepaths, get_prj_file
-from sfrmaker.routing import find_path, make_graph
-from sfrmaker.units import convert_length_units
+from sfrmaker.routing import find_path, make_graph, get_upsegs
+from sfrmaker.units import convert_length_units, unit_abbreviations
 from sfrmaker.utils import width_from_arbolate_sum, arbolate_sum
 
 
+def get_flowline_routing(NHDPlus_paths=None, PlusFlow=None, mask=None,
+                         mask_crs=None, nhdplus_crs=4269):
+    """Read a collection of NHDPlus version 2 PlusFlow (routing)
+    tables from one or more drainage basins and consolidate into a 
+    single pandas DataFrame, returning the `FROMCOMID` and `TOCOMID` 
+    columns.
+
+    Parameters
+    ----------
+    NHDPlus_paths : sequence
+        Sequence of paths to the top level folder for each drainage basin.
+        For example: 
+        
+        .. code-block:: python
+        
+            ['NHDPlus/NHDPlusGL/NHDPlus04', 
+             'NHDPlus/NHDPlusMS/NHDPlus07']
+             
+        by default None
+    PlusFlow : string or sequence
+        Single path to a PlusFlow table or sequence of PlusFlow table 
+        filepaths, by default None
+
+    Returns
+    -------
+    flowline_routing : DataFrame
+        [description]
+
+    Raises
+    ------
+    ValueError
+        [description]
+    """
+    if NHDPlus_paths is not None:
+        flowlines_files, pfvaa_files, pf_files, elevslope_files = \
+        get_nhdplus_v2_filepaths(NHDPlus_paths, raise_not_exist_error=False)
+        pf = shp2df(pf_files)
+        
+        if mask is not None:
+            if isinstance(mask, tuple):
+                extent_poly_nhd_crs = box(*mask)
+                filter = mask
+            elif mask is not None:
+                extent_poly_nhd_crs = read_polygon_feature(mask, 
+                                                           feature_crs=mask_crs,
+                                                           dest_crs=nhdplus_crs)
+                # ensure that filter bbox is in same crs as flowlines
+                # get filters from shapefiles, shapley Polygons or GeoJSON polygons
+                filter = get_bbox(extent_poly_nhd_crs, dest_crs=nhdplus_crs)
+            else:
+                filter = None
+            flowlines = shp2df(flowlines_files, filter=filter)
+            keep_comids = pf['FROMCOMID'].isin(flowlines['COMID']) | \
+                          pf['TOCOMID'].isin(flowlines['COMID'])
+            pf = pf.loc[keep_comids]
+    elif PlusFlow is not None:
+        pf = shp2df(PlusFlow)
+    else:
+        raise ValueError(("get_flowline_routing: Must provide one of more" 
+                          " NHDPlus_path or PlusFlow table."))
+    pf = pf.loc[pf['FROMCOMID'] != 0]
+    return pf[['FROMCOMID', 'TOCOMID']]
+        
+    
 def cull_flowlines(NHDPlus_paths,
                    active_area=None,
                    asum_thresh=None,
                    intermittent_streams_asum_thresh=None,
                    cull_invalid=True,
                    cull_isolated=True,
+                   keep_comids=None,
                    outfolder='clipped_flowlines', logger=None):
     """Cull NHDPlus data to an area defined by an ``active_area`` polygon and
     to flowlines with Arbolate sums greater than specified thresholds. Also remove
@@ -64,6 +139,8 @@ def cull_flowlines(NHDPlus_paths,
         SFRmaker identifies isolated flowslines by looking at up to 10 downstream connections
         to lines that are not stream network. Option to drop
         these lines. By default, False.
+    keep_comids : sequence
+        List-like of COMIDs to retain, regardless of culling criteria.
     outfolder : str, optional
         Location for writing output, by default 'clipped_flowlines'
     logger : sfrmaker.logger instance, optional
@@ -86,6 +163,11 @@ def cull_flowlines(NHDPlus_paths,
     flowlines_files, pfvaa_files, pf_files, elevslope_files = \
         get_nhdplus_v2_filepaths(NHDPlus_paths)
 
+    if keep_comids is not None:
+        keep_comids = set(keep_comids)
+    else:
+        keep_comids = set()
+        
     # logger the date modified timestamps for the NHDPlus files
     for f in flowlines_files + pfvaa_files + pf_files + elevslope_files:
         logger.log_file_and_date_modified(f)
@@ -121,27 +203,33 @@ def cull_flowlines(NHDPlus_paths,
     pf.index = pf.FROMCOMID.astype(int)
     elevslope.index = elevslope.COMID.astype(int)
 
+    original_comids = set(fl.index)
     if cull_invalid:
         logger.statement('Dropping flowlines without attribute information')
         # only retain comids that have information in all of the tables
-        original_comids = set(fl.index)
-        valid_comids = set(fl.index).intersection(pfvaa.index).\
+        
+        valid_comids = original_comids.intersection(pfvaa.index).\
             intersection(pf.index).intersection(elevslope.index)
+        
         # order the same as flowlines
         valid_comids = [c for c in fl.index if c in valid_comids]
-        fl = fl.loc[valid_comids]
-        pfvaa = pfvaa.loc[valid_comids]
-        pf = pf.loc[valid_comids]
-        elevslope = elevslope.loc[valid_comids]
+        fl = fl.loc[valid_comids].copy()
+        pfvaa = pfvaa.loc[valid_comids].copy()
+        pf = pf.loc[valid_comids].copy()
+        elevslope = elevslope.loc[valid_comids].copy()
         dropped = original_comids.difference(valid_comids)
         if any(dropped):
             logger.statement('Dropping {} of {} lines'.format(len(dropped),
                                                               len(original_comids)),
                              log_time=False)
     else:
-        pfvaa = pfvaa.loc[[True if c in fl.index else False for c in pfvaa.index]]
-        pf = pf.loc[[True if c in fl.index else False for c in pf.index]]
-        elevslope = elevslope.loc[[True if c in fl.index else False for c in elevslope.index]]
+        valid_comids = original_comids.union(keep_comids)
+        pfvaa = pfvaa.loc[[True if c in original_comids
+                           else False for c in pfvaa.index]]
+        pf = pf.loc[[True if c in original_comids
+                     else False for c in pf.index]]
+        elevslope = elevslope.loc[[True if c in original_comids
+                                   else False for c in elevslope.index]]
     fl['nhd_asum'] = pfvaa.ArbolateSu
 
     # cull by arbolate sum first
@@ -149,13 +237,15 @@ def cull_flowlines(NHDPlus_paths,
         logger.statement('Dropping Flowlines with arbolate sum less than {}km'.format(asum_thresh))
         # exclude streams classified as perennial from threshold
         criteria = (fl.FCODE == 46006) | (fl.nhd_asum >= asum_thresh)
+        criteria = criteria | fl['COMID'].isin(keep_comids)
         fl = fl.loc[criteria]
 
     # then cull intermittent streams
     if intermittent_streams_asum_thresh is not None:
         logger.statement('Dropping intermittent streams with arbolate sum less than {}km'.format(intermittent_streams_asum_thresh))
         drop_intermittent = (fl.nhd_asum < intermittent_streams_asum_thresh) & (fl.FCODE == 46003)
-        fl = fl.loc[~drop_intermittent]
+        criteria = ~drop_intermittent | fl['COMID'].isin(keep_comids)
+        fl = fl.loc[criteria]
 
     if cull_isolated:
         # drop any remaining stream segments that are isolated
@@ -191,8 +281,8 @@ def cull_flowlines(NHDPlus_paths,
                         # drop current comid and all upstream comids
                         drop_comids.update(set(path[:j+1]))
                         break
-
-        fl = fl.loc[~fl.COMID.isin(drop_comids)]
+        criteria = ~fl.COMID.isin(drop_comids) | fl['COMID'].isin(keep_comids)
+        fl = fl.loc[criteria]
 
         logger.log('Removing isolated flowlines that are no longer in the network')
         logger.statement('Removed {} of {} flowlines'.format(len(drop_comids) - 1,
@@ -226,6 +316,8 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
                        buffersize_meters=50,
                        asum_thresh=None,
                        known_connections=None,
+                       update_up_elevations=None,
+                       update_dn_elevations=None,
                        width_from_asum_a_param=0.1193,
                        width_from_asum_b_param=0.5032,
                        minimum_width=1.,
@@ -279,6 +371,32 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
     known_connections : dict, optional
         Dictionary of specified flowline connections {COMID: tocomid},
         which will override the routing selection at distributaries.
+        By default None.
+    update_up_elevations : dict, optional
+        Dictionary of specified stage or streambed top elevations 
+        {COMID: elevation} at the upstream end of flowlines, for example,
+        based on field measurements of streambed elevation or stage. The distinction between
+        streambed elevation and stage depends on the context of the other elevations. 
+        For example, DEM elevations for larger streams typically reflect stage
+        at the time data for the DEM (e.g. lidar) were collected. If all other COMID elevations
+        represent stage, then the elevations supplied to `update_up_elevations`
+        and `update_dn_elevations` should be stages. Streambed top is 
+        often poorly characterized and difficult to measure in the field. 
+        But if the SFR package is simulating stage (specified streambed bottom plus a 
+        simulated depth based on flow), appropriate streambed bottom input is needed
+        to produce reasonable stages. The user may start with DEM elevations and then 
+        later subtract off simulated stream depths(from the SFR package output) 
+        to arrive at simulated stages that are close to those observed in the field.
+        
+        `update_up_elevations` and `update_dn_elevations` input will override any other values 
+        (from NHDPlus or the DEM), and will be incorporated into the elevation smoothing.
+        By default None.
+    update_dn_elevations : dict, optional
+        Dictionary of specified elevations {COMID: elevation} at the downstream 
+        end of flowlines. See the `update_up_elevations` description for more details.
+        
+        `update_up_elevations` and `update_dn_elevations` input will override any other values 
+        (from NHDPlus or the DEM), and will be incorporated into the elevation smoothing.
         By default None.
     width_from_asum_a_param : float, optional
         :math:`a` parameter used for estimating channel width from arbolate sum.
@@ -433,7 +551,7 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
 
     # get bounds of flowlines
     with fiona.open(flowlines_file) as src:
-        flowline_bounds = src.bounds
+        flowline_bbox = box(*src.bounds)
 
     fl = shp2df(flowlines_file) # flowlines clipped to model area
     pfvaa = shp2df(pfvaa_file)
@@ -644,6 +762,36 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
     # (spurious values in the DEM)
     logger.log('Updating elevation values with 1st percentile sampled from the dem')
     elevs = dict(zip(flcc.COMID, flcc['pct01']))
+    
+    # update the elevations with any specified elevations
+    # for up elevations, update the elevations of the next lines upstream
+    if update_up_elevations is not None:
+        for comid, elev in update_up_elevations.items():
+            fromcomids = graph_r[comid]
+            for comid in fromcomids:
+                elevs[comid] = elev
+            # ensure that there aren't any lower elevations upstream
+            all_upstream_comids = get_upsegs(graph_r, comid)
+            for comid in all_upstream_comids:
+                if elevs[comid] < elev:
+                    elevs[comid] = elev
+    # for dn elevations, update the elevation for that line
+    if update_dn_elevations is not None:
+        for comid, elev in update_dn_elevations.items():
+            elevs[comid] = elev
+            # ensure that there aren't any lower elevations upstream
+            # include any co-tributaries
+            tocomid = flcc.loc[comid, 'tocomid']
+            cotribs = set(flcc.loc[flcc['tocomid'] == tocomid].index)
+            all_upstream_comids = set()
+            for comid in cotribs:
+                elevs[comid] = elev
+                cotribs_upstream_comids = get_upsegs(graph_r, comid)
+                all_upstream_comids.update(cotribs_upstream_comids)
+            for comid in all_upstream_comids:
+                if elevs[comid] < elev:
+                    elevs[comid] = elev
+                
     elevup = {}
     cm_to_output_units = convert_length_units('cm', output_length_units)
     # dictionary of NHDPlus minimum values converted to output units
@@ -664,6 +812,7 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
     flcc.loc[noelevup, 'elevup'] = flcc.loc[noelevup, 'elevdn']
 
     logger.log('Updating elevation values with 1st percentile sampled from the dem')
+
 
     # smooth segment end values so that they never rise downstream
     logger.log('Smoothing updated elevations')
@@ -731,10 +880,10 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
         logger.log('Sampling widths from NARWidth database')
         logger.log_package_version('rtree')
         narwidth_crs = get_crs(narwidth_shapefile)
-        narwidth_bounds = project(flowline_bounds, flowline_crs, narwidth_crs)
+        narwidth_bbox = project(flowline_bbox, flowline_crs, narwidth_crs)
         sample_NARWidth(flcc, narwidth_shapefile,
                         waterbodies=waterbody_shapefiles,
-                        filter=narwidth_bounds,
+                        filter=narwidth_bbox.bounds,
                         crs=project_crs,
                         output_width_units=output_length_units)
         logger.log('Sampling widths from NARWidth database')
@@ -1186,3 +1335,131 @@ def fix_invalid_asums(asums, fl_lengths, graph, graph_r):
                 asum_c = old_asum + increment
                 new_asums[cp] = asum_c
     return new_asums
+
+
+def swb_runoff_to_csv(swb_runoff_netcdf_output, nhdplus_catchments_file,
+                      runoff_output_variable='runoff',
+                      swb_rejected_net_inf_output=None,
+                      rejected_net_inf_variable='rejected_net_infiltration',
+                      catchment_id_col='FEATUREID',
+                      output_length_units='meters',
+                      outfile='swb_runoff_by_nhdplus_comid.csv'):
+    """Convert gridded runoff estimates from the USGS Soil Water Balance Code (SWB)
+    to a CSV format, associating each runoff value with a catchment ID. For the runoff to
+    be successfully mapped to the SFR network, the catchment IDs must correspond to line IDs
+    in the stream network, and each catchment must either be associated with a line, or
+    be referenced in the flowline_routing dataset. See the documentation for 
+    :func:`sfrmaker.flows.add_to_perioddata` for more details.
+
+    Parameters
+    ----------
+    swb_runoff_netcdf_output : str or path-like
+        NetCDF file with gridded SWB runoff estimates. Runoff values are assumed
+        to be in units of length/time (normalized to area). The CRS for the runoff
+        dataset is read from the 'proj4_string' attribute, and is assumed to have
+        length units of meters.
+    nhdplus_catchments_file : str or path-like
+        Shapefile of catchments with IDs (catchment_id_col). The catchments are rasterized
+        to the grid in swb_netcdf_output, so that each runoff value can be associated with
+        a catchment ID.
+    catchment_id_col : str, optional
+        Field in nhdplus_catchments_file with ID, by default 'FEATUREID'. For the 
+    runoff_output_variable : str, optional
+        Variable in swb_runoff_netcdf_output with runoff data, by default 'runoff'
+    swb_rejected_net_inf_output : str or path-like
+        NetCDF file with gridded SWB estimates of "rejected net infiltration". 
+        This is infiltration in the SWB simulation in excess of the specified max
+        infiltration rate. In reality this may represent a component of runoff
+        or 'quick' overland flow, depending on the timescale of the simulation.
+        Values are assumed to be in units of length/time (normalized to area). 
+        The CRS for the runoff dataset is read from the 'proj4_string' attribute, 
+        and is assumed to have length units of meters.
+    rejected_net_inf_variable : str, optional
+        Variable in swb_runoff_netcdf_output with runoff data, 
+        by default 'rejected_net_infiltration'
+    output_length_units : str, optional
+        Input units are read from the 'units' attribute of the netcdf_output_variable 
+        in swb_netcdf_output; specify output length units so that the output CSV
+        file is in the same length units as the model. No time unit conversion is perfo
+        by default 'meters'
+    outfile : str, optional
+        [description], by default 'swb_runoff_by_nhdplus_comid.csv'
+    """    
+    outfile = Path(outfile)
+    # get an affine.Affine representation and shape 
+    # of the grid in the culled NetCDF file
+    with xr.open_dataset(swb_runoff_netcdf_output) as ds:
+        xul = np.min(ds['x'].values)
+        yul = np.max(ds['y'].values)
+        dx = ds['x'].diff(dim='x').values[0]
+        dy = ds['y'].diff(dim='y').values[0]
+        ntimes, nrow, ncol = ds[runoff_output_variable].shape
+        nc_crs = get_authority_crs(ds['crs'].attrs['proj4_string'])
+        nc_bounds = (xul, np.min(ds['y'].values),
+                     np.max(ds['x'].values), yul)
+        nc_bbox = box(*nc_bounds)
+        nc_units = ds[runoff_output_variable].attrs['units']
+    nc_trans = affine.Affine(dx, 0., xul, 0., dy, yul)
+    
+    # combine monthly runoff with monthly "rejected_net_infiltration"
+    if swb_rejected_net_inf_output is not None:
+        with xr.open_dataset(swb_rejected_net_inf_output) as ds2: 
+            total_runoff = ds['runoff'] + ds2[rejected_net_inf_variable]
+            total_runoff.name = 'runoff'
+    else:
+        total_runoff = ds['runoff']
+        
+    # Read in the NHDPlus catchments 
+    # first reproject the SWB netcdf bounding box to lat/lon (NAD83)
+    # with a 10 km buffer
+    nc_bbox_4269 = project(nc_bbox.buffer(1e4), nc_crs, 4269)
+    # read the catchments intersecting the buffered bbox
+    catchments = gpd.read_file(nhdplus_catchments_file, bbox=nc_bbox_4269.bounds)
+    #  reproject to the SWB output CRS (probably 5070)
+    #  this assumes the SWB output has a valid crs!
+    catchments.to_crs(nc_crs, inplace=True)
+    #catchments.to_file(outpath / nhdplus_catchments.name)
+    
+    # rasterize the catchments unto the NetCDF file grid
+    features_list = list(zip(catchments['geometry'], catchments[catchment_id_col]))
+    rasterized = rasterio.features.rasterize(features_list, out_shape=(nrow, ncol), 
+                                    transform=nc_trans)
+    out_text_array = outfile.parent / 'nhdplus_catchments.dat'
+    np.savetxt(out_text_array, rasterized, fmt='%d')
+    print(f'wrote {out_text_array}')
+    write_raster(out_text_array.with_suffix('.tif'), rasterized, nodata=0, 
+                 xul=xul, yul=yul, dx=dx, dy=dy, crs=nc_crs)
+    masked = np.ma.masked_array(rasterized, mask=rasterized==0)
+    plt.imshow(masked)
+    plt.title('Rasterized NHDPlus catchments')
+    plt.savefig(out_text_array.with_suffix('.pdf'))
+    plt.close()
+    print(f"wrote {out_text_array.with_suffix('.pdf')}")
+    
+    # transpose the SWB runoff results from xarray DataSet to DataFrame
+    df = total_runoff.to_dataframe().reset_index()
+    df['comid'] = rasterized.ravel().tolist() * ntimes
+    # SWB runoff is in average daily inches over each cell
+    # convert to average daily volume for each cell
+    # then sum by comid to get average daily volume by comid
+    # (which can subsequently be distributed equally to reaches)
+    L = unit_abbreviations[output_length_units]
+    df[f'area_{L}2'] = abs(dx * dy)  # cell area in m3
+    df[f'runoff_{L}d'] = df['runoff'] * convert_length_units(nc_units, output_length_units)
+    df[f'runoff_{L}3d'] = df[f'runoff_{L}d'] * df[f'area_{L}2']
+    bycomid_month = df.groupby(['time', 'comid'])
+    data = bycomid_month.first()  # preserve times
+    aggregated = bycomid_month.sum()
+    data_cols = ['x', 'y', 'lat', 'lon']
+    for col in data_cols:
+        aggregated[col] = data[col]
+    # drop comids with zero total runoff
+    # (keep intermittent zero values; 
+    #  otherwise SFR package will continue previous value)
+    comid_runoff_totals = aggregated.groupby('comid').runoff.sum()
+    drop_comids = comid_runoff_totals.loc[comid_runoff_totals == 0].index
+    keep_rows = ~aggregated.index.get_level_values(1).isin(drop_comids)
+    aggregated = aggregated.loc[keep_rows]
+    aggregated = aggregated[['x', 'y', f'runoff_{L}3d', f'area_{L}2']]
+    aggregated.to_csv(outfile, index=True, float_format='%g')
+    print(f'wrote {outfile}')

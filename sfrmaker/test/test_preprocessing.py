@@ -6,11 +6,18 @@ from pathlib import Path
 import yaml
 import numpy as np
 import pandas as pd
+import geopandas as gpd
 from shapely.geometry import box
 import pytest
 from gisutils import df2shp, shp2df
 from sfrmaker.checks import check_monotonicity
-from sfrmaker.preprocessing import cull_flowlines, preprocess_nhdplus, clip_flowlines_to_polygon, edit_flowlines
+from sfrmaker.preprocessing import (get_flowline_routing,
+                                    cull_flowlines, 
+                                    preprocess_nhdplus, 
+                                    clip_flowlines_to_polygon, 
+                                    edit_flowlines,
+                                    swb_runoff_to_csv
+                                    )
 
 
 @pytest.fixture(scope='module')
@@ -192,6 +199,23 @@ def test_preprocess_nhdplus_no_zonal_stats(culled_flowlines, preprocessed_flowli
     # verify that the same result is produced
     # when reusing the shapefile output from zonal statistics
     pd.testing.assert_frame_equal(preprocessed_flowlines, preprocessed_flowlines2)
+    
+    # test manual updating of COMID end elevations
+    # (e.g. from measured stage data)
+    # assume mean stage at the Money, MS gage
+    # (near the upstream end of COMID 17991438)
+    # has been measured at 37.1 m (~1.2 meters above the min DEM elevation)
+    kwargs['update_up_elevations'] = {17991438: 37.1,
+                                }
+    # and that mean stage near Greenwood
+    # (near the downstream end of COMID 18047242)
+    # has been measured at 37.0 m (~1.1 meters above the min DEM elevation)
+    kwargs['update_dn_elevations'] = {18047242: 37.0,
+                                }
+    preprocessed_flowlines3 = preprocess_nhdplus(**kwargs)
+    
+    assert preprocessed_flowlines3.loc[17991438, 'elevupsmo'] == 37.1
+    assert preprocessed_flowlines3.loc[18047242, 'elevdnsmo'] == 37.0
 
 
 @pytest.mark.timeout(30)  # projection issues will cause zonal stats to hang
@@ -234,3 +258,69 @@ def test_edit_flowlines(flowlines, preprocessed_flowlines, test_data_path):
     assert not any(set(add_flowlines.comid).difference(edited_flowlines.index))
     if isinstance(flowlines, str):
         assert os.path.exists(flowlines[:-4] + '.prj')
+        
+
+def test_get_flowline_routing(datapath, project_root_path):
+    
+    # change the directory to the root level
+    # (other tests in this module use the output folder)
+    wd = os.getcwd()
+    os.chdir(project_root_path)
+    NHDPlus_paths = [f'{datapath}/tylerforks/NHDPlus/']
+    plusflow_files = [f'{datapath}/tylerforks/NHDPlus/NHDPlusAttributes/PlusFlow.dbf']
+
+    mask = f'{datapath}/tylerforks/grid.shp'
+    df = get_flowline_routing(NHDPlus_paths=NHDPlus_paths,
+                              mask=mask)
+    assert np.array_equal(df.columns, ['FROMCOMID', 'TOCOMID'])
+    df2 = get_flowline_routing(PlusFlow=plusflow_files)
+    pd.testing.assert_frame_equal(df2.loc[df2['FROMCOMID'].isin(df['FROMCOMID'])].head(),
+                                  df.head())
+    os.chdir(wd)
+    
+    
+def test_swb_runoff_to_csv(test_data_path, outdir):
+    test_data_path = Path(test_data_path)
+    swb_netcdf_output = test_data_path / 'runoff__1999-01-01_to_2018-12-31__989_by_661.nc'
+    nhdplus_catchments_file = test_data_path / 'NHDPlus08/NHDPlusCatchment/Catchment.shp'
+    outfile = Path(outdir, 'swb_runoff_by_nhdplus_comid.csv')
+    swb_runoff_to_csv(swb_netcdf_output, nhdplus_catchments_file,
+                      runoff_output_variable='runoff', 
+                      catchment_id_col='FEATUREID',
+                      output_length_units='meters',
+                      outfile=outfile)
+    df = pd.read_csv(outfile)
+    df['time'] = pd.to_datetime(df['time'])
+    #cat = gpd.read_file(nhdplus_catchments_file)
+    # model bounds
+    xoffset, yoffset = 500955, 1176285
+    nrow, ncol = 30, 35
+    dxy = 1000
+    x1 = xoffset + ncol * dxy
+    y1 = yoffset + nrow * dxy
+    within_model = (df.x.values > xoffset) & (df.x.values < x1) & \
+                   (df.y.values > yoffset) & (df.y.values < y1)
+    df = df.loc[within_model]
+    mean_monthly_runoff = df.groupby(df['time'].dt.year)['runoff_m3d'].sum().mean()/12
+    # no idea if this is the right number but similar to test results for modflow-setup
+    # and serves as a benchmark in case the output changes
+    assert np.allclose(mean_monthly_runoff, 5e5, rtol=0.2)
+    
+    # test with "rejected net infiltration added"
+    swb_rejected_net_inf_output = test_data_path / \
+        'irrtest_1000mrejected_net_infiltration__1999-01-01_to_2020-12-31__989_by_661.nc'
+    outfile2 = Path(outdir, 'swb_runoff_w_netinf_by_nhdplus_comid.csv')
+    swb_runoff_to_csv(swb_netcdf_output, nhdplus_catchments_file,
+                      runoff_output_variable='runoff', 
+                      swb_rejected_net_inf_output=swb_rejected_net_inf_output,
+                      catchment_id_col='FEATUREID',
+                      output_length_units='meters',
+                      outfile=outfile2)
+    df2 = pd.read_csv(outfile2)
+    df2['time'] = pd.to_datetime(df2['time'])
+    mean_monthly_runoff2 = df2.groupby(df2['time'].dt.year)['runoff_m3d'].sum().mean()/12
+    # similar to above; should be a bigger number 
+    # with the rejected net inf added
+    # not sure if this is right but will fail if the input 
+    # or the code changes substantially
+    assert np.allclose(mean_monthly_runoff2, 9e5, rtol=0.2)

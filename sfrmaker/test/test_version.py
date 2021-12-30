@@ -22,7 +22,7 @@ def get_changelog_version(project_root_path):
     file = os.path.join(project_root_path, 'docs/source/release-history.rst')
     with open(file) as src:
         for line in src:
-            if 'version' in line.lower():
+            if line.strip().lower().startswith('version'):
                 _, version_info, date = line.strip().split()
                 version_info = version.parse(version_info)
                 date = date.strip('()')

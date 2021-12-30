@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 import time
 from packaging import version
 import warnings
@@ -108,11 +109,11 @@ class SFRData(DataPackage):
               'hcond2', 'thickm2', 'elevdn', 'width2', 'depth2',
               'thts2', 'thti2', 'eps2', 'uhc2']
 
-    dtypes = {'rno': np.int, 'node': np.int, 'k': np.int, 'i': np.int, 'j': np.int,
-              'iseg': np.int, 'ireach': np.int, 'outreach': np.int, 'line_id': np.int,
-              'per': np.int, 'nseg': np.int, 'icalc': np.int, 'outseg': np.int,
-              'iupseg': np.int, 'iprior': np.int, 'nstrpts': np.int,
-              'name': np.object, 'geometry': np.object}
+    dtypes = {'rno': int, 'node': int, 'k': int, 'i': int, 'j': int,
+              'iseg': int, 'ireach': int, 'outreach': int, 'line_id': int,
+              'per': int, 'nseg': int, 'icalc': int, 'outseg': int,
+              'iupseg': int, 'iprior': int, 'nstrpts': int,
+              'name': object, 'geometry': object}
 
     # LENUNI = {"u": 0, "f": 1, "m": 2, "c": 3}
     len_const = {0: 1.0, 1: 1.486, 2: 1.0, 3: 100.}
@@ -135,6 +136,8 @@ class SFRData(DataPackage):
                  isfr=None,
                  model_length_units="undefined", model_time_units='days',
                  enforce_increasing_nsegs=True,
+                 default_slope=0.001, minimum_slope=0.0001,
+                 maximum_slope=1.,
                  package_name='model',
                  **kwargs):
         DataPackage.__init__(self, grid=grid, model=model, isfr=isfr,
@@ -172,7 +175,8 @@ class SFRData(DataPackage):
         # not the ideal logic for MODFLOW 6 case where only
         # rno and connections are supplied
         self.set_outreaches()
-        self.get_slopes()
+        self.get_slopes(default_slope=default_slope, minimum_slope=minimum_slope,
+                        maximum_slope=maximum_slope)
 
         # have to set the model last, because it also sets up a flopy sfr package instance
         self.model = model  # attached flopy model instance
@@ -577,17 +581,33 @@ class SFRData(DataPackage):
         """
         if self.model is not None and hasattr(self.model, 'dis'):
             botm = self.model.dis.botm.array.copy()
+            idomain = None
+            if self.model.version == 'mf6':
+                idomain = self.model.dis.idomain.array.copy()
+            else:
+                bas6 = getattr(self.model, 'bas6')
+                if bas6 is not None:
+                    idomain = bas6.ibound.array
+                    
             nlay = botm.shape[0] + 1
-            layers, new_botm = assign_layers(self.reach_data, botm_array=botm)
+            layers, new_botm = assign_layers(self.reach_data, botm_array=botm, idomain=idomain)
             self.reach_data['k'] = layers
             if new_botm is not None:
-                outfile = '{}_layer_{}_new_botm_elevations.dat'.format(self.package_name,
-                                                                       nlay)
-                outfile = os.path.join(adjusted_botm_output_path, outfile)
-                np.savetxt(outfile, new_botm, fmt='%.2f')
+                outfiles = []
+                if len(new_botm.shape) == 2:
+                    write_layers = [nlay - 1]
+                else:
+                    write_layers = list(range(nlay))
+                outpath = Path(adjusted_botm_output_path)
+                for k in write_layers:
+                    outfile = outpath / f'{self.package_name}_layer_{nlay}_new_botm_elevations.dat'
+                    np.savetxt(outfile, new_botm[-1], fmt='%.2f')
+                    outfiles.append(outfile)
                 msg = ('Sfrmaker pushed some model botm elevations downward'
                        'to accomodate streambed bottoms. New botm elevations'
-                       'for layer {} written to {}'.format(nlay, outfile))
+                       'written to:\n')
+                for f in outfiles:
+                    msg += f'{f}\n'
                 print(msg)
         else:
             print('Need a model instance with a discretization package to assign layers. '
@@ -921,10 +941,13 @@ class SFRData(DataPackage):
 
         print('running rasterstats.zonal_stats on {}...'.format(txt))
         t0 = time.time()
+        def get_min(x):
+            return np.min(x[x > -1e38])
         results = zonal_stats(features,
                               dem,
-                              stats='min')
-        elevs = [r['min'] for r in results]
+                              add_stats={'nanmin': get_min}
+                              )
+        elevs = [r['nanmin'] for r in results]
         print("finished in {:.2f}s\n".format(time.time() - t0))
 
         if all(v is None for v in elevs):
@@ -943,7 +966,7 @@ class SFRData(DataPackage):
         return elevs
 
     def set_streambed_top_elevations_from_dem(self, filename, elevation_units=None,
-                                              dem=None, dem_z_units=None,
+                                              dem=None,
                                               method='buffers',
                                               **kwargs):
         """Set streambed top elevations from a DEM raster.
@@ -969,7 +992,7 @@ class SFRData(DataPackage):
             warnings.warn('set_streambed_top_elevations_from_dem: dem argument is deprecated. '
                           'Use filename instead.', DeprecationWarning)
             filename = dem
-        if dem_z_units is not None:
+        if 'dem_z_units' in kwargs:
             warnings.warn('set_streambed_top_elevations_from_dem: dem_z_units argument is deprecated. '
                           'Use elevation_units instead.', DeprecationWarning)
             elevation_units = dem_z_units
@@ -1611,10 +1634,11 @@ class SFRData(DataPackage):
 
         if self.period_data is not None and len(self.period_data) > 0:
             pd_file = os.path.normpath('{}/{}_sfr_period_data.csv'.format(output_path, basename))
-            self.period_data.dropna(axis=1, how='all').to_csv(pd_file, index=False)
+            self.period_data.dropna(axis=1, how='all').to_csv(pd_file)
             print('wrote {}'.format(pd_file))
 
-    def write_gage_package(self, filename=None, gage_package_unit=25,
+    def write_gage_package(self, filename=None, sitename_col='obsname',
+                           gage_package_unit=25,
                            gage_starting_unit_number=None):
         """Write observation input for the MODFLOW-2005 Gage Package.
 
@@ -1623,6 +1647,11 @@ class SFRData(DataPackage):
         filename : str, optional
             Gage package file, by default None, in which case
             :py:attr:`SFRData.observations_file` is used.
+        sitename_col : str
+            Unique name or number for each gage site.
+            By default, 'obsname', which is the default field in the 
+            :attr:`SFRData.observations` table containing either 
+            site numbers or site number-variable pairs.
         gage_package_unit : int, optional
             Unit number for Gage Package, by default 25
         gage_starting_unit_number : int, optional
@@ -1648,6 +1677,7 @@ class SFRData(DataPackage):
                                   gage_package_filename=filename,
                                   gage_namfile_entries_file=gage_namfile_entries_file,
                                   model=model,
+                                  sitename_col=sitename_col,
                                   gage_package_unit=gage_package_unit,
                                   start_gage_unit=gage_starting_unit_number)
 
