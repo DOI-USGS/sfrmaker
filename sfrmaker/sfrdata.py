@@ -941,10 +941,13 @@ class SFRData(DataPackage):
 
         print('running rasterstats.zonal_stats on {}...'.format(txt))
         t0 = time.time()
+        def get_min(x):
+            return np.min(x[x > -1e38])
         results = zonal_stats(features,
                               dem,
-                              stats='min')
-        elevs = [r['min'] for r in results]
+                              add_stats={'nanmin': get_min}
+                              )
+        elevs = [r['nanmin'] for r in results]
         print("finished in {:.2f}s\n".format(time.time() - t0))
 
         if all(v is None for v in elevs):
