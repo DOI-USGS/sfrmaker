@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Stand-alone tools &mdash; SFRmaker 0.9.1.post6.dev0+g9b8b7a1 documentation</title>
+  <title>Stand-alone tools &mdash; SFRmaker 0.9.1.post7.dev0+g747f7e0 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
@@ -37,7 +37,7 @@
             <a href="../index.html" class="icon icon-home"> SFRmaker
           </a>
               <div class="version">
-                0.9.1.post6.dev0+g9b8b7a1
+                0.9.1.post7.dev0+g747f7e0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -320,7 +320,7 @@ div.nboutput.container div.output_area > div[class^='highlight']{
 }
 
 /* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
-.prompt a.copybtn {
+.prompt .copybtn {
     display: none;
 }
 
@@ -387,8 +387,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">flopy</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
@@ -405,8 +404,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="o">%%capture</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%%capture</span>
 <span class="n">lns</span> <span class="o">=</span> <span class="n">sfrmaker</span><span class="o">.</span><span class="n">Lines</span><span class="o">.</span><span class="n">from_nhdplus_v2</span><span class="p">(</span><span class="n">NHDPlus_paths</span><span class="o">=</span><span class="s1">&#39;../tylerforks/NHDPlus/&#39;</span><span class="p">,</span>
                             <span class="nb">filter</span><span class="o">=</span><span class="s1">&#39;../tylerforks/grid.shp&#39;</span><span class="p">)</span>
 <span class="n">m</span> <span class="o">=</span> <span class="n">flopy</span><span class="o">.</span><span class="n">modflow</span><span class="o">.</span><span class="n">Modflow</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">&#39;tf.nam&#39;</span><span class="p">,</span> <span class="n">model_ws</span><span class="o">=</span><span class="s1">&#39;../tylerforks/tylerforks&#39;</span><span class="p">)</span>
@@ -439,8 +437,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">routing</span> <span class="o">=</span> <span class="n">make_graph</span><span class="p">(</span><span class="n">sfr</span><span class="o">.</span><span class="n">segment_data</span><span class="p">[</span><span class="s1">&#39;nseg&#39;</span><span class="p">],</span> <span class="n">sfr</span><span class="o">.</span><span class="n">segment_data</span><span class="p">[</span><span class="s1">&#39;outseg&#39;</span><span class="p">])</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">routing</span> <span class="o">=</span> <span class="n">make_graph</span><span class="p">(</span><span class="n">sfr</span><span class="o">.</span><span class="n">segment_data</span><span class="p">[</span><span class="s1">&#39;nseg&#39;</span><span class="p">],</span> <span class="n">sfr</span><span class="o">.</span><span class="n">segment_data</span><span class="p">[</span><span class="s1">&#39;outseg&#39;</span><span class="p">])</span>
 <span class="n">routing</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 </pre></div>
 </div>
@@ -458,8 +455,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">routing</span> <span class="o">=</span> <span class="n">make_graph</span><span class="p">(</span><span class="n">sfr</span><span class="o">.</span><span class="n">segment_data</span><span class="p">[</span><span class="s1">&#39;nseg&#39;</span><span class="p">],</span> <span class="n">sfr</span><span class="o">.</span><span class="n">segment_data</span><span class="p">[</span><span class="s1">&#39;outseg&#39;</span><span class="p">],</span> <span class="n">one_to_many</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">routing</span> <span class="o">=</span> <span class="n">make_graph</span><span class="p">(</span><span class="n">sfr</span><span class="o">.</span><span class="n">segment_data</span><span class="p">[</span><span class="s1">&#39;nseg&#39;</span><span class="p">],</span> <span class="n">sfr</span><span class="o">.</span><span class="n">segment_data</span><span class="p">[</span><span class="s1">&#39;outseg&#39;</span><span class="p">],</span> <span class="n">one_to_many</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="n">routing</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 </pre></div>
 </div>
@@ -478,8 +474,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">routing_r</span> <span class="o">=</span> <span class="n">make_reverse_graph</span><span class="p">(</span><span class="n">routing</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">routing_r</span> <span class="o">=</span> <span class="n">make_reverse_graph</span><span class="p">(</span><span class="n">routing</span><span class="p">)</span>
 <span class="n">routing_r</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
 </pre></div>
 </div>
@@ -501,8 +496,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">path</span> <span class="o">=</span> <span class="n">find_path</span><span class="p">(</span><span class="n">routing</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">path</span> <span class="o">=</span> <span class="n">find_path</span><span class="p">(</span><span class="n">routing</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 <span class="n">path</span>
 </pre></div>
 </div>
@@ -523,8 +517,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">reach_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">sfr</span><span class="o">.</span><span class="n">reach_data</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">reach_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">sfr</span><span class="o">.</span><span class="n">reach_data</span><span class="p">)</span>
 <span class="n">reach_data</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">reach_data</span><span class="p">[</span><span class="s1">&#39;reachID&#39;</span><span class="p">]</span>
 
 <span class="n">reach_routing</span> <span class="o">=</span> <span class="n">make_graph</span><span class="p">(</span><span class="n">reach_data</span><span class="p">[</span><span class="s1">&#39;reachID&#39;</span><span class="p">],</span> <span class="n">reach_data</span><span class="p">[</span><span class="s1">&#39;outreach&#39;</span><span class="p">],</span> <span class="n">one_to_many</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
@@ -566,8 +559,7 @@ Text(0.5, 0, &#39;Distance in River miles&#39;)
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">get_upsegs</span><span class="p">(</span><span class="n">routing_r</span><span class="p">,</span> <span class="mi">42</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">get_upsegs</span><span class="p">(</span><span class="n">routing_r</span><span class="p">,</span> <span class="mi">42</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -584,8 +576,7 @@ Text(0.5, 0, &#39;Distance in River miles&#39;)
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
 </pre></div>
 </div>
 </div>
