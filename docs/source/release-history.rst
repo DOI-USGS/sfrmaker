@@ -2,7 +2,7 @@
 Release History
 ===============
 
-Version 0.9.0 (2021-12-30)
+Version 0.9.1 (2021-12-30)
 --------------------------
 * Added support for NHDPlus High Resolution
 * Features added to preprocessing:
@@ -26,6 +26,10 @@ Version 0.9.0 (2021-12-30)
   * SFRData.sample_reach_elevations: ignore nan elevations sampled from DEM (or from beyond DEM extent)
 * Refactoring:
   * sfrdata.set_streambed_top_elevations_from_dem: deprecate dem_z_units arg; replaced with 'elevation_units'
+
+Version 0.9.0 (2021-04-19)
+--------------------------
+This release is the same as 0.8.0 due to a mistake, and has been yanked from PyPI.
 
 Version 0.8.0 (2021-04-19)
 --------------------------

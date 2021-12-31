@@ -39,4 +39,3 @@ dependencies:
     - pytest-timeout
     - git+git://github.com/modflowpy/flopy@develop
     - git+git://github.com/aleaf/modflow-export@develop
-
