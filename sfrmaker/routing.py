@@ -30,7 +30,11 @@ def pick_toids(routing, elevations):
             v = list(v)
         if isinstance(v, list):
             elevs = [elevations.get(vv, 1e5) for vv in v]
-            routing2[k] = v[np.argmin(elevs)]
+            # check for empty list
+            if len(elevs) == 0:
+                routing2[k] = 0
+            else:
+                routing2[k] = v[np.argmin(elevs)]
         elif np.isscalar(v):
             routing2[k] = v
     print("finished in {:.2f}s\n".format(time.time() - ta))

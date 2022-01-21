@@ -1,4 +1,4 @@
-import collections
+from collections.abc import Iterable
 import os
 from packaging import version
 import warnings
@@ -203,7 +203,7 @@ def read_polygon_feature(feature, dest_crs=None, feature_crs=None):
         feature_crs = get_shapefile_crs(feature)
         geoms = shp2df(feature)['geometry'].values
         feature = unary_union(geoms)
-    elif isinstance(feature, collections.Iterable):
+    elif isinstance(feature, Iterable):
         if isinstance(feature[0], dict):
             try:
                 feature = [shape(f) for f in feature]
