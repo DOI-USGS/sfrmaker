@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Using SFRmaker with a configuration file &mdash; SFRmaker 0.9.1.post7.dev0+g747f7e0 documentation</title>
+  <title>Using SFRmaker with a configuration file &mdash; SFRmaker 0.9.1.post8.dev0+g4a06e6b documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
@@ -35,7 +35,7 @@
             <a href="index.html" class="icon icon-home"> SFRmaker
           </a>
               <div class="version">
-                0.9.1.post7.dev0+g747f7e0
+                0.9.1.post8.dev0+g4a06e6b
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -163,45 +163,45 @@
 <p>The configuration file for the Mississippi Embayment example is shown below. The configuration file, associate python script, and input files needed to reproduce the example are available on the <a class="reference external" href="https://github.com/aleaf/sfrmaker/examples/meras/">SFRmaker GitHub page</a>. The configuration file is specified in the <a class="reference external" href="yaml.org">YAML format</a>, which maps <code class="docutils literal notranslate"><span class="pre">key:</span> <span class="pre">value</span></code> pairs similar to a Python dictionary. In the SFRmaker configuration file, keys (to the left of the colons) indicate variables or groups of variables; values to apply to those variables are listed to the right of the colons.</p>
 <section id="meras-sfrmaker-config-yml">
 <h3>meras_sfrmaker_config.yml:<a class="headerlink" href="#meras-sfrmaker-config-yml" title="Permalink to this headline">¶</a></h3>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="nt">package_version</span><span class="p">:</span> <span class="s">&#39;mf6&#39;</span>
-<span class="linenos"> 2</span><span class="nt">package_name</span><span class="p">:</span> <span class="s">&#39;meras3&#39;</span>
-<span class="linenos"> 3</span><span class="nt">output_path</span><span class="p">:</span> <span class="s">&#39;meras3&#39;</span>
-<span class="linenos"> 4</span><span class="nt">modelgrid</span><span class="p">:</span>
-<span class="linenos"> 5</span>  <span class="nt">xoffset</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">177955</span>
-<span class="linenos"> 6</span>  <span class="nt">yoffset</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">938285</span>
-<span class="linenos"> 7</span>  <span class="nt">nrow</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">666</span>
-<span class="linenos"> 8</span>  <span class="nt">ncol</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">634</span>
-<span class="linenos"> 9</span>  <span class="nt">delr</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1000</span>  <span class="c1"># model spacing along a row</span>
-<span class="linenos">10</span>  <span class="nt">delc</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1000</span>  <span class="c1"># model spacing along a column</span>
-<span class="linenos">11</span>  <span class="nt">epsg</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">5070</span>  <span class="c1"># albers equal area</span>
-<span class="linenos">12</span><span class="nt">flowlines</span><span class="p">:</span>
-<span class="linenos">13</span>  <span class="nt">filename</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">flowlines.shp</span>
-<span class="linenos">14</span>  <span class="nt">id_column</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">COMID</span>  <span class="c1"># arguments to sfrmaker.Lines.from_shapefile</span>
-<span class="linenos">15</span>  <span class="nt">routing_column</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">tocomid</span>
-<span class="linenos">16</span>  <span class="nt">width1_column</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">width1</span>
-<span class="linenos">17</span>  <span class="nt">width2_column</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">width2</span>
-<span class="linenos">18</span>  <span class="nt">up_elevation_column</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">elevupsmo</span>
-<span class="linenos">19</span>  <span class="nt">dn_elevation_column</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">elevdnsmo</span>
-<span class="linenos">20</span>  <span class="nt">name_column</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">GNIS_NAME</span>
-<span class="linenos">21</span>  <span class="nt">attr_length_units</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">feet</span>  <span class="c1"># units of source data</span>
-<span class="linenos">22</span>  <span class="nt">attr_height_units</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">feet</span>  <span class="c1"># units of source data</span>
-<span class="linenos">23</span><span class="nt">inflows</span><span class="p">:</span>  <span class="c1"># see sfrmaker.data.add_to_perioddata for arguments</span>
-<span class="linenos">24</span>  <span class="nt">filename</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">inflows.csv</span>
-<span class="linenos">25</span>  <span class="nt">line_id_column</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">line_id</span>
-<span class="linenos">26</span>  <span class="nt">period_column</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">per</span>  <span class="c1"># column with model stress periods</span>
-<span class="linenos">27</span>  <span class="nt">data_column</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">inflow_m3d</span>  <span class="c1"># column with flow values</span>
-<span class="linenos">28</span><span class="nt">observations</span><span class="p">:</span>  <span class="c1"># see sfrmaker.observations.add_observations for arguments</span>
-<span class="linenos">29</span>  <span class="nt">filename</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">observations.csv</span>
-<span class="linenos">30</span>  <span class="nt">obstype</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">downstream-flow</span>  <span class="c1"># modflow-6 observation type</span>
-<span class="linenos">31</span>  <span class="nt">x_location_column</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">x</span>  <span class="c1"># observation locations, in CRS coordinates</span>
-<span class="linenos">32</span>  <span class="nt">y_location_column</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">y</span>
-<span class="linenos">33</span>  <span class="nt">obsname_column</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">site_no</span>  <span class="c1"># column for naming observations</span>
-<span class="linenos">34</span><span class="nt">options</span><span class="p">:</span>
-<span class="linenos">35</span>  <span class="nt">active_area</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">MERAS_Extent.shp</span>
-<span class="linenos">36</span>  <span class="nt">one_reach_per_cell</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span> <span class="c1">#  consolidate SFR reaches to one per i, j location</span>
-<span class="linenos">37</span>  <span class="c1"># add breaks in routing at the following line ids</span>
-<span class="linenos">38</span>  <span class="c1"># (flow downstream is controlled by dams, and specified as an inflow)</span>
-<span class="linenos">39</span>  <span class="nt">add_outlets</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="nv">18019782</span><span class="p p-Indicator">,</span> <span class="nv">15276792</span><span class="p p-Indicator">,</span> <span class="nv">15290344</span><span class="p p-Indicator">,</span> <span class="nv">15256386</span><span class="p p-Indicator">]</span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="nt">package_version</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;mf6&#39;</span><span class="w"></span>
+<span class="linenos"> 2</span><span class="nt">package_name</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;meras3&#39;</span><span class="w"></span>
+<span class="linenos"> 3</span><span class="nt">output_path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;meras3&#39;</span><span class="w"></span>
+<span class="linenos"> 4</span><span class="nt">modelgrid</span><span class="p">:</span><span class="w"></span>
+<span class="linenos"> 5</span><span class="w">  </span><span class="nt">xoffset</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">177955</span><span class="w"></span>
+<span class="linenos"> 6</span><span class="w">  </span><span class="nt">yoffset</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">938285</span><span class="w"></span>
+<span class="linenos"> 7</span><span class="w">  </span><span class="nt">nrow</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">666</span><span class="w"></span>
+<span class="linenos"> 8</span><span class="w">  </span><span class="nt">ncol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">634</span><span class="w"></span>
+<span class="linenos"> 9</span><span class="w">  </span><span class="nt">delr</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span><span class="w">  </span><span class="c1"># model spacing along a row</span><span class="w"></span>
+<span class="linenos">10</span><span class="w">  </span><span class="nt">delc</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span><span class="w">  </span><span class="c1"># model spacing along a column</span><span class="w"></span>
+<span class="linenos">11</span><span class="w">  </span><span class="nt">epsg</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5070</span><span class="w">  </span><span class="c1"># albers equal area</span><span class="w"></span>
+<span class="linenos">12</span><span class="nt">flowlines</span><span class="p">:</span><span class="w"></span>
+<span class="linenos">13</span><span class="w">  </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">flowlines.shp</span><span class="w"></span>
+<span class="linenos">14</span><span class="w">  </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">COMID</span><span class="w">  </span><span class="c1"># arguments to sfrmaker.Lines.from_shapefile</span><span class="w"></span>
+<span class="linenos">15</span><span class="w">  </span><span class="nt">routing_column</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tocomid</span><span class="w"></span>
+<span class="linenos">16</span><span class="w">  </span><span class="nt">width1_column</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">width1</span><span class="w"></span>
+<span class="linenos">17</span><span class="w">  </span><span class="nt">width2_column</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">width2</span><span class="w"></span>
+<span class="linenos">18</span><span class="w">  </span><span class="nt">up_elevation_column</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">elevupsmo</span><span class="w"></span>
+<span class="linenos">19</span><span class="w">  </span><span class="nt">dn_elevation_column</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">elevdnsmo</span><span class="w"></span>
+<span class="linenos">20</span><span class="w">  </span><span class="nt">name_column</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GNIS_NAME</span><span class="w"></span>
+<span class="linenos">21</span><span class="w">  </span><span class="nt">attr_length_units</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">feet</span><span class="w">  </span><span class="c1"># units of source data</span><span class="w"></span>
+<span class="linenos">22</span><span class="w">  </span><span class="nt">attr_height_units</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">feet</span><span class="w">  </span><span class="c1"># units of source data</span><span class="w"></span>
+<span class="linenos">23</span><span class="nt">inflows</span><span class="p">:</span><span class="w">  </span><span class="c1"># see sfrmaker.data.add_to_perioddata for arguments</span><span class="w"></span>
+<span class="linenos">24</span><span class="w">  </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">inflows.csv</span><span class="w"></span>
+<span class="linenos">25</span><span class="w">  </span><span class="nt">line_id_column</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">line_id</span><span class="w"></span>
+<span class="linenos">26</span><span class="w">  </span><span class="nt">period_column</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">per</span><span class="w">  </span><span class="c1"># column with model stress periods</span><span class="w"></span>
+<span class="linenos">27</span><span class="w">  </span><span class="nt">data_column</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">inflow_m3d</span><span class="w">  </span><span class="c1"># column with flow values</span><span class="w"></span>
+<span class="linenos">28</span><span class="nt">observations</span><span class="p">:</span><span class="w">  </span><span class="c1"># see sfrmaker.observations.add_observations for arguments</span><span class="w"></span>
+<span class="linenos">29</span><span class="w">  </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">observations.csv</span><span class="w"></span>
+<span class="linenos">30</span><span class="w">  </span><span class="nt">obstype</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">downstream-flow</span><span class="w">  </span><span class="c1"># modflow-6 observation type</span><span class="w"></span>
+<span class="linenos">31</span><span class="w">  </span><span class="nt">x_location_column</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">x</span><span class="w">  </span><span class="c1"># observation locations, in CRS coordinates</span><span class="w"></span>
+<span class="linenos">32</span><span class="w">  </span><span class="nt">y_location_column</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">y</span><span class="w"></span>
+<span class="linenos">33</span><span class="w">  </span><span class="nt">obsname_column</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">site_no</span><span class="w">  </span><span class="c1"># column for naming observations</span><span class="w"></span>
+<span class="linenos">34</span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="linenos">35</span><span class="w">  </span><span class="nt">active_area</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MERAS_Extent.shp</span><span class="w"></span>
+<span class="linenos">36</span><span class="w">  </span><span class="nt">one_reach_per_cell</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"> </span><span class="c1">#  consolidate SFR reaches to one per i, j location</span><span class="w"></span>
+<span class="linenos">37</span><span class="w">  </span><span class="c1"># add breaks in routing at the following line ids</span><span class="w"></span>
+<span class="linenos">38</span><span class="w">  </span><span class="c1"># (flow downstream is controlled by dams, and specified as an inflow)</span><span class="w"></span>
+<span class="linenos">39</span><span class="w">  </span><span class="nt">add_outlets</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">18019782</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">15276792</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">15290344</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">15256386</span><span class="p p-Indicator">]</span><span class="w"></span>
 </pre></div>
 </div>
 <p>Information on the model grid is specified in the <code class="docutils literal notranslate"><span class="pre">modelgrid:</span></code> block of the configuration file. The <code class="docutils literal notranslate"><span class="pre">xoffset</span></code> and <code class="docutils literal notranslate"><span class="pre">yoffset</span></code> arguments are the location of the lower left corner of the model grid, in units of the CRS defined by the EPSG code (typically meters). Since this is a uniform grid, only scalar values are provided for the row and column spacing. Variable row and column spacings can be specified using the list notation in YAML, or more simply by loading a flopy model instance into a Python script. SFRmaker does not require a modflow model as input, but a model can be optionally be specified in the configuration file with the <code class="docutils literal notranslate"><span class="pre">model:</span></code> and <code class="docutils literal notranslate"><span class="pre">simulation:</span></code> blocks (the latter is only needed for MODFLOW-6 models).</p>
@@ -234,37 +234,37 @@
 <p>In the first configuration file, the Name file and workspace for a MODFLOW-NWT model are specified. An active area denoting where the SFR package will be built is provided with a shapefile. NHDPlus data are provided as a file path to the root folder level for a drainage basin (for example, 04, The Great Lakes), assuming the files within that path are in the same structure as the <a class="reference external" href="https://nhdplus.com/NHDPlus/NHDPlusV2_data.php">download from the NHDPlus website</a>. Finally, a dem is provided as a <a class="reference external" href="notebooks/Streambed_elevation_demo.html">a more accurate source of streambed elevations</a>.</p>
 <section id="tf-sfrmaker-config-yml">
 <h3>tf_sfrmaker_config.yml:<a class="headerlink" href="#tf-sfrmaker-config-yml" title="Permalink to this headline">¶</a></h3>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="nt">model</span><span class="p">:</span>
-<span class="linenos"> 2</span>  <span class="nt">namefile</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">tf.nam</span>
-<span class="linenos"> 3</span>  <span class="nt">model_ws</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">tylerforks/</span>
-<span class="linenos"> 4</span><span class="nt">flowlines</span><span class="p">:</span>
-<span class="linenos"> 5</span>  <span class="nt">nhdplus_paths</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">NHDPlus/</span>
-<span class="linenos"> 6</span><span class="nt">dem</span><span class="p">:</span>
-<span class="linenos"> 7</span>  <span class="nt">filename</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">dem_26715.tif</span>
-<span class="linenos"> 8</span>  <span class="nt">elevation_units</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">meters</span>
-<span class="linenos"> 9</span><span class="nt">options</span><span class="p">:</span>
-<span class="linenos">10</span>  <span class="nt">active_area</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">active_area.shp</span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="nt">model</span><span class="p">:</span><span class="w"></span>
+<span class="linenos"> 2</span><span class="w">  </span><span class="nt">namefile</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tf.nam</span><span class="w"></span>
+<span class="linenos"> 3</span><span class="w">  </span><span class="nt">model_ws</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tylerforks/</span><span class="w"></span>
+<span class="linenos"> 4</span><span class="nt">flowlines</span><span class="p">:</span><span class="w"></span>
+<span class="linenos"> 5</span><span class="w">  </span><span class="nt">nhdplus_paths</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NHDPlus/</span><span class="w"></span>
+<span class="linenos"> 6</span><span class="nt">dem</span><span class="p">:</span><span class="w"></span>
+<span class="linenos"> 7</span><span class="w">  </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dem_26715.tif</span><span class="w"></span>
+<span class="linenos"> 8</span><span class="w">  </span><span class="nt">elevation_units</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">meters</span><span class="w"></span>
+<span class="linenos"> 9</span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="linenos">10</span><span class="w">  </span><span class="nt">active_area</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">active_area.shp</span><span class="w"></span>
 </pre></div>
 </div>
 <p>In the second configuration file, no model is specified, so a package version, name, output path and length units are specified. The model grid is specified from a shapefile that has attribute fields indicating the row, column location of each cell. NHPlus data a specified as individual files.</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="nt">package_version</span><span class="p">:</span> <span class="s">&#39;mfnwt&#39;</span>
-<span class="linenos"> 2</span><span class="nt">package_name</span><span class="p">:</span> <span class="s">&#39;tf&#39;</span>
-<span class="linenos"> 3</span><span class="nt">output_path</span><span class="p">:</span> <span class="s">&#39;.&#39;</span>
-<span class="linenos"> 4</span><span class="nt">modelgrid</span><span class="p">:</span>
-<span class="linenos"> 5</span>  <span class="nt">shapefile</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">grid.shp</span>
-<span class="linenos"> 6</span>  <span class="nt">icol</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">i</span>  <span class="c1"># attribute field with row numbers</span>
-<span class="linenos"> 7</span>  <span class="nt">jcol</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">j</span>  <span class="c1"># attribute field with column numbers</span>
-<span class="linenos"> 8</span><span class="nt">flowlines</span><span class="p">:</span>
-<span class="linenos"> 9</span>  <span class="nt">NHDFlowlines</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">NHDPlus/NHDSnapshot/Hydrography/NHDFlowline.shp</span>
-<span class="linenos">10</span>  <span class="nt">PlusFlowlineVAA</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">NHDPlus/NHDPlusAttributes/PlusFlowlineVAA.dbf</span>
-<span class="linenos">11</span>  <span class="nt">PlusFlow</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">NHDPlus/NHDPlusAttributes/PlusFlow.dbf</span>
-<span class="linenos">12</span>  <span class="nt">elevslope</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">NHDPlus/NHDPlusAttributes/elevslope.dbf</span>
-<span class="linenos">13</span><span class="nt">dem</span><span class="p">:</span>
-<span class="linenos">14</span>  <span class="nt">filename</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">dem_26715.tif</span>
-<span class="linenos">15</span>  <span class="nt">elevation_units</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">meters</span>
-<span class="linenos">16</span>  <span class="nt">buffer_distance</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">50.</span>
-<span class="linenos">17</span><span class="nt">options</span><span class="p">:</span>
-<span class="linenos">18</span>  <span class="nt">model_length_units</span><span class="p">:</span> <span class="s">&#39;feet&#39;</span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="nt">package_version</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;mfnwt&#39;</span><span class="w"></span>
+<span class="linenos"> 2</span><span class="nt">package_name</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;tf&#39;</span><span class="w"></span>
+<span class="linenos"> 3</span><span class="nt">output_path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;.&#39;</span><span class="w"></span>
+<span class="linenos"> 4</span><span class="nt">modelgrid</span><span class="p">:</span><span class="w"></span>
+<span class="linenos"> 5</span><span class="w">  </span><span class="nt">shapefile</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">grid.shp</span><span class="w"></span>
+<span class="linenos"> 6</span><span class="w">  </span><span class="nt">icol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">i</span><span class="w">  </span><span class="c1"># attribute field with row numbers</span><span class="w"></span>
+<span class="linenos"> 7</span><span class="w">  </span><span class="nt">jcol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">j</span><span class="w">  </span><span class="c1"># attribute field with column numbers</span><span class="w"></span>
+<span class="linenos"> 8</span><span class="nt">flowlines</span><span class="p">:</span><span class="w"></span>
+<span class="linenos"> 9</span><span class="w">  </span><span class="nt">NHDFlowlines</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NHDPlus/NHDSnapshot/Hydrography/NHDFlowline.shp</span><span class="w"></span>
+<span class="linenos">10</span><span class="w">  </span><span class="nt">PlusFlowlineVAA</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NHDPlus/NHDPlusAttributes/PlusFlowlineVAA.dbf</span><span class="w"></span>
+<span class="linenos">11</span><span class="w">  </span><span class="nt">PlusFlow</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NHDPlus/NHDPlusAttributes/PlusFlow.dbf</span><span class="w"></span>
+<span class="linenos">12</span><span class="w">  </span><span class="nt">elevslope</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NHDPlus/NHDPlusAttributes/elevslope.dbf</span><span class="w"></span>
+<span class="linenos">13</span><span class="nt">dem</span><span class="p">:</span><span class="w"></span>
+<span class="linenos">14</span><span class="w">  </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dem_26715.tif</span><span class="w"></span>
+<span class="linenos">15</span><span class="w">  </span><span class="nt">elevation_units</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">meters</span><span class="w"></span>
+<span class="linenos">16</span><span class="w">  </span><span class="nt">buffer_distance</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">50.</span><span class="w"></span>
+<span class="linenos">17</span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="linenos">18</span><span class="w">  </span><span class="nt">model_length_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span><span class="w"></span>
 </pre></div>
 </div>
 <p>Either of these configuration files can then be used with a python script similar to the following:</p>
@@ -307,7 +307,7 @@
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Dec 31, 2021.
+      <span class="lastupdated">Last updated on Jan 23, 2022.
       </span></p>
   </div>
 
