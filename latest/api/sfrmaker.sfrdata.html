@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>The SFRData Module &mdash; SFRmaker 0.8.0.post27.dev0+gd3f76c9 documentation</title>
+  <title>The SFRData Module &mdash; SFRmaker 0.9.1.post10.dev0+g4b87d29 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
@@ -35,7 +35,7 @@
             <a href="../index.html" class="icon icon-home"> SFRmaker
           </a>
               <div class="version">
-                0.8.0.post27.dev0+gd3f76c9
+                0.9.1.post10.dev0+g4b87d29
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -581,7 +581,7 @@ Uses the segment routing specified for the first stress period to route reaches 
 
 <dl class="py method">
 <dt class="sig sig-object py" id="sfrmaker.sfrdata.SFRData.set_streambed_top_elevations_from_dem">
-<span class="sig-name descname"><span class="pre">set_streambed_top_elevations_from_dem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elevation_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dem</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dem_z_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'buffers'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/sfrdata.html#SFRData.set_streambed_top_elevations_from_dem"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.sfrdata.SFRData.set_streambed_top_elevations_from_dem" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">set_streambed_top_elevations_from_dem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elevation_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dem</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'buffers'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/sfrdata.html#SFRData.set_streambed_top_elevations_from_dem"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.sfrdata.SFRData.set_streambed_top_elevations_from_dem" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set streambed top elevations from a DEM raster.
 Runs sfrdata.sample_reach_elevations</p>
 <dl class="field-list simple">
@@ -672,7 +672,7 @@ by default None</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><dl>
-<dt><strong>gag</strong><span class="classifier"><a class="reference external" href="https://flopy.readthedocs.io/en/latest/source/flopy.modflow.mfgage.html#flopy.modflow.mfgage.ModflowGage" title="(in flopy Documentation v3.3.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">flopy.modflow.mfgage.ModflowGage</span></code></a> instance</span></dt><dd></dd>
+<dt><strong>gag</strong><span class="classifier"><a class="reference external" href="https://flopy.readthedocs.io/en/latest/source/flopy.modflow.mfgage.html#flopy.modflow.mfgage.ModflowGage" title="(in flopy Documentation v3.3.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">flopy.modflow.mfgage.ModflowGage</span></code></a> instance</span></dt><dd></dd>
 </dl>
 </dd>
 </dl>
@@ -691,7 +691,7 @@ by default None</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><dl>
 <dt><strong>filename</strong><span class="classifier">str, optional</span></dt><dd><p>File name for SFR package. By default None, in which
-case the filename of the attached <a class="reference external" href="https://flopy.readthedocs.io/en/latest/source/flopy.modflow.mfsfr2.html#flopy.modflow.mfsfr2.ModflowSfr2" title="(in flopy Documentation v3.3.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">flopy.modflow.mfsfr2.ModflowSfr2</span></code></a> instance
+case the filename of the attached <a class="reference external" href="https://flopy.readthedocs.io/en/latest/source/flopy.modflow.mfsfr2.html#flopy.modflow.mfsfr2.ModflowSfr2" title="(in flopy Documentation v3.3.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">flopy.modflow.mfsfr2.ModflowSfr2</span></code></a> instance
 (<code class="docutils literal notranslate"><span class="pre">SFRData.modflow_sfr2.fn_path</span></code>) is used.</p>
 </dd>
 <dt><strong>version</strong><span class="classifier">str, optional, {‘mf2005’, ‘mfnwt’, ‘mf6’}</span></dt><dd><p>MODFLOW version for the SFR package, by default ‘mf2005’</p>
@@ -769,7 +769,7 @@ and <a class="reference internal" href="#sfrmaker.sfrdata.SFRData.period_data" t
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Dec 09, 2021.
+      <span class="lastupdated">Last updated on Apr 11, 2022.
       </span></p>
   </div>
 

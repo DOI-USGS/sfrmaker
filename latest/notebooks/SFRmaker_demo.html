@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Basic usage of SFRmaker in a scripting context &mdash; SFRmaker 0.8.0.post27.dev0+gd3f76c9 documentation</title>
+  <title>Basic usage of SFRmaker in a scripting context &mdash; SFRmaker 0.9.1.post10.dev0+g4b87d29 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
@@ -20,8 +20,8 @@
         <script src="../_static/clipboard.min.js"></script>
         <script src="../_static/copybutton.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
         <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -37,7 +37,7 @@
             <a href="../index.html" class="icon icon-home"> SFRmaker
           </a>
               <div class="version">
-                0.8.0.post27.dev0+gd3f76c9
+                0.9.1.post10.dev0+g4b87d29
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -330,7 +330,7 @@ div.nboutput.container div.output_area > div[class^='highlight']{
 }
 
 /* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
-.prompt a.copybtn {
+.prompt .copybtn {
     display: none;
 }
 
@@ -397,8 +397,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">flopy</span>
 <span class="kn">import</span> <span class="nn">sfrmaker</span>
@@ -415,8 +414,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">NHDPlus_paths</span> <span class="o">=</span> <span class="s1">&#39;../tylerforks/NHDPlus/&#39;</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">NHDPlus_paths</span> <span class="o">=</span> <span class="s1">&#39;../tylerforks/NHDPlus/&#39;</span>
 </pre></div>
 </div>
 </div>
@@ -425,8 +423,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">NHDPlus_paths_list</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;/NHDPlusGL/NHDPlus04/&#39;</span><span class="p">,</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">NHDPlus_paths_list</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;/NHDPlusGL/NHDPlus04/&#39;</span><span class="p">,</span>
                       <span class="s1">&#39;/NHDPlusMS/NHDPlus07/&#39;</span><span class="p">]</span>
 </pre></div>
 </div>
@@ -441,8 +438,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">lns</span> <span class="o">=</span> <span class="n">sfrmaker</span><span class="o">.</span><span class="n">Lines</span><span class="o">.</span><span class="n">from_nhdplus_v2</span><span class="p">(</span><span class="n">NHDPlus_paths</span><span class="o">=</span><span class="s1">&#39;../tylerforks/NHDPlus/&#39;</span><span class="p">,</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">lns</span> <span class="o">=</span> <span class="n">sfrmaker</span><span class="o">.</span><span class="n">Lines</span><span class="o">.</span><span class="n">from_nhdplus_v2</span><span class="p">(</span><span class="n">NHDPlus_paths</span><span class="o">=</span><span class="s1">&#39;../tylerforks/NHDPlus/&#39;</span><span class="p">,</span>
                             <span class="nb">filter</span><span class="o">=</span><span class="s1">&#39;../tylerforks/grid.shp&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -470,7 +466,7 @@ reading ../tylerforks/NHDPlus/NHDPlusAttributes/PlusFlow.dbf...
 reading ../tylerforks/NHDPlus/NHDPlusAttributes/elevslope.dbf...
 --&gt; building dataframe... (may take a while for large shapefiles)
 
-load finished in 0.08s
+load finished in 0.28s
 
 Getting routing information from NHDPlus Plusflow table...
 finished in 0.04s
@@ -482,8 +478,7 @@ finished in 0.04s
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">lines</span> <span class="o">=</span> <span class="n">sfrmaker</span><span class="o">.</span><span class="n">Lines</span><span class="o">.</span><span class="n">from_nhdplus_v2</span><span class="p">(</span><span class="n">NHDFlowlines</span><span class="o">=</span><span class="s1">&#39;../tylerforks/NHDPlus/NHDSnapshot/Hydrography/NHDFlowline.shp&#39;</span><span class="p">,</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">lines</span> <span class="o">=</span> <span class="n">sfrmaker</span><span class="o">.</span><span class="n">Lines</span><span class="o">.</span><span class="n">from_nhdplus_v2</span><span class="p">(</span><span class="n">NHDFlowlines</span><span class="o">=</span><span class="s1">&#39;../tylerforks/NHDPlus/NHDSnapshot/Hydrography/NHDFlowline.shp&#39;</span><span class="p">,</span>
                                        <span class="n">PlusFlowlineVAA</span><span class="o">=</span><span class="s1">&#39;../tylerforks/NHDPlus/NHDPlusAttributes/PlusFlowlineVAA.dbf&#39;</span><span class="p">,</span>
                                        <span class="n">PlusFlow</span><span class="o">=</span><span class="s1">&#39;../tylerforks/NHDPlus/NHDPlusAttributes/PlusFlow.dbf&#39;</span><span class="p">,</span>
                                        <span class="n">elevslope</span><span class="o">=</span><span class="s1">&#39;../tylerforks/NHDPlus/NHDPlusAttributes/elevslope.dbf&#39;</span><span class="p">,</span>
@@ -512,10 +507,10 @@ reading ../tylerforks/NHDPlus/NHDPlusAttributes/PlusFlow.dbf...
 reading ../tylerforks/NHDPlus/NHDPlusAttributes/elevslope.dbf...
 --&gt; building dataframe... (may take a while for large shapefiles)
 
-load finished in 0.04s
+load finished in 0.07s
 
 Getting routing information from NHDPlus Plusflow table...
-finished in 0.04s
+finished in 0.03s
 
 </pre></div></div>
 </div>
@@ -527,8 +522,7 @@ finished in 0.04s
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">custom_lines</span> <span class="o">=</span> <span class="n">sfrmaker</span><span class="o">.</span><span class="n">Lines</span><span class="o">.</span><span class="n">from_shapefile</span><span class="p">(</span><span class="n">shapefile</span><span class="o">=</span><span class="s1">&#39;../meras/flowlines.shp&#39;</span><span class="p">,</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">custom_lines</span> <span class="o">=</span> <span class="n">sfrmaker</span><span class="o">.</span><span class="n">Lines</span><span class="o">.</span><span class="n">from_shapefile</span><span class="p">(</span><span class="n">shapefile</span><span class="o">=</span><span class="s1">&#39;../meras/flowlines.shp&#39;</span><span class="p">,</span>
                                              <span class="n">id_column</span><span class="o">=</span><span class="s1">&#39;COMID&#39;</span><span class="p">,</span>  <span class="c1"># arguments to sfrmaker.Lines.from_shapefile</span>
                                              <span class="n">routing_column</span><span class="o">=</span><span class="s1">&#39;tocomid&#39;</span><span class="p">,</span>
                                              <span class="n">width1_column</span><span class="o">=</span><span class="s1">&#39;width1&#39;</span><span class="p">,</span>
@@ -562,8 +556,7 @@ reading ../meras/flowlines.shp...
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">delr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">250</span> <span class="o">*</span> <span class="mf">0.3048</span><span class="p">]</span> <span class="o">*</span> <span class="mi">160</span><span class="p">)</span>  <span class="c1"># cell spacing along a row</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">delr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">250</span> <span class="o">*</span> <span class="mf">0.3048</span><span class="p">]</span> <span class="o">*</span> <span class="mi">160</span><span class="p">)</span>  <span class="c1"># cell spacing along a row</span>
 <span class="n">delc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">250</span> <span class="o">*</span> <span class="mf">0.3048</span><span class="p">]</span> <span class="o">*</span> <span class="mi">111</span><span class="p">)</span>  <span class="c1"># cell spacing along a column</span>
 
 <span class="n">flopy_grid</span> <span class="o">=</span> <span class="n">flopy</span><span class="o">.</span><span class="n">discretization</span><span class="o">.</span><span class="n">StructuredGrid</span><span class="p">(</span><span class="n">delr</span><span class="o">=</span><span class="n">delr</span><span class="p">,</span> <span class="n">delc</span><span class="o">=</span><span class="n">delc</span><span class="p">,</span>
@@ -584,8 +577,7 @@ reading ../meras/flowlines.shp...
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">grid</span> <span class="o">=</span> <span class="n">sfrmaker</span><span class="o">.</span><span class="n">StructuredGrid</span><span class="o">.</span><span class="n">from_shapefile</span><span class="p">(</span><span class="n">shapefile</span><span class="o">=</span><span class="s1">&#39;../tylerforks/grid.shp&#39;</span><span class="p">,</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">grid</span> <span class="o">=</span> <span class="n">sfrmaker</span><span class="o">.</span><span class="n">StructuredGrid</span><span class="o">.</span><span class="n">from_shapefile</span><span class="p">(</span><span class="n">shapefile</span><span class="o">=</span><span class="s1">&#39;../tylerforks/grid.shp&#39;</span><span class="p">,</span>
                                               <span class="n">icol</span><span class="o">=</span><span class="s1">&#39;i&#39;</span><span class="p">,</span>  <span class="c1"># attribute field with row information</span>
                                               <span class="n">jcol</span><span class="o">=</span><span class="s1">&#39;j&#39;</span><span class="p">,</span>  <span class="c1"># attribute field with column information</span>
                                               <span class="n">active_area</span><span class="o">=</span><span class="s1">&#39;../tylerforks/active_area.shp&#39;</span>
@@ -611,8 +603,7 @@ reading ../tylerforks/active_area.shp...
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">isfr</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="s1">&#39;nearest&#39;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">isfr</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="s1">&#39;nearest&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -622,7 +613,7 @@ reading ../tylerforks/active_area.shp...
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.image.AxesImage at 0x7effebcdc3d0&gt;
+&lt;matplotlib.image.AxesImage at 0x7f68bbd116c0&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -644,8 +635,7 @@ reading ../tylerforks/active_area.shp...
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">m</span> <span class="o">=</span> <span class="n">flopy</span><span class="o">.</span><span class="n">modflow</span><span class="o">.</span><span class="n">Modflow</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">&#39;tf.nam&#39;</span><span class="p">,</span> <span class="n">model_ws</span><span class="o">=</span><span class="s1">&#39;../tylerforks/tylerforks&#39;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">m</span> <span class="o">=</span> <span class="n">flopy</span><span class="o">.</span><span class="n">modflow</span><span class="o">.</span><span class="n">Modflow</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">&#39;tf.nam&#39;</span><span class="p">,</span> <span class="n">model_ws</span><span class="o">=</span><span class="s1">&#39;../tylerforks/tylerforks&#39;</span><span class="p">)</span>
 <span class="n">m</span>
 </pre></div>
 </div>
@@ -668,8 +658,7 @@ MODFLOW 5 layer(s) 111 row(s) 160 column(s) 1 stress period(s)
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">sfrdata</span> <span class="o">=</span> <span class="n">lines</span><span class="o">.</span><span class="n">to_sfr</span><span class="p">(</span><span class="n">grid</span><span class="o">=</span><span class="n">flopy_grid</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">m</span><span class="p">,</span> <span class="n">model_length_units</span><span class="o">=</span><span class="s1">&#39;feet&#39;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sfrdata</span> <span class="o">=</span> <span class="n">lines</span><span class="o">.</span><span class="n">to_sfr</span><span class="p">(</span><span class="n">grid</span><span class="o">=</span><span class="n">flopy_grid</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">m</span><span class="p">,</span> <span class="n">model_length_units</span><span class="o">=</span><span class="s1">&#39;feet&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -679,12 +668,12 @@ MODFLOW 5 layer(s) 111 row(s) 160 column(s) 1 stress period(s)
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 
-SFRmaker version 0.8.0.post27.dev0+gd3f76c9
+SFRmaker version 0.9.1.post10.dev0+g4b87d29
 
 Creating sfr dataset...
 
 Creating grid class instance from flopy Grid instance...
-grid class created in 0.34s
+grid class created in 0.31s
 
 Model grid information
 structured grid
@@ -715,11 +704,11 @@ finished in 0.01s
 Intersecting 42 flowlines with 17,760 grid cells...
 
 Building spatial index...
-finished in 1.88s
+finished in 1.91s
 
 Intersecting 42 features...
 42
-finished in 0.11s
+finished in 0.10s
 
 Setting up reach data... (may take a few minutes for large grids)
 finished in 0.30s
@@ -757,8 +746,7 @@ Time to create sfr dataset: 2.81s
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">sfrdata</span><span class="o">.</span><span class="n">reach_data</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sfrdata</span><span class="o">.</span><span class="n">reach_data</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -938,8 +926,7 @@ Time to create sfr dataset: 2.81s
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">sfrdata</span><span class="o">.</span><span class="n">segment_data</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sfrdata</span><span class="o">.</span><span class="n">segment_data</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -1123,8 +1110,8 @@ Time to create sfr dataset: 2.81s
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">sfrdata</span><span class="o">.</span><span class="n">set_streambed_top_elevations_from_dem</span><span class="p">(</span><span class="s1">&#39;../tylerforks/dem_26715.tif&#39;</span><span class="p">,</span> <span class="n">dem_z_units</span><span class="o">=</span><span class="s1">&#39;meters&#39;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sfrdata</span><span class="o">.</span><span class="n">set_streambed_top_elevations_from_dem</span><span class="p">(</span><span class="s1">&#39;../tylerforks/dem_26715.tif&#39;</span><span class="p">,</span>
+                                              <span class="n">elevation_units</span><span class="o">=</span><span class="s1">&#39;meters&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1134,11 +1121,11 @@ Time to create sfr dataset: 2.81s
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 running rasterstats.zonal_stats on buffered LineStrings...
-finished in 39.84s
+finished in 17.00s
 
 
 Smoothing elevations...
-finished in 0.16s
+finished in 0.15s
 </pre></div></div>
 </div>
 </section>
@@ -1149,8 +1136,7 @@ finished in 0.16s
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">sfrdata</span><span class="o">.</span><span class="n">assign_layers</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sfrdata</span><span class="o">.</span><span class="n">assign_layers</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -1158,8 +1144,7 @@ finished in 0.16s
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">sfrdata</span><span class="o">.</span><span class="n">reach_data</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sfrdata</span><span class="o">.</span><span class="n">reach_data</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -1349,8 +1334,7 @@ DEM and other data in a GIS environment. * <strong>suprious slopes:</strong> slo
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">sfrdata</span><span class="o">.</span><span class="n">run_diagnostics</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sfrdata</span><span class="o">.</span><span class="n">run_diagnostics</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1360,7 +1344,7 @@ DEM and other data in a GIS environment. * <strong>suprious slopes:</strong> slo
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 
-Running Flopy v. 3.3.5 diagnostics...
+Running Flopy v. 3.3.6 diagnostics...
 wrote tf_SFR.chk
 </pre></div></div>
 </div>
@@ -1372,8 +1356,7 @@ wrote tf_SFR.chk
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">sfrdata</span><span class="o">.</span><span class="n">write_package</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sfrdata</span><span class="o">.</span><span class="n">write_package</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -1382,9 +1365,9 @@ wrote tf_SFR.chk
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-SFRmaker v. 0.8.0.post27.dev0+gd3f76c9
+SFRmaker v. 0.9.1.post10.dev0+g4b87d29
 
-Running Flopy v. 3.3.5 diagnostics...
+Running Flopy v. 3.3.6 diagnostics...
 passed.
 
 Checking for continuity in segment and reach numbering...
@@ -1512,8 +1495,7 @@ wrote ../tylerforks/tylerforks/tf.sfr.
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">sfrdata</span><span class="o">.</span><span class="n">write_package</span><span class="p">(</span><span class="n">version</span><span class="o">=</span><span class="s1">&#39;mf6&#39;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sfrdata</span><span class="o">.</span><span class="n">write_package</span><span class="p">(</span><span class="n">version</span><span class="o">=</span><span class="s1">&#39;mf6&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1522,9 +1504,9 @@ wrote ../tylerforks/tylerforks/tf.sfr.
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-SFRmaker v. 0.8.0.post27.dev0+gd3f76c9
+SFRmaker v. 0.9.1.post10.dev0+g4b87d29
 
-Running Flopy v. 3.3.5 diagnostics...
+Running Flopy v. 3.3.6 diagnostics...
 passed.
 
 Checking for continuity in segment and reach numbering...
@@ -1654,8 +1636,7 @@ wrote ../tylerforks/tylerforks/tf.sfr
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">sfrdata</span><span class="o">.</span><span class="n">write_tables</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sfrdata</span><span class="o">.</span><span class="n">write_tables</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -1673,8 +1654,7 @@ wrote tables/tf_sfr_segment_data.csv
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">sfrdata2</span> <span class="o">=</span> <span class="n">sfrmaker</span><span class="o">.</span><span class="n">SFRData</span><span class="o">.</span><span class="n">from_tables</span><span class="p">(</span><span class="s1">&#39;tables/tf_sfr_reach_data.csv&#39;</span><span class="p">,</span> <span class="s1">&#39;tables/tf_sfr_segment_data.csv&#39;</span><span class="p">,</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sfrdata2</span> <span class="o">=</span> <span class="n">sfrmaker</span><span class="o">.</span><span class="n">SFRData</span><span class="o">.</span><span class="n">from_tables</span><span class="p">(</span><span class="s1">&#39;tables/tf_sfr_reach_data.csv&#39;</span><span class="p">,</span> <span class="s1">&#39;tables/tf_sfr_segment_data.csv&#39;</span><span class="p">,</span>
                                         <span class="n">grid</span><span class="o">=</span><span class="n">grid</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -1705,8 +1685,7 @@ active area defined by: isfr array
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">sfrdata</span><span class="o">.</span><span class="n">write_shapefiles</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sfrdata</span><span class="o">.</span><span class="n">write_shapefiles</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -1724,15 +1703,6 @@ No observations to export!
 No non-zero values of flow to export!
 </pre></div></div>
 </div>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>
-</pre></div>
-</div>
-</div>
 </section>
 </section>
 
@@ -1748,7 +1718,7 @@ No non-zero values of flow to export!
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Dec 09, 2021.
+      <span class="lastupdated">Last updated on Apr 11, 2022.
       </span></p>
   </div>
 
