@@ -1,0 +1,356 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "id": "626a5f2f",
+   "metadata": {},
+   "source": [
+    "# Stand-alone tools\n",
+    "Along with the core functionality of the [Lines](../api/sfrmaker.lines.rst#sfrmaker.lines.Lines) and [SFRData](../api/sfrmaker.sfrdata.rst#sfrmaker.sfrdata.SFRData) classes, SFRmaker also has stand-alone tools that may be useful in work related to the SFR package or other model components."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "id": "9ff268d2",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2022-08-01T18:08:24.353179Z",
+     "iopub.status.busy": "2022-08-01T18:08:24.352872Z",
+     "iopub.status.idle": "2022-08-01T18:08:25.757951Z",
+     "shell.execute_reply": "2022-08-01T18:08:25.756835Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "import numpy as np\n",
+    "import pandas as pd\n",
+    "import flopy\n",
+    "import matplotlib.pyplot as plt\n",
+    "import sfrmaker\n",
+    "from sfrmaker.routing import find_path, get_upsegs, make_graph, make_reverse_graph"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "c2430b24",
+   "metadata": {},
+   "source": [
+    "**Set up the Tyler Forks tests model SFR package**  \n",
+    "See [Using SFRmaker in a scripting context](SFRmaker_demo.ipynb) for more details"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "id": "1fde68c1",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2022-08-01T18:08:25.762387Z",
+     "iopub.status.busy": "2022-08-01T18:08:25.761639Z",
+     "iopub.status.idle": "2022-08-01T18:08:28.812665Z",
+     "shell.execute_reply": "2022-08-01T18:08:28.811947Z"
+    },
+    "tags": [
+     "\"hide-output\""
+    ]
+   },
+   "outputs": [],
+   "source": [
+    "%%capture\n",
+    "lns = sfrmaker.Lines.from_nhdplus_v2(NHDPlus_paths='../tylerforks/NHDPlus/',\n",
+    "                            filter='../tylerforks/grid.shp')\n",
+    "m = flopy.modflow.Modflow.load('tf.nam', model_ws='../tylerforks/tylerforks')\n",
+    "mg = flopy.discretization.StructuredGrid(delr=m.dis.delr.array * .3048,  # cell spacing along a row\n",
+    "                                         delc=m.dis.delc.array * .3048,  # cell spacing along a column\n",
+    "                                         xoff=682688, yoff=5139052,  # lower left corner of model grid\n",
+    "                                         angrot=0,  # grid is unrotated\n",
+    "                                         # projected coordinate system of model (UTM NAD27 zone 15 North)\n",
+    "                                         proj4='epsg:26715'\n",
+    "                                         )\n",
+    "sfr = lns.to_sfr(grid=mg, model=m, model_length_units='feet')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "54936b76",
+   "metadata": {},
+   "source": [
+    "## Methods for working with the SFR routing network, or any other directed acyclic graph (DAG)\n",
+    "\n",
+    "* the `sfrmaker.routing.find_path` function to trace a routing path from a given reach or segment to the outlet (or for example in the context of GSFLOW, a cascade path from an HRU to an outlet)\n",
+    "\n",
+    "* the `sfrmaker.routing.get_upsegs` method to get a list of all segments or reaches upstream of a point within the SFR routing network\n",
+    "\n",
+    "\n",
+    "### Create a routing dictionary\n",
+    "* from vectors of to/from nodes, which in this case are the segments\n",
+    "* if the `one_to_many=True` (the default), a set of one or more downstream connections is returned for each node\n",
+    "* if `one_to_many=False`, a single integer representing the downstream connection is returned\n",
+    "* SFRmaker's use of dictionaries to work with DAGs was inspired by [this essay](https://www.python.org/doc/essays/graphs/)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "id": "f5867efe",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2022-08-01T18:08:28.816634Z",
+     "iopub.status.busy": "2022-08-01T18:08:28.816238Z",
+     "iopub.status.idle": "2022-08-01T18:08:28.826199Z",
+     "shell.execute_reply": "2022-08-01T18:08:28.825553Z"
+    }
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "{4}"
+      ]
+     },
+     "execution_count": 3,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "routing = make_graph(sfr.segment_data['nseg'], sfr.segment_data['outseg'])\n",
+    "routing[1]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "id": "edb2d15c",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2022-08-01T18:08:28.832397Z",
+     "iopub.status.busy": "2022-08-01T18:08:28.831980Z",
+     "iopub.status.idle": "2022-08-01T18:08:28.836740Z",
+     "shell.execute_reply": "2022-08-01T18:08:28.836285Z"
+    }
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "4"
+      ]
+     },
+     "execution_count": 4,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "routing = make_graph(sfr.segment_data['nseg'], sfr.segment_data['outseg'], one_to_many=False)\n",
+    "routing[1]"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "6c6f7e91",
+   "metadata": {},
+   "source": [
+    "**The routing dictionary produced by ``make_graph`` can also be reversed:**"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "id": "d4fa3676",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2022-08-01T18:08:28.839432Z",
+     "iopub.status.busy": "2022-08-01T18:08:28.839087Z",
+     "iopub.status.idle": "2022-08-01T18:08:28.843674Z",
+     "shell.execute_reply": "2022-08-01T18:08:28.843050Z"
+    }
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "{1, 2}"
+      ]
+     },
+     "execution_count": 5,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "routing_r = make_reverse_graph(routing)\n",
+    "routing_r[4]"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "7d89ce32",
+   "metadata": {},
+   "source": [
+    "### Finding a path through the routing network\n",
+    "The returned path includes all nodes between the starting point (in this case 1) and the outlet (0)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "id": "a64e5605",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2022-08-01T18:08:28.847005Z",
+     "iopub.status.busy": "2022-08-01T18:08:28.846771Z",
+     "iopub.status.idle": "2022-08-01T18:08:28.851270Z",
+     "shell.execute_reply": "2022-08-01T18:08:28.850669Z"
+    }
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "[1, 4, 6, 10, 14, 26, 42, 0]"
+      ]
+     },
+     "execution_count": 6,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "path = find_path(routing, 1)\n",
+    "path"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "6f07f41c",
+   "metadata": {},
+   "source": [
+    "#### Plotting an elevation profile along a path\n",
+    "This can be useful, for example, when an elevation profile along a stream is desired, or if one wants to map the SFR reach that each HRU ultimately discharges to in a GSFLOW model."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "id": "b2250a66",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2022-08-01T18:08:28.854461Z",
+     "iopub.status.busy": "2022-08-01T18:08:28.854251Z",
+     "iopub.status.idle": "2022-08-01T18:08:28.965147Z",
+     "shell.execute_reply": "2022-08-01T18:08:28.964591Z"
+    }
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "Text(0.5, 0, 'Distance in River miles')"
+      ]
+     },
+     "execution_count": 7,
+     "metadata": {},
+     "output_type": "execute_result"
+    },
+    {
+     "data": {
+      "image/png": "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\n",
+      "text/plain": [
+       "<Figure size 432x288 with 1 Axes>"
+      ]
+     },
+     "metadata": {
+      "needs_background": "light"
+     },
+     "output_type": "display_data"
+    }
+   ],
+   "source": [
+    "reach_data = pd.DataFrame(m.sfr.reach_data)\n",
+    "reach_data.index = reach_data['reachID']\n",
+    "\n",
+    "reach_routing = make_graph(reach_data['reachID'], reach_data['outreach'], one_to_many=False)\n",
+    "path = find_path(reach_routing, 10)\n",
+    "\n",
+    "# leave off the outlet segment (0; which doesn't exist) when getting the elevations\n",
+    "path_reach_data = reach_data.loc[path[:-1]]\n",
+    "elevations = path_reach_data['strtop']\n",
+    "distances_mi = np.cumsum(path_reach_data['rchlen'])/5280  # distance along path in miles\n",
+    "\n",
+    "plt.plot(distances_mi, elevations)\n",
+    "plt.ylabel('Streambed elevation, in feet')\n",
+    "plt.xlabel('Distance in River miles')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "5a321216",
+   "metadata": {},
+   "source": [
+    "### Getting the upstream contributing segments\n",
+    "\n",
+    "The ``get_upsegs`` method takes a reverse routing dictionary (one-to-many) and returns a set of all of the nodes that are upstream of that point. This function is integral to the [streambed elevation smoothing](Streambed_elevation_demo.ipynb) in SFRmaker, and can also be used to aggregate flow components (for example, net groundwater inflow) at a point on the stream network."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "id": "ee910bc5",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2022-08-01T18:08:28.968230Z",
+     "iopub.status.busy": "2022-08-01T18:08:28.967982Z",
+     "iopub.status.idle": "2022-08-01T18:08:28.974991Z",
+     "shell.execute_reply": "2022-08-01T18:08:28.974493Z"
+    }
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "{1, 2, 3, 4, 5, 6, 9, 10, 13, 14, 25, 26}"
+      ]
+     },
+     "execution_count": 8,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "get_upsegs(routing_r, 42)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "db61101f",
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.9.13"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}
