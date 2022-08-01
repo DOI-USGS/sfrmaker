@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>sfrmaker.sfrdata &mdash; SFRmaker 0.9.1.post10.dev0+g706a282 documentation</title>
+  <title>sfrmaker.sfrdata &mdash; SFRmaker 0.9.1.post12.dev0+g0c5d9bf documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
@@ -15,6 +15,7 @@
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
         <script src="../../_static/clipboard.min.js"></script>
         <script src="../../_static/copybutton.js"></script>
@@ -32,7 +33,7 @@
             <a href="../../index.html" class="icon icon-home"> SFRmaker
           </a>
               <div class="version">
-                0.9.1.post10.dev0+g706a282
+                0.9.1.post12.dev0+g0c5d9bf
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -824,6 +825,8 @@
         <span class="c1"># create an sfrmaker.Mf6SFR instance</span>
         <span class="kn">from</span> <span class="nn">.mf5to6</span> <span class="kn">import</span> <span class="n">Mf6SFR</span>
 
+        <span class="c1"># update the ModflowSfr2 instance in case the SFR dataset has changed</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">create_modflow_sfr2</span><span class="p">()</span>
         <span class="n">sfr6</span> <span class="o">=</span> <span class="n">Mf6SFR</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">modflow_sfr2</span><span class="p">)</span>
 
         <span class="c1"># package data</span>
@@ -1092,7 +1095,7 @@
         <span class="k">if</span> <span class="s1">&#39;dem_z_units&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
             <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;set_streambed_top_elevations_from_dem: dem_z_units argument is deprecated. &#39;</span>
                           <span class="s1">&#39;Use elevation_units instead.&#39;</span><span class="p">,</span> <span class="ne">DeprecationWarning</span><span class="p">)</span>
-            <span class="n">elevation_units</span> <span class="o">=</span> <span class="n">dem_z_units</span>
+            <span class="n">elevation_units</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;dem_z_units&#39;</span><span class="p">]</span>
         <span class="n">sampled_elevs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_reach_elevations</span><span class="p">(</span><span class="n">dem</span><span class="o">=</span><span class="n">filename</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span>
                                                      <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">elevation_units</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -1899,7 +1902,7 @@
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Apr 11, 2022.
+      <span class="lastupdated">Last updated on Aug 01, 2022.
       </span></p>
   </div>
 

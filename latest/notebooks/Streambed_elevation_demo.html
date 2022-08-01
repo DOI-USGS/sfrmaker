@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Demonstration of how sfrmaker handles streambed elevations &mdash; SFRmaker 0.9.1.post10.dev0+g706a282 documentation</title>
+  <title>Demonstration of how sfrmaker handles streambed elevations &mdash; SFRmaker 0.9.1.post12.dev0+g0c5d9bf documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
@@ -16,6 +16,7 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/clipboard.min.js"></script>
         <script src="../_static/copybutton.js"></script>
@@ -37,7 +38,7 @@
             <a href="../index.html" class="icon icon-home"> SFRmaker
           </a>
               <div class="version">
-                0.9.1.post10.dev0+g706a282
+                0.9.1.post12.dev0+g0c5d9bf
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -329,6 +330,7 @@ div.nboutput.container div.output_area > div[class^='highlight']{
 }
 
 /* Some additional styling taken form the Jupyter notebook CSS */
+.jp-RenderedHTMLCommon table,
 div.rendered_html table {
   border: none;
   border-collapse: collapse;
@@ -337,10 +339,14 @@ div.rendered_html table {
   font-size: 12px;
   table-layout: fixed;
 }
+.jp-RenderedHTMLCommon thead,
 div.rendered_html thead {
   border-bottom: 1px solid black;
   vertical-align: bottom;
 }
+.jp-RenderedHTMLCommon tr,
+.jp-RenderedHTMLCommon th,
+.jp-RenderedHTMLCommon td,
 div.rendered_html tr,
 div.rendered_html th,
 div.rendered_html td {
@@ -352,12 +358,15 @@ div.rendered_html td {
   max-width: none;
   border: none;
 }
+.jp-RenderedHTMLCommon th,
 div.rendered_html th {
   font-weight: bold;
 }
+.jp-RenderedHTMLCommon tbody tr:nth-child(odd),
 div.rendered_html tbody tr:nth-child(odd) {
   background: #f5f5f5;
 }
+.jp-RenderedHTMLCommon tbody tr:hover,
 div.rendered_html tbody tr:hover {
   background: rgba(66, 165, 245, 0.2);
 }
@@ -385,7 +394,7 @@ div.rendered_html tbody tr:hover {
 }
 </style>
 <section id="Demonstration-of-how-sfrmaker-handles-streambed-elevations">
-<h1>Demonstration of how <code class="docutils literal notranslate"><span class="pre">sfrmaker</span></code> handles streambed elevations<a class="headerlink" href="#Demonstration-of-how-sfrmaker-handles-streambed-elevations" title="Permalink to this headline">¶</a></h1>
+<h1>Demonstration of how <code class="docutils literal notranslate"><span class="pre">sfrmaker</span></code> handles streambed elevations<a class="headerlink" href="#Demonstration-of-how-sfrmaker-handles-streambed-elevations" title="Permalink to this heading">¶</a></h1>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
@@ -403,7 +412,7 @@ div.rendered_html tbody tr:hover {
 </div>
 </div>
 <section id="Run-the-first-part-of-the-Tyler-Forks-example-problem-to-get-an-SFRData-instance">
-<h2>Run the first part of the Tyler Forks example problem to get an <code class="docutils literal notranslate"><span class="pre">SFRData</span></code> instance<a class="headerlink" href="#Run-the-first-part-of-the-Tyler-Forks-example-problem-to-get-an-SFRData-instance" title="Permalink to this headline">¶</a></h2>
+<h2>Run the first part of the Tyler Forks example problem to get an <code class="docutils literal notranslate"><span class="pre">SFRData</span></code> instance<a class="headerlink" href="#Run-the-first-part-of-the-Tyler-Forks-example-problem-to-get-an-SFRData-instance" title="Permalink to this heading">¶</a></h2>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
@@ -472,18 +481,18 @@ reading ../tylerforks/NHDPlus/NHDPlusAttributes/PlusFlow.dbf...
 reading ../tylerforks/NHDPlus/NHDPlusAttributes/elevslope.dbf...
 --&gt; building dataframe... (may take a while for large shapefiles)
 
-load finished in 0.25s
+load finished in 0.08s
 
 Getting routing information from NHDPlus Plusflow table...
 finished in 0.03s
 
 
-SFRmaker version 0.9.1.post10.dev0+g706a282
+SFRmaker version 0.9.1.post12.dev0+g0c5d9bf
 
 Creating sfr dataset...
 
 Creating grid class instance from flopy Grid instance...
-grid class created in 0.36s
+grid class created in 0.41s
 
 Model grid information
 structured grid
@@ -514,14 +523,14 @@ finished in 0.01s
 Intersecting 42 flowlines with 17,760 grid cells...
 
 Building spatial index...
-finished in 1.90s
+finished in 1.92s
 
 Intersecting 42 features...
 42
 finished in 0.09s
 
 Setting up reach data... (may take a few minutes for large grids)
-finished in 0.30s
+finished in 0.29s
 
 Computing widths...
 
@@ -543,20 +552,20 @@ bounds: 682688.00, 5139052.00, 694880.00, 5147510.20
 active area defined by: all cells
 
 
-Time to create sfr dataset: 2.83s
+Time to create sfr dataset: 2.87s
 
 </pre></div></div>
 </div>
 </section>
 <section id="Sample-elevations-from-the-DEM">
-<h2>Sample elevations from the DEM<a class="headerlink" href="#Sample-elevations-from-the-DEM" title="Permalink to this headline">¶</a></h2>
+<h2>Sample elevations from the DEM<a class="headerlink" href="#Sample-elevations-from-the-DEM" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>the <strong>buffers</strong> method draws a buffer around each LineString representing a reach (default=100m), and then gets the minimum DEM elevation within that buffer, using the <strong>``rasterstats``</strong> package</p></li>
 <li><p>alternatively, the <strong>``cell polygons``</strong> method would do the same thing using the model cell polygons instead to represent the reaches</p></li>
 <li><p>get results with and without smoothing.</p></li>
 </ul>
 <section id="pseudo-code-for-the-smoothing-algoritm:">
-<h3>pseudo code for the smoothing algoritm:<a class="headerlink" href="#pseudo-code-for-the-smoothing-algoritm:" title="Permalink to this headline">¶</a></h3>
+<h3>pseudo code for the smoothing algoritm:<a class="headerlink" href="#pseudo-code-for-the-smoothing-algoritm:" title="Permalink to this heading">¶</a></h3>
 <div class="highlight-none notranslate"><div class="highlight"><pre><span></span>Starting at the outlets to the stream network, list the reaches at each level (reaches that route to an outlet, reaches that route to reaches that route to an outlet, etc...)
 For each level:
     For each stream reach within the level:
@@ -579,20 +588,20 @@ For each level:
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 running rasterstats.zonal_stats on buffered LineStrings...
-finished in 14.78s
+finished in 6.00s
 
 running rasterstats.zonal_stats on buffered LineStrings...
-finished in 14.79s
+finished in 5.97s
 
 
 Smoothing elevations...
-finished in 0.15s
+finished in 0.13s
 </pre></div></div>
 </div>
 </section>
 </section>
 <section id="Make-comparison-plots-of-the-elevations-in-each-segment">
-<h2>Make comparison plots of the elevations in each segment<a class="headerlink" href="#Make-comparison-plots-of-the-elevations-in-each-segment" title="Permalink to this headline">¶</a></h2>
+<h2>Make comparison plots of the elevations in each segment<a class="headerlink" href="#Make-comparison-plots-of-the-elevations-in-each-segment" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>model_top: elevations sampled from the DEM at the cell centers</p></li>
 <li><p>nhdplus_elevations: reach elevations linearly interpolated from original COMID end elevations in NHDPlus</p></li>
@@ -600,7 +609,7 @@ finished in 0.15s
 <li><p>smooth_sampled_elevs: minimum DEM elevations within each buffered LineString with smoothing applied</p></li>
 </ul>
 <section id="Note:">
-<h3>Note:<a class="headerlink" href="#Note:" title="Permalink to this headline">¶</a></h3>
+<h3>Note:<a class="headerlink" href="#Note:" title="Permalink to this heading">¶</a></h3>
 <p>One of the segments has NHDPlus elevations that are much higher than the model top or DEM. This is due to the segment originating outside of the model domain, which means the COMID start elevation from NHDPlus is invalid.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
@@ -960,7 +969,7 @@ finished in 0.15s
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Apr 11, 2022.
+      <span class="lastupdated">Last updated on Aug 01, 2022.
       </span></p>
   </div>
 
