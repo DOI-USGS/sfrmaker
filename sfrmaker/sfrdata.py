@@ -727,6 +727,8 @@ class SFRData(DataPackage):
         # create an sfrmaker.Mf6SFR instance
         from .mf5to6 import Mf6SFR
 
+        # update the ModflowSfr2 instance in case the SFR dataset has changed
+        self.create_modflow_sfr2()
         sfr6 = Mf6SFR(self.modflow_sfr2)
 
         # package data
@@ -995,7 +997,7 @@ class SFRData(DataPackage):
         if 'dem_z_units' in kwargs:
             warnings.warn('set_streambed_top_elevations_from_dem: dem_z_units argument is deprecated. '
                           'Use elevation_units instead.', DeprecationWarning)
-            elevation_units = dem_z_units
+            elevation_units = kwargs['dem_z_units']
         sampled_elevs = self.sample_reach_elevations(dem=filename, method=method,
                                                      **kwargs)
         if elevation_units is None:
