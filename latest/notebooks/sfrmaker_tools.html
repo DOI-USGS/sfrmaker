@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Stand-alone tools &mdash; SFRmaker 0.9.1.post10.dev0+g4b87d29 documentation</title>
+  <title>Stand-alone tools &mdash; SFRmaker 0.9.1.post12.dev0+g60ab2e5 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
@@ -16,6 +16,7 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/clipboard.min.js"></script>
         <script src="../_static/copybutton.js"></script>
@@ -37,7 +38,7 @@
             <a href="../index.html" class="icon icon-home"> SFRmaker
           </a>
               <div class="version">
-                0.9.1.post10.dev0+g4b87d29
+                0.9.1.post12.dev0+g60ab2e5
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -325,6 +326,7 @@ div.nboutput.container div.output_area > div[class^='highlight']{
 }
 
 /* Some additional styling taken form the Jupyter notebook CSS */
+.jp-RenderedHTMLCommon table,
 div.rendered_html table {
   border: none;
   border-collapse: collapse;
@@ -333,10 +335,14 @@ div.rendered_html table {
   font-size: 12px;
   table-layout: fixed;
 }
+.jp-RenderedHTMLCommon thead,
 div.rendered_html thead {
   border-bottom: 1px solid black;
   vertical-align: bottom;
 }
+.jp-RenderedHTMLCommon tr,
+.jp-RenderedHTMLCommon th,
+.jp-RenderedHTMLCommon td,
 div.rendered_html tr,
 div.rendered_html th,
 div.rendered_html td {
@@ -348,12 +354,15 @@ div.rendered_html td {
   max-width: none;
   border: none;
 }
+.jp-RenderedHTMLCommon th,
 div.rendered_html th {
   font-weight: bold;
 }
+.jp-RenderedHTMLCommon tbody tr:nth-child(odd),
 div.rendered_html tbody tr:nth-child(odd) {
   background: #f5f5f5;
 }
+.jp-RenderedHTMLCommon tbody tr:hover,
 div.rendered_html tbody tr:hover {
   background: rgba(66, 165, 245, 0.2);
 }
@@ -381,7 +390,7 @@ div.rendered_html tbody tr:hover {
 }
 </style>
 <section id="Stand-alone-tools">
-<h1>Stand-alone tools<a class="headerlink" href="#Stand-alone-tools" title="Permalink to this headline">¶</a></h1>
+<h1>Stand-alone tools<a class="headerlink" href="#Stand-alone-tools" title="Permalink to this heading">¶</a></h1>
 <p>Along with the core functionality of the <a class="reference internal" href="../api/sfrmaker.lines.html#sfrmaker.lines.Lines"><span class="std std-ref">Lines</span></a> and <a class="reference internal" href="../api/sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData"><span class="std std-ref">SFRData</span></a> classes, SFRmaker also has stand-alone tools that may be useful in work related to the SFR package or other model components.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
@@ -420,13 +429,13 @@ div.rendered_html tbody tr:hover {
 </div>
 </div>
 <section id="Methods-for-working-with-the-SFR-routing-network,-or-any-other-directed-acyclic-graph-(DAG)">
-<h2>Methods for working with the SFR routing network, or any other directed acyclic graph (DAG)<a class="headerlink" href="#Methods-for-working-with-the-SFR-routing-network,-or-any-other-directed-acyclic-graph-(DAG)" title="Permalink to this headline">¶</a></h2>
+<h2>Methods for working with the SFR routing network, or any other directed acyclic graph (DAG)<a class="headerlink" href="#Methods-for-working-with-the-SFR-routing-network,-or-any-other-directed-acyclic-graph-(DAG)" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>the <code class="docutils literal notranslate"><span class="pre">sfrmaker.routing.find_path</span></code> function to trace a routing path from a given reach or segment to the outlet (or for example in the context of GSFLOW, a cascade path from an HRU to an outlet)</p></li>
 <li><p>the <code class="docutils literal notranslate"><span class="pre">sfrmaker.routing.get_upsegs</span></code> method to get a list of all segments or reaches upstream of a point within the SFR routing network</p></li>
 </ul>
 <section id="Create-a-routing-dictionary">
-<h3>Create a routing dictionary<a class="headerlink" href="#Create-a-routing-dictionary" title="Permalink to this headline">¶</a></h3>
+<h3>Create a routing dictionary<a class="headerlink" href="#Create-a-routing-dictionary" title="Permalink to this heading">¶</a></h3>
 <ul class="simple">
 <li><p>from vectors of to/from nodes, which in this case are the segments</p></li>
 <li><p>if the <code class="docutils literal notranslate"><span class="pre">one_to_many=True</span></code> (the default), a set of one or more downstream connections is returned for each node</p></li>
@@ -490,7 +499,7 @@ div.rendered_html tbody tr:hover {
 </div>
 </section>
 <section id="Finding-a-path-through-the-routing-network">
-<h3>Finding a path through the routing network<a class="headerlink" href="#Finding-a-path-through-the-routing-network" title="Permalink to this headline">¶</a></h3>
+<h3>Finding a path through the routing network<a class="headerlink" href="#Finding-a-path-through-the-routing-network" title="Permalink to this heading">¶</a></h3>
 <p>The returned path includes all nodes between the starting point (in this case 1) and the outlet (0)</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
@@ -511,7 +520,7 @@ div.rendered_html tbody tr:hover {
 </pre></div></div>
 </div>
 <section id="Plotting-an-elevation-profile-along-a-path">
-<h4>Plotting an elevation profile along a path<a class="headerlink" href="#Plotting-an-elevation-profile-along-a-path" title="Permalink to this headline">¶</a></h4>
+<h4>Plotting an elevation profile along a path<a class="headerlink" href="#Plotting-an-elevation-profile-along-a-path" title="Permalink to this heading">¶</a></h4>
 <p>This can be useful, for example, when an elevation profile along a stream is desired, or if one wants to map the SFR reach that each HRU ultimately discharges to in a GSFLOW model.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
@@ -553,7 +562,7 @@ Text(0.5, 0, &#39;Distance in River miles&#39;)
 </section>
 </section>
 <section id="Getting-the-upstream-contributing-segments">
-<h3>Getting the upstream contributing segments<a class="headerlink" href="#Getting-the-upstream-contributing-segments" title="Permalink to this headline">¶</a></h3>
+<h3>Getting the upstream contributing segments<a class="headerlink" href="#Getting-the-upstream-contributing-segments" title="Permalink to this heading">¶</a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">get_upsegs</span></code> method takes a reverse routing dictionary (one-to-many) and returns a set of all of the nodes that are upstream of that point. This function is integral to the <a class="reference internal" href="Streambed_elevation_demo.html"><span class="doc">streambed elevation smoothing</span></a> in SFRmaker, and can also be used to aggregate flow components (for example, net groundwater inflow) at a point on the stream network.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
@@ -596,7 +605,7 @@ Text(0.5, 0, &#39;Distance in River miles&#39;)
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Apr 11, 2022.
+      <span class="lastupdated">Last updated on Aug 01, 2022.
       </span></p>
   </div>
 
