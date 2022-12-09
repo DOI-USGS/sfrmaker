@@ -91,13 +91,14 @@ class Lines:
         """
         valid_units = {'feet': 'feet',
                        'foot': 'feet',
+                       'us-ft': 'feet',
                        'meters': 'meters',
-                       'metre': 'meters'}
+                       'meter': 'meters'}
         self._geometry_length_units = valid_units.get(self.crs.axis_info[0].unit_name)
         if self._geometry_length_units is None:
             print("Warning: No length units specified in CRS for input LineStrings "
-                  "or length units not recognized"
-                  "defaulting to meters.")
+                  "or length units not recognized. "
+                  "Defaulting to meters.")
             self._geometry_length_units = 'meters'
         return self._geometry_length_units
 
