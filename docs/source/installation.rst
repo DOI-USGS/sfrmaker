@@ -28,16 +28,22 @@ Download an environment file
   * Alternatively, clone (`using git`_) or `download`_ the ``sfrmaker`` repository, which includes the two environment files at the root level.
   * Note that both of these environment files contain a ``pip`` section of packages that will be installed with pip, after the ``conda`` packages are installed.
 
-Creating a `Conda environment`_
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Creating a `Conda environment`_ using `Mamba`_
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 If you are on the USGS internal network, see the `Considerations for USGS Users`_ section below first.
-Open an Anaconda Command Prompt on Windows or a terminal window on OSX and point it to the location of ``requirements.yml`` or ``gis.yml`` and enter:
+
+While Conda can of course be used to create a Conda environment, the Mamba package solver is generally faster and more robust, especially for larger, more complex environments like the included ``requirements.yml``. Mamba is a reimplementation of the conda package manager in C++.
+
+To get started, open an Anaconda Command Prompt on Windows or a terminal window on OSX and point it to the location of ``requirements.yml`` or ``gis.yml`` and enter:
 
 .. code-block:: bash
 
-    conda env create -f requirements.yml
+    mamba env create -f requirements.yml
 
 Building the environment will probably take a while. If the build fails because of an SSL error, fix the problem (see `Considerations for USGS Users`_ below) and either:
+
+    .. note::
+        Creating the ``requirements.yml`` environment (or any environment with ``git+https: ...`` installs) requires Git to be installed and visible in the system path where ``env create`` is being run. If Git is installed and somehow not in the system path, it can be added to the system path on Windows 10 without admin. rights via the "environment variables" editor under User Accounts in the Control Panel (Google it).
 
     a) 	Update the environment
 
@@ -100,14 +106,14 @@ to incorporate a bug fix that was made after the latest release. Pip can also be
 
 .. code-block:: bash
 
-    pip install git+git://github.com/usgs/sfrmaker@develop
+    pip install git+git://github.com/doi-usgs/sfrmaker@develop
 
 (for the develop branch). Subsequent updates can then be made with
 
 .. code-block:: bash
 
     pip uninstall sfrmaker
-    pip install git+git://github.com/usgs/sfrmaker@develop
+    pip install git+git://github.com/doi-usgs/sfrmaker@develop
 
 Installing the SFRmaker source code in-place
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -115,7 +121,7 @@ Finally, if you intend to contribute to SFRmaker (please do!) or update your ins
 
 .. code-block:: bash
 
-    git clone https://github.com/usgs/sfrmaker.git
+    git clone https://github.com/doi-usgs/sfrmaker.git
     cd sfrmaker
     pip install -e .
 
@@ -134,6 +140,17 @@ Your local copy of the SFRmaker repository can then be subsequently updated with
 
 The advantage of installing the source code in-place is that any changes you make are automatically incorporated into your python environment, without any additional install commands. When debugging in an interactive development environment (IDE) such as Pycharm or VS Code, error tracebacks and inspection features go to the actual source code, not the version installed in the ``site-packages`` folder. Additionally, since this install is done through pip, ``pip uninstall``
 will work to remove the package, and the current version of the package (including the latest commit information) will be visible with ``conda list``.
+
+Best practices
+------------------------
+
+* Install the \*conda distribution of your choice to your user account, NOT at the system level. Installing to your user means you have rights to delete and reinstall Anaconda as-needed, as well as to edit any configuration files for ``pip``, ``conda``, etc. Installing at the system level also just seems to lead to more confusing problems with dependencies, at least in the USGS.
+* Periodically (maybe a few times a year?) fully remove your \*conda distribution and reinstall it. If you just can't get things to work (packages won't import or produce DLL errors on import, adding or upgrading a package takes a very long time or results in excessive upgrades or downgrades of other packages, etc.), fully removing and reinstalling \*conda just may resolve your issues.
+* Don't use your base environment; create and delete environments as needed. Conda is generally pretty good about managing packages between environments without wasting a lot of disk space.
+* Use an environment file (as above) to create a conda environment, instead of installing packages ad-hoc.
+* Use ``mamba`` instead of ``conda``; it just works better for environments with a lot of packages.
+* After setting up the above conda environment, scan the screen output to make sure that everything installed correctly, especially the packages installed through ``pip``.
+* Use `conda-pack`_, rather than an overly-detailed environment file, to guarantee reproducibility.
 
 
 _`Considerations for USGS Users`
@@ -226,7 +243,9 @@ so it needs to be commented out on other operating systems (normally it wouldn't
 .. _Anaconda python distribution: https://www.anaconda.com/distribution/
 .. _clean uninstall: https://docs.anaconda.com/anaconda/install/uninstall/
 .. _conda: https://docs.conda.io/en/latest/
+.. _Mamba: https://mamba.readthedocs.io/en/latest/
 .. _conda environment: https://docs.conda.io/projects/conda/en/latest/user-guide/concepts/environments.html
+.. _conda-pack: https://conda.github.io/conda-pack/
 .. _condarc: https://docs.conda.io/projects/conda/en/latest/user-guide/configuration/use-condarc.html
 .. _download: https://github.com/aleaf/sfrmaker/archive/master.zip
 .. _gis.yml: https://raw.githubusercontent.com/aleaf/sfrmaker/master/gis.yml
