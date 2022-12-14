@@ -79,6 +79,8 @@ def assign_layers(reach_data, botm_array,
     if idomain is None:
         return_3d = False
         idomain = np.ones_like(botm_array, dtype=int)
+    else:
+        idomain = (idomain > 0).astype(int)
     in_active_area = (idomain.sum(axis=0) > 0)[i, j]
     below = (streambed_botm - pad <= model_botm) & in_active_area
     below_inds = np.where(below)[0]
