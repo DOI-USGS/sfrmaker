@@ -157,7 +157,7 @@ def cull_flowlines(NHDPlus_paths,
         logger.statement('created {}'.format(outfolder))
 
     if asum_thresh is not None:
-        version = '_gt{:.0f}km'.format(asum_thresh)
+        version = f'_gt{asum_thresh:.0f}km'
     else:
         version = ''
     flowlines_files, pfvaa_files, pf_files, elevslope_files = \
@@ -224,12 +224,48 @@ def cull_flowlines(NHDPlus_paths,
                              log_time=False)
     else:
         valid_comids = original_comids.union(keep_comids)
+        # remove attribute information for COMIDs that don't have flowlines
         pfvaa = pfvaa.loc[[True if c in original_comids
                            else False for c in pfvaa.index]]
         pf = pf.loc[[True if c in original_comids
                      else False for c in pf.index]]
         elevslope = elevslope.loc[[True if c in original_comids
                                    else False for c in elevslope.index]]
+        # add attribute information for any flowlines without attributes
+        # assign an arbitrary asum of 1
+        # (user will have to manually edit these invalid COMIDs later,
+        # or in this case, the minimum stream width would be assigned)
+        pfvaa_difference = list(set(fl.COMID).difference(pfvaa.ComID))
+        if any(pfvaa_difference):
+            to_append = pd.DataFrame({
+                'ComID': pfvaa_difference,
+                'ArbolateSu': [1] * len(pfvaa_difference)}, 
+            index=pfvaa_difference)
+            pfvaa = pd.concat([pfvaa, to_append], axis=0)
+        # add any missing COMIDs to routing table
+        # fill to comids with 0s (outlet condition)
+        pf_difference = list(set(fl.COMID).difference(pf.FROMCOMID))
+        if any(pf_difference):
+            to_append = pd.DataFrame({
+                'FROMCOMID': pf_difference,
+                'TOCOMID': [0] * len(pf_difference)}, 
+            index=pf_difference)
+            pf = pd.concat([pf, to_append], axis=0)
+        # add any missing COMIDs to elevations table
+        # fill missing elevations with zeros
+        elevslope_difference = list(set(fl.COMID).difference(elevslope.COMID))
+        if any(elevslope_difference):
+            to_append = pd.DataFrame({
+                'COMID': elevslope_difference,
+                'MAXELEVSMO': [0] * len(elevslope_difference), 
+                'MELEVSMO': [0] * len(elevslope_difference)}, 
+                index=elevslope_difference)
+            elevslope = pd.concat([elevslope, to_append], axis=0)
+    
+    assert pd.api.types.is_integer_dtype(pfvaa['ComID'])
+    assert pd.api.types.is_integer_dtype(pf['FROMCOMID'])
+    assert pd.api.types.is_integer_dtype(elevslope['COMID'])
+
     fl['nhd_asum'] = pfvaa.ArbolateSu
 
     # cull by arbolate sum first
@@ -314,7 +350,7 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
                        narwidth_shapefile=None,
                        waterbody_shapefiles=None,  # for sampling NARWidth
                        buffersize_meters=50,
-                       asum_thresh=None,
+                       asum_thresh=0.,
                        known_connections=None,
                        update_up_elevations=None,
                        update_dn_elevations=None,
@@ -509,7 +545,7 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
                   pf_file,
                   elevslope_file,
                   ]
-    if run_zonal_statistics:
+    if run_zonal_statistics and demfile is not None and os.path.exists(demfile):
         files_list.append(demfile)
     if narwidth_shapefile is not None:
         if waterbody_shapefiles is None:
@@ -525,6 +561,7 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
     if logger is None:
         logger = Logger()
 
+    outfolder = Path(outfolder)
     logger.log('Preprocessing Flowlines')
 
     # read NHDPlus files into pandas dataframes
@@ -640,14 +677,20 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
         logger.statement('Writing shapefile of buffers used to determine distributary routing...')
         flccb = fl.copy()
         flccb['geometry'] = flccb.buffpoly
+        outfile = 'flowlines_{}buffers.shp'
+        if asum_thresh > 0:
+            outfile = outfile.format(f'gt{asum_thresh:.0f}km_')
+        else:
+            outfile = outfile.format('')
         df2shp(flccb.drop('buffpoly', axis=1),
-               os.path.join(outfolder, 'flowlines_gt{:.0f}km_buffers.shp'.format(asum_thresh)),
+               outfolder / outfile,
                index=False, epsg=project_epsg)
     else:
-        assert Path(flowline_elevations_file).exists(), \
-            ("If run_zonal_statistics=False a flowline_elevations_file produced by"
-             "a previous run of the sfrmaker.preprocessing.preprocess_nhdplus() "
-             "function is needed.")
+        if not Path(flowline_elevations_file).exists():
+            raise ValueError(
+                "If run_zonal_statistics=False a flowline_elevations_file produced by"
+                "a previous run of the sfrmaker.preprocessing.preprocess_nhdplus() "
+                "function is needed.")
         flccb = shp2df(flowline_elevations_file)
         flccb.index = flccb['COMID']
         flccb['buffpoly'] = flccb['geometry']
@@ -879,7 +922,8 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
                                                  b=width_from_asum_b_param,
                                                  minimum_width=minimum_width,
                                                  input_units='km', output_units=output_length_units)
-
+    flcc['width1'] = flcc.width1asum
+    flcc['width2'] = flcc.width2asum
     if narwidth_shapefile is not None:
         if not os.path.exists(narwidth_shapefile):
             raise IOError("narwidth_shapefile: {} not found!".format(narwidth_shapefile))
@@ -894,8 +938,7 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
                         crs=project_crs,
                         output_width_units=output_length_units)
         logger.log('Sampling widths from NARWidth database')
-        flcc['width1'] = flcc.width1asum
-        flcc['width2'] = flcc.width2asum
+
         frac_narwidth = np.sum(~np.isnan(flcc.narwd_mean))/len(flcc)
         logger.statement('Flowline widths estimated from arbolate sum: {0:.1%}'.format(1-frac_narwidth), log_time=False)
         logger.statement('Flowline widths sampled from NARWidth: {0:.1%}'.format(frac_narwidth), log_time=False)
@@ -909,8 +952,12 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
         
     # write output files; record timestamps in logger
     logger.statement('writing output')
-    df2shp(flcc.drop('buffpoly', axis=1),
-           '{}/flowlines_gt{:.0f}km_edited.shp'.format(outfolder, asum_thresh),
+    outfile = 'flowlines_{}edited.shp'
+    if asum_thresh > 0:
+        outfile = outfile.format(f'gt{asum_thresh:.0f}km_')
+    else:
+        outfile = outfile.format('')
+    df2shp(flcc.drop('buffpoly', axis=1), outfolder / outfile,
            index=False, epsg=project_epsg)
     logger.log('Preprocessing Flowlines')
 
