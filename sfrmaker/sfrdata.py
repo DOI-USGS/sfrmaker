@@ -594,22 +594,25 @@ class SFRData(DataPackage):
                 self.reach_data, botm_array=botm, idomain=idomain)
             self.reach_data['k'] = layers
             if new_botm is not None:
-                outfiles = []
-                if len(new_botm.shape) == 2:
-                    write_layers = [nlay - 1]
-                else:
-                    write_layers = list(range(nlay))
-                outpath = Path(adjusted_botm_output_path)
-                for k in write_layers:
-                    outfile = outpath / f'{self.package_name}_layer_{k}_new_botm_elevations.dat'
-                    np.savetxt(outfile, new_botm[-1], fmt='%.2f')
-                    outfiles.append(outfile)
-                msg = ('Sfrmaker pushed some model botm elevations downward '
-                       'to accomodate streambed bottoms. New botm elevations '
-                       'written to:\n')
-                for f in outfiles:
-                    msg += f'{f}\n'
-                print(msg)
+                new_bottom_is_same = np.allclose(botm.ravel(), 
+                                                 new_botm.ravel(), rtol=0.0001)
+                if not new_bottom_is_same:
+                    outfiles = []
+                    if len(new_botm.shape) == 2:
+                        write_layers = [nlay - 1]
+                    else:
+                        write_layers = list(range(nlay))
+                    outpath = Path(adjusted_botm_output_path)
+                    for k in write_layers:
+                        outfile = outpath / f'{self.package_name}_layer_{k}_new_botm_elevations.dat'
+                        np.savetxt(outfile, new_botm[-1], fmt='%.2f')
+                        outfiles.append(outfile)
+                    msg = ('Sfrmaker pushed some model botm elevations downward '
+                        'to accomodate streambed bottoms. New botm elevations '
+                        'written to:\n')
+                    for f in outfiles:
+                        msg += f'{f}\n'
+                    print(msg)
         else:
             print('Need a model instance with a discretization package to assign layers. '
                   'A model can be assigned to the SFRData.model attribute.')
