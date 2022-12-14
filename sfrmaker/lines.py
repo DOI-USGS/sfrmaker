@@ -77,6 +77,9 @@ class Lines:
         self._geometry_length_units = None
 
         self._routing = None  # dictionary of routing connections
+        self._last_routing_dict_update = None
+        self._current_df_routing = None
+        self._current_df_routing_time = time.time()
         self._paths = None  # routing sequence from each segment to outlet
 
         # dictionary of elevations at the upstream ends of flowlines
@@ -107,6 +110,20 @@ class Lines:
         """Dictionary of routing connections from ids (keys)
         to to_ids (values).
         """
+        if self._current_df_routing is not None:
+            # Goal is to incorporate any updates in line dataframe
+            # into routing dictionary
+            # if user is trying to update the dataframe from the routing dict
+            # recursion can occur
+            # this checks the last time that self._routing_changed method
+            # recorded different routing information in the dataframe
+            # compared to a cached copy (_current_df_routing)
+            # if the routing dictionary was updated more recently,
+            # we can assume that updates haven't been made to the routing
+            # in the dataframe
+            if self._last_routing_dict_update is not None and \
+                self._last_routing_dict_update > self._current_df_routing_time:
+                    return self._routing
         if self._routing is None or self._routing_changed():
             toid = self.df.toid.values
             # check whether or not routing is
@@ -125,9 +142,14 @@ class Lines:
                                      one_to_many=not to_one)
                 if not to_one:
                     routing = pick_toids(routing, self.elevup)
+                # set toids not in routing dataset to 0
+                # (outlet condition)
+                routing = {k: v if v in routing.keys() else 0 
+                            for k, v in routing.items()}
             else:
                 routing = {self.df.id.values[0]: 0}
             self._routing = routing
+            self._last_routing_dict_update = time.time()
         return self._routing
 
     @property
@@ -153,6 +175,10 @@ class Lines:
         # compare the private routing attribute
         # to current values in reach data
         df_routing = dict(zip(self.df.id, self.df.toid))
+        if df_routing != self._routing:
+            if df_routing != self._current_df_routing:
+                self._current_df_routing = df_routing
+                self._current_df_routing_time = time.time()
         return df_routing != self._routing
 
     def cull(self, feature, simplify=False, tol=None,
@@ -293,6 +319,27 @@ class Lines:
             column_order.remove('i')
             column_order.remove('j')
         return reach_data[column_order].copy()
+
+
+    def make_routing_one_to_one(self):
+
+        # convert routing connections (toid column) from lists (one-to-many)
+        # to ints (one-to-one or many-to-one)
+        routing = self.routing.copy()
+
+        # one to many routing is not supported
+        to_one = is_to_one(routing.values())
+        assert to_one, "routing is still one-to-many"
+        # if not to_one:
+        #    routing = pick_toids(routing, elevup)
+        valid_ids = routing.keys()
+        # df.toid column is basis for routing attributes
+        # all paths terminating in invalid toids (outside of the model)
+        # will be none; set invalid toids = 0
+        # TODO: write a test for pick_toids if some IDs route to more than one connection
+        assert not np.any([isinstance(r, list) for r in routing.items()]), "one to many routing not supported"
+        self.df.toid = [routing[i] if routing[i] in valid_ids else 0
+                        for i in self.df.id.tolist()]
 
     def to_crs(self, dest_crs):
         """Reproject the LineStrings in :py:attr:`Lines.df` to
@@ -840,23 +887,7 @@ class Lines:
             else:
                 package_name = 'model'
 
-        # convert routing connections (toid column) from lists (one-to-many)
-        # to ints (one-to-one or many-to-one)
-        routing = self.routing.copy()
-
-        # one to many routing is not supported
-        to_one = is_to_one(routing.values())
-        assert to_one, "routing is still one-to-many"
-        # if not to_one:
-        #    routing = pick_toids(routing, elevup)
-        valid_ids = routing.keys()
-        # df.toid column is basis for routing attributes
-        # all paths terminating in invalid toids (outside of the model)
-        # will be none; set invalid toids = 0
-        # TODO: write a test for pick_toids if some IDs route to more than one connection
-        assert not np.any([isinstance(r, list) for r in routing.items()]), "one to many routing not supported"
-        self.df.toid = [routing[i] if routing[i] in valid_ids else 0
-                        for i in self.df.id.tolist()]
+        self.make_routing_one_to_one()
 
         # intersect lines with model grid to get preliminary reaches
         rd = self.intersect(grid)
