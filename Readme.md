@@ -5,25 +5,25 @@ SFRmaker is a python package for automating construction of stream flow routing 
 
 ### Version 0.9
 
-![Tests](https://github.com/usgs/sfrmaker/workflows/Tests/badge.svg)
-[![Coverage Status](https://codecov.io/github/usgs/SFRmaker/coverage.svg?branch=develop)](https://codecov.io/github/usgs/SFRmaker/coverage.svg?branch=develop)
+![Tests](https://github.com/aleaf/sfrmaker/workflows/Tests/badge.svg)
+[![Coverage Status](https://codecov.io/github/aleaf/SFRmaker/coverage.svg?branch=develop)](https://codecov.io/github/aleaf/SFRmaker/coverage.svg?branch=develop)
 [![PyPI version](https://badge.fury.io/py/sfrmaker.svg)](https://badge.fury.io/py/sfrmaker)
 [![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 
 Getting Started
 ----------------------------------------------- 
-See the [SFRmaker documentation](https://doi-usgs.github.io/sfrmaker/index.html)
+See the [SFRmaker documentation](https://aleaf.github.io/sfrmaker/index.html)
 
 
 Installation
 -----------------------------------------------
-See the [Installation Instructions](https://doi-usgs.github.io/sfrmaker/latest/installation.html)
+See the [Installation Instructions](https://aleaf.github.io/sfrmaker/latest/installation.html)
 
 How to cite
 --------------
 ###### Citation for SFRmaker
 
-Leaf, A.T., Fienen, M.N. and Reeves, H.W. (2021), SFRmaker and Linesink-maker: Rapid construction of streamflow routing networks from hydrography data. Groundwater. Accepted Author Manuscript. [https://doi.org/10.1111/gwat.13095](https://doi.org/10.1111/gwat.13095)
+Leaf, A.T., Fienen, M.N. and Reeves, H.W. (2021), SFRmaker and Linesink-Maker: Rapid Construction of Streamflow Routing Networks from Hydrography Data. Groundwater, 59: 761-771. https://doi.org/10.1111/gwat.13095
 
 ###### Software/Code citation for SFRmaker (IP-122355):
 Leaf, A.T., Fienen, M.N. and Reeves, H.W., 2021, SFRmaker version 0.7.1: U.S. Geological Survey Software Release, 29 Jan. 2021, [https://doi.org/10.5066/P9U2T031](https://doi.org/10.5066/P9U2T031)
