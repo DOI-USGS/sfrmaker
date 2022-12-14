@@ -590,7 +590,8 @@ class SFRData(DataPackage):
                     idomain = bas6.ibound.array
                     
             nlay = botm.shape[0] + 1
-            layers, new_botm = assign_layers(self.reach_data, botm_array=botm, idomain=idomain)
+            layers, new_botm = assign_layers(
+                self.reach_data, botm_array=botm, idomain=idomain)
             self.reach_data['k'] = layers
             if new_botm is not None:
                 outfiles = []
@@ -600,11 +601,11 @@ class SFRData(DataPackage):
                     write_layers = list(range(nlay))
                 outpath = Path(adjusted_botm_output_path)
                 for k in write_layers:
-                    outfile = outpath / f'{self.package_name}_layer_{nlay}_new_botm_elevations.dat'
+                    outfile = outpath / f'{self.package_name}_layer_{k}_new_botm_elevations.dat'
                     np.savetxt(outfile, new_botm[-1], fmt='%.2f')
                     outfiles.append(outfile)
-                msg = ('Sfrmaker pushed some model botm elevations downward'
-                       'to accomodate streambed bottoms. New botm elevations'
+                msg = ('Sfrmaker pushed some model botm elevations downward '
+                       'to accomodate streambed bottoms. New botm elevations '
                        'written to:\n')
                 for f in outfiles:
                     msg += f'{f}\n'
