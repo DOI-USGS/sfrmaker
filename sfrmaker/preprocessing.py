@@ -952,9 +952,9 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
         
     # write output files; record timestamps in logger
     logger.statement('writing output')
-    outfile = 'flowlines_{}edited.shp'
+    outfile = 'preprocessed_flowlines{}.shp'
     if asum_thresh > 0:
-        outfile = outfile.format(f'gt{asum_thresh:.0f}km_')
+        outfile = outfile.format(f'_gt{asum_thresh:.0f}km')
     else:
         outfile = outfile.format('')
     df2shp(flcc.drop('buffpoly', axis=1), outfolder / outfile,
