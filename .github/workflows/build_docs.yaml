@@ -64,7 +64,7 @@ jobs:
         fi
         echo bin/$d/. >> $GITHUB_PATH
         echo $GITHUB_PATH
-        pip install -e .
+        pip install --upgrade -e .
         python -m ipykernel install --user --name sfrmaker_ci --display-name "sfrmaker_ci"
     - name: Conda list
       shell: bash -l {0}
