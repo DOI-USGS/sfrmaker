@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>The MODFLOW-2005 to 6 Module &mdash; SFRmaker 0.9.1.post12.dev0+g60ab2e5 documentation</title>
+  <title>The MODFLOW-2005 to 6 Module &mdash; SFRmaker 0.9.1.post27.dev0+gdd7b388 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
@@ -18,6 +18,7 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
         <script src="../_static/clipboard.min.js"></script>
         <script src="../_static/copybutton.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -36,7 +37,7 @@
             <a href="../index.html" class="icon icon-home"> SFRmaker
           </a>
               <div class="version">
-                0.9.1.post12.dev0+g60ab2e5
+                0.9.1.post27.dev0+gdd7b388
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -68,7 +69,24 @@
 <li class="toctree-l2"><a class="reference internal" href="sfrmaker.flows.html">Flows Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="sfrmaker.grid.html">Grid Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="sfrmaker.lines.html">Lines Module</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">MODFLOW-2005 to 6 Module</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">MODFLOW-2005 to 6 Module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#sfrmaker.mf5to6.Mf6SFR"><code class="docutils literal notranslate"><span class="pre">Mf6SFR</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.mf5to6.Mf6SFR.cols"><code class="docutils literal notranslate"><span class="pre">Mf6SFR.cols</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.mf5to6.Mf6SFR.connections"><code class="docutils literal notranslate"><span class="pre">Mf6SFR.connections</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.mf5to6.Mf6SFR.graph_r"><code class="docutils literal notranslate"><span class="pre">Mf6SFR.graph_r</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.mf5to6.Mf6SFR.mf5names"><code class="docutils literal notranslate"><span class="pre">Mf6SFR.mf5names</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.mf5to6.Mf6SFR.mf6names"><code class="docutils literal notranslate"><span class="pre">Mf6SFR.mf6names</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.mf5to6.Mf6SFR.options_block"><code class="docutils literal notranslate"><span class="pre">Mf6SFR.options_block</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.mf5to6.Mf6SFR.packagedata"><code class="docutils literal notranslate"><span class="pre">Mf6SFR.packagedata</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.mf5to6.Mf6SFR.period_data"><code class="docutils literal notranslate"><span class="pre">Mf6SFR.period_data</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.mf5to6.Mf6SFR.write_file"><code class="docutils literal notranslate"><span class="pre">Mf6SFR.write_file()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#sfrmaker.mf5to6.cellids_to_kij"><code class="docutils literal notranslate"><span class="pre">cellids_to_kij()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sfrmaker.mf5to6.mf6sfr"><code class="docutils literal notranslate"><span class="pre">mf6sfr</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sfrmaker.mf5to6.segment_data_to_period_data"><code class="docutils literal notranslate"><span class="pre">segment_data_to_period_data()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="sfrmaker.observations.html">Observations Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="sfrmaker.preprocessing.html">Preprocessing Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="sfrmaker.sfrdata.html">SFRData Module</a></li>
@@ -97,9 +115,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="index.html">Modules</a> &raquo;</li>
-      <li>The MODFLOW-2005 to 6 Module</li>
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Modules</a></li>
+      <li class="breadcrumb-item active">The MODFLOW-2005 to 6 Module</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/api/sfrmaker.mf5to6.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -139,7 +157,7 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="sfrmaker.mf5to6.Mf6SFR">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sfrmaker.mf5to6.</span></span><span class="sig-name descname"><span class="pre">Mf6SFR</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ModflowSfr2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">SFRData</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">period_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">idomain</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auxiliary_line_numbers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/mf5to6.html#Mf6SFR"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.mf5to6.Mf6SFR" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Class for writing MODFLOW-6 SFR package input
 from a (MODFLOW-2005 style) flopy.modflow.ModflowSfr2 instance or
 an sfrmaker.SFRData instance.</p>
@@ -306,7 +324,7 @@ distribute these to k, i, j.</p>
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Aug 01, 2022.
+      <span class="lastupdated">Last updated on Dec 15, 2022.
       </span></p>
   </div>
 

@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>The Grid Module &mdash; SFRmaker 0.9.1.post12.dev0+g60ab2e5 documentation</title>
+  <title>The Grid Module &mdash; SFRmaker 0.9.1.post27.dev0+gdd7b388 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
@@ -18,6 +18,7 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
         <script src="../_static/clipboard.min.js"></script>
         <script src="../_static/copybutton.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -36,7 +37,7 @@
             <a href="../index.html" class="icon icon-home"> SFRmaker
           </a>
               <div class="version">
-                0.9.1.post12.dev0+g60ab2e5
+                0.9.1.post27.dev0+gdd7b388
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -66,7 +67,39 @@
 <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="index.html"> Code reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="sfrmaker.flows.html">Flows Module</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Grid Module</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Grid Module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#sfrmaker.grid.Grid"><code class="docutils literal notranslate"><span class="pre">Grid</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.grid.Grid.active_area"><code class="docutils literal notranslate"><span class="pre">Grid.active_area</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.grid.Grid.bounds"><code class="docutils literal notranslate"><span class="pre">Grid.bounds</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.grid.Grid.create_active_area_polygon_from_isfr"><code class="docutils literal notranslate"><span class="pre">Grid.create_active_area_polygon_from_isfr()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.grid.Grid.get_node"><code class="docutils literal notranslate"><span class="pre">Grid.get_node()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.grid.Grid.lenuni"><code class="docutils literal notranslate"><span class="pre">Grid.lenuni</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.grid.Grid.size"><code class="docutils literal notranslate"><span class="pre">Grid.size</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.grid.Grid.spatial_index"><code class="docutils literal notranslate"><span class="pre">Grid.spatial_index</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.grid.Grid.units_dict"><code class="docutils literal notranslate"><span class="pre">Grid.units_dict</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.grid.Grid.write_active_area_shapefile"><code class="docutils literal notranslate"><span class="pre">Grid.write_active_area_shapefile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.grid.Grid.write_grid_shapefile"><code class="docutils literal notranslate"><span class="pre">Grid.write_grid_shapefile()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#sfrmaker.grid.StructuredGrid"><code class="docutils literal notranslate"><span class="pre">StructuredGrid</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.grid.StructuredGrid.create_active_area_polygon_from_isfr"><code class="docutils literal notranslate"><span class="pre">StructuredGrid.create_active_area_polygon_from_isfr()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.grid.StructuredGrid.from_dataframe"><code class="docutils literal notranslate"><span class="pre">StructuredGrid.from_dataframe()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.grid.StructuredGrid.from_json"><code class="docutils literal notranslate"><span class="pre">StructuredGrid.from_json()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.grid.StructuredGrid.from_modelgrid"><code class="docutils literal notranslate"><span class="pre">StructuredGrid.from_modelgrid()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.grid.StructuredGrid.from_shapefile"><code class="docutils literal notranslate"><span class="pre">StructuredGrid.from_shapefile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.grid.StructuredGrid.from_sr"><code class="docutils literal notranslate"><span class="pre">StructuredGrid.from_sr()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.grid.StructuredGrid.isfr"><code class="docutils literal notranslate"><span class="pre">StructuredGrid.isfr</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.grid.StructuredGrid.transform"><code class="docutils literal notranslate"><span class="pre">StructuredGrid.transform</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.grid.StructuredGrid.uniform"><code class="docutils literal notranslate"><span class="pre">StructuredGrid.uniform</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#sfrmaker.grid.UnstructuredGrid"><code class="docutils literal notranslate"><span class="pre">UnstructuredGrid</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.grid.UnstructuredGrid.create_active_area_polygon_from_isfr"><code class="docutils literal notranslate"><span class="pre">UnstructuredGrid.create_active_area_polygon_from_isfr()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.grid.UnstructuredGrid.from_dataframe"><code class="docutils literal notranslate"><span class="pre">UnstructuredGrid.from_dataframe()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="sfrmaker.lines.html">Lines Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="sfrmaker.mf5to6.html">MODFLOW-2005 to 6 Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="sfrmaker.observations.html">Observations Module</a></li>
@@ -97,9 +130,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="index.html">Modules</a> &raquo;</li>
-      <li>The Grid Module</li>
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Modules</a></li>
+      <li class="breadcrumb-item active">The Grid Module</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/api/sfrmaker.grid.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -140,7 +173,7 @@ up a StructuredGrid instance, see <a class="reference internal" href="../noteboo
 <dl class="py class">
 <dt class="sig sig-object py" id="sfrmaker.grid.Grid">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sfrmaker.grid.</span></span><span class="sig-name descname"><span class="pre">Grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'undefined'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">crs_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">crs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proj_str</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prjfile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/grid.html#Grid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.grid.Grid" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Base class for model grids. Has methods and attributes
 that are common to both Structured and Unstructured Grids. Not
 meant to be called directly.</p>
@@ -236,7 +269,7 @@ Must have the following columns:</p>
 </tr>
 <tr class="row-odd"><td><p>geometry</p></td>
 <td><p>obj</p></td>
-<td><p>shapely <a class="reference external" href="https://shapely.readthedocs.io/en/latest/manual.html#Polygon" title="(in Shapely v0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Polygons</span></code></a> of model cells</p></td>
+<td><p>shapely <a class="reference external" href="https://shapely.readthedocs.io/en/latest/manual.html#Polygon" title="(in Shapely)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Polygons</span></code></a> of model cells</p></td>
 </tr>
 </tbody>
 </table>
@@ -270,7 +303,7 @@ by default None</p>
 </dd>
 <dt><strong>bounds</strong><span class="classifier">tuple, optional</span></dt><dd><p>(left, bottom, top, right) edges of the grid bounding box, if known.
 Otherwise, the <code class="xref py py-attr docutils literal notranslate"><span class="pre">bounds</span></code> attribute is computed from the
-shapely <a class="reference external" href="https://shapely.readthedocs.io/en/latest/manual.html#Polygon" title="(in Shapely v0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Polygons</span></code></a> in the <code class="xref py py-attr docutils literal notranslate"><span class="pre">Grid</span> <span class="pre">DataFrame</span></code> attribute.
+shapely <a class="reference external" href="https://shapely.readthedocs.io/en/latest/manual.html#Polygon" title="(in Shapely)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Polygons</span></code></a> in the <code class="xref py py-attr docutils literal notranslate"><span class="pre">Grid</span> <span class="pre">DataFrame</span></code> attribute.
 by default None</p>
 </dd>
 <dt><strong>active_area</strong><span class="classifier">shapely Polygon, list of Polygons, or shapefile path, optional</span></dt><dd><p>Polygon defining the active portion of the model grid.
@@ -377,7 +410,7 @@ flopy.discretization.StructuredGrid instance.</p>
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Aug 01, 2022.
+      <span class="lastupdated">Last updated on Dec 15, 2022.
       </span></p>
   </div>
 

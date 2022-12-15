@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>sfrmaker.preprocessing &mdash; SFRmaker 0.9.1.post12.dev0+g60ab2e5 documentation</title>
+  <title>sfrmaker.preprocessing &mdash; SFRmaker 0.9.1.post27.dev0+gdd7b388 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
@@ -17,6 +17,7 @@
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
         <script src="../../_static/clipboard.min.js"></script>
         <script src="../../_static/copybutton.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -33,7 +34,7 @@
             <a href="../../index.html" class="icon icon-home"> SFRmaker
           </a>
               <div class="version">
-                0.9.1.post12.dev0+g60ab2e5
+                0.9.1.post27.dev0+gdd7b388
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -84,9 +85,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../index.html">Module code</a> &raquo;</li>
-      <li>sfrmaker.preprocessing</li>
+      <li><a href="../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">sfrmaker.preprocessing</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -255,7 +256,7 @@
         <span class="n">logger</span><span class="o">.</span><span class="n">statement</span><span class="p">(</span><span class="s1">&#39;created </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">outfolder</span><span class="p">))</span>
 
     <span class="k">if</span> <span class="n">asum_thresh</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">version</span> <span class="o">=</span> <span class="s1">&#39;_gt</span><span class="si">{:.0f}</span><span class="s1">km&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">asum_thresh</span><span class="p">)</span>
+        <span class="n">version</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;_gt</span><span class="si">{</span><span class="n">asum_thresh</span><span class="si">:</span><span class="s1">.0f</span><span class="si">}</span><span class="s1">km&#39;</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">version</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
     <span class="n">flowlines_files</span><span class="p">,</span> <span class="n">pfvaa_files</span><span class="p">,</span> <span class="n">pf_files</span><span class="p">,</span> <span class="n">elevslope_files</span> <span class="o">=</span> \
@@ -322,12 +323,48 @@
                              <span class="n">log_time</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">valid_comids</span> <span class="o">=</span> <span class="n">original_comids</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">keep_comids</span><span class="p">)</span>
+        <span class="c1"># remove attribute information for COMIDs that don&#39;t have flowlines</span>
         <span class="n">pfvaa</span> <span class="o">=</span> <span class="n">pfvaa</span><span class="o">.</span><span class="n">loc</span><span class="p">[[</span><span class="kc">True</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">original_comids</span>
                            <span class="k">else</span> <span class="kc">False</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">pfvaa</span><span class="o">.</span><span class="n">index</span><span class="p">]]</span>
         <span class="n">pf</span> <span class="o">=</span> <span class="n">pf</span><span class="o">.</span><span class="n">loc</span><span class="p">[[</span><span class="kc">True</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">original_comids</span>
                      <span class="k">else</span> <span class="kc">False</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">pf</span><span class="o">.</span><span class="n">index</span><span class="p">]]</span>
         <span class="n">elevslope</span> <span class="o">=</span> <span class="n">elevslope</span><span class="o">.</span><span class="n">loc</span><span class="p">[[</span><span class="kc">True</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">original_comids</span>
                                    <span class="k">else</span> <span class="kc">False</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">elevslope</span><span class="o">.</span><span class="n">index</span><span class="p">]]</span>
+        <span class="c1"># add attribute information for any flowlines without attributes</span>
+        <span class="c1"># assign an arbitrary asum of 1</span>
+        <span class="c1"># (user will have to manually edit these invalid COMIDs later,</span>
+        <span class="c1"># or in this case, the minimum stream width would be assigned)</span>
+        <span class="n">pfvaa_difference</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">fl</span><span class="o">.</span><span class="n">COMID</span><span class="p">)</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">pfvaa</span><span class="o">.</span><span class="n">ComID</span><span class="p">))</span>
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">pfvaa_difference</span><span class="p">):</span>
+            <span class="n">to_append</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+                <span class="s1">&#39;ComID&#39;</span><span class="p">:</span> <span class="n">pfvaa_difference</span><span class="p">,</span>
+                <span class="s1">&#39;ArbolateSu&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">pfvaa_difference</span><span class="p">)},</span> 
+            <span class="n">index</span><span class="o">=</span><span class="n">pfvaa_difference</span><span class="p">)</span>
+            <span class="n">pfvaa</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">pfvaa</span><span class="p">,</span> <span class="n">to_append</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="c1"># add any missing COMIDs to routing table</span>
+        <span class="c1"># fill to comids with 0s (outlet condition)</span>
+        <span class="n">pf_difference</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">fl</span><span class="o">.</span><span class="n">COMID</span><span class="p">)</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">pf</span><span class="o">.</span><span class="n">FROMCOMID</span><span class="p">))</span>
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">pf_difference</span><span class="p">):</span>
+            <span class="n">to_append</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+                <span class="s1">&#39;FROMCOMID&#39;</span><span class="p">:</span> <span class="n">pf_difference</span><span class="p">,</span>
+                <span class="s1">&#39;TOCOMID&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">pf_difference</span><span class="p">)},</span> 
+            <span class="n">index</span><span class="o">=</span><span class="n">pf_difference</span><span class="p">)</span>
+            <span class="n">pf</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">pf</span><span class="p">,</span> <span class="n">to_append</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="c1"># add any missing COMIDs to elevations table</span>
+        <span class="c1"># fill missing elevations with zeros</span>
+        <span class="n">elevslope_difference</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">fl</span><span class="o">.</span><span class="n">COMID</span><span class="p">)</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">elevslope</span><span class="o">.</span><span class="n">COMID</span><span class="p">))</span>
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">elevslope_difference</span><span class="p">):</span>
+            <span class="n">to_append</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+                <span class="s1">&#39;COMID&#39;</span><span class="p">:</span> <span class="n">elevslope_difference</span><span class="p">,</span>
+                <span class="s1">&#39;MAXELEVSMO&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">elevslope_difference</span><span class="p">),</span> 
+                <span class="s1">&#39;MELEVSMO&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">elevslope_difference</span><span class="p">)},</span> 
+                <span class="n">index</span><span class="o">=</span><span class="n">elevslope_difference</span><span class="p">)</span>
+            <span class="n">elevslope</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">elevslope</span><span class="p">,</span> <span class="n">to_append</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    
+    <span class="k">assert</span> <span class="n">pd</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">is_integer_dtype</span><span class="p">(</span><span class="n">pfvaa</span><span class="p">[</span><span class="s1">&#39;ComID&#39;</span><span class="p">])</span>
+    <span class="k">assert</span> <span class="n">pd</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">is_integer_dtype</span><span class="p">(</span><span class="n">pf</span><span class="p">[</span><span class="s1">&#39;FROMCOMID&#39;</span><span class="p">])</span>
+    <span class="k">assert</span> <span class="n">pd</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">is_integer_dtype</span><span class="p">(</span><span class="n">elevslope</span><span class="p">[</span><span class="s1">&#39;COMID&#39;</span><span class="p">])</span>
+
     <span class="n">fl</span><span class="p">[</span><span class="s1">&#39;nhd_asum&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pfvaa</span><span class="o">.</span><span class="n">ArbolateSu</span>
 
     <span class="c1"># cull by arbolate sum first</span>
@@ -412,7 +449,7 @@
                        <span class="n">narwidth_shapefile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                        <span class="n">waterbody_shapefiles</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>  <span class="c1"># for sampling NARWidth</span>
                        <span class="n">buffersize_meters</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
-                       <span class="n">asum_thresh</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                       <span class="n">asum_thresh</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span>
                        <span class="n">known_connections</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                        <span class="n">update_up_elevations</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                        <span class="n">update_dn_elevations</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -607,7 +644,7 @@
                   <span class="n">pf_file</span><span class="p">,</span>
                   <span class="n">elevslope_file</span><span class="p">,</span>
                   <span class="p">]</span>
-    <span class="k">if</span> <span class="n">run_zonal_statistics</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">run_zonal_statistics</span> <span class="ow">and</span> <span class="n">demfile</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">demfile</span><span class="p">):</span>
         <span class="n">files_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">demfile</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">narwidth_shapefile</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">waterbody_shapefiles</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -623,6 +660,7 @@
     <span class="k">if</span> <span class="n">logger</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">()</span>
 
+    <span class="n">outfolder</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">outfolder</span><span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s1">&#39;Preprocessing Flowlines&#39;</span><span class="p">)</span>
 
     <span class="c1"># read NHDPlus files into pandas dataframes</span>
@@ -738,14 +776,20 @@
         <span class="n">logger</span><span class="o">.</span><span class="n">statement</span><span class="p">(</span><span class="s1">&#39;Writing shapefile of buffers used to determine distributary routing...&#39;</span><span class="p">)</span>
         <span class="n">flccb</span> <span class="o">=</span> <span class="n">fl</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="n">flccb</span><span class="p">[</span><span class="s1">&#39;geometry&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">flccb</span><span class="o">.</span><span class="n">buffpoly</span>
+        <span class="n">outfile</span> <span class="o">=</span> <span class="s1">&#39;flowlines_</span><span class="si">{}</span><span class="s1">buffers.shp&#39;</span>
+        <span class="k">if</span> <span class="n">asum_thresh</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">outfile</span> <span class="o">=</span> <span class="n">outfile</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;gt</span><span class="si">{</span><span class="n">asum_thresh</span><span class="si">:</span><span class="s1">.0f</span><span class="si">}</span><span class="s1">km_&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">outfile</span> <span class="o">=</span> <span class="n">outfile</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
         <span class="n">df2shp</span><span class="p">(</span><span class="n">flccb</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s1">&#39;buffpoly&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
-               <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">outfolder</span><span class="p">,</span> <span class="s1">&#39;flowlines_gt</span><span class="si">{:.0f}</span><span class="s1">km_buffers.shp&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">asum_thresh</span><span class="p">)),</span>
+               <span class="n">outfolder</span> <span class="o">/</span> <span class="n">outfile</span><span class="p">,</span>
                <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">epsg</span><span class="o">=</span><span class="n">project_epsg</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">assert</span> <span class="n">Path</span><span class="p">(</span><span class="n">flowline_elevations_file</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">(),</span> \
-            <span class="p">(</span><span class="s2">&quot;If run_zonal_statistics=False a flowline_elevations_file produced by&quot;</span>
-             <span class="s2">&quot;a previous run of the sfrmaker.preprocessing.preprocess_nhdplus() &quot;</span>
-             <span class="s2">&quot;function is needed.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">Path</span><span class="p">(</span><span class="n">flowline_elevations_file</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;If run_zonal_statistics=False a flowline_elevations_file produced by&quot;</span>
+                <span class="s2">&quot;a previous run of the sfrmaker.preprocessing.preprocess_nhdplus() &quot;</span>
+                <span class="s2">&quot;function is needed.&quot;</span><span class="p">)</span>
         <span class="n">flccb</span> <span class="o">=</span> <span class="n">shp2df</span><span class="p">(</span><span class="n">flowline_elevations_file</span><span class="p">)</span>
         <span class="n">flccb</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">flccb</span><span class="p">[</span><span class="s1">&#39;COMID&#39;</span><span class="p">]</span>
         <span class="n">flccb</span><span class="p">[</span><span class="s1">&#39;buffpoly&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">flccb</span><span class="p">[</span><span class="s1">&#39;geometry&#39;</span><span class="p">]</span>
@@ -789,6 +833,12 @@
         <span class="n">txt</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> --&gt; </span><span class="si">{}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
 
     <span class="n">logger</span><span class="o">.</span><span class="n">statement</span><span class="p">(</span><span class="n">txt</span><span class="p">)</span>
+
+    <span class="c1"># logger statement if no elevations are available and</span>
+    <span class="c1"># there is no downstream COMID with Divergence == 1</span>
+    <span class="n">no_main_stem_warning</span> <span class="o">=</span> <span class="s1">&#39;warning: no distributaries downstream of COMID </span><span class="si">{}</span><span class="s1"> &#39;</span>
+    <span class="n">no_main_stem_warning</span> <span class="o">+=</span> <span class="s1">&#39;with Divergence == 1. Picking the first one: </span><span class="si">{}</span><span class="s1">&#39;</span>
+
     <span class="c1"># dictionary of values for selecting main channel at diversions</span>
     <span class="n">valid_comids</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">flcc</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
     <span class="n">div_elevs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">flcc</span><span class="o">.</span><span class="n">COMID</span><span class="p">,</span> <span class="n">flcc</span><span class="p">[</span><span class="n">elevcol</span><span class="p">]))</span>
@@ -826,9 +876,10 @@
                 <span class="c1"># Divergence == 1 is the main stemp, Divergence == 2 is minor</span>
                 <span class="c1"># (see NHDPlus v2 User&#39;s Guide)</span>
                 <span class="n">info</span> <span class="o">=</span> <span class="n">flcc</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">tocomids_c</span><span class="p">,</span> <span class="s1">&#39;Divergence&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">sort_values</span><span class="p">()</span>
-                <span class="k">assert</span> <span class="n">info</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span>
-                <span class="n">tocomids</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-                <span class="c1">#tocomids[k] = flcc.loc[tocomids_c, &#39;Divergence&#39;].sort_values().index[0]</span>
+                <span class="n">selected_tocomid</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">info</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">statement</span><span class="p">(</span><span class="n">no_main_stem_warning</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">selected_tocomid</span><span class="p">))</span>
+                <span class="n">tocomids</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">selected_tocomid</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">tocomids</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">tocomids_c</span><span class="p">)[</span><span class="n">np</span><span class="o">.</span><span class="n">nanargmin</span><span class="p">(</span><span class="n">dnelevs</span><span class="p">)]</span>
             <span class="c1"># secondary distributaries</span>
@@ -970,7 +1021,8 @@
                                                  <span class="n">b</span><span class="o">=</span><span class="n">width_from_asum_b_param</span><span class="p">,</span>
                                                  <span class="n">minimum_width</span><span class="o">=</span><span class="n">minimum_width</span><span class="p">,</span>
                                                  <span class="n">input_units</span><span class="o">=</span><span class="s1">&#39;km&#39;</span><span class="p">,</span> <span class="n">output_units</span><span class="o">=</span><span class="n">output_length_units</span><span class="p">)</span>
-
+    <span class="n">flcc</span><span class="p">[</span><span class="s1">&#39;width1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">flcc</span><span class="o">.</span><span class="n">width1asum</span>
+    <span class="n">flcc</span><span class="p">[</span><span class="s1">&#39;width2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">flcc</span><span class="o">.</span><span class="n">width2asum</span>
     <span class="k">if</span> <span class="n">narwidth_shapefile</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">narwidth_shapefile</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s2">&quot;narwidth_shapefile: </span><span class="si">{}</span><span class="s2"> not found!&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">narwidth_shapefile</span><span class="p">))</span>
@@ -985,8 +1037,7 @@
                         <span class="n">crs</span><span class="o">=</span><span class="n">project_crs</span><span class="p">,</span>
                         <span class="n">output_width_units</span><span class="o">=</span><span class="n">output_length_units</span><span class="p">)</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s1">&#39;Sampling widths from NARWidth database&#39;</span><span class="p">)</span>
-        <span class="n">flcc</span><span class="p">[</span><span class="s1">&#39;width1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">flcc</span><span class="o">.</span><span class="n">width1asum</span>
-        <span class="n">flcc</span><span class="p">[</span><span class="s1">&#39;width2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">flcc</span><span class="o">.</span><span class="n">width2asum</span>
+
         <span class="n">frac_narwidth</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">flcc</span><span class="o">.</span><span class="n">narwd_mean</span><span class="p">))</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">flcc</span><span class="p">)</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">statement</span><span class="p">(</span><span class="s1">&#39;Flowline widths estimated from arbolate sum: </span><span class="si">{0:.1%}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">frac_narwidth</span><span class="p">),</span> <span class="n">log_time</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">statement</span><span class="p">(</span><span class="s1">&#39;Flowline widths sampled from NARWidth: </span><span class="si">{0:.1%}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">frac_narwidth</span><span class="p">),</span> <span class="n">log_time</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
@@ -1000,8 +1051,12 @@
         
     <span class="c1"># write output files; record timestamps in logger</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">statement</span><span class="p">(</span><span class="s1">&#39;writing output&#39;</span><span class="p">)</span>
-    <span class="n">df2shp</span><span class="p">(</span><span class="n">flcc</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s1">&#39;buffpoly&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
-           <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">/flowlines_gt</span><span class="si">{:.0f}</span><span class="s1">km_edited.shp&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">outfolder</span><span class="p">,</span> <span class="n">asum_thresh</span><span class="p">),</span>
+    <span class="n">outfile</span> <span class="o">=</span> <span class="s1">&#39;preprocessed_flowlines</span><span class="si">{}</span><span class="s1">.shp&#39;</span>
+    <span class="k">if</span> <span class="n">asum_thresh</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">outfile</span> <span class="o">=</span> <span class="n">outfile</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;_gt</span><span class="si">{</span><span class="n">asum_thresh</span><span class="si">:</span><span class="s1">.0f</span><span class="si">}</span><span class="s1">km&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">outfile</span> <span class="o">=</span> <span class="n">outfile</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="n">df2shp</span><span class="p">(</span><span class="n">flcc</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s1">&#39;buffpoly&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">outfolder</span> <span class="o">/</span> <span class="n">outfile</span><span class="p">,</span>
            <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">epsg</span><span class="o">=</span><span class="n">project_epsg</span><span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s1">&#39;Preprocessing Flowlines&#39;</span><span class="p">)</span>
 
@@ -1571,7 +1626,7 @@
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Aug 01, 2022.
+      <span class="lastupdated">Last updated on Dec 15, 2022.
       </span></p>
   </div>
 

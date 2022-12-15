@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>sfrmaker.lines &mdash; SFRmaker 0.9.1.post12.dev0+g60ab2e5 documentation</title>
+  <title>sfrmaker.lines &mdash; SFRmaker 0.9.1.post27.dev0+gdd7b388 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
@@ -17,6 +17,7 @@
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
         <script src="../../_static/clipboard.min.js"></script>
         <script src="../../_static/copybutton.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -33,7 +34,7 @@
             <a href="../../index.html" class="icon icon-home"> SFRmaker
           </a>
               <div class="version">
-                0.9.1.post12.dev0+g60ab2e5
+                0.9.1.post27.dev0+gdd7b388
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -84,9 +85,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../index.html">Module code</a> &raquo;</li>
-      <li>sfrmaker.lines</li>
+      <li><a href="../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">sfrmaker.lines</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -175,6 +176,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_geometry_length_units</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_routing</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># dictionary of routing connections</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_last_routing_dict_update</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_current_df_routing</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_current_df_routing_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_paths</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># routing sequence from each segment to outlet</span>
 
         <span class="c1"># dictionary of elevations at the upstream ends of flowlines</span>
@@ -189,13 +193,14 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">valid_units</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;feet&#39;</span><span class="p">:</span> <span class="s1">&#39;feet&#39;</span><span class="p">,</span>
                        <span class="s1">&#39;foot&#39;</span><span class="p">:</span> <span class="s1">&#39;feet&#39;</span><span class="p">,</span>
+                       <span class="s1">&#39;us-ft&#39;</span><span class="p">:</span> <span class="s1">&#39;feet&#39;</span><span class="p">,</span>
                        <span class="s1">&#39;meters&#39;</span><span class="p">:</span> <span class="s1">&#39;meters&#39;</span><span class="p">,</span>
-                       <span class="s1">&#39;metre&#39;</span><span class="p">:</span> <span class="s1">&#39;meters&#39;</span><span class="p">}</span>
+                       <span class="s1">&#39;meter&#39;</span><span class="p">:</span> <span class="s1">&#39;meters&#39;</span><span class="p">}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_geometry_length_units</span> <span class="o">=</span> <span class="n">valid_units</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">axis_info</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">unit_name</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_geometry_length_units</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Warning: No length units specified in CRS for input LineStrings &quot;</span>
-                  <span class="s2">&quot;or length units not recognized&quot;</span>
-                  <span class="s2">&quot;defaulting to meters.&quot;</span><span class="p">)</span>
+                  <span class="s2">&quot;or length units not recognized. &quot;</span>
+                  <span class="s2">&quot;Defaulting to meters.&quot;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_geometry_length_units</span> <span class="o">=</span> <span class="s1">&#39;meters&#39;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_geometry_length_units</span>
 
@@ -204,6 +209,20 @@
         <span class="sd">&quot;&quot;&quot;Dictionary of routing connections from ids (keys)</span>
 <span class="sd">        to to_ids (values).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_df_routing</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># Goal is to incorporate any updates in line dataframe</span>
+            <span class="c1"># into routing dictionary</span>
+            <span class="c1"># if user is trying to update the dataframe from the routing dict</span>
+            <span class="c1"># recursion can occur</span>
+            <span class="c1"># this checks the last time that self._routing_changed method</span>
+            <span class="c1"># recorded different routing information in the dataframe</span>
+            <span class="c1"># compared to a cached copy (_current_df_routing)</span>
+            <span class="c1"># if the routing dictionary was updated more recently,</span>
+            <span class="c1"># we can assume that updates haven&#39;t been made to the routing</span>
+            <span class="c1"># in the dataframe</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_last_routing_dict_update</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> \
+                <span class="bp">self</span><span class="o">.</span><span class="n">_last_routing_dict_update</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_df_routing_time</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_routing</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_routing</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_routing_changed</span><span class="p">():</span>
             <span class="n">toid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">toid</span><span class="o">.</span><span class="n">values</span>
             <span class="c1"># check whether or not routing is</span>
@@ -222,9 +241,14 @@
                                      <span class="n">one_to_many</span><span class="o">=</span><span class="ow">not</span> <span class="n">to_one</span><span class="p">)</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">to_one</span><span class="p">:</span>
                     <span class="n">routing</span> <span class="o">=</span> <span class="n">pick_toids</span><span class="p">(</span><span class="n">routing</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">elevup</span><span class="p">)</span>
+                <span class="c1"># set toids not in routing dataset to 0</span>
+                <span class="c1"># (outlet condition)</span>
+                <span class="n">routing</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">routing</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">else</span> <span class="mi">0</span> 
+                            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">routing</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">routing</span> <span class="o">=</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">id</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span> <span class="mi">0</span><span class="p">}</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_routing</span> <span class="o">=</span> <span class="n">routing</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_last_routing_dict_update</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_routing</span>
 
     <span class="nd">@property</span>
@@ -250,6 +274,10 @@
         <span class="c1"># compare the private routing attribute</span>
         <span class="c1"># to current values in reach data</span>
         <span class="n">df_routing</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">toid</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">df_routing</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_routing</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">df_routing</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_df_routing</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_current_df_routing</span> <span class="o">=</span> <span class="n">df_routing</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_current_df_routing_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">df_routing</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_routing</span>
 
 <div class="viewcode-block" id="Lines.cull"><a class="viewcode-back" href="../../api/sfrmaker.lines.html#sfrmaker.lines.Lines.cull">[docs]</a>    <span class="k">def</span> <span class="nf">cull</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">feature</span><span class="p">,</span> <span class="n">simplify</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -390,6 +418,27 @@
             <span class="n">column_order</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">)</span>
             <span class="n">column_order</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s1">&#39;j&#39;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">reach_data</span><span class="p">[</span><span class="n">column_order</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="Lines.make_routing_one_to_one"><a class="viewcode-back" href="../../api/sfrmaker.lines.html#sfrmaker.lines.Lines.make_routing_one_to_one">[docs]</a>    <span class="k">def</span> <span class="nf">make_routing_one_to_one</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="c1"># convert routing connections (toid column) from lists (one-to-many)</span>
+        <span class="c1"># to ints (one-to-one or many-to-one)</span>
+        <span class="n">routing</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">routing</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="c1"># one to many routing is not supported</span>
+        <span class="n">to_one</span> <span class="o">=</span> <span class="n">is_to_one</span><span class="p">(</span><span class="n">routing</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+        <span class="k">assert</span> <span class="n">to_one</span><span class="p">,</span> <span class="s2">&quot;routing is still one-to-many&quot;</span>
+        <span class="c1"># if not to_one:</span>
+        <span class="c1">#    routing = pick_toids(routing, elevup)</span>
+        <span class="n">valid_ids</span> <span class="o">=</span> <span class="n">routing</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+        <span class="c1"># df.toid column is basis for routing attributes</span>
+        <span class="c1"># all paths terminating in invalid toids (outside of the model)</span>
+        <span class="c1"># will be none; set invalid toids = 0</span>
+        <span class="c1"># TODO: write a test for pick_toids if some IDs route to more than one connection</span>
+        <span class="k">assert</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">([</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">routing</span><span class="o">.</span><span class="n">items</span><span class="p">()]),</span> <span class="s2">&quot;one to many routing not supported&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">toid</span> <span class="o">=</span> <span class="p">[</span><span class="n">routing</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">if</span> <span class="n">routing</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">in</span> <span class="n">valid_ids</span> <span class="k">else</span> <span class="mi">0</span>
+                        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">id</span><span class="o">.</span><span class="n">tolist</span><span class="p">()]</span></div>
 
 <div class="viewcode-block" id="Lines.to_crs"><a class="viewcode-back" href="../../api/sfrmaker.lines.html#sfrmaker.lines.Lines.to_crs">[docs]</a>    <span class="k">def</span> <span class="nf">to_crs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dest_crs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Reproject the LineStrings in :py:attr:`Lines.df` to</span>
@@ -899,9 +948,9 @@
 
         <span class="k">if</span> <span class="n">flopy</span> <span class="ow">and</span> <span class="n">active_area</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">isfr</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">version</span> <span class="o">==</span> <span class="s1">&#39;mf6&#39;</span><span class="p">:</span>
-                <span class="n">isfr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">idomain</span><span class="o">.</span><span class="n">array</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
+                <span class="n">isfr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">idomain</span><span class="o">.</span><span class="n">array</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">isfr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">bas6</span><span class="o">.</span><span class="n">ibound</span><span class="o">.</span><span class="n">array</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
+                <span class="n">isfr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">bas6</span><span class="o">.</span><span class="n">ibound</span><span class="o">.</span><span class="n">array</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
         <span class="k">if</span> <span class="n">flopy</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">flopy</span><span class="o">.</span><span class="n">discretization</span><span class="o">.</span><span class="n">StructuredGrid</span><span class="p">):</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Creating grid class instance from flopy Grid instance...&#39;</span><span class="p">)</span>
             <span class="n">ta</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
@@ -937,23 +986,7 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">package_name</span> <span class="o">=</span> <span class="s1">&#39;model&#39;</span>
 
-        <span class="c1"># convert routing connections (toid column) from lists (one-to-many)</span>
-        <span class="c1"># to ints (one-to-one or many-to-one)</span>
-        <span class="n">routing</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">routing</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-
-        <span class="c1"># one to many routing is not supported</span>
-        <span class="n">to_one</span> <span class="o">=</span> <span class="n">is_to_one</span><span class="p">(</span><span class="n">routing</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
-        <span class="k">assert</span> <span class="n">to_one</span><span class="p">,</span> <span class="s2">&quot;routing is still one-to-many&quot;</span>
-        <span class="c1"># if not to_one:</span>
-        <span class="c1">#    routing = pick_toids(routing, elevup)</span>
-        <span class="n">valid_ids</span> <span class="o">=</span> <span class="n">routing</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
-        <span class="c1"># df.toid column is basis for routing attributes</span>
-        <span class="c1"># all paths terminating in invalid toids (outside of the model)</span>
-        <span class="c1"># will be none; set invalid toids = 0</span>
-        <span class="c1"># TODO: write a test for pick_toids if some IDs route to more than one connection</span>
-        <span class="k">assert</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">([</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">routing</span><span class="o">.</span><span class="n">items</span><span class="p">()]),</span> <span class="s2">&quot;one to many routing not supported&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">toid</span> <span class="o">=</span> <span class="p">[</span><span class="n">routing</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">if</span> <span class="n">routing</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">in</span> <span class="n">valid_ids</span> <span class="k">else</span> <span class="mi">0</span>
-                        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">id</span><span class="o">.</span><span class="n">tolist</span><span class="p">()]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">make_routing_one_to_one</span><span class="p">()</span>
 
         <span class="c1"># intersect lines with model grid to get preliminary reaches</span>
         <span class="n">rd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">intersect</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
@@ -1191,7 +1224,7 @@
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Aug 01, 2022.
+      <span class="lastupdated">Last updated on Dec 15, 2022.
       </span></p>
   </div>
 

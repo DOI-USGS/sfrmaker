@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>The Preprocessing Module &mdash; SFRmaker 0.9.1.post12.dev0+g60ab2e5 documentation</title>
+  <title>The Preprocessing Module &mdash; SFRmaker 0.9.1.post27.dev0+gdd7b388 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
@@ -18,6 +18,7 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
         <script src="../_static/clipboard.min.js"></script>
         <script src="../_static/copybutton.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -38,7 +39,7 @@
             <a href="../index.html" class="icon icon-home"> SFRmaker
           </a>
               <div class="version">
-                0.9.1.post12.dev0+g60ab2e5
+                0.9.1.post27.dev0+gdd7b388
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -72,7 +73,18 @@
 <li class="toctree-l2"><a class="reference internal" href="sfrmaker.lines.html">Lines Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="sfrmaker.mf5to6.html">MODFLOW-2005 to 6 Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="sfrmaker.observations.html">Observations Module</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Preprocessing Module</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Preprocessing Module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#sfrmaker.preprocessing.clip_flowlines_to_polygon"><code class="docutils literal notranslate"><span class="pre">clip_flowlines_to_polygon()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sfrmaker.preprocessing.cull_flowlines"><code class="docutils literal notranslate"><span class="pre">cull_flowlines()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sfrmaker.preprocessing.edit_flowlines"><code class="docutils literal notranslate"><span class="pre">edit_flowlines()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sfrmaker.preprocessing.fix_invalid_asums"><code class="docutils literal notranslate"><span class="pre">fix_invalid_asums()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sfrmaker.preprocessing.get_flowline_routing"><code class="docutils literal notranslate"><span class="pre">get_flowline_routing()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sfrmaker.preprocessing.preprocess_nhdplus"><code class="docutils literal notranslate"><span class="pre">preprocess_nhdplus()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sfrmaker.preprocessing.recompute_asums_for_minor_distribs"><code class="docutils literal notranslate"><span class="pre">recompute_asums_for_minor_distribs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sfrmaker.preprocessing.sample_NARWidth"><code class="docutils literal notranslate"><span class="pre">sample_NARWidth()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sfrmaker.preprocessing.swb_runoff_to_csv"><code class="docutils literal notranslate"><span class="pre">swb_runoff_to_csv()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="sfrmaker.sfrdata.html">SFRData Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="sfrmaker.utils.html">Utilities Module</a></li>
 </ul>
@@ -99,9 +111,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="index.html">Modules</a> &raquo;</li>
-      <li>The Preprocessing Module</li>
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Modules</a></li>
+      <li class="breadcrumb-item active">The Preprocessing Module</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/api/sfrmaker.preprocessing.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -149,8 +161,8 @@ features in polygon.</p>
 </dd>
 <dt><strong>crs</strong><span class="classifier">obj</span></dt><dd><p>Coordinate reference system of flowlines. Only needed if
 the data do not have a valid ESRI projection (.prj) file.
-A Python int, dict, str, or <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.3.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> instance
-passed to <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input" title="(in pyproj v3.3.1)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.crs.CRS.from_user_input()</span></code></a></p>
+A Python int, dict, str, or <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.4.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> instance
+passed to <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input" title="(in pyproj v3.4.1)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.crs.CRS.from_user_input()</span></code></a></p>
 <dl class="simple">
 <dt>Can be any of:</dt><dd><ul class="simple">
 <li><p>PROJ string</p></li>
@@ -162,7 +174,7 @@ passed to <a class="reference external" href="https://pyproj4.github.io/pyproj/s
 <li><p>An EPSG integer code [i.e. 4326]</p></li>
 <li><p>A tuple of (“auth_name”: “auth_code”) [i.e (‘epsg’, ‘4326’)]</p></li>
 <li><p>An object with a <cite>to_wkt</cite> method.</p></li>
-<li><p>A <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.3.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> class</p></li>
+<li><p>A <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.4.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> class</p></li>
 </ul>
 </dd>
 </dl>
@@ -172,7 +184,7 @@ passed to <a class="reference external" href="https://pyproj4.github.io/pyproj/s
 must be in the same CRS as flowlines; shapefiles will be automatically reprojected.</p>
 </dd>
 <dt><strong>simplify_tol</strong><span class="classifier">float</span></dt><dd><p>Simplification tolerance for <code class="docutils literal notranslate"><span class="pre">polygon</span></code> to speed clipping.
-See <a class="reference external" href="https://shapely.readthedocs.io/en/latest/manual.html" title="(in Shapely v0)"><span>The Shapely User Manual</span></a> for more details.</p>
+See <a class="reference external" href="https://shapely.readthedocs.io/en/latest/manual.html" title="(in Shapely)"><span>The Shapely User Manual</span></a> for more details.</p>
 </dd>
 <dt><strong>logger</strong><span class="classifier">Logger instance</span></dt><dd></dd>
 </dl>
@@ -346,7 +358,7 @@ filepaths, by default None</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="sfrmaker.preprocessing.preprocess_nhdplus">
-<span class="sig-prename descclassname"><span class="pre">sfrmaker.preprocessing.</span></span><span class="sig-name descname"><span class="pre">preprocess_nhdplus</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">flowlines_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pfvaa_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pf_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elevslope_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">demfile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_zonal_statistics</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dem_length_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'meters'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flowline_elevations_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">active_area</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">narwidth_shapefile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">waterbody_shapefiles</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffersize_meters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">asum_thresh</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">known_connections</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">update_up_elevations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">update_dn_elevations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width_from_asum_a_param</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1193</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width_from_asum_b_param</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5032</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimum_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_length_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'meters'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfolder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'output/'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">project_epsg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flowline_crs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dest_crs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/preprocessing.html#preprocess_nhdplus"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.preprocessing.preprocess_nhdplus" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">sfrmaker.preprocessing.</span></span><span class="sig-name descname"><span class="pre">preprocess_nhdplus</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">flowlines_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pfvaa_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pf_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elevslope_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">demfile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_zonal_statistics</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dem_length_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'meters'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flowline_elevations_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">active_area</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">narwidth_shapefile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">waterbody_shapefiles</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffersize_meters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">asum_thresh</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">known_connections</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">update_up_elevations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">update_dn_elevations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width_from_asum_a_param</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1193</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width_from_asum_b_param</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5032</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimum_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_length_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'meters'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfolder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'output/'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">project_epsg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flowline_crs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dest_crs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/preprocessing.html#preprocess_nhdplus"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.preprocessing.preprocess_nhdplus" title="Permalink to this definition">¶</a></dt>
 <dd><p>Preprocess NHDPlus data to a single DataFrame of flowlines
 that each route to no more than one flowline, with width, elevation
 and recomputed arbolate sum attributes. A key part of the preprocessing is handling divergences in the stream network, as described in more detail in the <code class="docutils literal notranslate"><span class="pre">Notes</span></code> section. In picking routing at divergences, values are sampled from the <code class="docutils literal notranslate"><span class="pre">demfile</span></code> and included in the output DataFrame. Optionally (via the <code class="docutils literal notranslate"><span class="pre">narwidth_shapefile</span></code> arguement), remote sensing-based width estimates from the NARWidth Database (Allen and Pavelsky, 2015) can be included.</p>
@@ -442,8 +454,8 @@ Required if the flowlines are not in a valid Projected CRS.</p>
 </dd>
 <dt><strong>flowline_crs</strong><span class="classifier">obj</span></dt><dd><p>Coordinate reference system of the NHDPlus data. Only needed if
 the data do not have a valid ESRI projection (.prj) file.
-A Python int, dict, str, or <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.3.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> instance
-passed to <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input" title="(in pyproj v3.3.1)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.crs.CRS.from_user_input()</span></code></a></p>
+A Python int, dict, str, or <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.4.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> instance
+passed to <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input" title="(in pyproj v3.4.1)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.crs.CRS.from_user_input()</span></code></a></p>
 <dl class="simple">
 <dt>Can be any of:</dt><dd><ul class="simple">
 <li><p>PROJ string</p></li>
@@ -455,7 +467,7 @@ passed to <a class="reference external" href="https://pyproj4.github.io/pyproj/s
 <li><p>An EPSG integer code [i.e. 4326]</p></li>
 <li><p>A tuple of (“auth_name”: “auth_code”) [i.e (‘epsg’, ‘4326’)]</p></li>
 <li><p>An object with a <cite>to_wkt</cite> method.</p></li>
-<li><p>A <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.3.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> class</p></li>
+<li><p>A <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.4.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> class</p></li>
 </ul>
 </dd>
 </dl>
@@ -657,8 +669,8 @@ Flowlines must be in a projected Coordinate reference system (CRS).</p>
 <code class="docutils literal notranslate"><span class="pre">narwidth_shapefile</span></code> is specified.</p>
 </dd>
 <dt><strong>crs</strong><span class="classifier">obj</span></dt><dd><p>Coordinate reference system of flowlines.
-A Python int, dict, str, or <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.3.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> instance
-passed to <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input" title="(in pyproj v3.3.1)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.crs.CRS.from_user_input()</span></code></a></p>
+A Python int, dict, str, or <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.4.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> instance
+passed to <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input" title="(in pyproj v3.4.1)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.crs.CRS.from_user_input()</span></code></a></p>
 <dl class="simple">
 <dt>Can be any of:</dt><dd><ul class="simple">
 <li><p>PROJ string</p></li>
@@ -670,7 +682,7 @@ passed to <a class="reference external" href="https://pyproj4.github.io/pyproj/s
 <li><p>An EPSG integer code [i.e. 4326]</p></li>
 <li><p>A tuple of (“auth_name”: “auth_code”) [i.e (‘epsg’, ‘4326’)]</p></li>
 <li><p>An object with a <cite>to_wkt</cite> method.</p></li>
-<li><p>A <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.3.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> class</p></li>
+<li><p>A <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.4.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> class</p></li>
 </ul>
 </dd>
 </dl>
@@ -756,7 +768,7 @@ by default ‘meters’</p>
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Aug 01, 2022.
+      <span class="lastupdated">Last updated on Dec 15, 2022.
       </span></p>
   </div>
 

@@ -2,6 +2,14 @@
 Release History
 ===============
 
+Version 0.9.2 (2022-08-01)
+--------------------------
+* add support for python 3.10; drop support for 3.8
+* Bug fixes:
+  * fix issue with SFRData where MODFLOW 6 datasets weren't being updated with any changes made to SFRdata
+  * fix issue with empty elevation lists when determining routing
+
+
 Version 0.9.1 (2021-12-30)
 --------------------------
 * Added support for NHDPlus High Resolution

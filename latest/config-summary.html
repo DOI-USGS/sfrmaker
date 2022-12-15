@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SFRmaker configuration file options &mdash; SFRmaker 0.9.1.post12.dev0+g60ab2e5 documentation</title>
+  <title>SFRmaker configuration file options &mdash; SFRmaker 0.9.1.post27.dev0+gdd7b388 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
@@ -18,6 +18,7 @@
         <script src="_static/underscore.js"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
         <script src="_static/clipboard.min.js"></script>
         <script src="_static/copybutton.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -36,7 +37,7 @@
             <a href="index.html" class="icon icon-home"> SFRmaker
           </a>
               <div class="version">
-                0.9.1.post12.dev0+g60ab2e5
+                0.9.1.post27.dev0+gdd7b388
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -87,8 +88,8 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>SFRmaker configuration file options</li>
+      <li><a href="index.html" class="icon icon-home"></a></li>
+      <li class="breadcrumb-item active">SFRmaker configuration file options</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/config-summary.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -124,7 +125,7 @@
 </style>
 <section id="sfrmaker-configuration-file-options">
 <h1>SFRmaker configuration file options<a class="headerlink" href="#sfrmaker-configuration-file-options" title="Permalink to this heading">¶</a></h1>
-<p>Below is a comprehensive summary of the input options supported in the SFRmaker configuration file. Most keys in the YAML blocks represent arguments to methods within SFRmaker or <a class="reference external" href="https://flopy.readthedocs.io/en/latest/source/modules.html#flopy" title="(in flopy Documentation v3.3.6)"><span class="xref std std-ref">Flopy</span></a>. Additional description of method arguments is available in the <a class="reference internal" href="api/index.html#modules"><span class="std std-ref">SFRmaker code reference</span></a> and <a class="reference external" href="https://flopy.readthedocs.io/en/latest/source/modules.html#flopy" title="(in flopy Documentation v3.3.6)"><span class="xref std std-ref">Flopy documentation</span></a>.</p>
+<p>Below is a comprehensive summary of the input options supported in the SFRmaker configuration file. Most keys in the YAML blocks represent arguments to methods within SFRmaker or <a class="reference external" href="https://flopy.readthedocs.io/en/latest/source/modules.html#flopy" title="(in FloPy Documentation v3.3.7)"><span class="xref std std-ref">Flopy</span></a>. Additional description of method arguments is available in the <a class="reference internal" href="api/index.html#modules"><span class="std std-ref">SFRmaker code reference</span></a> and <a class="reference external" href="https://flopy.readthedocs.io/en/latest/source/modules.html#flopy" title="(in FloPy Documentation v3.3.7)"><span class="xref std std-ref">Flopy documentation</span></a>.</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="linenos">  1</span><span class="c1"># Summary of SFRmaker configuration file options</span><span class="w"></span>
 <span class="linenos">  2</span>
 <span class="linenos">  3</span><span class="nt">package_version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mf6</span><span class="w">  </span><span class="c1"># mf6, mfnwt or mf2005</span><span class="w"></span>
@@ -191,7 +192,7 @@
 <span class="linenos"> 64</span><span class="w">  </span><span class="c1"># (MODFLOW-6 only; arguments to flopy.mf6.MFSimulation.load):</span><span class="w"></span>
 <span class="linenos"> 65</span><span class="w">  </span><span class="nt">sim_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">modflowsim</span><span class="w"></span>
 <span class="linenos"> 66</span><span class="w">  </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mf6</span><span class="w"></span>
-<span class="linenos"> 67</span><span class="w">  </span><span class="nt">exe_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mf6.exe</span><span class="w"></span>
+<span class="linenos"> 67</span><span class="w">  </span><span class="nt">exe_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mf6</span><span class="w"></span>
 <span class="linenos"> 68</span><span class="w">  </span><span class="nt">sim_ws</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">.</span><span class="w"></span>
 <span class="linenos"> 69</span><span class="w">  </span><span class="nt">strict</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"></span>
 <span class="linenos"> 70</span><span class="w">  </span><span class="nt">verbosity_level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"></span>
@@ -204,7 +205,7 @@
 <span class="linenos"> 77</span><span class="w">  </span><span class="c1"># (arguments to flopy.modflow.Modflow.load):</span><span class="w"></span>
 <span class="linenos"> 78</span><span class="w">  </span><span class="nt">namefile</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span><span class="w">  </span><span class="c1"># &quot;f&quot; argument in flopy</span><span class="w"></span>
 <span class="linenos"> 79</span><span class="w">  </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mf2005</span><span class="w"></span>
-<span class="linenos"> 80</span><span class="w">  </span><span class="nt">exe_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mf2005.exe</span><span class="w"></span>
+<span class="linenos"> 80</span><span class="w">  </span><span class="nt">exe_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mf2005</span><span class="w"></span>
 <span class="linenos"> 81</span><span class="w">  </span><span class="nt">verbose</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w"></span>
 <span class="linenos"> 82</span><span class="w">  </span><span class="nt">model_ws</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">.</span><span class="w"></span>
 <span class="linenos"> 83</span><span class="w">  </span><span class="nt">load_only</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span><span class="w"></span>
@@ -294,7 +295,7 @@
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Aug 01, 2022.
+      <span class="lastupdated">Last updated on Dec 15, 2022.
       </span></p>
   </div>
 
