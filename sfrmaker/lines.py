@@ -849,7 +849,7 @@ class Lines:
 
         if flopy and active_area is None and isfr is None and model is not None:
             if model.version == 'mf6':
-                isfr = np.sum(model.dis.idomain.array == 1, axis=0) > 0
+                isfr = np.sum(model.dis.idomain.array > 0, axis=0) > 0
             else:
                 isfr = np.sum(model.bas6.ibound.array > 0, axis=0) > 0
         if flopy and isinstance(grid, flopy.discretization.StructuredGrid):
