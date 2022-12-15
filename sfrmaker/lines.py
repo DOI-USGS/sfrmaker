@@ -94,14 +94,13 @@ class Lines:
         """
         valid_units = {'feet': 'feet',
                        'foot': 'feet',
-                       'us-ft': 'feet',
                        'meters': 'meters',
-                       'meter': 'meters'}
+                       'metre': 'meters'}
         self._geometry_length_units = valid_units.get(self.crs.axis_info[0].unit_name)
         if self._geometry_length_units is None:
             print("Warning: No length units specified in CRS for input LineStrings "
-                  "or length units not recognized. "
-                  "Defaulting to meters.")
+                  "or length units not recognized"
+                  "defaulting to meters.")
             self._geometry_length_units = 'meters'
         return self._geometry_length_units
 
@@ -671,7 +670,7 @@ class Lines:
 
     @classmethod
     def from_nhdplus_hr(cls, NHDPlusHR_paths, filter=None, 
-                        drop_fcodes=None, crs=None, 
+                        drop_fcodes=None, drop_ftypes=None, drop_NHDids=None, crs=None,
                         epsg=None, proj_str=None):
         """
         Parameters
@@ -694,7 +693,13 @@ class Lines:
             water pipelines from line network::
                 
                 drop_fcodes = [42803, 42814]
-                
+        drop_ftypes : int or list of ints, optional
+            ftype or list of NHDFlowline FType to drop from network.
+            For example, to remove all pipelines from line network::
+
+                drop_fcodes = [428]
+        drop_NHDids : int or list of ints, optional
+            NHDid or list of NHDFlowline NHDid to drop from network.
         crs : obj, optional
             Coordinate reference object to reproject NHDPlus High Resolution 
             flowlines. A Python int, dict, str, or :class:`pyproj.crs.CRS` 
@@ -722,7 +727,7 @@ class Lines:
         ==========
         lines : :class:`Lines` instance
         """
-        df, gdb_crs = load_nhdplus_hr(NHDPlusHR_paths, filter = filter, drop_fcodes=drop_fcodes)
+        df, gdb_crs = load_nhdplus_hr(NHDPlusHR_paths, filter=filter, drop_fcodes=drop_fcodes, drop_ftypes=drop_ftypes, drop_NHDids=drop_NHDids)
 
         #  check to see if flowline geodataframe needs to be reprojected, and get new CRS
         if crs is not None or epsg is not None or proj_str is not None:
@@ -851,7 +856,7 @@ class Lines:
             if model.version == 'mf6':
                 isfr = np.sum(model.dis.idomain.array > 0, axis=0) > 0
             else:
-                isfr = np.sum(model.bas6.ibound.array > 0, axis=0) > 0
+                isfr = np.sum(model.bas6.ibound.array == 1, axis=0) > 0
         if flopy and isinstance(grid, flopy.discretization.StructuredGrid):
             print('\nCreating grid class instance from flopy Grid instance...')
             ta = time.time()
