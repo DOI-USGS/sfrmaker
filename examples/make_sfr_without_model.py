@@ -4,8 +4,7 @@ using a shapefile to specify the grid. Reaches will
 be assigned to layer 1 by default, and Flopy diagnostics that
 only involved the SFR package can still be run.
 """
-import os
-
+from pathlib import Path
 from sfrmaker import Lines, StructuredGrid
 
 # NHDPlus input files (see the input requirements in the SFRmaker readme file
@@ -21,9 +20,8 @@ flowlines = ['{}/NHDFlowlines.shp'.format(data_dir)]
 dem = '{}/dem_26715.tif'.format(data_dir)
 
 # output folder
-outdir = 'temp/'
-if not os.path.isdir(outdir):
-    os.mkdir(outdir)
+outdir = Path('temp/')
+outdir.mkdir(exist_ok=True)
 
 # make an instance of the sfrmaker.lines class from NHDPlus data
 # use a shapefile of the model grid to filter what is read in
