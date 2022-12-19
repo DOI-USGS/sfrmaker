@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>sfrmaker.preprocessing &mdash; SFRmaker 0.9.1.post27.dev0+gdd7b388 documentation</title>
+  <title>sfrmaker.preprocessing &mdash; SFRmaker 0.9.1.post30.dev0+gadae02f documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
@@ -34,7 +34,7 @@
             <a href="../../index.html" class="icon icon-home"> SFRmaker
           </a>
               <div class="version">
-                0.9.1.post27.dev0+gdd7b388
+                0.9.1.post30.dev0+gadae02f
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -55,6 +55,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../inputs.html"> Input Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../examples.html"> Using SFRmaker with a configuration file</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../notebooks/SFRmaker_demo.html"> Basic Usage in a scripting context</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../notebooks/preprocessing_demo.html"> Preprocessing NHDPlus version 2 data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../notebooks/lines_from_NHDPlusHR_demo.html"> Using SFRmaker with NHDPlus High Resolution</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../concepts.html"> Concepts and methods</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../notebooks/sfrmaker_tools.html"> Stand-alone tools</a></li>
@@ -203,7 +204,7 @@
                    <span class="n">cull_isolated</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                    <span class="n">keep_comids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                    <span class="n">outfolder</span><span class="o">=</span><span class="s1">&#39;clipped_flowlines&#39;</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Cull NHDPlus data to an area defined by an ``active_area`` polygon and</span>
+    <span class="sd">&quot;&quot;&quot;Cull NHDPlus version2 data to an area defined by an ``active_area`` polygon and</span>
 <span class="sd">    to flowlines with Arbolate sums greater than specified thresholds. Also remove</span>
 <span class="sd">    lines that are isolated from the stream network or are missing attribute information.</span>
 
@@ -255,7 +256,7 @@
         <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">outfolder</span><span class="p">)</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">statement</span><span class="p">(</span><span class="s1">&#39;created </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">outfolder</span><span class="p">))</span>
 
-    <span class="k">if</span> <span class="n">asum_thresh</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">asum_thresh</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">asum_thresh</span> <span class="o">&gt;</span> <span class="mf">0.</span><span class="p">:</span>
         <span class="n">version</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;_gt</span><span class="si">{</span><span class="n">asum_thresh</span><span class="si">:</span><span class="s1">.0f</span><span class="si">}</span><span class="s1">km&#39;</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">version</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
@@ -458,7 +459,7 @@
                        <span class="n">minimum_width</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span>
                        <span class="n">output_length_units</span><span class="o">=</span><span class="s1">&#39;meters&#39;</span><span class="p">,</span>
                        <span class="n">logger</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">outfolder</span><span class="o">=</span><span class="s1">&#39;output/&#39;</span><span class="p">,</span>
-                       <span class="n">project_epsg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">flowline_crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dest_crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                       <span class="n">flowline_crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dest_crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                        <span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Preprocess NHDPlus data to a single DataFrame of flowlines</span>
 <span class="sd">    that each route to no more than one flowline, with width, elevation</span>
@@ -470,7 +471,7 @@
 <span class="sd">        Path to NHDPlus NHDFlowline shapefile. May or maybe not have been</span>
 <span class="sd">        preprocessed by :func:`~sfrmaker.preprocessing.cull_flowlines`. The flowlines</span>
 <span class="sd">        must be in a valid projected coorinate reference system (CRS; i.e., with units of meters),</span>
-<span class="sd">        or a valid projected CRS must be specified with ``project_epsg``.</span>
+<span class="sd">        or a valid projected CRS must be specified with ``flowline_crs``.</span>
 <span class="sd">    pfvaa_file : str</span>
 <span class="sd">        Path to NHDPlus PlusFlowlineVAA database (.dbf file). May or maybe not have been</span>
 <span class="sd">        preprocessed by :func:`~sfrmaker.preprocessing.cull_flowlines`. ``ArbolateSu``</span>
@@ -552,9 +553,6 @@
 <span class="sd">    logger : sfrmaker.logger instance, optional</span>
 <span class="sd">        Pass an existing sfrmaker.logger instance to logger the preprocessing operations,</span>
 <span class="sd">        by default None</span>
-<span class="sd">    project_epsg : int</span>
-<span class="sd">        EPSG code for the output CRS (e.g. 5070 for NAD83 Albers).</span>
-<span class="sd">        Required if the flowlines are not in a valid Projected CRS.</span>
 <span class="sd">    flowline_crs : obj</span>
 <span class="sd">        Coordinate reference system of the NHDPlus data. Only needed if</span>
 <span class="sd">        the data do not have a valid ESRI projection (.prj) file.</span>
@@ -575,7 +573,6 @@
 <span class="sd">    dest_crs : obj</span>
 <span class="sd">        Output Coordinate reference system. Same input types</span>
 <span class="sd">        as ``flowline_crs``.</span>
-<span class="sd">        By default, epsg:5070</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -650,7 +647,7 @@
         <span class="k">if</span> <span class="n">waterbody_shapefiles</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;NARWidth option &quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">waterbody_shapefiles</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">waterbody_shapefiles</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">waterbody_shapefiles</span><span class="p">,</span> <span class="n">Path</span><span class="p">):</span>
                 <span class="n">waterbody_shapefiles</span> <span class="o">=</span> <span class="p">[</span><span class="n">waterbody_shapefiles</span><span class="p">]</span>
             <span class="n">files_list</span> <span class="o">+=</span> <span class="n">waterbody_shapefiles</span>
     <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files_list</span><span class="p">:</span>
@@ -676,20 +673,20 @@
         <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> not found; flowlines must have a valid projection file.&quot;</span>
                <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">prjfile</span><span class="p">))</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">lraise</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">project_epsg</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">dest_crs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">project_crs</span> <span class="o">=</span> <span class="n">get_crs</span><span class="p">(</span><span class="n">epsg</span><span class="o">=</span><span class="n">project_epsg</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="n">dest_crs</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">flowline_crs</span><span class="o">.</span><span class="n">is_geographic</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">project_crs</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">project_crs</span><span class="o">.</span><span class="n">is_geographic</span><span class="p">:</span>
-            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;project_epsg for a valid Projected CRS (i.e. in units of meters)</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="k">if</span> <span class="n">dest_crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">project_crs</span> <span class="o">=</span> <span class="n">get_crs</span><span class="p">(</span><span class="n">crs</span><span class="o">=</span><span class="n">dest_crs</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">project_crs</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">project_crs</span><span class="o">.</span><span class="n">is_geographic</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;dest_crs for a valid Projected CRS (i.e. in units of meters)</span><span class="se">\n</span><span class="s2">&quot;</span>
                    <span class="s2">&quot; must be specified if flowlines are in a Geographic CRS</span><span class="se">\n</span><span class="s2">&quot;</span>
-                   <span class="s2">&quot;specified project_epsg: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">project_epsg</span><span class="p">))</span>
+                   <span class="sa">f</span><span class="s2">&quot;specified dest_crs: </span><span class="si">{</span><span class="n">dest_crs</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">lraise</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    
 
     <span class="c1"># get bounds of flowlines</span>
     <span class="k">with</span> <span class="n">fiona</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">flowlines_file</span><span class="p">)</span> <span class="k">as</span> <span class="n">src</span><span class="p">:</span>
         <span class="n">flowline_bbox</span> <span class="o">=</span> <span class="n">box</span><span class="p">(</span><span class="o">*</span><span class="n">src</span><span class="o">.</span><span class="n">bounds</span><span class="p">)</span>
 
-    <span class="n">fl</span> <span class="o">=</span> <span class="n">shp2df</span><span class="p">(</span><span class="n">flowlines_file</span><span class="p">)</span> <span class="c1"># flowlines clipped to model area</span>
+    <span class="n">fl</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">flowlines_file</span><span class="p">)</span> <span class="c1"># flowlines clipped to model area</span>
     <span class="n">pfvaa</span> <span class="o">=</span> <span class="n">shp2df</span><span class="p">(</span><span class="n">pfvaa_file</span><span class="p">)</span>
     <span class="n">pf</span> <span class="o">=</span> <span class="n">shp2df</span><span class="p">(</span><span class="n">pf_file</span><span class="p">)</span>
     <span class="n">elevslope</span> <span class="o">=</span> <span class="n">shp2df</span><span class="p">(</span><span class="n">elevslope_file</span><span class="p">)</span>
@@ -707,7 +704,8 @@
 
     <span class="c1"># to_crs the flowlines if they are not in project_crs</span>
     <span class="k">if</span> <span class="n">project_crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">flowline_crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">project_crs</span> <span class="o">!=</span> <span class="n">flowline_crs</span><span class="p">:</span>
-        <span class="n">fl</span><span class="p">[</span><span class="s1">&#39;geometry&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">project</span><span class="p">(</span><span class="n">fl</span><span class="o">.</span><span class="n">geometry</span><span class="p">,</span> <span class="n">flowline_crs</span><span class="p">,</span> <span class="n">project_crs</span><span class="p">)</span>
+        <span class="c1">#fl[&#39;geometry&#39;] = project(fl.geometry, flowline_crs, project_crs)</span>
+        <span class="n">fl</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">project_crs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="c1"># option to reuse shapefile from previous run instead of re-running zonal statistics</span>
     <span class="c1"># which can take an hour for large problems</span>
@@ -783,7 +781,7 @@
             <span class="n">outfile</span> <span class="o">=</span> <span class="n">outfile</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
         <span class="n">df2shp</span><span class="p">(</span><span class="n">flccb</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s1">&#39;buffpoly&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
                <span class="n">outfolder</span> <span class="o">/</span> <span class="n">outfile</span><span class="p">,</span>
-               <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">epsg</span><span class="o">=</span><span class="n">project_epsg</span><span class="p">)</span>
+               <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="n">dest_crs</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">Path</span><span class="p">(</span><span class="n">flowline_elevations_file</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
@@ -1046,7 +1044,7 @@
 
     <span class="k">if</span> <span class="n">active_area</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">flcc</span> <span class="o">=</span> <span class="n">clip_flowlines_to_polygon</span><span class="p">(</span><span class="n">flcc</span><span class="p">,</span> <span class="n">active_area</span><span class="p">,</span>
-                                         <span class="n">flowlines_epsg</span><span class="o">=</span><span class="n">project_epsg</span><span class="p">,</span>
+                                         <span class="n">crs</span><span class="o">=</span><span class="n">dest_crs</span><span class="p">,</span>
                                          <span class="n">simplify_tol</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">)</span>
         
     <span class="c1"># write output files; record timestamps in logger</span>
@@ -1057,14 +1055,14 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="n">outfile</span> <span class="o">=</span> <span class="n">outfile</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
     <span class="n">df2shp</span><span class="p">(</span><span class="n">flcc</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s1">&#39;buffpoly&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">outfolder</span> <span class="o">/</span> <span class="n">outfile</span><span class="p">,</span>
-           <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">epsg</span><span class="o">=</span><span class="n">project_epsg</span><span class="p">)</span>
+           <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="n">dest_crs</span><span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s1">&#39;Preprocessing Flowlines&#39;</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">flcc</span></div>
 
 
 <div class="viewcode-block" id="clip_flowlines_to_polygon"><a class="viewcode-back" href="../../api/sfrmaker.preprocessing.html#sfrmaker.preprocessing.clip_flowlines_to_polygon">[docs]</a><span class="k">def</span> <span class="nf">clip_flowlines_to_polygon</span><span class="p">(</span><span class="n">flowlines</span><span class="p">,</span> <span class="n">polygon</span><span class="p">,</span>
-                              <span class="n">flowlines_epsg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                              <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                               <span class="n">simplify_tol</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Clip line features in a flowlines DataFrame to polygon</span>
 <span class="sd">    features in polygon.</span>
@@ -1110,8 +1108,11 @@
 
     <span class="c1"># read in the active area and to_crs to same crs as flowlines</span>
     <span class="n">flowlines_crs</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="k">if</span> <span class="n">flowlines_epsg</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">flowlines_crs</span> <span class="o">=</span> <span class="n">get_crs</span><span class="p">(</span><span class="n">epsg</span><span class="o">=</span><span class="n">flowlines_epsg</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">flowlines_crs</span> <span class="o">=</span> <span class="n">get_crs</span><span class="p">(</span><span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">flowlines</span><span class="p">,</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">):</span>
+        <span class="n">flowlines_crs</span> <span class="o">=</span> <span class="n">flowlines</span><span class="o">.</span><span class="n">crs</span>
+        
     <span class="n">active_area_polygon</span> <span class="o">=</span> <span class="n">read_polygon_feature</span><span class="p">(</span><span class="n">polygon</span><span class="p">,</span> <span class="n">flowlines_crs</span><span class="p">)</span>
 
     <span class="c1"># simplify polygon vertices to speed intersection testing</span>
@@ -1134,7 +1135,7 @@
 
 <div class="viewcode-block" id="sample_NARWidth"><a class="viewcode-back" href="../../api/sfrmaker.preprocessing.html#sfrmaker.preprocessing.sample_NARWidth">[docs]</a><span class="k">def</span> <span class="nf">sample_NARWidth</span><span class="p">(</span><span class="n">flowlines</span><span class="p">,</span> <span class="n">narwidth_shapefile</span><span class="p">,</span> <span class="n">waterbodies</span><span class="p">,</span>
                     <span class="nb">filter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                    <span class="n">flowlines_epsg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                     <span class="n">output_width_units</span><span class="o">=</span><span class="s1">&#39;meters&#39;</span><span class="p">,</span>
                     <span class="n">outpath</span><span class="o">=</span><span class="s1">&#39;shps/&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -1191,7 +1192,7 @@
     <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">outpath</span><span class="p">):</span>
         <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">outpath</span><span class="p">)</span>
 
-    <span class="n">flowline_crs</span> <span class="o">=</span> <span class="n">get_crs</span><span class="p">(</span><span class="n">epsg</span><span class="o">=</span><span class="n">flowlines_epsg</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">)</span>
+    <span class="n">flowline_crs</span> <span class="o">=</span> <span class="n">get_crs</span><span class="p">(</span><span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">flowline_crs</span><span class="o">.</span><span class="n">is_geographic</span><span class="p">:</span>
         <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Flowlines must be in a projected Coordinate Reference System &quot;</span>
                <span class="s2">&quot;(CRS; i.e. with units of meters).&quot;</span><span class="p">)</span>
@@ -1207,7 +1208,7 @@
     <span class="n">buffers</span> <span class="o">=</span> <span class="p">[</span><span class="n">g</span><span class="o">.</span><span class="n">buffer</span><span class="p">(</span><span class="n">buffdist</span><span class="p">)</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">flowlines</span><span class="o">.</span><span class="n">geometry</span><span class="p">]</span>
     <span class="n">flbuff</span> <span class="o">=</span> <span class="n">flowlines</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
     <span class="n">flbuff</span><span class="p">[</span><span class="s1">&#39;geometry&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">buffers</span>
-    <span class="n">df2shp</span><span class="p">(</span><span class="n">flbuff</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">/flowlines_edited_buffers_</span><span class="si">{}</span><span class="s1">.shp&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">outpath</span><span class="p">,</span> <span class="n">buffdist</span><span class="p">),</span> <span class="n">epsg</span><span class="o">=</span><span class="n">flowlines_epsg</span><span class="p">)</span>
+    <span class="n">df2shp</span><span class="p">(</span><span class="n">flbuff</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">/flowlines_edited_buffers_</span><span class="si">{}</span><span class="s1">.shp&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">outpath</span><span class="p">,</span> <span class="n">buffdist</span><span class="p">),</span> <span class="n">crs</span><span class="o">=</span><span class="n">flowline_crs</span><span class="p">)</span>
 
     <span class="c1"># determine which narwidth segments intersect the flowline buffers</span>
     <span class="n">results</span> <span class="o">=</span> <span class="n">intersect_rtree</span><span class="p">(</span><span class="n">nw</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span> <span class="n">flbuff</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
@@ -1273,7 +1274,7 @@
     <span class="n">criteria</span> <span class="o">=</span> <span class="n">rivers_with_widths</span> <span class="o">|</span> <span class="n">wbs</span>
 
     <span class="n">df2shp</span><span class="p">(</span><span class="n">flowlines</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">criteria</span><span class="p">,</span> <span class="p">:],</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">/flowlines_w_sampled_narwidth_elevations.shp&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">outpath</span><span class="p">),</span>
-           <span class="n">epsg</span><span class="o">=</span><span class="n">flowlines_epsg</span><span class="p">)</span></div>
+           <span class="n">crs</span><span class="o">=</span><span class="n">flowline_crs</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="edit_flowlines"><a class="viewcode-back" href="../../api/sfrmaker.preprocessing.html#sfrmaker.preprocessing.edit_flowlines">[docs]</a><span class="k">def</span> <span class="nf">edit_flowlines</span><span class="p">(</span><span class="n">flowlines</span><span class="p">,</span> <span class="n">config_file</span><span class="p">,</span>
@@ -1314,7 +1315,7 @@
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">config_file</span><span class="p">)</span> <span class="k">as</span> <span class="n">src</span><span class="p">:</span>
         <span class="n">cfg</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">Loader</span><span class="o">=</span><span class="n">yaml</span><span class="o">.</span><span class="n">Loader</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">flowlines</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">flowlines</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">flowlines</span><span class="p">,</span> <span class="n">Path</span><span class="p">):</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">log_file_and_date_modified</span><span class="p">(</span><span class="n">flowlines</span><span class="p">)</span>
         <span class="n">df</span> <span class="o">=</span> <span class="n">shp2df</span><span class="p">(</span><span class="n">flowlines</span><span class="p">)</span>
         <span class="c1"># make a backup</span>
@@ -1374,7 +1375,7 @@
     <span class="c1">#notin = set(df[toid_column]).difference(df.index)</span>
 
     <span class="c1"># write out an updated version of the input flowlines file</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">flowlines</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">flowlines</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">flowlines</span><span class="p">,</span> <span class="n">Path</span><span class="p">):</span>
         <span class="n">df2shp</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">flowlines</span><span class="p">,</span> <span class="n">prj</span><span class="o">=</span><span class="n">prj_file</span><span class="p">)</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">statement</span><span class="p">(</span><span class="s1">&#39;wrote </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">flowlines</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">df</span></div>
@@ -1626,7 +1627,7 @@
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Dec 15, 2022.
+      <span class="lastupdated">Last updated on Dec 19, 2022.
       </span></p>
   </div>
 

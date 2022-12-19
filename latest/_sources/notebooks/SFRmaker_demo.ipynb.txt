@@ -13,10 +13,10 @@
    "execution_count": 1,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-12-15T17:12:50.635339Z",
-     "iopub.status.busy": "2022-12-15T17:12:50.635050Z",
-     "iopub.status.idle": "2022-12-15T17:12:51.756896Z",
-     "shell.execute_reply": "2022-12-15T17:12:51.756250Z"
+     "iopub.execute_input": "2022-12-19T15:40:12.615708Z",
+     "iopub.status.busy": "2022-12-19T15:40:12.615199Z",
+     "iopub.status.idle": "2022-12-19T15:40:13.837152Z",
+     "shell.execute_reply": "2022-12-19T15:40:13.836431Z"
     }
    },
    "outputs": [],
@@ -43,10 +43,10 @@
    "execution_count": 2,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-12-15T17:12:51.760752Z",
-     "iopub.status.busy": "2022-12-15T17:12:51.760386Z",
-     "iopub.status.idle": "2022-12-15T17:12:51.764532Z",
-     "shell.execute_reply": "2022-12-15T17:12:51.763970Z"
+     "iopub.execute_input": "2022-12-19T15:40:13.841369Z",
+     "iopub.status.busy": "2022-12-19T15:40:13.840711Z",
+     "iopub.status.idle": "2022-12-19T15:40:13.850281Z",
+     "shell.execute_reply": "2022-12-19T15:40:13.848149Z"
     }
    },
    "outputs": [],
@@ -66,10 +66,10 @@
    "execution_count": 3,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-12-15T17:12:51.767300Z",
-     "iopub.status.busy": "2022-12-15T17:12:51.767098Z",
-     "iopub.status.idle": "2022-12-15T17:12:51.769894Z",
-     "shell.execute_reply": "2022-12-15T17:12:51.769280Z"
+     "iopub.execute_input": "2022-12-19T15:40:13.854036Z",
+     "iopub.status.busy": "2022-12-19T15:40:13.853507Z",
+     "iopub.status.idle": "2022-12-19T15:40:13.857438Z",
+     "shell.execute_reply": "2022-12-19T15:40:13.856742Z"
     }
    },
    "outputs": [],
@@ -93,10 +93,10 @@
    "execution_count": 4,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-12-15T17:12:51.772850Z",
-     "iopub.status.busy": "2022-12-15T17:12:51.772649Z",
-     "iopub.status.idle": "2022-12-15T17:12:51.902090Z",
-     "shell.execute_reply": "2022-12-15T17:12:51.901337Z"
+     "iopub.execute_input": "2022-12-19T15:40:13.861026Z",
+     "iopub.status.busy": "2022-12-19T15:40:13.860439Z",
+     "iopub.status.idle": "2022-12-19T15:40:14.008970Z",
+     "shell.execute_reply": "2022-12-19T15:40:14.007944Z"
     }
    },
    "outputs": [
@@ -122,7 +122,7 @@
       "reading ../tylerforks/NHDPlus/NHDPlusAttributes/elevslope.dbf...\n",
       "--> building dataframe... (may take a while for large shapefiles)\n",
       "\n",
-      "load finished in 0.08s\n",
+      "load finished in 0.09s\n",
       "\n",
       "Getting routing information from NHDPlus Plusflow table...\n",
       "finished in 0.04s\n",
@@ -147,10 +147,10 @@
    "execution_count": 5,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-12-15T17:12:51.940174Z",
-     "iopub.status.busy": "2022-12-15T17:12:51.939600Z",
-     "iopub.status.idle": "2022-12-15T17:12:52.030282Z",
-     "shell.execute_reply": "2022-12-15T17:12:52.029578Z"
+     "iopub.execute_input": "2022-12-19T15:40:14.047959Z",
+     "iopub.status.busy": "2022-12-19T15:40:14.047410Z",
+     "iopub.status.idle": "2022-12-19T15:40:14.146839Z",
+     "shell.execute_reply": "2022-12-19T15:40:14.146160Z"
     }
    },
    "outputs": [
@@ -174,10 +174,10 @@
       "reading ../tylerforks/NHDPlus/NHDPlusAttributes/elevslope.dbf...\n",
       "--> building dataframe... (may take a while for large shapefiles)\n",
       "\n",
-      "load finished in 0.04s\n",
+      "load finished in 0.05s\n",
       "\n",
       "Getting routing information from NHDPlus Plusflow table...\n",
-      "finished in 0.04s\n",
+      "finished in 0.03s\n",
       "\n"
      ]
     }
@@ -203,10 +203,10 @@
    "execution_count": 6,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-12-15T17:12:52.033600Z",
-     "iopub.status.busy": "2022-12-15T17:12:52.033180Z",
-     "iopub.status.idle": "2022-12-15T17:12:55.794906Z",
-     "shell.execute_reply": "2022-12-15T17:12:55.794116Z"
+     "iopub.execute_input": "2022-12-19T15:40:14.150420Z",
+     "iopub.status.busy": "2022-12-19T15:40:14.150138Z",
+     "iopub.status.idle": "2022-12-19T15:40:18.111903Z",
+     "shell.execute_reply": "2022-12-19T15:40:18.111228Z"
     }
    },
    "outputs": [
@@ -251,10 +251,10 @@
    "execution_count": 7,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-12-15T17:12:55.798655Z",
-     "iopub.status.busy": "2022-12-15T17:12:55.798419Z",
-     "iopub.status.idle": "2022-12-15T17:12:55.802311Z",
-     "shell.execute_reply": "2022-12-15T17:12:55.801697Z"
+     "iopub.execute_input": "2022-12-19T15:40:18.116354Z",
+     "iopub.status.busy": "2022-12-19T15:40:18.115764Z",
+     "iopub.status.idle": "2022-12-19T15:40:18.120419Z",
+     "shell.execute_reply": "2022-12-19T15:40:18.119790Z"
     }
    },
    "outputs": [],
@@ -285,10 +285,10 @@
    "execution_count": 8,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-12-15T17:12:55.805163Z",
-     "iopub.status.busy": "2022-12-15T17:12:55.804955Z",
-     "iopub.status.idle": "2022-12-15T17:12:56.443590Z",
-     "shell.execute_reply": "2022-12-15T17:12:56.442472Z"
+     "iopub.execute_input": "2022-12-19T15:40:18.123910Z",
+     "iopub.status.busy": "2022-12-19T15:40:18.123372Z",
+     "iopub.status.idle": "2022-12-19T15:40:18.896894Z",
+     "shell.execute_reply": "2022-12-19T15:40:18.896202Z"
     }
    },
    "outputs": [
@@ -325,17 +325,17 @@
    "execution_count": 9,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-12-15T17:12:56.447000Z",
-     "iopub.status.busy": "2022-12-15T17:12:56.446729Z",
-     "iopub.status.idle": "2022-12-15T17:12:56.600168Z",
-     "shell.execute_reply": "2022-12-15T17:12:56.599471Z"
+     "iopub.execute_input": "2022-12-19T15:40:18.900945Z",
+     "iopub.status.busy": "2022-12-19T15:40:18.900319Z",
+     "iopub.status.idle": "2022-12-19T15:40:19.070725Z",
+     "shell.execute_reply": "2022-12-19T15:40:19.070086Z"
     }
    },
    "outputs": [
     {
      "data": {
       "text/plain": [
-       "<matplotlib.image.AxesImage at 0x7fb51fe5b340>"
+       "<matplotlib.image.AxesImage at 0x7f5ab77635b0>"
       ]
      },
      "execution_count": 9,
@@ -378,10 +378,10 @@
    "execution_count": 10,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-12-15T17:12:56.603949Z",
-     "iopub.status.busy": "2022-12-15T17:12:56.603521Z",
-     "iopub.status.idle": "2022-12-15T17:12:56.705497Z",
-     "shell.execute_reply": "2022-12-15T17:12:56.704802Z"
+     "iopub.execute_input": "2022-12-19T15:40:19.074894Z",
+     "iopub.status.busy": "2022-12-19T15:40:19.074363Z",
+     "iopub.status.idle": "2022-12-19T15:40:19.180202Z",
+     "shell.execute_reply": "2022-12-19T15:40:19.179592Z"
     }
    },
    "outputs": [
@@ -416,10 +416,10 @@
    "execution_count": 11,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-12-15T17:12:56.708968Z",
-     "iopub.status.busy": "2022-12-15T17:12:56.708587Z",
-     "iopub.status.idle": "2022-12-15T17:12:59.404367Z",
-     "shell.execute_reply": "2022-12-15T17:12:59.403337Z"
+     "iopub.execute_input": "2022-12-19T15:40:19.183841Z",
+     "iopub.status.busy": "2022-12-19T15:40:19.183440Z",
+     "iopub.status.idle": "2022-12-19T15:40:21.907257Z",
+     "shell.execute_reply": "2022-12-19T15:40:21.906388Z"
     }
    },
    "outputs": [
@@ -428,12 +428,12 @@
      "output_type": "stream",
      "text": [
       "\n",
-      "SFRmaker version 0.9.1.post27.dev0+gdd7b388\n",
+      "SFRmaker version 0.9.1.post30.dev0+gadae02f\n",
       "\n",
       "Creating sfr dataset...\n",
       "\n",
       "Creating grid class instance from flopy Grid instance...\n",
-      "grid class created in 0.27s\n",
+      "grid class created in 0.29s\n",
       "\n",
       "Model grid information\n",
       "structured grid\n",
@@ -471,7 +471,7 @@
       "finished in 0.09s\n",
       "\n",
       "Setting up reach data... (may take a few minutes for large grids)\n",
-      "finished in 0.31s\n",
+      "finished in 0.30s\n",
       "\n",
       "Warning: No length units specified in CRS for input LineStrings or length units not recognized. Defaulting to meters.\n",
       "Computing widths...\n",
@@ -494,7 +494,7 @@
       "active area defined by: all cells\n",
       "\n",
       "\n",
-      "Time to create sfr dataset: 2.69s\n",
+      "Time to create sfr dataset: 2.72s\n",
       "\n"
      ]
     }
@@ -516,10 +516,10 @@
    "execution_count": 12,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-12-15T17:12:59.407651Z",
-     "iopub.status.busy": "2022-12-15T17:12:59.407423Z",
-     "iopub.status.idle": "2022-12-15T17:12:59.424700Z",
-     "shell.execute_reply": "2022-12-15T17:12:59.424080Z"
+     "iopub.execute_input": "2022-12-19T15:40:21.911070Z",
+     "iopub.status.busy": "2022-12-19T15:40:21.910330Z",
+     "iopub.status.idle": "2022-12-19T15:40:21.931189Z",
+     "shell.execute_reply": "2022-12-19T15:40:21.930426Z"
     }
    },
    "outputs": [
@@ -578,8 +578,8 @@
        "      <td>1</td>\n",
        "      <td>1</td>\n",
        "      <td>208.786560</td>\n",
-       "      <td>1.0</td>\n",
-       "      <td>0.0001</td>\n",
+       "      <td>1.000000</td>\n",
+       "      <td>0.127815</td>\n",
        "      <td>...</td>\n",
        "      <td>0.0</td>\n",
        "      <td>0.0</td>\n",
@@ -587,10 +587,10 @@
        "      <td>0.0</td>\n",
        "      <td>2</td>\n",
        "      <td>4</td>\n",
-       "      <td>NaN</td>\n",
+       "      <td>31.819073</td>\n",
        "      <td>1815013</td>\n",
        "      <td>None</td>\n",
-       "      <td>LINESTRING Z (691394.6266907752 5139052 0, 691...</td>\n",
+       "      <td>LINESTRING (691394.6266907752 5139052, 691410....</td>\n",
        "    </tr>\n",
        "    <tr>\n",
        "      <th>513</th>\n",
@@ -602,8 +602,8 @@
        "      <td>1</td>\n",
        "      <td>2</td>\n",
        "      <td>294.110107</td>\n",
-       "      <td>1.0</td>\n",
-       "      <td>0.0001</td>\n",
+       "      <td>1.261215</td>\n",
+       "      <td>0.060613</td>\n",
        "      <td>...</td>\n",
        "      <td>0.0</td>\n",
        "      <td>0.0</td>\n",
@@ -611,10 +611,10 @@
        "      <td>0.0</td>\n",
        "      <td>3</td>\n",
        "      <td>4</td>\n",
-       "      <td>NaN</td>\n",
+       "      <td>108.460526</td>\n",
        "      <td>1815013</td>\n",
        "      <td>None</td>\n",
-       "      <td>LINESTRING Z (691451 5139078.992958551 0, 6914...</td>\n",
+       "      <td>LINESTRING (691451 5139078.992958551, 691470.9...</td>\n",
        "    </tr>\n",
        "    <tr>\n",
        "      <th>514</th>\n",
@@ -626,8 +626,8 @@
        "      <td>1</td>\n",
        "      <td>3</td>\n",
        "      <td>41.835766</td>\n",
-       "      <td>1.0</td>\n",
-       "      <td>0.0001</td>\n",
+       "      <td>1.532099</td>\n",
+       "      <td>0.332276</td>\n",
        "      <td>...</td>\n",
        "      <td>0.0</td>\n",
        "      <td>0.0</td>\n",
@@ -635,10 +635,10 @@
        "      <td>0.0</td>\n",
        "      <td>4</td>\n",
        "      <td>4</td>\n",
-       "      <td>NaN</td>\n",
+       "      <td>159.658676</td>\n",
        "      <td>1815013</td>\n",
        "      <td>None</td>\n",
-       "      <td>LINESTRING Z (691527.2 5139123.038141218 0, 69...</td>\n",
+       "      <td>LINESTRING (691527.2 5139123.038141218, 691538...</td>\n",
        "    </tr>\n",
        "    <tr>\n",
        "      <th>515</th>\n",
@@ -650,8 +650,8 @@
        "      <td>1</td>\n",
        "      <td>4</td>\n",
        "      <td>220.128555</td>\n",
-       "      <td>1.0</td>\n",
-       "      <td>0.0001</td>\n",
+       "      <td>1.714200</td>\n",
+       "      <td>0.092116</td>\n",
        "      <td>...</td>\n",
        "      <td>0.0</td>\n",
        "      <td>0.0</td>\n",
@@ -659,10 +659,10 @@
        "      <td>0.0</td>\n",
        "      <td>5</td>\n",
        "      <td>4</td>\n",
-       "      <td>NaN</td>\n",
+       "      <td>199.582047</td>\n",
        "      <td>1815013</td>\n",
        "      <td>None</td>\n",
-       "      <td>LINESTRING Z (691538.8600608129 5139128.2 0, 6...</td>\n",
+       "      <td>LINESTRING (691538.8600608129 5139128.2, 69156...</td>\n",
        "    </tr>\n",
        "    <tr>\n",
        "      <th>516</th>\n",
@@ -674,8 +674,8 @@
        "      <td>1</td>\n",
        "      <td>5</td>\n",
        "      <td>161.999496</td>\n",
-       "      <td>1.0</td>\n",
-       "      <td>0.0001</td>\n",
+       "      <td>1.949906</td>\n",
+       "      <td>0.097721</td>\n",
        "      <td>...</td>\n",
        "      <td>0.0</td>\n",
        "      <td>0.0</td>\n",
@@ -683,10 +683,10 @@
        "      <td>0.0</td>\n",
        "      <td>6</td>\n",
        "      <td>4</td>\n",
-       "      <td>NaN</td>\n",
+       "      <td>257.818359</td>\n",
        "      <td>1815013</td>\n",
        "      <td>None</td>\n",
-       "      <td>LINESTRING Z (691603.4 5139143.608205146 0, 69...</td>\n",
+       "      <td>LINESTRING (691603.4 5139143.608205146, 691624...</td>\n",
        "    </tr>\n",
        "  </tbody>\n",
        "</table>\n",
@@ -694,26 +694,26 @@
        "</div>"
       ],
       "text/plain": [
-       "     rno   node  k    i    j  iseg  ireach      rchlen  width   slope  ...  \\\n",
-       "512    1  17714  0  110  114     1       1  208.786560    1.0  0.0001  ...   \n",
-       "513    2  17715  0  110  115     1       2  294.110107    1.0  0.0001  ...   \n",
-       "514    3  17716  0  110  116     1       3   41.835766    1.0  0.0001  ...   \n",
-       "515    4  17556  0  109  116     1       4  220.128555    1.0  0.0001  ...   \n",
-       "516    5  17557  0  109  117     1       5  161.999496    1.0  0.0001  ...   \n",
+       "     rno   node  k    i    j  iseg  ireach      rchlen     width     slope  \\\n",
+       "512    1  17714  0  110  114     1       1  208.786560  1.000000  0.127815   \n",
+       "513    2  17715  0  110  115     1       2  294.110107  1.261215  0.060613   \n",
+       "514    3  17716  0  110  116     1       3   41.835766  1.532099  0.332276   \n",
+       "515    4  17556  0  109  116     1       4  220.128555  1.714200  0.092116   \n",
+       "516    5  17557  0  109  117     1       5  161.999496  1.949906  0.097721   \n",
        "\n",
-       "     thts  thti  eps  uhc  outreach  outseg  asum  line_id  name  \\\n",
-       "512   0.0   0.0  0.0  0.0         2       4   NaN  1815013  None   \n",
-       "513   0.0   0.0  0.0  0.0         3       4   NaN  1815013  None   \n",
-       "514   0.0   0.0  0.0  0.0         4       4   NaN  1815013  None   \n",
-       "515   0.0   0.0  0.0  0.0         5       4   NaN  1815013  None   \n",
-       "516   0.0   0.0  0.0  0.0         6       4   NaN  1815013  None   \n",
+       "     ...  thts  thti  eps  uhc  outreach  outseg        asum  line_id  name  \\\n",
+       "512  ...   0.0   0.0  0.0  0.0         2       4   31.819073  1815013  None   \n",
+       "513  ...   0.0   0.0  0.0  0.0         3       4  108.460526  1815013  None   \n",
+       "514  ...   0.0   0.0  0.0  0.0         4       4  159.658676  1815013  None   \n",
+       "515  ...   0.0   0.0  0.0  0.0         5       4  199.582047  1815013  None   \n",
+       "516  ...   0.0   0.0  0.0  0.0         6       4  257.818359  1815013  None   \n",
        "\n",
        "                                              geometry  \n",
-       "512  LINESTRING Z (691394.6266907752 5139052 0, 691...  \n",
-       "513  LINESTRING Z (691451 5139078.992958551 0, 6914...  \n",
-       "514  LINESTRING Z (691527.2 5139123.038141218 0, 69...  \n",
-       "515  LINESTRING Z (691538.8600608129 5139128.2 0, 6...  \n",
-       "516  LINESTRING Z (691603.4 5139143.608205146 0, 69...  \n",
+       "512  LINESTRING (691394.6266907752 5139052, 691410....  \n",
+       "513  LINESTRING (691451 5139078.992958551, 691470.9...  \n",
+       "514  LINESTRING (691527.2 5139123.038141218, 691538...  \n",
+       "515  LINESTRING (691538.8600608129 5139128.2, 69156...  \n",
+       "516  LINESTRING (691603.4 5139143.608205146, 691624...  \n",
        "\n",
        "[5 rows x 23 columns]"
       ]
@@ -732,10 +732,10 @@
    "execution_count": 13,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-12-15T17:12:59.427453Z",
-     "iopub.status.busy": "2022-12-15T17:12:59.427242Z",
-     "iopub.status.idle": "2022-12-15T17:12:59.444164Z",
-     "shell.execute_reply": "2022-12-15T17:12:59.443538Z"
+     "iopub.execute_input": "2022-12-19T15:40:21.934836Z",
+     "iopub.status.busy": "2022-12-19T15:40:21.934579Z",
+     "iopub.status.idle": "2022-12-19T15:40:21.954609Z",
+     "shell.execute_reply": "2022-12-19T15:40:21.953866Z"
     }
    },
    "outputs": [
@@ -800,8 +800,8 @@
        "      <td>0.0</td>\n",
        "      <td>0.0</td>\n",
        "      <td>0.0</td>\n",
-       "      <td>0.000000</td>\n",
-       "      <td>3.280840</td>\n",
+       "      <td>1297.867432</td>\n",
+       "      <td>18.499418</td>\n",
        "      <td>0.0</td>\n",
        "      <td>0.0</td>\n",
        "      <td>0.0</td>\n",
@@ -824,8 +824,8 @@
        "      <td>0.0</td>\n",
        "      <td>0.0</td>\n",
        "      <td>0.0</td>\n",
-       "      <td>0.000000</td>\n",
-       "      <td>3.280840</td>\n",
+       "      <td>1297.867432</td>\n",
+       "      <td>123.988358</td>\n",
        "      <td>0.0</td>\n",
        "      <td>0.0</td>\n",
        "      <td>0.0</td>\n",
@@ -918,8 +918,8 @@
        "4    0     5      1      10       0       0        0   0.0     0.0   0.0  ...   \n",
        "\n",
        "   uhc1  hcond2  thickm2       elevdn      width2  depth2  thts2  thti2  eps2  \\\n",
-       "0   0.0     0.0      0.0     0.000000    3.280840     0.0    0.0    0.0   0.0   \n",
-       "1   0.0     0.0      0.0     0.000000    3.280840     0.0    0.0    0.0   0.0   \n",
+       "0   0.0     0.0      0.0  1297.867432   18.499418     0.0    0.0    0.0   0.0   \n",
+       "1   0.0     0.0      0.0  1297.867432  123.988358     0.0    0.0    0.0   0.0   \n",
        "2   0.0     0.0      0.0  1278.149658   23.194326     0.0    0.0    0.0   0.0   \n",
        "3   0.0     0.0      0.0  1278.149658  126.765388     0.0    0.0    0.0   0.0   \n",
        "4   0.0     0.0      0.0  1211.286133   21.228680     0.0    0.0    0.0   0.0   \n",
@@ -956,10 +956,10 @@
    "execution_count": 14,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-12-15T17:12:59.446912Z",
-     "iopub.status.busy": "2022-12-15T17:12:59.446706Z",
-     "iopub.status.idle": "2022-12-15T17:13:05.782537Z",
-     "shell.execute_reply": "2022-12-15T17:13:05.781483Z"
+     "iopub.execute_input": "2022-12-19T15:40:21.958726Z",
+     "iopub.status.busy": "2022-12-19T15:40:21.958241Z",
+     "iopub.status.idle": "2022-12-19T15:40:29.256637Z",
+     "shell.execute_reply": "2022-12-19T15:40:29.255946Z"
     }
    },
    "outputs": [
@@ -968,7 +968,7 @@
      "output_type": "stream",
      "text": [
       "running rasterstats.zonal_stats on buffered LineStrings...\n",
-      "finished in 6.11s\n",
+      "finished in 7.07s\n",
       "\n",
       "\n",
       "Smoothing elevations...\n",
@@ -994,10 +994,10 @@
    "execution_count": 15,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-12-15T17:13:05.786165Z",
-     "iopub.status.busy": "2022-12-15T17:13:05.785481Z",
-     "iopub.status.idle": "2022-12-15T17:13:05.791049Z",
-     "shell.execute_reply": "2022-12-15T17:13:05.790495Z"
+     "iopub.execute_input": "2022-12-19T15:40:29.260133Z",
+     "iopub.status.busy": "2022-12-19T15:40:29.259637Z",
+     "iopub.status.idle": "2022-12-19T15:40:29.265765Z",
+     "shell.execute_reply": "2022-12-19T15:40:29.265136Z"
     }
    },
    "outputs": [],
@@ -1010,10 +1010,10 @@
    "execution_count": 16,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-12-15T17:13:05.794082Z",
-     "iopub.status.busy": "2022-12-15T17:13:05.793745Z",
-     "iopub.status.idle": "2022-12-15T17:13:05.810266Z",
-     "shell.execute_reply": "2022-12-15T17:13:05.809627Z"
+     "iopub.execute_input": "2022-12-19T15:40:29.268931Z",
+     "iopub.status.busy": "2022-12-19T15:40:29.268369Z",
+     "iopub.status.idle": "2022-12-19T15:40:29.286026Z",
+     "shell.execute_reply": "2022-12-19T15:40:29.285303Z"
     }
    },
    "outputs": [
@@ -1072,8 +1072,8 @@
        "      <td>1</td>\n",
        "      <td>1</td>\n",
        "      <td>208.786560</td>\n",
-       "      <td>1.0</td>\n",
-       "      <td>0.0001</td>\n",
+       "      <td>1.000000</td>\n",
+       "      <td>0.127815</td>\n",
        "      <td>...</td>\n",
        "      <td>0.0</td>\n",
        "      <td>0.0</td>\n",
@@ -1081,10 +1081,10 @@
        "      <td>0.0</td>\n",
        "      <td>2</td>\n",
        "      <td>4</td>\n",
-       "      <td>NaN</td>\n",
+       "      <td>31.819073</td>\n",
        "      <td>1815013</td>\n",
        "      <td>None</td>\n",
-       "      <td>LINESTRING Z (691394.6266907752 5139052 0, 691...</td>\n",
+       "      <td>LINESTRING (691394.6266907752 5139052, 691410....</td>\n",
        "    </tr>\n",
        "    <tr>\n",
        "      <th>513</th>\n",
@@ -1096,8 +1096,8 @@
        "      <td>1</td>\n",
        "      <td>2</td>\n",
        "      <td>294.110107</td>\n",
-       "      <td>1.0</td>\n",
-       "      <td>0.0001</td>\n",
+       "      <td>1.261215</td>\n",
+       "      <td>0.060613</td>\n",
        "      <td>...</td>\n",
        "      <td>0.0</td>\n",
        "      <td>0.0</td>\n",
@@ -1105,10 +1105,10 @@
        "      <td>0.0</td>\n",
        "      <td>3</td>\n",
        "      <td>4</td>\n",
-       "      <td>NaN</td>\n",
+       "      <td>108.460526</td>\n",
        "      <td>1815013</td>\n",
        "      <td>None</td>\n",
-       "      <td>LINESTRING Z (691451 5139078.992958551 0, 6914...</td>\n",
+       "      <td>LINESTRING (691451 5139078.992958551, 691470.9...</td>\n",
        "    </tr>\n",
        "    <tr>\n",
        "      <th>514</th>\n",
@@ -1120,8 +1120,8 @@
        "      <td>1</td>\n",
        "      <td>3</td>\n",
        "      <td>41.835766</td>\n",
-       "      <td>1.0</td>\n",
-       "      <td>0.0001</td>\n",
+       "      <td>1.532099</td>\n",
+       "      <td>0.332276</td>\n",
        "      <td>...</td>\n",
        "      <td>0.0</td>\n",
        "      <td>0.0</td>\n",
@@ -1129,10 +1129,10 @@
        "      <td>0.0</td>\n",
        "      <td>4</td>\n",
        "      <td>4</td>\n",
-       "      <td>NaN</td>\n",
+       "      <td>159.658676</td>\n",
        "      <td>1815013</td>\n",
        "      <td>None</td>\n",
-       "      <td>LINESTRING Z (691527.2 5139123.038141218 0, 69...</td>\n",
+       "      <td>LINESTRING (691527.2 5139123.038141218, 691538...</td>\n",
        "    </tr>\n",
        "    <tr>\n",
        "      <th>515</th>\n",
@@ -1144,8 +1144,8 @@
        "      <td>1</td>\n",
        "      <td>4</td>\n",
        "      <td>220.128555</td>\n",
-       "      <td>1.0</td>\n",
-       "      <td>0.0001</td>\n",
+       "      <td>1.714200</td>\n",
+       "      <td>0.092116</td>\n",
        "      <td>...</td>\n",
        "      <td>0.0</td>\n",
        "      <td>0.0</td>\n",
@@ -1153,10 +1153,10 @@
        "      <td>0.0</td>\n",
        "      <td>5</td>\n",
        "      <td>4</td>\n",
-       "      <td>NaN</td>\n",
+       "      <td>199.582047</td>\n",
        "      <td>1815013</td>\n",
        "      <td>None</td>\n",
-       "      <td>LINESTRING Z (691538.8600608129 5139128.2 0, 6...</td>\n",
+       "      <td>LINESTRING (691538.8600608129 5139128.2, 69156...</td>\n",
        "    </tr>\n",
        "    <tr>\n",
        "      <th>516</th>\n",
@@ -1168,8 +1168,8 @@
        "      <td>1</td>\n",
        "      <td>5</td>\n",
        "      <td>161.999496</td>\n",
-       "      <td>1.0</td>\n",
-       "      <td>0.0001</td>\n",
+       "      <td>1.949906</td>\n",
+       "      <td>0.097721</td>\n",
        "      <td>...</td>\n",
        "      <td>0.0</td>\n",
        "      <td>0.0</td>\n",
@@ -1177,10 +1177,10 @@
        "      <td>0.0</td>\n",
        "      <td>6</td>\n",
        "      <td>4</td>\n",
-       "      <td>NaN</td>\n",
+       "      <td>257.818359</td>\n",
        "      <td>1815013</td>\n",
        "      <td>None</td>\n",
-       "      <td>LINESTRING Z (691603.4 5139143.608205146 0, 69...</td>\n",
+       "      <td>LINESTRING (691603.4 5139143.608205146, 691624...</td>\n",
        "    </tr>\n",
        "  </tbody>\n",
        "</table>\n",
@@ -1188,26 +1188,26 @@
        "</div>"
       ],
       "text/plain": [
-       "     rno   node  k    i    j  iseg  ireach      rchlen  width   slope  ...  \\\n",
-       "512    1  17714  2  110  114     1       1  208.786560    1.0  0.0001  ...   \n",
-       "513    2  17715  2  110  115     1       2  294.110107    1.0  0.0001  ...   \n",
-       "514    3  17716  2  110  116     1       3   41.835766    1.0  0.0001  ...   \n",
-       "515    4  17556  2  109  116     1       4  220.128555    1.0  0.0001  ...   \n",
-       "516    5  17557  2  109  117     1       5  161.999496    1.0  0.0001  ...   \n",
+       "     rno   node  k    i    j  iseg  ireach      rchlen     width     slope  \\\n",
+       "512    1  17714  2  110  114     1       1  208.786560  1.000000  0.127815   \n",
+       "513    2  17715  2  110  115     1       2  294.110107  1.261215  0.060613   \n",
+       "514    3  17716  2  110  116     1       3   41.835766  1.532099  0.332276   \n",
+       "515    4  17556  2  109  116     1       4  220.128555  1.714200  0.092116   \n",
+       "516    5  17557  2  109  117     1       5  161.999496  1.949906  0.097721   \n",
        "\n",
-       "     thts  thti  eps  uhc  outreach  outseg  asum  line_id  name  \\\n",
-       "512   0.0   0.0  0.0  0.0         2       4   NaN  1815013  None   \n",
-       "513   0.0   0.0  0.0  0.0         3       4   NaN  1815013  None   \n",
-       "514   0.0   0.0  0.0  0.0         4       4   NaN  1815013  None   \n",
-       "515   0.0   0.0  0.0  0.0         5       4   NaN  1815013  None   \n",
-       "516   0.0   0.0  0.0  0.0         6       4   NaN  1815013  None   \n",
+       "     ...  thts  thti  eps  uhc  outreach  outseg        asum  line_id  name  \\\n",
+       "512  ...   0.0   0.0  0.0  0.0         2       4   31.819073  1815013  None   \n",
+       "513  ...   0.0   0.0  0.0  0.0         3       4  108.460526  1815013  None   \n",
+       "514  ...   0.0   0.0  0.0  0.0         4       4  159.658676  1815013  None   \n",
+       "515  ...   0.0   0.0  0.0  0.0         5       4  199.582047  1815013  None   \n",
+       "516  ...   0.0   0.0  0.0  0.0         6       4  257.818359  1815013  None   \n",
        "\n",
        "                                              geometry  \n",
-       "512  LINESTRING Z (691394.6266907752 5139052 0, 691...  \n",
-       "513  LINESTRING Z (691451 5139078.992958551 0, 6914...  \n",
-       "514  LINESTRING Z (691527.2 5139123.038141218 0, 69...  \n",
-       "515  LINESTRING Z (691538.8600608129 5139128.2 0, 6...  \n",
-       "516  LINESTRING Z (691603.4 5139143.608205146 0, 69...  \n",
+       "512  LINESTRING (691394.6266907752 5139052, 691410....  \n",
+       "513  LINESTRING (691451 5139078.992958551, 691470.9...  \n",
+       "514  LINESTRING (691527.2 5139123.038141218, 691538...  \n",
+       "515  LINESTRING (691538.8600608129 5139128.2, 69156...  \n",
+       "516  LINESTRING (691603.4 5139143.608205146, 691624...  \n",
        "\n",
        "[5 rows x 23 columns]"
       ]
@@ -1244,10 +1244,10 @@
    "execution_count": 17,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-12-15T17:13:05.813395Z",
-     "iopub.status.busy": "2022-12-15T17:13:05.812990Z",
-     "iopub.status.idle": "2022-12-15T17:13:05.899150Z",
-     "shell.execute_reply": "2022-12-15T17:13:05.898390Z"
+     "iopub.execute_input": "2022-12-19T15:40:29.289265Z",
+     "iopub.status.busy": "2022-12-19T15:40:29.288762Z",
+     "iopub.status.idle": "2022-12-19T15:40:29.378065Z",
+     "shell.execute_reply": "2022-12-19T15:40:29.377363Z"
     }
    },
    "outputs": [
@@ -1278,10 +1278,10 @@
    "execution_count": 18,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-12-15T17:13:05.902382Z",
-     "iopub.status.busy": "2022-12-15T17:13:05.902016Z",
-     "iopub.status.idle": "2022-12-15T17:13:06.028325Z",
-     "shell.execute_reply": "2022-12-15T17:13:06.027592Z"
+     "iopub.execute_input": "2022-12-19T15:40:29.381183Z",
+     "iopub.status.busy": "2022-12-19T15:40:29.380935Z",
+     "iopub.status.idle": "2022-12-19T15:40:29.514153Z",
+     "shell.execute_reply": "2022-12-19T15:40:29.513399Z"
     }
    },
    "outputs": [
@@ -1289,7 +1289,7 @@
      "name": "stdout",
      "output_type": "stream",
      "text": [
-      "SFRmaker v. 0.9.1.post27.dev0+gdd7b388\n",
+      "SFRmaker v. 0.9.1.post30.dev0+gadae02f\n",
       "\n",
       "Running Flopy v. 3.3.7 diagnostics...\n",
       "passed.\n",
@@ -1429,10 +1429,10 @@
    "execution_count": 19,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-12-15T17:13:06.031931Z",
-     "iopub.status.busy": "2022-12-15T17:13:06.031705Z",
-     "iopub.status.idle": "2022-12-15T17:13:06.415476Z",
-     "shell.execute_reply": "2022-12-15T17:13:06.414830Z"
+     "iopub.execute_input": "2022-12-19T15:40:29.518191Z",
+     "iopub.status.busy": "2022-12-19T15:40:29.517796Z",
+     "iopub.status.idle": "2022-12-19T15:40:29.896314Z",
+     "shell.execute_reply": "2022-12-19T15:40:29.895622Z"
     }
    },
    "outputs": [
@@ -1440,7 +1440,7 @@
      "name": "stdout",
      "output_type": "stream",
      "text": [
-      "SFRmaker v. 0.9.1.post27.dev0+gdd7b388\n",
+      "SFRmaker v. 0.9.1.post30.dev0+gadae02f\n",
       "\n",
       "Running Flopy v. 3.3.7 diagnostics...\n",
       "passed.\n",
@@ -1582,10 +1582,10 @@
    "execution_count": 20,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-12-15T17:13:06.419132Z",
-     "iopub.status.busy": "2022-12-15T17:13:06.418690Z",
-     "iopub.status.idle": "2022-12-15T17:13:06.437911Z",
-     "shell.execute_reply": "2022-12-15T17:13:06.437220Z"
+     "iopub.execute_input": "2022-12-19T15:40:29.899749Z",
+     "iopub.status.busy": "2022-12-19T15:40:29.899417Z",
+     "iopub.status.idle": "2022-12-19T15:40:29.920270Z",
+     "shell.execute_reply": "2022-12-19T15:40:29.919531Z"
     }
    },
    "outputs": [
@@ -1614,10 +1614,10 @@
    "execution_count": 21,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-12-15T17:13:06.441226Z",
-     "iopub.status.busy": "2022-12-15T17:13:06.440922Z",
-     "iopub.status.idle": "2022-12-15T17:13:06.533612Z",
-     "shell.execute_reply": "2022-12-15T17:13:06.532543Z"
+     "iopub.execute_input": "2022-12-19T15:40:29.924408Z",
+     "iopub.status.busy": "2022-12-19T15:40:29.924144Z",
+     "iopub.status.idle": "2022-12-19T15:40:30.026202Z",
+     "shell.execute_reply": "2022-12-19T15:40:30.025551Z"
     }
    },
    "outputs": [
@@ -1663,10 +1663,10 @@
    "execution_count": 22,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-12-15T17:13:06.537334Z",
-     "iopub.status.busy": "2022-12-15T17:13:06.536653Z",
-     "iopub.status.idle": "2022-12-15T17:13:07.476170Z",
-     "shell.execute_reply": "2022-12-15T17:13:07.475473Z"
+     "iopub.execute_input": "2022-12-19T15:40:30.030093Z",
+     "iopub.status.busy": "2022-12-19T15:40:30.029363Z",
+     "iopub.status.idle": "2022-12-19T15:40:30.978500Z",
+     "shell.execute_reply": "2022-12-19T15:40:30.977674Z"
     }
    },
    "outputs": [

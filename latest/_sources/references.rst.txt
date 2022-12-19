@@ -20,7 +20,7 @@ Langevin, C.D., Hughes, J.D., Banta, E.R., Niswonger, R.G., Panday, Sorab, and P
 
 Leaf, A.T., Fienen, M.N., Hunt, R.J., and Buchwald, C.A., 2015, Groundwater/Surface-Water Interactions in the Bad River Watershed, Wisconsin: U.S. Geological Survey Scientific Investigations Report 2015–5162, 110 p., http://dx.doi.org/10.3133/sir20155162.
 
-Leaf, Andrew T., 2020, Automated construction of streamflow-routing networks for MODFLOW: application in the Mississippi Embayment region: U.S. Geological Survey Scientific Investigations Report 2020-XXXX, in revision.
+Leaf, Andrew T., 2023, Automated construction of streamflow-routing networks for MODFLOW: application in the Mississippi Embayment region: U.S. Geological Survey Scientific Investigations Report 2022-XXXX, xx p. (in revision)
 
 McKay, L., Bondelid, T., Dewald, T., Johnston, J., Moore, R., and Rea, A., 2012, NHDPlus Version 2—User guide, accessed November 15, 2014, at http://www.horizon-systems.com/NHDPlus/ NHDPlusV2_documentation.php.
 
@@ -29,3 +29,4 @@ Park, C. C. (1977), World-wide variations in hydraulic geometry exponents of str
 Peng, R.D., 2011. Reproducible research in computational science, Science v. 334, no. 6060, p. 1226-1227. DOI: 10.1126/science.1213847
 
 Prudic, D.E., Konikow, L.F., and Banta, E.R., 2004, A new Streamflow-Routing (SFR1) Package to simulate stream-aquifer interaction with MODFLOW–2000: U.S. Geological Survey Open–File Report 2004–1042, 95 p.
+
