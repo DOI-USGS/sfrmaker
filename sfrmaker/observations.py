@@ -2,6 +2,7 @@
 Functions for handling observations of SFR package output.
 """
 import os
+from pathlib import Path
 import numpy as np
 import pandas as pd
 import geopandas as gpd
@@ -510,7 +511,7 @@ def write_mf6_sfr_obsfile(observation_locations,
     writes filename
     """
     locs = observation_locations
-    if isinstance(observation_locations, str):
+    if isinstance(observation_locations, str) or isinstance(observation_locations, Path):
         locs = pd.read_csv(observation_locations)
 
     with open(filename, 'w') as output:

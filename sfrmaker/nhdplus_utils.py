@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 import time
 import warnings
 import pandas as pd
@@ -9,11 +10,11 @@ from .gis import get_bbox, get_crs
 
 def get_prj_file(NHDPlus_paths=None, NHDFlowlines=None):
     if NHDPlus_paths is not None:
-        if isinstance(NHDPlus_paths, str):
+        if isinstance(NHDPlus_paths, str) or isinstance(NHDPlus_paths, Path):
             NHDPlus_paths = [NHDPlus_paths]
         return os.path.join(NHDPlus_paths[0], 'NHDSnapshot/Hydrography/NHDFlowline.prj')
     elif NHDFlowlines is not None:
-        if isinstance(NHDFlowlines, str):
+        if isinstance(NHDFlowlines, str) or isinstance(NHDFlowlines, Path):
             NHDFlowlines = [NHDFlowlines]
         return NHDFlowlines[0][:-4] + '.prj'
 
@@ -21,7 +22,7 @@ def get_prj_file(NHDPlus_paths=None, NHDFlowlines=None):
 def get_nhdplus_v2_filepaths(NHDPlus_paths, 
                              raise_not_exist_error=True):
     print('for basins:')
-    if isinstance(NHDPlus_paths, str):
+    if isinstance(NHDPlus_paths, str) or isinstance(NHDPlus_paths, Path):
         NHDPlus_paths = [NHDPlus_paths]
     for path in NHDPlus_paths:
         print(path)
@@ -340,7 +341,7 @@ def load_nhdplus_hr(NHDPlusHR_paths, filter=None,
         crs = df.crs
     
     #  Read if using one HUC-4 FileGDP passed as str
-    if isinstance(NHDPlusHR_paths, str):
+    if isinstance(NHDPlusHR_paths, str) or isinstance(NHDPlusHR_paths, Path):
         df = read_nhdplus_hr(NHDPlusHR_paths, filter = filter)
         #  get OpenFileGDB crs
         crs = df.crs

@@ -5,6 +5,7 @@ https://github.com/jtwhite79/pyemu
 """
 from __future__ import print_function, division
 import os
+from pathlib import Path
 import time
 from datetime import datetime
 import io
@@ -47,7 +48,7 @@ class Logger(object):
         defaults = {''}
         self.items = {}
         self.echo = bool(echo)
-        if isinstance(filename, str):
+        if isinstance(filename, str) or isinstance(filename, Path):
             self.filename = filename
             if os.path.exists(filename) and mode == 'a':
                 self.f = open(filename, 'a')

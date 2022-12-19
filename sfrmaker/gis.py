@@ -1,6 +1,7 @@
 from collections.abc import Iterable
 import os
 from packaging import version
+from pathlib import Path
 import warnings
 import time
 import traceback
@@ -199,7 +200,7 @@ def read_polygon_feature(feature, dest_crs=None, feature_crs=None):
     -------
     feature : shapely geometry object
     """
-    if isinstance(feature, str):
+    if isinstance(feature, str) or isinstance(feature, Path):
         feature_crs = get_shapefile_crs(feature)
         geoms = shp2df(feature)['geometry'].values
         feature = unary_union(geoms)
@@ -251,7 +252,7 @@ def get_bbox(feature, dest_crs):
 
         By default, epsg:4269
     """
-    if isinstance(feature, str):
+    if isinstance(feature, str) or isinstance(feature, Path):
         with fiona.open(feature) as src:
             l, b, r, t = src.bounds
         bbox_src_crs = box(*src.bounds)
