@@ -2,6 +2,22 @@
 Release History
 ===============
 
+Version 0.9.3 (2022-12-14)
+--------------------------
+* fixes to ``SFRdata.assign_layers``:
+    * only compare new cell bottoms to old cell bottoms if a new bottom array is returned
+    * when using idomain/ibound to set reach layers, recast array to boolean array of inactive/active cells, otherwise the ``np.argmax`` approach for finding the lowest active layer might identify the wrong layer (if ibound or idomain has values > 1). 
+    * bug in file naming for revised bottom arrays (all arrays were previously named using the bottom layer).
+* fixes to ``Lines`` class: 
+    * add check for last update to routing dictionary, to avoid recursion if a user is trying to manually update the routing column in the attached dataframe (df) using the dictionary.
+    * refactor internal updating of dataframe routing column in Lines.to_sfr() to its own method
+    * use correct expression of ibound/idomain ``> 0`` when making isfr array, to handle cases where values > 1 are used to denote active cells.
+* fixes to ``preprocessing.py`` module:
+    * add support for cases where ``cull_invalid=False``, ``cull_isolated=False`` and ``asum_thresh=0`` (i.e. where all flowlines within the model area are kept
+    * ``preprocessing.preprocess_nhdplus``: handle cases where no main stem is classified at a divergence; include warning in log file
+* revert documentation links to ``aleaf`` fork, until GitHub Actions are allowed in ``doi-usgs`` org.
+* add demo of preprocessing module to documentation
+
 Version 0.9.2 (2022-08-01)
 --------------------------
 * add support for python 3.10; drop support for 3.8

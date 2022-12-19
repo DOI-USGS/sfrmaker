@@ -2,7 +2,7 @@
 Make a SFR package for a prexisting MODFLOW model,
 using a flopy model grid to specify the grid
 """
-import os
+from pathlib import Path
 import flopy
 import numpy as np
 
@@ -23,9 +23,8 @@ flowlines = ['{}/NHDFlowlines.shp'.format(data_dir)]
 dem = '{}/dem_26715.tif'.format(data_dir)
 
 # output folder
-outdir = 'temp/'
-if not os.path.isdir(outdir):
-    os.mkdir(outdir)
+outdir = Path('temp/')
+outdir.mkdir(exist_ok=True)
 
 # make an instance of the sfrmaker.lines class from NHDPlus data
 # use a shapefile of the model grid to filter what is read in
