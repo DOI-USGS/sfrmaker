@@ -1,0 +1,1713 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Basic usage of SFRmaker in a scripting context\n",
+    "This example illustrates basic usage of SFRmaker in a scripting context. For examples of using SFRmaker with a configuration file, see the MERAS and Tyler Forks examples."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2022-12-19T16:14:52.975305Z",
+     "iopub.status.busy": "2022-12-19T16:14:52.974894Z",
+     "iopub.status.idle": "2022-12-19T16:14:54.060880Z",
+     "shell.execute_reply": "2022-12-19T16:14:54.059663Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "import numpy as np\n",
+    "import matplotlib.pyplot as plt\n",
+    "import flopy\n",
+    "import sfrmaker"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Input requirements\n",
+    "The most basic input requirements of SFRmaker are hydrography and a model grid. Optionally, a model and a DEM can be input, as demonstrated below. See the [documentation](https://aleaf.github.io/sfrmaker/inputs.html) for a more detailed description of inputs.\n",
+    "\n",
+    "#### Hydrography\n",
+    "In this example, we will use data that has been downloaded from [NHDPlus](https://nhdplus.com/NHDPlus/NHDPlusV2_data.php). The original file structure in the download has been maintained, allowing us to simply supply SFRmaker with a path to the NHDPlus files:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2022-12-19T16:14:54.065486Z",
+     "iopub.status.busy": "2022-12-19T16:14:54.064656Z",
+     "iopub.status.idle": "2022-12-19T16:14:54.068519Z",
+     "shell.execute_reply": "2022-12-19T16:14:54.067941Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "NHDPlus_paths = '../tylerforks/NHDPlus/'"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "If we were dealing with more than one drainage basin, the NHDPlus file paths could be included in a list:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2022-12-19T16:14:54.071307Z",
+     "iopub.status.busy": "2022-12-19T16:14:54.071109Z",
+     "iopub.status.idle": "2022-12-19T16:14:54.074000Z",
+     "shell.execute_reply": "2022-12-19T16:14:54.073455Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "NHDPlus_paths_list = ['/NHDPlusGL/NHDPlus04/',\n",
+    "                      '/NHDPlusMS/NHDPlus07/']"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Creating a ``Lines`` instance from NHDPlus\n",
+    "The ``sfrmaker.Lines`` class includes functionality for reading and processing hydrography flowlines. This example shows how to create a ``Lines`` instance from NHDPlus data.\n",
+    "\n",
+    "For large hydrography datasets, it is advantageous to filter the data when it is read in. The ``filter`` argument to ``sfrmaker.Lines`` accepts a shapefile path or tuple of bounding box coordinates. In either case, a bounding box tuple is created and passed to the ``filter`` method in the [``fiona`` package](https://fiona.readthedocs.io/en/latest/manual.html), which is fast."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2022-12-19T16:14:54.076762Z",
+     "iopub.status.busy": "2022-12-19T16:14:54.076561Z",
+     "iopub.status.idle": "2022-12-19T16:14:54.559742Z",
+     "shell.execute_reply": "2022-12-19T16:14:54.559249Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "\n",
+      "loading NHDPlus v2 hydrography data...\n",
+      "for basins:\n",
+      "../tylerforks/NHDPlus/\n",
+      "\n",
+      "reading ../tylerforks/NHDPlus/NHDSnapshot/Hydrography/NHDFlowline.shp...\n",
+      "filtering on bounding box -90.624482596925, 46.37886827710283, -90.4625592199325, 46.45832567355404...\n",
+      "--> building dataframe... (may take a while for large shapefiles)\n",
+      "\n",
+      "reading ../tylerforks/NHDPlus/NHDPlusAttributes/PlusFlowlineVAA.dbf...\n",
+      "--> building dataframe... (may take a while for large shapefiles)\n",
+      "\n",
+      "reading ../tylerforks/NHDPlus/NHDPlusAttributes/PlusFlow.dbf...\n",
+      "--> building dataframe... (may take a while for large shapefiles)\n",
+      "\n",
+      "reading ../tylerforks/NHDPlus/NHDPlusAttributes/elevslope.dbf...\n",
+      "--> building dataframe... (may take a while for large shapefiles)\n",
+      "\n",
+      "load finished in 0.44s\n",
+      "\n",
+      "Getting routing information from NHDPlus Plusflow table...\n",
+      "finished in 0.03s\n",
+      "\n"
+     ]
+    }
+   ],
+   "source": [
+    "lns = sfrmaker.Lines.from_nhdplus_v2(NHDPlus_paths='../tylerforks/NHDPlus/',\n",
+    "                            filter='../tylerforks/grid.shp')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Alternatively, ``sfrmaker.Lines`` can be instantiated with separate arguments for each NHDPlus file used:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2022-12-19T16:14:54.563027Z",
+     "iopub.status.busy": "2022-12-19T16:14:54.562480Z",
+     "iopub.status.idle": "2022-12-19T16:14:54.648562Z",
+     "shell.execute_reply": "2022-12-19T16:14:54.647971Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "\n",
+      "loading NHDPlus v2 hydrography data...\n",
+      "\n",
+      "reading ../tylerforks/NHDPlus/NHDSnapshot/Hydrography/NHDFlowline.shp...\n",
+      "filtering on bounding box -90.625, 46.3788, -90.4634, 46.4586...\n",
+      "--> building dataframe... (may take a while for large shapefiles)\n",
+      "\n",
+      "reading ../tylerforks/NHDPlus/NHDPlusAttributes/PlusFlowlineVAA.dbf...\n",
+      "--> building dataframe... (may take a while for large shapefiles)\n",
+      "\n",
+      "reading ../tylerforks/NHDPlus/NHDPlusAttributes/PlusFlow.dbf...\n",
+      "--> building dataframe... (may take a while for large shapefiles)\n",
+      "\n",
+      "reading ../tylerforks/NHDPlus/NHDPlusAttributes/elevslope.dbf...\n",
+      "--> building dataframe... (may take a while for large shapefiles)\n",
+      "\n",
+      "load finished in 0.04s\n",
+      "\n",
+      "Getting routing information from NHDPlus Plusflow table...\n",
+      "finished in 0.03s\n",
+      "\n"
+     ]
+    }
+   ],
+   "source": [
+    "lines = sfrmaker.Lines.from_nhdplus_v2(NHDFlowlines='../tylerforks/NHDPlus/NHDSnapshot/Hydrography/NHDFlowline.shp',\n",
+    "                                       PlusFlowlineVAA='../tylerforks/NHDPlus/NHDPlusAttributes/PlusFlowlineVAA.dbf',\n",
+    "                                       PlusFlow='../tylerforks/NHDPlus/NHDPlusAttributes/PlusFlow.dbf',\n",
+    "                                       elevslope='../tylerforks/NHDPlus/NHDPlusAttributes/elevslope.dbf',\n",
+    "                                       filter=(-90.625, 46.3788, -90.4634, 46.4586))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Creating a ``Lines`` instance from custom hydrography\n",
+    "Alternatively, a ``Lines`` instance can be created from any hydrography that includes the pertinent attribute fields, which must be specified:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2022-12-19T16:14:54.651396Z",
+     "iopub.status.busy": "2022-12-19T16:14:54.651192Z",
+     "iopub.status.idle": "2022-12-19T16:14:57.933046Z",
+     "shell.execute_reply": "2022-12-19T16:14:57.932090Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "\n",
+      "reading ../meras/flowlines.shp...\n",
+      "--> building dataframe... (may take a while for large shapefiles)\n"
+     ]
+    }
+   ],
+   "source": [
+    "custom_lines = sfrmaker.Lines.from_shapefile(shapefile='../meras/flowlines.shp',\n",
+    "                                             id_column='COMID',  # arguments to sfrmaker.Lines.from_shapefile\n",
+    "                                             routing_column='tocomid',\n",
+    "                                             width1_column='width1',\n",
+    "                                             width2_column='width2',\n",
+    "                                             up_elevation_column='elevupsmo',\n",
+    "                                             dn_elevation_column='elevdnsmo',\n",
+    "                                             name_column='GNIS_NAME',\n",
+    "                                             attr_length_units='feet',  # units of source data\n",
+    "                                             attr_height_units='feet',  # units of source data\n",
+    "                                             )"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Specifying a model grid from a flopy `StructuredGrid` instance\n",
+    "The next step is to specify a model grid. One option is to specify a flopy `StructuredGrid` instance. SFRmaker will then use this internally to create an instance of its own `StructuredGrid` class. In this case, the row and column spacing must be provided in the units of the projected coordinate reference system (CRS) that the model is in, which is typically meters. In this case, our model grid spacing is 250 feet, so we have to convert. \n",
+    "\n",
+    "Specifying a CRS (via the ``proj4`` argument) is also important, as it allows SFRmaker to automatically reproject any input data to the same CRS as the model grid. [The best way to do this is with an EPSG code](https://proj.org/faq.html#what-is-the-best-format-for-describing-coordinate-reference-systems), as shown below.\n",
+    "\n",
+    "See the flopy documentation for more details about `StructuredGrid`."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2022-12-19T16:14:57.936441Z",
+     "iopub.status.busy": "2022-12-19T16:14:57.936078Z",
+     "iopub.status.idle": "2022-12-19T16:14:57.941584Z",
+     "shell.execute_reply": "2022-12-19T16:14:57.940612Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "delr = np.array([250 * 0.3048] * 160)  # cell spacing along a row\n",
+    "delc = np.array([250 * 0.3048] * 111)  # cell spacing along a column\n",
+    "\n",
+    "flopy_grid = flopy.discretization.StructuredGrid(delr=delr, delc=delc,\n",
+    "                                                 xoff=682688, yoff=5139052,  # lower left corner of model grid\n",
+    "                                                 angrot=0,  # grid is unrotated\n",
+    "                                                 # projected coordinate system of model (UTM NAD27 zone 15 North)\n",
+    "                                                 proj4='epsg:26715'\n",
+    "                                                 )"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Specifying a model grid from a shapefile\n",
+    "Another option is to create an SFRmaker `StructuredGrid` directly using a shapefile. While the basic underpinings are in place for SFRmaker to support unstructured grids, this option hasn't been fully implemented yet.\n",
+    "\n",
+    "Attribute fields with row and column information must be specified. An polygon defining the area where the SFR network will be created can optionally be specified here, or later in the creation of ``SFRData`` (see below)."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2022-12-19T16:14:57.944154Z",
+     "iopub.status.busy": "2022-12-19T16:14:57.943956Z",
+     "iopub.status.idle": "2022-12-19T16:14:58.516042Z",
+     "shell.execute_reply": "2022-12-19T16:14:58.515513Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "\n",
+      "reading ../tylerforks/grid.shp...\n",
+      "--> building dataframe... (may take a while for large shapefiles)\n",
+      "\n",
+      "reading ../tylerforks/active_area.shp...\n",
+      "--> building dataframe... (may take a while for large shapefiles)\n"
+     ]
+    }
+   ],
+   "source": [
+    "grid = sfrmaker.StructuredGrid.from_shapefile(shapefile='../tylerforks/grid.shp',\n",
+    "                                              icol='i',  # attribute field with row information\n",
+    "                                              jcol='j',  # attribute field with column information\n",
+    "                                              active_area='../tylerforks/active_area.shp'\n",
+    "                                              )"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "With specification of ``active_area``, the grid created above has an **``isfr``** array attribute designating which cells can have SFR:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 9,
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2022-12-19T16:14:58.519082Z",
+     "iopub.status.busy": "2022-12-19T16:14:58.518875Z",
+     "iopub.status.idle": "2022-12-19T16:14:58.659324Z",
+     "shell.execute_reply": "2022-12-19T16:14:58.658830Z"
+    }
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "<matplotlib.image.AxesImage at 0x7fc98a758ee0>"
+      ]
+     },
+     "execution_count": 9,
+     "metadata": {},
+     "output_type": "execute_result"
+    },
+    {
+     "data": {
+      "image/png": "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AFiHgAIAAKwT1wHF6/Xq2WefldfrjfVUuhXrZt09Aetm3T1BT113R8TlQbIAAMDd4rqCAgAA3ImAAgAArENAAQAA1iGgAAAA6xBQAACAdeI2oKxbt07p6enq16+fsrKy9OGHH8Z6So4qKCjQ7bffruTkZA0ZMkRTp07VoUOHosYYY5SXl6dAIKDExETl5OSosrIyRjPuGgUFBfJ4PAoGg5Ftbl33119/rccee0yDBg1SUlKSbr31VpWXl0f2u3Hdzc3Nevrpp5Wenq7ExESNHDlSq1atUkvL/7+RnBvWvXv3bt1///0KBALyeDx6/fXXo/Z3ZI0NDQ1auHChBg8erP79+2vKlCk6duxYN67iyrW37qamJi1btkyjR49W//79FQgENGvWLB0/fjzqPdy27ovNmTNHHo9Ha9eujdoej+t2WlwGlG3btikYDGrlypU6cOCAvv/97+uee+7R0aNHYz01x5SWlmr+/Pn66KOPVFJSoubmZuXm5urUqVORMYWFhSoqKlJxcbHKysrk9/s1adIk1dfXx3DmzikrK9OGDRt08803R21347pra2s1fvx49enTR2+99ZY+//xz/epXv9I111wTGePGda9Zs0avvPKKiouL9cUXX6iwsFAvvviiXn755cgYN6z71KlTuuWWW1RcXNzm/o6sMRgMaseOHdq6dav27NmjkydP6r777tPZs2e7axlXrL11nz59Wvv379czzzyj/fv3a/v27Tp8+LCmTJkSNc5t677Q66+/rn/84x8KBAKt9sXjuh1n4tB3v/tdM3fu3Khto0aNMsuXL4/RjLpeTU2NkWRKS0uNMca0tLQYv99vXnjhhciYb7/91qSmpppXXnklVtN0TH19vcnIyDAlJSVm4sSJZtGiRcYY96572bJlZsKECZfc79Z1T5482Tz++ONR26ZNm2Yee+wxY4w71y3J7NixI/K8I2v83//+Z/r06WO2bt0aGfP111+bXr16mb/97W/dNvfOuHjdbdm3b5+RZI4cOWKMcfe6jx07Zq699lrz2WefmREjRpiXXnopss8N63ZC3FVQGhsbVV5ertzc3Kjtubm52rt3b4xm1fXq6uokSQMHDpQkVVVVKRQKRX0OXq9XEydOdMXnMH/+fE2ePFl333131Ha3rnvnzp0aO3asHnzwQQ0ZMkRjxozRq6++Gtnv1nVPmDBB7777rg4fPixJ+uSTT7Rnzx7de++9kty77gt1ZI3l5eVqamqKGhMIBJSZmemaz0E69z3n8XgilUO3rrulpUUzZ87UkiVLdNNNN7Xa79Z1X6m4u5vxN998o7Nnz8rn80Vt9/l8CoVCMZpV1zLGaPHixZowYYIyMzMlKbLWtj6HI0eOdPscnbR161bt379fZWVlrfa5dd1fffWV1q9fr8WLF+vnP/+59u3bpyeeeEJer1ezZs1y7bqXLVumuro6jRo1Sr1799bZs2e1evVqPfroo5Lc++d9oY6sMRQKqW/fvhowYECrMW753vv222+1fPlyTZ8+PXJXX7eue82aNUpISNATTzzR5n63rvtKxV1AOc/j8UQ9N8a02uYWCxYs0Keffqo9e/a02ue2z6G6ulqLFi3Srl271K9fv0uOc9u6W1paNHbsWOXn50uSxowZo8rKSq1fv16zZs2KjHPburdt26bNmzdry5Ytuummm1RRUaFgMKhAIKDZs2dHxrlt3W25mjW65XNoamrSI488opaWFq1bt+6y4+N53eXl5fr1r3+t/fv3X/Ea4nndVyPuWjyDBw9W7969W6XImpqaVv8H4gYLFy7Uzp079f7772vYsGGR7X6/X5Jc9zmUl5erpqZGWVlZSkhIUEJCgkpLS/Wb3/xGCQkJkbW5bd1Dhw7VjTfeGLXthhtuiBz47dY/7yVLlmj58uV65JFHNHr0aM2cOVNPPvmkCgoKJLl33RfqyBr9fr8aGxtVW1t7yTHxqqmpSQ899JCqqqpUUlISqZ5I7lz3hx9+qJqaGg0fPjzyHXfkyBE99dRTuu666yS5c91XI+4CSt++fZWVlaWSkpKo7SUlJcrOzo7RrJxnjNGCBQu0fft2vffee0pPT4/an56eLr/fH/U5NDY2qrS0NK4/h7vuuksHDx5URUVF5DF27FjNmDFDFRUVGjlypCvXPX78+FankR8+fFgjRoyQ5N4/79OnT6tXr+ivod69e0dOM3brui/UkTVmZWWpT58+UWNOnDihzz77LK4/h/Ph5Msvv9Q777yjQYMGRe1347pnzpypTz/9NOo7LhAIaMmSJXr77bcluXPdVyVGB+d2ytatW02fPn3M73//e/P555+bYDBo+vfvb/7973/HemqO+elPf2pSU1PNBx98YE6cOBF5nD59OjLmhRdeMKmpqWb79u3m4MGD5tFHHzVDhw414XA4hjN33oVn8RjjznXv27fPJCQkmNWrV5svv/zS/OlPfzJJSUlm8+bNkTFuXPfs2bPNtddea/7617+aqqoqs337djN48GCzdOnSyBg3rLu+vt4cOHDAHDhwwEgyRUVF5sCBA5GzVTqyxrlz55phw4aZd955x+zfv9/84Ac/MLfccotpbm6O1bIuq711NzU1mSlTpphhw4aZioqKqO+5hoaGyHu4bd1tufgsHmPic91Oi8uAYowxv/3tb82IESNM3759zW233RY5/dYtJLX5eO211yJjWlpazLPPPmv8fr/xer3mjjvuMAcPHozdpLvIxQHFrev+y1/+YjIzM43X6zWjRo0yGzZsiNrvxnWHw2GzaNEiM3z4cNOvXz8zcuRIs3Llyqh/oNyw7vfff7/Nv8+zZ882xnRsjWfOnDELFiwwAwcONImJiea+++4zR48ejcFqOq69dVdVVV3ye+7999+PvIfb1t2WtgJKPK7baR5jjOmOSg0AAEBHxd0xKAAAwP0IKAAAwDoEFAAAYB0CCgAAsA4BBQAAWIeAAgAArENAAQAA1iGgAAAA6xBQAACAdQgoAADAOgQUAABgnf8H0yy9GjXKQTUAAAAASUVORK5CYII=\n",
+      "text/plain": [
+       "<Figure size 640x480 with 1 Axes>"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    }
+   ],
+   "source": [
+    "plt.imshow(grid.isfr, interpolation='nearest')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Using the ``modelgrid`` attached to a flopy model\n",
+    "If no grid is supplied as input, SFRmaker will try to use ``modelgrid`` attribute attached to a supplied flopy model instance. This only works if ``modelgrid`` is valid. Loading a flopy model with a valid model grid requires the grid information to be specified in the namefile header, and that the model be in the same units as the projected CRS. See the flopy documentation for more details"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Specifying a model\n",
+    "While a model is not required to run SFRmaker, specifying a model is advantageous in that it allows SFRmaker to assign valid model layers for reaches. Models are specified as flopy model instances, which can be loaded or created from scratch (see the flopy documentation). In this case, we are loading a model:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 10,
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2022-12-19T16:14:58.662680Z",
+     "iopub.status.busy": "2022-12-19T16:14:58.662098Z",
+     "iopub.status.idle": "2022-12-19T16:14:58.756826Z",
+     "shell.execute_reply": "2022-12-19T16:14:58.756041Z"
+    }
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "MODFLOW 5 layer(s) 111 row(s) 160 column(s) 1 stress period(s)"
+      ]
+     },
+     "execution_count": 10,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "m = flopy.modflow.Modflow.load('tf.nam', model_ws='../tylerforks/tylerforks')\n",
+    "m"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Creating an SFRData instance\n",
+    "The ``sfrmaker.SFRData`` class is the primary object for creating or modifying an SFR dataset. A ``SFRData`` instance can be created from the ``Lines`` class using the ``to_sfr()`` method.\n",
+    "\n",
+    "Either a flopy ``StructuredGrid`` or sfrmaker ``StructuredGrid`` can be supplied. While MODFLOW and flopy support specification of length units, these aren't always specified in the model input files, so it is good practice to specifiy the units explicitly to SFRmaker."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 11,
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2022-12-19T16:14:58.759781Z",
+     "iopub.status.busy": "2022-12-19T16:14:58.759566Z",
+     "iopub.status.idle": "2022-12-19T16:15:01.345046Z",
+     "shell.execute_reply": "2022-12-19T16:15:01.344506Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "\n",
+      "SFRmaker version 0.9.3\n",
+      "\n",
+      "Creating sfr dataset...\n",
+      "\n",
+      "Creating grid class instance from flopy Grid instance...\n",
+      "grid class created in 0.25s\n",
+      "\n",
+      "Model grid information\n",
+      "structured grid\n",
+      "nnodes: 17,760\n",
+      "nlay: 1\n",
+      "nrow: 111\n",
+      "ncol: 160\n",
+      "model length units: undefined\n",
+      "crs: EPSG:26715\n",
+      "bounds: 682688.00, 5139052.00, 694880.00, 5147510.20\n",
+      "active area defined by: all cells\n",
+      "\n",
+      "MODFLOW 5 layer(s) 111 row(s) 160 column(s) 1 stress period(s)\n",
+      "Warning: No length units specified in CRS for input LineStrings or length units not recognized. Defaulting to meters.\n",
+      "\n",
+      "reprojecting hydrography from\n",
+      "EPSG:4269\n",
+      "to\n",
+      "EPSG:26715\n",
+      "\n",
+      "\n",
+      "Culling hydrography to active area...\n",
+      "starting lines: 45\n",
+      "remaining lines: 42\n",
+      "finished in 0.01s\n",
+      "\n",
+      "\n",
+      "Intersecting 42 flowlines with 17,760 grid cells...\n",
+      "\n",
+      "Building spatial index...\n",
+      "finished in 1.78s\n",
+      "\n",
+      "Intersecting 42 features...\n",
+      "42\n",
+      "finished in 0.09s\n",
+      "\n",
+      "Setting up reach data... (may take a few minutes for large grids)\n",
+      "finished in 0.30s\n",
+      "\n",
+      "Warning: No length units specified in CRS for input LineStrings or length units not recognized. Defaulting to meters.\n",
+      "Computing widths...\n",
+      "\n",
+      "Dropping 46 reaches with length < 12.50 feet...\n",
+      "\n",
+      "Repairing routing connections...\n",
+      "enforcing best segment numbering...\n",
+      "\n",
+      "Setting up segment data...\n",
+      "Model grid information\n",
+      "structured grid\n",
+      "nnodes: 17,760\n",
+      "nlay: 1\n",
+      "nrow: 111\n",
+      "ncol: 160\n",
+      "model length units: undefined\n",
+      "crs: EPSG:26715\n",
+      "bounds: 682688.00, 5139052.00, 694880.00, 5147510.20\n",
+      "active area defined by: all cells\n",
+      "\n",
+      "\n",
+      "Time to create sfr dataset: 2.58s\n",
+      "\n"
+     ]
+    }
+   ],
+   "source": [
+    "sfrdata = lines.to_sfr(grid=flopy_grid, model=m, model_length_units='feet')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### The ``SFRData`` class\n",
+    "Internally, the SFRData class mostly uses the data model for the MODFLOW-2005 style SFR2 package (which includes MODFLOW-NWT), which organizes the input into segments and reaches. Segment and reach data are stored in the ``reach_data`` and ``segment_data`` attribute DataFrames. In addition to the MODFLOW-2005 data, reach numbers and their routing connections (as needed for MODFLOW-6) are also stored. On writing of SFR package input, MODFLOW-6 style input can be created via the ``sfrmaker.mf5to6`` module."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 12,
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2022-12-19T16:15:01.348134Z",
+     "iopub.status.busy": "2022-12-19T16:15:01.347923Z",
+     "iopub.status.idle": "2022-12-19T16:15:01.364425Z",
+     "shell.execute_reply": "2022-12-19T16:15:01.363836Z"
+    }
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>rno</th>\n",
+       "      <th>node</th>\n",
+       "      <th>k</th>\n",
+       "      <th>i</th>\n",
+       "      <th>j</th>\n",
+       "      <th>iseg</th>\n",
+       "      <th>ireach</th>\n",
+       "      <th>rchlen</th>\n",
+       "      <th>width</th>\n",
+       "      <th>slope</th>\n",
+       "      <th>...</th>\n",
+       "      <th>thts</th>\n",
+       "      <th>thti</th>\n",
+       "      <th>eps</th>\n",
+       "      <th>uhc</th>\n",
+       "      <th>outreach</th>\n",
+       "      <th>outseg</th>\n",
+       "      <th>asum</th>\n",
+       "      <th>line_id</th>\n",
+       "      <th>name</th>\n",
+       "      <th>geometry</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>512</th>\n",
+       "      <td>1</td>\n",
+       "      <td>17714</td>\n",
+       "      <td>0</td>\n",
+       "      <td>110</td>\n",
+       "      <td>114</td>\n",
+       "      <td>1</td>\n",
+       "      <td>1</td>\n",
+       "      <td>208.786560</td>\n",
+       "      <td>1.000000</td>\n",
+       "      <td>0.127815</td>\n",
+       "      <td>...</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>2</td>\n",
+       "      <td>4</td>\n",
+       "      <td>31.819073</td>\n",
+       "      <td>1815013</td>\n",
+       "      <td>None</td>\n",
+       "      <td>LINESTRING (691394.6266907752 5139052, 691410....</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>513</th>\n",
+       "      <td>2</td>\n",
+       "      <td>17715</td>\n",
+       "      <td>0</td>\n",
+       "      <td>110</td>\n",
+       "      <td>115</td>\n",
+       "      <td>1</td>\n",
+       "      <td>2</td>\n",
+       "      <td>294.110107</td>\n",
+       "      <td>1.261215</td>\n",
+       "      <td>0.060613</td>\n",
+       "      <td>...</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>3</td>\n",
+       "      <td>4</td>\n",
+       "      <td>108.460526</td>\n",
+       "      <td>1815013</td>\n",
+       "      <td>None</td>\n",
+       "      <td>LINESTRING (691451 5139078.992958551, 691470.9...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>514</th>\n",
+       "      <td>3</td>\n",
+       "      <td>17716</td>\n",
+       "      <td>0</td>\n",
+       "      <td>110</td>\n",
+       "      <td>116</td>\n",
+       "      <td>1</td>\n",
+       "      <td>3</td>\n",
+       "      <td>41.835766</td>\n",
+       "      <td>1.532099</td>\n",
+       "      <td>0.332276</td>\n",
+       "      <td>...</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>4</td>\n",
+       "      <td>4</td>\n",
+       "      <td>159.658676</td>\n",
+       "      <td>1815013</td>\n",
+       "      <td>None</td>\n",
+       "      <td>LINESTRING (691527.2 5139123.038141218, 691538...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>515</th>\n",
+       "      <td>4</td>\n",
+       "      <td>17556</td>\n",
+       "      <td>0</td>\n",
+       "      <td>109</td>\n",
+       "      <td>116</td>\n",
+       "      <td>1</td>\n",
+       "      <td>4</td>\n",
+       "      <td>220.128555</td>\n",
+       "      <td>1.714200</td>\n",
+       "      <td>0.092116</td>\n",
+       "      <td>...</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>5</td>\n",
+       "      <td>4</td>\n",
+       "      <td>199.582047</td>\n",
+       "      <td>1815013</td>\n",
+       "      <td>None</td>\n",
+       "      <td>LINESTRING (691538.8600608129 5139128.2, 69156...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>516</th>\n",
+       "      <td>5</td>\n",
+       "      <td>17557</td>\n",
+       "      <td>0</td>\n",
+       "      <td>109</td>\n",
+       "      <td>117</td>\n",
+       "      <td>1</td>\n",
+       "      <td>5</td>\n",
+       "      <td>161.999496</td>\n",
+       "      <td>1.949906</td>\n",
+       "      <td>0.097721</td>\n",
+       "      <td>...</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>6</td>\n",
+       "      <td>4</td>\n",
+       "      <td>257.818359</td>\n",
+       "      <td>1815013</td>\n",
+       "      <td>None</td>\n",
+       "      <td>LINESTRING (691603.4 5139143.608205146, 691624...</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "<p>5 rows × 23 columns</p>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "     rno   node  k    i    j  iseg  ireach      rchlen     width     slope  \\\n",
+       "512    1  17714  0  110  114     1       1  208.786560  1.000000  0.127815   \n",
+       "513    2  17715  0  110  115     1       2  294.110107  1.261215  0.060613   \n",
+       "514    3  17716  0  110  116     1       3   41.835766  1.532099  0.332276   \n",
+       "515    4  17556  0  109  116     1       4  220.128555  1.714200  0.092116   \n",
+       "516    5  17557  0  109  117     1       5  161.999496  1.949906  0.097721   \n",
+       "\n",
+       "     ...  thts  thti  eps  uhc  outreach  outseg        asum  line_id  name  \\\n",
+       "512  ...   0.0   0.0  0.0  0.0         2       4   31.819073  1815013  None   \n",
+       "513  ...   0.0   0.0  0.0  0.0         3       4  108.460526  1815013  None   \n",
+       "514  ...   0.0   0.0  0.0  0.0         4       4  159.658676  1815013  None   \n",
+       "515  ...   0.0   0.0  0.0  0.0         5       4  199.582047  1815013  None   \n",
+       "516  ...   0.0   0.0  0.0  0.0         6       4  257.818359  1815013  None   \n",
+       "\n",
+       "                                              geometry  \n",
+       "512  LINESTRING (691394.6266907752 5139052, 691410....  \n",
+       "513  LINESTRING (691451 5139078.992958551, 691470.9...  \n",
+       "514  LINESTRING (691527.2 5139123.038141218, 691538...  \n",
+       "515  LINESTRING (691538.8600608129 5139128.2, 69156...  \n",
+       "516  LINESTRING (691603.4 5139143.608205146, 691624...  \n",
+       "\n",
+       "[5 rows x 23 columns]"
+      ]
+     },
+     "execution_count": 12,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "sfrdata.reach_data.head()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 13,
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2022-12-19T16:15:01.367073Z",
+     "iopub.status.busy": "2022-12-19T16:15:01.366874Z",
+     "iopub.status.idle": "2022-12-19T16:15:01.383041Z",
+     "shell.execute_reply": "2022-12-19T16:15:01.382489Z"
+    }
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>per</th>\n",
+       "      <th>nseg</th>\n",
+       "      <th>icalc</th>\n",
+       "      <th>outseg</th>\n",
+       "      <th>iupseg</th>\n",
+       "      <th>iprior</th>\n",
+       "      <th>nstrpts</th>\n",
+       "      <th>flow</th>\n",
+       "      <th>runoff</th>\n",
+       "      <th>etsw</th>\n",
+       "      <th>...</th>\n",
+       "      <th>uhc1</th>\n",
+       "      <th>hcond2</th>\n",
+       "      <th>thickm2</th>\n",
+       "      <th>elevdn</th>\n",
+       "      <th>width2</th>\n",
+       "      <th>depth2</th>\n",
+       "      <th>thts2</th>\n",
+       "      <th>thti2</th>\n",
+       "      <th>eps2</th>\n",
+       "      <th>uhc2</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>0</td>\n",
+       "      <td>1</td>\n",
+       "      <td>1</td>\n",
+       "      <td>4</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>...</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>1297.867432</td>\n",
+       "      <td>18.499418</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>0</td>\n",
+       "      <td>2</td>\n",
+       "      <td>1</td>\n",
+       "      <td>4</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>...</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>1297.867432</td>\n",
+       "      <td>123.988358</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>0</td>\n",
+       "      <td>3</td>\n",
+       "      <td>1</td>\n",
+       "      <td>6</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>...</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>1278.149658</td>\n",
+       "      <td>23.194326</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>0</td>\n",
+       "      <td>4</td>\n",
+       "      <td>1</td>\n",
+       "      <td>6</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>...</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>1278.149658</td>\n",
+       "      <td>126.765388</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>0</td>\n",
+       "      <td>5</td>\n",
+       "      <td>1</td>\n",
+       "      <td>10</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>...</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>1211.286133</td>\n",
+       "      <td>21.228680</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "<p>5 rows × 35 columns</p>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "   per  nseg  icalc  outseg  iupseg  iprior  nstrpts  flow  runoff  etsw  ...  \\\n",
+       "0    0     1      1       4       0       0        0   0.0     0.0   0.0  ...   \n",
+       "1    0     2      1       4       0       0        0   0.0     0.0   0.0  ...   \n",
+       "2    0     3      1       6       0       0        0   0.0     0.0   0.0  ...   \n",
+       "3    0     4      1       6       0       0        0   0.0     0.0   0.0  ...   \n",
+       "4    0     5      1      10       0       0        0   0.0     0.0   0.0  ...   \n",
+       "\n",
+       "   uhc1  hcond2  thickm2       elevdn      width2  depth2  thts2  thti2  eps2  \\\n",
+       "0   0.0     0.0      0.0  1297.867432   18.499418     0.0    0.0    0.0   0.0   \n",
+       "1   0.0     0.0      0.0  1297.867432  123.988358     0.0    0.0    0.0   0.0   \n",
+       "2   0.0     0.0      0.0  1278.149658   23.194326     0.0    0.0    0.0   0.0   \n",
+       "3   0.0     0.0      0.0  1278.149658  126.765388     0.0    0.0    0.0   0.0   \n",
+       "4   0.0     0.0      0.0  1211.286133   21.228680     0.0    0.0    0.0   0.0   \n",
+       "\n",
+       "   uhc2  \n",
+       "0   0.0  \n",
+       "1   0.0  \n",
+       "2   0.0  \n",
+       "3   0.0  \n",
+       "4   0.0  \n",
+       "\n",
+       "[5 rows x 35 columns]"
+      ]
+     },
+     "execution_count": 13,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "sfrdata.segment_data.head()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Sampling streambed top elevations from a DEM\n",
+    "While the above dataset contains streambed top elevations read from NHDPlus, a DEM can be sampled to obtain more accurate elevations. If the DEM elevation units are specified, SFRmaker will convert the elevations to model units if needed. See the Streambed_elevation_demo notebook for more information on how this works."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 14,
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2022-12-19T16:15:01.385759Z",
+     "iopub.status.busy": "2022-12-19T16:15:01.385565Z",
+     "iopub.status.idle": "2022-12-19T16:15:07.518655Z",
+     "shell.execute_reply": "2022-12-19T16:15:07.518138Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "running rasterstats.zonal_stats on buffered LineStrings...\n",
+      "finished in 5.92s\n",
+      "\n",
+      "\n",
+      "Smoothing elevations...\n",
+      "finished in 0.12s\n"
+     ]
+    }
+   ],
+   "source": [
+    "sfrdata.set_streambed_top_elevations_from_dem('../tylerforks/dem_26715.tif', \n",
+    "                                              elevation_units='meters')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Assigning layers to the reaches\n",
+    "Once we have a valid set of streambed elevations, the reaches can be assigned to model layers."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 15,
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2022-12-19T16:15:07.521715Z",
+     "iopub.status.busy": "2022-12-19T16:15:07.521288Z",
+     "iopub.status.idle": "2022-12-19T16:15:07.526244Z",
+     "shell.execute_reply": "2022-12-19T16:15:07.525721Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "sfrdata.assign_layers()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 16,
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2022-12-19T16:15:07.528827Z",
+     "iopub.status.busy": "2022-12-19T16:15:07.528617Z",
+     "iopub.status.idle": "2022-12-19T16:15:07.544578Z",
+     "shell.execute_reply": "2022-12-19T16:15:07.543983Z"
+    }
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>rno</th>\n",
+       "      <th>node</th>\n",
+       "      <th>k</th>\n",
+       "      <th>i</th>\n",
+       "      <th>j</th>\n",
+       "      <th>iseg</th>\n",
+       "      <th>ireach</th>\n",
+       "      <th>rchlen</th>\n",
+       "      <th>width</th>\n",
+       "      <th>slope</th>\n",
+       "      <th>...</th>\n",
+       "      <th>thts</th>\n",
+       "      <th>thti</th>\n",
+       "      <th>eps</th>\n",
+       "      <th>uhc</th>\n",
+       "      <th>outreach</th>\n",
+       "      <th>outseg</th>\n",
+       "      <th>asum</th>\n",
+       "      <th>line_id</th>\n",
+       "      <th>name</th>\n",
+       "      <th>geometry</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>512</th>\n",
+       "      <td>1</td>\n",
+       "      <td>17714</td>\n",
+       "      <td>2</td>\n",
+       "      <td>110</td>\n",
+       "      <td>114</td>\n",
+       "      <td>1</td>\n",
+       "      <td>1</td>\n",
+       "      <td>208.786560</td>\n",
+       "      <td>1.000000</td>\n",
+       "      <td>0.127815</td>\n",
+       "      <td>...</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>2</td>\n",
+       "      <td>4</td>\n",
+       "      <td>31.819073</td>\n",
+       "      <td>1815013</td>\n",
+       "      <td>None</td>\n",
+       "      <td>LINESTRING (691394.6266907752 5139052, 691410....</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>513</th>\n",
+       "      <td>2</td>\n",
+       "      <td>17715</td>\n",
+       "      <td>2</td>\n",
+       "      <td>110</td>\n",
+       "      <td>115</td>\n",
+       "      <td>1</td>\n",
+       "      <td>2</td>\n",
+       "      <td>294.110107</td>\n",
+       "      <td>1.261215</td>\n",
+       "      <td>0.060613</td>\n",
+       "      <td>...</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>3</td>\n",
+       "      <td>4</td>\n",
+       "      <td>108.460526</td>\n",
+       "      <td>1815013</td>\n",
+       "      <td>None</td>\n",
+       "      <td>LINESTRING (691451 5139078.992958551, 691470.9...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>514</th>\n",
+       "      <td>3</td>\n",
+       "      <td>17716</td>\n",
+       "      <td>2</td>\n",
+       "      <td>110</td>\n",
+       "      <td>116</td>\n",
+       "      <td>1</td>\n",
+       "      <td>3</td>\n",
+       "      <td>41.835766</td>\n",
+       "      <td>1.532099</td>\n",
+       "      <td>0.332276</td>\n",
+       "      <td>...</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>4</td>\n",
+       "      <td>4</td>\n",
+       "      <td>159.658676</td>\n",
+       "      <td>1815013</td>\n",
+       "      <td>None</td>\n",
+       "      <td>LINESTRING (691527.2 5139123.038141218, 691538...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>515</th>\n",
+       "      <td>4</td>\n",
+       "      <td>17556</td>\n",
+       "      <td>2</td>\n",
+       "      <td>109</td>\n",
+       "      <td>116</td>\n",
+       "      <td>1</td>\n",
+       "      <td>4</td>\n",
+       "      <td>220.128555</td>\n",
+       "      <td>1.714200</td>\n",
+       "      <td>0.092116</td>\n",
+       "      <td>...</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>5</td>\n",
+       "      <td>4</td>\n",
+       "      <td>199.582047</td>\n",
+       "      <td>1815013</td>\n",
+       "      <td>None</td>\n",
+       "      <td>LINESTRING (691538.8600608129 5139128.2, 69156...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>516</th>\n",
+       "      <td>5</td>\n",
+       "      <td>17557</td>\n",
+       "      <td>2</td>\n",
+       "      <td>109</td>\n",
+       "      <td>117</td>\n",
+       "      <td>1</td>\n",
+       "      <td>5</td>\n",
+       "      <td>161.999496</td>\n",
+       "      <td>1.949906</td>\n",
+       "      <td>0.097721</td>\n",
+       "      <td>...</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>6</td>\n",
+       "      <td>4</td>\n",
+       "      <td>257.818359</td>\n",
+       "      <td>1815013</td>\n",
+       "      <td>None</td>\n",
+       "      <td>LINESTRING (691603.4 5139143.608205146, 691624...</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "<p>5 rows × 23 columns</p>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "     rno   node  k    i    j  iseg  ireach      rchlen     width     slope  \\\n",
+       "512    1  17714  2  110  114     1       1  208.786560  1.000000  0.127815   \n",
+       "513    2  17715  2  110  115     1       2  294.110107  1.261215  0.060613   \n",
+       "514    3  17716  2  110  116     1       3   41.835766  1.532099  0.332276   \n",
+       "515    4  17556  2  109  116     1       4  220.128555  1.714200  0.092116   \n",
+       "516    5  17557  2  109  117     1       5  161.999496  1.949906  0.097721   \n",
+       "\n",
+       "     ...  thts  thti  eps  uhc  outreach  outseg        asum  line_id  name  \\\n",
+       "512  ...   0.0   0.0  0.0  0.0         2       4   31.819073  1815013  None   \n",
+       "513  ...   0.0   0.0  0.0  0.0         3       4  108.460526  1815013  None   \n",
+       "514  ...   0.0   0.0  0.0  0.0         4       4  159.658676  1815013  None   \n",
+       "515  ...   0.0   0.0  0.0  0.0         5       4  199.582047  1815013  None   \n",
+       "516  ...   0.0   0.0  0.0  0.0         6       4  257.818359  1815013  None   \n",
+       "\n",
+       "                                              geometry  \n",
+       "512  LINESTRING (691394.6266907752 5139052, 691410....  \n",
+       "513  LINESTRING (691451 5139078.992958551, 691470.9...  \n",
+       "514  LINESTRING (691527.2 5139123.038141218, 691538...  \n",
+       "515  LINESTRING (691538.8600608129 5139128.2, 69156...  \n",
+       "516  LINESTRING (691603.4 5139143.608205146, 691624...  \n",
+       "\n",
+       "[5 rows x 23 columns]"
+      ]
+     },
+     "execution_count": 16,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "sfrdata.reach_data.head()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Running diagnostics\n",
+    "`SFRData` includes a `run_diagnostics()` method that executes the Flopy checker on the SFR package input. While the Flopy checks are only implemented for MODFLOW-2005 style SFR packages, `run_diagnostics()` works on MODFLOW-6 packages as well, by working of an attached MODFLOW-2005 representation of the MODFLOW-6 SFR input. The following checks are executed:\n",
+    "* **NaNs** (not a number values, which will cause MODFLOW to crash)\n",
+    "* **consecutive segment and reach numbering**\n",
+    "* **segment numbering that only increases** in the downstream direction\n",
+    "* **circular routing sequences** (reaches or segments routing back to themselves)\n",
+    "* **routing connection proximity:** The length of routing connections, as determined by the distance between their cell centers, is compared to 1.25 times the diagonal distance across the cell containing the upstream reach. This benchmark length is equivalent to a diagonal connection between two square cells, where one cell had a spacing of 1.5 times the other cell (the maximum recommended increase in spacing between two adjacent cells; see Anderson and others, 2015). While this routing proximity check can be helpful for identifying egregious routing issues, in practice, it may not be uncommon for valid routing connections to violate this rule. For example, if the ``one_reach_per_cell`` option is used in constructing the SFR package with a large grid size, there may be numerous routing connections that extend across several cells. When non-adjacent routing connections are identified, the user can check the shapefile of routing connections to verify the results.\n",
+    "* **overlapping conductances:** This check identifies instances of collocated reaches, where more than one reach has a connection to the groundwater flow solution in that cell. Collocated reaches may or may not present an issue for a particular model solution, but can potentially promote instability or spurious circulation of flow between the collocated reaches.\n",
+    "* **spurious streambed top elevations:** Values < -10 or > 15,000 are flagged\n",
+    "* **downstream rises in streambed elevation**\n",
+    "* **inconsistencies between streambed elevation and the model grid:** This check looks for streambed bottoms below their respective cell bottoms, which will cause MODFLOW to halt execution, and streambed tops that are above the model top. The latter issue will not prevent MODFLOW from running, but may indicate problems with the input if the differences are large. For coarse grids in areas of high stream density (where there are often multiple streams in a cell), it may be impossible to ensure that all streambed top elevations are at or below the model top. Oftentimes, these reaches are dry anyways (for example, and ephemeral gully that runs off a bluff into a perennial stream, where the cell elevation is based on the elevation of the perennial stream). In any case, it is good practice to check the largest violations by comparing the SFRmaker shapefile output to a DEM and other data in a GIS environment.\n",
+    "* **suprious slopes:** slopes of less than 0.0001 (which can lead to excessive stages with the SFR package's Manning approximation) and greater than 1.0 are flagged."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 17,
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2022-12-19T16:15:07.547372Z",
+     "iopub.status.busy": "2022-12-19T16:15:07.547168Z",
+     "iopub.status.idle": "2022-12-19T16:15:07.693147Z",
+     "shell.execute_reply": "2022-12-19T16:15:07.692515Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "\n",
+      "Running Flopy v. 3.3.7 diagnostics...\n",
+      "wrote tf_SFR.chk\n"
+     ]
+    }
+   ],
+   "source": [
+    "sfrdata.run_diagnostics(verbose=False)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Writing an SFR package\n",
+    "Now we can write the package. By default, a MODFLOW-2005 style package is written to the current working directory or the model workspace of the attached model instance."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 18,
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2022-12-19T16:15:07.696129Z",
+     "iopub.status.busy": "2022-12-19T16:15:07.695918Z",
+     "iopub.status.idle": "2022-12-19T16:15:07.817724Z",
+     "shell.execute_reply": "2022-12-19T16:15:07.817155Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "SFRmaker v. 0.9.3\n",
+      "\n",
+      "Running Flopy v. 3.3.7 diagnostics...\n",
+      "passed.\n",
+      "\n",
+      "Checking for continuity in segment and reach numbering...\n",
+      "passed.\n",
+      "\n",
+      "Checking for increasing segment numbers in downstream direction...\n",
+      "passed.\n",
+      "\n",
+      "Checking for circular routing...\n",
+      "passed.\n",
+      "\n",
+      "Checking reach connections for proximity...\n",
+      "5 segments with non-adjacent reaches found.\n",
+      "At segments:\n",
+      "41 20 21 22 23\n",
+      "\n",
+      "5 segments with non-adjacent reaches found.\n",
+      "At segments:\n",
+      "41 20 21 22 23\n",
+      "\n",
+      "\n",
+      "Checking for model cells with multiple non-zero SFR conductances...\n",
+      "25 model cells with multiple non-zero SFR conductances found.\n",
+      "This may lead to circular routing between collocated reaches.\n",
+      "Nodes with overlapping conductances:\n",
+      "k\ti\tj\tiseg\tireach\trchlen\tstrthick\tstrhc1\n",
+      "2\t110\t119\t1\t8\t268.3089904785156\t1.0\t1.0\n",
+      "2\t110\t119\t2\t1\t72.39283752441406\t1.0\t1.0\n",
+      "0\t87\t122\t3\t54\t35.61542510986328\t1.0\t1.0\n",
+      "2\t110\t119\t4\t1\t12.818351745605469\t1.0\t1.0\n",
+      "0\t87\t122\t4\t34\t230.8770751953125\t1.0\t1.0\n",
+      "0\t76\t110\t5\t47\t204.68466186523438\t1.0\t1.0\n",
+      "0\t87\t122\t6\t1\t30.619203567504883\t1.0\t1.0\n",
+      "2\t84\t119\t6\t7\t271.296630859375\t1.0\t1.0\n",
+      "2\t84\t119\t6\t9\t26.846023559570312\t1.0\t1.0\n",
+      "0\t76\t110\t6\t27\t75.61869812011719\t1.0\t1.0\n",
+      "2\t25\t24\t7\t42\t95.18097686767578\t1.0\t1.0\n",
+      "2\t25\t24\t8\t47\t230.81414794921875\t1.0\t1.0\n",
+      "1\t58\t132\t9\t25\t42.411964416503906\t1.0\t1.0\n",
+      "1\t58\t132\t9\t27\t88.49227905273438\t1.0\t1.0\n",
+      "0\t48\t109\t9\t64\t251.07437133789062\t1.0\t1.0\n",
+      "0\t76\t110\t10\t1\t69.44449615478516\t1.0\t1.0\n",
+      "0\t48\t108\t10\t40\t20.661043167114258\t1.0\t1.0\n",
+      "0\t48\t109\t10\t41\t114.03108978271484\t1.0\t1.0\n",
+      "0\t48\t108\t10\t42\t35.86711502075195\t1.0\t1.0\n",
+      "2\t25\t24\t11\t1\t21.262147903442383\t1.0\t1.0\n",
+      "2\t18\t17\t11\t15\t148.88375854492188\t1.0\t1.0\n",
+      "2\t19\t23\t12\t47\t12.734856605529785\t1.0\t1.0\n",
+      "2\t19\t23\t12\t49\t108.90869903564453\t1.0\t1.0\n",
+      "2\t18\t17\t12\t58\t77.02336120605469\t1.0\t1.0\n",
+      "1\t80\t49\t13\t70\t159.628662109375\t1.0\t1.0\n",
+      "0\t48\t108\t14\t1\t125.59841918945312\t1.0\t1.0\n",
+      "0\t47\t98\t14\t22\t67.49517059326172\t1.0\t1.0\n",
+      "0\t47\t98\t14\t24\t102.60327911376953\t1.0\t1.0\n",
+      "0\t54\t89\t14\t39\t35.04909896850586\t1.0\t1.0\n",
+      "0\t54\t89\t14\t41\t62.93534851074219\t1.0\t1.0\n",
+      "0\t53\t78\t14\t57\t61.92954635620117\t1.0\t1.0\n",
+      "0\t53\t78\t14\t59\t28.305360794067383\t1.0\t1.0\n",
+      "0\t52\t76\t14\t62\t63.750675201416016\t1.0\t1.0\n",
+      "0\t52\t76\t14\t64\t294.7840270996094\t1.0\t1.0\n",
+      "1\t54\t73\t14\t69\t341.07586669921875\t1.0\t1.0\n",
+      "1\t54\t73\t14\t71\t27.020740509033203\t1.0\t1.0\n",
+      "1\t80\t49\t14\t125\t39.87680435180664\t1.0\t1.0\n",
+      "2\t18\t17\t16\t1\t185.31173706054688\t1.0\t1.0\n",
+      "2\t15\t3\t16\t21\t32.886505126953125\t1.0\t1.0\n",
+      "2\t36\t11\t17\t38\t58.1950798034668\t1.0\t1.0\n",
+      "2\t110\t159\t19\t2\t201.7003936767578\t1.0\t1.0\n",
+      "0\t38\t85\t21\t8\t72.13273620605469\t1.0\t1.0\n",
+      "0\t38\t85\t21\t9\t52.62028121948242\t1.0\t1.0\n",
+      "2\t108\t57\t24\t8\t237.81178283691406\t1.0\t1.0\n",
+      "2\t108\t57\t24\t9\t46.60417556762695\t1.0\t1.0\n",
+      "0\t94\t35\t24\t45\t96.37408447265625\t1.0\t1.0\n",
+      "0\t94\t35\t24\t47\t89.41510009765625\t1.0\t1.0\n",
+      "2\t91\t35\t24\t50\t60.342041015625\t1.0\t1.0\n",
+      "2\t91\t34\t24\t51\t61.56704330444336\t1.0\t1.0\n",
+      "1\t80\t49\t25\t1\t146.53265380859375\t1.0\t1.0\n",
+      "2\t91\t35\t25\t26\t308.05096435546875\t1.0\t1.0\n",
+      "2\t91\t34\t25\t27\t76.15687561035156\t1.0\t1.0\n",
+      "2\t15\t3\t31\t1\t273.3369445800781\t1.0\t1.0\n",
+      "2\t36\t11\t36\t1\t262.8287048339844\t1.0\t1.0\n",
+      "2\t110\t159\t38\t1\t23.601938247680664\t1.0\t1.0\n",
+      "2\t91\t34\t42\t1\t130.4016571044922\t1.0\t1.0\n",
+      "1\t92\t30\t42\t6\t67.78282165527344\t1.0\t1.0\n",
+      "1\t92\t30\t42\t8\t252.36495971679688\t1.0\t1.0\n",
+      "\n",
+      "Checking for streambed tops of less than -10...\n",
+      "passed.\n",
+      "\n",
+      "Checking for streambed tops of greater than 15000...\n",
+      "passed.\n",
+      "\n",
+      "Checking segment_data for downstream rises in streambed elevation...\n",
+      "Segment elevup and elevdn not specified for nstrm=-1441 and isfropt=1\n",
+      "passed.\n",
+      "\n",
+      "Checking reach_data for downstream rises in streambed elevation...\n",
+      "passed.\n",
+      "\n",
+      "Checking reach_data for inconsistencies between streambed elevations and the model grid...\n",
+      "1 reaches encountered with streambed above model top.\n",
+      "Model top violations:\n",
+      "i j iseg ireach strtop modeltop strhc1 reachID diff\n",
+      "49 15 18 19 922.1929321289062 920.3099975585938 1.0 788 -1.8829345703125\n",
+      "\n",
+      "\n",
+      "Checking segment_data for inconsistencies between segment end elevations and the model grid...\n",
+      "Segment elevup and elevdn not specified for nstrm=-1441 and isfropt=1\n",
+      "passed.\n",
+      "\n",
+      "Checking for streambed slopes of less than 0.0001...\n",
+      "passed.\n",
+      "\n",
+      "Checking for streambed slopes of greater than 1.0...\n",
+      "passed.\n",
+      "\n",
+      "wrote tf_SFR.chk\n",
+      "wrote ../tylerforks/tylerforks/tf.sfr.\n"
+     ]
+    }
+   ],
+   "source": [
+    "sfrdata.write_package()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Writing a MODFLOW-6 SFR package\n",
+    "Alternatively, a MODFLOW-6 style SFR package can be written by specifying ``version='mf6'``"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 19,
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2022-12-19T16:15:07.820721Z",
+     "iopub.status.busy": "2022-12-19T16:15:07.820505Z",
+     "iopub.status.idle": "2022-12-19T16:15:08.180335Z",
+     "shell.execute_reply": "2022-12-19T16:15:08.179664Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "SFRmaker v. 0.9.3\n",
+      "\n",
+      "Running Flopy v. 3.3.7 diagnostics...\n",
+      "passed.\n",
+      "\n",
+      "Checking for continuity in segment and reach numbering...\n",
+      "passed.\n",
+      "\n",
+      "Checking for increasing segment numbers in downstream direction...\n",
+      "passed.\n",
+      "\n",
+      "Checking for circular routing...\n",
+      "passed.\n",
+      "\n",
+      "Checking reach connections for proximity...\n",
+      "5 segments with non-adjacent reaches found.\n",
+      "At segments:\n",
+      "41 20 21 22 23\n",
+      "\n",
+      "5 segments with non-adjacent reaches found.\n",
+      "At segments:\n",
+      "41 20 21 22 23\n",
+      "\n",
+      "\n",
+      "Checking for model cells with multiple non-zero SFR conductances...\n",
+      "25 model cells with multiple non-zero SFR conductances found.\n",
+      "This may lead to circular routing between collocated reaches.\n",
+      "Nodes with overlapping conductances:\n",
+      "k\ti\tj\tiseg\tireach\trchlen\tstrthick\tstrhc1\n",
+      "2\t110\t119\t1\t8\t268.3089904785156\t1.0\t1.0\n",
+      "2\t110\t119\t2\t1\t72.39283752441406\t1.0\t1.0\n",
+      "0\t87\t122\t3\t54\t35.61542510986328\t1.0\t1.0\n",
+      "2\t110\t119\t4\t1\t12.818351745605469\t1.0\t1.0\n",
+      "0\t87\t122\t4\t34\t230.8770751953125\t1.0\t1.0\n",
+      "0\t76\t110\t5\t47\t204.68466186523438\t1.0\t1.0\n",
+      "0\t87\t122\t6\t1\t30.619203567504883\t1.0\t1.0\n",
+      "2\t84\t119\t6\t7\t271.296630859375\t1.0\t1.0\n",
+      "2\t84\t119\t6\t9\t26.846023559570312\t1.0\t1.0\n",
+      "0\t76\t110\t6\t27\t75.61869812011719\t1.0\t1.0\n",
+      "2\t25\t24\t7\t42\t95.18097686767578\t1.0\t1.0\n",
+      "2\t25\t24\t8\t47\t230.81414794921875\t1.0\t1.0\n",
+      "1\t58\t132\t9\t25\t42.411964416503906\t1.0\t1.0\n",
+      "1\t58\t132\t9\t27\t88.49227905273438\t1.0\t1.0\n",
+      "0\t48\t109\t9\t64\t251.07437133789062\t1.0\t1.0\n",
+      "0\t76\t110\t10\t1\t69.44449615478516\t1.0\t1.0\n",
+      "0\t48\t108\t10\t40\t20.661043167114258\t1.0\t1.0\n",
+      "0\t48\t109\t10\t41\t114.03108978271484\t1.0\t1.0\n",
+      "0\t48\t108\t10\t42\t35.86711502075195\t1.0\t1.0\n",
+      "2\t25\t24\t11\t1\t21.262147903442383\t1.0\t1.0\n",
+      "2\t18\t17\t11\t15\t148.88375854492188\t1.0\t1.0\n",
+      "2\t19\t23\t12\t47\t12.734856605529785\t1.0\t1.0\n",
+      "2\t19\t23\t12\t49\t108.90869903564453\t1.0\t1.0\n",
+      "2\t18\t17\t12\t58\t77.02336120605469\t1.0\t1.0\n",
+      "1\t80\t49\t13\t70\t159.628662109375\t1.0\t1.0\n",
+      "0\t48\t108\t14\t1\t125.59841918945312\t1.0\t1.0\n",
+      "0\t47\t98\t14\t22\t67.49517059326172\t1.0\t1.0\n",
+      "0\t47\t98\t14\t24\t102.60327911376953\t1.0\t1.0\n",
+      "0\t54\t89\t14\t39\t35.04909896850586\t1.0\t1.0\n",
+      "0\t54\t89\t14\t41\t62.93534851074219\t1.0\t1.0\n",
+      "0\t53\t78\t14\t57\t61.92954635620117\t1.0\t1.0\n",
+      "0\t53\t78\t14\t59\t28.305360794067383\t1.0\t1.0\n",
+      "0\t52\t76\t14\t62\t63.750675201416016\t1.0\t1.0\n",
+      "0\t52\t76\t14\t64\t294.7840270996094\t1.0\t1.0\n",
+      "1\t54\t73\t14\t69\t341.07586669921875\t1.0\t1.0\n",
+      "1\t54\t73\t14\t71\t27.020740509033203\t1.0\t1.0\n",
+      "1\t80\t49\t14\t125\t39.87680435180664\t1.0\t1.0\n",
+      "2\t18\t17\t16\t1\t185.31173706054688\t1.0\t1.0\n",
+      "2\t15\t3\t16\t21\t32.886505126953125\t1.0\t1.0\n",
+      "2\t36\t11\t17\t38\t58.1950798034668\t1.0\t1.0\n",
+      "2\t110\t159\t19\t2\t201.7003936767578\t1.0\t1.0\n",
+      "0\t38\t85\t21\t8\t72.13273620605469\t1.0\t1.0\n",
+      "0\t38\t85\t21\t9\t52.62028121948242\t1.0\t1.0\n",
+      "2\t108\t57\t24\t8\t237.81178283691406\t1.0\t1.0\n",
+      "2\t108\t57\t24\t9\t46.60417556762695\t1.0\t1.0\n",
+      "0\t94\t35\t24\t45\t96.37408447265625\t1.0\t1.0\n",
+      "0\t94\t35\t24\t47\t89.41510009765625\t1.0\t1.0\n",
+      "2\t91\t35\t24\t50\t60.342041015625\t1.0\t1.0\n",
+      "2\t91\t34\t24\t51\t61.56704330444336\t1.0\t1.0\n",
+      "1\t80\t49\t25\t1\t146.53265380859375\t1.0\t1.0\n",
+      "2\t91\t35\t25\t26\t308.05096435546875\t1.0\t1.0\n",
+      "2\t91\t34\t25\t27\t76.15687561035156\t1.0\t1.0\n",
+      "2\t15\t3\t31\t1\t273.3369445800781\t1.0\t1.0\n",
+      "2\t36\t11\t36\t1\t262.8287048339844\t1.0\t1.0\n",
+      "2\t110\t159\t38\t1\t23.601938247680664\t1.0\t1.0\n",
+      "2\t91\t34\t42\t1\t130.4016571044922\t1.0\t1.0\n",
+      "1\t92\t30\t42\t6\t67.78282165527344\t1.0\t1.0\n",
+      "1\t92\t30\t42\t8\t252.36495971679688\t1.0\t1.0\n",
+      "\n",
+      "Checking for streambed tops of less than -10...\n",
+      "passed.\n",
+      "\n",
+      "Checking for streambed tops of greater than 15000...\n",
+      "passed.\n",
+      "\n",
+      "Checking segment_data for downstream rises in streambed elevation...\n",
+      "Segment elevup and elevdn not specified for nstrm=-1441 and isfropt=1\n",
+      "passed.\n",
+      "\n",
+      "Checking reach_data for downstream rises in streambed elevation...\n",
+      "passed.\n",
+      "\n",
+      "Checking reach_data for inconsistencies between streambed elevations and the model grid...\n",
+      "1 reaches encountered with streambed above model top.\n",
+      "Model top violations:\n",
+      "i j iseg ireach strtop modeltop strhc1 reachID diff\n",
+      "49 15 18 19 922.1929321289062 920.3099975585938 1.0 788 -1.8829345703125\n",
+      "\n",
+      "\n",
+      "Checking segment_data for inconsistencies between segment end elevations and the model grid...\n",
+      "Segment elevup and elevdn not specified for nstrm=-1441 and isfropt=1\n",
+      "passed.\n",
+      "\n",
+      "Checking for streambed slopes of less than 0.0001...\n",
+      "passed.\n",
+      "\n",
+      "Checking for streambed slopes of greater than 1.0...\n",
+      "passed.\n",
+      "\n",
+      "wrote tf_SFR.chk\n",
+      "converting segment data to period data...\n",
+      "converting reach and segment data to package data...\n",
+      "wrote ../tylerforks/tylerforks/tf.sfr\n"
+     ]
+    }
+   ],
+   "source": [
+    "sfrdata.write_package(version='mf6')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Writing tables\n",
+    "The ``reach_data`` and ``segment_data`` tables can be written out to csv files for further processing:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 20,
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2022-12-19T16:15:08.183326Z",
+     "iopub.status.busy": "2022-12-19T16:15:08.183104Z",
+     "iopub.status.idle": "2022-12-19T16:15:08.199704Z",
+     "shell.execute_reply": "2022-12-19T16:15:08.199109Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "wrote tables/tf_sfr_reach_data.csv\n",
+      "wrote tables/tf_sfr_segment_data.csv\n"
+     ]
+    }
+   ],
+   "source": [
+    "sfrdata.write_tables()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "and then read back in to create an ``SFRData`` instance"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 21,
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2022-12-19T16:15:08.202444Z",
+     "iopub.status.busy": "2022-12-19T16:15:08.202243Z",
+     "iopub.status.idle": "2022-12-19T16:15:08.288350Z",
+     "shell.execute_reply": "2022-12-19T16:15:08.287850Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Model grid information\n",
+      "structured grid\n",
+      "nnodes: 17,760\n",
+      "nlay: 1\n",
+      "nrow: 111\n",
+      "ncol: 160\n",
+      "model length units: undefined\n",
+      "crs: EPSG:26715\n",
+      "bounds: 682688.00, 5139052.00, 694880.00, 5147510.20\n",
+      "active area defined by: isfr array\n",
+      "\n"
+     ]
+    }
+   ],
+   "source": [
+    "sfrdata2 = sfrmaker.SFRData.from_tables('tables/tf_sfr_reach_data.csv', 'tables/tf_sfr_segment_data.csv',\n",
+    "                                        grid=grid)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Writing shapefiles\n",
+    "Shapefiles can also be written to visualize the SFR package. These include:\n",
+    "* hydrography linestrings associated with each reach\n",
+    "* model cell polygons associated with each reach\n",
+    "* outlet locations where water is leaving the model\n",
+    "* routing connections (as lines drawn between cell centers)\n",
+    "* the locations of specified inflows or any other period data\n",
+    "* observation locations (if observations were supplied as input)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 22,
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2022-12-19T16:15:08.291753Z",
+     "iopub.status.busy": "2022-12-19T16:15:08.291171Z",
+     "iopub.status.idle": "2022-12-19T16:15:09.207327Z",
+     "shell.execute_reply": "2022-12-19T16:15:09.206570Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "writing shps/tf_sfr_cells.shp... Done\n",
+      "writing shps/tf_sfr_outlets.shp... Done\n",
+      "writing shps/tf_sfr_lines.shp... Done\n",
+      "writing shps/tf_sfr_routing.shp... Done\n",
+      "No period data to export!\n",
+      "No observations to export!\n",
+      "No non-zero values of flow to export!\n"
+     ]
+    }
+   ],
+   "source": [
+    "sfrdata.write_shapefiles()"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.9.13"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 4
+}
