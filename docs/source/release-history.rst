@@ -2,7 +2,7 @@
 Release History
 ===============
 
-Version 0.9.3 (2022-12-14)
+Version 0.9.3 (2022-12-19)
 --------------------------
 * fixes to ``SFRdata.assign_layers``:
     * only compare new cell bottoms to old cell bottoms if a new bottom array is returned
