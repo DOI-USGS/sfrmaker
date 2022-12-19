@@ -86,7 +86,7 @@ def test_lines_from_NHDPlus(tylerforks_lines_from_NHDPlus):
     # add dropna due to some lines along boundary 
     # not being in the PFVAA subset used for the test
     assert np.allclose(lines.df['asum1'].dropna(), expected_asum1s.dropna(), atol=10)
-    assert np.all(lines.df.loc[tf, 'asum1'].dropna() > 95000)
+    assert np.all(lines.df.loc[tf, 'asum1'].dropna() > 90000)
     assert isinstance(lines, Lines)
 
 

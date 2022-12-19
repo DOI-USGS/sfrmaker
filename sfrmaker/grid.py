@@ -3,7 +3,7 @@ Module for working with model grids. For examples of how to easily set
 up a StructuredGrid instance, see :ref:`Basic usage of SFRmaker in a scripting context`.
 """
 
-import os
+from pathlib import Path
 import warnings
 
 import fiona
@@ -154,7 +154,7 @@ class Grid:
             # set isfr from polygon
             if self.df.isfr.sum() == len(self.df):
                 self._set_isfr_from_active_area()
-                if isinstance(feature, str):
+                if isinstance(feature, str) or isinstance(feature, Path):
                     self._active_area_defined_by = feature
                 else:
                     self._active_area_defined_by = 'supplied Polygon feature(s)'

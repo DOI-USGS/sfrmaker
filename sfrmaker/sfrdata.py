@@ -1140,7 +1140,7 @@ class SFRData(DataPackage):
         """
         # load the configuration file
         wd = os.getcwd()
-        if isinstance(config_file, str):
+        if isinstance(config_file, str) or isinstance(config_file, Path):
             # change the cwd to the config file path
             path, config_file = os.path.split(config_file)
             path = path if len(path) > 0 else '.'

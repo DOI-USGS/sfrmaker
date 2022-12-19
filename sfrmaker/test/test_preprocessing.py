@@ -98,7 +98,7 @@ def preprocessed_flowlines(test_data_path, culled_flowlines, outfolder, project_
     kwargs['logger'] = None
     kwargs['output_length_units'] = 'meters'
     kwargs['outfolder'] = outfolder
-    kwargs['project_epsg'] = 5070
+    kwargs['dest_crs'] = 5070
     preprocessed_flowlines = preprocess_nhdplus(**kwargs)
 
     # check that the known_connections were routed correctly
@@ -193,7 +193,7 @@ def test_preprocess_nhdplus_no_zonal_stats(culled_flowlines, preprocessed_flowli
     kwargs['logger'] = None
     kwargs['output_length_units'] = 'meters'
     kwargs['outfolder'] = outfolder
-    kwargs['project_epsg'] = 5070
+    kwargs['dest_crs'] = 5070
     preprocessed_flowlines2 = preprocess_nhdplus(**kwargs)
 
     # verify that the same result is produced
@@ -228,7 +228,7 @@ def test_preprocess_nhdplus_no_narwidth(test_data_path, culled_flowlines, outfol
     kwargs['known_connections'] = None
     kwargs['logger'] = None
     kwargs['outfolder'] = outfolder
-    kwargs['project_epsg'] = 5070
+    kwargs['dest_crs'] = 5070
     preprocess_nhdplus(**kwargs)
 
 
@@ -256,7 +256,7 @@ def test_edit_flowlines(flowlines, preprocessed_flowlines, test_data_path):
         assert edited_flowlines.loc[comid, 'tocomid'] == tocomid
     add_flowlines = shp2df(os.path.join(test_data_path, 'yazoo.shp'))
     assert not any(set(add_flowlines.comid).difference(edited_flowlines.index))
-    if isinstance(flowlines, str):
+    if isinstance(flowlines, str) or isinstance(flowlines, Path):
         assert os.path.exists(flowlines[:-4] + '.prj')
         
 
@@ -324,3 +324,14 @@ def test_swb_runoff_to_csv(test_data_path, outdir):
     # not sure if this is right but will fail if the input 
     # or the code changes substantially
     assert np.allclose(mean_monthly_runoff2, 9e5, rtol=0.2)
+
+
+def test_cull_flowlines2(project_root_path):
+    outfolder = Path(project_root_path, 'examples/Notebooks/output')
+    outfolder.mkdir(exist_ok=True)
+
+    results = cull_flowlines(NHDPlus_paths=[Path(project_root_path, 'examples/tylerforks/NHDPlus/')],
+                            asum_thresh=5, intermittent_streams_asum_thresh=10,
+                            cull_invalid=True, cull_isolated=False,
+                            active_area=Path(project_root_path, 'examples/tylerforks/active_area.shp'),
+                            outfolder=outfolder)

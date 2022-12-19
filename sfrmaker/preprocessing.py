@@ -104,7 +104,7 @@ def cull_flowlines(NHDPlus_paths,
                    cull_isolated=True,
                    keep_comids=None,
                    outfolder='clipped_flowlines', logger=None):
-    """Cull NHDPlus data to an area defined by an ``active_area`` polygon and
+    """Cull NHDPlus version2 data to an area defined by an ``active_area`` polygon and
     to flowlines with Arbolate sums greater than specified thresholds. Also remove
     lines that are isolated from the stream network or are missing attribute information.
 
@@ -156,7 +156,7 @@ def cull_flowlines(NHDPlus_paths,
         os.makedirs(outfolder)
         logger.statement('created {}'.format(outfolder))
 
-    if asum_thresh is not None:
+    if asum_thresh is not None and asum_thresh > 0.:
         version = f'_gt{asum_thresh:.0f}km'
     else:
         version = ''
@@ -359,7 +359,7 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
                        minimum_width=1.,
                        output_length_units='meters',
                        logger=None, outfolder='output/',
-                       project_epsg=None, flowline_crs=None, dest_crs=None,
+                       flowline_crs=None, dest_crs=None,
                        ):
     """Preprocess NHDPlus data to a single DataFrame of flowlines
     that each route to no more than one flowline, with width, elevation
@@ -371,7 +371,7 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
         Path to NHDPlus NHDFlowline shapefile. May or maybe not have been
         preprocessed by :func:`~sfrmaker.preprocessing.cull_flowlines`. The flowlines
         must be in a valid projected coorinate reference system (CRS; i.e., with units of meters),
-        or a valid projected CRS must be specified with ``project_epsg``.
+        or a valid projected CRS must be specified with ``flowline_crs``.
     pfvaa_file : str
         Path to NHDPlus PlusFlowlineVAA database (.dbf file). May or maybe not have been
         preprocessed by :func:`~sfrmaker.preprocessing.cull_flowlines`. ``ArbolateSu``
@@ -453,9 +453,6 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
     logger : sfrmaker.logger instance, optional
         Pass an existing sfrmaker.logger instance to logger the preprocessing operations,
         by default None
-    project_epsg : int
-        EPSG code for the output CRS (e.g. 5070 for NAD83 Albers).
-        Required if the flowlines are not in a valid Projected CRS.
     flowline_crs : obj
         Coordinate reference system of the NHDPlus data. Only needed if
         the data do not have a valid ESRI projection (.prj) file.
@@ -476,7 +473,6 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
     dest_crs : obj
         Output Coordinate reference system. Same input types
         as ``flowline_crs``.
-        By default, epsg:5070
 
     Returns
     -------
@@ -551,7 +547,7 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
         if waterbody_shapefiles is None:
             raise ValueError("NARWidth option ")
         else:
-            if isinstance(waterbody_shapefiles, str):
+            if isinstance(waterbody_shapefiles, str) or isinstance(waterbody_shapefiles, Path):
                 waterbody_shapefiles = [waterbody_shapefiles]
             files_list += waterbody_shapefiles
     for f in files_list:
@@ -577,20 +573,20 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
         msg = ("{} not found; flowlines must have a valid projection file."
                .format(prjfile))
         logger.lraise(msg)
-    if project_epsg is not None and dest_crs is None:
-        project_crs = get_crs(epsg=project_epsg, crs=dest_crs)
-    if flowline_crs.is_geographic:
-        if project_crs is None or project_crs.is_geographic:
-            msg = ("project_epsg for a valid Projected CRS (i.e. in units of meters)\n"
+    if dest_crs is not None:
+        project_crs = get_crs(crs=dest_crs)
+    elif project_crs is None or project_crs.is_geographic:
+            msg = ("dest_crs for a valid Projected CRS (i.e. in units of meters)\n"
                    " must be specified if flowlines are in a Geographic CRS\n"
-                   "specified project_epsg: {}".format(project_epsg))
+                   f"specified dest_crs: {dest_crs}")
             logger.lraise(msg)
+    
 
     # get bounds of flowlines
     with fiona.open(flowlines_file) as src:
         flowline_bbox = box(*src.bounds)
 
-    fl = shp2df(flowlines_file) # flowlines clipped to model area
+    fl = gpd.read_file(flowlines_file) # flowlines clipped to model area
     pfvaa = shp2df(pfvaa_file)
     pf = shp2df(pf_file)
     elevslope = shp2df(elevslope_file)
@@ -608,7 +604,8 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
 
     # to_crs the flowlines if they are not in project_crs
     if project_crs is not None and flowline_crs is not None and project_crs != flowline_crs:
-        fl['geometry'] = project(fl.geometry, flowline_crs, project_crs)
+        #fl['geometry'] = project(fl.geometry, flowline_crs, project_crs)
+        fl.to_crs(project_crs, inplace=True)
 
     # option to reuse shapefile from previous run instead of re-running zonal statistics
     # which can take an hour for large problems
@@ -684,7 +681,7 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
             outfile = outfile.format('')
         df2shp(flccb.drop('buffpoly', axis=1),
                outfolder / outfile,
-               index=False, epsg=project_epsg)
+               index=False, crs=dest_crs)
     else:
         if not Path(flowline_elevations_file).exists():
             raise ValueError(
@@ -947,7 +944,7 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
 
     if active_area is not None:
         flcc = clip_flowlines_to_polygon(flcc, active_area,
-                                         flowlines_epsg=project_epsg,
+                                         crs=dest_crs,
                                          simplify_tol=100, logger=logger)
         
     # write output files; record timestamps in logger
@@ -958,14 +955,14 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
     else:
         outfile = outfile.format('')
     df2shp(flcc.drop('buffpoly', axis=1), outfolder / outfile,
-           index=False, epsg=project_epsg)
+           index=False, crs=dest_crs)
     logger.log('Preprocessing Flowlines')
 
     return flcc
 
 
 def clip_flowlines_to_polygon(flowlines, polygon,
-                              flowlines_epsg=None, crs=None,
+                              crs=None,
                               simplify_tol=100, logger=None):
     """Clip line features in a flowlines DataFrame to polygon
     features in polygon.
@@ -1011,8 +1008,11 @@ def clip_flowlines_to_polygon(flowlines, polygon,
 
     # read in the active area and to_crs to same crs as flowlines
     flowlines_crs = None
-    if flowlines_epsg is not None:
-        flowlines_crs = get_crs(epsg=flowlines_epsg, crs=crs)
+    if crs is not None:
+        flowlines_crs = get_crs(crs=crs)
+    elif isinstance(flowlines, gpd.GeoDataFrame):
+        flowlines_crs = flowlines.crs
+        
     active_area_polygon = read_polygon_feature(polygon, flowlines_crs)
 
     # simplify polygon vertices to speed intersection testing
@@ -1035,7 +1035,7 @@ def clip_flowlines_to_polygon(flowlines, polygon,
 
 def sample_NARWidth(flowlines, narwidth_shapefile, waterbodies,
                     filter=None,
-                    flowlines_epsg=None, crs=None,
+                    crs=None,
                     output_width_units='meters',
                     outpath='shps/'):
     """
@@ -1092,7 +1092,7 @@ def sample_NARWidth(flowlines, narwidth_shapefile, waterbodies,
     if not os.path.isdir(outpath):
         os.makedirs(outpath)
 
-    flowline_crs = get_crs(epsg=flowlines_epsg, crs=crs)
+    flowline_crs = get_crs(crs=crs)
     if flowline_crs.is_geographic:
         msg = ("Flowlines must be in a projected Coordinate Reference System "
                "(CRS; i.e. with units of meters).")
@@ -1108,7 +1108,7 @@ def sample_NARWidth(flowlines, narwidth_shapefile, waterbodies,
     buffers = [g.buffer(buffdist) for g in flowlines.geometry]
     flbuff = flowlines.copy()
     flbuff['geometry'] = buffers
-    df2shp(flbuff, '{}/flowlines_edited_buffers_{}.shp'.format(outpath, buffdist), epsg=flowlines_epsg)
+    df2shp(flbuff, '{}/flowlines_edited_buffers_{}.shp'.format(outpath, buffdist), crs=flowline_crs)
 
     # determine which narwidth segments intersect the flowline buffers
     results = intersect_rtree(nw.geometry.tolist(), flbuff.geometry.tolist())
@@ -1174,7 +1174,7 @@ def sample_NARWidth(flowlines, narwidth_shapefile, waterbodies,
     criteria = rivers_with_widths | wbs
 
     df2shp(flowlines.loc[criteria, :], '{}/flowlines_w_sampled_narwidth_elevations.shp'.format(outpath),
-           epsg=flowlines_epsg)
+           crs=flowline_crs)
 
 
 def edit_flowlines(flowlines, config_file,
@@ -1215,7 +1215,7 @@ def edit_flowlines(flowlines, config_file,
     with open(config_file) as src:
         cfg = yaml.load(src, Loader=yaml.Loader)
 
-    if isinstance(flowlines, str):
+    if isinstance(flowlines, str) or isinstance(flowlines, Path):
         logger.log_file_and_date_modified(flowlines)
         df = shp2df(flowlines)
         # make a backup
@@ -1275,7 +1275,7 @@ def edit_flowlines(flowlines, config_file,
     #notin = set(df[toid_column]).difference(df.index)
 
     # write out an updated version of the input flowlines file
-    if isinstance(flowlines, str):
+    if isinstance(flowlines, str) or isinstance(flowlines, Path):
         df2shp(df, flowlines, prj=prj_file)
         logger.statement('wrote {}'.format(flowlines))
     return df
