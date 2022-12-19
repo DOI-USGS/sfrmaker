@@ -2,9 +2,9 @@
 Tests for the SFRmaker logger module.
 """
 import os
+from pathlib import Path
 import pytest
 from sfrmaker.logger import Logger
-from pathlib import Path
 
 
 @pytest.fixture(autouse=True)
@@ -32,7 +32,7 @@ def existing_log_file(outfolder):
                                            (existing_log_file, 'junk')  # work with an open file handle
                                       ))
 def test_init(filename, mode, existing_log_file, outfolder):
-    if isinstance(filename, str):
+    if isinstance(filename, str) or isinstance(filename, Path):
         filename = os.path.join(outfolder, filename)
         logger = Logger(filename, mode)
     elif filename is not None:

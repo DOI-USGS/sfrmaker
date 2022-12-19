@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 import time
 from shapely.geometry import LineString
 try:
@@ -62,9 +63,8 @@ class DataPackage:
         """Write shapefiles illustrating all aspects of a boundary package.
         """
         if basename is None:
-            output_path = self._shapefiles_path
-            if not os.path.isdir(output_path):
-                os.makedirs(output_path)
+            output_path = Path(self._shapefiles_path)
+            output_path.mkdir(exist_ok=True)
             basename = self.package_name
         else:
             output_path, basename = os.path.split(basename)

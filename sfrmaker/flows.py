@@ -1,6 +1,7 @@
 """
 Functions for getting or adding specified flows or other stress-period-based inputs to the SFR package.
 """
+from pathlib import Path
 import warnings
 import numpy as np
 import pandas as pd
@@ -54,7 +55,7 @@ def get_inflow_locations_from_parent_model(parent_reach_data, inset_reach_data,
     """
 
     # spatial reference instances defining parent and inset grids
-    if isinstance(inset_grid, str):
+    if isinstance(inset_grid, str) or isinstance(inset_grid, Path):
         grid = load_modelgrid(inset_grid)
     elif isinstance(inset_grid, flopy.discretization.grid.Grid):
         grid = inset_grid
@@ -66,7 +67,7 @@ def get_inflow_locations_from_parent_model(parent_reach_data, inset_reach_data,
         active_area = box(l, b, r, t)
 
     # parent and inset reach data
-    if isinstance(parent_reach_data, str):
+    if isinstance(parent_reach_data, str) or isinstance(parent_reach_data, Path):
         prd = shp2df(parent_reach_data)
     elif isinstance(parent_reach_data, pd.DataFrame):
         prd = parent_reach_data.copy()
@@ -78,7 +79,7 @@ def get_inflow_locations_from_parent_model(parent_reach_data, inset_reach_data,
     mustinclude_cols = {'line_id', 'rno', 'iseg', 'ireach', 'geometry'}
     assert len(mustinclude_cols.intersection(prd.columns)) == len(mustinclude_cols)
 
-    if isinstance(inset_reach_data, str):
+    if isinstance(inset_reach_data, str) or isinstance(inset_reach_data, Path):
         if inset_reach_data.endswith('.shp'):
             ird = shp2df(inset_reach_data)
         else:
