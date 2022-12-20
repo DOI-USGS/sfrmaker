@@ -58,6 +58,24 @@ def test_write_shapefile(tylerforks_lines_from_NHDPlus, test_data_path):
 
 @pytest.mark.skipif(platform.system() == 'Linux', reason="Fiona FileGDB driver error")
 def test_load_nhdplus_hr(neversink_lines_from_nhdplus_hr):
+    
     lines = neversink_lines_from_nhdplus_hr
     assert isinstance(lines, sfrmaker.lines.Lines)
     assert is_to_one(lines._original_routing)
+
+
+@pytest.mark.skipif(platform.system() == 'Linux', reason="Fiona FileGDB driver error")
+@pytest.mark.parametrize('kwargs', (
+    {'drop_ftypes': [428], 'drop_NHDPlusIDs': [10000200240966]},
+))
+def test_load_nhdplus_hr_options(datapath, kwargs):
+    NHDPlusHR_paths = [f'{datapath}/neversink_rondout/NHDPLUS_HR_1.gdb', 
+                       f'{datapath}/neversink_rondout/NHDPLUS_HR_2.gdb']
+    boundary_file = f'{datapath}/neversink_rondout/Model_Extent.shp'
+
+    lns = sfrmaker.Lines.from_nhdplus_hr(NHDPlusHR_paths,
+                                        filter=boundary_file,
+                                        **kwargs)
+    assert not any(set(lns.df.id).intersection(kwargs['drop_NHDPlusIDs']))
+    # these two NHDPlusIDs have FType == 428
+    assert not any(set(lns.df.id).intersection([10000700047982, 10000200046339]))
