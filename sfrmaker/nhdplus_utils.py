@@ -280,7 +280,7 @@ def get_hr_routing(pf, fl):
 
 
 def load_nhdplus_hr(NHDPlusHR_paths, filter=None, 
-                    drop_fcodes=None, drop_ftypes=None, drop_NHDids=None):
+                    drop_fcodes=None, drop_ftypes=None, drop_NHDPlusIDs=None):
     """
     Parameters
     ==========
@@ -296,8 +296,8 @@ def load_nhdplus_hr(NHDPlusHR_paths, filter=None,
             fcode or list of NHDFlowline FCodes to drop from network. 
     drop_ftypes: int or list of ints, optional
             ftype or list of NHDFlowline Ftypes to drop from network. 
-    drop_NHDids: int or list of ints, optional
-            NHDid or list of NHDFlowline NHDids to drop from network. 
+    drop_NHDPlusIDs: int or list of ints, optional
+            NHDPlusID or list of NHDFlowline NHDPlusIDs to drop from network. 
     crs : obj
         Coordinate reference system of the NHDPlus data. Only needed if
         the data do not have a valid ESRI projection (.prj) file.
@@ -355,8 +355,8 @@ def load_nhdplus_hr(NHDPlusHR_paths, filter=None,
         df = df.loc[~df.FCode.isin(drop_fcodes)]
     if drop_ftypes is not None:
         df = df.loc[~df.FType.isin(drop_ftypes)]
-    if drop_NHDids is not None:
-        df = df.loc[~df.NHDPlusID.isin(drop_NHDids)]
+    if drop_NHDPlusIDs is not None:
+        df = df.loc[~df.NHDPlusID.isin(drop_NHDPlusIDs)]
         
     keep_cols = ['NHDPlusID', 'ToNHDPID', 'ArbolateSu',
                'geometry', 'StreamOrde',

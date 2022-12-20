@@ -670,7 +670,7 @@ class Lines:
 
     @classmethod
     def from_nhdplus_hr(cls, NHDPlusHR_paths, filter=None, 
-                        drop_fcodes=None, drop_ftypes=None, drop_NHDids=None, crs=None,
+                        drop_fcodes=None, drop_ftypes=None, drop_NHDPlusIDs=None, crs=None,
                         epsg=None, proj_str=None):
         """
         Parameters
@@ -694,12 +694,12 @@ class Lines:
                 
                 drop_fcodes = [42803, 42814]
         drop_ftypes : int or list of ints, optional
-            ftype or list of NHDFlowline FType to drop from network.
+            List of NHDFlowline FTypes to drop from network.
             For example, to remove all pipelines from line network::
 
                 drop_fcodes = [428]
-        drop_NHDids : int or list of ints, optional
-            NHDid or list of NHDFlowline NHDid to drop from network.
+        drop_NHDPlusIDs : int or list of ints, optional
+            List of NHDFlowlines (as NHDPlusIDs) to drop from network.
         crs : obj, optional
             Coordinate reference object to reproject NHDPlus High Resolution 
             flowlines. A Python int, dict, str, or :class:`pyproj.crs.CRS` 
@@ -727,7 +727,8 @@ class Lines:
         ==========
         lines : :class:`Lines` instance
         """
-        df, gdb_crs = load_nhdplus_hr(NHDPlusHR_paths, filter=filter, drop_fcodes=drop_fcodes, drop_ftypes=drop_ftypes, drop_NHDids=drop_NHDids)
+        df, gdb_crs = load_nhdplus_hr(NHDPlusHR_paths, filter=filter, drop_fcodes=drop_fcodes, 
+                                      drop_ftypes=drop_ftypes, drop_NHDPlusIDs=drop_NHDPlusIDs)
 
         #  check to see if flowline geodataframe needs to be reprojected, and get new CRS
         if crs is not None or epsg is not None or proj_str is not None:
