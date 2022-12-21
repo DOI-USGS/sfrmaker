@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Contributing to SFRmaker &mdash; SFRmaker 0.9.3.post0.dev0+g544d7ae documentation</title>
+  <title>Contributing to SFRmaker &mdash; SFRmaker 0.9.1.post33.dev0+gbf64173 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
@@ -37,7 +37,7 @@
             <a href="index.html" class="icon icon-home"> SFRmaker
           </a>
               <div class="version">
-                0.9.3.post0.dev0+g544d7ae
+                0.9.1.post33.dev0+gbf64173
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -227,7 +227,7 @@ return values should be documented explicitly. (Note: there are admittedly more 
 grouping, imports should be alphabetized.  Always use absolute
 imports when possible, and explicit relative imports for local
 imports when necessary in tests. Imports can be sorted automatically using the isort package with a pre-commit hook. For more details see <a class="reference internal" href="#contributing-style"><span class="std std-ref">below</span></a>.</p></li>
-<li><p>SFRmaker supports Python 3.7+ only.</p></li>
+<li><p>SFRmaker supports Python 3.9+ only.</p></li>
 </ul>
 <section id="seven-steps-for-contributing">
 <h3>Seven Steps for Contributing<a class="headerlink" href="#seven-steps-for-contributing" title="Permalink to this heading">¶</a></h3>
@@ -398,6 +398,20 @@ and the docstrings follow the <a class="reference external" href="https://github
 <p>Once you’ve made changes and pushed them to your forked repository, you then
 submit a pull request to have them integrated into the <em>SFRmaker</em> code base.</p>
 <p>You can find a pull request (or PR) tutorial in the <a class="reference external" href="https://help.github.com/articles/using-pull-requests/">GitHub’s Help Docs</a>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Please make pull requests to the develop branch; the master branch is typically only updated when releases are made to PyPI.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If you haven’t already, it’s also good practice to rebase the feature branch that your are working on (e.g. <code class="docutils literal notranslate"><span class="pre">shiny-new-feature</span></code> above) to the develop branch on the main repository. This brings your branch into sync with the main develop branch, and places the commits you are adding (the new feature or bug fix, etc) on top of it. If you see a message in the pull request dialog on GitHub such as “This branch cannot be rebased due to conflicts”, rebasing your feature branch to the develop branch on the main repository should fix it. Note that you may have to use the <code class="docutils literal notranslate"><span class="pre">-f</span></code> flag to force push to your fork after rebasing. For example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">fetch</span> <span class="n">upstream</span>
+<span class="n">git</span> <span class="n">rebase</span> <span class="n">upstream</span><span class="o">/</span><span class="n">develop</span>
+<span class="n">git</span> <span class="n">push</span> <span class="n">origin</span> <span class="n">shiny</span><span class="o">-</span><span class="n">new</span><span class="o">-</span><span class="n">feature</span>
+</pre></div>
+</div>
+<p>(this assumes that your remote pointing to the main repository is called <em>upstream</em>, and your remote pointing to your fork is called <em>origin</em>)</p>
+</div>
 </section>
 <section id="style-guide-linting">
 <span id="contributing-style"></span><h3>Style Guide &amp; Linting<a class="headerlink" href="#style-guide-linting" title="Permalink to this heading">¶</a></h3>
@@ -439,7 +453,7 @@ can be done by installing <code class="docutils literal notranslate"><span class
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Dec 19, 2022.
+      <span class="lastupdated">Last updated on Dec 21, 2022.
       </span></p>
   </div>
 
