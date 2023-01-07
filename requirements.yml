@@ -18,7 +18,7 @@ dependencies:
   - rasterstats
   - shapely
   - rtree
-  - pyproj>=2.2
+  - pyproj
   - pyshp
   - netcdf4
   - pytest

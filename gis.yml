@@ -21,7 +21,7 @@ dependencies:
 - shapely
 - rasterio
 - rasterstats
-- pyproj>=2.0
+- pyproj
 - cartopy
 - descartes
 - netcdf4
@@ -51,7 +51,7 @@ dependencies:
 - pip
 - pip:
   - pytest-timeout
-  - isort>=5.0.4  # for sorting imports
+  - isort  # for sorting imports
   - pre-commit  # for pre-commit hooks
   - versioneer
   - git+https://github.com/modflowpy/flopy@develop
