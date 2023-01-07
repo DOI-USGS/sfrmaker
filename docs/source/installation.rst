@@ -6,26 +6,34 @@ Installing python dependencies with Conda
 -----------------------------------------
 ``sfrmaker`` depends on a number of python packages, many of which have external C library dependencies. The easiest way to install most of these is with `conda`_. A few packages are not available via conda, and must be installed with `pip`_. If you are on the USGS internal network, see the `Considerations for USGS Users`_ section below first.
 
-Download and install the 64-bit `Anaconda python distribution`_ or `Miniconda <https://docs.conda.io/en/latest/miniconda.html>`_
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Download and install a python distribution and Conda-like package installer 
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+There are many ways to do this:
 
-  * Anaconda comes with a larger selection of popular data science and scientific packages, making it ideal for those who use python frequently for scientific computing.
-  * Miniconda is a minimal installer with a much smaller footprint, making it ideal for those who only want to use ``SFRmaker``.
-  * **Make sure to install Anaconda or Miniconda to your username** (not at the system level). More often than not, installing at the system level (for all users) seems to result in issues with library dependencies (for example, import of ``fiona`` or ``rasterio`` failing because gdal isn't found). It is also good practice to periodically do a `clean uninstall`_ of Anaconda, which at the system level requires admin. privileges.
+    * The `Anaconda python distribution`_ comes with a large selection of popular data science and scientific packages pre-installed.
 
-    * In the installer, at the “Destination Select” step, select “Install for me only.” It should say something about how the software will be installed to your home folder.
-    * If your installer skips the “Destination Select” step, when you get to "Installation Type", click “Change Install Location” and then “Install for me only.”
+    * `Miniconda <https://docs.conda.io/en/latest/miniconda.html>`_ is a minimal installer with a much smaller footprint, makingit ideal for creating python environments dedicated to specific tasks (a recommended practice).
+
+    * `Mambaforge <https://github.com/conda-forge/miniforge#mambaforge>`_ is like Miniconda, but pre-configured to use the`Mamba`_ installer, and only the `conda-forge <https://conda-forge.org/docs/user/introduction.html>`_ channel for gettingpackages (more below). If the above two options don't work (for example, the Conda installer fails or gets stuck on the"solve" step), this may be your best option.
+
+**Make sure to install Anaconda or Miniconda to your username** (not at the system level). More often than not, installing at the system level (for all users) seems to result in issues with library dependencies (for example, import of ``fiona`` or``rasterio`` failing because gdal isn't found). It is also good practice to periodically do a `clean uninstall`_ of Anaconda, which at the system level requires admin. privileges.
+
+  * In the installer, at the “Destination Select” step, select “Install for me only.” It should say something about how the software will be installed to your home folder.
+
+  * If your installer skips the “Destination Select” step, when you get to "Installation Type", click “Change Install Location” and then “Install for me only.”
 
 Download an environment file
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   * `requirements.yml`_ for a `conda environment`_ with the minimum packages required to run SFRmaker, or
+
   * `gis.yml`_ for a more full set of packages in the python geospatial stack, including Jupyter Notebooks and packages needed for testing, documentation and packaging. Note that the environment described by ``requirements.yml`` is called `sfrmaker`, while the environment in ``gis.yml`` is called `gis`.
 
     .. note::
         To download the above YAML files, simply follow the links to get the raw text and then go to File > Save within your web browser, and save the text as a YAML file (with the `.yaml` or `.yml` extension).
 
   * Alternatively, clone (`using git`_) or `download`_ the ``sfrmaker`` repository, which includes the two environment files at the root level.
+
   * Note that both of these environment files contain a ``pip`` section of packages that will be installed with pip, after the ``conda`` packages are installed.
 
 Creating a `Conda environment`_ using `Mamba`_
@@ -34,7 +42,18 @@ If you are on the USGS internal network, see the `Considerations for USGS Users`
 
 While Conda can of course be used to create a Conda environment, the Mamba package solver is generally faster and more robust, especially for larger, more complex environments like the included ``requirements.yml``. Mamba is a reimplementation of the conda package manager in C++.
 
-To get started, open an Anaconda Command Prompt on Windows or a terminal window on OSX and point it to the location of ``requirements.yml`` or ``gis.yml`` and enter:
+Before using Mamba, you will need to `install it first <https://mamba.readthedocs.io/en/latest/installation.html>`_.
+
+Python packages are available through conda via channels. Conda comes preconfigured to install packages from the default channel, which is maintained by Anaconda, Inc. In general, you may have better luck exclusively using the `conda-forge <https://conda-forge.org/docs/user/introduction.html>`_ channel instead, which is community-based and intended to provide a single location to get any package, with a minimum of hassle. In general, it is bad practice to mix package channels within a single environment. You can read more `here <https://conda-forge.org/docs/user/introduction.html>`__, but to set conda-forge as the default:
+
+.. code-block:: bash
+
+    conda config --add channels conda-forge
+
+.. note::
+    If you are having trouble installing Mamba (for example, the conda package solver fails when you try to install it, or takes an excessively long time), you may have better luck uninstalling `Anaconda completely <clean uninstall>`_ and installing `Mambaforge <https://github.com/conda-forge/miniforge#mambaforge>`_ instead, as directed in the Mamba install instructions. Mambaforge solves both of the above problems by providing a minimal python distribution and conda-style package installer that is preconfigured to use both `conda-forge <https://conda-forge.org/docs/user/introduction.html>`_ and `Mamba`_.
+
+Once you have a python distribution and mamba installed, to create the conda environment, open a new Anaconda Command Prompt on Windows or a new terminal window on OSX and point it to the location of ``requirements.yml`` or ``gis.yml`` and enter:
 
 .. code-block:: bash
 
@@ -158,7 +177,7 @@ _`Considerations for USGS Users`
 Using conda or pip on the USGS network requires SSL verification, which can cause a number of issues.
 If you are encountering persistant issues with creating the conda environment,
 you may have better luck trying the install off of the USGS network (e.g. at home).
-See `here <https://tst.usgs.gov/applications/application-and-script-signing/>`_ for more information
+See `here <https://tst.usgs.gov/applications/application-and-script-signing/>`__ for more information
 about SSL verification on the USGS network, and to download the DOI SSL certificate.
 
 _`Installing the DOI SSL certificate for use with pip`
