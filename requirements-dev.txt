@@ -8,10 +8,10 @@ xarray
 geopandas
 gdal
 fiona
-rasterio>=1.0
+rasterio
 rasterstats
 shapely
-pyproj>=2.2
+pyproj
 flopy
 rtree
 flopy
