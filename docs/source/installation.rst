@@ -4,7 +4,7 @@ Installation
 
 Installing python dependencies with Conda
 -----------------------------------------
-``sfrmaker`` depends on a number of python packages, many of which have external C library dependencies. The easiest way to install most of these is with `conda`_. A few packages are not available via conda, and must be installed with `pip`_. If you are on the USGS internal network, see the `Considerations for USGS Users`_ section below first.
+SFRmaker depends on a number of python packages, many of which have external C library dependencies. The easiest way to install most of these is with a package installer like `Conda`_. A few packages are not available via conda, and must be installed with `pip`_. If you are on the USGS internal network, see the `Considerations for USGS Users`_ section below first.
 
 Download and install a python distribution and Conda-like package installer 
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -14,9 +14,9 @@ There are many ways to do this:
 
     * `Miniconda <https://docs.conda.io/en/latest/miniconda.html>`_ is a minimal installer with a much smaller footprint, makingit ideal for creating python environments dedicated to specific tasks (a recommended practice).
 
-    * `Mambaforge <https://github.com/conda-forge/miniforge#mambaforge>`_ is like Miniconda, but pre-configured to use the`Mamba`_ installer, and only the `conda-forge <https://conda-forge.org/docs/user/introduction.html>`_ channel for gettingpackages (more below). If the above two options don't work (for example, the Conda installer fails or gets stuck on the"solve" step), this may be your best option.
+    * `Mambaforge <https://github.com/conda-forge/miniforge#mambaforge>`_ is like Miniconda, but pre-configured to use the `Mamba`_ installer, and only the `conda-forge <https://conda-forge.org/docs/user/introduction.html>`_ channel for getting packages (more below). If the above two options don't work (for example, the Conda installer fails or gets stuck on the "solve" step), this may be your best option.
 
-**Make sure to install Anaconda or Miniconda to your username** (not at the system level). More often than not, installing at the system level (for all users) seems to result in issues with library dependencies (for example, import of ``fiona`` or``rasterio`` failing because gdal isn't found). It is also good practice to periodically do a `clean uninstall`_ of Anaconda, which at the system level requires admin. privileges.
+**Make sure to install Anaconda or Miniconda to your username** (not at the system level). More often than not, installing at the system level (for all users) seems to result in issues with library dependencies (for example, import of ``fiona`` or ``rasterio`` failing because gdal isn't found). It is also good practice to periodically do a `clean uninstall`_ of Anaconda, which at the system level requires admin. privileges.
 
   * In the installer, at the “Destination Select” step, select “Install for me only.” It should say something about how the software will be installed to your home folder.
 
@@ -32,9 +32,9 @@ Download an environment file
     .. note::
         To download the above YAML files, simply follow the links to get the raw text and then go to File > Save within your web browser, and save the text as a YAML file (with the `.yaml` or `.yml` extension).
 
-  * Alternatively, clone (`using git`_) or `download`_ the ``sfrmaker`` repository, which includes the two environment files at the root level.
+  * Alternatively, clone (`using git`_) or `download`_ the SFRmaker repository, which includes the two environment files at the root level.
 
-  * Note that both of these environment files contain a ``pip`` section of packages that will be installed with pip, after the ``conda`` packages are installed.
+  * Note that both of these environment files contain a ``pip`` section of packages that will be installed with pip, after the Conda packages are installed.
 
 Creating a `Conda environment`_ using `Mamba`_
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -44,7 +44,7 @@ While Conda can of course be used to create a Conda environment, the Mamba packa
 
 Before using Mamba, you will need to `install it first <https://mamba.readthedocs.io/en/latest/installation.html>`_.
 
-Python packages are available through conda via channels. Conda comes preconfigured to install packages from the default channel, which is maintained by Anaconda, Inc. In general, you may have better luck exclusively using the `conda-forge <https://conda-forge.org/docs/user/introduction.html>`_ channel instead, which is community-based and intended to provide a single location to get any package, with a minimum of hassle. In general, it is bad practice to mix package channels within a single environment. You can read more `here <https://conda-forge.org/docs/user/introduction.html>`__, but to set conda-forge as the default:
+Python packages are available from conda via channels. Conda comes preconfigured to install packages from the default channel, which is maintained by Anaconda, Inc. In general, you may have better luck exclusively using the `conda-forge <https://conda-forge.org/docs/user/introduction.html>`_ channel instead, which is community-based and intended to provide a single location to get any package, with a minimum of hassle. In general, it is bad practice to mix package channels within a single environment. You can read more `here <https://conda-forge.org/docs/user/introduction.html>`__, but to set conda-forge as the default:
 
 .. code-block:: bash
 
@@ -163,12 +163,13 @@ will work to remove the package, and the current version of the package (includi
 Best practices
 ------------------------
 
-* Install the \*conda distribution of your choice to your user account, NOT at the system level. Installing to your user means you have rights to delete and reinstall Anaconda as-needed, as well as to edit any configuration files for ``pip``, ``conda``, etc. Installing at the system level also just seems to lead to more confusing problems with dependencies, at least in the USGS.
+* Install the \*conda distribution of your choice to your user account, NOT at the system level. Installing to your user means you have rights to delete and reinstall Anaconda as-needed, as well as to edit any configuration files for pip, Conda, etc. Installing at the system level also just seems to lead to more confusing problems with dependencies, at least in the USGS.
 * Periodically (maybe a few times a year?) fully remove your \*conda distribution and reinstall it. If you just can't get things to work (packages won't import or produce DLL errors on import, adding or upgrading a package takes a very long time or results in excessive upgrades or downgrades of other packages, etc.), fully removing and reinstalling \*conda just may resolve your issues.
 * Don't use your base environment; create and delete environments as needed. Conda is generally pretty good about managing packages between environments without wasting a lot of disk space.
 * Use an environment file (as above) to create a conda environment, instead of installing packages ad-hoc.
-* Use ``mamba`` instead of ``conda``; it just works better for environments with a lot of packages.
-* After setting up the above conda environment, scan the screen output to make sure that everything installed correctly, especially the packages installed through ``pip``.
+* Use Mamba instead of Conda; it just works better for environments with a lot of packages.
+* After setting up the above conda environment, scan the screen output to make sure that everything installed correctly, especially the packages installed through pip.
+* Avoid mixing package channels within a Conda environment. Strictly sticking to conda-forge may yield the best results.
 * Use `conda-pack`_, rather than an overly-detailed environment file, to guarantee reproducibility.
 
 
@@ -227,7 +228,7 @@ SSL-related error messages when using conda
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 (with ``SSL`` mentioned in the message and possibly ``bad handshake``)
 
-Make sure that the ``conda`` package installer is configured to use the USGS certificate
+Make sure that the ``Conda`` package installer is configured to use the USGS certificate
 (see :ref:`Installing the DOI SSL certificate for use with conda` above).
 
 
@@ -261,7 +262,7 @@ so it needs to be commented out on other operating systems (normally it wouldn't
 
 .. _Anaconda python distribution: https://www.anaconda.com/distribution/
 .. _clean uninstall: https://docs.anaconda.com/anaconda/install/uninstall/
-.. _conda: https://docs.conda.io/en/latest/
+.. _Conda: https://docs.conda.io/en/latest/
 .. _Mamba: https://mamba.readthedocs.io/en/latest/
 .. _conda environment: https://docs.conda.io/projects/conda/en/latest/user-guide/concepts/environments.html
 .. _conda-pack: https://conda.github.io/conda-pack/
