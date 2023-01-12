@@ -4,11 +4,14 @@ channels:
 - defaults
 dependencies:
 - python
+- ipython
 - jupyter
 - jupyterlab
 - notebook
+- ipykernel
 - pandas
 - geopandas
+- bottleneck  # a collection of fast NumPy array functions written in C
 - numba
 - xarray
 - pyarrow
@@ -26,8 +29,8 @@ dependencies:
 - descartes
 - netcdf4
 - rtree
-- nose
 - lxml
+- openpyxl
 - pyshp
 - pytest
 - nbstripout
@@ -52,6 +55,7 @@ dependencies:
 - pip:
   - pytest-timeout
   - isort  # for sorting imports
+  - nbstripout  # to skip tracking output cells in notebooks
   - pre-commit  # for pre-commit hooks
   - versioneer
   - git+https://github.com/modflowpy/flopy@develop

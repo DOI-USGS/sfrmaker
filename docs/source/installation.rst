@@ -12,7 +12,7 @@ There are many ways to do this:
 
     * The `Anaconda python distribution`_ comes with a large selection of popular data science and scientific packages pre-installed.
 
-    * `Miniconda <https://docs.conda.io/en/latest/miniconda.html>`_ is a minimal installer with a much smaller footprint, makingit ideal for creating python environments dedicated to specific tasks (a recommended practice).
+    * `Miniconda <https://docs.conda.io/en/latest/miniconda.html>`_ is a minimal installer with a much smaller footprint, making it ideal for creating python environments dedicated to specific tasks (a recommended practice).
 
     * `Mambaforge <https://github.com/conda-forge/miniforge#mambaforge>`_ is like Miniconda, but pre-configured to use the `Mamba`_ installer, and only the `conda-forge <https://conda-forge.org/docs/user/introduction.html>`_ channel for getting packages (more below). If the above two options don't work (for example, the Conda installer fails or gets stuck on the "solve" step), this may be your best option.
 
@@ -68,14 +68,14 @@ Building the environment will probably take a while. If the build fails because 
 
         .. code-block:: bash
 
-            conda env update -f requirements.yml
+            mamba env update -f requirements.yml
 
     b) 	or remove and reinstall it:
 
         .. code-block:: bash
 
             conda env remove -n sfrmaker
-            conda env create -f requirements.yml
+            mamba env create -f requirements.yml
 
 Keeping the Conda environment up to date
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -159,6 +159,17 @@ Your local copy of the SFRmaker repository can then be subsequently updated with
 
 The advantage of installing the source code in-place is that any changes you make are automatically incorporated into your python environment, without any additional install commands. When debugging in an interactive development environment (IDE) such as Pycharm or VS Code, error tracebacks and inspection features go to the actual source code, not the version installed in the ``site-packages`` folder. Additionally, since this install is done through pip, ``pip uninstall``
 will work to remove the package, and the current version of the package (including the latest commit information) will be visible with ``conda list``.
+
+Installing the IPython kernel to use SFRmaker in Jupyter Notebooks
+------------------------------------------------------------------------------------------------
+This step may not be needed if you already have an existing Python environment with the packages required by SFRmaker *and* Jupyter Notebook installed. However, if you'd like to use SFRmaker in a Jupyter Notebook with the included ``sfrmaker`` environment (specified in ``requirements.yml``), you'll most likely need to install the IPython kernel in that environment. You can do this at the command line or terminal window (with ``sfrmaker`` activated):
+
+.. code-block:: bash
+
+    python -m ipykernel install --user --name sfrmaker --display-name "sfrmaker"
+
+
+The first instance of ``sfrmaker`` in this command is the environment to install the kernel to, and the second instance (in quotes) is the name that will appear in the ``Kernel`` menu within Jupyter Notebook. To use the kernel, simply select it from the ``Kernel > Change kernel`` menu within  Jupyter Notebook.
 
 Best practices
 ------------------------
