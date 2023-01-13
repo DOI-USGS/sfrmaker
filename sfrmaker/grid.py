@@ -282,11 +282,11 @@ class StructuredGrid(Grid):
                  uniform=None,
                  model_units='undefined', crs_units=None,
                  bounds=None, active_area=None,
-                 epsg=None, proj_str=None, prjfile=None, **kwargs):
+                 crs=None, epsg=None, proj_str=None, prjfile=None, **kwargs):
 
         Grid.__init__(self, df, model_units=model_units, crs_units=crs_units,
                       bounds=bounds, active_area=active_area,
-                      epsg=epsg, proj_str=proj_str, prjfile=prjfile, **kwargs)
+                      crs=crs, epsg=epsg, proj_str=proj_str, prjfile=prjfile, **kwargs)
 
         # structured grid parameters
         self.xul = xul
@@ -380,6 +380,9 @@ class StructuredGrid(Grid):
         if epsg is None:
             epsg = mg.epsg
         crs = get_crs(prjfile=prjfile, epsg=epsg, proj_str=mg.proj4, crs=crs)
+        # get the crs from the model grid if it wasn't supplied
+        if crs is None and hasattr(mg, 'crs'):
+            crs = mg.crs
 
         if isfr is not None:
             # if a 3D array is supplied for isfr, convert to 2D
