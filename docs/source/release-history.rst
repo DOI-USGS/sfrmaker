@@ -2,6 +2,12 @@
 Release History
 ===============
 
+Version 0.9.4 (2023-01-19)
+--------------------------
+* add ability drop NHDPlus High Resolution segments by ftype (e.g., 428) and NHDPlusID, similar to the "drop_fcodes" option in the ``from_nhdplus_hr()`` method.
+* fix issue where the crs argument for pyproj CRS-style coordinate references wasn't being passed to the base grid class; get the crs from a Flopy-style grid if it exists.
+* updates to the install instructions, concerning Mamba and IPython kernels
+
 Version 0.9.3 (2022-12-19)
 --------------------------
 * fixes to ``SFRdata.assign_layers``:
