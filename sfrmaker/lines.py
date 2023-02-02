@@ -1,10 +1,11 @@
 import os
 import time
-
+import warnings
 import numpy as np
 import pandas as pd
 from shapely.geometry import box
 import geopandas as gpd
+import pyproj
 import flopy
 from gisutils import shp2df, df2shp, project, get_authority_crs
 import sfrmaker
@@ -388,7 +389,23 @@ class Lines:
                                                                      dest_crs))
         reprojected = self.df.to_crs(dest_crs)
         if not reprojected.geometry.values[0].is_valid:
-            raise ValueError("Invalid reprojection; check CRS for lines and grid.")
+            # Try turning off the Proj Network
+            # where PROJ reaches out to the web for projection grids
+            # an invalid reproject can result if there is an SSL issue
+            # https://pyproj4.github.io/pyproj/stable/api/network.html
+            warnings.warn('Reprojection failed. This could be due to an SSL issue '
+                          'preventing pyproj from accessing the PROJ Network '
+                          '(see https://pyproj4.github.io/pyproj/stable/api/network.html). '
+                          'Trying with pyproj.network.set_network_enabled(False). '
+                          'Are you currently on an internal network or VPN? '
+                          'You might consider re-running this script off of the network.')
+            pyproj.network.set_network_enabled(False)
+            reprojected = self.df.to_crs(dest_crs)
+            if not reprojected.geometry.values[0].is_valid:
+                raise ValueError("Invalid reprojection; check CRS for lines and grid.")
+            else:
+                print('Reprojection with with pyproj.network.set_network_enabled(False) '
+                      'succeeded, but please check the results for accuracy.')
         self.df = reprojected
         self.crs = dest_crs
 

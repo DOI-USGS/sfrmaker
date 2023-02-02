@@ -144,3 +144,21 @@ def test_from_shapefile(crs, prjfile):
     elif prjfile is not None:
         assert lines.crs == get_shapefile_crs(prjfile)
         
+
+def test_lines_to_crs(datapath):
+    """This test is for the intermittent issue where reprojection 
+    with pyproj fails due to an SSL certificate issue. This problem is 
+    difficult to reproduce, possibly because pyproj catches data from the PROJ Network,
+    so this test may only be meaningful in the situation of a new pyproj install
+    on an internal network requiring an SSL certificate bundle. In the 
+    situation where pyproj can't access the PROJ Network 
+    (resulting in inf values on reprojection), 
+    SFRmaker will pyproj.network.set_network_enabled(False) and try again. Therefore,
+    reprojection as below shouldn't fail, but the results may potentially be less
+    accurate than they would otherwise.
+    """
+    from pathlib import Path
+    NHDPlus_paths = Path(datapath) / 'tylerforks/NHDPlus'
+    lines = sfrmaker.Lines.from_nhdplus_v2(NHDPlus_paths=NHDPlus_paths)
+    lines.to_crs(32616)    
+        
