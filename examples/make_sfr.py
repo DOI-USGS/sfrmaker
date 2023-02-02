@@ -33,7 +33,7 @@ lns = Lines.from_nhdplus_v2(NHDFlowlines=flowlines,
                             PlusFlowlineVAA=pfvaa_files,
                             PlusFlow=plusflow_files,
                             elevslope=elevslope_files,
-                            filter='{}/grid.shp'.format(data_dir))
+                            bbox_filter='{}/grid.shp'.format(data_dir))
 
 # make a flopy StructuredGrid instance
 # that represents the model grid
