@@ -98,10 +98,10 @@ def test_write_perioddata(shellmound_sfrdata_with_period_data, outdir):
     assert np.array_equal(rno_values, sfrd.period_data.index.get_level_values(1))
     assert np.allclose(q_values, sfrd.period_data['inflow'].values)
     assert set(txt_values) == {'inflow'}
-    out_tables = Path(outdir + 'tables')
+    out_tables = Path(outdir / 'tables')
     out_tables.mkdir(exist_ok=True, parents=True)
-    sfrd.write_tables(basename=outdir + 'tables/shellmound')
-    written_pd = pd.read_csv(outdir + 'tables/shellmound_sfr_period_data.csv')
+    sfrd.write_tables(basename=outdir / 'tables/shellmound')
+    written_pd = pd.read_csv(outdir / 'tables/shellmound_sfr_period_data.csv')
     assert 'rno' in written_pd.columns and 'per' in written_pd.columns
 
 

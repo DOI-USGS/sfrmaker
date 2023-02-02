@@ -127,10 +127,10 @@ def test_make_sfr(outdir,
     #m.write_name_file()  # write new version of name file with sfr package
 
     # wite shapefiles for visualization
-    sfr.export_cells(outdir + 'example_cells.shp')
-    sfr.export_outlets(outdir + 'example_outlets.shp')
-    sfr.export_lines(outdir + 'example_lines.shp')
-    sfr.export_routing(outdir + 'example_routing.shp')
+    sfr.export_cells(outdir / 'example_cells.shp')
+    sfr.export_outlets(outdir / 'example_outlets.shp')
+    sfr.export_lines(outdir / 'example_lines.shp')
+    sfr.export_routing(outdir / 'example_routing.shp')
 
     # run modflow
     if sfrmaker.utils.exe_exists(mfnwt_exe):

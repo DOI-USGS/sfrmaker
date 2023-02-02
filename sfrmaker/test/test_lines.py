@@ -157,8 +157,7 @@ def test_lines_to_crs(datapath):
     reprojection as below shouldn't fail, but the results may potentially be less
     accurate than they would otherwise.
     """
-    from pathlib import Path
-    NHDPlus_paths = Path(datapath) / 'tylerforks/NHDPlus'
+    NHDPlus_paths = datapath / 'tylerforks/NHDPlus'
     lines = sfrmaker.Lines.from_nhdplus_v2(NHDPlus_paths=NHDPlus_paths)
     lines.to_crs(32616)    
         
