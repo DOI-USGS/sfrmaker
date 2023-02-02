@@ -646,7 +646,7 @@ class SFRData(DataPackage):
             if model is not None:
                 nper = 1
                 if 'tdis' in model.simulation.package_key_dict.keys():
-                    tdis = model.simulation.package_key_dict['tdis']
+                    tdis = model.simulation.tdis
                     nper = tdis.nper.array
                 if 'dis' in model.package_dict.keys():
                     dis = model.dis
@@ -710,7 +710,7 @@ class SFRData(DataPackage):
         if model is not None and model.version == 'mf6':
             m = model
             if 'tdis' in model.simulation.package_key_dict.keys():
-                tdis = model.simulation.package_key_dict['tdis']
+                tdis = model.simulation.tdis
                 nper = tdis.nper.array
         # create an flopy mf2005 model instance attached to modflow_sfr2 object
         # this is a parallel model instance to self.model, that is only
