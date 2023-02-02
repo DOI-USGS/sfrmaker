@@ -74,6 +74,15 @@ class Lines:
         self.attr_length_units = attr_length_units
         self.attr_height_units = attr_height_units
         self.crs = get_crs(prjfile=prjfile, epsg=epsg, proj_str=proj_str, crs=crs)
+        if not hasattr(df, 'crs'):
+            df = gpd.GeoDataFrame(df, crs=self.crs)
+        elif self.crs is None:
+            self.crs = df.crs
+        elif not df.crs == self.crs:
+            raise ValueError('Coordinate reference system (CRS) attached to '
+                             'input DataFrame is different than CRS supplied '
+                             'as argument to sfrmaker.Lines!')
+            
         self._geometry_length_units = None
 
         self._routing = None  # dictionary of routing connections
@@ -96,6 +105,12 @@ class Lines:
                        'foot': 'feet',
                        'meters': 'meters',
                        'metre': 'meters'}
+        if self.crs.is_geographic:
+            raise ValueError('Flowline geometries need to be in a '
+                             'projected coordinate system; supply a model grid '
+                             'with a projected CRS to the Lines.to_sfr() method or '
+                             'run Lines.to_crs() to reproject the flowlines.'
+                             )
         self._geometry_length_units = valid_units.get(self.crs.axis_info[0].unit_name)
         if self._geometry_length_units is None:
             print("Warning: No length units specified in CRS for input LineStrings "
@@ -241,8 +256,7 @@ class Lines:
         # df = df.loc[~drop]
         intersects = [g.intersects(feature_s) for g in lines]
         if not np.any(intersects):
-            print('No lines in active area. Check CRS.')
-            quit()
+            raise ValueError('No lines in active area. Check CRS for lines, grid and active area polygon.')
 
         df = df.loc[intersects]
         df['geometry'] = [g.intersection(feature) for g in df.geometry]
@@ -340,6 +354,7 @@ class Lines:
         self.df.toid = [routing[i] if routing[i] in valid_ids else 0
                         for i in self.df.id.tolist()]
 
+
     def to_crs(self, dest_crs):
         """Reproject the LineStrings in :py:attr:`Lines.df` to
         a different Coordinate Reference System.
@@ -363,17 +378,18 @@ class Lines:
               - An object with a `to_wkt` method.
               - A :class:`pyproj.crs.CRS` class
         """        
-        assert self.crs is not None, "No crs for flowlines"
-        assert dest_crs is not None, "No destination CRS."
+        if self.crs is None:
+            raise ValueError("No crs for flowlines.")
+        if dest_crs is None:
+            raise ValueError("No destination CRS to project flowlines to.")
 
         dest_crs = get_authority_crs(dest_crs)
         print('\nreprojecting hydrography from\n{}\nto\n{}\n'.format(self.crs,
                                                                      dest_crs))
-        geoms = project(self.df.geometry, self.crs, dest_crs)
-        assert geoms[0].is_valid, \
-            "Invalid reprojection; check CRS for lines and grid."
-
-        self.df['geometry'] = geoms
+        reprojected = self.df.to_crs(dest_crs)
+        if not reprojected.geometry.values[0].is_valid:
+            raise ValueError("Invalid reprojection; check CRS for lines and grid.")
+        self.df = reprojected
         self.crs = dest_crs
 
     def write_shapefile(self, outshp='flowlines.shp'):
@@ -397,7 +413,7 @@ class Lines:
                        dn_elevation_column='elevdn',
                        name_column='name',
                        attr_length_units='meters', attr_height_units='meters',
-                       filter=None,
+                       filter=None, bbox_filter=None,
                        crs=None, epsg=None, proj_str=None, prjfile=None):
         """Create a Lines instance from a shapefile.
 
@@ -435,25 +451,37 @@ class Lines:
         attr_height_units : str, optional
             Length units for elevation attributes
             By default, 'meters'.
-        filter : tuple, optional
+        bbox_filter : tuple, optional
             (xmin, ymin, xmax, ymax) bounding box to filter which records 
             are read from the shapefile. By default None.
-        epsg: int, optional
-            EPSG code identifying Coordinate Reference System (CRS)
-            for features in the input shapefile.
-        proj_str: str, optional
-            proj_str string identifying CRS for features in the input shapefile.
+        crs : obj, optional
+            Coordinate reference object for input flowlines. This argument is only needed
+            if the input flowlines don't have a valid projection file.
+            A Python int, dict, str, or :class:`pyproj.crs.CRS` 
+            instance passed to :meth:`pyproj.crs.CRS.from_user_input`
+            Can be any of:
+            - PROJ string
+            - Dictionary of PROJ parameters
+            - PROJ keyword arguments for parameters
+            - JSON string with PROJ parameters
+            - CRS WKT string
+            - An authority string [i.e. 'epsg:4326']
+            - An EPSG integer code [i.e. 4326]
+            - A tuple of ("auth_name": "auth_code") [i.e ('epsg', '4326')]
+            - An object with a `to_wkt` method.
+            - A :class:`pyproj.crs.CRS` class
         prjfile: str, optional
             File path to projection (.prj) file identifying CRS
-            for features in the input shapefile. By default,
-            the projection file included with the input shapefile
-            will be used.
+            for features in the input flowlines. This argument 
+            is only needed if the input flowlines don't have a 
+            valid projection file.
 
         Returns
         -------
         lines : :class:`Lines` instance
         """        
-        
+        if filter is not None:
+            raise ValueError("The 'filter' argument is deprecated; use 'bbox_filter' instead")
 
         if prjfile is None:
             prjfile = str(shapefile).replace('.shp', '.prj')
@@ -461,11 +489,12 @@ class Lines:
 
         shpfile_crs = get_crs(prjfile=prjfile, epsg=epsg, proj_str=proj_str, crs=crs)
 
-        # ensure that filter bbox is in same crs as flowlines
-        if filter is not None and not isinstance(filter, tuple):
-            filter = get_bbox(filter, shpfile_crs)
+        # ensure that bbox_filter bbox is in same crs as flowlines
+        if bbox_filter is not None and not isinstance(bbox_filter, tuple):
+            bbox_filter = get_bbox(bbox_filter, shpfile_crs)
 
-        df = shp2df(shapefile, filter=filter)
+        df = gpd.read_file(shapefile, bbox=bbox_filter)
+        #df = shp2df(shapefile, filter=bbox_filter)
         assert 'geometry' in df.columns, "No feature geometries found in {}.".format(shapefile)
 
         return cls.from_dataframe(df,
@@ -479,7 +508,7 @@ class Lines:
                                   name_column=name_column,
                                   attr_length_units=attr_length_units,
                                   attr_height_units=attr_height_units,
-                                  epsg=epsg, proj_str=proj_str, prjfile=prjfile)
+                                  crs=shpfile_crs, epsg=epsg, proj_str=proj_str, prjfile=prjfile)
 
     @classmethod
     def from_dataframe(cls, df,
@@ -494,7 +523,7 @@ class Lines:
                        name_column='name',
                        attr_length_units='meters',
                        attr_height_units='meters',
-                       epsg=None, proj_str=None, prjfile=None):
+                       crs=None, epsg=None, proj_str=None, prjfile=None):
         """[summary]
 
         Parameters
@@ -532,14 +561,6 @@ class Lines:
         attr_height_units : str, optional
             Length units for elevation attributes
             By default, 'meters'.
-        filter : tuple, optional
-            (xmin, ymin, xmax, ymax) bounding box to filter which records 
-            are read from the shapefile. By default None.
-        epsg: int, optional
-            EPSG code identifying Coordinate Reference System (CRS)
-            for features in the input shapefile.
-        proj_str: str, optional
-            proj_str string identifying CRS for features in the input shapefile.
         prjfile: str, optional
             File path to projection (.prj) file identifying CRS
             for features in the input shapefile. By default,
@@ -588,14 +609,13 @@ class Lines:
 
         return cls(df, attr_length_units=attr_length_units,
                    attr_height_units=attr_height_units,
-                   epsg=epsg, proj_str=proj_str, prjfile=prjfile)
-
+                   crs=crs, epsg=epsg, proj_str=proj_str, prjfile=prjfile)
 
     @classmethod
     def from_nhdplus_v2(cls, NHDPlus_paths=None,
                         NHDFlowlines=None, PlusFlowlineVAA=None, PlusFlow=None, elevslope=None,
-                        filter=None,
-                        epsg=None, proj_str=None, prjfile=None):
+                        filter=None, bbox_filter=None,
+                        crs=None, epsg=None, proj_str=None, prjfile=None):
         """
         Parameters
         ==========
@@ -625,28 +645,42 @@ class Lines:
             DBF file or list of DBF files with end elevations for each
             line arc in NHDFlowlines. Must contain the following attribute fields:
             COMID : common identifier number
-        filter : tuple or str
+        bbox_filter : tuple or str
             Bounding box (tuple) or shapefile of model stream network area.
-        epsg: int, optional
-            EPSG code identifying Coordinate Reference System (CRS)
-            for features in the input shapefile.
-        proj_str: str, optional
-            proj_str string identifying CRS for features in the input shapefile.
+        crs : obj, optional
+            Coordinate reference object for input flowlines. This argument is only needed
+            if the input flowlines don't have a valid projection file.
+            A Python int, dict, str, or :class:`pyproj.crs.CRS` 
+            instance passed to :meth:`pyproj.crs.CRS.from_user_input`
+            Can be any of:
+            - PROJ string
+            - Dictionary of PROJ parameters
+            - PROJ keyword arguments for parameters
+            - JSON string with PROJ parameters
+            - CRS WKT string
+            - An authority string [i.e. 'epsg:4326']
+            - An EPSG integer code [i.e. 4326]
+            - A tuple of ("auth_name": "auth_code") [i.e ('epsg', '4326')]
+            - An object with a `to_wkt` method.
+            - A :class:`pyproj.crs.CRS` class
         prjfile: str, optional
             File path to projection (.prj) file identifying CRS
-            for features in the input shapefile. By default,
-            the projection file included with the input shapefile
-            will be used.
+            for features in the input flowlines. This argument 
+            is only needed if the input flowlines don't have a 
+            valid projection file.
 
         Returns
         -------
         lines : :class:`Lines` instance
         """
+        if filter is not None:
+            raise ValueError("The 'filter' argument is deprecated; use 'bbox_filter' instead")
+        
         df = load_nhdplus_v2(NHDPlus_paths=NHDPlus_paths,
                              NHDFlowlines=NHDFlowlines, PlusFlowlineVAA=PlusFlowlineVAA,
                              PlusFlow=PlusFlow, elevslope=elevslope,
-                             filter=filter,
-                             epsg=epsg, proj_str=proj_str, prjfile=prjfile)
+                             bbox_filter=bbox_filter,
+                             crs=crs, epsg=epsg, proj_str=proj_str, prjfile=prjfile)
 
         if prjfile is None:
             prjfile = get_prj_file(NHDPlus_paths, NHDFlowlines)
@@ -666,10 +700,10 @@ class Lines:
                                   name_column='GNIS_NAME',
                                   attr_length_units='meters',
                                   attr_height_units='meters',
-                                  epsg=epsg, proj_str=proj_str, prjfile=prjfile)
+                                  crs=crs, prjfile=prjfile)
 
     @classmethod
-    def from_nhdplus_hr(cls, NHDPlusHR_paths, filter=None, 
+    def from_nhdplus_hr(cls, NHDPlusHR_paths, filter=None, bbox_filter=None, 
                         drop_fcodes=None, drop_ftypes=None, drop_NHDPlusIDs=None, crs=None,
                         epsg=None, proj_str=None):
         """
@@ -685,7 +719,7 @@ class Lines:
                                     '/NHDPLUS_HR_2/NHDPLUS_H_0204_HU4_GDB.gdb'] 
                                                 
             for the 4-digit Hydrologic Units 0202 and 0204.      
-        filter : tuple or str, optional
+        bbox_filter : tuple or str, optional
             Bounding box (tuple) or shapefile of model stream network area.
         drop_fcodes : int or list of ints, optional
             fcode or list of NHDFlowline FCodes to drop from network. 
@@ -715,19 +749,15 @@ class Lines:
             - A tuple of ("auth_name": "auth_code") [i.e ('epsg', '4326')]
             - An object with a `to_wkt` method.
             - A :class:`pyproj.crs.CRS` class
-                
-        epsg : int, optional
-            EPSG code to to reproject NHDPlus High Resolution flowlines.
-            By default, None, will use NHDPlus HR fileGDB CRS 
-        proj_str : str, optional
-            proj_str string to to reproject NHDPlus High Resolution flowlines.
-            By default, None, will use NHDPlus HR fileGDB CRS 
 
         Returns
         ==========
         lines : :class:`Lines` instance
         """
-        df, gdb_crs = load_nhdplus_hr(NHDPlusHR_paths, filter=filter, drop_fcodes=drop_fcodes, 
+        if filter is not None:
+            raise ValueError("The 'filter' argument is deprecated; use 'bbox_filter' instead")
+        
+        df, gdb_crs = load_nhdplus_hr(NHDPlusHR_paths, bbox_filter=bbox_filter, drop_fcodes=drop_fcodes, 
                                       drop_ftypes=drop_ftypes, drop_NHDPlusIDs=drop_NHDPlusIDs)
 
         #  check to see if flowline geodataframe needs to be reprojected, and get new CRS
@@ -770,7 +800,7 @@ class Lines:
                                   geometry_column='geometry',
                                   attr_length_units='meters',
                                   attr_height_units='meters',
-                                  epsg=epsg, proj_str=proj_str)
+                                  crs=crs, epsg=epsg, proj_str=proj_str)
 
 
     def to_sfr(self, grid=None,
@@ -792,7 +822,7 @@ class Lines:
         Parameters
         ----------
         grid : sfrmaker.grid or flopy.discretization.StructuredGrid
-            Numerica model grid instance. Required unless an attached model
+            Numerical model grid instance. Required unless an attached model
             has a valid modelgrid attribute.
         active_area : shapely Polygon, list of shapely Polygons, or shapefile path; optional
             Shapely Polygons must be in same CRS as input flowlines; shapefile
@@ -858,14 +888,17 @@ class Lines:
                 isfr = np.sum(model.dis.idomain.array > 0, axis=0) > 0
             else:
                 isfr = np.sum(model.bas6.ibound.array == 1, axis=0) > 0
+        # get an SFRmaker StructuredGrid instance of the model grid
         if flopy and isinstance(grid, flopy.discretization.StructuredGrid):
             print('\nCreating grid class instance from flopy Grid instance...')
             ta = time.time()
             grid = StructuredGrid.from_modelgrid(grid, active_area=active_area, isfr=isfr)
             print("grid class created in {:.2f}s\n".format(time.time() - ta))
+        elif isinstance(grid, sfrmaker.grid.Grid):
+            pass
         elif flopy and model is not None:
             grid = StructuredGrid.from_modelgrid(model.modelgrid, active_area=active_area, isfr=isfr)
-        elif not isinstance(grid, sfrmaker.grid.Grid):
+        else:
             raise TypeError('Unrecognized input for grid: {}'.format(grid))
 
         # print grid information to screen
@@ -874,14 +907,17 @@ class Lines:
         # print model information to screen
         print(model)
 
+        # reproject the flowlines if they aren't in same CRS as grid
+        # this also needs to be done before 
+        # the geometry_length_units property is computed
+        if self.crs != grid.crs:
+            self.to_crs(grid.crs)
+            
         model_length_units = get_length_units(model_length_units, grid, model)
         mult = convert_length_units(self.attr_length_units, model_length_units)
         mult_h = convert_length_units(self.attr_height_units, model_length_units)
         gis_mult = convert_length_units(self.geometry_length_units, model_length_units)
 
-        # to_crs the flowlines if they aren't in same CRS as grid
-        if self.crs != grid.crs:
-            self.to_crs(grid.crs)
         # cull the flowlines to the active part of the model grid
         if grid.active_area is not None:
             self.cull(grid.active_area, inplace=True, simplify=True, tol=2000)

@@ -62,7 +62,7 @@ def get_nhdplus_v2_routing(PlusFlow_file,
 
 def load_nhdplus_v2(NHDPlus_paths=None,
                     NHDFlowlines=None, PlusFlowlineVAA=None, PlusFlow=None, elevslope=None,
-                    filter=None, crs=None,
+                    filter=None, bbox_filter=None, crs=None,
                     epsg=None, proj_str=None, prjfile=None):
     """
     Parameters
@@ -84,7 +84,7 @@ def load_nhdplus_v2(NHDPlus_paths=None,
         DBF file or list of DBF files with end elevations for each
         line arc in NHDFlowlines. Must contain the following attribute fields:
         COMID : common identifier number
-    filter : tuple, str (filepath), shapely Polygon or GeoJSON polygon
+    bbox_filter : tuple, str (filepath), shapely Polygon or GeoJSON polygon
         Bounding box (tuple) or polygon feature of model stream network area.
         Shapefiles will be reprojected to the CRS of the flowlines; all other
         feature types must be supplied in same CRS as flowlines.
@@ -109,6 +109,10 @@ def load_nhdplus_v2(NHDPlus_paths=None,
         By default, None
     """
     print("\nloading NHDPlus v2 hydrography data...")
+    
+    if filter is not None:
+        raise ValueError("The 'filter' argument is deprecated; use 'bbox_filter' instead")
+    
     ta = time.time()
 
     if NHDPlus_paths is not None:
@@ -116,13 +120,13 @@ def load_nhdplus_v2(NHDPlus_paths=None,
             get_nhdplus_v2_filepaths(NHDPlus_paths)
 
     # get crs information from flowline projection file
-    crs = get_shapefile_crs(NHDFlowlines)
-    nhdcrs = get_crs(prjfile=prjfile, epsg=epsg, proj_str=proj_str, crs=crs)
+    #crs_from_shapefile = get_shapefile_crs(NHDFlowlines)
+    crs = get_crs(prjfile=NHDFlowlines, epsg=epsg, proj_str=proj_str, crs=crs)
 
     # ensure that filter bbox is in same crs as flowlines
     # get filters from shapefiles, shapley Polygons or GeoJSON polygons
-    if filter is not None and not isinstance(filter, tuple):
-        filter = get_bbox(filter, dest_crs=nhdcrs)
+    if bbox_filter is not None and not isinstance(bbox_filter, tuple):
+        bbox_filter = get_bbox(bbox_filter, dest_crs=crs)
 
     fl_cols = ['COMID',  # 'FCODE', 'FDATE', 'FLOWDIR',
                # 'FTYPE', 'GNIS_ID',
@@ -135,7 +139,7 @@ def load_nhdplus_v2(NHDPlus_paths=None,
     elevs_cols = ['MAXELEVSMO', 'MINELEVSMO']
 
     # read flowlines and attribute tables into dataframes
-    fl = read_nhdplus(NHDFlowlines, bbox_filter=filter)
+    fl = read_nhdplus(NHDFlowlines, bbox_filter=bbox_filter)
     pfvaa = read_nhdplus(PlusFlowlineVAA)
     pf = shp2df(PlusFlow)
     elevs = read_nhdplus(elevslope)
@@ -201,10 +205,24 @@ def find_next_comid(comid, pftable, comids, max_levels=10):
     return 0
 
 
-def read_nhdplus(shpfiles, bbox_filter=None,
+def read_nhdplus(shapefiles, bbox_filter=None,
                  index_col='comid'):
     # read shapefile into dataframe and find the index column
-    df = shp2df(shpfiles, filter=bbox_filter)
+    if isinstance(shapefiles, str) or isinstance(shapefiles, Path):
+        shapefiles = [shapefiles]
+    dfs = []
+    for i, f in enumerate(shapefiles):
+        df = gpd.read_file(f, bbox=bbox_filter)
+        if len(dfs) > 0:
+            if df.crs != dfs[-1].crs:
+                # we could simply reproject, 
+                # but if the CRS are different among sets of NHDPlus data, 
+                # there might be other issues
+                raise ValueError(f'{f} has a different CRS than {shapefiles[i-1]}')
+        dfs.append(df)
+    df = pd.concat(dfs)
+        
+    #df = shp2df(shpfiles, filter=bbox_filter)
     if len(df) > 0:
         index_col = [c for c in df.columns if c.lower() == index_col]
         if len(index_col) == 0:
@@ -217,7 +235,7 @@ def read_nhdplus(shpfiles, bbox_filter=None,
         return df
 
 
-def read_nhdplus_hr(NHDPlusHR_path, filter=None, drop_fcodes=None):
+def read_nhdplus_hr(NHDPlusHR_path, bbox_filter=None, drop_fcodes=None):
     ta = time.time()
     print('reading {}...'.format(NHDPlusHR_path))
     #  read NHDFLowlines from NHDPlusHR_path (NHDPlus HR OpenFileGDB)
@@ -230,12 +248,12 @@ def read_nhdplus_hr(NHDPlusHR_path, filter=None, drop_fcodes=None):
     
     #  ensure that filter bbox is in same crs as flowlines
     #  get filters from shapefiles, shapley Polygons or GeoJSON polygons
-    if filter is not None:
-        if filter is not isinstance(filter, tuple):
-            filter = get_bbox(filter, dest_crs=fl_crs)
+    if bbox_filter is not None:
+        if bbox_filter is not isinstance(bbox_filter, tuple):
+            bbox_filter = get_bbox(bbox_filter, dest_crs=fl_crs)
         
         #  filter to bbox using geopandas spatial indexing
-        fl = fl.cx[filter[0]:filter[2], filter[1]:filter[3]]
+        fl = fl.cx[bbox_filter[0]:bbox_filter[2], bbox_filter[1]:bbox_filter[3]]
         
     #  read NHDPlusFlowlineVAA file from NHDPlusHR_path (NHDPlus HR OpenFileGDB) and merge with flowlines
     flvaa = gpd.read_file(NHDPlusHR_path, driver='OpenFileGDB', layer='NHDPlusFlowlineVAA')
@@ -279,7 +297,7 @@ def get_hr_routing(pf, fl):
     return pf_routing_dict
 
 
-def load_nhdplus_hr(NHDPlusHR_paths, filter=None, 
+def load_nhdplus_hr(NHDPlusHR_paths, bbox_filter=None, 
                     drop_fcodes=None, drop_ftypes=None, drop_NHDPlusIDs=None):
     """
     Parameters
@@ -336,7 +354,7 @@ def load_nhdplus_hr(NHDPlusHR_paths, filter=None,
     
     #  Read if using more than one HUC-4 OpenFileGDB or one passed as list
     if isinstance(NHDPlusHR_paths, list):
-        dfs = [read_nhdplus_hr(p, filter = filter) for p in NHDPlusHR_paths]
+        dfs = [read_nhdplus_hr(p, bbox_filter=bbox_filter) for p in NHDPlusHR_paths]
         #  make sure that all FLowlines have the same CRS
         assert all(df.crs == dfs[0].crs for df in dfs), 'NHDPlusHR OpenFileGDBs have have different CRSs'
         #  concat into single df

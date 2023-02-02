@@ -224,7 +224,7 @@ def tylerforks_lines_from_NHDPlus(datapath):
                                          PlusFlowlineVAA=pfvaa_files,
                                          PlusFlow=plusflow_files,
                                          elevslope=elevslope_files,
-                                         filter='{}/tylerforks/grid.shp'.format(datapath))
+                                         bbox_filter='{}/tylerforks/grid.shp'.format(datapath))
     return lns
 
 
@@ -286,7 +286,7 @@ def neversink_lines_from_nhdplus_hr(datapath):
     nhdhr_epsg = 4269
 
     lns = sfrmaker.Lines.from_nhdplus_hr(NHDPlusHR_paths,
-                                        filter=boundary_file,
+                                        bbox_filter=boundary_file,
                                         drop_fcodes=drop_fcodes,
                                         epsg=nhdhr_epsg)
     return lns
