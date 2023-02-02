@@ -1,4 +1,4 @@
-# MODFLOW-6 SFR input; created by SFRmaker v. 0.9.4.post0.dev0+g65bdd4d
+# MODFLOW-6 SFR input; created by SFRmaker v. 0.9.4.post3.dev0+gb6c0a04
 
 BEGIN Options
   save_flows

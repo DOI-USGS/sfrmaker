@@ -31,13 +31,13 @@ def pytest_collection_modifyitems(config, items):
 @pytest.fixture(scope="session")
 def project_root_path():
     filepath = os.path.split(os.path.abspath(__file__))[0]
-    return os.path.normpath(os.path.join(filepath, '../../'))
+    return Path(os.path.normpath(os.path.join(filepath, '../../')))
 
 
 @pytest.fixture(scope="session")
 def datapath():
     """Example datasets for users."""
-    return 'examples/'
+    return Path('examples/')
 
 
 @pytest.fixture(scope="session")
@@ -54,7 +54,7 @@ def outdir(project_root_path):
         if os.path.isdir(folder):
             shutil.rmtree(folder)
         os.makedirs(folder)
-    return folder
+    return Path(folder)
 
 
 @pytest.fixture(scope="session")
@@ -66,7 +66,7 @@ def bin_path(project_root_path):
         bin_path = os.path.join(bin_path, "mac")
     else:
         bin_path = os.path.join(bin_path, "win")
-    return bin_path
+    return Path(bin_path)
 
 
 @pytest.fixture(scope="session")
