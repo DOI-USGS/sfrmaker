@@ -2,6 +2,12 @@
 Release History
 ===============
 
+Version 0.10.0 (2023-01-19)
+---------------------------
+* the Lines.df attribute is now a GeoDataFrame with an attached crs attribute representing the current coordinate reference system for the flowlines.
+* more fixes related to passing CRS references from the constructor method for Lines and the model grid attribute, through to reprojection to the model grid CRS and creation of the SFR package.
+* rename `filter` argument to methods that read shapefiles to `bbox_filter`, to avoid overwriting built-in `filter`.
+
 Version 0.9.4 (2023-01-19)
 --------------------------
 * add ability drop NHDPlus High Resolution segments by ftype (e.g., 428) and NHDPlusID, similar to the "drop_fcodes" option in the ``from_nhdplus_hr()`` method.
