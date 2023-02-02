@@ -23,14 +23,20 @@ def get_crs(prjfile=None, epsg=None, proj_str=None, crs=None):
     if crs is not None:
         crs = get_authority_crs(crs)
     if epsg is not None:
-        warnings.warn('The epsg argument is deprecated, use crs instead.')
+        warnings.warn('The epsg argument is deprecated, use crs or prjfile instead.')
         if crs is None:
             crs = get_authority_crs(epsg)
     elif prjfile is not None:
-        if crs is None:
-            crs = get_shapefile_crs(prjfile)
+        prjfile_crs = get_shapefile_crs(prjfile)
+        if (crs is not None) and (crs != prjfile_crs):
+                raise ValueError('Different coordinate reference systems '
+                                 f'in crs argument and supplied projection file: {prjfile}\n'
+                                 f'\nuser supplied crs: {crs}  !=\ncrs from projection file: {prjfile_crs}'
+                                 )
+        else:
+            crs = prjfile_crs
     elif proj_str is not None:
-        warnings.warn('The proj_str argument is deprecated, use crs instead.')
+        warnings.warn('The proj_str argument is deprecated, use crs or prjfile instead.')
         if crs is None:
             crs = get_authority_crs(proj_str)
     return crs

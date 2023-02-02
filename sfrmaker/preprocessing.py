@@ -73,17 +73,17 @@ def get_flowline_routing(NHDPlus_paths=None, PlusFlow=None, mask=None,
         if mask is not None:
             if isinstance(mask, tuple):
                 extent_poly_nhd_crs = box(*mask)
-                filter = mask
+                bbox_filter = mask
             elif mask is not None:
                 extent_poly_nhd_crs = read_polygon_feature(mask, 
                                                            feature_crs=mask_crs,
                                                            dest_crs=nhdplus_crs)
                 # ensure that filter bbox is in same crs as flowlines
                 # get filters from shapefiles, shapley Polygons or GeoJSON polygons
-                filter = get_bbox(extent_poly_nhd_crs, dest_crs=nhdplus_crs)
+                bbox_filter = get_bbox(extent_poly_nhd_crs, dest_crs=nhdplus_crs)
             else:
-                filter = None
-            flowlines = shp2df(flowlines_files, filter=filter)
+                bbox_filter = None
+            flowlines = shp2df(flowlines_files, filter=bbox_filter)
             keep_comids = pf['FROMCOMID'].isin(flowlines['COMID']) | \
                           pf['TOCOMID'].isin(flowlines['COMID'])
             pf = pf.loc[keep_comids]
@@ -931,7 +931,7 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
         narwidth_bbox = project(flowline_bbox, flowline_crs, narwidth_crs)
         sample_NARWidth(flcc, narwidth_shapefile,
                         waterbodies=waterbody_shapefiles,
-                        filter=narwidth_bbox.bounds,
+                        bbox_filter=narwidth_bbox.bounds,
                         crs=project_crs,
                         output_width_units=output_length_units)
         logger.log('Sampling widths from NARWidth database')
@@ -1034,7 +1034,7 @@ def clip_flowlines_to_polygon(flowlines, polygon,
 
 
 def sample_NARWidth(flowlines, narwidth_shapefile, waterbodies,
-                    filter=None,
+                    bbox_filter=None,
                     crs=None,
                     output_width_units='meters',
                     outpath='shps/'):
@@ -1099,7 +1099,7 @@ def sample_NARWidth(flowlines, narwidth_shapefile, waterbodies,
         raise ValueError(msg)
 
     # read in narwidth shapefile; to_crs to flowline CRS
-    nw = shp2df(narwidth_shapefile, filter=filter)
+    nw = shp2df(narwidth_shapefile, filter=bbox_filter)
     narwidth_crs = get_shapefile_crs(narwidth_shapefile)
     nw['geometry'] = project(nw.geometry, narwidth_crs, flowline_crs)
 

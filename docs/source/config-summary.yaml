@@ -48,6 +48,7 @@ flowlines:
   attr_length_units: meters
   attr_height_units: meters
   filter: None
+  bbox_filter: None
   crs: None
   epsg: None
   proj_str: None
@@ -71,6 +72,7 @@ simulation:
   load_only: None
   verify_data: False
   write_headers: True
+  auto_set_sizes: True
 
 model:
   # MODFLOW-NWT or MODFLOW-2005 information

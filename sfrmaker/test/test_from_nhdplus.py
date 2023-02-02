@@ -99,6 +99,7 @@ def test_make_sfr(outdir,
     m = tylerforks_model
     sfr = tylerforks_lines_from_NHDPlus.to_sfr(grid=grid,
                                                model=m)
+    assert sfr.crs == grid.crs  
     sfr.set_streambed_top_elevations_from_dem(dem, elevation_units='meters')
 
     # verify that the minimum width on the Tyler Forks

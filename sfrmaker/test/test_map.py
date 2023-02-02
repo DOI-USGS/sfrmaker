@@ -104,4 +104,6 @@ def test_lines_to_sfr(lines, grid):
                                      'slope'] == 0.011)
     assert sfr.reach_data.slope.min() == 0.01
     assert sfr.reach_data.slope.max() == 0.012
+    # check that CRS was successfully passed to SFRData object
+    assert lines.crs == sfr.crs == grid.crs
     
