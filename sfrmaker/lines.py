@@ -152,7 +152,8 @@ class Lines:
                 if not to_one:
                     toid = [[l] if np.isscalar(l) else l for l in toid]
                     to_one = is_to_one(toid)
-                toid = np.squeeze(list(toid))
+                if to_one:
+                    toid = np.squeeze(list(toid))
                 routing = make_graph(self.df.id.values, toid,
                                      one_to_many=not to_one)
                 if not to_one:
