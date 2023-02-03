@@ -47,13 +47,15 @@ def valid_nsegs(nsegs, outsegs=None, increasing=True):
 
 
 def is_to_one(toid_sequence):
+    """Check if a sequence of to-IDs (downstream routing connections) 
+    has only one downstream connection for each item."""
     if isinstance(toid_sequence, dict):
         toid_sequence = list(toid_sequence.values())
-    squeezed = np.squeeze(list(toid_sequence))
-    if squeezed.ndim == 0:
-        return True
+    max_len = np.max([len(l) if not np.isscalar(l) else 0 for l in toid_sequence])
+    if max_len > 1:
+        return False
     else:
-        return np.isscalar(np.squeeze(list(toid_sequence))[0])
+        return True
 
 
 def rno_nseg_routing_consistent(nseg, outseg, iseg, ireach, rno, outreach):
