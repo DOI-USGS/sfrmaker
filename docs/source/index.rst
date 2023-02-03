@@ -7,6 +7,17 @@ SFRmaker
 ==================
 version |version|
 
+|Go to the GitHub site|_
+
+.. |Go to the GitHub site| replace:: **Go to the GitHub site**
+.. _Go to the GitHub site: https://github.com/DOI-USGS/sfrmaker
+
+|Read the paper|_
+
+.. |Read the paper| replace:: **Read the paper**
+.. _Read the paper: https://ngwa.onlinelibrary.wiley.com/doi/full/10.1111/gwat.13095
+
+
 .. raw:: html
 
    <hr>

@@ -10,6 +10,10 @@ Clark, B.R., Westerman, D.A., and Fugitt, D.T., 2013, Enhancements to the Missis
 
 Feinstein, D.T., Hunt, R.J., and Reeves, H.W., 2010, Regional groundwater-flow model of the Lake Michigan Basin in support of Great Lakes Basin water availability and use studies: U.S. Geological Survey Scientific Investigations Report 2010–5109, 379 p.
 
+Fienen, M. N., and Bakker, M. (2016). Hess opinions: Repeatable research: What hydrologists can learn from the duke cancer research scandal. Hydrol. Earth Syst. Sci. 20 (9), 3739–3743. doi:10.5194/hess-20-3739-2016
+
+Gardner, M.A., C.G. Morton, J.L. Huntington, R.G. Niswonger, and W.R. Henson. 2018. Input data processing tools for the integrated hydrologic model GSFLOW. Environmental Modelling & Software 109: 41–53.
+
 Haitjema, H.M., 1995, Analytic element modeling of groundwater flow: San Diego, Academic Press, 394 p.
 
 Harbaugh, A. W.: MODFLOW-2005, The U.S. Geological Survey Modular Ground-Water Model – the Ground-Water Flow Pro- cess, in: Modeling techniques, Section A: Ground Water, U.S. Geological Survey, Reston, Virginia, USA, no. 16, p. 253, 2005.
