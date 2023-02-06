@@ -2,7 +2,11 @@
 Release History
 ===============
 
-Version 0.10.0 (2023-01-19)
+Version 0.10.1 (2023-02-06)
+---------------------------
+* fixes to adapt to breaking changes in numpy 1.24
+
+Version 0.10.0 (2023-02-02)
 ---------------------------
 * the Lines.df attribute is now a GeoDataFrame with an attached crs attribute representing the current coordinate reference system for the flowlines.
 * more fixes related to passing CRS references from the constructor method for Lines and the model grid attribute, through to reprojection to the model grid CRS and creation of the SFR package.

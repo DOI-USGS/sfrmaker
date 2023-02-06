@@ -32,6 +32,6 @@ dependencies:
   - pip:
     - gis-utils
     - doctr
-    - git+git://github.com/modflowpy/flopy@develop
-    - git+git://github.com/aleaf/modflow-export@develop
+    - git+https://github.com/modflowpy/flopy@develop
+    - git+https://github.com/aleaf/modflow-export@develop
 
