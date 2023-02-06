@@ -125,14 +125,14 @@ to incorporate a bug fix that was made after the latest release. Pip can also be
 
 .. code-block:: bash
 
-    pip install git+git://github.com/doi-usgs/sfrmaker@develop
+    pip install git+https://github.com/doi-usgs/sfrmaker@develop
 
 (for the develop branch). Subsequent updates can then be made with
 
 .. code-block:: bash
 
     pip uninstall sfrmaker
-    pip install git+git://github.com/doi-usgs/sfrmaker@develop
+    pip install git+https://github.com/doi-usgs/sfrmaker@develop
 
 Installing the SFRmaker source code in-place
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

@@ -21,6 +21,6 @@ Updating SFRmaker
 ``conda list`` can also be used to check if you SFRmaker is up to date.
 
 * if you installed SFRmaker from PyPI (e.g. ``pip install sfrmaker``), the reported version should match `the latest <https://pypi.org/project/sfrmaker/>`_. Otherwise ``pip install --upgrade sfrmaker``.
-* if you installed SFRmaker from PyPI and you need to incorporate a recently pushed bug fix, you might need to reinstall directly from GitHub (e.g. ``pip install --upgrade git+git://github.com/usgs/sfrmaker@develop``)
+* if you installed SFRmaker from PyPI and you need to incorporate a recently pushed bug fix, you might need to reinstall directly from GitHub (e.g. ``pip install --upgrade git+https://github.com/usgs/sfrmaker@develop``)
 * if you cloned the SFRmaker source code and need to incorporate a recently pushed bug fix, you will need to pull (``git pull``) and possibly reinstall (``pip install --upgrade -e .`` in the root folder of the source code).
 * in the latter two cases (sfrmaker installed from GitHub), the version reported by ``conda list`` should match the latest commit hash. For example version ``0.8.0.post6+g91f0db4`` for the commit hash starting with ``91f0db4``.

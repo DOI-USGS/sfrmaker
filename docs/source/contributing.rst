@@ -151,7 +151,7 @@ want to clone your fork to your machine::
 
     git clone git@github.com:your-user-name/sfrmaker.git sfrmaker-yourname
     cd sfrmaker-yourname
-    git remote add upstream git://github.com/sfrmaker/sfrmaker.git
+    git remote add upstream https://github.com/sfrmaker/sfrmaker.git
 
 This creates the directory `sfrmaker-yourname` and connects your repository to
 the upstream (main project) *SFRmaker* repository.
