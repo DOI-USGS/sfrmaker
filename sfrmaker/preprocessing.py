@@ -198,10 +198,20 @@ def cull_flowlines(NHDPlus_paths,
     logger.log('Reading raw NHDPlus files')
 
     # index dataframes by common-identifier numbers
-    fl.index = fl.COMID.astype(int)
-    pfvaa.index = pfvaa.ComID.astype(int)
-    pf.index = pf.FROMCOMID.astype(int)
-    elevslope.index = elevslope.COMID.astype(int)
+    # drop any entries without ID numbers
+    # enforce integer dtype in ID numbers
+    fl.dropna(subset=['COMID'], axis=0, inplace=True)
+    fl['COMID'] = fl.COMID.astype(int)
+    fl.index = fl['COMID']
+    pfvaa.dropna(subset=['ComID'], axis=0, inplace=True)
+    pfvaa['ComID'] = pfvaa.ComID.astype(int)
+    pfvaa.index = pfvaa['ComID']
+    pf.dropna(subset=['FROMCOMID'], axis=0, inplace=True)
+    pf['FROMCOMID'] = pf.FROMCOMID.astype(int)
+    pf.index = pf['FROMCOMID']
+    elevslope.dropna(subset=['COMID'], axis=0, inplace=True)
+    elevslope['COMID'] = elevslope.COMID.astype(int)
+    elevslope.index = elevslope['COMID']
 
     original_comids = set(fl.index)
     if cull_invalid:
