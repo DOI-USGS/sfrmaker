@@ -278,17 +278,29 @@ def test_get_flowline_routing(datapath, project_root_path):
                                   df.head())
     os.chdir(wd)
     
+
+@pytest.mark.parametrize('limit_runoff_to_area,start_datetime,end_datetime,expected', (
+    (None, None, None, (5e5, 9e5)),
+    ('runoff_area.shp', '2016-01-01', '2018-01-01', (3000, 1870)),
+))    
+def test_swb_runoff_to_csv(test_data_path, limit_runoff_to_area, 
+                           start_datetime, end_datetime,
+                           expected, outdir):
     
-def test_swb_runoff_to_csv(test_data_path, outdir):
     test_data_path = Path(test_data_path)
+    if limit_runoff_to_area is not None:
+        limit_runoff_to_area = test_data_path / limit_runoff_to_area
     swb_netcdf_output = test_data_path / 'runoff__1999-01-01_to_2018-12-31__989_by_661.nc'
     nhdplus_catchments_file = test_data_path / 'NHDPlus08/NHDPlusCatchment/Catchment.shp'
     outfile = Path(outdir, 'swb_runoff_by_nhdplus_comid.csv')
-    swb_runoff_to_csv(swb_netcdf_output, nhdplus_catchments_file,
-                      runoff_output_variable='runoff', 
-                      catchment_id_col='FEATUREID',
-                      output_length_units='meters',
-                      outfile=outfile)
+    aggregated = swb_runoff_to_csv(
+        swb_netcdf_output, nhdplus_catchments_file,
+        runoff_output_variable='runoff', 
+        catchment_id_col='FEATUREID',
+        limit_runoff_to_area=limit_runoff_to_area,
+        output_length_units='meters',
+        include_xy_in_output=True, xy_crs=5070,
+        outfile=outfile)
     df = pd.read_csv(outfile)
     df['time'] = pd.to_datetime(df['time'])
     #cat = gpd.read_file(nhdplus_catchments_file)
@@ -304,7 +316,25 @@ def test_swb_runoff_to_csv(test_data_path, outdir):
     mean_monthly_runoff = df.groupby(df['time'].dt.year)['runoff_m3d'].sum().mean()/12
     # no idea if this is the right number but similar to test results for modflow-setup
     # and serves as a benchmark in case the output changes
-    assert np.allclose(mean_monthly_runoff, 5e5, rtol=0.2)
+    assert np.allclose(mean_monthly_runoff, expected[0], rtol=0.2)
+    
+    # verify aggregrated runoff for a catchment 
+    # that intersects a single SWB cell
+    # (this will break if the test data change)
+    if limit_runoff_to_area is None:
+        loc = aggregated.index.get_level_values(1) == 17955907
+        expected = aggregated.loc[loc, 'area_m2']
+        # expected amount is the average inches per day
+        # converted to meters, then multiplied by
+        # SWB cell area of 1 km x 1 km
+        assert np.allclose(aggregated.loc[loc, 'runoff_m3d'].mean(), 
+                           0.008788843639195 * 1e6 * (.3048/12))
+    else:
+        # in this case, the expected amount is the same as
+        # the aggregated runoff for the single interected SWB cell
+        
+        assert np.allclose(aggregated['runoff_m3d'].mean(), 
+                           0.119300499558449 * 1e6 * (.3048/12))
     
     # test with "rejected net infiltration added"
     swb_rejected_net_inf_output = test_data_path / \
@@ -314,7 +344,11 @@ def test_swb_runoff_to_csv(test_data_path, outdir):
                       runoff_output_variable='runoff', 
                       swb_rejected_net_inf_output=swb_rejected_net_inf_output,
                       catchment_id_col='FEATUREID',
+                      limit_runoff_to_area=limit_runoff_to_area,
+                      start_datetime=start_datetime,
+                      end_datetime=end_datetime,
                       output_length_units='meters',
+                      include_xy_in_output=False,
                       outfile=outfile2)
     df2 = pd.read_csv(outfile2)
     df2['time'] = pd.to_datetime(df2['time'])
@@ -323,7 +357,7 @@ def test_swb_runoff_to_csv(test_data_path, outdir):
     # with the rejected net inf added
     # not sure if this is right but will fail if the input 
     # or the code changes substantially
-    assert np.allclose(mean_monthly_runoff2, 9e5, rtol=0.2)
+    assert np.allclose(mean_monthly_runoff2, expected[1], rtol=0.2)
 
 
 def test_cull_flowlines2(project_root_path):
