@@ -10,9 +10,13 @@ import xarray as xr
 import geopandas as gpd
 import fiona
 import rasterio
-from shapely.geometry import shape, MultiLineString, box
+import pyproj
+from shapely.geometry import (
+    MultiLineString, 
+    box)
 from rasterstats import zonal_stats
 import matplotlib.pyplot as plt
+import matplotlib.colors as colors
 from gisutils import (
     get_shapefile_crs, 
     write_raster, 
@@ -1401,12 +1405,37 @@ def fix_invalid_asums(asums, fl_lengths, graph, graph_r):
     return new_asums
 
 
+def get_netcdf_crs_from_grid_mapping(grid_mapping):
+    crs = None
+    try:
+        crs = pyproj.CRS.from_cf(grid_mapping)
+    except:
+        pass
+    if 'crs_wkt' in grid_mapping:
+        try:
+            crs = pyproj.CRS(grid_mapping['crs_wkt'])
+        except:
+            pass
+    # Soil Water Balance Code output
+    # usually has a "proj4_string" entry
+    if 'proj4_string' in grid_mapping:
+        try:
+            crs = pyproj.CRS(grid_mapping['proj4_string'])
+        except:
+            pass
+    # could add more crazy try/excepts here
+    return crs
+    
+    
 def swb_runoff_to_csv(swb_runoff_netcdf_output, nhdplus_catchments_file,
                       runoff_output_variable='runoff',
                       swb_rejected_net_inf_output=None,
                       rejected_net_inf_variable='rejected_net_infiltration',
                       catchment_id_col='FEATUREID',
+                      limit_runoff_to_area=None,
+                      start_datetime=None, end_datetime=None,
                       output_length_units='meters',
+                      include_xy_in_output=False, xy_crs=None,
                       outfile='swb_runoff_by_nhdplus_comid.csv'):
     """Convert gridded runoff estimates from the USGS Soil Water Balance Code (SWB)
     to a CSV format, associating each runoff value with a catchment ID. For the runoff to
@@ -1426,8 +1455,8 @@ def swb_runoff_to_csv(swb_runoff_netcdf_output, nhdplus_catchments_file,
         Shapefile of catchments with IDs (catchment_id_col). The catchments are rasterized
         to the grid in swb_netcdf_output, so that each runoff value can be associated with
         a catchment ID.
-    catchment_id_col : str, optional
-        Field in nhdplus_catchments_file with ID, by default 'FEATUREID'. For the 
+    catchment_id_col : str
+        Field in nhdplus_catchments_file with ID, by default 'FEATUREID'. 
     runoff_output_variable : str, optional
         Variable in swb_runoff_netcdf_output with runoff data, by default 'runoff'
     swb_rejected_net_inf_output : str or path-like
@@ -1441,13 +1470,65 @@ def swb_runoff_to_csv(swb_runoff_netcdf_output, nhdplus_catchments_file,
     rejected_net_inf_variable : str, optional
         Variable in swb_runoff_netcdf_output with runoff data, 
         by default 'rejected_net_infiltration'
+    limit_runoff_to_area : str or path-like
+        Optionally limit runoff to an area defined by a polygon shapefile.
+        By default None, in which case runoff is aggregated for each
+        NHDPlus Catchment that intersections the grid in swb_runoff_netcdf_output.
+    start_datetime : str
+        Include runoff on or after this date in the output. Can be in any 
+        string format used for time slicing in pandas or xarray.
+        By default, None (include all times in `swb_runoff_netcdf_output`).
+    end_datetime : str
+        Include runoff on or before this date in the output. Can be in any 
+        string format used for time slicing in pandas or xarray.
+        By default, None (include all times in `swb_runoff_netcdf_output`).
     output_length_units : str, optional
         Input units are read from the 'units' attribute of the netcdf_output_variable 
         in swb_netcdf_output; specify output length units so that the output CSV
         file is in the same length units as the model. No time unit conversion is perfo
         by default 'meters'
+    include_xy_in_output : bool
+        Option to include approximate x, y coordinates of catchments in the
+        output. The x, y coordinates represent the average x and y values of
+        the SWB grid cells intersected by each catchment.
+    xy_crs :
+        Output coordinate reference system (CRS) for coordinates in outfile.
+        Only used if `include_xy_in_output=True`.
+        By default False, in which case the CRS for `swb_runoff_netcdf_output`
+        is used.
     outfile : str, optional
-        [description], by default 'swb_runoff_by_nhdplus_comid.csv'
+        Output CSV file with transient runoff volumes for each catchment 
+        intersecting the SWB grid, by default 'swb_runoff_by_nhdplus_comid.csv'
+    
+    Returns
+    -------
+    aggregated : DataFrame (also written to outfile)
+        DataFrame with columns:
+        
+        =================== =============================================================
+        time                time associated with each runoff volume
+        comid               catchment and flowline identifier
+        x                   (optional) approximate x-coordinate of catchment, in `xy_crs`
+        y                   (optional) approximate y-coordinate of catchment, in `xy_crs`
+        runoff_{L}3d        runoff volume, in model length units cubed per day
+        area_{L}2           total area of SWB cells intersected by catchment, in model length units cubed
+        =================== =============================================================
+    
+    Notes
+    -----
+    
+    
+    Some notes on SWB output variables, as of 7/5/2023: 
+    * `'runoff_outside'` is the sum of `'runoff'` plus `'rejected_net_infiltration'`. 
+    * When routing is inactive in the SWB simulation, 'runoff_outside' is computed 
+      for every SWB grid cell. In this case, it can be supplied here to
+      `swb_runoff_netcdf_output` (and `runoff_output_variable`), in lieu of supplying both 
+      `swb_runoff_netcdf_output` and `swb_rejected_net_inf_output`.
+    * When routing is active, 'runoff_outside' represents only water that cannot 
+      be moved downslope; in most cases it should be zero in the model interior.
+      In this case, one would most likely supply both `swb_runoff_netcdf_output` and 
+      `swb_rejected_net_inf_output`.
+    
     """    
     outfile = Path(outfile)
     # get an affine.Affine representation and shape 
@@ -1457,35 +1538,102 @@ def swb_runoff_to_csv(swb_runoff_netcdf_output, nhdplus_catchments_file,
         yul = np.max(ds['y'].values)
         dx = ds['x'].diff(dim='x').values[0]
         dy = ds['y'].diff(dim='y').values[0]
+        # subset to time limits, if provided
+        ds = ds.sel(time=slice(start_datetime, end_datetime))
         ntimes, nrow, ncol = ds[runoff_output_variable].shape
-        nc_crs = get_authority_crs(ds['crs'].attrs['proj4_string'])
+        nc_crs = get_netcdf_crs_from_grid_mapping(ds['crs'].attrs)
         nc_bounds = (xul, np.min(ds['y'].values),
                      np.max(ds['x'].values), yul)
         nc_bbox = box(*nc_bounds)
         nc_units = ds[runoff_output_variable].attrs['units']
     nc_trans = affine.Affine(dx, 0., xul, 0., dy, yul)
     
-    # combine monthly runoff with monthly "rejected_net_infiltration"
+    # combine runoff with "rejected_net_infiltration"
     if swb_rejected_net_inf_output is not None:
         with xr.open_dataset(swb_rejected_net_inf_output) as ds2: 
-            total_runoff = ds['runoff'] + ds2[rejected_net_inf_variable]
-            total_runoff.name = 'runoff'
+            nc_crs2 = get_netcdf_crs_from_grid_mapping(ds2['crs'].attrs)
+            if nc_crs2 != nc_crs:
+                raise ValueError(f"Files {swb_runoff_netcdf_output} (crs: {nc_crs}) "
+                                 f"{swb_rejected_net_inf_output} (crs: {nc_crs2}) have "
+                                 "different coordinate reference systems. Are these "
+                                 "from the same SWB simulation?")
+            ds2 = ds2.sel(time=slice(start_datetime, end_datetime))
+            total_runoff = ds[runoff_output_variable] + ds2[rejected_net_inf_variable]
     else:
-        total_runoff = ds['runoff']
-        
+        total_runoff = ds[runoff_output_variable]
+    total_runoff.name = 'runoff'
+    
+    # plot average runoff, rejected net_inf, and total runoff
+    fig, axes = plt.subplots(1, 3, figsize=(11, 8.5), sharey=True, layout='constrained'
+                             )
+    
+    cbar_kwargs={'location': 'bottom'}
+    xlim = (ds.x.min(), ds.x.max())
+    
+    # compute the means to get global non-zero min and maxes
+    mean_runoff = ds[runoff_output_variable].mean(axis=0)
+    all_values = [mean_runoff.values[mean_runoff.values > 0]]
+    if swb_rejected_net_inf_output is not None:
+        mean_rjnet = ds2[rejected_net_inf_variable].mean(axis=0)
+        all_values.append(mean_rjnet.values[mean_rjnet.values > 0])
+    mean_total_runoff = total_runoff.mean(axis=0)
+    all_values.append(mean_total_runoff.values[mean_total_runoff.values > 0])
+    non_zero_values = np.hstack(all_values)
+    vmin, vmax = non_zero_values.min(), non_zero_values.max()
+    
+    ax = axes.flat[0]
+    norm = colors.LogNorm(vmin, vmax)
+    mean_runoff.plot(ax=ax, norm=norm, cbar_kwargs=cbar_kwargs)
+    ax.set_xticks(ax.get_xticks(), ax.get_xticklabels(), rotation=90, ha='center')
+    ax.set_aspect(1)
+    ax.set_xlim(*xlim)
+    ax.set_title('')
+    
+    if swb_rejected_net_inf_output is not None:
+        ax = axes.flat[1]
+        norm = colors.LogNorm(vmin, vmax)
+        mean_rjnet.plot(ax=ax, norm=norm, cbar_kwargs=cbar_kwargs)
+        ax.set_xticks(ax.get_xticks(), ax.get_xticklabels(), rotation=90, ha='center')
+        ax.set_aspect(1)
+        ax.set_xlim(*xlim)
+        ax.set_ylabel('')
+        ax.set_title('')
+    
+    ax = axes.flat[2]
+    norm = colors.LogNorm(vmin, vmax)
+    cbar_kwargs['label'] = (f'{runoff_output_variable} + '
+                          f'{rejected_net_inf_variable}')
+    mean_total_runoff.plot(ax=ax, norm=norm, cbar_kwargs=cbar_kwargs)
+    ax.set_xticks(ax.get_xticks(), ax.get_xticklabels(), rotation=90, ha='center')
+    ax.set_aspect(1)
+    ax.set_xlim(*xlim)
+    ax.set_ylabel('')
+    ax.set_title('')
+    
+    plt.subplots_adjust(top=0.9)
+    times = ds.time.dt.strftime('%Y-%m-%d').values
+    plt.suptitle(f'Average values for {times[0]} to {times[-1]}',
+                 y=0.8)
+    plt.savefig(outfile.parent / 'runoff_comparison.pdf')
+    plt.close()
+
     # Read in the NHDPlus catchments 
     # first reproject the SWB netcdf bounding box to lat/lon (NAD83)
     # with a 10 km buffer
-    nc_bbox_4269 = project(nc_bbox.buffer(1e4), nc_crs, 4269)
+    shapefile_crs = get_shapefile_crs(nhdplus_catchments_file)
+    nc_bbox = project(nc_bbox.buffer(1e4), nc_crs, shapefile_crs)
     # read the catchments intersecting the buffered bbox
-    catchments = gpd.read_file(nhdplus_catchments_file, bbox=nc_bbox_4269.bounds)
+    catchments = gpd.read_file(nhdplus_catchments_file, 
+                               bbox=nc_bbox.bounds,
+                               dtypes={catchment_id_col: int})
     #  reproject to the SWB output CRS (probably 5070)
     #  this assumes the SWB output has a valid crs!
-    catchments.to_crs(nc_crs, inplace=True)
-    #catchments.to_file(outpath / nhdplus_catchments.name)
+    if shapefile_crs != nc_crs:
+        catchments.to_crs(nc_crs, inplace=True)
     
     # rasterize the catchments unto the NetCDF file grid
-    features_list = list(zip(catchments['geometry'], catchments[catchment_id_col]))
+    features_list = list(zip(catchments['geometry'], 
+                             catchments[catchment_id_col].astype(int)))
     rasterized = rasterio.features.rasterize(features_list, out_shape=(nrow, ncol), 
                                     transform=nc_trans)
     out_text_array = outfile.parent / 'nhdplus_catchments.dat'
@@ -1493,16 +1641,45 @@ def swb_runoff_to_csv(swb_runoff_netcdf_output, nhdplus_catchments_file,
     print(f'wrote {out_text_array}')
     write_raster(out_text_array.with_suffix('.tif'), rasterized, nodata=0, 
                  xul=xul, yul=yul, dx=dx, dy=dy, crs=nc_crs)
-    masked = np.ma.masked_array(rasterized, mask=rasterized==0)
-    plt.imshow(masked)
+    
+    # normalize colors
+    unique_values = np.unique(rasterized)
+    np.random.shuffle(unique_values)
+    mapping = dict(zip(unique_values, np.arange(1, len(unique_values)+1)
+                       ))
+    to_show = np.reshape([mapping[c] for c in rasterized.ravel()],
+                         rasterized.shape)
+    masked = np.ma.masked_array(to_show, mask=rasterized==0)
+    plt.imshow(masked, cmap='gist_earth')
     plt.title('Rasterized NHDPlus catchments')
     plt.savefig(out_text_array.with_suffix('.pdf'))
     plt.close()
     print(f"wrote {out_text_array.with_suffix('.pdf')}")
-    
-    # transpose the SWB runoff results from xarray DataSet to DataFrame
+ 
+     # transpose the SWB runoff results from xarray DataSet to DataFrame
     df = total_runoff.to_dataframe().reset_index()
     df['comid'] = rasterized.ravel().tolist() * ntimes
+    
+    # optionally limit runoff to user-defined polygon area
+    if limit_runoff_to_area is not None:
+        roff_area = gpd.read_file(limit_runoff_to_area)
+        roff_area.to_crs(nc_crs, inplace=True)
+        roff_area_ids = np.arange(1, len(roff_area) + 1)
+        features_list = list(zip(roff_area['geometry'], roff_area_ids))
+        allow_runoff = rasterio.features.rasterize(features_list, out_shape=(nrow, ncol), 
+                                        transform=nc_trans)     
+        loc = list(allow_runoff.ravel() > 0) * ntimes
+        df = df.loc[loc].copy()
+        runoff_area_outfile = outfile.parent / 'runoff_area.tif'
+        write_raster(runoff_area_outfile, allow_runoff, nodata=0, 
+                    xul=xul, yul=yul, dx=dx, dy=dy, crs=nc_crs)
+        masked = np.ma.masked_array(allow_runoff, mask=allow_runoff==0)
+        plt.imshow(masked)
+        plt.title('Rasterized runoff area')
+        plt.savefig(runoff_area_outfile.with_suffix('.pdf'))
+        plt.close()
+        print(f"wrote {runoff_area_outfile.with_suffix('.pdf')}")
+
     # SWB runoff is in average daily inches over each cell
     # convert to average daily volume for each cell
     # then sum by comid to get average daily volume by comid
@@ -1511,12 +1688,99 @@ def swb_runoff_to_csv(swb_runoff_netcdf_output, nhdplus_catchments_file,
     df[f'area_{L}2'] = abs(dx * dy)  # cell area in m3
     df[f'runoff_{L}d'] = df['runoff'] * convert_length_units(nc_units, output_length_units)
     df[f'runoff_{L}3d'] = df[f'runoff_{L}d'] * df[f'area_{L}2']
-    bycomid_month = df.groupby(['time', 'comid'])
-    data = bycomid_month.first()  # preserve times
-    aggregated = bycomid_month.sum()
+    bycomid_time = df.groupby(['time', 'comid'])
+    data = bycomid_time.first()  # preserve times
+    # sum the runoff for all cells intersecting each catchment
+    # (at each time)
+    aggregated = bycomid_time.sum()
     data_cols = ['x', 'y', 'lat', 'lon']
-    for col in data_cols:
-        aggregated[col] = data[col]
+    for c in data_cols:
+        if c in aggregated.columns:
+            aggregated[c] = data[c]
+    if include_xy_in_output:
+        aggregated['x'] = bycomid_time.mean()['x']
+        aggregated['y'] = bycomid_time.mean()['y']
+        if xy_crs != nc_crs:
+            x, y = project(
+                (aggregated['x'], aggregated['y']), nc_crs, xy_crs)
+            aggregated['x'] = x
+            aggregated['y'] = y          
+
+    # remap aggregated runoff back to COMIDs 
+    # and compare to gridded total runoff from SWB
+    geoms = dict(zip(catchments[catchment_id_col], catchments['geometry']))
+    # get the mean for each catchment through time
+    comid_runoff_means = pd.DataFrame(aggregated.groupby('comid')['runoff_m3d'].mean())
+    comid_runoff_means.columns = ['mean_roff']
+    comid_runoff_means['geometry'] = [geoms[comid] 
+                                       for comid in comid_runoff_means.index]
+    # keep unconverted linear runoff from SWB for diagnostic/QC purposes
+    # (for example, this allows for direct comparison of a catchment intersecting 
+    # a single SWB cell to the SWB output)
+    comid_runoff_means['runoff'] = pd.DataFrame(aggregated.groupby('comid')['runoff'].mean())
+    comid_runoff_means = gpd.GeoDataFrame(comid_runoff_means, crs=catchments.crs)
+    fig, axes = plt.subplots(1, 2, figsize=(11, 8.5), 
+                             sharey=True, sharex=True, layout='constrained')
+    
+    ax = axes.flat[1]
+    non_zero = comid_runoff_means['mean_roff'] > 0
+    catchments_norm = colors.LogNorm(
+        comid_runoff_means.loc[non_zero, 'mean_roff'].min(),
+        comid_runoff_means.loc[non_zero, 'mean_roff'].max()
+    )
+    comid_runoff_means.plot(
+        column='mean_roff', legend=True, norm=catchments_norm,
+        legend_kwds={
+            'label': ('Mean runoff mapped to catchments, '
+                      f'in {output_length_units}$^3$/day'),
+            'orientation': 'horizontal'
+                     },
+        ax=ax)
+    ax.set_xlabel('') 
+    xlim = ax.get_xlim()
+    ylim = ax.get_ylim()
+    aspect = ax.set_aspect(1)
+    ax.set_xticks(ax.get_xticks(), ax.get_xticklabels(), rotation=90, ha='center')
+    
+    ax = axes.flat[0]
+    cbar_kwargs['label'] = (f'Mean SWB {runoff_output_variable} + '
+                            f'{rejected_net_inf_variable}, in {nc_units}/day')
+    if limit_runoff_to_area is not None:
+        plot_array = mean_total_runoff.where(allow_runoff > 0)
+    else:
+        plot_array = mean_total_runoff
+    plot_array.plot(ax=ax, norm=norm, cbar_kwargs=cbar_kwargs)
+    ax.set_aspect(1)
+    ax.set_xlim(*xlim)
+    ax.set_xticks(ax.get_xticks(), ax.get_xticklabels(), rotation=90, ha='center')
+    #ax.set_ylim(*ylim)
+    ax.set_ylabel('')
+    ax.set_xlabel('')
+    ax.set_title('')
+    comid_runoff_means.plot(
+        facecolor='none', edgecolor='0.5', linewidth=0.5, ax=ax)
+    mean_total_runoff_pdf = outfile.parent / 'mean_total_runoff_comparison.pdf'
+    fig.suptitle(f'Average values for {times[0]} to {times[-1]}')
+    #plt.subplots_adjust(top=0.1)
+    plt.savefig(mean_total_runoff_pdf)
+    plt.close()
+    print(f"wrote {mean_total_runoff_pdf}")
+       
+    # export to GIS layers as well
+    mean_total_runoff_shp = outfile.parent / 'mean_total_runoff_by_catchment.shp'
+    comid_runoff_means.to_file(mean_total_runoff_shp) 
+    print(f"wrote {mean_total_runoff_shp}")
+    mean_total_runoff_raster = outfile.parent / 'mean_total_runoff_on_swb_grid.tif'
+    if limit_runoff_to_area is not None:
+        output_array = mean_total_runoff.where(allow_runoff > 0).values
+    else:
+        output_array = mean_total_runoff.values
+    write_raster(mean_total_runoff_raster, 
+                 output_array,
+                 nodata=0, 
+                 xul=xul, yul=yul, dx=dx, dy=dy, crs=nc_crs)
+    print(f"wrote {mean_total_runoff_raster}")
+        
     # drop comids with zero total runoff
     # (keep intermittent zero values; 
     #  otherwise SFR package will continue previous value)
@@ -1524,6 +1788,12 @@ def swb_runoff_to_csv(swb_runoff_netcdf_output, nhdplus_catchments_file,
     drop_comids = comid_runoff_totals.loc[comid_runoff_totals == 0].index
     keep_rows = ~aggregated.index.get_level_values(1).isin(drop_comids)
     aggregated = aggregated.loc[keep_rows]
-    aggregated = aggregated[['x', 'y', f'runoff_{L}3d', f'area_{L}2']]
+    output_cols = []
+    if include_xy_in_output:
+        output_cols = ['x', 'y']
+    output_cols += [f'runoff_{L}3d', f'area_{L}2']
+    aggregated = aggregated[output_cols]
     aggregated.to_csv(outfile, index=True, float_format='%g')
     print(f'wrote {outfile}')
+    
+    return aggregated
