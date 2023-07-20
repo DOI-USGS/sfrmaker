@@ -88,6 +88,6 @@ jobs:
     - name: Run tests and upload coverage
       shell: bash -l {0}
       run: |
-        coverage run -m pytest -v --durations=20
+        coverage run -m pytest -v --durations=20 --timeout=120
         coverage report -m
         codecov
