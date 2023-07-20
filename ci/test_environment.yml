@@ -1,7 +1,6 @@
 name: sfrmaker_ci
 channels:
   - conda-forge
-  - defaults
 dependencies:
   - python
   - ipython
