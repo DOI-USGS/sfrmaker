@@ -33,7 +33,7 @@ def consolidate_reach_conductances(rd, keep_only_dominant=False):
     # dominant reaches include those not collocated with other reaches, and the longest collocated reach
     rd['Dominant'] = [True] * len(rd)
 
-    for c, nreaches in rd.node.value_counts().iteritems():
+    for c, nreaches in rd.node.value_counts().items():
         # this is apparently nearly twice as fast as
         # a vectorized approach on all of m1.
         # apparently because it only operates on collocated reaches

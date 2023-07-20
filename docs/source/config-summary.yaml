@@ -24,8 +24,6 @@ modelgrid:
   botm: None
   idomain: None
   lenuni: None
-  proj4: None
-  prj: None
   xoff: 0.0
   yoff: 0.0
   angrot: 0.0
@@ -72,6 +70,7 @@ simulation:
   load_only: None
   verify_data: False
   write_headers: True
+  lazy_io: False
 
 model:
   # MODFLOW-NWT or MODFLOW-2005 information

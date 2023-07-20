@@ -248,6 +248,7 @@ def load_modelgrid(filename):
     cfg = load_json(filename)
     rename = {'xll': 'xoff',
               'yll': 'yoff',
+              'epsg': 'crs'
               }
     for k, v in rename.items():
         if k in cfg:

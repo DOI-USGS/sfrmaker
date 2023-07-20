@@ -8,7 +8,7 @@ modelgrid:
   ncol: 634
   delr: 1000  # model spacing along a row
   delc: 1000  # model spacing along a column
-  epsg: 5070  # albers equal area
+  crs: 5070  # albers equal area
 flowlines:
   filename: flowlines.shp
   id_column: COMID  # arguments to sfrmaker.Lines.from_shapefile
