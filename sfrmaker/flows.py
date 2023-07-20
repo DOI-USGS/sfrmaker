@@ -314,7 +314,7 @@ def add_to_perioddata(sfrdata, data, flowline_routing=None,
         #  to each line_id_in_model)
         if len(set(data['line_id_in_model'])) < len(set(data[line_id_column])):
             by_line_id_in_model = data.groupby(['per', 'line_id_in_model'])
-            sums = by_line_id_in_model.sum()[[data_column]].reset_index()
+            sums = by_line_id_in_model[[data_column]].sum().reset_index()
             # preserve other columns that were dropped in sum()
             # (e.g. datetime)
             other_columns = data.columns.difference(sums.columns).difference({line_id_column})
