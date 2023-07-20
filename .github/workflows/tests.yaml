@@ -87,7 +87,12 @@ jobs:
     #    flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Run tests and upload coverage
       shell: bash -l {0}
+      timeout-minutes: 60
       run: |
+        set -vxeuo pipefail
         coverage run -m pytest -v --durations=20 --timeout=120
+    - name: Upload coverage
+      shell: bash -l {0}
+      run: |
         coverage report -m
         codecov
