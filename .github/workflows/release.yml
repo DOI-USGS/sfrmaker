@@ -63,7 +63,7 @@ jobs:
         auto-update-conda: true
         activate-environment: sfrmaker_ci
         environment-file: ci/test_environment.yml
-        python-version: '3.9'
+        python-version: '3.11'
         auto-activate-base: false
         # must be false in most cases
         # https://github.com/JamesIves/github-pages-deploy-action
