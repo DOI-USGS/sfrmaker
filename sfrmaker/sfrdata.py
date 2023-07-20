@@ -825,7 +825,7 @@ class SFRData(DataPackage):
             exists_already = {obs[0] for obs in existing_obs.intersection(new_obs)}
             exists_already = self._observations['obsname'].isin(exists_already)
             self._observations = self._observations.loc[~exists_already]
-        self._observations = self.observations.append(added_obs).reset_index(drop=True)
+        self._observations = pd.concat([self.observations, added_obs], axis=0).reset_index(drop=True)
 
         for df in self._observations, added_obs:
             # enforce dtypes (pandas doesn't allow an empty dataframe

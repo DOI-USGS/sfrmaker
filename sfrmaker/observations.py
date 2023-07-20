@@ -212,6 +212,9 @@ def get_closest_reach(x, y, sfrlines,
     rno : int or list of ints
         Reach numbers for reaches closest to each location
         defined by x, y.
+    distance: int or list of ints
+        Distance from each site in x, y to the corresponding 
+        closest SFR reach.
     """
     scalar = False
     if np.isscalar(x):

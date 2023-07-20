@@ -202,10 +202,12 @@ class Mf6SFR:
 
     def _get_segment_dataframe(self):
         sd = pd.DataFrame()
+        dfs = []
         for k, v in self.ModflowSfr2.segment_data.items():
             df = pd.DataFrame(v)
             df['per'] = k
-            sd = sd.append(df)
+            dfs.append(df)
+        sd = pd.concat(dfs, axis=0)
         keepcols = (sd.sum(axis=0) > 0) | np.in1d(sd.columns.values, ['per'])
         return sd.loc[:, keepcols]
 
@@ -365,7 +367,7 @@ class Mf6SFR:
                     # drop the period from the index
                     group.reset_index(level=0, drop=True, inplace=True)
                     datacols = {'inflow', 'manning', 'rainfall', 'evaporation', 'runoff', 'stage'}
-                    datacols = datacols.intersection(group.columns)
+                    datacols = [c for c in group.columns if c in datacols]
                     group = group.loc[:, datacols]
                     group.stack().to_csv(output, sep=' ', index=True, header=False)
                     output.write('END Period {}\n'.format(per + 1))
@@ -484,7 +486,7 @@ def segment_data_to_period_data(segment_data, reach_data):
     strtop['status'] = 'SIMPLE'
 
     if len(strtop) > 0:
-        distributed = distributed.append(strtop)
+        distributed = pd.concat([distributed, strtop], axis=0)
     distributed.sort_values(by=['per', 'rno'], inplace=True)
 
     # rearrange the columns

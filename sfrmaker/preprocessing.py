@@ -811,7 +811,7 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
 
     # label secondary distributaries
     flcc['main_chan'] = True
-    flcc.loc[diversionminorcomids, 'main_chan'] = False
+    flcc.loc[list(diversionminorcomids), 'main_chan'] = False
 
     # verify that all comids only route to one other comid
     assert np.all([np.isscalar(v) for v in tocomids.values()])
@@ -1261,7 +1261,7 @@ def edit_flowlines(flowlines, config_file,
         # drop the IDs being added if they already exist
         df = df.loc[~df[id_column].isin(df2[id_column])]
 
-        df = df.append(df2)
+        df = pd.concat([df, df2], axis=0)
         df.index = df[id_column]
         logger.statement('added flowlines: {}'.format(textwrap.fill(str(df2[id_column].tolist()),
                                                                     100)))

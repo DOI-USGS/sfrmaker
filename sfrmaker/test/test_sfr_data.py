@@ -41,7 +41,9 @@ def test_init(tylerforks_sfrdata, tylerforks_model_grid, tylerforks_sfrmaker_gri
     assert isinstance(sfrdata, sfrmaker.SFRData)
     pd.testing.assert_frame_equal(sfrdata.reach_data, rd,
                                   check_dtype=False,
-                                  check_less_precise=2)
+                                  rtol=0.01
+                                  #check_less_precise=2
+                                  )
     pd.testing.assert_frame_equal(sfrdata.segment_data, sd,
                                   check_dtype=False)
     assert isinstance(sfrdata.grid, sfrmaker.StructuredGrid)
@@ -114,15 +116,15 @@ def test_export_period_data(shellmound_sfrdata_with_period_data, outdir):
     pers = [int(c.strip('inflow')) for c in df.columns if 'inflow' in c]
     assert set(pers) == set(sfrd.period_data.index.levels[0])
     assert set(df['rno']) == set(sfrd.period_data.index.levels[1])
-    assert np.allclose(df['0inflow'].append(df['1inflow']).values,
-                       sfrd.period_data['inflow'].values)
+    results = pd.concat([df['0inflow'], df['1inflow']]).values
+    assert np.allclose(results, sfrd.period_data['inflow'].values)
     assert np.array_equal(df.node.values, np.array([nodes[rno] for rno in df.rno], dtype=int))
 
     # check that export still works if there are multiple items in a reach
-    sfrd._period_data = sfrd.period_data.append(sfrd.period_data)
+    sfrd._period_data = pd.concat([sfrd.period_data, sfrd.period_data])
     sfrd.export_period_data(outfile)
     df = shp2df(outfile)
-    assert np.allclose(sorted(df['0inflow'].append(df['1inflow']).values),
+    assert np.allclose(sorted(pd.concat([df['0inflow'], df['1inflow']]).values),
                        sorted(sfrd.period_data.groupby(['rno', 'per']).sum().inflow.values))
 
 
