@@ -89,7 +89,6 @@ jobs:
       shell: bash -l {0}
       timeout-minutes: 60
       run: |
-        set -vxeuo pipefail
         coverage run -m pytest -v --durations=20 --timeout=120
     - name: Upload coverage
       shell: bash -l {0}
