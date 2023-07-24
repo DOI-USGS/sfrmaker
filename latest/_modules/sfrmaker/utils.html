@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>sfrmaker.utils &mdash; SFRmaker 0.9.1.post12.dev0+g0c5d9bf documentation</title>
+  <title>sfrmaker.utils &mdash; SFRmaker 0.10.0.post16.dev0+gae6eca3 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
@@ -17,6 +17,7 @@
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
         <script src="../../_static/clipboard.min.js"></script>
         <script src="../../_static/copybutton.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -30,14 +31,18 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../index.html" class="icon icon-home"> SFRmaker
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            SFRmaker
           </a>
               <div class="version">
-                0.9.1.post12.dev0+g0c5d9bf
+                0.10.0.post16.dev0+gae6eca3
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -54,6 +59,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../inputs.html"> Input Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../examples.html"> Using SFRmaker with a configuration file</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../notebooks/SFRmaker_demo.html"> Basic Usage in a scripting context</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../notebooks/preprocessing_demo.html"> Preprocessing NHDPlus version 2 data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../notebooks/lines_from_NHDPlusHR_demo.html"> Using SFRmaker with NHDPlus High Resolution</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../concepts.html"> Concepts and methods</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../notebooks/sfrmaker_tools.html"> Stand-alone tools</a></li>
@@ -84,9 +90,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../index.html">Module code</a> &raquo;</li>
-      <li>sfrmaker.utils</li>
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">sfrmaker.utils</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -117,7 +123,7 @@
                   <span class="n">strtop_col</span><span class="o">=</span><span class="s1">&#39;strtop&#39;</span><span class="p">,</span> <span class="n">strthick_col</span><span class="o">=</span><span class="s1">&#39;strthick&#39;</span><span class="p">,</span>
                   <span class="n">idomain</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span> 
                   <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Assigns the appropriate layer for each SFR reach,</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Assigns the appropriate layer for each SFR reach,</span>
 <span class="sd">            based on cell bottoms at location of reach.</span>
 
 <span class="sd">    Parameters</span>
@@ -177,6 +183,8 @@
     <span class="k">if</span> <span class="n">idomain</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">return_3d</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="n">idomain</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">botm_array</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">idomain</span> <span class="o">=</span> <span class="p">(</span><span class="n">idomain</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
     <span class="n">in_active_area</span> <span class="o">=</span> <span class="p">(</span><span class="n">idomain</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span>
     <span class="n">below</span> <span class="o">=</span> <span class="p">(</span><span class="n">streambed_botm</span> <span class="o">-</span> <span class="n">pad</span> <span class="o">&lt;=</span> <span class="n">model_botm</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">in_active_area</span>
     <span class="n">below_inds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">below</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
@@ -212,7 +220,7 @@
 
 
 <div class="viewcode-block" id="get_layer"><a class="viewcode-back" href="../../api/sfrmaker.utils.html#sfrmaker.utils.get_layer">[docs]</a><span class="k">def</span> <span class="nf">get_layer</span><span class="p">(</span><span class="n">botm_array</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">elev</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Return the layers for elevations at i, j locations.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the layers for elevations at i, j locations.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -264,7 +272,7 @@
 
 
 <div class="viewcode-block" id="arbolate_sum"><a class="viewcode-back" href="../../api/sfrmaker.utils.html#sfrmaker.utils.arbolate_sum">[docs]</a><span class="k">def</span> <span class="nf">arbolate_sum</span><span class="p">(</span><span class="n">segment</span><span class="p">,</span> <span class="n">lengths</span><span class="p">,</span> <span class="n">routing</span><span class="p">,</span> <span class="n">starting_asums</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Compute the total length of all tributaries upstream from</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute the total length of all tributaries upstream from</span>
 <span class="sd">    segment, including that segment, using the supplied lengths and</span>
 <span class="sd">    routing connections.</span>
 
@@ -306,7 +314,7 @@
 
 
 <div class="viewcode-block" id="get_input_arguments"><a class="viewcode-back" href="../../api/sfrmaker.utils.html#sfrmaker.utils.get_input_arguments">[docs]</a><span class="k">def</span> <span class="nf">get_input_arguments</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">function</span><span class="p">,</span> <span class="n">warn</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Return subset of keyword arguments in kwargs dict</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return subset of keyword arguments in kwargs dict</span>
 <span class="sd">    that are valid parameters to a function or method.</span>
 
 <span class="sd">    Parameters</span>
@@ -350,7 +358,7 @@
 
 
 <div class="viewcode-block" id="which"><a class="viewcode-back" href="../../api/sfrmaker.utils.html#sfrmaker.utils.which">[docs]</a><span class="k">def</span> <span class="nf">which</span><span class="p">(</span><span class="n">program</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Check for existance of executable.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check for existance of executable.</span>
 <span class="sd">    https://stackoverflow.com/questions/377017/test-if-executable-exists-in-python</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">is_exe</span><span class="p">(</span><span class="n">fpath</span><span class="p">):</span>
@@ -375,7 +383,7 @@
 
 
 <div class="viewcode-block" id="update"><a class="viewcode-back" href="../../api/sfrmaker.utils.html#sfrmaker.utils.update">[docs]</a><span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">u</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Recursively update a dictionary of varying depth</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Recursively update a dictionary of varying depth</span>
 <span class="sd">    d with items from u.</span>
 <span class="sd">    from: https://stackoverflow.com/questions/3232943/update-value-of-a-nested-dictionary-of-varying-depth</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -392,7 +400,7 @@
 
 <div class="viewcode-block" id="width_from_arbolate_sum"><a class="viewcode-back" href="../../api/sfrmaker.utils.html#sfrmaker.utils.width_from_arbolate_sum">[docs]</a><span class="k">def</span> <span class="nf">width_from_arbolate_sum</span><span class="p">(</span><span class="n">asum</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="mf">0.1193</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mf">0.5032</span><span class="p">,</span> <span class="n">minimum_width</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span> <span class="n">input_units</span><span class="o">=</span><span class="s1">&#39;meters&#39;</span><span class="p">,</span>
                             <span class="n">output_units</span><span class="o">=</span><span class="s1">&#39;meters&#39;</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Estimate stream width from arbolate sum, using a power law regression</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Estimate stream width from arbolate sum, using a power law regression</span>
 <span class="sd">    comparing measured channel widths to arbolate sum.</span>
 <span class="sd">    (after Leaf, 2020 and Feinstein et al. 2010, Appendix 2, p 266.)</span>
 
@@ -459,7 +467,7 @@
 
 
 <div class="viewcode-block" id="get_method_args_values"><a class="viewcode-back" href="../../api/sfrmaker.utils.html#sfrmaker.utils.get_method_args_values">[docs]</a><span class="k">def</span> <span class="nf">get_method_args_values</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Get arguments for a function or method and their default values.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get arguments for a function or method and their default values.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -604,7 +612,7 @@
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Aug 01, 2022.
+      <span class="lastupdated">Last updated on Jul 24, 2023.
       </span></p>
   </div>
 

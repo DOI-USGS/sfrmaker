@@ -7,6 +7,17 @@ SFRmaker
 ==================
 version |version|
 
+|Go to the GitHub site|_
+
+.. |Go to the GitHub site| replace:: **Go to the GitHub site**
+.. _Go to the GitHub site: https://github.com/DOI-USGS/sfrmaker
+
+|Read the paper|_
+
+.. |Read the paper| replace:: **Read the paper**
+.. _Read the paper: https://ngwa.onlinelibrary.wiley.com/doi/full/10.1111/gwat.13095
+
+
 .. raw:: html
 
    <hr>
@@ -26,6 +37,7 @@ version |version|
    Input Requirements <inputs>
    Using SFRmaker with a configuration file <examples>
    Basic Usage in a scripting context <notebooks/SFRmaker_demo>
+   Preprocessing NHDPlus version 2 data <notebooks/preprocessing_demo>
    Using SFRmaker with NHDPlus High Resolution <notebooks/lines_from_NHDPlusHR_demo>
    Concepts and methods <concepts.rst>
    Stand-alone tools <notebooks/sfrmaker_tools>

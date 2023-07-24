@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>The SFRData Module &mdash; SFRmaker 0.9.1.post12.dev0+g0c5d9bf documentation</title>
+  <title>The SFRData Module &mdash; SFRmaker 0.10.0.post16.dev0+gae6eca3 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
@@ -18,6 +18,7 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
         <script src="../_static/clipboard.min.js"></script>
         <script src="../_static/copybutton.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -33,14 +34,18 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html" class="icon icon-home"> SFRmaker
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            SFRmaker
           </a>
               <div class="version">
-                0.9.1.post12.dev0+g0c5d9bf
+                0.10.0.post16.dev0+gae6eca3
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -57,6 +62,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../inputs.html"> Input Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples.html"> Using SFRmaker with a configuration file</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../notebooks/SFRmaker_demo.html"> Basic Usage in a scripting context</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebooks/preprocessing_demo.html"> Preprocessing NHDPlus version 2 data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../notebooks/lines_from_NHDPlusHR_demo.html"> Using SFRmaker with NHDPlus High Resolution</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../concepts.html"> Concepts and methods</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../notebooks/sfrmaker_tools.html"> Stand-alone tools</a></li>
@@ -71,7 +77,65 @@
 <li class="toctree-l2"><a class="reference internal" href="sfrmaker.mf5to6.html">MODFLOW-2005 to 6 Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="sfrmaker.observations.html">Observations Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="sfrmaker.preprocessing.html">Preprocessing Module</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">SFRData Module</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">SFRData Module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#sfrmaker.sfrdata.SFRData"><code class="docutils literal notranslate"><span class="pre">SFRData</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.sfrdata.SFRData.add_observations"><code class="docutils literal notranslate"><span class="pre">SFRData.add_observations()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.sfrdata.SFRData.add_to_perioddata"><code class="docutils literal notranslate"><span class="pre">SFRData.add_to_perioddata()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.sfrdata.SFRData.add_to_segment_data"><code class="docutils literal notranslate"><span class="pre">SFRData.add_to_segment_data()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.sfrdata.SFRData.assign_layers"><code class="docutils literal notranslate"><span class="pre">SFRData.assign_layers()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.sfrdata.SFRData.const"><code class="docutils literal notranslate"><span class="pre">SFRData.const</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.sfrdata.SFRData.create_mf6sfr"><code class="docutils literal notranslate"><span class="pre">SFRData.create_mf6sfr()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.sfrdata.SFRData.create_modflow_sfr2"><code class="docutils literal notranslate"><span class="pre">SFRData.create_modflow_sfr2()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.sfrdata.SFRData.crs"><code class="docutils literal notranslate"><span class="pre">SFRData.crs</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.sfrdata.SFRData.crs_units"><code class="docutils literal notranslate"><span class="pre">SFRData.crs_units</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.sfrdata.SFRData.defaults"><code class="docutils literal notranslate"><span class="pre">SFRData.defaults</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.sfrdata.SFRData.dtypes"><code class="docutils literal notranslate"><span class="pre">SFRData.dtypes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.sfrdata.SFRData.export_observations"><code class="docutils literal notranslate"><span class="pre">SFRData.export_observations()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.sfrdata.SFRData.export_outlets"><code class="docutils literal notranslate"><span class="pre">SFRData.export_outlets()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.sfrdata.SFRData.export_routing"><code class="docutils literal notranslate"><span class="pre">SFRData.export_routing()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.sfrdata.SFRData.export_transient_variable"><code class="docutils literal notranslate"><span class="pre">SFRData.export_transient_variable()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.sfrdata.SFRData.from_package"><code class="docutils literal notranslate"><span class="pre">SFRData.from_package()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.sfrdata.SFRData.from_tables"><code class="docutils literal notranslate"><span class="pre">SFRData.from_tables()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.sfrdata.SFRData.from_yaml"><code class="docutils literal notranslate"><span class="pre">SFRData.from_yaml()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.sfrdata.SFRData.get_empty_reach_data"><code class="docutils literal notranslate"><span class="pre">SFRData.get_empty_reach_data()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.sfrdata.SFRData.get_empty_segment_data"><code class="docutils literal notranslate"><span class="pre">SFRData.get_empty_segment_data()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.sfrdata.SFRData.get_slopes"><code class="docutils literal notranslate"><span class="pre">SFRData.get_slopes()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.sfrdata.SFRData.interpolate_to_reaches"><code class="docutils literal notranslate"><span class="pre">SFRData.interpolate_to_reaches()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.sfrdata.SFRData.isfropt0_to_1"><code class="docutils literal notranslate"><span class="pre">SFRData.isfropt0_to_1()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.sfrdata.SFRData.len_const"><code class="docutils literal notranslate"><span class="pre">SFRData.len_const</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.sfrdata.SFRData.mf5names"><code class="docutils literal notranslate"><span class="pre">SFRData.mf5names</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.sfrdata.SFRData.mf6names"><code class="docutils literal notranslate"><span class="pre">SFRData.mf6names</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.sfrdata.SFRData.model"><code class="docutils literal notranslate"><span class="pre">SFRData.model</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.sfrdata.SFRData.modflow_sfr2"><code class="docutils literal notranslate"><span class="pre">SFRData.modflow_sfr2</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.sfrdata.SFRData.observations"><code class="docutils literal notranslate"><span class="pre">SFRData.observations</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.sfrdata.SFRData.observations_file"><code class="docutils literal notranslate"><span class="pre">SFRData.observations_file</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.sfrdata.SFRData.package_name"><code class="docutils literal notranslate"><span class="pre">SFRData.package_name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.sfrdata.SFRData.package_type"><code class="docutils literal notranslate"><span class="pre">SFRData.package_type</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.sfrdata.SFRData.paths"><code class="docutils literal notranslate"><span class="pre">SFRData.paths</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.sfrdata.SFRData.period_data"><code class="docutils literal notranslate"><span class="pre">SFRData.period_data</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.sfrdata.SFRData.rdcols"><code class="docutils literal notranslate"><span class="pre">SFRData.rdcols</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.sfrdata.SFRData.reach_paths"><code class="docutils literal notranslate"><span class="pre">SFRData.reach_paths</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.sfrdata.SFRData.repair_outsegs"><code class="docutils literal notranslate"><span class="pre">SFRData.repair_outsegs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.sfrdata.SFRData.reset_reaches"><code class="docutils literal notranslate"><span class="pre">SFRData.reset_reaches()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.sfrdata.SFRData.reset_segments"><code class="docutils literal notranslate"><span class="pre">SFRData.reset_segments()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.sfrdata.SFRData.rno_routing"><code class="docutils literal notranslate"><span class="pre">SFRData.rno_routing</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.sfrdata.SFRData.run_diagnostics"><code class="docutils literal notranslate"><span class="pre">SFRData.run_diagnostics()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.sfrdata.SFRData.sample_reach_elevations"><code class="docutils literal notranslate"><span class="pre">SFRData.sample_reach_elevations()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.sfrdata.SFRData.sdcols"><code class="docutils literal notranslate"><span class="pre">SFRData.sdcols</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.sfrdata.SFRData.segment_routing"><code class="docutils literal notranslate"><span class="pre">SFRData.segment_routing</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.sfrdata.SFRData.set_outreaches"><code class="docutils literal notranslate"><span class="pre">SFRData.set_outreaches()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.sfrdata.SFRData.set_streambed_top_elevations_from_dem"><code class="docutils literal notranslate"><span class="pre">SFRData.set_streambed_top_elevations_from_dem()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.sfrdata.SFRData.structured"><code class="docutils literal notranslate"><span class="pre">SFRData.structured</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.sfrdata.SFRData.time_const"><code class="docutils literal notranslate"><span class="pre">SFRData.time_const</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.sfrdata.SFRData.to_riv"><code class="docutils literal notranslate"><span class="pre">SFRData.to_riv()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.sfrdata.SFRData.write_gage_package"><code class="docutils literal notranslate"><span class="pre">SFRData.write_gage_package()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.sfrdata.SFRData.write_mf6_sfr_obsfile"><code class="docutils literal notranslate"><span class="pre">SFRData.write_mf6_sfr_obsfile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.sfrdata.SFRData.write_package"><code class="docutils literal notranslate"><span class="pre">SFRData.write_package()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.sfrdata.SFRData.write_tables"><code class="docutils literal notranslate"><span class="pre">SFRData.write_tables()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="sfrmaker.utils.html">Utilities Module</a></li>
 </ul>
 </li>
@@ -97,9 +161,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="index.html">Modules</a> &raquo;</li>
-      <li>The SFRData Module</li>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Modules</a></li>
+      <li class="breadcrumb-item active">The SFRData Module</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/api/sfrmaker.sfrdata.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -109,31 +173,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  
-<style>
-/* CSS overrides for sphinx_rtd_theme */
-
-/* 24px margin */
-.nbinput.nblast.container,
-.nboutput.nblast.container {
-    margin-bottom: 19px;  /* padding has already 5px */
-}
-
-/* ... except between code cells! */
-.nblast.container + .nbinput.container {
-    margin-top: -19px;
-}
-
-.admonition > p:before {
-    margin-right: 4px;  /* make room for the exclamation icon */
-}
-
-/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
-.math {
-    text-align: unset;
-}
-</style>
-<section id="module-sfrmaker.sfrdata">
+  <section id="module-sfrmaker.sfrdata">
 <span id="the-sfrdata-module"></span><h1>The SFRData Module<a class="headerlink" href="#module-sfrmaker.sfrdata" title="Permalink to this heading">¶</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="sfrmaker.sfrdata.SFRData">
@@ -673,7 +713,7 @@ by default None</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><dl>
-<dt><strong>gag</strong><span class="classifier"><a class="reference external" href="https://flopy.readthedocs.io/en/latest/source/flopy.modflow.mfgage.html#flopy.modflow.mfgage.ModflowGage" title="(in flopy Documentation v3.3.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">flopy.modflow.mfgage.ModflowGage</span></code></a> instance</span></dt><dd></dd>
+<dt><strong>gag</strong><span class="classifier"><a class="reference external" href="https://flopy.readthedocs.io/en/latest/source/flopy.modflow.mfgage.html#flopy.modflow.mfgage.ModflowGage" title="(in FloPy Documentation v3.5.0.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">flopy.modflow.mfgage.ModflowGage</span></code></a> instance</span></dt><dd></dd>
 </dl>
 </dd>
 </dl>
@@ -692,7 +732,7 @@ by default None</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><dl>
 <dt><strong>filename</strong><span class="classifier">str, optional</span></dt><dd><p>File name for SFR package. By default None, in which
-case the filename of the attached <a class="reference external" href="https://flopy.readthedocs.io/en/latest/source/flopy.modflow.mfsfr2.html#flopy.modflow.mfsfr2.ModflowSfr2" title="(in flopy Documentation v3.3.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">flopy.modflow.mfsfr2.ModflowSfr2</span></code></a> instance
+case the filename of the attached <a class="reference external" href="https://flopy.readthedocs.io/en/latest/source/flopy.modflow.mfsfr2.html#flopy.modflow.mfsfr2.ModflowSfr2" title="(in FloPy Documentation v3.5.0.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">flopy.modflow.mfsfr2.ModflowSfr2</span></code></a> instance
 (<code class="docutils literal notranslate"><span class="pre">SFRData.modflow_sfr2.fn_path</span></code>) is used.</p>
 </dd>
 <dt><strong>version</strong><span class="classifier">str, optional, {‘mf2005’, ‘mfnwt’, ‘mf6’}</span></dt><dd><p>MODFLOW version for the SFR package, by default ‘mf2005’</p>
@@ -770,7 +810,7 @@ and <a class="reference internal" href="#sfrmaker.sfrdata.SFRData.period_data" t
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Aug 01, 2022.
+      <span class="lastupdated">Last updated on Jul 24, 2023.
       </span></p>
   </div>
 

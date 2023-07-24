@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>sfrmaker.sfrdata &mdash; SFRmaker 0.9.1.post12.dev0+g0c5d9bf documentation</title>
+  <title>sfrmaker.sfrdata &mdash; SFRmaker 0.10.0.post16.dev0+gae6eca3 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
@@ -17,6 +17,7 @@
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
         <script src="../../_static/clipboard.min.js"></script>
         <script src="../../_static/copybutton.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -30,14 +31,18 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../index.html" class="icon icon-home"> SFRmaker
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            SFRmaker
           </a>
               <div class="version">
-                0.9.1.post12.dev0+g0c5d9bf
+                0.10.0.post16.dev0+gae6eca3
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -54,6 +59,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../inputs.html"> Input Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../examples.html"> Using SFRmaker with a configuration file</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../notebooks/SFRmaker_demo.html"> Basic Usage in a scripting context</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../notebooks/preprocessing_demo.html"> Preprocessing NHDPlus version 2 data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../notebooks/lines_from_NHDPlusHR_demo.html"> Using SFRmaker with NHDPlus High Resolution</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../concepts.html"> Concepts and methods</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../notebooks/sfrmaker_tools.html"> Stand-alone tools</a></li>
@@ -84,9 +90,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../index.html">Module code</a> &raquo;</li>
-      <li>sfrmaker.sfrdata</li>
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">sfrmaker.sfrdata</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -131,7 +137,7 @@
 
 
 <div class="viewcode-block" id="SFRData"><a class="viewcode-back" href="../../api/sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData">[docs]</a><span class="k">class</span> <span class="nc">SFRData</span><span class="p">(</span><span class="n">DataPackage</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Class for working with a streamflow routing (SFR) dataset,</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class for working with a streamflow routing (SFR) dataset,</span>
 <span class="sd">    where the stream network is discretized into reaches contained</span>
 <span class="sd">    within individual model cells. Reaches may be grouped into segments,</span>
 <span class="sd">    with routing between segments specified, and routing between reaches</span>
@@ -292,12 +298,12 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">_itmuni</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;MODFLOW time units code&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;MODFLOW time units code&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">itmuni_values</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">model_time_units</span><span class="p">]</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">_lenuni</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;MODFLOW length units code&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;MODFLOW length units code&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">lenuni_values</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">model_length_units</span><span class="p">]</span>
 
     <span class="nd">@property</span>
@@ -339,7 +345,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">crs_units</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Length units of the coordinate reference system&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Length units of the coordinate reference system&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">length_units</span>
 
     <span class="nd">@property</span>
@@ -371,7 +377,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">modflow_sfr2</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;A `flopy.modflow.mfsfr2.ModflowSfr2` represenation of the sfr dataset.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;A `flopy.modflow.mfsfr2.ModflowSfr2` represenation of the sfr dataset.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ModflowSfr2</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">create_modflow_sfr2</span><span class="p">()</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ModflowSfr2</span>
@@ -522,7 +528,7 @@
                                    <span class="n">data_column</span><span class="o">=</span><span class="n">data_column</span><span class="p">)</span></div>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">paths</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Dict listing routing sequence for each segment</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Dict listing routing sequence for each segment</span>
 <span class="sd">        in SFR network.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_paths</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_set_paths</span><span class="p">()</span>
@@ -533,7 +539,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">reach_paths</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Dict listing routing sequence for each segment</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Dict listing routing sequence for each segment</span>
 <span class="sd">        in SFR network.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_paths</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_set_reach_paths</span><span class="p">()</span>
@@ -578,14 +584,14 @@
         <span class="k">return</span> <span class="n">segment_routing_changed</span> <span class="o">&amp;</span> <span class="n">reach_routing_changed</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">consistent</span>
 
 <div class="viewcode-block" id="SFRData.repair_outsegs"><a class="viewcode-back" href="../../api/sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.repair_outsegs">[docs]</a>    <span class="k">def</span> <span class="nf">repair_outsegs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Set any outsegs that are not nsegs or lakes to 0 (outlet status)&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set any outsegs that are not nsegs or lakes to 0 (outlet status)&quot;&quot;&quot;</span>
         <span class="n">isasegment</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">in1d</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">segment_data</span><span class="o">.</span><span class="n">outseg</span><span class="p">,</span>
                              <span class="bp">self</span><span class="o">.</span><span class="n">segment_data</span><span class="o">.</span><span class="n">nseg</span><span class="p">)</span>
         <span class="n">isasegment</span> <span class="o">=</span> <span class="n">isasegment</span> <span class="o">|</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">segment_data</span><span class="o">.</span><span class="n">outseg</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">segment_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">~</span><span class="n">isasegment</span><span class="p">,</span> <span class="s1">&#39;outseg&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span></div>
 
 <div class="viewcode-block" id="SFRData.reset_segments"><a class="viewcode-back" href="../../api/sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.reset_segments">[docs]</a>    <span class="k">def</span> <span class="nf">reset_segments</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Reset the segment numbering so that is consecutive,</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Reset the segment numbering so that is consecutive,</span>
 <span class="sd">        starts at 1 and only increases downstream.&quot;&quot;&quot;</span>
         <span class="n">r</span> <span class="o">=</span> <span class="n">renumber_segments</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">segment_data</span><span class="o">.</span><span class="n">nseg</span><span class="p">,</span>
                               <span class="bp">self</span><span class="o">.</span><span class="n">segment_data</span><span class="o">.</span><span class="n">outseg</span><span class="p">)</span>
@@ -600,7 +606,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">reach_data</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;iseg&#39;</span><span class="p">,</span> <span class="s1">&#39;ireach&#39;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="SFRData.reset_reaches"><a class="viewcode-back" href="../../api/sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.reset_reaches">[docs]</a>    <span class="k">def</span> <span class="nf">reset_reaches</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Ensure that the reaches in each segment are numbered</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Ensure that the reaches in each segment are numbered</span>
 <span class="sd">        consecutively starting at 1.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">reach_data</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;iseg&#39;</span><span class="p">,</span> <span class="s1">&#39;ireach&#39;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">reach_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reach_data</span>
@@ -617,7 +623,7 @@
             <span class="n">j</span><span class="o">=</span><span class="mi">2</span></div>
 
 <div class="viewcode-block" id="SFRData.set_outreaches"><a class="viewcode-back" href="../../api/sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.set_outreaches">[docs]</a>    <span class="k">def</span> <span class="nf">set_outreaches</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Determine the outreach for each SFR reach (requires a rno column in reach_data).</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Determine the outreach for each SFR reach (requires a rno column in reach_data).</span>
 <span class="sd">        Uses the segment routing specified for the first stress period to route reaches between segments.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">reach_data</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;iseg&#39;</span><span class="p">,</span> <span class="s1">&#39;ireach&#39;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -653,7 +659,7 @@
         <span class="k">return</span> <span class="n">incols</span> <span class="o">&amp;</span> <span class="n">arevalid</span>
 
     <span class="k">def</span> <span class="nf">_check_reach_routing</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Cursory check of reach routing.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Cursory check of reach routing.&quot;&quot;&quot;</span>
         <span class="n">valid_rnos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_valid_rnos</span><span class="p">()</span>
         <span class="n">non_zero_outreaches</span> <span class="o">=</span> <span class="s1">&#39;outreach&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">reach_data</span><span class="o">.</span><span class="n">columns</span> <span class="o">&amp;</span> \
                               <span class="bp">self</span><span class="o">.</span><span class="n">reach_data</span><span class="o">.</span><span class="n">outreach</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span>
@@ -666,7 +672,7 @@
                            <span class="n">increasing</span><span class="o">=</span><span class="n">increasing</span><span class="p">)</span>
 
 <div class="viewcode-block" id="SFRData.assign_layers"><a class="viewcode-back" href="../../api/sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.assign_layers">[docs]</a>    <span class="k">def</span> <span class="nf">assign_layers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">adjusted_botm_output_path</span><span class="o">=</span><span class="s1">&#39;.&#39;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Assign model layers to SFR reaches, using the discretzation</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Assign model layers to SFR reaches, using the discretzation</span>
 <span class="sd">        package in the attached model. New botm elevations for the model</span>
 <span class="sd">        will be written to a text array file, if any streambed bottoms</span>
 <span class="sd">        are below the model bottom.</span>
@@ -688,25 +694,29 @@
                     <span class="n">idomain</span> <span class="o">=</span> <span class="n">bas6</span><span class="o">.</span><span class="n">ibound</span><span class="o">.</span><span class="n">array</span>
                     
             <span class="n">nlay</span> <span class="o">=</span> <span class="n">botm</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
-            <span class="n">layers</span><span class="p">,</span> <span class="n">new_botm</span> <span class="o">=</span> <span class="n">assign_layers</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reach_data</span><span class="p">,</span> <span class="n">botm_array</span><span class="o">=</span><span class="n">botm</span><span class="p">,</span> <span class="n">idomain</span><span class="o">=</span><span class="n">idomain</span><span class="p">)</span>
+            <span class="n">layers</span><span class="p">,</span> <span class="n">new_botm</span> <span class="o">=</span> <span class="n">assign_layers</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">reach_data</span><span class="p">,</span> <span class="n">botm_array</span><span class="o">=</span><span class="n">botm</span><span class="p">,</span> <span class="n">idomain</span><span class="o">=</span><span class="n">idomain</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">reach_data</span><span class="p">[</span><span class="s1">&#39;k&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">layers</span>
             <span class="k">if</span> <span class="n">new_botm</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">outfiles</span> <span class="o">=</span> <span class="p">[]</span>
-                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_botm</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                    <span class="n">write_layers</span> <span class="o">=</span> <span class="p">[</span><span class="n">nlay</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">write_layers</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">nlay</span><span class="p">))</span>
-                <span class="n">outpath</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">adjusted_botm_output_path</span><span class="p">)</span>
-                <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">write_layers</span><span class="p">:</span>
-                    <span class="n">outfile</span> <span class="o">=</span> <span class="n">outpath</span> <span class="o">/</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">package_name</span><span class="si">}</span><span class="s1">_layer_</span><span class="si">{</span><span class="n">nlay</span><span class="si">}</span><span class="s1">_new_botm_elevations.dat&#39;</span>
-                    <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">outfile</span><span class="p">,</span> <span class="n">new_botm</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%.2f</span><span class="s1">&#39;</span><span class="p">)</span>
-                    <span class="n">outfiles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">outfile</span><span class="p">)</span>
-                <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Sfrmaker pushed some model botm elevations downward&#39;</span>
-                       <span class="s1">&#39;to accomodate streambed bottoms. New botm elevations&#39;</span>
-                       <span class="s1">&#39;written to:</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
-                <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">outfiles</span><span class="p">:</span>
-                    <span class="n">msg</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
-                <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                <span class="n">new_bottom_is_same</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">botm</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span> 
+                                                 <span class="n">new_botm</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span> <span class="n">rtol</span><span class="o">=</span><span class="mf">0.0001</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">new_bottom_is_same</span><span class="p">:</span>
+                    <span class="n">outfiles</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_botm</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                        <span class="n">write_layers</span> <span class="o">=</span> <span class="p">[</span><span class="n">nlay</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">write_layers</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">nlay</span><span class="p">))</span>
+                    <span class="n">outpath</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">adjusted_botm_output_path</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">write_layers</span><span class="p">:</span>
+                        <span class="n">outfile</span> <span class="o">=</span> <span class="n">outpath</span> <span class="o">/</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">package_name</span><span class="si">}</span><span class="s1">_layer_</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1">_new_botm_elevations.dat&#39;</span>
+                        <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">outfile</span><span class="p">,</span> <span class="n">new_botm</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%.2f</span><span class="s1">&#39;</span><span class="p">)</span>
+                        <span class="n">outfiles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">outfile</span><span class="p">)</span>
+                    <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Sfrmaker pushed some model botm elevations downward &#39;</span>
+                        <span class="s1">&#39;to accomodate streambed bottoms. New botm elevations &#39;</span>
+                        <span class="s1">&#39;written to:</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">outfiles</span><span class="p">:</span>
+                        <span class="n">msg</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Need a model instance with a discretization package to assign layers. &#39;</span>
                   <span class="s1">&#39;A model can be assigned to the SFRData.model attribute.&#39;</span><span class="p">)</span></div>
@@ -740,7 +750,7 @@
             <span class="k">if</span> <span class="n">model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">nper</span> <span class="o">=</span> <span class="mi">1</span>
                 <span class="k">if</span> <span class="s1">&#39;tdis&#39;</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">package_key_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-                    <span class="n">tdis</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">package_key_dict</span><span class="p">[</span><span class="s1">&#39;tdis&#39;</span><span class="p">]</span>
+                    <span class="n">tdis</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">tdis</span>
                     <span class="n">nper</span> <span class="o">=</span> <span class="n">tdis</span><span class="o">.</span><span class="n">nper</span><span class="o">.</span><span class="n">array</span>
                 <span class="k">if</span> <span class="s1">&#39;dis&#39;</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">package_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
                     <span class="n">dis</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">dis</span>
@@ -804,7 +814,7 @@
         <span class="k">if</span> <span class="n">model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">model</span><span class="o">.</span><span class="n">version</span> <span class="o">==</span> <span class="s1">&#39;mf6&#39;</span><span class="p">:</span>
             <span class="n">m</span> <span class="o">=</span> <span class="n">model</span>
             <span class="k">if</span> <span class="s1">&#39;tdis&#39;</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">package_key_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-                <span class="n">tdis</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">package_key_dict</span><span class="p">[</span><span class="s1">&#39;tdis&#39;</span><span class="p">]</span>
+                <span class="n">tdis</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">tdis</span>
                 <span class="n">nper</span> <span class="o">=</span> <span class="n">tdis</span><span class="o">.</span><span class="n">nper</span><span class="o">.</span><span class="n">array</span>
         <span class="c1"># create an flopy mf2005 model instance attached to modflow_sfr2 object</span>
         <span class="c1"># this is a parallel model instance to self.model, that is only</span>
@@ -919,7 +929,7 @@
             <span class="n">exists_already</span> <span class="o">=</span> <span class="p">{</span><span class="n">obs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">obs</span> <span class="ow">in</span> <span class="n">existing_obs</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">new_obs</span><span class="p">)}</span>
             <span class="n">exists_already</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_observations</span><span class="p">[</span><span class="s1">&#39;obsname&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">exists_already</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_observations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_observations</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">~</span><span class="n">exists_already</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_observations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">added_obs</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_observations</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="p">,</span> <span class="n">added_obs</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">df</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_observations</span><span class="p">,</span> <span class="n">added_obs</span><span class="p">:</span>
             <span class="c1"># enforce dtypes (pandas doesn&#39;t allow an empty dataframe</span>
@@ -929,7 +939,7 @@
         <span class="k">return</span> <span class="n">added_obs</span></div>
 
 <div class="viewcode-block" id="SFRData.interpolate_to_reaches"><a class="viewcode-back" href="../../api/sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.interpolate_to_reaches">[docs]</a>    <span class="k">def</span> <span class="nf">interpolate_to_reaches</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">segvar1</span><span class="p">,</span> <span class="n">segvar2</span><span class="p">,</span> <span class="n">per</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Interpolate values in datasets 6b and 6c to each reach in stream segment</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Interpolate values in datasets 6b and 6c to each reach in stream segment</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -968,7 +978,7 @@
                                       <span class="p">)</span></div>
 
 <div class="viewcode-block" id="SFRData.isfropt0_to_1"><a class="viewcode-back" href="../../api/sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.isfropt0_to_1">[docs]</a>    <span class="k">def</span> <span class="nf">isfropt0_to_1</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;transfer isfropt=0 segment properties to reaches,</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;transfer isfropt=0 segment properties to reaches,</span>
 <span class="sd">        using linear interpolation.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">snames</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;strtop&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;elevup&#39;</span><span class="p">,</span> <span class="s1">&#39;elevdn&#39;</span><span class="p">),</span>
@@ -990,7 +1000,7 @@
                                 <span class="n">buffer_distance</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
                                 <span class="n">smooth</span><span class="o">=</span><span class="kc">True</span>
                                 <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Computes zonal statistics on a raster for SFR reaches, using</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Computes zonal statistics on a raster for SFR reaches, using</span>
 <span class="sd">        either buffer polygons around the reach LineStrings, or the model</span>
 <span class="sd">        grid cell polygons containing each reach.</span>
 
@@ -1069,7 +1079,7 @@
                                               <span class="n">dem</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                                               <span class="n">method</span><span class="o">=</span><span class="s1">&#39;buffers&#39;</span><span class="p">,</span>
                                               <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Set streambed top elevations from a DEM raster.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set streambed top elevations from a DEM raster.</span>
 <span class="sd">        Runs sfrdata.sample_reach_elevations</span>
 
 <span class="sd">        Parameters</span>
@@ -1107,7 +1117,7 @@
 
 <div class="viewcode-block" id="SFRData.get_slopes"><a class="viewcode-back" href="../../api/sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.get_slopes">[docs]</a>    <span class="k">def</span> <span class="nf">get_slopes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">default_slope</span><span class="o">=</span><span class="mf">0.001</span><span class="p">,</span> <span class="n">minimum_slope</span><span class="o">=</span><span class="mf">0.0001</span><span class="p">,</span>
                    <span class="n">maximum_slope</span><span class="o">=</span><span class="mf">1.</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Compute slopes by reach using values in strtop (streambed top) and rchlen (reach length)</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute slopes by reach using values in strtop (streambed top) and rchlen (reach length)</span>
 <span class="sd">        columns of reach_data. The slope for a reach n is computed as strtop(n+1) - strtop(n) / rchlen(n).</span>
 <span class="sd">        Slopes for outlet reaches are set equal to a default value (default_slope).</span>
 <span class="sd">        Populates the slope column in reach_data.</span>
@@ -1145,7 +1155,7 @@
                      <span class="n">sim_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">model_ws</span><span class="o">=</span><span class="s1">&#39;.&#39;</span><span class="p">,</span>
                      <span class="n">version</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">model_name</span><span class="o">=</span><span class="s1">&#39;model&#39;</span><span class="p">,</span> <span class="n">package_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                      <span class="n">linework</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Read SFR package file</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read SFR package file</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -1211,7 +1221,7 @@
 <div class="viewcode-block" id="SFRData.from_yaml"><a class="viewcode-back" href="../../api/sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.from_yaml">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_yaml</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">config_file</span><span class="p">,</span> <span class="n">package_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">output_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                   <span class="n">write_output</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Create an SFRData instance from a yaml-format configuration file.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create an SFRData instance from a yaml-format configuration file.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -1234,7 +1244,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># load the configuration file</span>
         <span class="n">wd</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">config_file</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">config_file</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">config_file</span><span class="p">,</span> <span class="n">Path</span><span class="p">):</span>
             <span class="c1"># change the cwd to the config file path</span>
             <span class="n">path</span><span class="p">,</span> <span class="n">config_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">config_file</span><span class="p">)</span>
             <span class="n">path</span> <span class="o">=</span> <span class="n">path</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="s1">&#39;.&#39;</span>
@@ -1456,7 +1466,7 @@
         <span class="k">return</span> <span class="n">sfrdata</span></div>
 
 <div class="viewcode-block" id="SFRData.to_riv"><a class="viewcode-back" href="../../api/sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.to_riv">[docs]</a>    <span class="k">def</span> <span class="nf">to_riv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">segments</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">rno</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">line_ids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">drop_in_sfr</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Cast one or more reaches to a RivData instance,</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Cast one or more reaches to a RivData instance,</span>
 <span class="sd">        which can then be written as input to the MODFLOW RIV package.</span>
 
 <span class="sd">        Parameters</span>
@@ -1576,7 +1586,7 @@
         <span class="k">return</span> <span class="n">riv</span></div>
 
 <div class="viewcode-block" id="SFRData.run_diagnostics"><a class="viewcode-back" href="../../api/sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.run_diagnostics">[docs]</a>    <span class="k">def</span> <span class="nf">run_diagnostics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">checkfile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Run the Flopy SFR diagnostic suite.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Run the Flopy SFR diagnostic suite.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -1600,7 +1610,7 @@
                       <span class="n">write_observations_input</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                       <span class="n">external_files_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">gage_starting_unit_number</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                       <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Write an SFR package input file.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Write an SFR package input file.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -1708,7 +1718,7 @@
             <span class="n">sfr6</span><span class="o">.</span><span class="n">write_file</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="p">,</span> <span class="n">external_files_path</span><span class="o">=</span><span class="n">external_files_path</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="SFRData.write_tables"><a class="viewcode-back" href="../../api/sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.write_tables">[docs]</a>    <span class="k">def</span> <span class="nf">write_tables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">basename</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Write :py:attr:`~SFRData.reach_data`, :py:attr:`~SFRData.segment_data`,</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Write :py:attr:`~SFRData.reach_data`, :py:attr:`~SFRData.segment_data`,</span>
 <span class="sd">        and :py:attr:`~SFRData.period_data` (if populated) to csv files. </span>
 
 <span class="sd">        Parameters</span>
@@ -1740,7 +1750,7 @@
 <div class="viewcode-block" id="SFRData.write_gage_package"><a class="viewcode-back" href="../../api/sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.write_gage_package">[docs]</a>    <span class="k">def</span> <span class="nf">write_gage_package</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sitename_col</span><span class="o">=</span><span class="s1">&#39;obsname&#39;</span><span class="p">,</span>
                            <span class="n">gage_package_unit</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span>
                            <span class="n">gage_starting_unit_number</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Write observation input for the MODFLOW-2005 Gage Package.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Write observation input for the MODFLOW-2005 Gage Package.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -1795,7 +1805,7 @@
                                      <span class="n">sfr_output_filename</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="SFRData.export_outlets"><a class="viewcode-back" href="../../api/sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.export_outlets">[docs]</a>    <span class="k">def</span> <span class="nf">export_outlets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Export shapefile of model cells with stream reaches.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Export shapefile of model cells with stream reaches.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">filename</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">filename</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">package_name</span> <span class="o">+</span> <span class="s1">&#39;_sfr_outlets.shp&#39;</span>
         <span class="n">nodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reach_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">reach_data</span><span class="o">.</span><span class="n">outreach</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;node&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
@@ -1803,7 +1813,7 @@
                           <span class="n">nodes</span><span class="o">=</span><span class="n">nodes</span><span class="p">,</span> <span class="n">geomtype</span><span class="o">=</span><span class="s1">&#39;point&#39;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="SFRData.export_routing"><a class="viewcode-back" href="../../api/sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.export_routing">[docs]</a>    <span class="k">def</span> <span class="nf">export_routing</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Export linework shapefile showing all routing connections between SFR reaches.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Export linework shapefile showing all routing connections between SFR reaches.</span>
 <span class="sd">        A length field containing the distance between connected reaches</span>
 <span class="sd">        can be used to filter for the longest connections in a GIS.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1836,7 +1846,7 @@
         <span class="n">df2shp</span><span class="p">(</span><span class="n">rd</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="SFRData.export_transient_variable"><a class="viewcode-back" href="../../api/sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.export_transient_variable">[docs]</a>    <span class="k">def</span> <span class="nf">export_transient_variable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">varname</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Export point shapefile showing locations with</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Export point shapefile showing locations with</span>
 <span class="sd">        a given segment_data variable applied. For example, segments</span>
 <span class="sd">        where streamflow is entering or leaving the upstream end of a stream segment (FLOW)</span>
 <span class="sd">        or where RUNOFF is applied. Cell centroids of the first reach of segments with</span>
@@ -1902,7 +1912,7 @@
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Aug 01, 2022.
+      <span class="lastupdated">Last updated on Jul 24, 2023.
       </span></p>
   </div>
 

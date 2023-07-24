@@ -13,10 +13,10 @@
    "execution_count": 1,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-08-01T15:57:51.740944Z",
-     "iopub.status.busy": "2022-08-01T15:57:51.740267Z",
-     "iopub.status.idle": "2022-08-01T15:57:53.152319Z",
-     "shell.execute_reply": "2022-08-01T15:57:53.151513Z"
+     "iopub.execute_input": "2023-07-24T20:56:58.585536Z",
+     "iopub.status.busy": "2023-07-24T20:56:58.585359Z",
+     "iopub.status.idle": "2023-07-24T20:56:59.687374Z",
+     "shell.execute_reply": "2023-07-24T20:56:59.686420Z"
     }
    },
    "outputs": [],
@@ -43,10 +43,10 @@
    "execution_count": 2,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-08-01T15:57:53.156844Z",
-     "iopub.status.busy": "2022-08-01T15:57:53.156246Z",
-     "iopub.status.idle": "2022-08-01T15:57:53.159799Z",
-     "shell.execute_reply": "2022-08-01T15:57:53.159255Z"
+     "iopub.execute_input": "2023-07-24T20:56:59.690572Z",
+     "iopub.status.busy": "2023-07-24T20:56:59.690021Z",
+     "iopub.status.idle": "2023-07-24T20:56:59.694587Z",
+     "shell.execute_reply": "2023-07-24T20:56:59.693561Z"
     }
    },
    "outputs": [],
@@ -66,10 +66,10 @@
    "execution_count": 3,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-08-01T15:57:53.162769Z",
-     "iopub.status.busy": "2022-08-01T15:57:53.162366Z",
-     "iopub.status.idle": "2022-08-01T15:57:53.165655Z",
-     "shell.execute_reply": "2022-08-01T15:57:53.165052Z"
+     "iopub.execute_input": "2023-07-24T20:56:59.696847Z",
+     "iopub.status.busy": "2023-07-24T20:56:59.696559Z",
+     "iopub.status.idle": "2023-07-24T20:56:59.699167Z",
+     "shell.execute_reply": "2023-07-24T20:56:59.698640Z"
     }
    },
    "outputs": [],
@@ -93,10 +93,10 @@
    "execution_count": 4,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-08-01T15:57:53.168675Z",
-     "iopub.status.busy": "2022-08-01T15:57:53.168193Z",
-     "iopub.status.idle": "2022-08-01T15:57:53.297389Z",
-     "shell.execute_reply": "2022-08-01T15:57:53.296689Z"
+     "iopub.execute_input": "2023-07-24T20:56:59.701343Z",
+     "iopub.status.busy": "2023-07-24T20:56:59.701064Z",
+     "iopub.status.idle": "2023-07-24T20:56:59.922248Z",
+     "shell.execute_reply": "2023-07-24T20:56:59.921795Z"
     }
    },
    "outputs": [
@@ -109,20 +109,10 @@
       "for basins:\n",
       "../tylerforks/NHDPlus/\n",
       "\n",
-      "reading ../tylerforks/NHDPlus/NHDSnapshot/Hydrography/NHDFlowline.shp...\n",
-      "filtering on bounding box -90.624482596925, 46.37886827710284, -90.4625592199325, 46.45832567355404...\n",
-      "--> building dataframe... (may take a while for large shapefiles)\n",
-      "\n",
-      "reading ../tylerforks/NHDPlus/NHDPlusAttributes/PlusFlowlineVAA.dbf...\n",
-      "--> building dataframe... (may take a while for large shapefiles)\n",
-      "\n",
       "reading ../tylerforks/NHDPlus/NHDPlusAttributes/PlusFlow.dbf...\n",
       "--> building dataframe... (may take a while for large shapefiles)\n",
       "\n",
-      "reading ../tylerforks/NHDPlus/NHDPlusAttributes/elevslope.dbf...\n",
-      "--> building dataframe... (may take a while for large shapefiles)\n",
-      "\n",
-      "load finished in 0.08s\n",
+      "load finished in 0.17s\n",
       "\n",
       "Getting routing information from NHDPlus Plusflow table...\n",
       "finished in 0.03s\n",
@@ -132,7 +122,7 @@
    ],
    "source": [
     "lns = sfrmaker.Lines.from_nhdplus_v2(NHDPlus_paths='../tylerforks/NHDPlus/',\n",
-    "                            filter='../tylerforks/grid.shp')"
+    "                            bbox_filter='../tylerforks/grid.shp')"
    ]
   },
   {
@@ -147,10 +137,10 @@
    "execution_count": 5,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-08-01T15:57:53.335849Z",
-     "iopub.status.busy": "2022-08-01T15:57:53.335332Z",
-     "iopub.status.idle": "2022-08-01T15:57:53.423170Z",
-     "shell.execute_reply": "2022-08-01T15:57:53.422475Z"
+     "iopub.execute_input": "2023-07-24T20:56:59.946140Z",
+     "iopub.status.busy": "2023-07-24T20:56:59.945623Z",
+     "iopub.status.idle": "2023-07-24T20:57:00.107347Z",
+     "shell.execute_reply": "2023-07-24T20:57:00.106745Z"
     }
    },
    "outputs": [
@@ -161,20 +151,10 @@
       "\n",
       "loading NHDPlus v2 hydrography data...\n",
       "\n",
-      "reading ../tylerforks/NHDPlus/NHDSnapshot/Hydrography/NHDFlowline.shp...\n",
-      "filtering on bounding box -90.625, 46.3788, -90.4634, 46.4586...\n",
-      "--> building dataframe... (may take a while for large shapefiles)\n",
-      "\n",
-      "reading ../tylerforks/NHDPlus/NHDPlusAttributes/PlusFlowlineVAA.dbf...\n",
-      "--> building dataframe... (may take a while for large shapefiles)\n",
-      "\n",
       "reading ../tylerforks/NHDPlus/NHDPlusAttributes/PlusFlow.dbf...\n",
       "--> building dataframe... (may take a while for large shapefiles)\n",
       "\n",
-      "reading ../tylerforks/NHDPlus/NHDPlusAttributes/elevslope.dbf...\n",
-      "--> building dataframe... (may take a while for large shapefiles)\n",
-      "\n",
-      "load finished in 0.04s\n",
+      "load finished in 0.12s\n",
       "\n",
       "Getting routing information from NHDPlus Plusflow table...\n",
       "finished in 0.03s\n",
@@ -187,7 +167,7 @@
     "                                       PlusFlowlineVAA='../tylerforks/NHDPlus/NHDPlusAttributes/PlusFlowlineVAA.dbf',\n",
     "                                       PlusFlow='../tylerforks/NHDPlus/NHDPlusAttributes/PlusFlow.dbf',\n",
     "                                       elevslope='../tylerforks/NHDPlus/NHDPlusAttributes/elevslope.dbf',\n",
-    "                                       filter=(-90.625, 46.3788, -90.4634, 46.4586))"
+    "                                       bbox_filter=(-90.625, 46.3788, -90.4634, 46.4586))"
    ]
   },
   {
@@ -203,23 +183,13 @@
    "execution_count": 6,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-08-01T15:57:53.426457Z",
-     "iopub.status.busy": "2022-08-01T15:57:53.426091Z",
-     "iopub.status.idle": "2022-08-01T15:57:57.679798Z",
-     "shell.execute_reply": "2022-08-01T15:57:57.678994Z"
+     "iopub.execute_input": "2023-07-24T20:57:00.109842Z",
+     "iopub.status.busy": "2023-07-24T20:57:00.109651Z",
+     "iopub.status.idle": "2023-07-24T20:57:18.288850Z",
+     "shell.execute_reply": "2023-07-24T20:57:18.288278Z"
     }
    },
-   "outputs": [
-    {
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "\n",
-      "reading ../meras/flowlines.shp...\n",
-      "--> building dataframe... (may take a while for large shapefiles)\n"
-     ]
-    }
-   ],
+   "outputs": [],
    "source": [
     "custom_lines = sfrmaker.Lines.from_shapefile(shapefile='../meras/flowlines.shp',\n",
     "                                             id_column='COMID',  # arguments to sfrmaker.Lines.from_shapefile\n",
@@ -251,10 +221,10 @@
    "execution_count": 7,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-08-01T15:57:57.684103Z",
-     "iopub.status.busy": "2022-08-01T15:57:57.683609Z",
-     "iopub.status.idle": "2022-08-01T15:57:57.688424Z",
-     "shell.execute_reply": "2022-08-01T15:57:57.687562Z"
+     "iopub.execute_input": "2023-07-24T20:57:18.291732Z",
+     "iopub.status.busy": "2023-07-24T20:57:18.291446Z",
+     "iopub.status.idle": "2023-07-24T20:57:18.301425Z",
+     "shell.execute_reply": "2023-07-24T20:57:18.300587Z"
     }
    },
    "outputs": [],
@@ -285,10 +255,10 @@
    "execution_count": 8,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-08-01T15:57:57.691624Z",
-     "iopub.status.busy": "2022-08-01T15:57:57.691230Z",
-     "iopub.status.idle": "2022-08-01T15:57:58.532745Z",
-     "shell.execute_reply": "2022-08-01T15:57:58.531648Z"
+     "iopub.execute_input": "2023-07-24T20:57:18.303596Z",
+     "iopub.status.busy": "2023-07-24T20:57:18.303406Z",
+     "iopub.status.idle": "2023-07-24T20:57:20.246493Z",
+     "shell.execute_reply": "2023-07-24T20:57:20.245661Z"
     }
    },
    "outputs": [
@@ -325,17 +295,17 @@
    "execution_count": 9,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-08-01T15:57:58.535926Z",
-     "iopub.status.busy": "2022-08-01T15:57:58.535680Z",
-     "iopub.status.idle": "2022-08-01T15:57:58.651967Z",
-     "shell.execute_reply": "2022-08-01T15:57:58.651397Z"
+     "iopub.execute_input": "2023-07-24T20:57:20.249197Z",
+     "iopub.status.busy": "2023-07-24T20:57:20.248645Z",
+     "iopub.status.idle": "2023-07-24T20:57:20.390789Z",
+     "shell.execute_reply": "2023-07-24T20:57:20.389989Z"
     }
    },
    "outputs": [
     {
      "data": {
       "text/plain": [
-       "<matplotlib.image.AxesImage at 0x7fbc8cd43b50>"
+       "<matplotlib.image.AxesImage at 0x7f5e3b6c41d0>"
       ]
      },
      "execution_count": 9,
@@ -344,14 +314,12 @@
     },
     {
      "data": {
-      "image/png": "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\n",
+      "image/png": "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",
       "text/plain": [
-       "<Figure size 432x288 with 1 Axes>"
+       "<Figure size 640x480 with 1 Axes>"
       ]
      },
-     "metadata": {
-      "needs_background": "light"
-     },
+     "metadata": {},
      "output_type": "display_data"
     }
    ],
@@ -380,10 +348,10 @@
    "execution_count": 10,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-08-01T15:57:58.655393Z",
-     "iopub.status.busy": "2022-08-01T15:57:58.654732Z",
-     "iopub.status.idle": "2022-08-01T15:57:58.761829Z",
-     "shell.execute_reply": "2022-08-01T15:57:58.760698Z"
+     "iopub.execute_input": "2023-07-24T20:57:20.393131Z",
+     "iopub.status.busy": "2023-07-24T20:57:20.392950Z",
+     "iopub.status.idle": "2023-07-24T20:57:20.494415Z",
+     "shell.execute_reply": "2023-07-24T20:57:20.493917Z"
     }
    },
    "outputs": [
@@ -418,10 +386,10 @@
    "execution_count": 11,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-08-01T15:57:58.765183Z",
-     "iopub.status.busy": "2022-08-01T15:57:58.764790Z",
-     "iopub.status.idle": "2022-08-01T15:58:01.612803Z",
-     "shell.execute_reply": "2022-08-01T15:58:01.612067Z"
+     "iopub.execute_input": "2023-07-24T20:57:20.497086Z",
+     "iopub.status.busy": "2023-07-24T20:57:20.496713Z",
+     "iopub.status.idle": "2023-07-24T20:57:23.174713Z",
+     "shell.execute_reply": "2023-07-24T20:57:23.174113Z"
     }
    },
    "outputs": [
@@ -430,12 +398,12 @@
      "output_type": "stream",
      "text": [
       "\n",
-      "SFRmaker version 0.9.1.post12.dev0+g0c5d9bf\n",
+      "SFRmaker version 0.10.0.post16.dev0+gae6eca3\n",
       "\n",
       "Creating sfr dataset...\n",
       "\n",
       "Creating grid class instance from flopy Grid instance...\n",
-      "grid class created in 0.42s\n",
+      "grid class created in 0.49s\n",
       "\n",
       "Model grid information\n",
       "structured grid\n",
@@ -449,7 +417,6 @@
       "active area defined by: all cells\n",
       "\n",
       "MODFLOW 5 layer(s) 111 row(s) 160 column(s) 1 stress period(s)\n",
-      "Warning: No length units specified in CRS for input LineStrings or length units not recognizeddefaulting to meters.\n",
       "\n",
       "reprojecting hydrography from\n",
       "EPSG:4269\n",
@@ -466,18 +433,18 @@
       "Intersecting 42 flowlines with 17,760 grid cells...\n",
       "\n",
       "Building spatial index...\n",
-      "finished in 1.86s\n",
+      "finished in 1.14s\n",
       "\n",
       "Intersecting 42 features...\n",
       "42\n",
-      "finished in 0.10s\n",
+      "finished in 0.21s\n",
       "\n",
       "Setting up reach data... (may take a few minutes for large grids)\n",
-      "finished in 0.29s\n",
+      "finished in 0.62s\n",
       "\n",
       "Computing widths...\n",
       "\n",
-      "Dropping 46 reaches with length < 12.50 feet...\n",
+      "Dropping 48 reaches with length < 12.50 feet...\n",
       "\n",
       "Repairing routing connections...\n",
       "enforcing best segment numbering...\n",
@@ -495,7 +462,7 @@
       "active area defined by: all cells\n",
       "\n",
       "\n",
-      "Time to create sfr dataset: 2.84s\n",
+      "Time to create sfr dataset: 2.67s\n",
       "\n"
      ]
     }
@@ -517,10 +484,26 @@
    "execution_count": 12,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-08-01T15:58:01.616586Z",
-     "iopub.status.busy": "2022-08-01T15:58:01.616189Z",
-     "iopub.status.idle": "2022-08-01T15:58:01.635993Z",
-     "shell.execute_reply": "2022-08-01T15:58:01.635322Z"
+     "iopub.execute_input": "2023-07-24T20:57:23.177079Z",
+     "iopub.status.busy": "2023-07-24T20:57:23.176783Z",
+     "iopub.status.idle": "2023-07-24T20:57:23.180211Z",
+     "shell.execute_reply": "2023-07-24T20:57:23.179658Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "sfrdata.reach_data.loc[sfrdata.reach_data['rno'] == 1, 'strhc1'] = 5"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 13,
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2023-07-24T20:57:23.182359Z",
+     "iopub.status.busy": "2023-07-24T20:57:23.182077Z",
+     "iopub.status.idle": "2023-07-24T20:57:23.197629Z",
+     "shell.execute_reply": "2023-07-24T20:57:23.197128Z"
     }
    },
    "outputs": [
@@ -570,7 +553,7 @@
        "  </thead>\n",
        "  <tbody>\n",
        "    <tr>\n",
-       "      <th>512</th>\n",
+       "      <th>511</th>\n",
        "      <td>1</td>\n",
        "      <td>17714</td>\n",
        "      <td>0</td>\n",
@@ -578,9 +561,9 @@
        "      <td>114</td>\n",
        "      <td>1</td>\n",
        "      <td>1</td>\n",
-       "      <td>208.786560</td>\n",
-       "      <td>1.0</td>\n",
-       "      <td>0.0001</td>\n",
+       "      <td>208.809647</td>\n",
+       "      <td>1.000000</td>\n",
+       "      <td>0.127778</td>\n",
        "      <td>...</td>\n",
        "      <td>0.0</td>\n",
        "      <td>0.0</td>\n",
@@ -588,13 +571,13 @@
        "      <td>0.0</td>\n",
        "      <td>2</td>\n",
        "      <td>4</td>\n",
-       "      <td>NaN</td>\n",
+       "      <td>31.822592</td>\n",
        "      <td>1815013</td>\n",
        "      <td>None</td>\n",
-       "      <td>LINESTRING Z (691394.6266907752 5139052 0, 691...</td>\n",
+       "      <td>LINESTRING (691394.6392124404 5139052, 691410....</td>\n",
        "    </tr>\n",
        "    <tr>\n",
-       "      <th>513</th>\n",
+       "      <th>512</th>\n",
        "      <td>2</td>\n",
        "      <td>17715</td>\n",
        "      <td>0</td>\n",
@@ -602,9 +585,9 @@
        "      <td>115</td>\n",
        "      <td>1</td>\n",
        "      <td>2</td>\n",
-       "      <td>294.110107</td>\n",
-       "      <td>1.0</td>\n",
-       "      <td>0.0001</td>\n",
+       "      <td>294.098969</td>\n",
+       "      <td>1.261246</td>\n",
+       "      <td>0.060562</td>\n",
        "      <td>...</td>\n",
        "      <td>0.0</td>\n",
        "      <td>0.0</td>\n",
@@ -612,13 +595,13 @@
        "      <td>0.0</td>\n",
        "      <td>3</td>\n",
        "      <td>4</td>\n",
-       "      <td>NaN</td>\n",
+       "      <td>108.465866</td>\n",
        "      <td>1815013</td>\n",
        "      <td>None</td>\n",
-       "      <td>LINESTRING Z (691451 5139078.992958551 0, 6914...</td>\n",
+       "      <td>LINESTRING (691451 5139079.029146607, 691471.0...</td>\n",
        "    </tr>\n",
        "    <tr>\n",
-       "      <th>514</th>\n",
+       "      <th>513</th>\n",
        "      <td>3</td>\n",
        "      <td>17716</td>\n",
        "      <td>0</td>\n",
@@ -626,9 +609,9 @@
        "      <td>116</td>\n",
        "      <td>1</td>\n",
        "      <td>3</td>\n",
-       "      <td>41.835766</td>\n",
-       "      <td>1.0</td>\n",
-       "      <td>0.0001</td>\n",
+       "      <td>41.620331</td>\n",
+       "      <td>1.531958</td>\n",
+       "      <td>0.333961</td>\n",
        "      <td>...</td>\n",
        "      <td>0.0</td>\n",
        "      <td>0.0</td>\n",
@@ -636,13 +619,13 @@
        "      <td>0.0</td>\n",
        "      <td>4</td>\n",
        "      <td>4</td>\n",
-       "      <td>NaN</td>\n",
+       "      <td>159.629486</td>\n",
        "      <td>1815013</td>\n",
        "      <td>None</td>\n",
-       "      <td>LINESTRING Z (691527.2 5139123.038141218 0, 69...</td>\n",
+       "      <td>LINESTRING (691527.2 5139123.064664635, 691538...</td>\n",
        "    </tr>\n",
        "    <tr>\n",
-       "      <th>515</th>\n",
+       "      <th>514</th>\n",
        "      <td>4</td>\n",
        "      <td>17556</td>\n",
        "      <td>0</td>\n",
@@ -650,9 +633,9 @@
        "      <td>116</td>\n",
        "      <td>1</td>\n",
        "      <td>4</td>\n",
-       "      <td>220.128555</td>\n",
-       "      <td>1.0</td>\n",
-       "      <td>0.0001</td>\n",
+       "      <td>220.368561</td>\n",
+       "      <td>1.714090</td>\n",
+       "      <td>0.092204</td>\n",
        "      <td>...</td>\n",
        "      <td>0.0</td>\n",
        "      <td>0.0</td>\n",
@@ -660,13 +643,13 @@
        "      <td>0.0</td>\n",
        "      <td>5</td>\n",
        "      <td>4</td>\n",
-       "      <td>NaN</td>\n",
+       "      <td>199.556595</td>\n",
        "      <td>1815013</td>\n",
        "      <td>None</td>\n",
-       "      <td>LINESTRING Z (691538.8600608129 5139128.2 0, 6...</td>\n",
+       "      <td>LINESTRING (691538.79999182 5139128.2, 691563....</td>\n",
        "    </tr>\n",
        "    <tr>\n",
-       "      <th>516</th>\n",
+       "      <th>515</th>\n",
        "      <td>5</td>\n",
        "      <td>17557</td>\n",
        "      <td>0</td>\n",
@@ -674,9 +657,9 @@
        "      <td>117</td>\n",
        "      <td>1</td>\n",
        "      <td>5</td>\n",
-       "      <td>161.999496</td>\n",
-       "      <td>1.0</td>\n",
-       "      <td>0.0001</td>\n",
+       "      <td>162.617142</td>\n",
+       "      <td>1.950306</td>\n",
+       "      <td>0.097331</td>\n",
        "      <td>...</td>\n",
        "      <td>0.0</td>\n",
        "      <td>0.0</td>\n",
@@ -684,10 +667,10 @@
        "      <td>0.0</td>\n",
        "      <td>6</td>\n",
        "      <td>4</td>\n",
-       "      <td>NaN</td>\n",
+       "      <td>257.923615</td>\n",
        "      <td>1815013</td>\n",
        "      <td>None</td>\n",
-       "      <td>LINESTRING Z (691603.4 5139143.608205146 0, 69...</td>\n",
+       "      <td>LINESTRING (691603.4 5139143.663010655, 691624...</td>\n",
        "    </tr>\n",
        "  </tbody>\n",
        "</table>\n",
@@ -695,31 +678,31 @@
        "</div>"
       ],
       "text/plain": [
-       "     rno   node  k    i    j  iseg  ireach      rchlen  width   slope  ...  \\\n",
-       "512    1  17714  0  110  114     1       1  208.786560    1.0  0.0001  ...   \n",
-       "513    2  17715  0  110  115     1       2  294.110107    1.0  0.0001  ...   \n",
-       "514    3  17716  0  110  116     1       3   41.835766    1.0  0.0001  ...   \n",
-       "515    4  17556  0  109  116     1       4  220.128555    1.0  0.0001  ...   \n",
-       "516    5  17557  0  109  117     1       5  161.999496    1.0  0.0001  ...   \n",
+       "     rno   node  k    i    j  iseg  ireach      rchlen     width     slope  \\\n",
+       "511    1  17714  0  110  114     1       1  208.809647  1.000000  0.127778   \n",
+       "512    2  17715  0  110  115     1       2  294.098969  1.261246  0.060562   \n",
+       "513    3  17716  0  110  116     1       3   41.620331  1.531958  0.333961   \n",
+       "514    4  17556  0  109  116     1       4  220.368561  1.714090  0.092204   \n",
+       "515    5  17557  0  109  117     1       5  162.617142  1.950306  0.097331   \n",
        "\n",
-       "     thts  thti  eps  uhc  outreach  outseg  asum  line_id  name  \\\n",
-       "512   0.0   0.0  0.0  0.0         2       4   NaN  1815013  None   \n",
-       "513   0.0   0.0  0.0  0.0         3       4   NaN  1815013  None   \n",
-       "514   0.0   0.0  0.0  0.0         4       4   NaN  1815013  None   \n",
-       "515   0.0   0.0  0.0  0.0         5       4   NaN  1815013  None   \n",
-       "516   0.0   0.0  0.0  0.0         6       4   NaN  1815013  None   \n",
+       "     ...  thts  thti  eps  uhc  outreach  outseg        asum  line_id  name  \\\n",
+       "511  ...   0.0   0.0  0.0  0.0         2       4   31.822592  1815013  None   \n",
+       "512  ...   0.0   0.0  0.0  0.0         3       4  108.465866  1815013  None   \n",
+       "513  ...   0.0   0.0  0.0  0.0         4       4  159.629486  1815013  None   \n",
+       "514  ...   0.0   0.0  0.0  0.0         5       4  199.556595  1815013  None   \n",
+       "515  ...   0.0   0.0  0.0  0.0         6       4  257.923615  1815013  None   \n",
        "\n",
        "                                              geometry  \n",
-       "512  LINESTRING Z (691394.6266907752 5139052 0, 691...  \n",
-       "513  LINESTRING Z (691451 5139078.992958551 0, 6914...  \n",
-       "514  LINESTRING Z (691527.2 5139123.038141218 0, 69...  \n",
-       "515  LINESTRING Z (691538.8600608129 5139128.2 0, 6...  \n",
-       "516  LINESTRING Z (691603.4 5139143.608205146 0, 69...  \n",
+       "511  LINESTRING (691394.6392124404 5139052, 691410....  \n",
+       "512  LINESTRING (691451 5139079.029146607, 691471.0...  \n",
+       "513  LINESTRING (691527.2 5139123.064664635, 691538...  \n",
+       "514  LINESTRING (691538.79999182 5139128.2, 691563....  \n",
+       "515  LINESTRING (691603.4 5139143.663010655, 691624...  \n",
        "\n",
        "[5 rows x 23 columns]"
       ]
      },
-     "execution_count": 12,
+     "execution_count": 13,
      "metadata": {},
      "output_type": "execute_result"
     }
@@ -730,13 +713,13 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 13,
+   "execution_count": 14,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-08-01T15:58:01.638902Z",
-     "iopub.status.busy": "2022-08-01T15:58:01.638498Z",
-     "iopub.status.idle": "2022-08-01T15:58:01.655273Z",
-     "shell.execute_reply": "2022-08-01T15:58:01.654672Z"
+     "iopub.execute_input": "2023-07-24T20:57:23.199825Z",
+     "iopub.status.busy": "2023-07-24T20:57:23.199548Z",
+     "iopub.status.idle": "2023-07-24T20:57:23.215339Z",
+     "shell.execute_reply": "2023-07-24T20:57:23.214817Z"
     }
    },
    "outputs": [
@@ -801,8 +784,8 @@
        "      <td>0.0</td>\n",
        "      <td>0.0</td>\n",
        "      <td>0.0</td>\n",
-       "      <td>0.000000</td>\n",
-       "      <td>3.280840</td>\n",
+       "      <td>1297.867432</td>\n",
+       "      <td>18.499418</td>\n",
        "      <td>0.0</td>\n",
        "      <td>0.0</td>\n",
        "      <td>0.0</td>\n",
@@ -825,8 +808,8 @@
        "      <td>0.0</td>\n",
        "      <td>0.0</td>\n",
        "      <td>0.0</td>\n",
-       "      <td>0.000000</td>\n",
-       "      <td>3.280840</td>\n",
+       "      <td>1297.867432</td>\n",
+       "      <td>123.988358</td>\n",
        "      <td>0.0</td>\n",
        "      <td>0.0</td>\n",
        "      <td>0.0</td>\n",
@@ -919,8 +902,8 @@
        "4    0     5      1      10       0       0        0   0.0     0.0   0.0  ...   \n",
        "\n",
        "   uhc1  hcond2  thickm2       elevdn      width2  depth2  thts2  thti2  eps2  \\\n",
-       "0   0.0     0.0      0.0     0.000000    3.280840     0.0    0.0    0.0   0.0   \n",
-       "1   0.0     0.0      0.0     0.000000    3.280840     0.0    0.0    0.0   0.0   \n",
+       "0   0.0     0.0      0.0  1297.867432   18.499418     0.0    0.0    0.0   0.0   \n",
+       "1   0.0     0.0      0.0  1297.867432  123.988358     0.0    0.0    0.0   0.0   \n",
        "2   0.0     0.0      0.0  1278.149658   23.194326     0.0    0.0    0.0   0.0   \n",
        "3   0.0     0.0      0.0  1278.149658  126.765388     0.0    0.0    0.0   0.0   \n",
        "4   0.0     0.0      0.0  1211.286133   21.228680     0.0    0.0    0.0   0.0   \n",
@@ -935,7 +918,7 @@
        "[5 rows x 35 columns]"
       ]
      },
-     "execution_count": 13,
+     "execution_count": 14,
      "metadata": {},
      "output_type": "execute_result"
     }
@@ -954,13 +937,13 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 14,
+   "execution_count": 15,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-08-01T15:58:01.658461Z",
-     "iopub.status.busy": "2022-08-01T15:58:01.658251Z",
-     "iopub.status.idle": "2022-08-01T15:58:07.870690Z",
-     "shell.execute_reply": "2022-08-01T15:58:07.869936Z"
+     "iopub.execute_input": "2023-07-24T20:57:23.217722Z",
+     "iopub.status.busy": "2023-07-24T20:57:23.217309Z",
+     "iopub.status.idle": "2023-07-24T20:57:30.090472Z",
+     "shell.execute_reply": "2023-07-24T20:57:30.090012Z"
     }
    },
    "outputs": [
@@ -969,11 +952,11 @@
      "output_type": "stream",
      "text": [
       "running rasterstats.zonal_stats on buffered LineStrings...\n",
-      "finished in 5.98s\n",
+      "finished in 6.66s\n",
       "\n",
       "\n",
       "Smoothing elevations...\n",
-      "finished in 0.13s\n"
+      "finished in 0.12s\n"
      ]
     }
    ],
@@ -992,13 +975,13 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 15,
+   "execution_count": 16,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-08-01T15:58:07.874776Z",
-     "iopub.status.busy": "2022-08-01T15:58:07.874028Z",
-     "iopub.status.idle": "2022-08-01T15:58:07.880790Z",
-     "shell.execute_reply": "2022-08-01T15:58:07.880052Z"
+     "iopub.execute_input": "2023-07-24T20:57:30.093102Z",
+     "iopub.status.busy": "2023-07-24T20:57:30.092730Z",
+     "iopub.status.idle": "2023-07-24T20:57:30.097228Z",
+     "shell.execute_reply": "2023-07-24T20:57:30.096736Z"
     }
    },
    "outputs": [],
@@ -1008,13 +991,13 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 16,
+   "execution_count": 17,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-08-01T15:58:07.884002Z",
-     "iopub.status.busy": "2022-08-01T15:58:07.883558Z",
-     "iopub.status.idle": "2022-08-01T15:58:07.902641Z",
-     "shell.execute_reply": "2022-08-01T15:58:07.901891Z"
+     "iopub.execute_input": "2023-07-24T20:57:30.099801Z",
+     "iopub.status.busy": "2023-07-24T20:57:30.099411Z",
+     "iopub.status.idle": "2023-07-24T20:57:30.115013Z",
+     "shell.execute_reply": "2023-07-24T20:57:30.114449Z"
     }
    },
    "outputs": [
@@ -1064,7 +1047,7 @@
        "  </thead>\n",
        "  <tbody>\n",
        "    <tr>\n",
-       "      <th>512</th>\n",
+       "      <th>511</th>\n",
        "      <td>1</td>\n",
        "      <td>17714</td>\n",
        "      <td>2</td>\n",
@@ -1072,9 +1055,9 @@
        "      <td>114</td>\n",
        "      <td>1</td>\n",
        "      <td>1</td>\n",
-       "      <td>208.786560</td>\n",
-       "      <td>1.0</td>\n",
-       "      <td>0.0001</td>\n",
+       "      <td>208.809647</td>\n",
+       "      <td>1.000000</td>\n",
+       "      <td>0.127778</td>\n",
        "      <td>...</td>\n",
        "      <td>0.0</td>\n",
        "      <td>0.0</td>\n",
@@ -1082,13 +1065,13 @@
        "      <td>0.0</td>\n",
        "      <td>2</td>\n",
        "      <td>4</td>\n",
-       "      <td>NaN</td>\n",
+       "      <td>31.822592</td>\n",
        "      <td>1815013</td>\n",
        "      <td>None</td>\n",
-       "      <td>LINESTRING Z (691394.6266907752 5139052 0, 691...</td>\n",
+       "      <td>LINESTRING (691394.6392124404 5139052, 691410....</td>\n",
        "    </tr>\n",
        "    <tr>\n",
-       "      <th>513</th>\n",
+       "      <th>512</th>\n",
        "      <td>2</td>\n",
        "      <td>17715</td>\n",
        "      <td>2</td>\n",
@@ -1096,9 +1079,9 @@
        "      <td>115</td>\n",
        "      <td>1</td>\n",
        "      <td>2</td>\n",
-       "      <td>294.110107</td>\n",
-       "      <td>1.0</td>\n",
-       "      <td>0.0001</td>\n",
+       "      <td>294.098969</td>\n",
+       "      <td>1.261246</td>\n",
+       "      <td>0.060562</td>\n",
        "      <td>...</td>\n",
        "      <td>0.0</td>\n",
        "      <td>0.0</td>\n",
@@ -1106,13 +1089,13 @@
        "      <td>0.0</td>\n",
        "      <td>3</td>\n",
        "      <td>4</td>\n",
-       "      <td>NaN</td>\n",
+       "      <td>108.465866</td>\n",
        "      <td>1815013</td>\n",
        "      <td>None</td>\n",
-       "      <td>LINESTRING Z (691451 5139078.992958551 0, 6914...</td>\n",
+       "      <td>LINESTRING (691451 5139079.029146607, 691471.0...</td>\n",
        "    </tr>\n",
        "    <tr>\n",
-       "      <th>514</th>\n",
+       "      <th>513</th>\n",
        "      <td>3</td>\n",
        "      <td>17716</td>\n",
        "      <td>2</td>\n",
@@ -1120,9 +1103,9 @@
        "      <td>116</td>\n",
        "      <td>1</td>\n",
        "      <td>3</td>\n",
-       "      <td>41.835766</td>\n",
-       "      <td>1.0</td>\n",
-       "      <td>0.0001</td>\n",
+       "      <td>41.620331</td>\n",
+       "      <td>1.531958</td>\n",
+       "      <td>0.333961</td>\n",
        "      <td>...</td>\n",
        "      <td>0.0</td>\n",
        "      <td>0.0</td>\n",
@@ -1130,13 +1113,13 @@
        "      <td>0.0</td>\n",
        "      <td>4</td>\n",
        "      <td>4</td>\n",
-       "      <td>NaN</td>\n",
+       "      <td>159.629486</td>\n",
        "      <td>1815013</td>\n",
        "      <td>None</td>\n",
-       "      <td>LINESTRING Z (691527.2 5139123.038141218 0, 69...</td>\n",
+       "      <td>LINESTRING (691527.2 5139123.064664635, 691538...</td>\n",
        "    </tr>\n",
        "    <tr>\n",
-       "      <th>515</th>\n",
+       "      <th>514</th>\n",
        "      <td>4</td>\n",
        "      <td>17556</td>\n",
        "      <td>2</td>\n",
@@ -1144,9 +1127,9 @@
        "      <td>116</td>\n",
        "      <td>1</td>\n",
        "      <td>4</td>\n",
-       "      <td>220.128555</td>\n",
-       "      <td>1.0</td>\n",
-       "      <td>0.0001</td>\n",
+       "      <td>220.368561</td>\n",
+       "      <td>1.714090</td>\n",
+       "      <td>0.092204</td>\n",
        "      <td>...</td>\n",
        "      <td>0.0</td>\n",
        "      <td>0.0</td>\n",
@@ -1154,13 +1137,13 @@
        "      <td>0.0</td>\n",
        "      <td>5</td>\n",
        "      <td>4</td>\n",
-       "      <td>NaN</td>\n",
+       "      <td>199.556595</td>\n",
        "      <td>1815013</td>\n",
        "      <td>None</td>\n",
-       "      <td>LINESTRING Z (691538.8600608129 5139128.2 0, 6...</td>\n",
+       "      <td>LINESTRING (691538.79999182 5139128.2, 691563....</td>\n",
        "    </tr>\n",
        "    <tr>\n",
-       "      <th>516</th>\n",
+       "      <th>515</th>\n",
        "      <td>5</td>\n",
        "      <td>17557</td>\n",
        "      <td>2</td>\n",
@@ -1168,9 +1151,9 @@
        "      <td>117</td>\n",
        "      <td>1</td>\n",
        "      <td>5</td>\n",
-       "      <td>161.999496</td>\n",
-       "      <td>1.0</td>\n",
-       "      <td>0.0001</td>\n",
+       "      <td>162.617142</td>\n",
+       "      <td>1.950306</td>\n",
+       "      <td>0.097331</td>\n",
        "      <td>...</td>\n",
        "      <td>0.0</td>\n",
        "      <td>0.0</td>\n",
@@ -1178,10 +1161,10 @@
        "      <td>0.0</td>\n",
        "      <td>6</td>\n",
        "      <td>4</td>\n",
-       "      <td>NaN</td>\n",
+       "      <td>257.923615</td>\n",
        "      <td>1815013</td>\n",
        "      <td>None</td>\n",
-       "      <td>LINESTRING Z (691603.4 5139143.608205146 0, 69...</td>\n",
+       "      <td>LINESTRING (691603.4 5139143.663010655, 691624...</td>\n",
        "    </tr>\n",
        "  </tbody>\n",
        "</table>\n",
@@ -1189,31 +1172,31 @@
        "</div>"
       ],
       "text/plain": [
-       "     rno   node  k    i    j  iseg  ireach      rchlen  width   slope  ...  \\\n",
-       "512    1  17714  2  110  114     1       1  208.786560    1.0  0.0001  ...   \n",
-       "513    2  17715  2  110  115     1       2  294.110107    1.0  0.0001  ...   \n",
-       "514    3  17716  2  110  116     1       3   41.835766    1.0  0.0001  ...   \n",
-       "515    4  17556  2  109  116     1       4  220.128555    1.0  0.0001  ...   \n",
-       "516    5  17557  2  109  117     1       5  161.999496    1.0  0.0001  ...   \n",
+       "     rno   node  k    i    j  iseg  ireach      rchlen     width     slope  \\\n",
+       "511    1  17714  2  110  114     1       1  208.809647  1.000000  0.127778   \n",
+       "512    2  17715  2  110  115     1       2  294.098969  1.261246  0.060562   \n",
+       "513    3  17716  2  110  116     1       3   41.620331  1.531958  0.333961   \n",
+       "514    4  17556  2  109  116     1       4  220.368561  1.714090  0.092204   \n",
+       "515    5  17557  2  109  117     1       5  162.617142  1.950306  0.097331   \n",
        "\n",
-       "     thts  thti  eps  uhc  outreach  outseg  asum  line_id  name  \\\n",
-       "512   0.0   0.0  0.0  0.0         2       4   NaN  1815013  None   \n",
-       "513   0.0   0.0  0.0  0.0         3       4   NaN  1815013  None   \n",
-       "514   0.0   0.0  0.0  0.0         4       4   NaN  1815013  None   \n",
-       "515   0.0   0.0  0.0  0.0         5       4   NaN  1815013  None   \n",
-       "516   0.0   0.0  0.0  0.0         6       4   NaN  1815013  None   \n",
+       "     ...  thts  thti  eps  uhc  outreach  outseg        asum  line_id  name  \\\n",
+       "511  ...   0.0   0.0  0.0  0.0         2       4   31.822592  1815013  None   \n",
+       "512  ...   0.0   0.0  0.0  0.0         3       4  108.465866  1815013  None   \n",
+       "513  ...   0.0   0.0  0.0  0.0         4       4  159.629486  1815013  None   \n",
+       "514  ...   0.0   0.0  0.0  0.0         5       4  199.556595  1815013  None   \n",
+       "515  ...   0.0   0.0  0.0  0.0         6       4  257.923615  1815013  None   \n",
        "\n",
        "                                              geometry  \n",
-       "512  LINESTRING Z (691394.6266907752 5139052 0, 691...  \n",
-       "513  LINESTRING Z (691451 5139078.992958551 0, 6914...  \n",
-       "514  LINESTRING Z (691527.2 5139123.038141218 0, 69...  \n",
-       "515  LINESTRING Z (691538.8600608129 5139128.2 0, 6...  \n",
-       "516  LINESTRING Z (691603.4 5139143.608205146 0, 69...  \n",
+       "511  LINESTRING (691394.6392124404 5139052, 691410....  \n",
+       "512  LINESTRING (691451 5139079.029146607, 691471.0...  \n",
+       "513  LINESTRING (691527.2 5139123.064664635, 691538...  \n",
+       "514  LINESTRING (691538.79999182 5139128.2, 691563....  \n",
+       "515  LINESTRING (691603.4 5139143.663010655, 691624...  \n",
        "\n",
        "[5 rows x 23 columns]"
       ]
      },
-     "execution_count": 16,
+     "execution_count": 17,
      "metadata": {},
      "output_type": "execute_result"
     }
@@ -1242,13 +1225,13 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 17,
+   "execution_count": 18,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-08-01T15:58:07.905634Z",
-     "iopub.status.busy": "2022-08-01T15:58:07.905220Z",
-     "iopub.status.idle": "2022-08-01T15:58:07.995869Z",
-     "shell.execute_reply": "2022-08-01T15:58:07.995056Z"
+     "iopub.execute_input": "2023-07-24T20:57:30.117196Z",
+     "iopub.status.busy": "2023-07-24T20:57:30.116919Z",
+     "iopub.status.idle": "2023-07-24T20:57:30.210489Z",
+     "shell.execute_reply": "2023-07-24T20:57:30.209656Z"
     }
    },
    "outputs": [
@@ -1257,7 +1240,7 @@
      "output_type": "stream",
      "text": [
       "\n",
-      "Running Flopy v. 3.3.6 diagnostics...\n",
+      "Running Flopy v. 3.5.0.dev0 diagnostics...\n",
       "wrote tf_SFR.chk\n"
      ]
     }
@@ -1276,13 +1259,13 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 18,
+   "execution_count": 19,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-08-01T15:58:07.999277Z",
-     "iopub.status.busy": "2022-08-01T15:58:07.998851Z",
-     "iopub.status.idle": "2022-08-01T15:58:08.127902Z",
-     "shell.execute_reply": "2022-08-01T15:58:08.127125Z"
+     "iopub.execute_input": "2023-07-24T20:57:30.212699Z",
+     "iopub.status.busy": "2023-07-24T20:57:30.212423Z",
+     "iopub.status.idle": "2023-07-24T20:57:30.348320Z",
+     "shell.execute_reply": "2023-07-24T20:57:30.347363Z"
     }
    },
    "outputs": [
@@ -1290,9 +1273,9 @@
      "name": "stdout",
      "output_type": "stream",
      "text": [
-      "SFRmaker v. 0.9.1.post12.dev0+g0c5d9bf\n",
+      "SFRmaker v. 0.10.0.post16.dev0+gae6eca3\n",
       "\n",
-      "Running Flopy v. 3.3.6 diagnostics...\n",
+      "Running Flopy v. 3.5.0.dev0 diagnostics...\n",
       "passed.\n",
       "\n",
       "Checking for continuity in segment and reach numbering...\n",
@@ -1315,68 +1298,65 @@
       "\n",
       "\n",
       "Checking for model cells with multiple non-zero SFR conductances...\n",
-      "25 model cells with multiple non-zero SFR conductances found.\n",
+      "24 model cells with multiple non-zero SFR conductances found.\n",
       "This may lead to circular routing between collocated reaches.\n",
       "Nodes with overlapping conductances:\n",
       "k\ti\tj\tiseg\tireach\trchlen\tstrthick\tstrhc1\n",
-      "2\t110\t119\t1\t8\t268.3089904785156\t1.0\t1.0\n",
-      "2\t110\t119\t2\t1\t72.39283752441406\t1.0\t1.0\n",
-      "0\t87\t122\t3\t54\t35.61542510986328\t1.0\t1.0\n",
-      "2\t110\t119\t4\t1\t12.818351745605469\t1.0\t1.0\n",
-      "0\t87\t122\t4\t34\t230.8770751953125\t1.0\t1.0\n",
-      "0\t76\t110\t5\t47\t204.68466186523438\t1.0\t1.0\n",
-      "0\t87\t122\t6\t1\t30.619203567504883\t1.0\t1.0\n",
-      "2\t84\t119\t6\t7\t271.296630859375\t1.0\t1.0\n",
-      "2\t84\t119\t6\t9\t26.846023559570312\t1.0\t1.0\n",
-      "0\t76\t110\t6\t27\t75.61869812011719\t1.0\t1.0\n",
-      "2\t25\t24\t7\t42\t95.18097686767578\t1.0\t1.0\n",
-      "2\t25\t24\t8\t47\t230.81414794921875\t1.0\t1.0\n",
-      "1\t58\t132\t9\t25\t42.411964416503906\t1.0\t1.0\n",
-      "1\t58\t132\t9\t27\t88.49227905273438\t1.0\t1.0\n",
-      "0\t48\t109\t9\t64\t251.07437133789062\t1.0\t1.0\n",
-      "0\t76\t110\t10\t1\t69.44449615478516\t1.0\t1.0\n",
-      "0\t48\t108\t10\t40\t20.661043167114258\t1.0\t1.0\n",
-      "0\t48\t109\t10\t41\t114.03108978271484\t1.0\t1.0\n",
-      "0\t48\t108\t10\t42\t35.86711502075195\t1.0\t1.0\n",
-      "2\t25\t24\t11\t1\t21.262147903442383\t1.0\t1.0\n",
-      "2\t18\t17\t11\t15\t148.88375854492188\t1.0\t1.0\n",
-      "2\t19\t23\t12\t47\t12.734856605529785\t1.0\t1.0\n",
-      "2\t19\t23\t12\t49\t108.90869903564453\t1.0\t1.0\n",
-      "2\t18\t17\t12\t58\t77.02336120605469\t1.0\t1.0\n",
-      "1\t80\t49\t13\t70\t159.628662109375\t1.0\t1.0\n",
-      "0\t48\t108\t14\t1\t125.59841918945312\t1.0\t1.0\n",
-      "0\t47\t98\t14\t22\t67.49517059326172\t1.0\t1.0\n",
-      "0\t47\t98\t14\t24\t102.60327911376953\t1.0\t1.0\n",
-      "0\t54\t89\t14\t39\t35.04909896850586\t1.0\t1.0\n",
-      "0\t54\t89\t14\t41\t62.93534851074219\t1.0\t1.0\n",
-      "0\t53\t78\t14\t57\t61.92954635620117\t1.0\t1.0\n",
-      "0\t53\t78\t14\t59\t28.305360794067383\t1.0\t1.0\n",
-      "0\t52\t76\t14\t62\t63.750675201416016\t1.0\t1.0\n",
-      "0\t52\t76\t14\t64\t294.7840270996094\t1.0\t1.0\n",
-      "1\t54\t73\t14\t69\t341.07586669921875\t1.0\t1.0\n",
-      "1\t54\t73\t14\t71\t27.020740509033203\t1.0\t1.0\n",
-      "1\t80\t49\t14\t125\t39.87680435180664\t1.0\t1.0\n",
-      "2\t18\t17\t16\t1\t185.31173706054688\t1.0\t1.0\n",
-      "2\t15\t3\t16\t21\t32.886505126953125\t1.0\t1.0\n",
-      "2\t36\t11\t17\t38\t58.1950798034668\t1.0\t1.0\n",
-      "2\t110\t159\t19\t2\t201.7003936767578\t1.0\t1.0\n",
-      "0\t38\t85\t21\t8\t72.13273620605469\t1.0\t1.0\n",
-      "0\t38\t85\t21\t9\t52.62028121948242\t1.0\t1.0\n",
-      "2\t108\t57\t24\t8\t237.81178283691406\t1.0\t1.0\n",
-      "2\t108\t57\t24\t9\t46.60417556762695\t1.0\t1.0\n",
-      "0\t94\t35\t24\t45\t96.37408447265625\t1.0\t1.0\n",
-      "0\t94\t35\t24\t47\t89.41510009765625\t1.0\t1.0\n",
-      "2\t91\t35\t24\t50\t60.342041015625\t1.0\t1.0\n",
-      "2\t91\t34\t24\t51\t61.56704330444336\t1.0\t1.0\n",
-      "1\t80\t49\t25\t1\t146.53265380859375\t1.0\t1.0\n",
-      "2\t91\t35\t25\t26\t308.05096435546875\t1.0\t1.0\n",
-      "2\t91\t34\t25\t27\t76.15687561035156\t1.0\t1.0\n",
-      "2\t15\t3\t31\t1\t273.3369445800781\t1.0\t1.0\n",
-      "2\t36\t11\t36\t1\t262.8287048339844\t1.0\t1.0\n",
-      "2\t110\t159\t38\t1\t23.601938247680664\t1.0\t1.0\n",
-      "2\t91\t34\t42\t1\t130.4016571044922\t1.0\t1.0\n",
-      "1\t92\t30\t42\t6\t67.78282165527344\t1.0\t1.0\n",
-      "1\t92\t30\t42\t8\t252.36495971679688\t1.0\t1.0\n",
+      "2\t110\t119\t1\t8\t268.58270263671875\t1.0\t1.0\n",
+      "2\t110\t119\t2\t1\t72.6148681640625\t1.0\t1.0\n",
+      "0\t87\t122\t3\t54\t35.3535041809082\t1.0\t1.0\n",
+      "0\t87\t122\t4\t33\t231.09617614746094\t1.0\t1.0\n",
+      "0\t76\t110\t5\t47\t204.88819885253906\t1.0\t1.0\n",
+      "0\t87\t122\t6\t1\t30.41412925720215\t1.0\t1.0\n",
+      "2\t84\t119\t6\t7\t271.2482604980469\t1.0\t1.0\n",
+      "2\t84\t119\t6\t9\t26.372055053710938\t1.0\t1.0\n",
+      "0\t76\t110\t6\t27\t75.33323669433594\t1.0\t1.0\n",
+      "2\t25\t24\t7\t42\t95.2734375\t1.0\t1.0\n",
+      "2\t25\t24\t8\t47\t230.5772705078125\t1.0\t1.0\n",
+      "1\t58\t132\t9\t25\t48.154903411865234\t1.0\t1.0\n",
+      "1\t58\t132\t9\t27\t92.93828582763672\t1.0\t1.0\n",
+      "0\t48\t109\t9\t64\t251.07447814941406\t1.0\t1.0\n",
+      "0\t76\t110\t10\t1\t69.20012664794922\t1.0\t1.0\n",
+      "0\t48\t108\t10\t40\t19.569835662841797\t1.0\t1.0\n",
+      "0\t48\t109\t10\t41\t122.80995178222656\t1.0\t1.0\n",
+      "0\t48\t108\t10\t42\t28.3659725189209\t1.0\t1.0\n",
+      "2\t25\t24\t11\t1\t21.518386840820312\t1.0\t1.0\n",
+      "2\t18\t17\t11\t15\t148.965087890625\t1.0\t1.0\n",
+      "2\t18\t17\t12\t57\t76.79830932617188\t1.0\t1.0\n",
+      "1\t80\t49\t13\t70\t159.26702880859375\t1.0\t1.0\n",
+      "0\t48\t108\t14\t1\t125.24427032470703\t1.0\t1.0\n",
+      "0\t47\t98\t14\t22\t67.60020446777344\t1.0\t1.0\n",
+      "0\t47\t98\t14\t24\t103.02963256835938\t1.0\t1.0\n",
+      "0\t54\t89\t14\t39\t34.45429992675781\t1.0\t1.0\n",
+      "0\t54\t89\t14\t41\t60.65333938598633\t1.0\t1.0\n",
+      "0\t53\t78\t14\t57\t61.4118537902832\t1.0\t1.0\n",
+      "0\t53\t78\t14\t59\t28.43659782409668\t1.0\t1.0\n",
+      "0\t52\t76\t14\t62\t63.3633918762207\t1.0\t1.0\n",
+      "0\t52\t76\t14\t64\t294.85870361328125\t1.0\t1.0\n",
+      "1\t54\t73\t14\t69\t341.6589050292969\t1.0\t1.0\n",
+      "1\t54\t73\t14\t71\t27.67204475402832\t1.0\t1.0\n",
+      "1\t80\t49\t14\t125\t39.76188278198242\t1.0\t1.0\n",
+      "2\t18\t17\t16\t1\t185.5455780029297\t1.0\t1.0\n",
+      "2\t15\t3\t16\t21\t32.64350128173828\t1.0\t1.0\n",
+      "2\t36\t11\t17\t38\t57.837913513183594\t1.0\t1.0\n",
+      "2\t110\t159\t19\t2\t201.6383819580078\t1.0\t1.0\n",
+      "0\t38\t85\t21\t8\t72.70938873291016\t1.0\t1.0\n",
+      "0\t38\t85\t21\t9\t54.38801574707031\t1.0\t1.0\n",
+      "2\t108\t57\t24\t8\t237.04391479492188\t1.0\t1.0\n",
+      "2\t108\t57\t24\t9\t46.13855743408203\t1.0\t1.0\n",
+      "0\t94\t35\t24\t45\t96.94822692871094\t1.0\t1.0\n",
+      "0\t94\t35\t24\t47\t91.543701171875\t1.0\t1.0\n",
+      "2\t91\t35\t24\t50\t60.90004348754883\t1.0\t1.0\n",
+      "2\t91\t34\t24\t51\t61.169124603271484\t1.0\t1.0\n",
+      "1\t80\t49\t25\t1\t146.92994689941406\t1.0\t1.0\n",
+      "2\t91\t35\t25\t26\t308.28497314453125\t1.0\t1.0\n",
+      "2\t91\t34\t25\t27\t75.82471466064453\t1.0\t1.0\n",
+      "2\t15\t3\t31\t1\t273.6022033691406\t1.0\t1.0\n",
+      "2\t36\t11\t36\t1\t263.12506103515625\t1.0\t1.0\n",
+      "2\t110\t159\t38\t1\t24.26714324951172\t1.0\t1.0\n",
+      "2\t91\t34\t42\t1\t130.5291290283203\t1.0\t1.0\n",
+      "1\t92\t30\t42\t6\t66.65398406982422\t1.0\t1.0\n",
+      "1\t92\t30\t42\t8\t252.9161376953125\t1.0\t1.0\n",
       "\n",
       "Checking for streambed tops of less than -10...\n",
       "passed.\n",
@@ -1385,7 +1365,7 @@
       "passed.\n",
       "\n",
       "Checking segment_data for downstream rises in streambed elevation...\n",
-      "Segment elevup and elevdn not specified for nstrm=-1441 and isfropt=1\n",
+      "Segment elevup and elevdn not specified for nstrm=-1439 and isfropt=1\n",
       "passed.\n",
       "\n",
       "Checking reach_data for downstream rises in streambed elevation...\n",
@@ -1395,11 +1375,11 @@
       "1 reaches encountered with streambed above model top.\n",
       "Model top violations:\n",
       "i j iseg ireach strtop modeltop strhc1 reachID diff\n",
-      "49 15 18 19 922.1929321289062 920.3099975585938 1.0 788 -1.8829345703125\n",
+      "49 15 18 19 922.1929321289062 920.3099975585938 1.0 786 -1.8829345703125\n",
       "\n",
       "\n",
       "Checking segment_data for inconsistencies between segment end elevations and the model grid...\n",
-      "Segment elevup and elevdn not specified for nstrm=-1441 and isfropt=1\n",
+      "Segment elevup and elevdn not specified for nstrm=-1439 and isfropt=1\n",
       "passed.\n",
       "\n",
       "Checking for streambed slopes of less than 0.0001...\n",
@@ -1409,7 +1389,7 @@
       "passed.\n",
       "\n",
       "wrote tf_SFR.chk\n",
-      "wrote ../tylerforks/tylerforks/tf.sfr.\n"
+      "wrote /home/runner/work/sfrmaker/sfrmaker/examples/Notebooks/../tylerforks/tylerforks/tf.sfr.\n"
      ]
     }
    ],
@@ -1427,13 +1407,13 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 19,
+   "execution_count": 20,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-08-01T15:58:08.130958Z",
-     "iopub.status.busy": "2022-08-01T15:58:08.130727Z",
-     "iopub.status.idle": "2022-08-01T15:58:08.490957Z",
-     "shell.execute_reply": "2022-08-01T15:58:08.490276Z"
+     "iopub.execute_input": "2023-07-24T20:57:30.350951Z",
+     "iopub.status.busy": "2023-07-24T20:57:30.350687Z",
+     "iopub.status.idle": "2023-07-24T20:57:30.745817Z",
+     "shell.execute_reply": "2023-07-24T20:57:30.745313Z"
     }
    },
    "outputs": [
@@ -1441,9 +1421,9 @@
      "name": "stdout",
      "output_type": "stream",
      "text": [
-      "SFRmaker v. 0.9.1.post12.dev0+g0c5d9bf\n",
+      "SFRmaker v. 0.10.0.post16.dev0+gae6eca3\n",
       "\n",
-      "Running Flopy v. 3.3.6 diagnostics...\n",
+      "Running Flopy v. 3.5.0.dev0 diagnostics...\n",
       "passed.\n",
       "\n",
       "Checking for continuity in segment and reach numbering...\n",
@@ -1466,68 +1446,65 @@
       "\n",
       "\n",
       "Checking for model cells with multiple non-zero SFR conductances...\n",
-      "25 model cells with multiple non-zero SFR conductances found.\n",
+      "24 model cells with multiple non-zero SFR conductances found.\n",
       "This may lead to circular routing between collocated reaches.\n",
       "Nodes with overlapping conductances:\n",
       "k\ti\tj\tiseg\tireach\trchlen\tstrthick\tstrhc1\n",
-      "2\t110\t119\t1\t8\t268.3089904785156\t1.0\t1.0\n",
-      "2\t110\t119\t2\t1\t72.39283752441406\t1.0\t1.0\n",
-      "0\t87\t122\t3\t54\t35.61542510986328\t1.0\t1.0\n",
-      "2\t110\t119\t4\t1\t12.818351745605469\t1.0\t1.0\n",
-      "0\t87\t122\t4\t34\t230.8770751953125\t1.0\t1.0\n",
-      "0\t76\t110\t5\t47\t204.68466186523438\t1.0\t1.0\n",
-      "0\t87\t122\t6\t1\t30.619203567504883\t1.0\t1.0\n",
-      "2\t84\t119\t6\t7\t271.296630859375\t1.0\t1.0\n",
-      "2\t84\t119\t6\t9\t26.846023559570312\t1.0\t1.0\n",
-      "0\t76\t110\t6\t27\t75.61869812011719\t1.0\t1.0\n",
-      "2\t25\t24\t7\t42\t95.18097686767578\t1.0\t1.0\n",
-      "2\t25\t24\t8\t47\t230.81414794921875\t1.0\t1.0\n",
-      "1\t58\t132\t9\t25\t42.411964416503906\t1.0\t1.0\n",
-      "1\t58\t132\t9\t27\t88.49227905273438\t1.0\t1.0\n",
-      "0\t48\t109\t9\t64\t251.07437133789062\t1.0\t1.0\n",
-      "0\t76\t110\t10\t1\t69.44449615478516\t1.0\t1.0\n",
-      "0\t48\t108\t10\t40\t20.661043167114258\t1.0\t1.0\n",
-      "0\t48\t109\t10\t41\t114.03108978271484\t1.0\t1.0\n",
-      "0\t48\t108\t10\t42\t35.86711502075195\t1.0\t1.0\n",
-      "2\t25\t24\t11\t1\t21.262147903442383\t1.0\t1.0\n",
-      "2\t18\t17\t11\t15\t148.88375854492188\t1.0\t1.0\n",
-      "2\t19\t23\t12\t47\t12.734856605529785\t1.0\t1.0\n",
-      "2\t19\t23\t12\t49\t108.90869903564453\t1.0\t1.0\n",
-      "2\t18\t17\t12\t58\t77.02336120605469\t1.0\t1.0\n",
-      "1\t80\t49\t13\t70\t159.628662109375\t1.0\t1.0\n",
-      "0\t48\t108\t14\t1\t125.59841918945312\t1.0\t1.0\n",
-      "0\t47\t98\t14\t22\t67.49517059326172\t1.0\t1.0\n",
-      "0\t47\t98\t14\t24\t102.60327911376953\t1.0\t1.0\n",
-      "0\t54\t89\t14\t39\t35.04909896850586\t1.0\t1.0\n",
-      "0\t54\t89\t14\t41\t62.93534851074219\t1.0\t1.0\n",
-      "0\t53\t78\t14\t57\t61.92954635620117\t1.0\t1.0\n",
-      "0\t53\t78\t14\t59\t28.305360794067383\t1.0\t1.0\n",
-      "0\t52\t76\t14\t62\t63.750675201416016\t1.0\t1.0\n",
-      "0\t52\t76\t14\t64\t294.7840270996094\t1.0\t1.0\n",
-      "1\t54\t73\t14\t69\t341.07586669921875\t1.0\t1.0\n",
-      "1\t54\t73\t14\t71\t27.020740509033203\t1.0\t1.0\n",
-      "1\t80\t49\t14\t125\t39.87680435180664\t1.0\t1.0\n",
-      "2\t18\t17\t16\t1\t185.31173706054688\t1.0\t1.0\n",
-      "2\t15\t3\t16\t21\t32.886505126953125\t1.0\t1.0\n",
-      "2\t36\t11\t17\t38\t58.1950798034668\t1.0\t1.0\n",
-      "2\t110\t159\t19\t2\t201.7003936767578\t1.0\t1.0\n",
-      "0\t38\t85\t21\t8\t72.13273620605469\t1.0\t1.0\n",
-      "0\t38\t85\t21\t9\t52.62028121948242\t1.0\t1.0\n",
-      "2\t108\t57\t24\t8\t237.81178283691406\t1.0\t1.0\n",
-      "2\t108\t57\t24\t9\t46.60417556762695\t1.0\t1.0\n",
-      "0\t94\t35\t24\t45\t96.37408447265625\t1.0\t1.0\n",
-      "0\t94\t35\t24\t47\t89.41510009765625\t1.0\t1.0\n",
-      "2\t91\t35\t24\t50\t60.342041015625\t1.0\t1.0\n",
-      "2\t91\t34\t24\t51\t61.56704330444336\t1.0\t1.0\n",
-      "1\t80\t49\t25\t1\t146.53265380859375\t1.0\t1.0\n",
-      "2\t91\t35\t25\t26\t308.05096435546875\t1.0\t1.0\n",
-      "2\t91\t34\t25\t27\t76.15687561035156\t1.0\t1.0\n",
-      "2\t15\t3\t31\t1\t273.3369445800781\t1.0\t1.0\n",
-      "2\t36\t11\t36\t1\t262.8287048339844\t1.0\t1.0\n",
-      "2\t110\t159\t38\t1\t23.601938247680664\t1.0\t1.0\n",
-      "2\t91\t34\t42\t1\t130.4016571044922\t1.0\t1.0\n",
-      "1\t92\t30\t42\t6\t67.78282165527344\t1.0\t1.0\n",
-      "1\t92\t30\t42\t8\t252.36495971679688\t1.0\t1.0\n",
+      "2\t110\t119\t1\t8\t268.58270263671875\t1.0\t1.0\n",
+      "2\t110\t119\t2\t1\t72.6148681640625\t1.0\t1.0\n",
+      "0\t87\t122\t3\t54\t35.3535041809082\t1.0\t1.0\n",
+      "0\t87\t122\t4\t33\t231.09617614746094\t1.0\t1.0\n",
+      "0\t76\t110\t5\t47\t204.88819885253906\t1.0\t1.0\n",
+      "0\t87\t122\t6\t1\t30.41412925720215\t1.0\t1.0\n",
+      "2\t84\t119\t6\t7\t271.2482604980469\t1.0\t1.0\n",
+      "2\t84\t119\t6\t9\t26.372055053710938\t1.0\t1.0\n",
+      "0\t76\t110\t6\t27\t75.33323669433594\t1.0\t1.0\n",
+      "2\t25\t24\t7\t42\t95.2734375\t1.0\t1.0\n",
+      "2\t25\t24\t8\t47\t230.5772705078125\t1.0\t1.0\n",
+      "1\t58\t132\t9\t25\t48.154903411865234\t1.0\t1.0\n",
+      "1\t58\t132\t9\t27\t92.93828582763672\t1.0\t1.0\n",
+      "0\t48\t109\t9\t64\t251.07447814941406\t1.0\t1.0\n",
+      "0\t76\t110\t10\t1\t69.20012664794922\t1.0\t1.0\n",
+      "0\t48\t108\t10\t40\t19.569835662841797\t1.0\t1.0\n",
+      "0\t48\t109\t10\t41\t122.80995178222656\t1.0\t1.0\n",
+      "0\t48\t108\t10\t42\t28.3659725189209\t1.0\t1.0\n",
+      "2\t25\t24\t11\t1\t21.518386840820312\t1.0\t1.0\n",
+      "2\t18\t17\t11\t15\t148.965087890625\t1.0\t1.0\n",
+      "2\t18\t17\t12\t57\t76.79830932617188\t1.0\t1.0\n",
+      "1\t80\t49\t13\t70\t159.26702880859375\t1.0\t1.0\n",
+      "0\t48\t108\t14\t1\t125.24427032470703\t1.0\t1.0\n",
+      "0\t47\t98\t14\t22\t67.60020446777344\t1.0\t1.0\n",
+      "0\t47\t98\t14\t24\t103.02963256835938\t1.0\t1.0\n",
+      "0\t54\t89\t14\t39\t34.45429992675781\t1.0\t1.0\n",
+      "0\t54\t89\t14\t41\t60.65333938598633\t1.0\t1.0\n",
+      "0\t53\t78\t14\t57\t61.4118537902832\t1.0\t1.0\n",
+      "0\t53\t78\t14\t59\t28.43659782409668\t1.0\t1.0\n",
+      "0\t52\t76\t14\t62\t63.3633918762207\t1.0\t1.0\n",
+      "0\t52\t76\t14\t64\t294.85870361328125\t1.0\t1.0\n",
+      "1\t54\t73\t14\t69\t341.6589050292969\t1.0\t1.0\n",
+      "1\t54\t73\t14\t71\t27.67204475402832\t1.0\t1.0\n",
+      "1\t80\t49\t14\t125\t39.76188278198242\t1.0\t1.0\n",
+      "2\t18\t17\t16\t1\t185.5455780029297\t1.0\t1.0\n",
+      "2\t15\t3\t16\t21\t32.64350128173828\t1.0\t1.0\n",
+      "2\t36\t11\t17\t38\t57.837913513183594\t1.0\t1.0\n",
+      "2\t110\t159\t19\t2\t201.6383819580078\t1.0\t1.0\n",
+      "0\t38\t85\t21\t8\t72.70938873291016\t1.0\t1.0\n",
+      "0\t38\t85\t21\t9\t54.38801574707031\t1.0\t1.0\n",
+      "2\t108\t57\t24\t8\t237.04391479492188\t1.0\t1.0\n",
+      "2\t108\t57\t24\t9\t46.13855743408203\t1.0\t1.0\n",
+      "0\t94\t35\t24\t45\t96.94822692871094\t1.0\t1.0\n",
+      "0\t94\t35\t24\t47\t91.543701171875\t1.0\t1.0\n",
+      "2\t91\t35\t24\t50\t60.90004348754883\t1.0\t1.0\n",
+      "2\t91\t34\t24\t51\t61.169124603271484\t1.0\t1.0\n",
+      "1\t80\t49\t25\t1\t146.92994689941406\t1.0\t1.0\n",
+      "2\t91\t35\t25\t26\t308.28497314453125\t1.0\t1.0\n",
+      "2\t91\t34\t25\t27\t75.82471466064453\t1.0\t1.0\n",
+      "2\t15\t3\t31\t1\t273.6022033691406\t1.0\t1.0\n",
+      "2\t36\t11\t36\t1\t263.12506103515625\t1.0\t1.0\n",
+      "2\t110\t159\t38\t1\t24.26714324951172\t1.0\t1.0\n",
+      "2\t91\t34\t42\t1\t130.5291290283203\t1.0\t1.0\n",
+      "1\t92\t30\t42\t6\t66.65398406982422\t1.0\t1.0\n",
+      "1\t92\t30\t42\t8\t252.9161376953125\t1.0\t1.0\n",
       "\n",
       "Checking for streambed tops of less than -10...\n",
       "passed.\n",
@@ -1536,7 +1513,7 @@
       "passed.\n",
       "\n",
       "Checking segment_data for downstream rises in streambed elevation...\n",
-      "Segment elevup and elevdn not specified for nstrm=-1441 and isfropt=1\n",
+      "Segment elevup and elevdn not specified for nstrm=-1439 and isfropt=1\n",
       "passed.\n",
       "\n",
       "Checking reach_data for downstream rises in streambed elevation...\n",
@@ -1546,11 +1523,11 @@
       "1 reaches encountered with streambed above model top.\n",
       "Model top violations:\n",
       "i j iseg ireach strtop modeltop strhc1 reachID diff\n",
-      "49 15 18 19 922.1929321289062 920.3099975585938 1.0 788 -1.8829345703125\n",
+      "49 15 18 19 922.1929321289062 920.3099975585938 1.0 786 -1.8829345703125\n",
       "\n",
       "\n",
       "Checking segment_data for inconsistencies between segment end elevations and the model grid...\n",
-      "Segment elevup and elevdn not specified for nstrm=-1441 and isfropt=1\n",
+      "Segment elevup and elevdn not specified for nstrm=-1439 and isfropt=1\n",
       "passed.\n",
       "\n",
       "Checking for streambed slopes of less than 0.0001...\n",
@@ -1562,7 +1539,7 @@
       "wrote tf_SFR.chk\n",
       "converting segment data to period data...\n",
       "converting reach and segment data to package data...\n",
-      "wrote ../tylerforks/tylerforks/tf.sfr\n"
+      "wrote /home/runner/work/sfrmaker/sfrmaker/examples/Notebooks/../tylerforks/tylerforks/tf.sfr\n"
      ]
     }
    ],
@@ -1580,13 +1557,13 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 20,
+   "execution_count": 21,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-08-01T15:58:08.494633Z",
-     "iopub.status.busy": "2022-08-01T15:58:08.494035Z",
-     "iopub.status.idle": "2022-08-01T15:58:08.512416Z",
-     "shell.execute_reply": "2022-08-01T15:58:08.511755Z"
+     "iopub.execute_input": "2023-07-24T20:57:30.748732Z",
+     "iopub.status.busy": "2023-07-24T20:57:30.747903Z",
+     "iopub.status.idle": "2023-07-24T20:57:30.765863Z",
+     "shell.execute_reply": "2023-07-24T20:57:30.765361Z"
     }
    },
    "outputs": [
@@ -1612,13 +1589,13 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 21,
+   "execution_count": 22,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-08-01T15:58:08.515266Z",
-     "iopub.status.busy": "2022-08-01T15:58:08.514924Z",
-     "iopub.status.idle": "2022-08-01T15:58:08.599028Z",
-     "shell.execute_reply": "2022-08-01T15:58:08.598334Z"
+     "iopub.execute_input": "2023-07-24T20:57:30.767957Z",
+     "iopub.status.busy": "2023-07-24T20:57:30.767786Z",
+     "iopub.status.idle": "2023-07-24T20:57:30.851386Z",
+     "shell.execute_reply": "2023-07-24T20:57:30.850882Z"
     }
    },
    "outputs": [
@@ -1661,13 +1638,13 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 22,
+   "execution_count": 23,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-08-01T15:58:08.602130Z",
-     "iopub.status.busy": "2022-08-01T15:58:08.601910Z",
-     "iopub.status.idle": "2022-08-01T15:58:09.550401Z",
-     "shell.execute_reply": "2022-08-01T15:58:09.549735Z"
+     "iopub.execute_input": "2023-07-24T20:57:30.853978Z",
+     "iopub.status.busy": "2023-07-24T20:57:30.853556Z",
+     "iopub.status.idle": "2023-07-24T20:57:31.614468Z",
+     "shell.execute_reply": "2023-07-24T20:57:31.613581Z"
     }
    },
    "outputs": [
@@ -1706,7 +1683,7 @@
    "name": "python",
    "nbconvert_exporter": "python",
    "pygments_lexer": "ipython3",
-   "version": "3.10.5"
+   "version": "3.11.4"
   }
  },
  "nbformat": 4,

@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Philosophy &mdash; SFRmaker 0.9.1.post12.dev0+g0c5d9bf documentation</title>
+  <title>Philosophy &mdash; SFRmaker 0.10.0.post16.dev0+gae6eca3 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
@@ -18,6 +18,7 @@
         <script src="_static/underscore.js"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
         <script src="_static/clipboard.min.js"></script>
         <script src="_static/copybutton.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -33,14 +34,18 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="index.html" class="icon icon-home"> SFRmaker
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            SFRmaker
           </a>
               <div class="version">
-                0.9.1.post12.dev0+g0c5d9bf
+                0.10.0.post16.dev0+gae6eca3
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -52,6 +57,10 @@
 <li class="toctree-l2"><a class="reference internal" href="#motivation">Motivation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#what-sfrmaker-does">What SFRmaker does</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#what-sfrmaker-doesn-t-do">What SFRmaker doesn’t do</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#read-more">Read more</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#cited-references">Cited <span class="xref std std-ref">References</span></a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="examples.html"> Examples</a></li>
@@ -62,6 +71,7 @@
 <li class="toctree-l1"><a class="reference internal" href="inputs.html"> Input Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples.html"> Using SFRmaker with a configuration file</a></li>
 <li class="toctree-l1"><a class="reference internal" href="notebooks/SFRmaker_demo.html"> Basic Usage in a scripting context</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/preprocessing_demo.html"> Preprocessing NHDPlus version 2 data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="notebooks/lines_from_NHDPlusHR_demo.html"> Using SFRmaker with NHDPlus High Resolution</a></li>
 <li class="toctree-l1"><a class="reference internal" href="concepts.html"> Concepts and methods</a></li>
 <li class="toctree-l1"><a class="reference internal" href="notebooks/sfrmaker_tools.html"> Stand-alone tools</a></li>
@@ -92,8 +102,8 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>Philosophy</li>
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Philosophy</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/philosophy.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -103,43 +113,27 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  
-<style>
-/* CSS overrides for sphinx_rtd_theme */
-
-/* 24px margin */
-.nbinput.nblast.container,
-.nboutput.nblast.container {
-    margin-bottom: 19px;  /* padding has already 5px */
-}
-
-/* ... except between code cells! */
-.nblast.container + .nbinput.container {
-    margin-top: -19px;
-}
-
-.admonition > p:before {
-    margin-right: 4px;  /* make room for the exclamation icon */
-}
-
-/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
-.math {
-    text-align: unset;
-}
-</style>
-<section id="philosophy">
+  <section id="philosophy">
 <h1>Philosophy<a class="headerlink" href="#philosophy" title="Permalink to this heading">¶</a></h1>
 <section id="motivation">
 <h2>Motivation<a class="headerlink" href="#motivation" title="Permalink to this heading">¶</a></h2>
-<p>As the world grapples with increasingly pressing and often complex water resources challenges, demand has grown for groundwater models that more realistically incorporate surface water. Often, groundwater models are motivated by questions regarding groundwater/surface water interactions and the availability or quality of in-stream flows. The Streamflow Routing (SFR) Package for MODFLOW (Prudic, 2004) allows for more realistic simulation of groundwater/surface water interactions and in-stream flows but remains underutilized, presumably due to the complexity of input requirements (Anderson and others, 2015). Preparation of SFR input requires mapping linear stream features to a finite-difference grid, and populating each finite difference cell with attributes describing the properties of stream reaches within that cell. This process can be arduous and error-prone, requiring many geoprocessing operations or even extensive hand-digitizing of features. The number and complexity of operations presents a fundamental challenge to scientific reproducibility (e.g ref: Peng 2011 Science article) and step-wise modeling (Haitjema, 1995).</p>
+<p>Increasingly pressing and often complex water resources challenges require groundwater models that more holistically consider the integrated water cycle, and that can be built and updated on faster timeframes. While more advanced boundary condition formulations such as the Streamflow Routing (SFR) Package for MODFLOW (Prudic et al. 2004; Niswonger and Prudic 2005; Langevin et al. 2017) have long been available, they are often underutilized, presumably due to the complexity of input requirements (Anderson et al. 2015). Preparation of SFR input requires mapping linear stream features to a finite-difference grid, and populating each resulting stream reach with attribute properties. This process can be arduous and error-prone, requiring many geoprocessing operations or even extensive hand-digitizing of features. The number and complexity of operations presents a fundamental challenge to <a class="reference external" href="https://doi.org/10.1126/science.1213847">scientific reproducibility</a> and <a class="reference external" href="https://haitjema.com/stepwise.html">step-wise modeling</a> (Haitjema 1995).</p>
 </section>
 <section id="what-sfrmaker-does">
 <h2>What SFRmaker does<a class="headerlink" href="#what-sfrmaker-does" title="Permalink to this heading">¶</a></h2>
-<p>SFRmaker translates hydrography data into input for the MODFLOW-2005 (Harbaugh, 2005) or MODFLOW-6 (Langevin, 2017) SFR package, using the open-source python geospatial stack. NHDPlus data (McKay and others, 2012) can be read directly, or any hydrography with routing information (in an attribute field) can be used. In general, SFRmaker is designed for the basic use case of a structured model grid and rectangular stream channel, where stage is estimated as part of the SFR package solution (ICALC=1 in MODFLOW-2005 parlance, or the input available in MODFLOW-6). Other options, such as specifying stream depth, unsaturated flow parameters and lake connections, can be accomplished by editing <code class="docutils literal notranslate"><span class="pre">reach_data</span></code> and <code class="docutils literal notranslate"><span class="pre">segment_data</span></code> tables associated with an <code class="docutils literal notranslate"><span class="pre">SFRData</span></code> object (see Basic Usage section). SFRmaker produces an SFR package input file as output, as well as shapefiles for visualizing the SFR package.</p>
+<p>SFRmaker translates hydrography (“flowlines” or LineString features representing streams) into input for the MODFLOW-2005 (Harbaugh 2005) or MODFLOW-6 (Langevin 2017) SFR package, using the open-source Python geospatial stack. NHDPlus data (McKay et al. 2012) can be read directly, or any hydrography with routing attribute information can be used. Additional auxillary data such as observation locations, specified inflows, and surface runoff can be supplied in general formats such as shapefiles, CSV or NetCDF files. Streambed elevations can be estimated from a DEM, by sampling and then monotonically smoothing minimum elevations in the vicinity of each line. Overly dense stream networks can be pruned, and some common issues resolved semi-automatically with a preprocessing module that produces an intermediate set of (grid-independent) flowlines for a project area.</p>
+<p>In general, SFRmaker is designed for the basic use case of a structured model grid and rectangular stream channel, where stage is estimated as part of the SFR package solution (ICALC=1 in MODFLOW-2005 parlance, or the input available in MODFLOW-6). Other options, such as specifying stream depth, unsaturated flow parameters and lake connections, can be accomplished within a script by editing the <code class="docutils literal notranslate"><span class="pre">reach_data</span></code> and <code class="docutils literal notranslate"><span class="pre">segment_data</span></code> tables associated with an <code class="docutils literal notranslate"><span class="pre">SFRData</span></code> object (see Basic Usage section). SFRmaker produces an SFR package input file, along with optional input to the MODFLOW 6 observation utility or HYDMOD, and shapefiles for visualizing the SFR package.</p>
 </section>
 <section id="what-sfrmaker-doesn-t-do">
 <h2>What SFRmaker doesn’t do<a class="headerlink" href="#what-sfrmaker-doesn-t-do" title="Permalink to this heading">¶</a></h2>
-<p>Development of Sfrmaker has been primarily driven by project needs. As a result, it does not provide comprehensive support for the features available in the MODFLOW SFR Package. Currently, only structured model grids (those with row, column indices) are supported. As noted above, advanced SFR input options including lake connections, unsaturated flow beneath streams and diversions must be specified manually by editing the reach or segment data tables. Non-rectangular channel geometries are not supported. Support for unstructured grids and other SFR features may be added in the future. Contributions are welcome through GitHub pull requests; see the Contributing page.</p>
+<p>SFRmaker doesn’t map streams. Input hydrography can be obtained from databases such as NHDPlus, developed via flow accumulation methods (for example, Gardner et al. 2018) or even digitized by hand in a GIS environment. Development of SFRmaker has been primarily driven by project needs. As a result, it does not provide comprehensive support for the features available in the MODFLOW SFR Package. Currently, only structured model grids (those with row, column indices) are supported. As noted above, advanced SFR input options including lake connections, unsaturated flow beneath streams and diversions must be specified manually by editing the reach or segment data tables. Non-rectangular channel geometries are not supported. Support for unstructured grids and other SFR features may be added in the future. Contributions are welcome through GitHub pull requests; see the Contributing page.</p>
+</section>
+<section id="read-more">
+<h2>Read more<a class="headerlink" href="#read-more" title="Permalink to this heading">¶</a></h2>
+<p>Further description of SFRmaker and the companion <a class="reference external" href="https://github.com/DOI-USGS/linesink-maker">Linesink-maker package</a> for <a class="reference external" href="https://www.epa.gov/ceam/gflow-groundwater-flow-analytic-element-model">analytic element models</a> can be found in <a class="reference external" href="https://doi.org/10.1111/gwat.13095">Leaf et al. 2021.</a></p>
+<section id="cited-references">
+<h3>Cited <a class="reference internal" href="references.html#references"><span class="std std-ref">References</span></a><a class="headerlink" href="#cited-references" title="Permalink to this heading">¶</a></h3>
+</section>
 </section>
 </section>
 
@@ -155,7 +149,7 @@
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Aug 01, 2022.
+      <span class="lastupdated">Last updated on Jul 24, 2023.
       </span></p>
   </div>
 

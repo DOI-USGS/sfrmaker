@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>sfrmaker.flows &mdash; SFRmaker 0.9.1.post12.dev0+g0c5d9bf documentation</title>
+  <title>sfrmaker.flows &mdash; SFRmaker 0.10.0.post16.dev0+gae6eca3 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
@@ -17,6 +17,7 @@
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
         <script src="../../_static/clipboard.min.js"></script>
         <script src="../../_static/copybutton.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -30,14 +31,18 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../index.html" class="icon icon-home"> SFRmaker
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            SFRmaker
           </a>
               <div class="version">
-                0.9.1.post12.dev0+g0c5d9bf
+                0.10.0.post16.dev0+gae6eca3
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -54,6 +59,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../inputs.html"> Input Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../examples.html"> Using SFRmaker with a configuration file</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../notebooks/SFRmaker_demo.html"> Basic Usage in a scripting context</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../notebooks/preprocessing_demo.html"> Preprocessing NHDPlus version 2 data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../notebooks/lines_from_NHDPlusHR_demo.html"> Using SFRmaker with NHDPlus High Resolution</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../concepts.html"> Concepts and methods</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../notebooks/sfrmaker_tools.html"> Stand-alone tools</a></li>
@@ -84,9 +90,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../index.html">Module code</a> &raquo;</li>
-      <li>sfrmaker.flows</li>
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">sfrmaker.flows</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -99,6 +105,7 @@
 <span></span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Functions for getting or adding specified flows or other stress-period-based inputs to the SFR package.</span>
 <span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
@@ -115,7 +122,7 @@
 <div class="viewcode-block" id="get_inflow_locations_from_parent_model"><a class="viewcode-back" href="../../api/sfrmaker.flows.html#sfrmaker.flows.get_inflow_locations_from_parent_model">[docs]</a><span class="k">def</span> <span class="nf">get_inflow_locations_from_parent_model</span><span class="p">(</span><span class="n">parent_reach_data</span><span class="p">,</span> <span class="n">inset_reach_data</span><span class="p">,</span>
                                            <span class="n">inset_grid</span><span class="p">,</span> <span class="n">active_area</span><span class="o">=</span><span class="kc">None</span>
                                            <span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Get places in an inset model SFR network where the parent SFR network crosses</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get places in an inset model SFR network where the parent SFR network crosses</span>
 <span class="sd">    the inset model boundary, using common line ID numbers from parent and inset reach datasets.</span>
 <span class="sd">    MF2005 or MF6 supported; if either dataset contains only reach numbers (is MODFLOW-6),</span>
 <span class="sd">    the reach numbers are used as segment numbers, with each segment only having one reach.</span>
@@ -152,7 +159,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># spatial reference instances defining parent and inset grids</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">inset_grid</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">inset_grid</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">inset_grid</span><span class="p">,</span> <span class="n">Path</span><span class="p">):</span>
         <span class="n">grid</span> <span class="o">=</span> <span class="n">load_modelgrid</span><span class="p">(</span><span class="n">inset_grid</span><span class="p">)</span>
     <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">inset_grid</span><span class="p">,</span> <span class="n">flopy</span><span class="o">.</span><span class="n">discretization</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">Grid</span><span class="p">):</span>
         <span class="n">grid</span> <span class="o">=</span> <span class="n">inset_grid</span>
@@ -164,7 +171,7 @@
         <span class="n">active_area</span> <span class="o">=</span> <span class="n">box</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
 
     <span class="c1"># parent and inset reach data</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parent_reach_data</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parent_reach_data</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parent_reach_data</span><span class="p">,</span> <span class="n">Path</span><span class="p">):</span>
         <span class="n">prd</span> <span class="o">=</span> <span class="n">shp2df</span><span class="p">(</span><span class="n">parent_reach_data</span><span class="p">)</span>
     <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parent_reach_data</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
         <span class="n">prd</span> <span class="o">=</span> <span class="n">parent_reach_data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
@@ -176,7 +183,7 @@
     <span class="n">mustinclude_cols</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;line_id&#39;</span><span class="p">,</span> <span class="s1">&#39;rno&#39;</span><span class="p">,</span> <span class="s1">&#39;iseg&#39;</span><span class="p">,</span> <span class="s1">&#39;ireach&#39;</span><span class="p">,</span> <span class="s1">&#39;geometry&#39;</span><span class="p">}</span>
     <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">mustinclude_cols</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">prd</span><span class="o">.</span><span class="n">columns</span><span class="p">))</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">mustinclude_cols</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">inset_reach_data</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">inset_reach_data</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">inset_reach_data</span><span class="p">,</span> <span class="n">Path</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">inset_reach_data</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.shp&#39;</span><span class="p">):</span>
             <span class="n">ird</span> <span class="o">=</span> <span class="n">shp2df</span><span class="p">(</span><span class="n">inset_reach_data</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -254,7 +261,7 @@
 <div class="viewcode-block" id="get_inflows_from_parent_model"><a class="viewcode-back" href="../../api/sfrmaker.flows.html#sfrmaker.flows.get_inflows_from_parent_model">[docs]</a><span class="k">def</span> <span class="nf">get_inflows_from_parent_model</span><span class="p">(</span><span class="n">parent_reach_data</span><span class="p">,</span> <span class="n">inset_reach_data</span><span class="p">,</span>
                                   <span class="n">mf2005_parent_sfr_outputfile</span><span class="p">,</span> <span class="n">mf6_parent_sfr_budget_file</span><span class="p">,</span>
                                   <span class="n">inset_grid</span><span class="p">,</span> <span class="n">active_area</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Get places in an inset model SFR network where the parent SFR network crosses</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get places in an inset model SFR network where the parent SFR network crosses</span>
 <span class="sd">    the inset model boundary, using common line ID numbers from parent and inset reach datasets.</span>
 <span class="sd">    MF2005 or MF6 supported; if either dataset contains only reach numbers (is MODFLOW-6),</span>
 <span class="sd">    the reach numbers are used as segment numbers, with each segment only having one reach.</span>
@@ -312,7 +319,7 @@
                       <span class="n">data_column</span><span class="o">=</span><span class="s1">&#39;Q_avg&#39;</span><span class="p">,</span>
                       <span class="n">one_inflow_per_path</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                       <span class="n">distribute_flows_to_reaches</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Add data to the period data table (sfrdata.period_data)</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Add data to the period data table (sfrdata.period_data)</span>
 <span class="sd">    for a MODFLOW-6 style sfrpackage.</span>
 
 <span class="sd">    Parameters</span>
@@ -411,7 +418,7 @@
         <span class="c1">#  to each line_id_in_model)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;line_id_in_model&#39;</span><span class="p">]))</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">line_id_column</span><span class="p">])):</span>
             <span class="n">by_line_id_in_model</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s1">&#39;per&#39;</span><span class="p">,</span> <span class="s1">&#39;line_id_in_model&#39;</span><span class="p">])</span>
-            <span class="n">sums</span> <span class="o">=</span> <span class="n">by_line_id_in_model</span><span class="o">.</span><span class="n">sum</span><span class="p">()[[</span><span class="n">data_column</span><span class="p">]]</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+            <span class="n">sums</span> <span class="o">=</span> <span class="n">by_line_id_in_model</span><span class="p">[[</span><span class="n">data_column</span><span class="p">]]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
             <span class="c1"># preserve other columns that were dropped in sum()</span>
             <span class="c1"># (e.g. datetime)</span>
             <span class="n">other_columns</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">sums</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span><span class="o">.</span><span class="n">difference</span><span class="p">({</span><span class="n">line_id_column</span><span class="p">})</span>
@@ -566,7 +573,7 @@
                         <span class="n">segment_column</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                         <span class="n">period_column</span><span class="o">=</span><span class="s1">&#39;per&#39;</span><span class="p">,</span>
                         <span class="n">data_column</span><span class="o">=</span><span class="s1">&#39;Q_avg&#39;</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Like add_to_perioddata, but for MODFLOW-2005.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Like add_to_perioddata, but for MODFLOW-2005.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">sfrd</span> <span class="o">=</span> <span class="n">sfrdata</span>
 
@@ -644,7 +651,7 @@
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Aug 01, 2022.
+      <span class="lastupdated">Last updated on Jul 24, 2023.
       </span></p>
   </div>
 

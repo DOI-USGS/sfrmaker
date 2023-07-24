@@ -94,7 +94,7 @@ In particular, when submitting a pull request:
   imports when possible, and explicit relative imports for local
   imports when necessary in tests. Imports can be sorted automatically using the isort package with a pre-commit hook. For more details see :ref:`below <contributing_style>`.
 
-- SFRmaker supports Python 3.7+ only.
+- SFRmaker supports Python 3.9+ only.
 
 
 Seven Steps for Contributing
@@ -151,7 +151,7 @@ want to clone your fork to your machine::
 
     git clone git@github.com:your-user-name/sfrmaker.git sfrmaker-yourname
     cd sfrmaker-yourname
-    git remote add upstream git://github.com/sfrmaker/sfrmaker.git
+    git remote add upstream https://github.com/sfrmaker/sfrmaker.git
 
 This creates the directory `sfrmaker-yourname` and connects your repository to
 the upstream (main project) *SFRmaker* repository.
@@ -299,6 +299,20 @@ Once you've made changes and pushed them to your forked repository, you then
 submit a pull request to have them integrated into the *SFRmaker* code base.
 
 You can find a pull request (or PR) tutorial in the `GitHub's Help Docs <https://help.github.com/articles/using-pull-requests/>`_.
+
+.. note::
+   Please make pull requests to the develop branch; the master branch is typically only updated when releases are made to PyPI.
+
+.. note::
+   If you haven't already, it's also good practice to rebase the feature branch that your are working on (e.g. ``shiny-new-feature`` above) to the develop branch on the main repository. This brings your branch into sync with the main develop branch, and places the commits you are adding (the new feature or bug fix, etc) on top of it. If you see a message in the pull request dialog on GitHub such as "This branch cannot be rebased due to conflicts", rebasing your feature branch to the develop branch on the main repository should fix it. Note that you may have to use the ``-f`` flag to force push to your fork after rebasing. For example:
+
+   .. code-block:: 
+
+     git fetch upstream
+     git rebase upstream/develop
+     git push origin shiny-new-feature
+
+   (this assumes that your remote pointing to the main repository is called *upstream*, and your remote pointing to your fork is called *origin*) 
 
 .. _contributing_style:
 

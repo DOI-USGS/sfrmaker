@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SFRmaker &mdash; SFRmaker 0.9.1.post12.dev0+g0c5d9bf documentation</title>
+  <title>SFRmaker &mdash; SFRmaker 0.10.0.post16.dev0+gae6eca3 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
@@ -18,6 +18,7 @@
         <script src="_static/underscore.js"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
         <script src="_static/clipboard.min.js"></script>
         <script src="_static/copybutton.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -32,14 +33,18 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="#" class="icon icon-home"> SFRmaker
+
+          
+          
+          <a href="#" class="icon icon-home">
+            SFRmaker
           </a>
               <div class="version">
-                0.9.1.post12.dev0+g0c5d9bf
+                0.10.0.post16.dev0+gae6eca3
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -56,6 +61,7 @@
 <li class="toctree-l1"><a class="reference internal" href="inputs.html"> Input Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples.html"> Using SFRmaker with a configuration file</a></li>
 <li class="toctree-l1"><a class="reference internal" href="notebooks/SFRmaker_demo.html"> Basic Usage in a scripting context</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/preprocessing_demo.html"> Preprocessing NHDPlus version 2 data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="notebooks/lines_from_NHDPlusHR_demo.html"> Using SFRmaker with NHDPlus High Resolution</a></li>
 <li class="toctree-l1"><a class="reference internal" href="concepts.html"> Concepts and methods</a></li>
 <li class="toctree-l1"><a class="reference internal" href="notebooks/sfrmaker_tools.html"> Stand-alone tools</a></li>
@@ -86,8 +92,8 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="#" class="icon icon-home"></a> &raquo;</li>
-      <li>SFRmaker</li>
+      <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">SFRmaker</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -97,33 +103,11 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  
-<style>
-/* CSS overrides for sphinx_rtd_theme */
-
-/* 24px margin */
-.nbinput.nblast.container,
-.nboutput.nblast.container {
-    margin-bottom: 19px;  /* padding has already 5px */
-}
-
-/* ... except between code cells! */
-.nblast.container + .nbinput.container {
-    margin-top: -19px;
-}
-
-.admonition > p:before {
-    margin-right: 4px;  /* make room for the exclamation icon */
-}
-
-/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
-.math {
-    text-align: unset;
-}
-</style>
-<section id="sfrmaker">
+  <section id="sfrmaker">
 <h1>SFRmaker<a class="headerlink" href="#sfrmaker" title="Permalink to this heading">¶</a></h1>
-<p>version 0.9.1.post12.dev0+g0c5d9bf</p>
+<p>version 0.10.0.post16.dev0+gae6eca3</p>
+<p><a class="reference external" href="https://github.com/DOI-USGS/sfrmaker"><strong>Go to the GitHub site</strong></a></p>
+<p><a class="reference external" href="https://ngwa.onlinelibrary.wiley.com/doi/full/10.1111/gwat.13095"><strong>Read the paper</strong></a></p>
 <hr><div class="toctree-wrapper compound">
 <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
 <ul>
@@ -131,6 +115,10 @@
 <li class="toctree-l2"><a class="reference internal" href="philosophy.html#motivation">Motivation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="philosophy.html#what-sfrmaker-does">What SFRmaker does</a></li>
 <li class="toctree-l2"><a class="reference internal" href="philosophy.html#what-sfrmaker-doesn-t-do">What SFRmaker doesn’t do</a></li>
+<li class="toctree-l2"><a class="reference internal" href="philosophy.html#read-more">Read more</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="philosophy.html#cited-references">Cited <span class="xref std std-ref">References</span></a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="examples.html"> Examples</a><ul>
@@ -149,9 +137,9 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html"> Installation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="installation.html#installing-python-dependencies-with-conda">Installing python dependencies with Conda</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="installation.html#download-and-install-the-64-bit-anaconda-python-distribution-or-miniconda">Download and install the 64-bit Anaconda python distribution or Miniconda</a></li>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#download-and-install-a-python-distribution-and-conda-like-package-installer">Download and install a python distribution and Conda-like package installer</a></li>
 <li class="toctree-l3"><a class="reference internal" href="installation.html#download-an-environment-file">Download an environment file</a></li>
-<li class="toctree-l3"><a class="reference internal" href="installation.html#creating-a-conda-environment">Creating a Conda environment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#creating-a-conda-environment-using-mamba">Creating a Conda environment using Mamba</a></li>
 <li class="toctree-l3"><a class="reference internal" href="installation.html#keeping-the-conda-environment-up-to-date">Keeping the Conda environment up to date</a></li>
 </ul>
 </li>
@@ -161,8 +149,10 @@
 <li class="toctree-l3"><a class="reference internal" href="installation.html#installing-the-sfrmaker-source-code-in-place">Installing the SFRmaker source code in-place</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="installation.html#id1">Considerations for USGS Users</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="installation.html#id2">Installing the DOI SSL certificate for use with pip</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#installing-the-ipython-kernel-to-use-sfrmaker-in-jupyter-notebooks">Installing the IPython kernel to use SFRmaker in Jupyter Notebooks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#best-practices">Best practices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#id4">Considerations for USGS Users</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#id5">Installing the DOI SSL certificate for use with pip</a></li>
 <li class="toctree-l3"><a class="reference internal" href="installation.html#installing-the-doi-ssl-certificate-for-use-with-conda">Installing the DOI SSL certificate for use with conda</a></li>
 <li class="toctree-l3"><a class="reference internal" href="installation.html#troubleshooting-issues-with-the-usgs-network">Troubleshooting issues with the USGS network</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="installation.html#ssl-related-error-messages-when-using-conda">SSL-related error messages when using conda</a></li>
@@ -206,6 +196,12 @@
 <li class="toctree-l2"><a class="reference internal" href="notebooks/SFRmaker_demo.html#Writing-a-MODFLOW-6-SFR-package">Writing a MODFLOW-6 SFR package</a></li>
 <li class="toctree-l2"><a class="reference internal" href="notebooks/SFRmaker_demo.html#Writing-tables">Writing tables</a></li>
 <li class="toctree-l2"><a class="reference internal" href="notebooks/SFRmaker_demo.html#Writing-shapefiles">Writing shapefiles</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/preprocessing_demo.html"> Preprocessing NHDPlus version 2 data</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/preprocessing_demo.html#Merging-and-culling-flowlines">Merging and culling flowlines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/preprocessing_demo.html#Preprocessing-the-flowlines">Preprocessing the flowlines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/preprocessing_demo.html#Clipping-the-flowlines-to-a-specific-area">Clipping the flowlines to a specific area</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="notebooks/lines_from_NHDPlusHR_demo.html"> Using SFRmaker with NHDPlus High Resolution</a><ul>
@@ -258,7 +254,7 @@
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Aug 01, 2022.
+      <span class="lastupdated">Last updated on Jul 24, 2023.
       </span></p>
   </div>
 
