@@ -1519,15 +1519,16 @@ def swb_runoff_to_csv(swb_runoff_netcdf_output, nhdplus_catchments_file,
     
     
     Some notes on SWB output variables, as of 7/5/2023: 
-    * `'runoff_outside'` is the sum of `'runoff'` plus `'rejected_net_infiltration'`. 
-    * When routing is inactive in the SWB simulation, 'runoff_outside' is computed 
-      for every SWB grid cell. In this case, it can be supplied here to
-      `swb_runoff_netcdf_output` (and `runoff_output_variable`), in lieu of supplying both 
-      `swb_runoff_netcdf_output` and `swb_rejected_net_inf_output`.
-    * When routing is active, 'runoff_outside' represents only water that cannot 
-      be moved downslope; in most cases it should be zero in the model interior.
-      In this case, one would most likely supply both `swb_runoff_netcdf_output` and 
-      `swb_rejected_net_inf_output`.
+    
+        * ``'runoff_outside'`` is the sum of ``'runoff'`` plus ``'rejected_net_infiltration'``. 
+        * When routing is inactive in the SWB simulation, ``'runoff_outside'`` is computed 
+          for every SWB grid cell. In this case, it can be supplied here to 
+          ``swb_runoff_netcdf_output`` (and ``runoff_output_variable``), in lieu of supplying both 
+          ``swb_runoff_netcdf_output`` and ``swb_rejected_net_inf_output``.
+        * When routing is active, ``'runoff_outside'`` represents only water that cannot 
+          be moved downslope; in most cases it should be zero in the model interior. 
+          In this case, one would most likely supply both ``swb_runoff_netcdf_output`` and 
+          ``swb_rejected_net_inf_output``.
     
     """    
     outfile = Path(outfile)

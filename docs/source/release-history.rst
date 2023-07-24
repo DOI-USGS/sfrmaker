@@ -2,6 +2,17 @@
 Release History
 ===============
 
+Version 0.10.2 (2023-07-24)
+---------------------------
+ * enhancements to ``preprocessing.swb_runoff_to_csv()``:
+    * add option to limit runoff output to a polygon area
+    * add option to include x, y coordinates in output in a specified CRS (were previously included by default in the same CRS as the NetCDF input)
+    * add start\_ and end_datetime args to limit the timespan of runoff output
+    * add more robust detection of coordinate reference system of NetCDF input
+    * add additional plotting and GIS layers export for diagnostic/QC checking (done by default)
+ * fixes to adapted to breaking changes with pandas 2.0 and revised flopy modelgrid/crs interface
+ * bug fix in cull_flowlines() function in preprocessing.py
+
 Version 0.10.1 (2023-02-06)
 ---------------------------
 * fixes to adapt to breaking changes in numpy 1.24
