@@ -2,7 +2,7 @@
 Release History
 ===============
 
-Version 0.10.2 (2023-07-24)
+Version 0.11.0 (2023-07-25)
 ---------------------------
  * enhancements to ``preprocessing.swb_runoff_to_csv()``:
     * add option to limit runoff output to a polygon area
