@@ -6,7 +6,7 @@ Installing python dependencies with Conda
 -----------------------------------------
 SFRmaker depends on a number of python packages, many of which have external C library dependencies. The easiest way to install most of these is with a package installer like `Conda`_. A few packages are not available via conda, and must be installed with `pip`_. If you are on the USGS internal network, see the `Considerations for USGS Users`_ section below first.
 
-Download and install a python distribution and Conda-like package installer 
+Download and install a python distribution and Conda-like package manager 
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 There are many ways to do this:
 
@@ -16,8 +16,13 @@ There are many ways to do this:
 
     * `Mambaforge <https://github.com/conda-forge/miniforge#mambaforge>`_ is like Miniconda, but pre-configured to use the `Mamba`_ installer, and only the `conda-forge <https://conda-forge.org/docs/user/introduction.html>`_ channel for getting packages (more below). If the above two options don't work (for example, the Conda installer fails or gets stuck on the "solve" step), this may be your best option.
 
-**Make sure to install Anaconda or Miniconda to your username** (not at the system level). More often than not, installing at the system level (for all users) seems to result in issues with library dependencies (for example, import of ``fiona`` or ``rasterio`` failing because gdal isn't found). It is also good practice to periodically do a `clean uninstall`_ of Anaconda, which at the system level requires admin. privileges.
+**Make sure to install the python distribution to your username** (not at the system level). More often than not, installing at the system level (for all users) seems to result in issues with library dependencies (for example, import of ``fiona`` or ``rasterio`` failing because gdal isn't found). It is also good practice to periodically do a `clean uninstall`_ of Anaconda, which at the system level requires admin. privileges.
 
+Mambaforge-specific instructions:
+  * If after downloading the Mambaforge installer you get a message that it "isn't commonly downloaded" and the option to "Trust" it is grayed out (because you don't have sufficient rights), try using a different browser like Google Chrome (for example, if you were using Microsoft Edge).
+  * Once the installer is running, go against the recommendation and **select the option to add Mambaforge to the system path for your user.**
+
+Anaconda-specific instructions:
   * In the installer, at the “Destination Select” step, select “Install for me only.” It should say something about how the software will be installed to your home folder.
 
   * If your installer skips the “Destination Select” step, when you get to "Installation Type", click “Change Install Location” and then “Install for me only.”
@@ -59,10 +64,12 @@ Once you have a python distribution and mamba installed, to create the conda env
 
     mamba env create -f requirements.yml
 
-Building the environment will probably take a while. If the build fails because of an SSL error, fix the problem (see `Considerations for USGS Users`_ below) and either:
 
     .. note::
         Creating the ``requirements.yml`` environment (or any environment with ``git+https: ...`` installs) requires Git to be installed and visible in the system path where ``env create`` is being run. If Git is installed and somehow not in the system path, it can be added to the system path on Windows 10 without admin. rights via the "environment variables" editor under User Accounts in the Control Panel (Google it).
+
+Building the environment will probably take a while. If the build fails because of an SSL error, fix the problem (see `Considerations for USGS Users`_ below) and either:
+
 
     a) 	Update the environment
 
@@ -79,7 +86,7 @@ Building the environment will probably take a while. If the build fails because 
 
 Keeping the Conda environment up to date
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-The python packages and other open source software libraries that SFRmaker depends on are continually changing. SFRmaker aims to mostly follow the `Numpy guidelines for package support <https://numpy.org/neps/nep-0029-deprecation_policy.html>`_, which effectively means that the two latest minor versions of Python (e.g. 3.9 and 3.8) and their associated Numpy versions will be supported. However, occasionally backwards compatability with a particular package may be broken in a shorter timeframe, in which case the minimum required version of that package will be specified in the ``requirements.yml`` file. All of this to say that your Conda environment will eventually get out of date. The `Conda documentation <https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html>`_ has instructions for updating packages within a Conda environment, but at some point (perhaps a few times a year) it is good practice to simply delete the environment and rebuild it from the `.yml` file. Every so often, you may also want to reinstall Anaconda after a `clean uninstall`_.
+The python packages and other open source software libraries that SFRmaker depends on are continually changing. SFRmaker aims to mostly follow the `Numpy guidelines for package support <https://numpy.org/neps/nep-0029-deprecation_policy.html>`_, which effectively means that the two latest minor versions of Python (e.g. 3.11 and 3.10) and their associated Numpy versions will be supported. However, occasionally backwards compatability with a particular package may be broken in a shorter timeframe, in which case the minimum required version of that package will be specified in the ``requirements.yml`` file. All of this to say that your Conda environment will eventually get out of date. The `Conda documentation <https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html>`_ has instructions for updating packages within a Conda environment, but at some point (perhaps a few times a year) it is good practice to simply delete the environment and rebuild it from the `.yml` file. Every so often, you may also want to reinstall Anaconda after a `clean uninstall`_.
 
 Installing SFRmaker
 ------------------------
@@ -184,28 +191,61 @@ Best practices
 * Use `conda-pack`_, rather than an overly-detailed environment file, to guarantee reproducibility.
 
 
-_`Considerations for USGS Users`
---------------------------------
+_`Considerations for USGS Users` (or anyone else with an organizational SSL certificate)
+-------------------------------------------------------------------------------------------
 Using conda or pip on the USGS network requires SSL verification, which can cause a number of issues.
 If you are encountering persistant issues with creating the conda environment,
 you may have better luck trying the install off of the USGS network (e.g. at home).
 See `here <https://tst.usgs.gov/applications/application-and-script-signing/>`__ for more information
-about SSL verification on the USGS network, and to download the DOI SSL certificate.
+about SSL verification on the USGS network, and to download the DOI SSL certificate. It might be most helpful to consult with your local IT staff; some centers pre-install the appropriate certificate bundle on all new computers.
 
 _`Installing the DOI SSL certificate for use with pip`
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 1) `Download the DOI SSL certificate (internal DOI network only) <https://tst.usgs.gov/applications/application-and-script-signing/>`_
-2) On Windows, create the file ``C:\Users\<your username>\AppData\Roaming\pip\pip.ini``.
-   On OSX, create ``/Users/<your username>/Library/Application Support/pip/pip.conf``.
-
-Include the following in this file:
+2) Create a pip configuration file at your user level as described `here <https://pip.pypa.io/en/stable/topics/configuration/>`_
+    * On Windows, this may be ``C:\Users\<your username>\AppData\Roaming\pip\pip.ini``.
+    * On OSX, this may be ``/Users/<your username>/Library/Application Support/pip/pip.conf``.
 
 ::
 
     [global]
-    cert = <path to DOI certificate file (e.g. DOIRootCA2.cer)>
+    cert = <path to DOI certificate bundle (e.g. cacert_usgs.pem)>
 
-Note that when you are off the USGS network, you may have to comment out the ``cert=`` line in the above pip configuration file to get ``pip`` to work.
+
+`More information on the pip configuration file and it's location <https://pip.pypa.io/en/stable/topics/configuration/>`_
+
+You can verify the pip configuration that is being used at a particular location with
+
+::  
+
+    pip config list
+
+
+.. note::
+    When you are off the USGS network, you may have to comment out the ``cert=`` line with a leading ``#`` 
+    in the above pip configuration file to get ``pip`` to work.
+
+.. note::
+    To test that pip is working, simply try ``pip install --upgrade`` on a package of choice; ideally one that is relatively downstream in the dependency stack (for example, ``gis-utils``), so as to minimize any additional changes to your environment that may occur.
+
+
+_`Installing the DOI SSL certificate for use with git`
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Using git to reach out to the web also requires the appropriate certificate bundle. This is stored in the git configuration under the ``http.sslCAinfo`` variable. A valid certificate is needed here to clone and push/pull from git repositories, and also to install packages from git using pip (for example, the entries in ``requirements.yml`` starting with ``git+https://github.com/``). A missing certificate bundle will cause setup of the ``sfrmaker`` environment to fail on the pip installs section, even if a valid certificate bundle is specified in the pip configuration bundle. To add your certificate bundle to git:
+
+.. code-block:: bash
+
+    git config --global http.sslCAinfo <path to DOI certificate bundle (e.g. cacert_usgs.pem)>
+
+You can then verify that the certificate was added by displaying your git configuration
+
+.. code-block:: bash
+
+    git config --list
+
+.. note::
+    To test that both pip and git are working, simply try ``pip install --upgrade`` on a package in the pip section of ``requirements.yml`` that starts with ``git+https://``; for example ``git+https://github.com/modflowpy/flopy@develop``.
+
 
 Installing the DOI SSL certificate for use with conda
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -235,6 +275,10 @@ Common issues:
 Troubleshooting issues with the USGS network
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+.. note::
+    If all else fails, you can simply try running the installs off-network.
+
+
 SSL-related error messages when using conda
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 (with ``SSL`` mentioned in the message and possibly ``bad handshake``)
@@ -243,12 +287,35 @@ Make sure that the ``Conda`` package installer is configured to use the USGS cer
 (see :ref:`Installing the DOI SSL certificate for use with conda` above).
 
 
-SSL-related error messages when using pip
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-(something similar to ``SSL: CERTIFICATE_VERIFY_FAILED``).
+SSL-related error messages when using building a conda environment or using pip
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+If the error message looks like this:
 
-Make sure that the ``pip`` package installer is configured to use the USGS certificate
+.. code::
+
+    Could not fetch URL https://pypi.org/simple/pip/: 
+    There was a problem confirming the ssl certificate: HTTPSConnectionPool(host='pypi.org', port=443): 
+    Max retries exceeded with url: /simple/pip/ (Caused by SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate 
+    verify failed: unable to get local issuer certificate (_ssl.c:997)'))) - skipping 
+
+Make sure that the ``pip`` package installer is configured to use the USGS certificate bundle
 (see `Installing the DOI SSL certificate for use with pip`_ above).
+
+If the error message looks like this:
+
+.. code::
+
+    Pip subprocess error:
+    Running command git clone --filter=blob:none --quiet https://github.com/<some package>
+    ...
+    fatal: unable to access 'https://github.com/<some package>': SSL certificate problem: unable to get local issuer certificate
+    error: subprocess-exited-with-error
+    ...
+    note: This error originates from a subprocess, and is likely not a problem with pip.
+
+Make sure that git is configured to use the USGS certificate bundle
+(see `Installing the DOI SSL certificate for use with git`_ above).
+
 
 If you are on the USGS network, using Windows, and you get this error message:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
