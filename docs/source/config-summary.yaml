@@ -14,8 +14,6 @@ modelgrid:
   isfr_col: isfr
   active_area: None
   crs: None
-  epsg: None
-  proj_str: None
   prjfile: None
   # Flopy modelgrid option (arguments to flopy.discretization.StructuredGrid):
   delc: None
@@ -38,18 +36,16 @@ flowlines:
   id_column: id
   routing_column: toid
   arbolate_sum_column2: asum2
+  asum_units: km
   width1_column: width1
   width2_column: width2
+  width_units: meters
   up_elevation_column: elevup
   dn_elevation_column: elevdn
+  elevation_units: meters
   name_column: name
-  attr_length_units: meters
-  attr_height_units: meters
-  filter: None
   bbox_filter: None
   crs: None
-  epsg: None
-  proj_str: None
   prjfile: None
   # NHDPlus option (arguments to sfrmaker.Lines.from_nhdplus_v2):
   NHDPlus_paths: None

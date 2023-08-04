@@ -7,7 +7,7 @@ from shapely.geometry import box
 import geopandas as gpd
 import pyproj
 import flopy
-from gisutils import shp2df, df2shp, project, get_authority_crs
+from gisutils import df2shp, get_authority_crs, get_shapefile_crs
 import sfrmaker
 from sfrmaker.routing import pick_toids, find_path, make_graph, renumber_segments
 from sfrmaker.checks import routing_is_circular, is_to_one
@@ -26,40 +26,58 @@ class Lines:
 
     Parameters
     ----------
-    df : DataFrame
-        Dataframe with linestring features and attribute information.
-        Must have the following columns:
+    df : DataFrame or GeoDataFrame
+        Dataframe with linestring features (flowlines) and attribute information.
+        Column descriptions:
         
-        ============ =====================================================
-        **id**       sequential integers for identifying each feature
-        **toid**     integers representing routing connections
-        **geometry** shapely :class:`LineString` objects for each feature
-        ============ =====================================================
-        
-    attr_length_units : str, {'meters', 'feet', ..}
-        Length units for feature attributes (e.g. width, arbolate sum, etc.)
-        (default 'meters')
-    attr_height_units : str, {'meters', 'feet', ..}
-        Length units for elevation attributes
-        (default 'meters')
-    crs : obj
-        Coordinate reference system for features on df.geometry.
-        A Python int, dict, str, or :class:`pyproj.crs.CRS` instance
-        passed to :meth:`pyproj.crs.CRS.from_user_input`
-
+        ========================= =============================================================
+        **id**                    Sequential integers representing each flowline
+        **toid**                  Integers representing downstream routing connections
+        **arbolate_sum_column2**  (optional) Arbolate sum at the end of each flowline
+        **width1_column**         (optional) Stream channel width at the start of each flowline
+        **width2_column**         (optional) Stream channel width at the end of each flowline
+        **up_elevation_column**   (optional) Streambed elevation at the start of each flowline
+        **dn_elevation_column**   (optional) Streambed elevation at the end of each flowline
+        **name_column**           (optional) Flowline name
+        **geometry**              shapely :class:`LineString` objects for each feature
+        ========================= =============================================================
+    asum_units : str, optional
+        Length units for values in ``arbolate_sum_column2``; 
+        by default 'km'.
+    width_units : str, optional
+        Length units for values in ``width1_column`` and ``width2_column``; 
+        by default 'meters'.
+    elevation_units : str, optional
+        Length units for values in ``up_elevation_column`` and ``dn_elevation_column``; 
+        by default 'meters'.
+    crs : obj, optional
+        Coordinate reference object for ``df``. This argument is only needed
+        if ``df`` is not a GeoDataFrame with a valid attached coordinate reference.
         Can be any of:
-          - PROJ string
-          - Dictionary of PROJ parameters
-          - PROJ keyword arguments for parameters
-          - JSON string with PROJ parameters
-          - CRS WKT string
-          - An authority string [i.e. 'epsg:4326']
-          - An EPSG integer code [i.e. 4326]
-          - A tuple of ("auth_name": "auth_code") [i.e ('epsg', '4326')]
-          - An object with a `to_wkt` method.
-          - A :class:`pyproj.crs.CRS` class
+        - PROJ string
+        - Dictionary of PROJ parameters
+        - PROJ keyword arguments for parameters
+        - JSON string with PROJ parameters
+        - CRS WKT string
+        - An authority string [i.e. 'epsg:4326']
+        - An EPSG integer code [i.e. 4326]
+        - A tuple of ("auth_name": "auth_code") [i.e ('epsg', '4326')]
+        - An object with a `to_wkt` method.
+        - A :class:`pyproj.crs.CRS` class
+    prjfile: str, optional
+        ESRI-style projection file with coordinate reference information for ``df``. 
+        This argument is only needed if ``df`` is not a GeoDataFrame 
+        with a valid attached coordinate reference.
+    **kwargs : dict, optional
+        Support for deprecated keyword options.
 
-        By default, None
+        .. deprecated:: 0.13
+            The following arguments will be removed in SFRmaker 0.13.
+
+            - ``attr_length_units`` (str): use ``width_units`` or ``asum_units`` instead.
+            - ``attr_height_units`` (str): use ``elevation_units`` instead.
+            - ``epsg`` (int): use ``crs`` instead.
+            - ``proj_str`` (str): use ``crs`` instead.
         
     Attributes
     ----------
@@ -67,14 +85,31 @@ class Lines:
     """
 
     def __init__(self, df=None,
-                 attr_length_units='meters',
-                 attr_height_units='meters',
-                 crs=None, epsg=None, proj_str=None, prjfile=None):
+                asum_units='km',
+                width_units='meters',
+                elevation_units='meters',
+                crs=None, prjfile=None, **kwargs):
+        if 'attr_length_units' in kwargs:
+            warnings.warn(
+            "attr_length_units argument is deprecated, "
+            "use width_units or asum_units instead",
+            PendingDeprecationWarning,
+        )
+            asum_units = kwargs['attr_length_units']
+            width_units = kwargs['attr_length_units']
+        if 'attr_height_units' in kwargs:
+            warnings.warn(
+            "attr_height_units argument is deprecated, "
+            "use elevation_units instead",
+            PendingDeprecationWarning,
+        )
+            elevation_units = kwargs['attr_height_units']
 
         self.df = df
-        self.attr_length_units = attr_length_units
-        self.attr_height_units = attr_height_units
-        self.crs = get_crs(prjfile=prjfile, epsg=epsg, proj_str=proj_str, crs=crs)
+        self.asum_units = asum_units
+        self.width_units = width_units
+        self.elevation_units = elevation_units
+        self.crs = get_crs(prjfile=prjfile, crs=crs, **kwargs)
         if not hasattr(df, 'crs'):
             df = gpd.GeoDataFrame(df, crs=self.crs)
         elif self.crs is None:
@@ -425,14 +460,16 @@ class Lines:
                        id_column='id',
                        routing_column='toid',
                        arbolate_sum_column2='asum2',
+                       asum_units='km',
                        width1_column='width1',
                        width2_column='width2',
+                       width_units='meters',
                        up_elevation_column='elevup',
                        dn_elevation_column='elevdn',
+                       elevation_units='meters',
                        name_column='name',
-                       attr_length_units='meters', attr_height_units='meters',
-                       filter=None, bbox_filter=None,
-                       crs=None, epsg=None, proj_str=None, prjfile=None):
+                       bbox_filter=None,
+                       crs=None, prjfile=None, **kwargs):
         """Create a Lines instance from a shapefile.
 
         Parameters
@@ -448,35 +485,36 @@ class Lines:
         arbolate_sum_column2 : str, optional
             Attribute field with arbolate sums at downstream ends of lines, 
             by default 'asum2'
+        asum_units : str, optional
+            Length units for values in ``arbolate_sum_column2``; 
+            by default 'km'.
         width1_column : str, optional
             Attribute field with channel widths at upstream ends of lines,
             by default 'width1'
         width2_column : str, optional
             Attribute field with channel widths at downstream ends of lines, 
             by default 'width2'
+        width_units : str, optional
+            Length units for values in ``width1_column`` and ``width2_column``; 
+            by default 'meters'.
         up_elevation_column : str, optional
             Attribute field with elevations at upstream ends of lines, 
             by default 'elevup'
         dn_elevation_column : str, optional
             Attribute field with elevations at downstream ends of lines,
             by default 'elevdn'
+        elevation_units : str, optional
+            Length units for values in ``up_elevation_column`` and ``dn_elevation_column``; 
+            by default 'meters'.
         name_column : str, optional
             Attribute field with feature names, 
             by default 'name'
-        attr_length_units : str, optional
-            Length units for feature attributes (e.g. width, arbolate sum, etc.)
-            By default, meters.
-        attr_height_units : str, optional
-            Length units for elevation attributes
-            By default, 'meters'.
         bbox_filter : tuple, optional
             (xmin, ymin, xmax, ymax) bounding box to filter which records 
             are read from the shapefile. By default None.
         crs : obj, optional
-            Coordinate reference object for input flowlines. This argument is only needed
-            if the input flowlines don't have a valid projection file.
-            A Python int, dict, str, or :class:`pyproj.crs.CRS` 
-            instance passed to :meth:`pyproj.crs.CRS.from_user_input`
+            Coordinate reference object for ``shapefile``. This argument is only needed
+            if ``shapefile`` does not include a valid projection file.
             Can be any of:
             - PROJ string
             - Dictionary of PROJ parameters
@@ -489,65 +527,85 @@ class Lines:
             - An object with a `to_wkt` method.
             - A :class:`pyproj.crs.CRS` class
         prjfile: str, optional
-            File path to projection (.prj) file identifying CRS
-            for features in the input flowlines. This argument 
-            is only needed if the input flowlines don't have a 
-            valid projection file.
+            ESRI-style projection file with coordinate reference information for ``df``. 
+            This argument is only needed
+            if ``shapefile`` does not include a valid projection file.
+        **kwargs : dict, optional
+            Support for deprecated keyword options.
+
+            .. deprecated:: 0.13
+                The following arguments will be removed in SFRmaker 0.13.
+
+                - ``attr_length_units`` (str): use ``width_units`` or ``asum_units`` instead.
+                - ``attr_height_units`` (str): use ``elevation_units`` instead.
+                - ``epsg`` (int): use ``crs`` instead.
+                - ``proj_str`` (str): use ``crs`` instead.
+                - ``filter`` (tuple): use ``bbox_filter`` instead.
 
         Returns
         -------
         lines : :class:`Lines` instance
         """        
-        if filter is not None:
-            raise ValueError("The 'filter' argument is deprecated; use 'bbox_filter' instead")
+        if 'filter' in kwargs:
+            warnings.warn(
+            "filter argument is deprecated, "
+            "use bbox_filter instead",
+            PendingDeprecationWarning,
+        )
+            bbox_filter = kwargs['filter']
 
         if prjfile is None:
             prjfile = str(shapefile).replace('.shp', '.prj')
             prjfile = prjfile if os.path.exists(prjfile) else None
 
-        shpfile_crs = get_crs(prjfile=prjfile, epsg=epsg, proj_str=proj_str, crs=crs)
-
+        if crs is None and prjfile is None:
+            shpfile_crs = get_shapefile_crs(shapefile)
+        elif prjfile is not None:
+            shpfile_crs = get_shapefile_crs(prjfile)
         # ensure that bbox_filter bbox is in same crs as flowlines
         if bbox_filter is not None and not isinstance(bbox_filter, tuple):
             bbox_filter = get_bbox(bbox_filter, shpfile_crs)
 
         df = gpd.read_file(shapefile, bbox=bbox_filter)
-        #df = shp2df(shapefile, filter=bbox_filter)
         assert 'geometry' in df.columns, "No feature geometries found in {}.".format(shapefile)
 
         return cls.from_dataframe(df,
                                   id_column=id_column,
                                   routing_column=routing_column,
                                   arbolate_sum_column2=arbolate_sum_column2,
+                                  asum_units=asum_units,
                                   width1_column=width1_column,
                                   width2_column=width2_column,
+                                  width_units=width_units,
                                   up_elevation_column=up_elevation_column,
                                   dn_elevation_column=dn_elevation_column,
+                                  elevation_units=elevation_units,
                                   name_column=name_column,
-                                  attr_length_units=attr_length_units,
-                                  attr_height_units=attr_height_units,
-                                  crs=shpfile_crs, epsg=epsg, proj_str=proj_str, prjfile=prjfile)
+                                  crs=crs, prjfile=prjfile, **kwargs)
 
     @classmethod
     def from_dataframe(cls, df,
                        id_column='id',
                        routing_column='toid',
                        arbolate_sum_column2='asum2',
+                       asum_units='km',
                        width1_column='width1',
                        width2_column='width2',
+                       width_units='meters',
                        up_elevation_column='elevup',
                        dn_elevation_column='elevdn',
+                       elevation_units='meters',
                        geometry_column='geometry',
                        name_column='name',
-                       attr_length_units='meters',
-                       attr_height_units='meters',
-                       crs=None, epsg=None, proj_str=None, prjfile=None):
+                       crs=None, prjfile=None,
+                       **kwargs):
         """[summary]
 
         Parameters
         ----------
         df : DataFrame
-            Pandas DataFrame with flowline information, including
+            Pandas DataFrame or Geopandas GeoDataFrame
+            with flowline information, including
             shapely :class:`LineStrings <LineString>` in a `'geometry'` column.
         id_column : str, optional
             Attribute field with line identifiers, 
@@ -558,37 +616,64 @@ class Lines:
         arbolate_sum_column2 : str, optional
             Attribute field with arbolate sums at downstream ends of lines, 
             by default 'asum2'
+        asum_units : str, optional
+            Length units for values in ``arbolate_sum_column2``; 
+            by default 'km'.
         width1_column : str, optional
             Attribute field with channel widths at upstream ends of lines,
             by default 'width1'
         width2_column : str, optional
             Attribute field with channel widths at downstream ends of lines, 
             by default 'width2'
+        width_units : str, optional
+            Length units for values in ``width1_column`` and ``width2_column``; 
+            by default 'meters'.
         up_elevation_column : str, optional
             Attribute field with elevations at upstream ends of lines, 
             by default 'elevup'
         dn_elevation_column : str, optional
             Attribute field with elevations at downstream ends of lines,
             by default 'elevdn'
+        elevation_units : str, optional
+            Length units for values in ``up_elevation_column`` and ``dn_elevation_column``; 
+            by default 'meters'.
         name_column : str, optional
             Attribute field with feature names, 
             by default 'name'
-        attr_length_units : str, optional
-            Length units for feature attributes (e.g. width, arbolate sum, etc.)
-            By default, meters.
-        attr_height_units : str, optional
-            Length units for elevation attributes
-            By default, 'meters'.
+        crs : obj, optional
+            Coordinate reference object for ``df``. This argument is only needed
+            if ``df`` is not a GeoDataFrame with a valid attached coordinate reference.
+            Can be any of:
+            - PROJ string
+            - Dictionary of PROJ parameters
+            - PROJ keyword arguments for parameters
+            - JSON string with PROJ parameters
+            - CRS WKT string
+            - An authority string [i.e. 'epsg:4326']
+            - An EPSG integer code [i.e. 4326]
+            - A tuple of ("auth_name": "auth_code") [i.e ('epsg', '4326')]
+            - An object with a `to_wkt` method.
+            - A :class:`pyproj.crs.CRS` class
         prjfile: str, optional
-            File path to projection (.prj) file identifying CRS
-            for features in the input shapefile. By default,
-            the projection file included with the input shapefile
-            will be used.
+            ESRI-style projection file with coordinate reference information for ``df``. 
+            This argument is only needed if ``df`` is not a GeoDataFrame 
+            with a valid attached coordinate reference.
+        **kwargs : dict, optional
+            Support for deprecated keyword options.
 
+            .. deprecated:: 0.13
+                The following arguments will be removed in SFRmaker 0.13.
+
+                - ``attr_length_units`` (str): use ``width_units`` or ``asum_units`` instead.
+                - ``attr_height_units`` (str): use ``elevation_units`` instead.
+                - ``epsg`` (int): use ``crs`` instead.
+                - ``proj_str`` (str): use ``crs`` instead.
+             
         Returns
         -------
         lines : :class:`Lines` instance
         """
+
         assert geometry_column in df.columns, \
             "No feature geometries found: dataframe column '{}' doesn't exist.".format(geometry_column)
         assert routing_column in df.columns, \
@@ -625,15 +710,17 @@ class Lines:
                 assert isinstance(df[c], pd.Series)
         df = df[column_order].copy()
 
-        return cls(df, attr_length_units=attr_length_units,
-                   attr_height_units=attr_height_units,
-                   crs=crs, epsg=epsg, proj_str=proj_str, prjfile=prjfile)
+        return cls(df, 
+                   asum_units=asum_units,
+                   width_units=width_units, 
+                   elevation_units=elevation_units,
+                   crs=crs, prjfile=prjfile, **kwargs)
 
     @classmethod
     def from_nhdplus_v2(cls, NHDPlus_paths=None,
                         NHDFlowlines=None, PlusFlowlineVAA=None, PlusFlow=None, elevslope=None,
-                        filter=None, bbox_filter=None,
-                        crs=None, epsg=None, proj_str=None, prjfile=None):
+                        bbox_filter=None,
+                        crs=None, prjfile=None, **kwargs):
         """
         Parameters
         ==========
@@ -666,10 +753,8 @@ class Lines:
         bbox_filter : tuple or str
             Bounding box (tuple) or shapefile of model stream network area.
         crs : obj, optional
-            Coordinate reference object for input flowlines. This argument is only needed
+            Coordinate reference object for ``df``. This argument is only needed
             if the input flowlines don't have a valid projection file.
-            A Python int, dict, str, or :class:`pyproj.crs.CRS` 
-            instance passed to :meth:`pyproj.crs.CRS.from_user_input`
             Can be any of:
             - PROJ string
             - Dictionary of PROJ parameters
@@ -682,23 +767,29 @@ class Lines:
             - An object with a `to_wkt` method.
             - A :class:`pyproj.crs.CRS` class
         prjfile: str, optional
-            File path to projection (.prj) file identifying CRS
-            for features in the input flowlines. This argument 
-            is only needed if the input flowlines don't have a 
-            valid projection file.
+            ESRI-style projection file with coordinate reference information for ``df``. 
+            This argument is only needed
+            if the input flowlines don't have a valid projection file.
+        **kwargs : dict, optional
+            Support for deprecated keyword options.
+
+            .. deprecated:: 0.13
+                The following arguments will be removed in SFRmaker 0.13.
+                
+                - ``epsg`` (int): use ``crs`` instead.
+                - ``proj_str`` (str): use ``crs`` instead.
+                - ``filter`` (tuble): use ``bbox_filter`` instead.
 
         Returns
         -------
         lines : :class:`Lines` instance
         """
-        if filter is not None:
-            raise ValueError("The 'filter' argument is deprecated; use 'bbox_filter' instead")
         
         df = load_nhdplus_v2(NHDPlus_paths=NHDPlus_paths,
                              NHDFlowlines=NHDFlowlines, PlusFlowlineVAA=PlusFlowlineVAA,
                              PlusFlow=PlusFlow, elevslope=elevslope,
                              bbox_filter=bbox_filter,
-                             crs=crs, epsg=epsg, proj_str=proj_str, prjfile=prjfile)
+                             crs=crs, prjfile=prjfile, **kwargs)
 
         if prjfile is None:
             prjfile = get_prj_file(NHDPlus_paths, NHDFlowlines)
@@ -716,14 +807,14 @@ class Lines:
         return cls.from_dataframe(df, id_column='COMID',
                                   routing_column='tocomid',
                                   name_column='GNIS_NAME',
-                                  attr_length_units='meters',
-                                  attr_height_units='meters',
-                                  crs=crs, prjfile=prjfile)
+                                  asum_units='meters',
+                                  elevation_units='meters',
+                                  crs=crs, prjfile=prjfile, **kwargs)
 
     @classmethod
-    def from_nhdplus_hr(cls, NHDPlusHR_paths, filter=None, bbox_filter=None, 
-                        drop_fcodes=None, drop_ftypes=None, drop_NHDPlusIDs=None, crs=None,
-                        epsg=None, proj_str=None):
+    def from_nhdplus_hr(cls, NHDPlusHR_paths, bbox_filter=None, 
+                        drop_fcodes=None, drop_ftypes=None, drop_NHDPlusIDs=None,
+                        **kwargs):
         """
         Parameters
         ==========
@@ -752,53 +843,46 @@ class Lines:
                 drop_fcodes = [428]
         drop_NHDPlusIDs : int or list of ints, optional
             List of NHDFlowlines (as NHDPlusIDs) to drop from network.
-        crs : obj, optional
-            Coordinate reference object to reproject NHDPlus High Resolution 
-            flowlines. A Python int, dict, str, or :class:`pyproj.crs.CRS` 
-            instance passed to :meth:`pyproj.crs.CRS.from_user_input`
-            Can be any of:
-            - PROJ string
-            - Dictionary of PROJ parameters
-            - PROJ keyword arguments for parameters
-            - JSON string with PROJ parameters
-            - CRS WKT string
-            - An authority string [i.e. 'epsg:4326']
-            - An EPSG integer code [i.e. 4326]
-            - A tuple of ("auth_name": "auth_code") [i.e ('epsg', '4326')]
-            - An object with a `to_wkt` method.
-            - A :class:`pyproj.crs.CRS` class
+        **kwargs : dict, optional
+            Support for deprecated keyword options.
+
+            .. deprecated:: 0.13
+                The following arguments will be removed in SFRmaker 0.13.
+            
+                - ``crs``: NHDPlus HR data are assumed to include valid projection information.
+                - ``epsg`` (int): NHDPlus HR data are assumed to include valid projection information.
+                - ``proj_str`` (str): NHDPlus HR data are assumed to include valid projection information.
+                - ``filter`` (tuble): use ``bbox_filter`` instead.
 
         Returns
         ==========
         lines : :class:`Lines` instance
         """
-        if filter is not None:
-            raise ValueError("The 'filter' argument is deprecated; use 'bbox_filter' instead")
         
-        df, gdb_crs = load_nhdplus_hr(NHDPlusHR_paths, bbox_filter=bbox_filter, drop_fcodes=drop_fcodes, 
-                                      drop_ftypes=drop_ftypes, drop_NHDPlusIDs=drop_NHDPlusIDs)
+        df = load_nhdplus_hr(NHDPlusHR_paths, bbox_filter=bbox_filter, drop_fcodes=drop_fcodes, 
+                             drop_ftypes=drop_ftypes, drop_NHDPlusIDs=drop_NHDPlusIDs, **kwargs)
 
         #  check to see if flowline geodataframe needs to be reprojected, and get new CRS
-        if crs is not None or epsg is not None or proj_str is not None:
-            if crs is not None:
-                crs = get_authority_crs(crs)
-            if epsg is not None:
-                if crs is None:
-                    crs = get_authority_crs(epsg)
-            elif proj_str is not None:
-                if crs is None:
-                    crs = get_authority_crs(proj_str)
-            epsg = crs.to_epsg()
-            proj_str = crs.to_proj4()
-            
-            #  reproject
-            df = df.to_crs(crs)
-
-        #  if not, use NHDPlus HR CRS
-        else:
-            crs = get_authority_crs(gdb_crs)
-            epsg = crs.to_epsg()
-            proj_str = crs.to_proj4()
+        #if crs is not None or epsg is not None or proj_str is not None:
+        #    if crs is not None:
+        #        crs = get_authority_crs(crs)
+        #    if epsg is not None:
+        #        if crs is None:
+        #            crs = get_authority_crs(epsg)
+        #    elif proj_str is not None:
+        #        if crs is None:
+        #            crs = get_authority_crs(proj_str)
+        #    epsg = crs.to_epsg()
+        #    proj_str = crs.to_proj4()
+        #    
+        #    #  reproject
+        #    df = df.to_crs(crs)
+#
+        ##  if not, use NHDPlus HR CRS
+        #else:
+        #    crs = get_authority_crs(gdb_crs)
+        #    epsg = crs.to_epsg()
+        #    proj_str = crs.to_proj4()
 
         # convert arbolate sums from km to m
         df['asum2'] = df.ArbolateSu * 1000
@@ -813,12 +897,11 @@ class Lines:
                                   routing_column='ToNHDPID',
                                   name_column='GNIS_Name',
                                   arbolate_sum_column2='asum2',
+                                  asum_units='meters',
                                   up_elevation_column='elevup',
                                   dn_elevation_column='elevdn',
-                                  geometry_column='geometry',
-                                  attr_length_units='meters',
-                                  attr_height_units='meters',
-                                  crs=crs, epsg=epsg, proj_str=proj_str)
+                                  elevation_units='meters',
+                                  geometry_column='geometry')
 
 
     def to_sfr(self, grid=None,
@@ -932,9 +1015,12 @@ class Lines:
             self.to_crs(grid.crs)
             
         model_length_units = get_length_units(model_length_units, grid, model)
-        mult = convert_length_units(self.attr_length_units, model_length_units)
-        mult_h = convert_length_units(self.attr_height_units, model_length_units)
-        gis_mult = convert_length_units(self.geometry_length_units, model_length_units)
+        width_units_conversion = convert_length_units(
+            self.width_units, model_length_units)
+        elevation_units_conversion = convert_length_units(
+            self.elevation_units, model_length_units)
+        crs_units_conversion = convert_length_units(
+            self.geometry_length_units, model_length_units)
 
         # cull the flowlines to the active part of the model grid
         if grid.active_area is not None:
@@ -965,36 +1051,30 @@ class Lines:
         routing = self.routing.copy()
         
         # length of intersected line fragments (in model units)
-        rd['rchlen'] = np.array([g.length for g in rd.geometry]) * gis_mult
+        rd['rchlen'] = np.array([g.length for g in rd.geometry]) * crs_units_conversion
 
         # compute arbolate sums for original LineStrings if they weren't provided
+        # output all asums in meters
         if 'asum2' not in self.df.columns:
-            raise NotImplementedError('Check length unit conversions before using this option.')
+            line_lengths = np.array([g.length for g in self.df.geometry]) * \
+                convert_length_units(self.geometry_length_units, self.asum_units)
+            line_lengths_lookup = dict(zip(self.df.id, line_lengths)),
             asums = arbolate_sum(self.df.id,
-                                    dict(zip(self.df.id,
-                                            np.array([g.length for g in self.df.geometry]) * convert_length_units(self.geometry_length_units, 'meters')
-                                            )),
-                                    self.routing)
-        else:
-            #asums = dict(zip(self.df.id, 
-            #                 self.df.asum2 * convert_length_units(self.attr_length_units, 
-            #                                                      'meters')))
-            self.df['asum2'] = self.df['asum2'] * convert_length_units(self.attr_length_units, 
-                                                                    'meters')
+                                 lengths=line_lengths_lookup,
+                                 routing=self.routing)
+            self.df['asum2'] = asums
 
         # populate starting asums (asum1)
-        if 'asum1' not in self.df.columns:
-            length_conversion = convert_length_units(self.geometry_length_units, 'meters')
+        if 'asum1' not in self.df.columns or self.df['asum1'].sum() == 0:
+            length_conversion = convert_length_units(self.geometry_length_units, self.asum_units)
             line_lengths = [g.length * length_conversion for g in self.df.geometry]
             self.df['asum1'] = self.df['asum2'] - line_lengths
             
-        #routing_r = {v: k for k, v in self.routing.items() if v != 0}
-        #self.df['asum1'] = [asums.get(routing_r.get(id, 0), 0) for id in self.df.id.values]
         asum1s = dict(zip(self.df.id, self.df.asum1))
 
-        # compute arbolate sum at reach midpoints (in meters)
+        # compute arbolate sum at reach midpoints
         lengths = rd[['line_id', 'ireach', 'geometry']].copy()
-        lengths['rchlen'] = np.array([g.length for g in lengths.geometry]) * convert_length_units(self.geometry_length_units, 'meters')
+        lengths['rchlen'] = [g.length for g in lengths.geometry]
         groups = lengths.groupby('line_id')  # fragments grouped by parent line
 
         reach_cumsums = []
@@ -1005,7 +1085,8 @@ class Lines:
             reach_cumsums.append(dist)
         reach_cumsums = np.concatenate(reach_cumsums)
         segment_asums = [asum1s[id] for id in lengths.line_id]
-        reach_asums = segment_asums + reach_cumsums
+        reach_asums = segment_asums + reach_cumsums *\
+            convert_length_units(self.geometry_length_units, self.asum_units)
         # maintain positive asums; lengths in NHD often aren't exactly equal to feature lengths
         # reach_asums[reach_asums < 0.] = 0
         rd['asum'] = reach_asums
@@ -1017,7 +1098,8 @@ class Lines:
                                             a=width_from_asum_a_param,
                                             b=width_from_asum_b_param,
                                             minimum_width=minimum_reach_width,
-                                            input_units='meters', output_units=model_length_units)
+                                            input_units=self.asum_units, 
+                                            output_units=model_length_units)
             rd['width'] = width
             rd.loc[rd.width < minimum_reach_width, 'width'] = minimum_reach_width
 
@@ -1026,13 +1108,13 @@ class Lines:
                                             a=width_from_asum_a_param,
                                             b=width_from_asum_b_param,
                                             minimum_width=minimum_reach_width,
-                                            input_units=self.attr_length_units,
+                                            input_units=self.asum_units,
                                             output_units=model_length_units)
             self.df['width2'] = width_from_arbolate_sum(self.df.asum2.values,
                                                         a=width_from_asum_a_param,
                                                         b=width_from_asum_b_param,
                                                         minimum_width=minimum_reach_width,
-                                                        input_units=self.attr_length_units,
+                                                        input_units=self.asum_units,
                                                         output_units=model_length_units)
 
         # interpolate linestring end widths to intersected reaches
@@ -1048,7 +1130,8 @@ class Lines:
                                                  segvar1='width1', segvar2='width2',
                                                  reach_data_group_col='line_id',
                                                  segment_data_group_col='id'
-                                                 ) * mult
+                                                 ) * width_units_conversion
+            self.df[['width1', 'width2']] *= width_units_conversion
 
         # discard very small reaches; redo numbering
         # set minimum reach length based on cell size
@@ -1056,7 +1139,7 @@ class Lines:
         if minimum_reach_length is None:
             cellgeoms = grid.df.loc[rd.node.values, 'geometry']
             mean_area = np.mean([g.area for g in cellgeoms])
-            minimum_reach_length = np.sqrt(mean_area) * thresh * gis_mult
+            minimum_reach_length = np.sqrt(mean_area) * thresh * crs_units_conversion
 
         inds = rd.rchlen > minimum_reach_length
         print('\nDropping {} reaches with length < {:.2f} {}...'.format(np.sum(~inds),
@@ -1149,8 +1232,8 @@ class Lines:
         sd['elevup'] = [elevup[line_id[s]] for s in sd.nseg]
         sd['elevdn'] = [elevdn[line_id[s]] for s in sd.nseg]
         # convert elevation units
-        sd['elevup'] *= mult_h
-        sd['elevdn'] *= mult_h
+        sd['elevup'] *= elevation_units_conversion
+        sd['elevdn'] *= elevation_units_conversion
 
         # apply widths if they were included
         if self.df[['width1', 'width2']].sum().sum() > 0:
@@ -1158,8 +1241,6 @@ class Lines:
             width2 = dict(zip(self.df.id, self.df.width2))
             sd['width1'] = [width1[line_id[s]] for s in sd.nseg]
             sd['width2'] = [width2[line_id[s]] for s in sd.nseg]
-            sd['width1'] *= mult
-            sd['width2'] *= mult  # convert length units from source data to model
         elif self.df.width2.sum() == 0:
             raise NotImplementedError('Need to supply width1 and width2 or use arbolate sum.')
 

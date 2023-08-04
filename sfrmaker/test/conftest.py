@@ -150,7 +150,7 @@ def shellmound_grid(shellmound_model):
                                              delc=m.dis.delc.array,  # cell spacing along a column
                                              xoff=500955.0, yoff=1176285.0,  # lower left corner of model grid
                                              angrot=0,  # grid is unrotated
-                                             proj4='epsg:5070'
+                                             crs=5070
                                              )
     m._modelgrid = mg
     return mg
@@ -199,7 +199,7 @@ def tylerforks_model_grid(tylerforks_model):
                                              delc=np.round((m.dis.delc.array * .3048).astype(np.float64), 4),  # cell spacing along a column
                                              xoff=682688, yoff=5139052,  # lower left corner of model grid
                                              angrot=0,  # grid is unrotated
-                                             proj4='epsg:26715'
+                                             crs=26715
                                              # projected coordinate system of model (UTM NAD27 zone 15 North)
                                              )
     m.modelgrid = mg
@@ -246,13 +246,14 @@ def lines_from_shapefile(test_data_path):
                                         id_column='COMID',
                                         routing_column='tocomid',
                                         arbolate_sum_column2='asum_calc',
+                                        asum_units='km',
                                         width1_column='width1',
                                         width2_column='width2',
+                                        width_units='feet',
                                         up_elevation_column='elevupsmo',
                                         dn_elevation_column='elevdnsmo',
+                                        elevation_units='feet',
                                         name_column='GNIS_NAME',
-                                        attr_length_units='feet',  # units of source data
-                                        attr_height_units='feet'  # units of source data
                                         )
     return lns
 
@@ -288,5 +289,5 @@ def neversink_lines_from_nhdplus_hr(datapath):
     lns = sfrmaker.Lines.from_nhdplus_hr(NHDPlusHR_paths,
                                         bbox_filter=boundary_file,
                                         drop_fcodes=drop_fcodes,
-                                        epsg=nhdhr_epsg)
+                                        crs=nhdhr_epsg)
     return lns
