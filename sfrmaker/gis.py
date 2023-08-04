@@ -19,13 +19,23 @@ if version.parse(gisutils.__version__) < version.parse('0.2.2'):
                   '\nPlease pip install --upgrade gis-utils')
 
 
-def get_crs(prjfile=None, epsg=None, proj_str=None, crs=None):
+def get_crs(prjfile=None, crs=None, **kwargs):
+    if 'epsg' in kwargs:
+        warnings.warn(
+        "epsg argument is deprecated, "
+        "use crs instead",
+        PendingDeprecationWarning,
+    )
+        crs = kwargs['epsg']
+    if 'proj_str' in kwargs:
+        warnings.warn(
+        "proj_str argument is deprecated, "
+        "use crs instead",
+        PendingDeprecationWarning,
+    )
+        crs = kwargs['proj_str']
     if crs is not None:
         crs = get_authority_crs(crs)
-    if epsg is not None:
-        warnings.warn('The epsg argument is deprecated, use crs or prjfile instead.')
-        if crs is None:
-            crs = get_authority_crs(epsg)
     elif prjfile is not None:
         prjfile_crs = get_shapefile_crs(prjfile)
         if (crs is not None) and (crs != prjfile_crs):
@@ -35,10 +45,6 @@ def get_crs(prjfile=None, epsg=None, proj_str=None, crs=None):
                                  )
         else:
             crs = prjfile_crs
-    elif proj_str is not None:
-        warnings.warn('The proj_str argument is deprecated, use crs or prjfile instead.')
-        if crs is None:
-            crs = get_authority_crs(proj_str)
     return crs
 
 

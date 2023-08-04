@@ -16,17 +16,18 @@ def name_path():
 @pytest.fixture(scope="module")
 def lines(test_data_path, name_path):
     name, path = name_path
-    lns = sfrmaker.Lines.from_shapefile('{}/{}/flowlines.shp'.format(test_data_path, path),
-                                        id_column='COMID',
-                                        routing_column='tocomid',
-                                        width1_column='width1',
-                                        width2_column='width2',
-                                        up_elevation_column='elevupsmo',
-                                        dn_elevation_column='elevdnsmo',
-                                        name_column='GNIS_NAME',
-                                        attr_length_units='feet',
-                                        attr_height_units='feet',
-                                        epsg=5070)
+    lns = sfrmaker.Lines.from_shapefile(
+        test_data_path / f'{path}/flowlines.shp'.format(test_data_path, path),
+        id_column='COMID',
+        routing_column='tocomid',
+        width1_column='width1',
+        width2_column='width2',
+        up_elevation_column='elevupsmo',
+        dn_elevation_column='elevdnsmo',
+        name_column='GNIS_NAME',
+        width_units='feet',
+        elevation_units='feet',
+        crs=5070)
     return lns
 
 

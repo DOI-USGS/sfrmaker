@@ -20,7 +20,7 @@ def test_structuredgrid_from_flopy_mg():
                                              delc=m.dis.delc.array * .3048,  # cell spacing along a column
                                              xoff=682688, yoff=5139052,  # lower left corner of model grid
                                              angrot=0,  # grid is unrotated
-                                             proj4='epsg:26715'
+                                             crs=26715
                                              # projected coordinate system of model (UTM NAD27 zone 15 North)
                                              )
 

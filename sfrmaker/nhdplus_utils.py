@@ -62,8 +62,8 @@ def get_nhdplus_v2_routing(PlusFlow_file,
 
 def load_nhdplus_v2(NHDPlus_paths=None,
                     NHDFlowlines=None, PlusFlowlineVAA=None, PlusFlow=None, elevslope=None,
-                    filter=None, bbox_filter=None, crs=None,
-                    epsg=None, proj_str=None, prjfile=None):
+                    bbox_filter=None, crs=None,
+                    prjfile=None, **kwargs):
     """
     Parameters
     ==========
@@ -88,30 +88,53 @@ def load_nhdplus_v2(NHDPlus_paths=None,
         Bounding box (tuple) or polygon feature of model stream network area.
         Shapefiles will be reprojected to the CRS of the flowlines; all other
         feature types must be supplied in same CRS as flowlines.
-    crs : obj
-        Coordinate reference system of the NHDPlus data. Only needed if
-        the data do not have a valid ESRI projection (.prj) file.
-        A Python int, dict, str, or :class:`pyproj.crs.CRS` instance
-        passed to :meth:`pyproj.crs.CRS.from_user_input`
-
+    crs : obj, optional
+        Coordinate reference object for ``df``. This argument is only needed
+        if the input flowlines don't have a valid projection file.
         Can be any of:
-          - PROJ string
-          - Dictionary of PROJ parameters
-          - PROJ keyword arguments for parameters
-          - JSON string with PROJ parameters
-          - CRS WKT string
-          - An authority string [i.e. 'epsg:4326']
-          - An EPSG integer code [i.e. 4326]
-          - A tuple of ("auth_name": "auth_code") [i.e ('epsg', '4326')]
-          - An object with a `to_wkt` method.
-          - A :class:`pyproj.crs.CRS` class
+        - PROJ string
+        - Dictionary of PROJ parameters
+        - PROJ keyword arguments for parameters
+        - JSON string with PROJ parameters
+        - CRS WKT string
+        - An authority string [i.e. 'epsg:4326']
+        - An EPSG integer code [i.e. 4326]
+        - A tuple of ("auth_name": "auth_code") [i.e ('epsg', '4326')]
+        - An object with a `to_wkt` method.
+        - A :class:`pyproj.crs.CRS` class
+    prjfile: str, optional
+        ESRI-style projection file with coordinate reference information for ``df``. 
+        This argument is only needed
+        if the input flowlines don't have a valid projection file.
+    **kwargs : dict, optional
+        Support for deprecated keyword options.
 
-        By default, None
+        .. deprecated:: 0.13
+            The following arguments will be removed in SFRmaker 0.13.
+            
+            - ``epsg`` (int): use ``crs`` instead.
+            - ``proj_str`` (str): use ``crs`` instead.
+    
+    Returns
+    -------
+    df : GeoDataFrame
+        Table of NHDPlus version 2 information with columns:
+        
+        ===== ========= ======== ========== ========== ========== ==========
+        COMID GNIS_NAME LENGTHKM ArbolateSu StreamOrde MAXELEVSMO MINELEVSMO
+        ===== ========= ======== ========== ========== ========== ==========
+        
+        See NHDPlus version 2 documentation for descriptions.
+        
     """
     print("\nloading NHDPlus v2 hydrography data...")
-    
-    if filter is not None:
-        raise ValueError("The 'filter' argument is deprecated; use 'bbox_filter' instead")
+    if 'filter' in kwargs:
+            warnings.warn(
+            "filter argument is deprecated, "
+            "use bbox_filter instead",
+            PendingDeprecationWarning,
+        )
+            bbox_filter = kwargs['filter']
     
     ta = time.time()
 
@@ -121,7 +144,9 @@ def load_nhdplus_v2(NHDPlus_paths=None,
 
     # get crs information from flowline projection file
     #crs_from_shapefile = get_shapefile_crs(NHDFlowlines)
-    crs = get_crs(prjfile=NHDFlowlines, epsg=epsg, proj_str=proj_str, crs=crs)
+    if prjfile is None:
+        prjfile = NHDFlowlines
+    crs = get_crs(prjfile=prjfile, crs=crs, **kwargs)
 
     # ensure that filter bbox is in same crs as flowlines
     # get filters from shapefiles, shapley Polygons or GeoJSON polygons
@@ -298,7 +323,8 @@ def get_hr_routing(pf, fl):
 
 
 def load_nhdplus_hr(NHDPlusHR_paths, bbox_filter=None, 
-                    drop_fcodes=None, drop_ftypes=None, drop_NHDPlusIDs=None):
+                    drop_fcodes=None, drop_ftypes=None, drop_NHDPlusIDs=None,
+                    **kwargs):
     """
     Parameters
     ==========
@@ -316,39 +342,35 @@ def load_nhdplus_hr(NHDPlusHR_paths, bbox_filter=None,
             ftype or list of NHDFlowline Ftypes to drop from network. 
     drop_NHDPlusIDs: int or list of ints, optional
             NHDPlusID or list of NHDFlowline NHDPlusIDs to drop from network. 
-    crs : obj
-        Coordinate reference system of the NHDPlus data. Only needed if
-        the data do not have a valid ESRI projection (.prj) file.
-        A Python int, dict, str, or :class:`pyproj.crs.CRS` instance
-        passed to :meth:`pyproj.crs.CRS.from_user_input`
+    **kwargs : dict, optional
+        Support for deprecated keyword options.
 
-        Can be any of:
-          - PROJ string
-          - Dictionary of PROJ parameters
-          - PROJ keyword arguments for parameters
-          - JSON string with PROJ parameters
-          - CRS WKT string
-          - An authority string [i.e. 'epsg:4326']
-          - An EPSG integer code [i.e. 4326]
-          - A tuple of ("auth_name": "auth_code") [i.e ('epsg', '4326')]
-          - An object with a `to_wkt` method.
-          - A :class:`pyproj.crs.CRS` class
-        By default, None
-        epsg: int, optional
-            EPSG code identifying Coordinate Reference System (CRS)
-            for features in the input shapefile.
-        proj_str: str, optional
-            proj_str string identifying CRS for features in the input shapefile.
-        prjfile: str, optional
-            File path to projection (.prj) file identifying CRS
-            for features in the input shapefile. By default,
-            the projection file included with the input shapefile
-            will be used.
+        .. deprecated:: 0.13
+            The following arguments will be removed in SFRmaker 0.13.
+        
+            - ``crs``: NHDPlus HR data are assumed to include valid projection information.
+            - ``epsg`` (int): NHDPlus HR data are assumed to include valid projection information.
+            - ``proj_str`` (str): NHDPlus HR data are assumed to include valid projection information.
+                - ``filter`` (tuble): use ``bbox_filter`` instead.
 
     Returns
     ==========
     df : dataframe
     """
+    for arg in 'crs', 'epsg', 'proj_str':
+        if arg in kwargs:
+            warnings.warn(
+            f"{arg} argument is deprecated; "
+            "NHDPlus HR data are assumed to include valid projection information.",
+            PendingDeprecationWarning,
+        )
+    if 'filter' in kwargs:
+            warnings.warn(
+            "filter argument is deprecated, "
+            "use bbox_filter instead",
+            PendingDeprecationWarning,
+        )
+            bbox_filter = kwargs['filter']
     print("loading NHDPlus HR hydrography data...")
     ta = time.time()
     
@@ -359,14 +381,10 @@ def load_nhdplus_hr(NHDPlusHR_paths, bbox_filter=None,
         assert all(df.crs == dfs[0].crs for df in dfs), 'NHDPlusHR OpenFileGDBs have have different CRSs'
         #  concat into single df
         df = gpd.GeoDataFrame(pd.concat(dfs, ignore_index=True), crs=dfs[0].crs)
-        #  get OpenFileGDB crs
-        crs = df.crs
     
     #  Read if using one HUC-4 FileGDP passed as str
     if isinstance(NHDPlusHR_paths, str) or isinstance(NHDPlusHR_paths, Path):
         df = read_nhdplus_hr(NHDPlusHR_paths, filter = filter)
-        #  get OpenFileGDB crs
-        crs = df.crs
    
     #  Option to drop specified FCodes
     if drop_fcodes is not None:    
@@ -385,4 +403,4 @@ def load_nhdplus_hr(NHDPlusHR_paths, bbox_filter=None,
 
     print("\nload finished in {:.2f}s\n".format(time.time() - ta))
 
-    return df, crs
+    return df

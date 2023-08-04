@@ -17,8 +17,8 @@ def dem(datapath):
 
 
 def test_attribute_units(tylerforks_lines_from_NHDPlus, tylerforks_sfrdata):
-    assert tylerforks_lines_from_NHDPlus.attr_height_units == 'meters'
-    assert tylerforks_lines_from_NHDPlus.attr_length_units == 'meters'
+    assert tylerforks_lines_from_NHDPlus.elevation_units == 'meters'
+    assert tylerforks_lines_from_NHDPlus.width_units == 'meters'
     assert tylerforks_sfrdata.model_length_units == 'feet'
     lines_mean_strtop = tylerforks_lines_from_NHDPlus.df[['elevup', 'elevdn']].mean().mean()
     rd = tylerforks_sfrdata.reach_data

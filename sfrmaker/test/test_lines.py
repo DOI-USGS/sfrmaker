@@ -50,8 +50,8 @@ def test_from_dataframe(nhdplus_dataframe, one_to_many,
     lines = sfrmaker.Lines.from_dataframe(df, id_column='COMID',
                                           routing_column='tocomid',
                                           name_column='GNIS_NAME',
-                                          attr_length_units='meters',
-                                          attr_height_units='meters',
+                                          asum_units='meters',
+                                          elevation_units='meters',
                                           prjfile=prjfile, crs=crs)
     # verify that values (to ids) in original routing dictionary are scalars
     assert is_to_one(lines._original_routing)
@@ -134,8 +134,8 @@ def test_from_shapefile(crs, prjfile):
         up_elevation_column='elevupsmo',
         dn_elevation_column='elevdnsmo',
         name_column='GNIS_NAME',
-        attr_length_units='feet',  # units of source data
-        attr_height_units='feet',  # units of source data
+        width_units='feet',  # units of source data
+        elevation_units='feet',  # units of source data
         prjfile=prjfile, crs=crs
         )
     assert lines.df.crs == lines.crs
