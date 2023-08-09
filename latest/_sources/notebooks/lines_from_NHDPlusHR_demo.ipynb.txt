@@ -671,7 +671,7 @@
    "source": [
     "flopy_structuredgrid = StructuredGrid(delc=np.full(160,100.), \n",
     "                                      delr=np.full(220,100.),\n",
-    "                                      epsg=5070,\n",
+    "                                      crs=5070,\n",
     "                                      xoff=1742953.0226834335,\n",
     "                                      yoff=2279064.250857591,\n",
     "                                      lenuni='meters'\n",

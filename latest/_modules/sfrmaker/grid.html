@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>sfrmaker.grid &mdash; SFRmaker 0.11.0.post0.dev0+g61bf0ec documentation</title>
+  <title>sfrmaker.grid &mdash; SFRmaker 0.11.0.post2.dev0+gdfa6519 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
@@ -38,7 +38,7 @@
             SFRmaker
           </a>
               <div class="version">
-                0.11.0.post0.dev0+g61bf0ec
+                0.11.0.post2.dev0+gdfa6519
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -135,14 +135,13 @@
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span>
                  <span class="n">model_units</span><span class="o">=</span><span class="s1">&#39;undefined&#39;</span><span class="p">,</span> <span class="n">crs_units</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                 <span class="n">bounds</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                 <span class="n">epsg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">proj_str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">prjfile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+                 <span class="n">bounds</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">prjfile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">df</span> <span class="o">=</span> <span class="n">df</span>
 
         <span class="c1"># coordinate projection stuff</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model_units</span> <span class="o">=</span> <span class="n">model_units</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">crs</span> <span class="o">=</span> <span class="n">get_crs</span><span class="p">(</span><span class="n">prjfile</span><span class="o">=</span><span class="n">prjfile</span><span class="p">,</span> <span class="n">epsg</span><span class="o">=</span><span class="n">epsg</span><span class="p">,</span> <span class="n">proj_str</span><span class="o">=</span><span class="n">proj_str</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">crs</span> <span class="o">=</span> <span class="n">get_crs</span><span class="p">(</span><span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">,</span> <span class="n">prjfile</span><span class="o">=</span><span class="n">prjfile</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">crs_units</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;The crs_units argument is deprecated. Units are now read &#39;</span>
                           <span class="s1">&#39;from the crs information via the pyproj.crs.CRS class&#39;</span><span class="p">)</span>
@@ -368,16 +367,21 @@
 <span class="sd">        Polygon defining the active portion of the model grid.</span>
 <span class="sd">        Polygons must be in same CRS as linework; shapefile features will be reprojected if their crs is different.</span>
 <span class="sd">        by default None, in which case the entire grid is assumed to be active.</span>
-<span class="sd">    epsg: int, optional</span>
-<span class="sd">        EPSG code identifying Coordinate Reference System (CRS)</span>
-<span class="sd">        for features in the input shapefile.</span>
-<span class="sd">    proj_str: str, optional</span>
-<span class="sd">        proj_str string identifying CRS for features in the input shapefile.</span>
+<span class="sd">    crs : obj, optional</span>
+<span class="sd">        Coordinate reference object for ``df``.</span>
+<span class="sd">        Can be any of:</span>
+<span class="sd">        - PROJ string</span>
+<span class="sd">        - Dictionary of PROJ parameters</span>
+<span class="sd">        - PROJ keyword arguments for parameters</span>
+<span class="sd">        - JSON string with PROJ parameters</span>
+<span class="sd">        - CRS WKT string</span>
+<span class="sd">        - An authority string [i.e. &#39;epsg:4326&#39;]</span>
+<span class="sd">        - An EPSG integer code [i.e. 4326]</span>
+<span class="sd">        - A tuple of (&quot;auth_name&quot;: &quot;auth_code&quot;) [i.e (&#39;epsg&#39;, &#39;4326&#39;)]</span>
+<span class="sd">        - An object with a `to_wkt` method.</span>
+<span class="sd">        - A :class:`pyproj.crs.CRS` class</span>
 <span class="sd">    prjfile: str, optional</span>
-<span class="sd">        File path to projection (.prj) file identifying CRS</span>
-<span class="sd">        for features in the input shapefile. By default,</span>
-<span class="sd">        the projection file included with the input shapefile</span>
-<span class="sd">        will be used.</span>
+<span class="sd">        ESRI-style projection file with coordinate reference information for ``df``. </span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">_structured</span> <span class="o">=</span> <span class="kc">True</span>
 
@@ -386,11 +390,11 @@
                  <span class="n">uniform</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">model_units</span><span class="o">=</span><span class="s1">&#39;undefined&#39;</span><span class="p">,</span> <span class="n">crs_units</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">bounds</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">active_area</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                 <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">epsg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">proj_str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">prjfile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+                 <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">prjfile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 
         <span class="n">Grid</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">model_units</span><span class="o">=</span><span class="n">model_units</span><span class="p">,</span> <span class="n">crs_units</span><span class="o">=</span><span class="n">crs_units</span><span class="p">,</span>
                       <span class="n">bounds</span><span class="o">=</span><span class="n">bounds</span><span class="p">,</span> <span class="n">active_area</span><span class="o">=</span><span class="n">active_area</span><span class="p">,</span>
-                      <span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">,</span> <span class="n">epsg</span><span class="o">=</span><span class="n">epsg</span><span class="p">,</span> <span class="n">proj_str</span><span class="o">=</span><span class="n">proj_str</span><span class="p">,</span> <span class="n">prjfile</span><span class="o">=</span><span class="n">prjfile</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                      <span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">,</span> <span class="n">prjfile</span><span class="o">=</span><span class="n">prjfile</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="c1"># structured grid parameters</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">xul</span> <span class="o">=</span> <span class="n">xul</span>
@@ -456,21 +460,20 @@
 
 <div class="viewcode-block" id="StructuredGrid.from_json"><a class="viewcode-back" href="../../api/sfrmaker.grid.html#sfrmaker.grid.StructuredGrid.from_json">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_json</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">jsonfile</span><span class="p">,</span> <span class="n">active_area</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">isfr</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                  <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">epsg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">proj_str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">prjfile</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+                  <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">prjfile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="kn">from</span> <span class="nn">sfrmaker.fileio</span> <span class="kn">import</span> <span class="n">load_modelgrid</span>
         <span class="n">grid</span> <span class="o">=</span> <span class="n">load_modelgrid</span><span class="p">(</span><span class="n">jsonfile</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_modelgrid</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">active_area</span><span class="o">=</span><span class="n">active_area</span><span class="p">,</span> <span class="n">isfr</span><span class="o">=</span><span class="n">isfr</span><span class="p">,</span>
-                                  <span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">,</span> <span class="n">epsg</span><span class="o">=</span><span class="n">epsg</span><span class="p">,</span> <span class="n">proj_str</span><span class="o">=</span><span class="n">proj_str</span><span class="p">,</span> <span class="n">prjfile</span><span class="o">=</span><span class="n">prjfile</span><span class="p">)</span></div>
+                                  <span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">,</span> <span class="n">prjfile</span><span class="o">=</span><span class="n">prjfile</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="StructuredGrid.from_sr"><a class="viewcode-back" href="../../api/sfrmaker.grid.html#sfrmaker.grid.StructuredGrid.from_sr">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_sr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">active_area</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">isfr</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                <span class="n">epsg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">proj_str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">prjfile</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">from_sr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s2">&quot;the from_sr method is depricated. Please use from_modelgrid,&quot;</span>
                              <span class="s2">&quot;as demonstrated in the examples.&quot;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="StructuredGrid.from_modelgrid"><a class="viewcode-back" href="../../api/sfrmaker.grid.html#sfrmaker.grid.StructuredGrid.from_modelgrid">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_modelgrid</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">mg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">active_area</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">isfr</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                       <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">epsg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">proj_str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">prjfile</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+                       <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">prjfile</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create StructureGrid class instance from a</span>
 <span class="sd">        flopy.discretization.StructuredGrid instance.&quot;&quot;&quot;</span>
         <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">indices</span><span class="p">((</span><span class="n">mg</span><span class="o">.</span><span class="n">nrow</span><span class="p">,</span> <span class="n">mg</span><span class="o">.</span><span class="n">ncol</span><span class="p">))</span>
@@ -481,12 +484,8 @@
                            <span class="s1">&#39;j&#39;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">mg</span><span class="o">.</span><span class="n">ncol</span><span class="p">))</span> <span class="o">*</span> <span class="n">mg</span><span class="o">.</span><span class="n">nrow</span><span class="p">,</span>
                            <span class="s1">&#39;geometry&#39;</span><span class="p">:</span> <span class="n">polygons</span>
                            <span class="p">},</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;node&#39;</span><span class="p">,</span> <span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="s1">&#39;j&#39;</span><span class="p">,</span> <span class="s1">&#39;geometry&#39;</span><span class="p">])</span>
-        <span class="k">if</span> <span class="n">epsg</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">epsg</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">epsg</span>
-        <span class="n">crs</span> <span class="o">=</span> <span class="n">get_crs</span><span class="p">(</span><span class="n">prjfile</span><span class="o">=</span><span class="n">prjfile</span><span class="p">,</span> <span class="n">epsg</span><span class="o">=</span><span class="n">epsg</span><span class="p">,</span> <span class="n">proj_str</span><span class="o">=</span><span class="n">mg</span><span class="o">.</span><span class="n">proj4</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">)</span>
-        <span class="c1"># get the crs from the model grid if it wasn&#39;t supplied</span>
-        <span class="k">if</span> <span class="n">crs</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">mg</span><span class="p">,</span> <span class="s1">&#39;crs&#39;</span><span class="p">):</span>
-            <span class="n">crs</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">crs</span>
+
+        <span class="n">crs</span> <span class="o">=</span> <span class="n">get_crs</span><span class="p">(</span><span class="n">prjfile</span><span class="o">=</span><span class="n">prjfile</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="n">mg</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">isfr</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># if a 3D array is supplied for isfr, convert to 2D</span>
@@ -525,11 +524,11 @@
                        <span class="n">node_col</span><span class="o">=</span><span class="s1">&#39;node&#39;</span><span class="p">,</span> <span class="n">kcol</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">icol</span><span class="o">=</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="n">jcol</span><span class="o">=</span><span class="s1">&#39;j&#39;</span><span class="p">,</span>
                        <span class="n">isfr_col</span><span class="o">=</span><span class="s1">&#39;isfr&#39;</span><span class="p">,</span>
                        <span class="n">active_area</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                       <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">epsg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">proj_str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">prjfile</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+                       <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">prjfile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 
         <span class="k">if</span> <span class="n">crs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">crs</span> <span class="o">=</span> <span class="n">get_shapefile_crs</span><span class="p">(</span><span class="n">shapefile</span><span class="p">)</span>
-        <span class="n">crs</span> <span class="o">=</span> <span class="n">get_crs</span><span class="p">(</span><span class="n">prjfile</span><span class="o">=</span><span class="n">prjfile</span><span class="p">,</span> <span class="n">epsg</span><span class="o">=</span><span class="n">epsg</span><span class="p">,</span> <span class="n">proj_str</span><span class="o">=</span><span class="n">proj_str</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">)</span>
+        <span class="n">crs</span> <span class="o">=</span> <span class="n">get_crs</span><span class="p">(</span><span class="n">prjfile</span><span class="o">=</span><span class="n">prjfile</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="k">with</span> <span class="n">fiona</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">shapefile</span><span class="p">)</span> <span class="k">as</span> <span class="n">src</span><span class="p">:</span>
             <span class="n">bounds</span> <span class="o">=</span> <span class="n">src</span><span class="o">.</span><span class="n">bounds</span>
@@ -548,7 +547,7 @@
                        <span class="n">isfr_col</span><span class="o">=</span><span class="s1">&#39;isfr&#39;</span><span class="p">,</span>
                        <span class="n">geometry_column</span><span class="o">=</span><span class="s1">&#39;geometry&#39;</span><span class="p">,</span>
                        <span class="n">active_area</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                       <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">epsg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">proj_str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">prjfile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+                       <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">prjfile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 
         <span class="k">assert</span> <span class="n">geometry_column</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> \
             <span class="s2">&quot;No feature geometries found in dataframe column &#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">geometry_column</span><span class="p">)</span>
@@ -556,7 +555,7 @@
         <span class="k">assert</span> <span class="n">icol</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> <span class="s2">&quot;No icol=&#39;</span><span class="si">{}</span><span class="s2">&#39; not found&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">icol</span><span class="p">)</span>
         <span class="k">assert</span> <span class="n">jcol</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> <span class="s2">&quot;No jcol=&#39;</span><span class="si">{}</span><span class="s2">&#39; not found&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">jcol</span><span class="p">)</span>
 
-        <span class="n">crs</span> <span class="o">=</span> <span class="n">get_crs</span><span class="p">(</span><span class="n">prjfile</span><span class="o">=</span><span class="n">prjfile</span><span class="p">,</span> <span class="n">epsg</span><span class="o">=</span><span class="n">epsg</span><span class="p">,</span> <span class="n">proj_str</span><span class="o">=</span><span class="n">proj_str</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">)</span>
+        <span class="n">crs</span> <span class="o">=</span> <span class="n">get_crs</span><span class="p">(</span><span class="n">prjfile</span><span class="o">=</span><span class="n">prjfile</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="c1"># set layer column</span>
         <span class="k">if</span> <span class="n">kcol</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
@@ -616,10 +615,10 @@
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span>
                  <span class="n">model_units</span><span class="o">=</span><span class="s1">&#39;undefined&#39;</span><span class="p">,</span> <span class="n">crs_units</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">bounds</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">active_area</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                 <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">epsg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">proj_str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">prjfile</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+                 <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">prjfile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">Grid</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">model_units</span><span class="o">=</span><span class="n">model_units</span><span class="p">,</span> <span class="n">crs_units</span><span class="o">=</span><span class="n">crs_units</span><span class="p">,</span>
                       <span class="n">bounds</span><span class="o">=</span><span class="n">bounds</span><span class="p">,</span> <span class="n">active_area</span><span class="o">=</span><span class="n">active_area</span><span class="p">,</span>
-                      <span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">,</span> <span class="n">epsg</span><span class="o">=</span><span class="n">epsg</span><span class="p">,</span> <span class="n">proj_str</span><span class="o">=</span><span class="n">proj_str</span><span class="p">,</span> <span class="n">prjfile</span><span class="o">=</span><span class="n">prjfile</span><span class="p">)</span>
+                      <span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">,</span> <span class="n">prjfile</span><span class="o">=</span><span class="n">prjfile</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="k">assert</span> <span class="s1">&#39;node&#39;</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> \
             <span class="s2">&quot;DataFrame df must have a &#39;node&#39; column for identifying model cells.&quot;</span>
@@ -643,12 +642,12 @@
                        <span class="n">isfr_col</span><span class="o">=</span><span class="s1">&#39;isfr&#39;</span><span class="p">,</span>
                        <span class="n">geometry_column</span><span class="o">=</span><span class="s1">&#39;geometry&#39;</span><span class="p">,</span>
                        <span class="n">model_units</span><span class="o">=</span><span class="s1">&#39;feet&#39;</span><span class="p">,</span> <span class="n">active_area</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                       <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">epsg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">proj_str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">prjfile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+                       <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">prjfile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 
         <span class="k">assert</span> <span class="n">geometry_column</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> \
             <span class="s2">&quot;No feature geometries found in dataframe column &#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">geometry_column</span><span class="p">)</span>
 
-        <span class="n">crs</span> <span class="o">=</span> <span class="n">get_crs</span><span class="p">(</span><span class="n">prjfile</span><span class="o">=</span><span class="n">prjfile</span><span class="p">,</span> <span class="n">epsg</span><span class="o">=</span><span class="n">epsg</span><span class="p">,</span> <span class="n">proj_str</span><span class="o">=</span><span class="n">proj_str</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">)</span>
+        <span class="n">crs</span> <span class="o">=</span> <span class="n">get_crs</span><span class="p">(</span><span class="n">prjfile</span><span class="o">=</span><span class="n">prjfile</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">node_col</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
             <span class="n">df</span><span class="p">[</span><span class="s1">&#39;node&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">node_col</span><span class="p">]</span>
@@ -679,7 +678,7 @@
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Jul 25, 2023.
+      <span class="lastupdated">Last updated on Aug 09, 2023.
       </span></p>
   </div>
 

@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Installation &mdash; SFRmaker 0.11.0.post0.dev0+g61bf0ec documentation</title>
+  <title>Installation &mdash; SFRmaker 0.11.0.post2.dev0+gdfa6519 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
@@ -41,7 +41,7 @@
             SFRmaker
           </a>
               <div class="version">
-                0.11.0.post0.dev0+g61bf0ec
+                0.11.0.post2.dev0+gdfa6519
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -57,7 +57,7 @@
 <li class="toctree-l1"><a class="reference internal" href="examples.html"> Examples</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#"> Installation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#installing-python-dependencies-with-conda">Installing python dependencies with Conda</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#download-and-install-a-python-distribution-and-conda-like-package-installer">Download and install a python distribution and Conda-like package installer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#download-and-install-a-python-distribution-and-conda-like-package-manager">Download and install a python distribution and Conda-like package manager</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#download-an-environment-file">Download an environment file</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#creating-a-conda-environment-using-mamba">Creating a Conda environment using Mamba</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#keeping-the-conda-environment-up-to-date">Keeping the Conda environment up to date</a></li>
@@ -71,12 +71,13 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#installing-the-ipython-kernel-to-use-sfrmaker-in-jupyter-notebooks">Installing the IPython kernel to use SFRmaker in Jupyter Notebooks</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#best-practices">Best practices</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id4">Considerations for USGS Users</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#id5">Installing the DOI SSL certificate for use with pip</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#considerations-for-usgs-users-or-anyone-else-with-an-organizational-ssl-certificate">Considerations for USGS Users (or anyone else with an organizational SSL certificate)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id4">Installing the DOI SSL certificate for use with pip</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id5">Installing the DOI SSL certificate for use with git</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#installing-the-doi-ssl-certificate-for-use-with-conda">Installing the DOI SSL certificate for use with conda</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#troubleshooting-issues-with-the-usgs-network">Troubleshooting issues with the USGS network</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#ssl-related-error-messages-when-using-conda">SSL-related error messages when using conda</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#ssl-related-error-messages-when-using-pip">SSL-related error messages when using pip</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ssl-related-error-messages-when-using-building-a-conda-environment-or-using-pip">SSL-related error messages when using building a conda environment or using pip</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#if-you-are-on-the-usgs-network-using-windows-and-you-get-this-error-message">If you are on the USGS network, using Windows, and you get this error message:</a></li>
 </ul>
 </li>
@@ -137,8 +138,8 @@
 <section id="installing-python-dependencies-with-conda">
 <h2>Installing python dependencies with Conda<a class="headerlink" href="#installing-python-dependencies-with-conda" title="Permalink to this heading">¶</a></h2>
 <p>SFRmaker depends on a number of python packages, many of which have external C library dependencies. The easiest way to install most of these is with a package installer like <a class="reference external" href="https://docs.conda.io/en/latest/">Conda</a>. A few packages are not available via conda, and must be installed with <a class="reference external" href="https://packaging.python.org/tutorials/installing-packages/#use-pip-for-installing">pip</a>. If you are on the USGS internal network, see the <a class="reference internal" href="#considerations-for-usgs-users">Considerations for USGS Users</a> section below first.</p>
-<section id="download-and-install-a-python-distribution-and-conda-like-package-installer">
-<h3>Download and install a python distribution and Conda-like package installer<a class="headerlink" href="#download-and-install-a-python-distribution-and-conda-like-package-installer" title="Permalink to this heading">¶</a></h3>
+<section id="download-and-install-a-python-distribution-and-conda-like-package-manager">
+<h3>Download and install a python distribution and Conda-like package manager<a class="headerlink" href="#download-and-install-a-python-distribution-and-conda-like-package-manager" title="Permalink to this heading">¶</a></h3>
 <p>There are many ways to do this:</p>
 <blockquote>
 <div><ul class="simple">
@@ -147,13 +148,19 @@
 <li><p><a class="reference external" href="https://github.com/conda-forge/miniforge#mambaforge">Mambaforge</a> is like Miniconda, but pre-configured to use the <a class="reference external" href="https://mamba.readthedocs.io/en/latest/">Mamba</a> installer, and only the <a class="reference external" href="https://conda-forge.org/docs/user/introduction.html">conda-forge</a> channel for getting packages (more below). If the above two options don’t work (for example, the Conda installer fails or gets stuck on the “solve” step), this may be your best option.</p></li>
 </ul>
 </div></blockquote>
-<p><strong>Make sure to install Anaconda or Miniconda to your username</strong> (not at the system level). More often than not, installing at the system level (for all users) seems to result in issues with library dependencies (for example, import of <code class="docutils literal notranslate"><span class="pre">fiona</span></code> or <code class="docutils literal notranslate"><span class="pre">rasterio</span></code> failing because gdal isn’t found). It is also good practice to periodically do a <a class="reference external" href="https://docs.anaconda.com/anaconda/install/uninstall/">clean uninstall</a> of Anaconda, which at the system level requires admin. privileges.</p>
-<blockquote>
-<div><ul class="simple">
+<p><strong>Make sure to install the python distribution to your username</strong> (not at the system level). More often than not, installing at the system level (for all users) seems to result in issues with library dependencies (for example, import of <code class="docutils literal notranslate"><span class="pre">fiona</span></code> or <code class="docutils literal notranslate"><span class="pre">rasterio</span></code> failing because gdal isn’t found). It is also good practice to periodically do a <a class="reference external" href="https://docs.anaconda.com/anaconda/install/uninstall/">clean uninstall</a> of Anaconda, which at the system level requires admin. privileges.</p>
+<dl class="simple">
+<dt>Mambaforge-specific instructions:</dt><dd><ul class="simple">
+<li><p>If after downloading the Mambaforge installer you get a message that it “isn’t commonly downloaded” and the option to “Trust” it is grayed out (because you don’t have sufficient rights), try using a different browser like Google Chrome (for example, if you were using Microsoft Edge).</p></li>
+<li><p>Once the installer is running, go against the recommendation and <strong>select the option to add Mambaforge to the system path for your user.</strong></p></li>
+</ul>
+</dd>
+<dt>Anaconda-specific instructions:</dt><dd><ul class="simple">
 <li><p>In the installer, at the “Destination Select” step, select “Install for me only.” It should say something about how the software will be installed to your home folder.</p></li>
 <li><p>If your installer skips the “Destination Select” step, when you get to “Installation Type”, click “Change Install Location” and then “Install for me only.”</p></li>
 </ul>
-</div></blockquote>
+</dd>
+</dl>
 </section>
 <section id="download-an-environment-file">
 <h3>Download an environment file<a class="headerlink" href="#download-an-environment-file" title="Permalink to this heading">¶</a></h3>
@@ -186,15 +193,15 @@
 </div>
 <p>Once you have a python distribution and mamba installed, to create the conda environment, open a new Anaconda Command Prompt on Windows or a new terminal window on OSX and point it to the location of <code class="docutils literal notranslate"><span class="pre">requirements.yml</span></code> or <code class="docutils literal notranslate"><span class="pre">gis.yml</span></code> and enter:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mamba<span class="w"> </span>env<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>requirements.yml
+
+
+..<span class="w"> </span>note::
+<span class="w">    </span>Creating<span class="w"> </span>the<span class="w"> </span><span class="sb">``</span>requirements.yml<span class="sb">``</span><span class="w"> </span>environment<span class="w"> </span><span class="o">(</span>or<span class="w"> </span>any<span class="w"> </span>environment<span class="w"> </span>with<span class="w"> </span><span class="sb">``</span>git+https:<span class="w"> </span>...<span class="sb">``</span><span class="w"> </span>installs<span class="o">)</span><span class="w"> </span>requires<span class="w"> </span>Git<span class="w"> </span>to<span class="w"> </span>be<span class="w"> </span>installed<span class="w"> </span>and<span class="w"> </span>visible<span class="w"> </span><span class="k">in</span><span class="w"> </span>the<span class="w"> </span>system<span class="w"> </span>path<span class="w"> </span>where<span class="w"> </span><span class="sb">``</span>env<span class="w"> </span>create<span class="sb">``</span><span class="w"> </span>is<span class="w"> </span>being<span class="w"> </span>run.<span class="w"> </span>If<span class="w"> </span>Git<span class="w"> </span>is<span class="w"> </span>installed<span class="w"> </span>and<span class="w"> </span>somehow<span class="w"> </span>not<span class="w"> </span><span class="k">in</span><span class="w"> </span>the<span class="w"> </span>system<span class="w"> </span>path,<span class="w"> </span>it<span class="w"> </span>can<span class="w"> </span>be<span class="w"> </span>added<span class="w"> </span>to<span class="w"> </span>the<span class="w"> </span>system<span class="w"> </span>path<span class="w"> </span>on<span class="w"> </span>Windows<span class="w"> </span><span class="m">10</span><span class="w"> </span>without<span class="w"> </span>admin.<span class="w"> </span>rights<span class="w"> </span>via<span class="w"> </span>the<span class="w"> </span><span class="s2">&quot;environment variables&quot;</span><span class="w"> </span>editor<span class="w"> </span>under<span class="w"> </span>User<span class="w"> </span>Accounts<span class="w"> </span><span class="k">in</span><span class="w"> </span>the<span class="w"> </span>Control<span class="w"> </span>Panel<span class="w"> </span><span class="o">(</span>Google<span class="w"> </span>it<span class="o">)</span>.
 </pre></div>
 </div>
 <p>Building the environment will probably take a while. If the build fails because of an SSL error, fix the problem (see <a class="reference internal" href="#considerations-for-usgs-users">Considerations for USGS Users</a> below) and either:</p>
 <blockquote>
-<div><div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Creating the <code class="docutils literal notranslate"><span class="pre">requirements.yml</span></code> environment (or any environment with <code class="docutils literal notranslate"><span class="pre">git+https:</span> <span class="pre">...</span></code> installs) requires Git to be installed and visible in the system path where <code class="docutils literal notranslate"><span class="pre">env</span> <span class="pre">create</span></code> is being run. If Git is installed and somehow not in the system path, it can be added to the system path on Windows 10 without admin. rights via the “environment variables” editor under User Accounts in the Control Panel (Google it).</p>
-</div>
-<ol class="loweralpha">
+<div><ol class="loweralpha">
 <li><p>Update the environment</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mamba<span class="w"> </span>env<span class="w"> </span>update<span class="w"> </span>-f<span class="w"> </span>requirements.yml
 </pre></div>
@@ -211,7 +218,7 @@ mamba<span class="w"> </span>env<span class="w"> </span>create<span class="w"> <
 </section>
 <section id="keeping-the-conda-environment-up-to-date">
 <h3>Keeping the Conda environment up to date<a class="headerlink" href="#keeping-the-conda-environment-up-to-date" title="Permalink to this heading">¶</a></h3>
-<p>The python packages and other open source software libraries that SFRmaker depends on are continually changing. SFRmaker aims to mostly follow the <a class="reference external" href="https://numpy.org/neps/nep-0029-deprecation_policy.html">Numpy guidelines for package support</a>, which effectively means that the two latest minor versions of Python (e.g. 3.9 and 3.8) and their associated Numpy versions will be supported. However, occasionally backwards compatability with a particular package may be broken in a shorter timeframe, in which case the minimum required version of that package will be specified in the <code class="docutils literal notranslate"><span class="pre">requirements.yml</span></code> file. All of this to say that your Conda environment will eventually get out of date. The <a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html">Conda documentation</a> has instructions for updating packages within a Conda environment, but at some point (perhaps a few times a year) it is good practice to simply delete the environment and rebuild it from the <cite>.yml</cite> file. Every so often, you may also want to reinstall Anaconda after a <a class="reference external" href="https://docs.anaconda.com/anaconda/install/uninstall/">clean uninstall</a>.</p>
+<p>The python packages and other open source software libraries that SFRmaker depends on are continually changing. SFRmaker aims to mostly follow the <a class="reference external" href="https://numpy.org/neps/nep-0029-deprecation_policy.html">Numpy guidelines for package support</a>, which effectively means that the two latest minor versions of Python (e.g. 3.11 and 3.10) and their associated Numpy versions will be supported. However, occasionally backwards compatability with a particular package may be broken in a shorter timeframe, in which case the minimum required version of that package will be specified in the <code class="docutils literal notranslate"><span class="pre">requirements.yml</span></code> file. All of this to say that your Conda environment will eventually get out of date. The <a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html">Conda documentation</a> has instructions for updating packages within a Conda environment, but at some point (perhaps a few times a year) it is good practice to simply delete the environment and rebuild it from the <cite>.yml</cite> file. Every so often, you may also want to reinstall Anaconda after a <a class="reference external" href="https://docs.anaconda.com/anaconda/install/uninstall/">clean uninstall</a>.</p>
 </section>
 </section>
 <section id="installing-sfrmaker">
@@ -300,26 +307,59 @@ will work to remove the package, and the current version of the package (includi
 <li><p>Use <a class="reference external" href="https://conda.github.io/conda-pack/">conda-pack</a>, rather than an overly-detailed environment file, to guarantee reproducibility.</p></li>
 </ul>
 </section>
-<section id="id4">
-<h2><span class="target" id="considerations-for-usgs-users">Considerations for USGS Users</span><a class="headerlink" href="#id4" title="Permalink to this heading">¶</a></h2>
+<section id="considerations-for-usgs-users-or-anyone-else-with-an-organizational-ssl-certificate">
+<h2><span class="target" id="considerations-for-usgs-users">Considerations for USGS Users</span> (or anyone else with an organizational SSL certificate)<a class="headerlink" href="#considerations-for-usgs-users-or-anyone-else-with-an-organizational-ssl-certificate" title="Permalink to this heading">¶</a></h2>
 <p>Using conda or pip on the USGS network requires SSL verification, which can cause a number of issues.
 If you are encountering persistant issues with creating the conda environment,
 you may have better luck trying the install off of the USGS network (e.g. at home).
 See <a class="reference external" href="https://tst.usgs.gov/applications/application-and-script-signing/">here</a> for more information
-about SSL verification on the USGS network, and to download the DOI SSL certificate.</p>
-<section id="id5">
-<h3><span class="target" id="installing-the-doi-ssl-certificate-for-use-with-pip">Installing the DOI SSL certificate for use with pip</span><a class="headerlink" href="#id5" title="Permalink to this heading">¶</a></h3>
+about SSL verification on the USGS network, and to download the DOI SSL certificate. It might be most helpful to consult with your local IT staff; some centers pre-install the appropriate certificate bundle on all new computers.</p>
+<section id="id4">
+<h3><span class="target" id="installing-the-doi-ssl-certificate-for-use-with-pip">Installing the DOI SSL certificate for use with pip</span><a class="headerlink" href="#id4" title="Permalink to this heading">¶</a></h3>
 <ol class="arabic simple">
 <li><p><a class="reference external" href="https://tst.usgs.gov/applications/application-and-script-signing/">Download the DOI SSL certificate (internal DOI network only)</a></p></li>
-<li><p>On Windows, create the file <code class="docutils literal notranslate"><span class="pre">C:\Users\&lt;your</span> <span class="pre">username&gt;\AppData\Roaming\pip\pip.ini</span></code>.
-On OSX, create <code class="docutils literal notranslate"><span class="pre">/Users/&lt;your</span> <span class="pre">username&gt;/Library/Application</span> <span class="pre">Support/pip/pip.conf</span></code>.</p></li>
+<li><dl class="simple">
+<dt>Create a pip configuration file at your user level as described <a class="reference external" href="https://pip.pypa.io/en/stable/topics/configuration/">here</a></dt><dd><ul class="simple">
+<li><p>On Windows, this may be <code class="docutils literal notranslate"><span class="pre">C:\Users\&lt;your</span> <span class="pre">username&gt;\AppData\Roaming\pip\pip.ini</span></code>.</p></li>
+<li><p>On OSX, this may be <code class="docutils literal notranslate"><span class="pre">/Users/&lt;your</span> <span class="pre">username&gt;/Library/Application</span> <span class="pre">Support/pip/pip.conf</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
 </ol>
-<p>Include the following in this file:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="k">global</span><span class="p">]</span>
-<span class="n">cert</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">path</span> <span class="n">to</span> <span class="n">DOI</span> <span class="n">certificate</span> <span class="n">file</span> <span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">g</span><span class="o">.</span> <span class="n">DOIRootCA2</span><span class="o">.</span><span class="n">cer</span><span class="p">)</span><span class="o">&gt;</span>
+<span class="n">cert</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">path</span> <span class="n">to</span> <span class="n">DOI</span> <span class="n">certificate</span> <span class="n">bundle</span> <span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">g</span><span class="o">.</span> <span class="n">cacert_usgs</span><span class="o">.</span><span class="n">pem</span><span class="p">)</span><span class="o">&gt;</span>
 </pre></div>
 </div>
-<p>Note that when you are off the USGS network, you may have to comment out the <code class="docutils literal notranslate"><span class="pre">cert=</span></code> line in the above pip configuration file to get <code class="docutils literal notranslate"><span class="pre">pip</span></code> to work.</p>
+<p><a class="reference external" href="https://pip.pypa.io/en/stable/topics/configuration/">More information on the pip configuration file and it’s location</a></p>
+<p>You can verify the pip configuration that is being used at a particular location with</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">config</span> <span class="nb">list</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>When you are off the USGS network, you may have to comment out the <code class="docutils literal notranslate"><span class="pre">cert=</span></code> line with a leading <code class="docutils literal notranslate"><span class="pre">#</span></code>
+in the above pip configuration file to get <code class="docutils literal notranslate"><span class="pre">pip</span></code> to work.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>To test that pip is working, simply try <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">--upgrade</span></code> on a package of choice; ideally one that is relatively downstream in the dependency stack (for example, <code class="docutils literal notranslate"><span class="pre">gis-utils</span></code>), so as to minimize any additional changes to your environment that may occur.</p>
+</div>
+</section>
+<section id="id5">
+<h3><span class="target" id="installing-the-doi-ssl-certificate-for-use-with-git">Installing the DOI SSL certificate for use with git</span><a class="headerlink" href="#id5" title="Permalink to this heading">¶</a></h3>
+<p>Using git to reach out to the web also requires the appropriate certificate bundle. This is stored in the git configuration under the <code class="docutils literal notranslate"><span class="pre">http.sslCAinfo</span></code> variable. A valid certificate is needed here to clone and push/pull from git repositories, and also to install packages from git using pip (for example, the entries in <code class="docutils literal notranslate"><span class="pre">requirements.yml</span></code> starting with <code class="docutils literal notranslate"><span class="pre">git+https://github.com/</span></code>). A missing certificate bundle will cause setup of the <code class="docutils literal notranslate"><span class="pre">sfrmaker</span></code> environment to fail on the pip installs section, even if a valid certificate bundle is specified in the pip configuration bundle. To add your certificate bundle to git:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>config<span class="w"> </span>--global<span class="w"> </span>http.sslCAinfo<span class="w"> </span>&lt;path<span class="w"> </span>to<span class="w"> </span>DOI<span class="w"> </span>certificate<span class="w"> </span>bundle<span class="w"> </span><span class="o">(</span>e.g.<span class="w"> </span>cacert_usgs.pem<span class="o">)</span>&gt;
+</pre></div>
+</div>
+<p>You can then verify that the certificate was added by displaying your git configuration</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>config<span class="w"> </span>--list
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>To test that both pip and git are working, simply try <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">--upgrade</span></code> on a package in the pip section of <code class="docutils literal notranslate"><span class="pre">requirements.yml</span></code> that starts with <code class="docutils literal notranslate"><span class="pre">git+https://</span></code>; for example <code class="docutils literal notranslate"><span class="pre">git+https://github.com/modflowpy/flopy&#64;develop</span></code>.</p>
+</div>
 </section>
 <section id="installing-the-doi-ssl-certificate-for-use-with-conda">
 <h3>Installing the DOI SSL certificate for use with conda<a class="headerlink" href="#installing-the-doi-ssl-certificate-for-use-with-conda" title="Permalink to this heading">¶</a></h3>
@@ -347,17 +387,39 @@ and comment out the SSL certificate file, if it is specified. E.g.:</p>
 </section>
 <section id="troubleshooting-issues-with-the-usgs-network">
 <h3>Troubleshooting issues with the USGS network<a class="headerlink" href="#troubleshooting-issues-with-the-usgs-network" title="Permalink to this heading">¶</a></h3>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If all else fails, you can simply try running the installs off-network.</p>
+</div>
 <section id="ssl-related-error-messages-when-using-conda">
 <h4>SSL-related error messages when using conda<a class="headerlink" href="#ssl-related-error-messages-when-using-conda" title="Permalink to this heading">¶</a></h4>
 <p>(with <code class="docutils literal notranslate"><span class="pre">SSL</span></code> mentioned in the message and possibly <code class="docutils literal notranslate"><span class="pre">bad</span> <span class="pre">handshake</span></code>)</p>
 <p>Make sure that the <code class="docutils literal notranslate"><span class="pre">Conda</span></code> package installer is configured to use the USGS certificate
 (see <a class="reference internal" href="#installing-the-doi-ssl-certificate-for-use-with-conda"><span class="std std-ref">Installing the DOI SSL certificate for use with conda</span></a> above).</p>
 </section>
-<section id="ssl-related-error-messages-when-using-pip">
-<h4>SSL-related error messages when using pip<a class="headerlink" href="#ssl-related-error-messages-when-using-pip" title="Permalink to this heading">¶</a></h4>
-<p>(something similar to <code class="docutils literal notranslate"><span class="pre">SSL:</span> <span class="pre">CERTIFICATE_VERIFY_FAILED</span></code>).</p>
-<p>Make sure that the <code class="docutils literal notranslate"><span class="pre">pip</span></code> package installer is configured to use the USGS certificate
+<section id="ssl-related-error-messages-when-using-building-a-conda-environment-or-using-pip">
+<h4>SSL-related error messages when using building a conda environment or using pip<a class="headerlink" href="#ssl-related-error-messages-when-using-building-a-conda-environment-or-using-pip" title="Permalink to this heading">¶</a></h4>
+<p>If the error message looks like this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Could</span> <span class="ow">not</span> <span class="n">fetch</span> <span class="n">URL</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">pypi</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">simple</span><span class="o">/</span><span class="n">pip</span><span class="o">/</span><span class="p">:</span>
+<span class="n">There</span> <span class="n">was</span> <span class="n">a</span> <span class="n">problem</span> <span class="n">confirming</span> <span class="n">the</span> <span class="n">ssl</span> <span class="n">certificate</span><span class="p">:</span> <span class="n">HTTPSConnectionPool</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="s1">&#39;pypi.org&#39;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">443</span><span class="p">):</span>
+<span class="n">Max</span> <span class="n">retries</span> <span class="n">exceeded</span> <span class="k">with</span> <span class="n">url</span><span class="p">:</span> <span class="o">/</span><span class="n">simple</span><span class="o">/</span><span class="n">pip</span><span class="o">/</span> <span class="p">(</span><span class="n">Caused</span> <span class="n">by</span> <span class="n">SSLError</span><span class="p">(</span><span class="n">SSLCertVerificationError</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;[SSL: CERTIFICATE_VERIFY_FAILED] certificate</span>
+<span class="n">verify</span> <span class="n">failed</span><span class="p">:</span> <span class="n">unable</span> <span class="n">to</span> <span class="n">get</span> <span class="n">local</span> <span class="n">issuer</span> <span class="n">certificate</span> <span class="p">(</span><span class="n">_ssl</span><span class="o">.</span><span class="n">c</span><span class="p">:</span><span class="mi">997</span><span class="p">)</span><span class="s1">&#39;))) - skipping</span>
+</pre></div>
+</div>
+<p>Make sure that the <code class="docutils literal notranslate"><span class="pre">pip</span></code> package installer is configured to use the USGS certificate bundle
 (see <a class="reference internal" href="#installing-the-doi-ssl-certificate-for-use-with-pip">Installing the DOI SSL certificate for use with pip</a> above).</p>
+<p>If the error message looks like this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Pip</span> <span class="n">subprocess</span> <span class="n">error</span><span class="p">:</span>
+<span class="n">Running</span> <span class="n">command</span> <span class="n">git</span> <span class="n">clone</span> <span class="o">--</span><span class="nb">filter</span><span class="o">=</span><span class="n">blob</span><span class="p">:</span><span class="n">none</span> <span class="o">--</span><span class="n">quiet</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/&lt;</span><span class="n">some</span> <span class="n">package</span><span class="o">&gt;</span>
+<span class="o">...</span>
+<span class="n">fatal</span><span class="p">:</span> <span class="n">unable</span> <span class="n">to</span> <span class="n">access</span> <span class="s1">&#39;https://github.com/&lt;some package&gt;&#39;</span><span class="p">:</span> <span class="n">SSL</span> <span class="n">certificate</span> <span class="n">problem</span><span class="p">:</span> <span class="n">unable</span> <span class="n">to</span> <span class="n">get</span> <span class="n">local</span> <span class="n">issuer</span> <span class="n">certificate</span>
+<span class="n">error</span><span class="p">:</span> <span class="n">subprocess</span><span class="o">-</span><span class="n">exited</span><span class="o">-</span><span class="k">with</span><span class="o">-</span><span class="n">error</span>
+<span class="o">...</span>
+<span class="n">note</span><span class="p">:</span> <span class="n">This</span> <span class="n">error</span> <span class="n">originates</span> <span class="kn">from</span> <span class="nn">a</span> <span class="n">subprocess</span><span class="p">,</span> <span class="ow">and</span> <span class="ow">is</span> <span class="n">likely</span> <span class="ow">not</span> <span class="n">a</span> <span class="n">problem</span> <span class="k">with</span> <span class="n">pip</span><span class="o">.</span>
+</pre></div>
+</div>
+<p>Make sure that git is configured to use the USGS certificate bundle
+(see <a class="reference internal" href="#installing-the-doi-ssl-certificate-for-use-with-git">Installing the DOI SSL certificate for use with git</a> above).</p>
 </section>
 <section id="if-you-are-on-the-usgs-network-using-windows-and-you-get-this-error-message">
 <h4>If you are on the USGS network, using Windows, and you get this error message:<a class="headerlink" href="#if-you-are-on-the-usgs-network-using-windows-and-you-get-this-error-message" title="Permalink to this heading">¶</a></h4>
@@ -390,7 +452,7 @@ so it needs to be commented out on other operating systems (normally it wouldn�
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Jul 25, 2023.
+      <span class="lastupdated">Last updated on Aug 09, 2023.
       </span></p>
   </div>
 
