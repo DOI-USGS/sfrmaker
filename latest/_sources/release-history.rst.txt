@@ -2,6 +2,12 @@
 Release History
 ===============
 
+Version 0.11.1 (2023-08-14)
+---------------------------
+* Refactor the lines class to replace the `attr_length_units`` arg with separate `asum_units` and `width_units` args, and rename the `attr_height_units`` arg to `elevation_units`.
+* replace references to `epsg` and `proj_str` input args with `crs`.
+* add warning to :py:func:`~sfrmaker.utils.assign_layers` if more than 1% of reaches land in an inactive cell.
+
 Version 0.11.0 (2023-07-25)
 ---------------------------
  * enhancements to ``preprocessing.swb_runoff_to_csv()``:
