@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Modules &mdash; SFRmaker 0.11.1 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="The Flows Module" href="sfrmaker.flows.html" />
+    <link rel="prev" title="Troubleshooting" href="../troubleshooting.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            SFRmaker
+          </a>
+              <div class="version">
+                0.11.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../philosophy.html"> Philosophy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html"> Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html"> Installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../inputs.html"> Input Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html"> Using SFRmaker with a configuration file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebooks/SFRmaker_demo.html"> Basic Usage in a scripting context</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebooks/preprocessing_demo.html"> Preprocessing NHDPlus version 2 data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebooks/lines_from_NHDPlusHR_demo.html"> Using SFRmaker with NHDPlus High Resolution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../concepts.html"> Concepts and methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebooks/sfrmaker_tools.html"> Stand-alone tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../troubleshooting.html"> Troubleshooting</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#"> Code reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.flows.html">Flows Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.grid.html">Grid Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.lines.html">Lines Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.mf5to6.html">MODFLOW-2005 to 6 Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.observations.html">Observations Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.preprocessing.html">Preprocessing Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.sfrdata.html">SFRData Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.utils.html">Utilities Module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../config-summary.html"> Summary of configuration file options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../release-history.html"> Release History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html"> Contributing to SFRmaker</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Bibliography</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../references.html"> References cited</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">SFRmaker</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Modules</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="modules">
+<h1>Modules<a class="headerlink" href="#modules" title="Permalink to this heading">¶</a></h1>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="sfrmaker.flows.html">Flows Module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.flows.html#sfrmaker.flows.add_to_perioddata"><code class="docutils literal notranslate"><span class="pre">add_to_perioddata()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.flows.html#sfrmaker.flows.add_to_segment_data"><code class="docutils literal notranslate"><span class="pre">add_to_segment_data()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.flows.html#sfrmaker.flows.get_inflow_locations_from_parent_model"><code class="docutils literal notranslate"><span class="pre">get_inflow_locations_from_parent_model()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.flows.html#sfrmaker.flows.get_inflows_from_parent_model"><code class="docutils literal notranslate"><span class="pre">get_inflows_from_parent_model()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="sfrmaker.grid.html">Grid Module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.grid.html#sfrmaker.grid.Grid"><code class="docutils literal notranslate"><span class="pre">Grid</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.grid.html#sfrmaker.grid.Grid.active_area"><code class="docutils literal notranslate"><span class="pre">Grid.active_area</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.grid.html#sfrmaker.grid.Grid.bounds"><code class="docutils literal notranslate"><span class="pre">Grid.bounds</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.grid.html#sfrmaker.grid.Grid.create_active_area_polygon_from_isfr"><code class="docutils literal notranslate"><span class="pre">Grid.create_active_area_polygon_from_isfr()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.grid.html#sfrmaker.grid.Grid.get_node"><code class="docutils literal notranslate"><span class="pre">Grid.get_node()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.grid.html#sfrmaker.grid.Grid.lenuni"><code class="docutils literal notranslate"><span class="pre">Grid.lenuni</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.grid.html#sfrmaker.grid.Grid.size"><code class="docutils literal notranslate"><span class="pre">Grid.size</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.grid.html#sfrmaker.grid.Grid.spatial_index"><code class="docutils literal notranslate"><span class="pre">Grid.spatial_index</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.grid.html#sfrmaker.grid.Grid.units_dict"><code class="docutils literal notranslate"><span class="pre">Grid.units_dict</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.grid.html#sfrmaker.grid.Grid.write_active_area_shapefile"><code class="docutils literal notranslate"><span class="pre">Grid.write_active_area_shapefile()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.grid.html#sfrmaker.grid.Grid.write_grid_shapefile"><code class="docutils literal notranslate"><span class="pre">Grid.write_grid_shapefile()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.grid.html#sfrmaker.grid.StructuredGrid"><code class="docutils literal notranslate"><span class="pre">StructuredGrid</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.grid.html#sfrmaker.grid.StructuredGrid.create_active_area_polygon_from_isfr"><code class="docutils literal notranslate"><span class="pre">StructuredGrid.create_active_area_polygon_from_isfr()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.grid.html#sfrmaker.grid.StructuredGrid.from_dataframe"><code class="docutils literal notranslate"><span class="pre">StructuredGrid.from_dataframe()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.grid.html#sfrmaker.grid.StructuredGrid.from_json"><code class="docutils literal notranslate"><span class="pre">StructuredGrid.from_json()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.grid.html#sfrmaker.grid.StructuredGrid.from_modelgrid"><code class="docutils literal notranslate"><span class="pre">StructuredGrid.from_modelgrid()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.grid.html#sfrmaker.grid.StructuredGrid.from_shapefile"><code class="docutils literal notranslate"><span class="pre">StructuredGrid.from_shapefile()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.grid.html#sfrmaker.grid.StructuredGrid.from_sr"><code class="docutils literal notranslate"><span class="pre">StructuredGrid.from_sr()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.grid.html#sfrmaker.grid.StructuredGrid.isfr"><code class="docutils literal notranslate"><span class="pre">StructuredGrid.isfr</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.grid.html#sfrmaker.grid.StructuredGrid.transform"><code class="docutils literal notranslate"><span class="pre">StructuredGrid.transform</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.grid.html#sfrmaker.grid.StructuredGrid.uniform"><code class="docutils literal notranslate"><span class="pre">StructuredGrid.uniform</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.grid.html#sfrmaker.grid.UnstructuredGrid"><code class="docutils literal notranslate"><span class="pre">UnstructuredGrid</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.grid.html#sfrmaker.grid.UnstructuredGrid.create_active_area_polygon_from_isfr"><code class="docutils literal notranslate"><span class="pre">UnstructuredGrid.create_active_area_polygon_from_isfr()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.grid.html#sfrmaker.grid.UnstructuredGrid.from_dataframe"><code class="docutils literal notranslate"><span class="pre">UnstructuredGrid.from_dataframe()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="sfrmaker.lines.html">Lines Module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.lines.html#sfrmaker.lines.Lines"><code class="docutils literal notranslate"><span class="pre">Lines</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.lines.html#sfrmaker.lines.Lines.cull"><code class="docutils literal notranslate"><span class="pre">Lines.cull()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.lines.html#sfrmaker.lines.Lines.from_dataframe"><code class="docutils literal notranslate"><span class="pre">Lines.from_dataframe()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.lines.html#sfrmaker.lines.Lines.from_nhdplus_hr"><code class="docutils literal notranslate"><span class="pre">Lines.from_nhdplus_hr()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.lines.html#sfrmaker.lines.Lines.from_nhdplus_v2"><code class="docutils literal notranslate"><span class="pre">Lines.from_nhdplus_v2()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.lines.html#sfrmaker.lines.Lines.from_shapefile"><code class="docutils literal notranslate"><span class="pre">Lines.from_shapefile()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.lines.html#sfrmaker.lines.Lines.geometry_length_units"><code class="docutils literal notranslate"><span class="pre">Lines.geometry_length_units</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.lines.html#sfrmaker.lines.Lines.intersect"><code class="docutils literal notranslate"><span class="pre">Lines.intersect()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.lines.html#sfrmaker.lines.Lines.make_routing_one_to_one"><code class="docutils literal notranslate"><span class="pre">Lines.make_routing_one_to_one()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.lines.html#sfrmaker.lines.Lines.paths"><code class="docutils literal notranslate"><span class="pre">Lines.paths</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.lines.html#sfrmaker.lines.Lines.routing"><code class="docutils literal notranslate"><span class="pre">Lines.routing</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.lines.html#sfrmaker.lines.Lines.to_crs"><code class="docutils literal notranslate"><span class="pre">Lines.to_crs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.lines.html#sfrmaker.lines.Lines.to_sfr"><code class="docutils literal notranslate"><span class="pre">Lines.to_sfr()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.lines.html#sfrmaker.lines.Lines.write_shapefile"><code class="docutils literal notranslate"><span class="pre">Lines.write_shapefile()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="sfrmaker.mf5to6.html">MODFLOW-2005 to 6 Module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.mf5to6.html#sfrmaker.mf5to6.Mf6SFR"><code class="docutils literal notranslate"><span class="pre">Mf6SFR</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.mf5to6.html#sfrmaker.mf5to6.Mf6SFR.cols"><code class="docutils literal notranslate"><span class="pre">Mf6SFR.cols</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.mf5to6.html#sfrmaker.mf5to6.Mf6SFR.connections"><code class="docutils literal notranslate"><span class="pre">Mf6SFR.connections</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.mf5to6.html#sfrmaker.mf5to6.Mf6SFR.graph_r"><code class="docutils literal notranslate"><span class="pre">Mf6SFR.graph_r</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.mf5to6.html#sfrmaker.mf5to6.Mf6SFR.mf5names"><code class="docutils literal notranslate"><span class="pre">Mf6SFR.mf5names</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.mf5to6.html#sfrmaker.mf5to6.Mf6SFR.mf6names"><code class="docutils literal notranslate"><span class="pre">Mf6SFR.mf6names</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.mf5to6.html#sfrmaker.mf5to6.Mf6SFR.options_block"><code class="docutils literal notranslate"><span class="pre">Mf6SFR.options_block</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.mf5to6.html#sfrmaker.mf5to6.Mf6SFR.packagedata"><code class="docutils literal notranslate"><span class="pre">Mf6SFR.packagedata</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.mf5to6.html#sfrmaker.mf5to6.Mf6SFR.period_data"><code class="docutils literal notranslate"><span class="pre">Mf6SFR.period_data</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.mf5to6.html#sfrmaker.mf5to6.Mf6SFR.write_file"><code class="docutils literal notranslate"><span class="pre">Mf6SFR.write_file()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.mf5to6.html#sfrmaker.mf5to6.cellids_to_kij"><code class="docutils literal notranslate"><span class="pre">cellids_to_kij()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.mf5to6.html#sfrmaker.mf5to6.mf6sfr"><code class="docutils literal notranslate"><span class="pre">mf6sfr</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.mf5to6.html#sfrmaker.mf5to6.segment_data_to_period_data"><code class="docutils literal notranslate"><span class="pre">segment_data_to_period_data()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="sfrmaker.observations.html">Observations Module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.observations.html#sfrmaker.observations.add_observations"><code class="docutils literal notranslate"><span class="pre">add_observations()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.observations.html#sfrmaker.observations.get_closest_reach"><code class="docutils literal notranslate"><span class="pre">get_closest_reach()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.observations.html#sfrmaker.observations.locate_sites"><code class="docutils literal notranslate"><span class="pre">locate_sites()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.observations.html#sfrmaker.observations.write_gage_package"><code class="docutils literal notranslate"><span class="pre">write_gage_package()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.observations.html#sfrmaker.observations.write_mf6_sfr_obsfile"><code class="docutils literal notranslate"><span class="pre">write_mf6_sfr_obsfile()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="sfrmaker.preprocessing.html">Preprocessing Module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.preprocessing.html#sfrmaker.preprocessing.clip_flowlines_to_polygon"><code class="docutils literal notranslate"><span class="pre">clip_flowlines_to_polygon()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.preprocessing.html#sfrmaker.preprocessing.cull_flowlines"><code class="docutils literal notranslate"><span class="pre">cull_flowlines()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.preprocessing.html#sfrmaker.preprocessing.edit_flowlines"><code class="docutils literal notranslate"><span class="pre">edit_flowlines()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.preprocessing.html#sfrmaker.preprocessing.fix_invalid_asums"><code class="docutils literal notranslate"><span class="pre">fix_invalid_asums()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.preprocessing.html#sfrmaker.preprocessing.get_flowline_routing"><code class="docutils literal notranslate"><span class="pre">get_flowline_routing()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.preprocessing.html#sfrmaker.preprocessing.get_netcdf_crs_from_grid_mapping"><code class="docutils literal notranslate"><span class="pre">get_netcdf_crs_from_grid_mapping()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.preprocessing.html#sfrmaker.preprocessing.preprocess_nhdplus"><code class="docutils literal notranslate"><span class="pre">preprocess_nhdplus()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.preprocessing.html#sfrmaker.preprocessing.recompute_asums_for_minor_distribs"><code class="docutils literal notranslate"><span class="pre">recompute_asums_for_minor_distribs()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.preprocessing.html#sfrmaker.preprocessing.sample_NARWidth"><code class="docutils literal notranslate"><span class="pre">sample_NARWidth()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.preprocessing.html#sfrmaker.preprocessing.swb_runoff_to_csv"><code class="docutils literal notranslate"><span class="pre">swb_runoff_to_csv()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="sfrmaker.sfrdata.html">SFRData Module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData"><code class="docutils literal notranslate"><span class="pre">SFRData</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.add_observations"><code class="docutils literal notranslate"><span class="pre">SFRData.add_observations()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.add_to_perioddata"><code class="docutils literal notranslate"><span class="pre">SFRData.add_to_perioddata()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.add_to_segment_data"><code class="docutils literal notranslate"><span class="pre">SFRData.add_to_segment_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.assign_layers"><code class="docutils literal notranslate"><span class="pre">SFRData.assign_layers()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.const"><code class="docutils literal notranslate"><span class="pre">SFRData.const</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.create_mf6sfr"><code class="docutils literal notranslate"><span class="pre">SFRData.create_mf6sfr()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.create_modflow_sfr2"><code class="docutils literal notranslate"><span class="pre">SFRData.create_modflow_sfr2()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.crs"><code class="docutils literal notranslate"><span class="pre">SFRData.crs</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.crs_units"><code class="docutils literal notranslate"><span class="pre">SFRData.crs_units</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.defaults"><code class="docutils literal notranslate"><span class="pre">SFRData.defaults</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.dtypes"><code class="docutils literal notranslate"><span class="pre">SFRData.dtypes</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.export_observations"><code class="docutils literal notranslate"><span class="pre">SFRData.export_observations()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.export_outlets"><code class="docutils literal notranslate"><span class="pre">SFRData.export_outlets()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.export_routing"><code class="docutils literal notranslate"><span class="pre">SFRData.export_routing()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.export_transient_variable"><code class="docutils literal notranslate"><span class="pre">SFRData.export_transient_variable()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.from_package"><code class="docutils literal notranslate"><span class="pre">SFRData.from_package()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.from_tables"><code class="docutils literal notranslate"><span class="pre">SFRData.from_tables()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.from_yaml"><code class="docutils literal notranslate"><span class="pre">SFRData.from_yaml()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.get_empty_reach_data"><code class="docutils literal notranslate"><span class="pre">SFRData.get_empty_reach_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.get_empty_segment_data"><code class="docutils literal notranslate"><span class="pre">SFRData.get_empty_segment_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.get_slopes"><code class="docutils literal notranslate"><span class="pre">SFRData.get_slopes()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.interpolate_to_reaches"><code class="docutils literal notranslate"><span class="pre">SFRData.interpolate_to_reaches()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.isfropt0_to_1"><code class="docutils literal notranslate"><span class="pre">SFRData.isfropt0_to_1()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.len_const"><code class="docutils literal notranslate"><span class="pre">SFRData.len_const</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.mf5names"><code class="docutils literal notranslate"><span class="pre">SFRData.mf5names</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.mf6names"><code class="docutils literal notranslate"><span class="pre">SFRData.mf6names</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.model"><code class="docutils literal notranslate"><span class="pre">SFRData.model</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.modflow_sfr2"><code class="docutils literal notranslate"><span class="pre">SFRData.modflow_sfr2</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.observations"><code class="docutils literal notranslate"><span class="pre">SFRData.observations</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.observations_file"><code class="docutils literal notranslate"><span class="pre">SFRData.observations_file</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.package_name"><code class="docutils literal notranslate"><span class="pre">SFRData.package_name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.package_type"><code class="docutils literal notranslate"><span class="pre">SFRData.package_type</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.paths"><code class="docutils literal notranslate"><span class="pre">SFRData.paths</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.period_data"><code class="docutils literal notranslate"><span class="pre">SFRData.period_data</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.rdcols"><code class="docutils literal notranslate"><span class="pre">SFRData.rdcols</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.reach_paths"><code class="docutils literal notranslate"><span class="pre">SFRData.reach_paths</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.repair_outsegs"><code class="docutils literal notranslate"><span class="pre">SFRData.repair_outsegs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.reset_reaches"><code class="docutils literal notranslate"><span class="pre">SFRData.reset_reaches()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.reset_segments"><code class="docutils literal notranslate"><span class="pre">SFRData.reset_segments()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.rno_routing"><code class="docutils literal notranslate"><span class="pre">SFRData.rno_routing</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.run_diagnostics"><code class="docutils literal notranslate"><span class="pre">SFRData.run_diagnostics()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.sample_reach_elevations"><code class="docutils literal notranslate"><span class="pre">SFRData.sample_reach_elevations()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.sdcols"><code class="docutils literal notranslate"><span class="pre">SFRData.sdcols</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.segment_routing"><code class="docutils literal notranslate"><span class="pre">SFRData.segment_routing</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.set_outreaches"><code class="docutils literal notranslate"><span class="pre">SFRData.set_outreaches()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.set_streambed_top_elevations_from_dem"><code class="docutils literal notranslate"><span class="pre">SFRData.set_streambed_top_elevations_from_dem()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.structured"><code class="docutils literal notranslate"><span class="pre">SFRData.structured</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.time_const"><code class="docutils literal notranslate"><span class="pre">SFRData.time_const</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.to_riv"><code class="docutils literal notranslate"><span class="pre">SFRData.to_riv()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.write_gage_package"><code class="docutils literal notranslate"><span class="pre">SFRData.write_gage_package()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.write_mf6_sfr_obsfile"><code class="docutils literal notranslate"><span class="pre">SFRData.write_mf6_sfr_obsfile()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.write_package"><code class="docutils literal notranslate"><span class="pre">SFRData.write_package()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.write_tables"><code class="docutils literal notranslate"><span class="pre">SFRData.write_tables()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="sfrmaker.utils.html">Utilities Module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.utils.html#sfrmaker.utils.arbolate_sum"><code class="docutils literal notranslate"><span class="pre">arbolate_sum()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.utils.html#sfrmaker.utils.assign_layers"><code class="docutils literal notranslate"><span class="pre">assign_layers()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.utils.html#sfrmaker.utils.exe_exists"><code class="docutils literal notranslate"><span class="pre">exe_exists()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.utils.html#sfrmaker.utils.get_input_arguments"><code class="docutils literal notranslate"><span class="pre">get_input_arguments()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.utils.html#sfrmaker.utils.get_layer"><code class="docutils literal notranslate"><span class="pre">get_layer()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.utils.html#sfrmaker.utils.get_method_args_values"><code class="docutils literal notranslate"><span class="pre">get_method_args_values()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.utils.html#sfrmaker.utils.get_sfr_package_format"><code class="docutils literal notranslate"><span class="pre">get_sfr_package_format()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.utils.html#sfrmaker.utils.make_config_summary"><code class="docutils literal notranslate"><span class="pre">make_config_summary()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.utils.html#sfrmaker.utils.print_item"><code class="docutils literal notranslate"><span class="pre">print_item()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.utils.html#sfrmaker.utils.update"><code class="docutils literal notranslate"><span class="pre">update()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.utils.html#sfrmaker.utils.which"><code class="docutils literal notranslate"><span class="pre">which()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.utils.html#sfrmaker.utils.width_from_arbolate_sum"><code class="docutils literal notranslate"><span class="pre">width_from_arbolate_sum()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../troubleshooting.html" class="btn btn-neutral float-left" title="Troubleshooting" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="sfrmaker.flows.html" class="btn btn-neutral float-right" title="The Flows Module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+      <span class="lastupdated">Last updated on Aug 14, 2023.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
