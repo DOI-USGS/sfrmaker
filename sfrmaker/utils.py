@@ -70,6 +70,13 @@ def assign_layers(reach_data, botm_array,
     i, j = reach_data.i.values, reach_data.j.values
     streambed_botm = reach_data[strtop_col].values - reach_data[strthick_col].values
     layers = get_layer(botm_array, i, j, streambed_botm - pad)
+    if idomain is not None:
+        active_frac = np.sum(idomain[layers, i, j] > 0)/len(i)
+        if active_frac < 0.99:
+            warnings.warn(f'{1-active_frac:.2%}of SFR reaches are in inactive cells. '
+                          'Check the model idomain array and possibly the SFR '
+                          'elevation and model length units for consistency.')
+        
 
     # check against model bottom
     model_botm = botm_array[-1, i, j]
