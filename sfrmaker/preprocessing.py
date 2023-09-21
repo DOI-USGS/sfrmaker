@@ -30,8 +30,9 @@ from sfrmaker.gis import (intersect_rtree, get_crs,
                           get_bbox, read_polygon_feature)
 from sfrmaker.elevations import smooth_elevations
 from sfrmaker.logger import Logger
-from sfrmaker.nhdplus_utils import get_nhdplus_v2_filepaths, get_prj_file
-from sfrmaker.routing import find_path, make_graph, get_upsegs
+from sfrmaker.nhdplus_utils import (
+    get_nhdplus_v2_filepaths, get_prj_file, read_nhdplus_hr)
+from sfrmaker.routing import find_path, make_graph, make_reverse_graph, get_upsegs
 from sfrmaker.units import convert_length_units, unit_abbreviations
 from sfrmaker.utils import width_from_arbolate_sum, arbolate_sum
 
@@ -1798,3 +1799,183 @@ def swb_runoff_to_csv(swb_runoff_netcdf_output, nhdplus_catchments_file,
     print(f'wrote {outfile}')
     
     return aggregated
+
+
+def preprocess_nhdplus_hr_flowlines(nhdplus_path, active_area=None,
+                          keep_fcodes=None,
+                          drop_ids_upstream=None,
+                          drop_isolated=False,
+                          dest_crs=None, 
+                          outfile='preprocessed_flowlines.shp'):
+    """Preprocess NHDPlus HR flowline and associated attribute data
+    to a shapefile.
+
+    Parameters
+    ----------
+    nhdplus_path : str, pathlike or list of pathlikes
+        Path to NHDPlus HR dataset(s) (FileGDB format)
+    active_area : str, shapely polygon or tuple, optional
+        A polygon shapefile, or shapely polygon or bounding box tuple
+        (left, bottom, top, right) in the NAD83 GCS (EPSG:4269). The active area
+        is converted to a bounding box, which is then used to filter the flowlines
+        that are read in. If none, no filtering is performed, and the whole
+        area encompased by the input NHDPlus data will be retained. Must be
+        in the same CRS as `nhdplus_path` (typically 4269) if
+        CRS information isn't included in the object (i.e. if it
+        is a tuple or polygon, or shapefile without a .prj file).
+        by default, None
+    keep_fcodes : sequence, optional
+        Option to only retain certain line types
+        (e.g. perennial streams), as indicated by their FCodes.
+        by default None
+    drop_ids_upstream : sequence, optional
+        Option to drop specified flowlines and
+        all flowlines upstream of them, by default None
+    drop_isolated : bool
+        Option to drop flowlines that have outlets lines
+        that are wholly inside the active area.
+        by default, False
+    dest_crs : CRS-like, optional
+        Reproject preprocessed flowlines to this 
+        coorindate reference system (CRS), for example as 
+        specified by an EPSG code. See the documentation for 
+        :meth:`pyproj.crs.CRS.from_user_input` for other examples, 
+        by default None
+    outfile : str or pathlike, optional
+        Output shapefile path, 
+        by default 'preprocessed_flowlines.shp'
+        
+    """
+    # read in the flowlines, filtering them to a designated bounding box
+    if isinstance(nhdplus_path, str) or isinstance(nhdplus_path, Path):
+        nhdplus_path = [nhdplus_path]
+    dfs = []
+    for f in nhdplus_path:
+        df = read_nhdplus_hr(f, bbox_filter=active_area)
+        dfs.append(df)
+    df = pd.concat(dfs)
+    
+    # cast nhdplus IDs to ints
+    df['NHDPlusID'] = df['NHDPlusID'].astype(int)
+    df['ToNHDPID'] = df['ToNHDPID'].astype(int)
+    
+    # drop undesired line types (storm sewers and aquaducts, etc.)
+    if keep_fcodes is not None:
+        df = df.loc[df['FCode'].isin(keep_fcodes)].copy()
+    
+    # drop drop_ids_upstream and all IDs above them
+    if drop_ids_upstream is not None:
+        routing = make_graph(df['NHDPlusID'], df['ToNHDPID'], one_to_many=False)
+        routing_r = make_reverse_graph(routing)
+        all_drop_ids = drop_ids_upstream.copy()
+        for nhdplusid in drop_ids_upstream:
+            upstream_ids = get_upsegs(routing_r, nhdplusid)
+            all_drop_ids.update(upstream_ids)
+        df = df.loc[~df['NHDPlusID'].isin(all_drop_ids)]
+    
+    # update the routing dicts
+    df.loc[~df['ToNHDPID'].isin(df['NHDPlusID']), 'ToNHDPID'] = 0
+    routing = make_graph(df['NHDPlusID'], df['ToNHDPID'], one_to_many=False)
+    routing_r = make_reverse_graph(routing)
+    df['ToNHDPID'] = [routing[nhdplusid] for nhdplusid in df['NHDPlusID']]
+    
+    # option to cull isolated groups of flowlines
+    if drop_isolated:
+        if isinstance(active_area, tuple):
+            extent_poly_nhd_crs = box(*active_area)
+        elif active_area is not None:
+            extent_poly_nhd_crs = read_polygon_feature(
+                active_area, dest_crs=df.crs)
+        else:
+            raise ValueError('drop_isolated option requires a valid active_area.')
+        # outlets are nhdplus IDs that don't route to anywhere
+        outlets = {k for k, v in routing.items() if v == 0}
+        # evaluate only outlets still in the dataset
+        outlets = outlets.intersection(df['NHDPlusID'])
+        for nhdplusid in outlets:
+            geom = df.loc[df['NHDPlusID'] == nhdplusid, 'geometry'].values[0]
+            # remove outlet streams that are inside the model area
+            if geom.within(extent_poly_nhd_crs):
+                # include the outlet
+                upstream_ids = {nhdplusid}
+                # and any upstream lines
+                if nhdplusid in routing_r:
+                    upstream_ids.update(get_upsegs(
+                        routing_r, 
+                        nhdplusid))
+                all_drop_ids.update(upstream_ids)
+        df = df.loc[~df['NHDPlusID'].isin(all_drop_ids)]
+    
+    # repoject to dest_crs
+    df = df.to_crs(dest_crs)
+    
+    # write out to shapefile
+    df['FDate'] = pd.to_datetime(df['FDate']).dt.strftime('%Y-%m-%d')
+    df.to_file(outfile)
+    print(f'wrote {outfile}')
+    
+
+def preprocess_nhdplus_hr_waterbodies(nhdplus_path, active_area,
+                                      drop_waterbodies=None, min_areasqkm=0.,
+                                      dest_crs=None,
+                                      outfile='preprocessed_waterbodies.shp'):
+    """_summary_
+
+    Parameters
+    ----------
+    nhdplus_path : str, pathlike or list of pathlikes
+        Path to NHDPlus HR dataset(s) (FileGDB format)
+    active_area : str, shapely polygon or tuple, optional
+        A polygon shapefile, or shapely polygon or bounding box tuple
+        (left, bottom, top, right). Must be
+        in the same CRS as `nhdplus_path` (typically 4269) if
+        CRS information isn't included in the object (i.e. if it
+        is a tuple or polygon, or shapefile without a .prj file).
+        by default, None
+    drop_waterbodies : sequence, optional
+        Option to drop specified waterbodies (by NHDPlusID), by default None
+    min_areasqkm : float, optional
+        Exclude waterbodies smaller than this size in the output, 
+        by default 0.
+    dest_crs : CRS-like, optional
+        Reproject preprocessed flowlines to this 
+        coorindate reference system (CRS), for example as 
+        specified by an EPSG code. See the documentation for 
+        :meth:`pyproj.crs.CRS.from_user_input` for other examples, 
+        by default None
+    outfile : str or pathlike, optional
+        Output shapefile path, 
+        by default 'preprocessed_waterbodies.shp'
+    """    
+
+    if isinstance(nhdplus_path, str) or isinstance(nhdplus_path, Path):
+        nhdplus_path = [nhdplus_path]
+    dfs = []
+    for f in nhdplus_path:
+        kwargs = {'layer': 'NHDWaterbody'}
+        if isinstance(active_area, tuple):
+            kwargs['bbox'] = active_area
+        # handle shapefile for testing
+        if Path(f).suffix == ".shp":
+            del kwargs['layer']
+        df = gpd.read_file(f, **kwargs)
+        dfs.append(df)
+    df = pd.concat(dfs)
+    wb_crs = df.crs
+    if dest_crs is None:
+        dest_crs = df.crs
+    else:
+        df.to_crs(dest_crs, inplace=True)
+
+    if isinstance(active_area, tuple):
+        intersects = np.array([True] * len(df))
+    elif active_area is not None:
+        extent_poly = read_polygon_feature(
+            active_area, dest_crs=dest_crs)
+        intersects = np.array([g.intersects(extent_poly) for g in df.geometry])
+    loc = intersects & ~df['NHDPlusID'].isin(drop_waterbodies) & (df['AreaSqKm'] > min_areasqkm)
+    df = df.loc[loc].copy()
+    df['NHDPlusID'] = df['NHDPlusID'].astype(int)
+    df['FDate'] = pd.to_datetime(df['FDate']).dt.strftime('%Y-%m-%d')
+    df.to_file(outfile)
+    print(f'wrote {outfile}')
