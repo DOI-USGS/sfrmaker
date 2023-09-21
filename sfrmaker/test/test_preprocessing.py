@@ -16,7 +16,9 @@ from sfrmaker.preprocessing import (get_flowline_routing,
                                     preprocess_nhdplus, 
                                     clip_flowlines_to_polygon, 
                                     edit_flowlines,
-                                    swb_runoff_to_csv
+                                    swb_runoff_to_csv,
+                                    preprocess_nhdplus_hr_flowlines,
+                                    preprocess_nhdplus_hr_waterbodies
                                     )
 
 
@@ -369,3 +371,56 @@ def test_cull_flowlines2(project_root_path):
                             cull_invalid=True, cull_isolated=False,
                             active_area=Path(project_root_path, 'examples/tylerforks/active_area.shp'),
                             outfolder=outfolder)
+    
+    
+def test_preprocess_nhdplus_hr_flowlines(project_root_path, outdir):
+    data_path = project_root_path / 'examples/neversink_rondout'
+    nhdplus_paths = [data_path / 'NHDPlus_HR_1.gdb',  #'../source_data/NHDPLUS_H_19020302_HU8_GDB/NHDPLUS_H_19020302_HU8_GDB.gdb'
+                     data_path / 'NHDPlus_HR_2.gdb'
+    ]
+    model_outline = data_path / 'Model_Extent.shp'    
+    outfile = outdir / 'preprocessed_flowlines.shp'
+    wb_outfile = outdir / 'preprocessed_waterbodies.shp'
+
+    # drop lines representing storm sewers and aquaducts, etc.
+    keep_fcodes = {46003,  # intermittent streams
+                   46006,  # perennial streams
+                   55800,  # artificial path (thru lakes)
+                   33600,  # canal/ditch (includes many wetlands, and the MS River)
+                   33400  # connector (some wetlands)
+                   }
+    
+    # drop these IDs and all IDs above them
+    drop_ids = {10000700059483}
+    
+    preprocess_nhdplus_hr_flowlines(nhdplus_paths, active_area=model_outline,
+                          keep_fcodes=keep_fcodes,
+                          drop_ids_upstream=drop_ids,
+                          drop_isolated=False,
+                          dest_crs=26918, outfile=outfile)
+    
+    df = gpd.read_file(outfile)
+    assert df.crs == 26918
+    assert not set(df['FCode']).difference(keep_fcodes)
+    assert 10000700059483 not in df['NHDPlusID'].values
+    # the next line up shouldn't be there either
+    assert 10000700020952 not in df['NHDPlusID'].values
+
+
+def test_preprocess_nhdplus_hr_waterbodies(project_root_path, outdir):
+    nhdplus_path = project_root_path / 'sfrmaker/test/data/nhdplus_hr_waterbodies.shp',  #'../source_data/NHDPLUS_H_19020302_HU8_GDB/NHDPLUS_H_19020302_HU8_GDB.gdb'    
+    outfile = outdir / 'preprocessed_waterbodies.shp'
+  
+    # drop these waterbodies, regardless of size
+    drop_waterbodies = set()
+    
+    preprocess_nhdplus_hr_waterbodies(nhdplus_path, 
+                                      active_area=(-151.00350, 60.64855, -150.96778, 60.67559), 
+                                      drop_waterbodies=drop_waterbodies,
+                                      min_areasqkm=0.05,
+                                      dest_crs=26905, outfile=outfile)
+    df = gpd.read_file(outfile)
+    df.crs == 26905
+    assert 'Beaver Lake' in df['GNIS_Name']
+    # the next line shouldn't be there either
+    assert 75004400012864 not in df['NHDPlusID'].values
