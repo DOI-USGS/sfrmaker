@@ -27,7 +27,7 @@ version |version|
    :caption: Getting Started
 
     Philosophy <philosophy>
-    Examples <examples>
+    Examples <examples/index.rst>
     Installation <installation>
 
 .. toctree::
@@ -35,7 +35,6 @@ version |version|
   :caption: User Guide
 
    Input Requirements <inputs>
-   Using SFRmaker with a configuration file <examples>
    Basic Usage in a scripting context <notebooks/SFRmaker_demo>
    Preprocessing NHDPlus version 2 data <notebooks/preprocessing_demo>
    Using SFRmaker with NHDPlus High Resolution <notebooks/lines_from_NHDPlusHR_demo>
