@@ -643,6 +643,11 @@ class SFRData(DataPackage):
             model_ws = '.' if model is None else model.model_ws
             m = fm.Modflow(modelname=self.package_name, model_ws=model_ws,
                            structured=self.structured)
+            nper = self.segment_data['per'].max() + 1
+            if nper > 1:
+                dis = fm.ModflowDis(m, nrow=self.grid.nrow, ncol=self.grid.ncol, 
+                                    nlay=self.grid.nlay, nper=nper)
+                
             if model is not None:
                 nper = 1
                 if 'tdis' in model.simulation.package_key_dict.keys():

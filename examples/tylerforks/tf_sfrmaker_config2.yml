@@ -10,6 +10,11 @@ flowlines:
   PlusFlowlineVAA: NHDPlus/NHDPlusAttributes/PlusFlowlineVAA.dbf
   PlusFlow: NHDPlus/NHDPlusAttributes/PlusFlow.dbf
   elevslope: NHDPlus/NHDPlusAttributes/elevslope.dbf
+inflows:  # see sfrmaker.data.add_to_perioddata for arguments
+  filename: inflows.csv
+  line_id_column: line_id_COMID
+  period_column: SP  # column with model stress periods
+  data_column: inflow_m3d  # column with flow values
 dem:
   filename: dem_26715.tif
   elevation_units: meters
