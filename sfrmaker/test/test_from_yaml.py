@@ -9,6 +9,7 @@ from shapely.geometry import box
 import pytest
 import gisutils
 import sfrmaker
+import flopy
 from sfrmaker.fileio import read_mf6_block
 
 
@@ -179,3 +180,24 @@ def test_tylerforks_from_config(config_file, dem):
     rd = sfrdata.reach_data.dropna(subset=['asum'], axis=0)
     assert np.allclose(rd.strtop.values.min(), 1125, rtol=0.01)
     assert sfrdata.grid.crs.srs == 'EPSG:26715'
+    
+    # check that inflows were written correctly
+    if 'inflows' in cfg:
+        m1 = sfrdata.modflow_sfr2.parent
+        m2 = flopy.modflow.Modflow(model_ws='.')
+        nper = sfrdata.segment_data['per'].max() + 1
+        dis = flopy.modflow.ModflowDis(m2, 
+            nrow=sfrdata.grid.nrow, ncol=sfrdata.grid.ncol, 
+            nlay=sfrdata.grid.nlay, nper=nper)
+        sfr = flopy.modflow.ModflowSfr2.load('tf.sfr', m2)
+        for i in range(nper):
+            assert np.allclose(sfr.segment_data[i]['flow'], 
+                               sfrdata.modflow_sfr2.segment_data[i]['flow'])
+        original_inflow_data = pd.read_csv(cfg['inflows']['filename'])
+        for i in range(nper):
+            per_col = cfg['inflows']['period_column']
+            q_col = cfg['inflows']['data_column']
+            q_orig = original_inflow_data.loc[original_inflow_data[per_col] == i, q_col].values[0]
+            idx = np.where(sfr.segment_data[i]['flow'] > 0)[0][0]
+            q_input = sfr.segment_data[i]['flow'][idx]
+            assert np.allclose(q_input, q_orig)
