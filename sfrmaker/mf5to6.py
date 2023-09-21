@@ -412,7 +412,7 @@ def segment_data_to_period_data(segment_data, reach_data):
     # get rno for reach 1s
     segroups = rd.groupby('iseg')
     reach1IDs = segroups.first()['rno'].to_dict()
-    prd['rno'] = [reach1IDs[i + 1] for i in prd.index]
+    prd['rno'] = [reach1IDs[seg] for seg in prd['nseg']]
     # prd['rainfall'] = np.random.randn(len(prd))
 
     #  distribute other variables to all reaches
