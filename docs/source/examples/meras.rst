@@ -1,6 +1,8 @@
+MERAS 3: Creating an SFR package from a configuration file with custom hydrography
+-------------------------------------------------------------------------------------
 This example illustrates the use of custom hydrography with the configuration file, as well the scalability of SFRmaker. An SFR package is generated on a regular 1 km grid (Clark and others, 2018) that spans the Mississippi Embayment, a former bay of the Gulf of Mexico that includes portions of Missouri, Tennessee, Arkansas, Mississippi and Louisiana. The goal is to update the stream network for the Mississippi Embayment Regional Aquifer System (MERAS 2) model (Haugh and others, 2020; Clark and others, 2013) to include a realistic representation of the thousands of mapped streams (Figure 1). NHDPlus hydrography were preprocessed to only include the lines intersecting the MERAS footprint that had a total upstream drainage (arbolate sum) of 20 kilometers or greater (figure 1). Attribute information from NHDPlus, including routing connections, elevations at the upstream and downstream ends of line arcs and channel widths estimated from arbolate sum values (e.g. ref: Feinstein and others (2010, p 266)) were joined to the culled flowlines, which were then saved to a shapefile.
 
-.. figure:: examples/meras_comparison.png
+.. figure:: meras_comparison.png
     :align: left
     :scale: 70 %
     :alt: alternate text
@@ -14,7 +16,7 @@ The configuration file for the Mississippi Embayment example is shown below. The
 
 meras_sfrmaker_config.yml:
 ##############################
-.. literalinclude:: ../../examples/meras/meras_sfrmaker_config.yml
+.. literalinclude:: ../../../examples/meras/meras_sfrmaker_config.yml
     :language: yaml
     :linenos:
 
@@ -32,13 +34,13 @@ The above configuration file can be used to generate an SFR package with the fol
 
 make_sfr.py:
 ##############################
-.. literalinclude:: ../../examples/meras/make_sfr.py
+.. literalinclude:: ../../../examples/meras/make_sfr.py
     :language: python
     :linenos:
 
 This will produce an sfr package for MODFLOW-6, csv table representations of the SFR input, and shapefiles for visualizing the SFR package. The resulting SFR package is shown in Figure 2.
 
-.. figure:: examples/meras_results.png
+.. figure:: meras_results.png
     :align: left
     :scale: 100 %
     :alt: alternate text

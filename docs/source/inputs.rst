@@ -45,7 +45,7 @@ Any Polyline shapefile can be supplied in lieu of NHDPlus, but it must have the 
 
 2) Model grid information
 --------------------------
-is supplied by creating a 	```flopy.discretization.Grid`` instance`_, instance or `via a shapefile`_, as shown in the :doc:`examples <examples>`.
+is supplied by creating a 	```flopy.discretization.Grid`` instance`_, instance or `via a shapefile`_, as shown in the :doc:`examples <examples/index>`.
 
 .. _flopy.discretization.Grid`` instance`: https://aleaf.github.io/sfrmaker/usage.html#create-a-flopy-structuredgrid-instance-defining-the-model-grid
 

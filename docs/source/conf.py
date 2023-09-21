@@ -45,7 +45,13 @@ extensions = [
     'numpydoc',
     'nbsphinx',
     'sphinx_copybutton',
+    'sphinx_gallery.gen_gallery'
 ]
+
+sphinx_gallery_conf = {
+     'examples_dirs': 'examples',   # path to your example scripts
+     'gallery_dirs': 'gallery',  # path to where to save gallery generated output
+}
 
 # Configuration options for plot_directive. See:
 # https://github.com/matplotlib/matplotlib/blob/f3ed922d935751e08494e5fb5311d3050a3b637b/lib/matplotlib/sphinxext/plot_directive.py#L81
@@ -94,7 +100,8 @@ language = 'en'
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This patterns also effect to html_static_path and html_extra_path
-exclude_patterns = ['_build', 'examples/*.rst']
+exclude_patterns = ['_build', #'examples/*.rst'
+                    ]
 
 
 # The name of the Pygments (syntax highlighting) style to use.
