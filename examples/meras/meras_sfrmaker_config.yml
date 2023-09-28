@@ -20,7 +20,7 @@ flowlines:
   name_column: GNIS_NAME
   attr_length_units: feet  # units of source data
   attr_height_units: feet  # units of source data
-inflows:  # see sfrmaker.data.add_to_perioddata for arguments
+inflows:  # see sfrmaker.flows.add_to_perioddata for arguments
   filename: inflows.csv
   line_id_column: line_id
   period_column: per  # column with model stress periods

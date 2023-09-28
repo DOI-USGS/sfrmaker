@@ -182,10 +182,13 @@ def test_add_to_segment_data(shellmound_sfrdata):
                         data_column='Q_avg')
     sd2 = sfrd.segment_data.copy()
     sd2.index = pd.MultiIndex.from_tuples(zip(sd2.per, sd2.nseg), names=['per', 'nseg'])
-    flows = flows.loc[~flows.line_id.isin([2])]
+    #flows = flows.loc[~flows.line_id.isin([2])]
+    #flows = flows.groupby(level=(0, 1)).sum()
     flows['nseg'] = [segment.get(l, segment[seq[-1]]) for l in flows.line_id]
-    flows.index = pd.MultiIndex.from_tuples(zip(flows.per, flows.nseg), names=['per', 'nseg'])
-    assert np.allclose(sd2.loc[flows.index, 'flow'], flows.Q_avg)
+    flow_sums = flows.groupby(['per', 'nseg']).first()
+    flow_sums['Q_avg'] = flows.groupby(['per', 'nseg'])['Q_avg'].sum()
+    #flows.index = pd.MultiIndex.from_tuples(zip(flows.per, flows.nseg), names=['per', 'nseg'])
+    assert np.allclose(sd2.loc[flow_sums.index, 'flow'], flow_sums.Q_avg)
     assert not sd2.isna().any().any()
     pd.testing.assert_frame_equal(sd1.drop('flow', axis=1),
                                   sd2.loc[sd1.index].drop('flow', axis=1),

@@ -415,13 +415,16 @@ class SFRData(DataPackage):
                             line_id_column=None,
                             segment_column='segment',
                             period_column='per',
-                            data_column='Q_avg'):
+                            data_column='Q_avg',
+                            one_inflow_per_path=False
+                            ):
         return add_to_segment_data(self, data, flowline_routing,
                                    variable=variable,
                                    line_id_column=line_id_column,
                                    segment_column=segment_column,
                                    period_column=period_column,
-                                   data_column=data_column)
+                                   data_column=data_column,
+                                   one_inflow_per_path=one_inflow_per_path)
     @property
     def paths(self):
         """Dict listing routing sequence for each segment
