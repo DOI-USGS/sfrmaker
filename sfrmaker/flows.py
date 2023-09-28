@@ -216,12 +216,12 @@ def add_to_perioddata(sfrdata, data, flowline_routing=None,
                       one_inflow_per_path=False,
                       distribute_flows_to_reaches=False):
     """Add data to the period data table (sfrdata.period_data)
-    for a MODFLOW-6 style sfrpackage.
+    for a MODFLOW-6 style SFR package.
 
     Parameters
     ----------
     sfrdata : sfrmaker.SFRData instance
-        SFRData instance with reach_data table attribute. To add observations from x, y coordinates,
+        SFRData instance with reach_data table attribute. To add data from x, y coordinates,
         the reach_data table must have a geometry column with LineStrings representing each reach, or
         an sfrlines_shapefile is required. Reach numbers are assumed to be in an 'rno' column.
     data : DataFrame, path to csv file, or list of DataFrames or file paths
@@ -468,8 +468,49 @@ def add_to_segment_data(sfrdata, data, flowline_routing=None,
                         line_id_column=None,
                         segment_column=None,
                         period_column='per',
-                        data_column='Q_avg'):
-    """Like add_to_perioddata, but for MODFLOW-2005.
+                        data_column='Q_avg',
+                        one_inflow_per_path=False):
+    """Add data to the segment data table (sfrdata.segment_data)
+    for a MODFLOW-2005 style SFR package.
+
+    Parameters
+    ----------
+    sfrdata : sfrmaker.SFRData instance
+        SFRData instance with reach_data table attribute. To add data from x, y coordinates,
+        the reach_data table must have a geometry column with LineStrings representing each reach, or
+        an sfrlines_shapefile is required. Reach numbers are assumed to be in an 'rno' column.
+    data : DataFrame, path to csv file, or list of DataFrames or file paths
+        Table with information on the inflow or other data sites to be located. Must have
+        either reach numbers (rno_column), line_ids (line_id_column),
+        or x and y locations (x_column_in_data and y_column_in_data).
+    flowline_routing : dict
+        Optional dictionary of routing for source hydrography. Only needed
+        if locating by line_id, and SFR network is a subset of the full source
+        hydrography (i.e. some lines were dropped in the creation of the SFR package,
+        or if the sites are inflow points corresponding to lines outside of the model perimeter).
+        In this case, points referenced to line_ids that are missing from the SFR
+        network are placed at the first reach corresponding to the next downstream line_id
+        that is represented in the SFR network. By default, None.
+    variable : str, optional
+        Modflow-2005 SFR Package variable (see the SFR2 Package documentation), by default 'flow'
+    line_id_column : str
+        Column in data matching observation sites to line_ids in the source hydrography data.
+        Either line_id_column or rno_column must be specified. By default, None
+    rno_column : str
+        Column in data matching observation sites to reach numbers in the SFR network. By default, None.
+    period_column : str, optional
+        Column with modflow stress period for each inflow value, by default 'per', by default, 'per'.
+    data_column : str, optional
+        Column with flow values, by default 'Q_avg'
+    one_inflow_per_path : bool, optional
+        Limit inflows to one per (headwater to outlet) routing path, choosing the inflow location 
+        that is furthest downstream. By default, False.
+    distribute_flows_to_reaches : bool, optional
+        Not implemented yet for MODFLOW-2005.
+
+    Returns
+    -------
+    Updates the sfrdata.segment_data DataFrame.
     """
     sfrd = sfrdata
 
@@ -492,7 +533,7 @@ def add_to_segment_data(sfrdata, data, flowline_routing=None,
             "Data to add need segment number or flowline routing information is needed."
 
     # check for duplicate inflows in same path
-    if variable == 'flow':
+    if variable == 'flow' and one_inflow_per_path:
         line_ids = set(data[line_id_column])
         drop = set()
         dropped_line_info_file = 'dropped_inflows_locations.csv'
@@ -521,14 +562,17 @@ def add_to_segment_data(sfrdata, data, flowline_routing=None,
     sfrd.segment_data.index = pd.MultiIndex.from_tuples(zip(sfrd.segment_data.per, sfrd.segment_data.nseg),
                                                         names=['per', 'nseg'])
     loc = list(zip(data.per, data.nseg))
-    data.index = pd.MultiIndex.from_tuples(loc, names=['per', 'nseg'])
-    replace = sorted(list(set(data.index).intersection(sfrd.segment_data.index)))
-    add = sorted(list(set(data.index).difference(sfrd.segment_data.index)))
-    sfrd.segment_data.loc[replace, variable] = data.loc[replace, variable]
+    # limit data to one row per segment, per period
+    # (sum multiple values)
+    per_seg_sums = data.groupby(['per', 'nseg']).last()
+    per_seg_sums[variable] = data.groupby(['per', 'nseg']).sum()[variable]
+    replace = sorted(list(set(per_seg_sums.index).intersection(sfrd.segment_data.index)))
+    add = sorted(list(set(per_seg_sums.index).difference(sfrd.segment_data.index)))
+    sfrd.segment_data.loc[replace, variable] = per_seg_sums.loc[replace, variable]
 
     # concat on the added data (create additional rows in segment_data table)
     to_concat = [sfrd.segment_data]
-    period_groups = data.loc[add, ['per', 'nseg', variable]].reset_index(drop=True).groupby('per')
+    period_groups = per_seg_sums.loc[add, [variable]].reset_index(drop=False).groupby('per')
     for per, group in period_groups:
         # start with existing data (row) for that segment
         df = sfrd.segment_data.loc[(slice(None, None), group.nseg), :].copy()
