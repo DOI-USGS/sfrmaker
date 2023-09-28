@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>The Flows Module &mdash; SFRmaker 0.11.1.post2.dev0+ge090954 documentation</title>
+  <title>The Flows Module &mdash; SFRmaker 0.11.1.post3.dev0+g2aae76e documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
@@ -41,7 +41,7 @@
             SFRmaker
           </a>
               <div class="version">
-                0.11.1.post2.dev0+ge090954
+                0.11.1.post3.dev0+g2aae76e
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -128,11 +128,11 @@
 <dt class="sig sig-object py" id="sfrmaker.flows.add_to_perioddata">
 <span class="sig-prename descclassname"><span class="pre">sfrmaker.flows.</span></span><span class="sig-name descname"><span class="pre">add_to_perioddata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sfrdata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flowline_routing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variable</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'inflow'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line_id_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rno_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">period_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'per'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Q_avg'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">one_inflow_per_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distribute_flows_to_reaches</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/flows.html#add_to_perioddata"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.flows.add_to_perioddata" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add data to the period data table (sfrdata.period_data)
-for a MODFLOW-6 style sfrpackage.</p>
+for a MODFLOW-6 style SFR package.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>sfrdata</strong><span class="classifier">sfrmaker.SFRData instance</span></dt><dd><p>SFRData instance with reach_data table attribute. To add observations from x, y coordinates,
+<dt><strong>sfrdata</strong><span class="classifier">sfrmaker.SFRData instance</span></dt><dd><p>SFRData instance with reach_data table attribute. To add data from x, y coordinates,
 the reach_data table must have a geometry column with LineStrings representing each reach, or
 an sfrlines_shapefile is required. Reach numbers are assumed to be in an ‘rno’ column.</p>
 </dd>
@@ -178,8 +178,52 @@ By default, False.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="sfrmaker.flows.add_to_segment_data">
-<span class="sig-prename descclassname"><span class="pre">sfrmaker.flows.</span></span><span class="sig-name descname"><span class="pre">add_to_segment_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sfrdata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flowline_routing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variable</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'flow'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line_id_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">segment_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">period_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'per'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Q_avg'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/flows.html#add_to_segment_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.flows.add_to_segment_data" title="Permalink to this definition">¶</a></dt>
-<dd><p>Like add_to_perioddata, but for MODFLOW-2005.</p>
+<span class="sig-prename descclassname"><span class="pre">sfrmaker.flows.</span></span><span class="sig-name descname"><span class="pre">add_to_segment_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sfrdata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flowline_routing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variable</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'flow'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line_id_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">segment_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">period_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'per'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Q_avg'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">one_inflow_per_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/flows.html#add_to_segment_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.flows.add_to_segment_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add data to the segment data table (sfrdata.segment_data)
+for a MODFLOW-2005 style SFR package.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>sfrdata</strong><span class="classifier">sfrmaker.SFRData instance</span></dt><dd><p>SFRData instance with reach_data table attribute. To add data from x, y coordinates,
+the reach_data table must have a geometry column with LineStrings representing each reach, or
+an sfrlines_shapefile is required. Reach numbers are assumed to be in an ‘rno’ column.</p>
+</dd>
+<dt><strong>data</strong><span class="classifier">DataFrame, path to csv file, or list of DataFrames or file paths</span></dt><dd><p>Table with information on the inflow or other data sites to be located. Must have
+either reach numbers (rno_column), line_ids (line_id_column),
+or x and y locations (x_column_in_data and y_column_in_data).</p>
+</dd>
+<dt><strong>flowline_routing</strong><span class="classifier">dict</span></dt><dd><p>Optional dictionary of routing for source hydrography. Only needed
+if locating by line_id, and SFR network is a subset of the full source
+hydrography (i.e. some lines were dropped in the creation of the SFR package,
+or if the sites are inflow points corresponding to lines outside of the model perimeter).
+In this case, points referenced to line_ids that are missing from the SFR
+network are placed at the first reach corresponding to the next downstream line_id
+that is represented in the SFR network. By default, None.</p>
+</dd>
+<dt><strong>variable</strong><span class="classifier">str, optional</span></dt><dd><p>Modflow-2005 SFR Package variable (see the SFR2 Package documentation), by default ‘flow’</p>
+</dd>
+<dt><strong>line_id_column</strong><span class="classifier">str</span></dt><dd><p>Column in data matching observation sites to line_ids in the source hydrography data.
+Either line_id_column or rno_column must be specified. By default, None</p>
+</dd>
+<dt><strong>rno_column</strong><span class="classifier">str</span></dt><dd><p>Column in data matching observation sites to reach numbers in the SFR network. By default, None.</p>
+</dd>
+<dt><strong>period_column</strong><span class="classifier">str, optional</span></dt><dd><p>Column with modflow stress period for each inflow value, by default ‘per’, by default, ‘per’.</p>
+</dd>
+<dt><strong>data_column</strong><span class="classifier">str, optional</span></dt><dd><p>Column with flow values, by default ‘Q_avg’</p>
+</dd>
+<dt><strong>one_inflow_per_path</strong><span class="classifier">bool, optional</span></dt><dd><p>Limit inflows to one per (headwater to outlet) routing path, choosing the inflow location 
+that is furthest downstream. By default, False.</p>
+</dd>
+<dt><strong>distribute_flows_to_reaches</strong><span class="classifier">bool, optional</span></dt><dd><p>Not implemented yet for MODFLOW-2005.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt>Updates the sfrdata.segment_data DataFrame.</dt><dd></dd>
+</dl>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -286,7 +330,7 @@ line_id : unique identifier for hydrography line that each reach is based on</p>
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Sep 21, 2023.
+      <span class="lastupdated">Last updated on Sep 28, 2023.
       </span></p>
   </div>
 

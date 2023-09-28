@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>sfrmaker.sfrdata &mdash; SFRmaker 0.11.1.post2.dev0+ge090954 documentation</title>
+  <title>sfrmaker.sfrdata &mdash; SFRmaker 0.11.1.post3.dev0+g2aae76e documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
@@ -38,7 +38,7 @@
             SFRmaker
           </a>
               <div class="version">
-                0.11.1.post2.dev0+ge090954
+                0.11.1.post3.dev0+g2aae76e
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -519,13 +519,16 @@
                             <span class="n">line_id_column</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                             <span class="n">segment_column</span><span class="o">=</span><span class="s1">&#39;segment&#39;</span><span class="p">,</span>
                             <span class="n">period_column</span><span class="o">=</span><span class="s1">&#39;per&#39;</span><span class="p">,</span>
-                            <span class="n">data_column</span><span class="o">=</span><span class="s1">&#39;Q_avg&#39;</span><span class="p">):</span>
+                            <span class="n">data_column</span><span class="o">=</span><span class="s1">&#39;Q_avg&#39;</span><span class="p">,</span>
+                            <span class="n">one_inflow_per_path</span><span class="o">=</span><span class="kc">False</span>
+                            <span class="p">):</span>
         <span class="k">return</span> <span class="n">add_to_segment_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">flowline_routing</span><span class="p">,</span>
                                    <span class="n">variable</span><span class="o">=</span><span class="n">variable</span><span class="p">,</span>
                                    <span class="n">line_id_column</span><span class="o">=</span><span class="n">line_id_column</span><span class="p">,</span>
                                    <span class="n">segment_column</span><span class="o">=</span><span class="n">segment_column</span><span class="p">,</span>
                                    <span class="n">period_column</span><span class="o">=</span><span class="n">period_column</span><span class="p">,</span>
-                                   <span class="n">data_column</span><span class="o">=</span><span class="n">data_column</span><span class="p">)</span></div>
+                                   <span class="n">data_column</span><span class="o">=</span><span class="n">data_column</span><span class="p">,</span>
+                                   <span class="n">one_inflow_per_path</span><span class="o">=</span><span class="n">one_inflow_per_path</span><span class="p">)</span></div>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">paths</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Dict listing routing sequence for each segment</span>
@@ -1917,7 +1920,7 @@
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Sep 21, 2023.
+      <span class="lastupdated">Last updated on Sep 28, 2023.
       </span></p>
   </div>
 

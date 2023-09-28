@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>sfrmaker.flows &mdash; SFRmaker 0.11.1.post2.dev0+ge090954 documentation</title>
+  <title>sfrmaker.flows &mdash; SFRmaker 0.11.1.post3.dev0+g2aae76e documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
@@ -38,7 +38,7 @@
             SFRmaker
           </a>
               <div class="version">
-                0.11.1.post2.dev0+ge090954
+                0.11.1.post3.dev0+g2aae76e
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -320,12 +320,12 @@
                       <span class="n">one_inflow_per_path</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                       <span class="n">distribute_flows_to_reaches</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Add data to the period data table (sfrdata.period_data)</span>
-<span class="sd">    for a MODFLOW-6 style sfrpackage.</span>
+<span class="sd">    for a MODFLOW-6 style SFR package.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    sfrdata : sfrmaker.SFRData instance</span>
-<span class="sd">        SFRData instance with reach_data table attribute. To add observations from x, y coordinates,</span>
+<span class="sd">        SFRData instance with reach_data table attribute. To add data from x, y coordinates,</span>
 <span class="sd">        the reach_data table must have a geometry column with LineStrings representing each reach, or</span>
 <span class="sd">        an sfrlines_shapefile is required. Reach numbers are assumed to be in an &#39;rno&#39; column.</span>
 <span class="sd">    data : DataFrame, path to csv file, or list of DataFrames or file paths</span>
@@ -572,8 +572,49 @@
                         <span class="n">line_id_column</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                         <span class="n">segment_column</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                         <span class="n">period_column</span><span class="o">=</span><span class="s1">&#39;per&#39;</span><span class="p">,</span>
-                        <span class="n">data_column</span><span class="o">=</span><span class="s1">&#39;Q_avg&#39;</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Like add_to_perioddata, but for MODFLOW-2005.</span>
+                        <span class="n">data_column</span><span class="o">=</span><span class="s1">&#39;Q_avg&#39;</span><span class="p">,</span>
+                        <span class="n">one_inflow_per_path</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Add data to the segment data table (sfrdata.segment_data)</span>
+<span class="sd">    for a MODFLOW-2005 style SFR package.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    sfrdata : sfrmaker.SFRData instance</span>
+<span class="sd">        SFRData instance with reach_data table attribute. To add data from x, y coordinates,</span>
+<span class="sd">        the reach_data table must have a geometry column with LineStrings representing each reach, or</span>
+<span class="sd">        an sfrlines_shapefile is required. Reach numbers are assumed to be in an &#39;rno&#39; column.</span>
+<span class="sd">    data : DataFrame, path to csv file, or list of DataFrames or file paths</span>
+<span class="sd">        Table with information on the inflow or other data sites to be located. Must have</span>
+<span class="sd">        either reach numbers (rno_column), line_ids (line_id_column),</span>
+<span class="sd">        or x and y locations (x_column_in_data and y_column_in_data).</span>
+<span class="sd">    flowline_routing : dict</span>
+<span class="sd">        Optional dictionary of routing for source hydrography. Only needed</span>
+<span class="sd">        if locating by line_id, and SFR network is a subset of the full source</span>
+<span class="sd">        hydrography (i.e. some lines were dropped in the creation of the SFR package,</span>
+<span class="sd">        or if the sites are inflow points corresponding to lines outside of the model perimeter).</span>
+<span class="sd">        In this case, points referenced to line_ids that are missing from the SFR</span>
+<span class="sd">        network are placed at the first reach corresponding to the next downstream line_id</span>
+<span class="sd">        that is represented in the SFR network. By default, None.</span>
+<span class="sd">    variable : str, optional</span>
+<span class="sd">        Modflow-2005 SFR Package variable (see the SFR2 Package documentation), by default &#39;flow&#39;</span>
+<span class="sd">    line_id_column : str</span>
+<span class="sd">        Column in data matching observation sites to line_ids in the source hydrography data.</span>
+<span class="sd">        Either line_id_column or rno_column must be specified. By default, None</span>
+<span class="sd">    rno_column : str</span>
+<span class="sd">        Column in data matching observation sites to reach numbers in the SFR network. By default, None.</span>
+<span class="sd">    period_column : str, optional</span>
+<span class="sd">        Column with modflow stress period for each inflow value, by default &#39;per&#39;, by default, &#39;per&#39;.</span>
+<span class="sd">    data_column : str, optional</span>
+<span class="sd">        Column with flow values, by default &#39;Q_avg&#39;</span>
+<span class="sd">    one_inflow_per_path : bool, optional</span>
+<span class="sd">        Limit inflows to one per (headwater to outlet) routing path, choosing the inflow location </span>
+<span class="sd">        that is furthest downstream. By default, False.</span>
+<span class="sd">    distribute_flows_to_reaches : bool, optional</span>
+<span class="sd">        Not implemented yet for MODFLOW-2005.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Updates the sfrdata.segment_data DataFrame.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">sfrd</span> <span class="o">=</span> <span class="n">sfrdata</span>
 
@@ -596,7 +637,7 @@
             <span class="s2">&quot;Data to add need segment number or flowline routing information is needed.&quot;</span>
 
     <span class="c1"># check for duplicate inflows in same path</span>
-    <span class="k">if</span> <span class="n">variable</span> <span class="o">==</span> <span class="s1">&#39;flow&#39;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">variable</span> <span class="o">==</span> <span class="s1">&#39;flow&#39;</span> <span class="ow">and</span> <span class="n">one_inflow_per_path</span><span class="p">:</span>
         <span class="n">line_ids</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">line_id_column</span><span class="p">])</span>
         <span class="n">drop</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
         <span class="n">dropped_line_info_file</span> <span class="o">=</span> <span class="s1">&#39;dropped_inflows_locations.csv&#39;</span>
@@ -625,14 +666,17 @@
     <span class="n">sfrd</span><span class="o">.</span><span class="n">segment_data</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="o">.</span><span class="n">from_tuples</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">sfrd</span><span class="o">.</span><span class="n">segment_data</span><span class="o">.</span><span class="n">per</span><span class="p">,</span> <span class="n">sfrd</span><span class="o">.</span><span class="n">segment_data</span><span class="o">.</span><span class="n">nseg</span><span class="p">),</span>
                                                         <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;per&#39;</span><span class="p">,</span> <span class="s1">&#39;nseg&#39;</span><span class="p">])</span>
     <span class="n">loc</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">per</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">nseg</span><span class="p">))</span>
-    <span class="n">data</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="o">.</span><span class="n">from_tuples</span><span class="p">(</span><span class="n">loc</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;per&#39;</span><span class="p">,</span> <span class="s1">&#39;nseg&#39;</span><span class="p">])</span>
-    <span class="n">replace</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">)</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">sfrd</span><span class="o">.</span><span class="n">segment_data</span><span class="o">.</span><span class="n">index</span><span class="p">)))</span>
-    <span class="n">add</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">)</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">sfrd</span><span class="o">.</span><span class="n">segment_data</span><span class="o">.</span><span class="n">index</span><span class="p">)))</span>
-    <span class="n">sfrd</span><span class="o">.</span><span class="n">segment_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">replace</span><span class="p">,</span> <span class="n">variable</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">replace</span><span class="p">,</span> <span class="n">variable</span><span class="p">]</span>
+    <span class="c1"># limit data to one row per segment, per period</span>
+    <span class="c1"># (sum multiple values)</span>
+    <span class="n">per_seg_sums</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s1">&#39;per&#39;</span><span class="p">,</span> <span class="s1">&#39;nseg&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">last</span><span class="p">()</span>
+    <span class="n">per_seg_sums</span><span class="p">[</span><span class="n">variable</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s1">&#39;per&#39;</span><span class="p">,</span> <span class="s1">&#39;nseg&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">sum</span><span class="p">()[</span><span class="n">variable</span><span class="p">]</span>
+    <span class="n">replace</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">per_seg_sums</span><span class="o">.</span><span class="n">index</span><span class="p">)</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">sfrd</span><span class="o">.</span><span class="n">segment_data</span><span class="o">.</span><span class="n">index</span><span class="p">)))</span>
+    <span class="n">add</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">per_seg_sums</span><span class="o">.</span><span class="n">index</span><span class="p">)</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">sfrd</span><span class="o">.</span><span class="n">segment_data</span><span class="o">.</span><span class="n">index</span><span class="p">)))</span>
+    <span class="n">sfrd</span><span class="o">.</span><span class="n">segment_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">replace</span><span class="p">,</span> <span class="n">variable</span><span class="p">]</span> <span class="o">=</span> <span class="n">per_seg_sums</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">replace</span><span class="p">,</span> <span class="n">variable</span><span class="p">]</span>
 
     <span class="c1"># concat on the added data (create additional rows in segment_data table)</span>
     <span class="n">to_concat</span> <span class="o">=</span> <span class="p">[</span><span class="n">sfrd</span><span class="o">.</span><span class="n">segment_data</span><span class="p">]</span>
-    <span class="n">period_groups</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">add</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;per&#39;</span><span class="p">,</span> <span class="s1">&#39;nseg&#39;</span><span class="p">,</span> <span class="n">variable</span><span class="p">]]</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;per&#39;</span><span class="p">)</span>
+    <span class="n">period_groups</span> <span class="o">=</span> <span class="n">per_seg_sums</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">add</span><span class="p">,</span> <span class="p">[</span><span class="n">variable</span><span class="p">]]</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;per&#39;</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">per</span><span class="p">,</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">period_groups</span><span class="p">:</span>
         <span class="c1"># start with existing data (row) for that segment</span>
         <span class="n">df</span> <span class="o">=</span> <span class="n">sfrd</span><span class="o">.</span><span class="n">segment_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[(</span><span class="nb">slice</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="n">group</span><span class="o">.</span><span class="n">nseg</span><span class="p">),</span> <span class="p">:]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
@@ -651,7 +695,7 @@
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Sep 21, 2023.
+      <span class="lastupdated">Last updated on Sep 28, 2023.
       </span></p>
   </div>
 
