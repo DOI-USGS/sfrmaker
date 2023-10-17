@@ -156,7 +156,8 @@ def test_create_mf6sfr(mf6sfr, shellmound_sfrdata, shellmound_model):
         if packagedata[col].dtype == object:
             packagedata[col] = pd.to_numeric(packagedata[col])
     reach_data = shellmound_sfrdata.reach_data
-    assert np.array_equal(packagedata['rno'].values + 1, reach_data['rno'].values)
+    rno_col = {'rno', 'ifno'}.intersection(packagedata.columns).pop()
+    assert np.array_equal(packagedata[rno_col].values + 1, reach_data['rno'].values)
     packagedata['iseg'] = reach_data['iseg']
     segment_data = shellmound_sfrdata.segment_data
     packagedata_groups = packagedata.groupby('iseg').mean()
@@ -237,7 +238,8 @@ def test_write_mf6_package(shellmound_sfrdata, mf6sfr, outdir):
     pdata = pdata.loc[active]
     pdata['k'], pdata['i'], pdata['j'] = cellids_to_kij(pdata.cellid)
     pdata.drop('cellid', axis=1, inplace=True)
-    cols = ['rno', 'k', 'i', 'j', 'rlen', 'rwid', 'rgrd', 'rtp', 'rbth', 'rhk', 'man', 'ncon', 'ustrf', 'ndv']
+    cols = ['rno', 'ifno', 'k', 'i', 'j', 'rlen', 'rwid', 'rgrd', 'rtp', 'rbth', 'rhk', 'man', 'ncon', 'ustrf', 'ndv']
+    cols = [c for c in cols if c in pdata.columns]
     pdata = pdata[cols].copy()
     rows = []
     with open(sfr_package_file) as src:
@@ -258,7 +260,7 @@ def test_write_mf6_package(shellmound_sfrdata, mf6sfr, outdir):
                          )
     isna = df.isna().any(axis=1).values.astype(bool)
     df.dropna(axis=0, inplace=True)
-    for c in ['k', 'i', 'j', 'rno']:
+    for c in ['k', 'i', 'j', cols[0]]:
         df[c] = df[c].astype(int) - 1
     pd.testing.assert_frame_equal(df,
                                   pdata.loc[~isna].reset_index(drop=True),
