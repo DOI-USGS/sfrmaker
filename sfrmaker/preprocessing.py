@@ -205,16 +205,16 @@ def cull_flowlines(NHDPlus_paths,
     # drop any entries without ID numbers
     # enforce integer dtype in ID numbers
     fl.dropna(subset=['COMID'], axis=0, inplace=True)
-    fl['COMID'] = fl.COMID.astype(int)
+    fl['COMID'] = fl.COMID.astype('int64')
     fl.index = fl['COMID']
     pfvaa.dropna(subset=['ComID'], axis=0, inplace=True)
-    pfvaa['ComID'] = pfvaa.ComID.astype(int)
+    pfvaa['ComID'] = pfvaa.ComID.astype('int64')
     pfvaa.index = pfvaa['ComID']
     pf.dropna(subset=['FROMCOMID'], axis=0, inplace=True)
-    pf['FROMCOMID'] = pf.FROMCOMID.astype(int)
+    pf['FROMCOMID'] = pf.FROMCOMID.astype('int64')
     pf.index = pf['FROMCOMID']
     elevslope.dropna(subset=['COMID'], axis=0, inplace=True)
-    elevslope['COMID'] = elevslope.COMID.astype(int)
+    elevslope['COMID'] = elevslope.COMID.astype('int64')
     elevslope.index = elevslope['COMID']
 
     original_comids = set(fl.index)
@@ -1634,7 +1634,7 @@ def swb_runoff_to_csv(swb_runoff_netcdf_output, nhdplus_catchments_file,
     
     # rasterize the catchments unto the NetCDF file grid
     features_list = list(zip(catchments['geometry'], 
-                             catchments[catchment_id_col].astype(int)))
+                             catchments[catchment_id_col].astype('int64')))
     rasterized = rasterio.features.rasterize(features_list, out_shape=(nrow, ncol), 
                                     transform=nc_trans)
     out_text_array = outfile.parent / 'nhdplus_catchments.dat'
