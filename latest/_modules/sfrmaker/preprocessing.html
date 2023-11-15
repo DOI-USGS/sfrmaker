@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>sfrmaker.preprocessing &mdash; SFRmaker 0.11.1.post5.dev0+ga0e0c61 documentation</title>
+  <title>sfrmaker.preprocessing &mdash; SFRmaker 0.11.1.post6.dev0+gb19b63e documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
@@ -38,7 +38,7 @@
             SFRmaker
           </a>
               <div class="version">
-                0.11.1.post5.dev0+ga0e0c61
+                0.11.1.post6.dev0+gb19b63e
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -309,16 +309,16 @@
     <span class="c1"># drop any entries without ID numbers</span>
     <span class="c1"># enforce integer dtype in ID numbers</span>
     <span class="n">fl</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;COMID&#39;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">fl</span><span class="p">[</span><span class="s1">&#39;COMID&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">fl</span><span class="o">.</span><span class="n">COMID</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">fl</span><span class="p">[</span><span class="s1">&#39;COMID&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">fl</span><span class="o">.</span><span class="n">COMID</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;int64&#39;</span><span class="p">)</span>
     <span class="n">fl</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">fl</span><span class="p">[</span><span class="s1">&#39;COMID&#39;</span><span class="p">]</span>
     <span class="n">pfvaa</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;ComID&#39;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">pfvaa</span><span class="p">[</span><span class="s1">&#39;ComID&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pfvaa</span><span class="o">.</span><span class="n">ComID</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">pfvaa</span><span class="p">[</span><span class="s1">&#39;ComID&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pfvaa</span><span class="o">.</span><span class="n">ComID</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;int64&#39;</span><span class="p">)</span>
     <span class="n">pfvaa</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">pfvaa</span><span class="p">[</span><span class="s1">&#39;ComID&#39;</span><span class="p">]</span>
     <span class="n">pf</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;FROMCOMID&#39;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">pf</span><span class="p">[</span><span class="s1">&#39;FROMCOMID&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pf</span><span class="o">.</span><span class="n">FROMCOMID</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">pf</span><span class="p">[</span><span class="s1">&#39;FROMCOMID&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pf</span><span class="o">.</span><span class="n">FROMCOMID</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;int64&#39;</span><span class="p">)</span>
     <span class="n">pf</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">pf</span><span class="p">[</span><span class="s1">&#39;FROMCOMID&#39;</span><span class="p">]</span>
     <span class="n">elevslope</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;COMID&#39;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">elevslope</span><span class="p">[</span><span class="s1">&#39;COMID&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">elevslope</span><span class="o">.</span><span class="n">COMID</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">elevslope</span><span class="p">[</span><span class="s1">&#39;COMID&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">elevslope</span><span class="o">.</span><span class="n">COMID</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;int64&#39;</span><span class="p">)</span>
     <span class="n">elevslope</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">elevslope</span><span class="p">[</span><span class="s1">&#39;COMID&#39;</span><span class="p">]</span>
 
     <span class="n">original_comids</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">fl</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
@@ -1738,7 +1738,7 @@
     
     <span class="c1"># rasterize the catchments unto the NetCDF file grid</span>
     <span class="n">features_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">catchments</span><span class="p">[</span><span class="s1">&#39;geometry&#39;</span><span class="p">],</span> 
-                             <span class="n">catchments</span><span class="p">[</span><span class="n">catchment_id_col</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)))</span>
+                             <span class="n">catchments</span><span class="p">[</span><span class="n">catchment_id_col</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;int64&#39;</span><span class="p">)))</span>
     <span class="n">rasterized</span> <span class="o">=</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">features</span><span class="o">.</span><span class="n">rasterize</span><span class="p">(</span><span class="n">features_list</span><span class="p">,</span> <span class="n">out_shape</span><span class="o">=</span><span class="p">(</span><span class="n">nrow</span><span class="p">,</span> <span class="n">ncol</span><span class="p">),</span> 
                                     <span class="n">transform</span><span class="o">=</span><span class="n">nc_trans</span><span class="p">)</span>
     <span class="n">out_text_array</span> <span class="o">=</span> <span class="n">outfile</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s1">&#39;nhdplus_catchments.dat&#39;</span>
@@ -1912,7 +1912,7 @@
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Oct 17, 2023.
+      <span class="lastupdated">Last updated on Nov 15, 2023.
       </span></p>
   </div>
 
