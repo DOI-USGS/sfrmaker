@@ -178,7 +178,7 @@ def make_graph(fromcomids, tocomids, one_to_many=True):
     if scalar_tocomids:
         tocomid_sets = [{int(v)} for v in tocomids]
     else:
-        tocomid_sets = [set(a.astype(int).tolist()) for a in map(np.array, tocomids)]
+        tocomid_sets = [set(a.astype('int64').tolist()) for a in map(np.array, tocomids)]
     tuples = zip(fromcomids, tocomid_sets)
     graph = defaultdict(set)
     for fromcomid, tocomid in tuples:

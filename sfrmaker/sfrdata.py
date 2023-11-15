@@ -110,7 +110,7 @@ class SFRData(DataPackage):
               'thts2', 'thti2', 'eps2', 'uhc2']
 
     dtypes = {'rno': int, 'node': int, 'k': int, 'i': int, 'j': int,
-              'iseg': int, 'ireach': int, 'outreach': int, 'line_id': int,
+              'iseg': int, 'ireach': int, 'outreach': int, 'line_id': 'int64',
               'per': int, 'nseg': int, 'icalc': int, 'outseg': int,
               'iupseg': int, 'iprior': int, 'nstrpts': int,
               'name': object, 'geometry': object}
