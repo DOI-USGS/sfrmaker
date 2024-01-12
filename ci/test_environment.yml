@@ -21,7 +21,6 @@ dependencies:
   - shapely
   - rtree
   - pyproj
-  - pyshp
   - netcdf4
   - codecov
   - coverage
