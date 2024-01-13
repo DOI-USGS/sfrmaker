@@ -2,7 +2,7 @@
 Release History
 ===============
 
-Version 0.11.2 (2024-01-12)
+Version 0.11.2 (2024-01-15)
 ---------------------------
 * fix issue with line_id dtypes, so that NHDPlus Hi-Res COMIDs (which require 64-bits as integers) work more robustly on Windows.
 * fixes to support Flopy renaming 'rno' to 'ifno'
