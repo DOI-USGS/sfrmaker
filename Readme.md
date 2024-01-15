@@ -21,9 +21,11 @@ See the [Installation Instructions](https://doi-usgs.github.io/sfrmaker/latest/i
 
 How to cite
 --------------
-###### Citation for SFRmaker
+###### Citations for SFRmaker
 
 Leaf, A.T., Fienen, M.N. and Reeves, H.W. (2021), SFRmaker and Linesink-Maker: Rapid Construction of Streamflow Routing Networks from Hydrography Data. Groundwater, 59: 761-771. https://doi.org/10.1111/gwat.13095
+
+Leaf, A.T., 2023, Automated construction of Streamflow-Routing networks for MODFLOW—Application in the Mississippi Embayment region: U.S. Geological Survey Scientific Investigations Report 2023–5051, 28 p., https://doi.org/10.3133/sir20235051.
 
 ###### Software/Code citation for SFRmaker (IP-122355):
 Leaf, A.T., Fienen, M.N. and Reeves, H.W., 2021, SFRmaker version 0.7.1: U.S. Geological Survey Software Release, 29 Jan. 2021, [https://doi.org/10.5066/P9U2T031](https://doi.org/10.5066/P9U2T031)
