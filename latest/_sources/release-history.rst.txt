@@ -2,6 +2,18 @@
 Release History
 ===============
 
+Version 0.11.2 (2024-01-15)
+---------------------------
+* fix issue with line_id dtypes, so that NHDPlus Hi-Res COMIDs (which require 64-bits as integers) work more robustly on Windows.
+* fixes to support Flopy renaming 'rno' to 'ifno'
+* fixes to SFRData.add_to_segment_data:
+    * add one_inflow_per_path argument similar to add_to_perioddata function for MODFLOW 6 with default of False; previously variables such as inflows were limited to a single value per flowline routing path (in the interest of avoiding duplicates), but many applications may have multiple inflows along a path.
+    * sum any multiple values so that there is only one value per SFR segment (required for SFR2 Package)
+* fixes to SFRData.create_modflow_sfr2: if no model is specified but the SFR package is MODFLOW 2005-style and transient (for example, with inflows specified by stress period), add stress periods and model grid information to flopy model instance (that is created so that flopy can be used to write the SFR package).
+* fixes to mf5to6.py::segment_data_to_period_data: use nseg column instead of dataframe index for segment numbers
+* bump supported python versions to 3.11 and 3.12
+* refactor project setup to use pyproject.toml
+
 Version 0.11.1 (2023-08-14)
 ---------------------------
 * Refactor the lines class to replace the `attr_length_units`` arg with separate `asum_units` and `width_units` args, and rename the `attr_height_units`` arg to `elevation_units`.

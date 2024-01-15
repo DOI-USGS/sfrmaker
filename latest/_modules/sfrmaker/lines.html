@@ -1,25 +1,24 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>sfrmaker.lines &mdash; SFRmaker 0.11.1.post6.dev0+gb19b63e documentation</title>
-      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/copybutton.css" type="text/css" />
+  <title>sfrmaker.lines &mdash; SFRmaker 0.11.1.post13.dev0+gf681dbf documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+
+  
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/underscore.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="../../_static/doctools.js"></script>
-        <script src="../../_static/sphinx_highlight.js"></script>
-        <script src="../../_static/clipboard.min.js"></script>
-        <script src="../../_static/copybutton.js"></script>
+        <script src="../../_static/documentation_options.js?v=9c7ba1cc"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../_static/copybutton.js?v=f281be69"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
@@ -38,7 +37,7 @@
             SFRmaker
           </a>
               <div class="version">
-                0.11.1.post6.dev0+gb19b63e
+                0.11.1.post13.dev0+gf681dbf
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -125,7 +124,9 @@
 <span class="kn">from</span> <span class="nn">sfrmaker.routing</span> <span class="kn">import</span> <span class="n">get_previous_ids_in_subset</span>
 
 
-<div class="viewcode-block" id="Lines"><a class="viewcode-back" href="../../api/sfrmaker.lines.html#sfrmaker.lines.Lines">[docs]</a><span class="k">class</span> <span class="nc">Lines</span><span class="p">:</span>
+<div class="viewcode-block" id="Lines">
+<a class="viewcode-back" href="../../api/sfrmaker.lines.html#sfrmaker.lines.Lines">[docs]</a>
+<span class="k">class</span> <span class="nc">Lines</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Class for working with linestring feature input.</span>
 
 <span class="sd">    Parameters</span>
@@ -336,7 +337,9 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">_current_df_routing_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">df_routing</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_routing</span>
 
-<div class="viewcode-block" id="Lines.cull"><a class="viewcode-back" href="../../api/sfrmaker.lines.html#sfrmaker.lines.Lines.cull">[docs]</a>    <span class="k">def</span> <span class="nf">cull</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">feature</span><span class="p">,</span> <span class="n">simplify</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<div class="viewcode-block" id="Lines.cull">
+<a class="viewcode-back" href="../../api/sfrmaker.lines.html#sfrmaker.lines.Lines.cull">[docs]</a>
+    <span class="k">def</span> <span class="nf">cull</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">feature</span><span class="p">,</span> <span class="n">simplify</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
              <span class="n">feature_crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Cull linework; retaining only the</span>
 <span class="sd">        lines that intersect a polygon feature.</span>
@@ -411,7 +414,10 @@
             <span class="k">return</span> <span class="n">df</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;finished in </span><span class="si">{:.2f}</span><span class="s2">s</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">ta</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="Lines.intersect"><a class="viewcode-back" href="../../api/sfrmaker.lines.html#sfrmaker.lines.Lines.intersect">[docs]</a>    <span class="k">def</span> <span class="nf">intersect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">size_thresh</span><span class="o">=</span><span class="mf">1e5</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Lines.intersect">
+<a class="viewcode-back" href="../../api/sfrmaker.lines.html#sfrmaker.lines.Lines.intersect">[docs]</a>
+    <span class="k">def</span> <span class="nf">intersect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">size_thresh</span><span class="o">=</span><span class="mf">1e5</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Intersect linework with a model grid.</span>
 
 <span class="sd">        Parameters</span>
@@ -475,7 +481,10 @@
         <span class="k">return</span> <span class="n">reach_data</span><span class="p">[</span><span class="n">column_order</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="Lines.make_routing_one_to_one"><a class="viewcode-back" href="../../api/sfrmaker.lines.html#sfrmaker.lines.Lines.make_routing_one_to_one">[docs]</a>    <span class="k">def</span> <span class="nf">make_routing_one_to_one</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Lines.make_routing_one_to_one">
+<a class="viewcode-back" href="../../api/sfrmaker.lines.html#sfrmaker.lines.Lines.make_routing_one_to_one">[docs]</a>
+    <span class="k">def</span> <span class="nf">make_routing_one_to_one</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
         <span class="c1"># convert routing connections (toid column) from lists (one-to-many)</span>
         <span class="c1"># to ints (one-to-one or many-to-one)</span>
@@ -496,7 +505,10 @@
                         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">id</span><span class="o">.</span><span class="n">tolist</span><span class="p">()]</span></div>
 
 
-<div class="viewcode-block" id="Lines.to_crs"><a class="viewcode-back" href="../../api/sfrmaker.lines.html#sfrmaker.lines.Lines.to_crs">[docs]</a>    <span class="k">def</span> <span class="nf">to_crs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dest_crs</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Lines.to_crs">
+<a class="viewcode-back" href="../../api/sfrmaker.lines.html#sfrmaker.lines.Lines.to_crs">[docs]</a>
+    <span class="k">def</span> <span class="nf">to_crs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dest_crs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Reproject the LineStrings in :py:attr:`Lines.df` to</span>
 <span class="sd">        a different Coordinate Reference System.</span>
 
@@ -549,7 +561,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">df</span> <span class="o">=</span> <span class="n">reprojected</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">crs</span> <span class="o">=</span> <span class="n">dest_crs</span></div>
 
-<div class="viewcode-block" id="Lines.write_shapefile"><a class="viewcode-back" href="../../api/sfrmaker.lines.html#sfrmaker.lines.Lines.write_shapefile">[docs]</a>    <span class="k">def</span> <span class="nf">write_shapefile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outshp</span><span class="o">=</span><span class="s1">&#39;flowlines.shp&#39;</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Lines.write_shapefile">
+<a class="viewcode-back" href="../../api/sfrmaker.lines.html#sfrmaker.lines.Lines.write_shapefile">[docs]</a>
+    <span class="k">def</span> <span class="nf">write_shapefile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outshp</span><span class="o">=</span><span class="s1">&#39;flowlines.shp&#39;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Write a shapefile of :py:attr:`Lines.df`.</span>
 
 <span class="sd">        Parameters</span>
@@ -559,7 +574,10 @@
 <span class="sd">        &quot;&quot;&quot;</span>        
         <span class="n">df2shp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">,</span> <span class="n">outshp</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Lines.from_shapefile"><a class="viewcode-back" href="../../api/sfrmaker.lines.html#sfrmaker.lines.Lines.from_shapefile">[docs]</a>    <span class="nd">@classmethod</span>
+
+<div class="viewcode-block" id="Lines.from_shapefile">
+<a class="viewcode-back" href="../../api/sfrmaker.lines.html#sfrmaker.lines.Lines.from_shapefile">[docs]</a>
+    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_shapefile</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">shapefile</span><span class="p">,</span>
                        <span class="n">id_column</span><span class="o">=</span><span class="s1">&#39;id&#39;</span><span class="p">,</span>
                        <span class="n">routing_column</span><span class="o">=</span><span class="s1">&#39;toid&#39;</span><span class="p">,</span>
@@ -687,7 +705,10 @@
                                   <span class="n">name_column</span><span class="o">=</span><span class="n">name_column</span><span class="p">,</span>
                                   <span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">,</span> <span class="n">prjfile</span><span class="o">=</span><span class="n">prjfile</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Lines.from_dataframe"><a class="viewcode-back" href="../../api/sfrmaker.lines.html#sfrmaker.lines.Lines.from_dataframe">[docs]</a>    <span class="nd">@classmethod</span>
+
+<div class="viewcode-block" id="Lines.from_dataframe">
+<a class="viewcode-back" href="../../api/sfrmaker.lines.html#sfrmaker.lines.Lines.from_dataframe">[docs]</a>
+    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_dataframe</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span>
                        <span class="n">id_column</span><span class="o">=</span><span class="s1">&#39;id&#39;</span><span class="p">,</span>
                        <span class="n">routing_column</span><span class="o">=</span><span class="s1">&#39;toid&#39;</span><span class="p">,</span>
@@ -820,7 +841,10 @@
                    <span class="n">elevation_units</span><span class="o">=</span><span class="n">elevation_units</span><span class="p">,</span>
                    <span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">,</span> <span class="n">prjfile</span><span class="o">=</span><span class="n">prjfile</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Lines.from_nhdplus_v2"><a class="viewcode-back" href="../../api/sfrmaker.lines.html#sfrmaker.lines.Lines.from_nhdplus_v2">[docs]</a>    <span class="nd">@classmethod</span>
+
+<div class="viewcode-block" id="Lines.from_nhdplus_v2">
+<a class="viewcode-back" href="../../api/sfrmaker.lines.html#sfrmaker.lines.Lines.from_nhdplus_v2">[docs]</a>
+    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_nhdplus_v2</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">NHDPlus_paths</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                         <span class="n">NHDFlowlines</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">PlusFlowlineVAA</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">PlusFlow</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">elevslope</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                         <span class="n">bbox_filter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -915,7 +939,10 @@
                                   <span class="n">elevation_units</span><span class="o">=</span><span class="s1">&#39;meters&#39;</span><span class="p">,</span>
                                   <span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">,</span> <span class="n">prjfile</span><span class="o">=</span><span class="n">prjfile</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Lines.from_nhdplus_hr"><a class="viewcode-back" href="../../api/sfrmaker.lines.html#sfrmaker.lines.Lines.from_nhdplus_hr">[docs]</a>    <span class="nd">@classmethod</span>
+
+<div class="viewcode-block" id="Lines.from_nhdplus_hr">
+<a class="viewcode-back" href="../../api/sfrmaker.lines.html#sfrmaker.lines.Lines.from_nhdplus_hr">[docs]</a>
+    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_nhdplus_hr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">NHDPlusHR_paths</span><span class="p">,</span> <span class="n">bbox_filter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
                         <span class="n">drop_fcodes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">drop_ftypes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">drop_NHDPlusIDs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                         <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -1008,7 +1035,10 @@
                                   <span class="n">geometry_column</span><span class="o">=</span><span class="s1">&#39;geometry&#39;</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="Lines.to_sfr"><a class="viewcode-back" href="../../api/sfrmaker.lines.html#sfrmaker.lines.Lines.to_sfr">[docs]</a>    <span class="k">def</span> <span class="nf">to_sfr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+
+<div class="viewcode-block" id="Lines.to_sfr">
+<a class="viewcode-back" href="../../api/sfrmaker.lines.html#sfrmaker.lines.Lines.to_sfr">[docs]</a>
+    <span class="k">def</span> <span class="nf">to_sfr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">active_area</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">isfr</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">model_length_units</span><span class="o">=</span><span class="s1">&#39;undefined&#39;</span><span class="p">,</span>
@@ -1359,7 +1389,9 @@
                        <span class="n">model_time_units</span><span class="o">=</span><span class="n">model_time_units</span><span class="p">,</span>
                        <span class="n">package_name</span><span class="o">=</span><span class="n">package_name</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Time to create sfr dataset: </span><span class="si">{:.2f}</span><span class="s2">s</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">totim</span><span class="p">))</span>
-        <span class="k">return</span> <span class="n">sfrd</span></div></div>
+        <span class="k">return</span> <span class="n">sfrd</span></div>
+</div>
+
 </pre></div>
 
            </div>
@@ -1370,7 +1402,7 @@
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Nov 15, 2023.
+      <span class="lastupdated">Last updated on Jan 15, 2024.
       </span></p>
   </div>
 

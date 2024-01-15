@@ -1,26 +1,25 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>The Observations Module &mdash; SFRmaker 0.11.1.post6.dev0+gb19b63e documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+  <title>The Observations Module &mdash; SFRmaker 0.11.1.post13.dev0+gf681dbf documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+
+  
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
-        <script src="../_static/clipboard.min.js"></script>
-        <script src="../_static/copybutton.js"></script>
+        <script src="../_static/documentation_options.js?v=9c7ba1cc"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../_static/copybutton.js?v=f281be69"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -41,7 +40,7 @@
             SFRmaker
           </a>
               <div class="version">
-                0.11.1.post6.dev0+gb19b63e
+                0.11.1.post13.dev0+gf681dbf
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -123,11 +122,11 @@
            <div itemprop="articleBody">
              
   <section id="module-sfrmaker.observations">
-<span id="the-observations-module"></span><h1>The Observations Module<a class="headerlink" href="#module-sfrmaker.observations" title="Permalink to this heading">¶</a></h1>
+<span id="the-observations-module"></span><h1>The Observations Module<a class="headerlink" href="#module-sfrmaker.observations" title="Link to this heading">¶</a></h1>
 <p>Functions for handling observations of SFR package output.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="sfrmaker.observations.add_observations">
-<span class="sig-prename descclassname"><span class="pre">sfrmaker.observations.</span></span><span class="sig-name descname"><span class="pre">add_observations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sfrdata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flowline_routing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obstype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sfrlines_shapefile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rno_column_in_sfrlines</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rno'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_location_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_location_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line_id_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rno_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obstype_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obsname_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'site_no'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/observations.html#add_observations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.observations.add_observations" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">sfrmaker.observations.</span></span><span class="sig-name descname"><span class="pre">add_observations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sfrdata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flowline_routing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obstype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sfrlines_shapefile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rno_column_in_sfrlines</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rno'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_location_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_location_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line_id_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rno_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obstype_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obsname_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'site_no'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/observations.html#add_observations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.observations.add_observations" title="Link to this definition">¶</a></dt>
 <dd><p>Add SFR observations to the observations DataFrame
 attribute of an sfrdata instance. Observations can
 by located on the SFR network by specifying reach number
@@ -135,7 +134,7 @@ directly (rno_column), by x, y location (x_column_in_data and y_column in data),
 or by specifying the source hydrography lines that they are located on
 (line_id_column).</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
 <dt><strong>sfrdata</strong><span class="classifier">sfrmaker.SFRData instance</span></dt><dd><p>SFRData instance with reach_data table attribute. To add observations from x, y coordinates,
 the reach_data table must have a geometry column with LineStrings representing each reach, or
@@ -186,10 +185,10 @@ segment corresponding to the line_id. Locating by x, y or reach number is more a
 
 <dl class="py function">
 <dt class="sig sig-object py" id="sfrmaker.observations.get_closest_reach">
-<span class="sig-prename descclassname"><span class="pre">sfrmaker.observations.</span></span><span class="sig-name descname"><span class="pre">get_closest_reach</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sfrlines</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rno_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rno'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/observations.html#get_closest_reach"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.observations.get_closest_reach" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">sfrmaker.observations.</span></span><span class="sig-name descname"><span class="pre">get_closest_reach</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sfrlines</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rno_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rno'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/observations.html#get_closest_reach"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.observations.get_closest_reach" title="Link to this definition">¶</a></dt>
 <dd><p>Get the SFR reach number closest to a point feature.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
 <dt><strong>x</strong><span class="classifier">scalar or list of scalars</span></dt><dd><p>x-coordinate(s) of point feature(s)</p>
 </dd>
@@ -205,7 +204,7 @@ this distance.</p>
 </dd>
 </dl>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
 <dt><strong>rno</strong><span class="classifier">int or list of ints</span></dt><dd><p>Reach numbers for reaches closest to each location
 defined by x, y.</p>
@@ -220,11 +219,11 @@ closest SFR reach.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="sfrmaker.observations.locate_sites">
-<span class="sig-prename descclassname"><span class="pre">sfrmaker.observations.</span></span><span class="sig-name descname"><span class="pre">locate_sites</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">site_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reach_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">active_area_shapefile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_column_in_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_column_in_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reach_id_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rno'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ireach_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ireach'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iseg_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'iseg'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site_number_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'site_no'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_columns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">perimeter_buffer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/observations.html#locate_sites"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.observations.locate_sites" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">sfrmaker.observations.</span></span><span class="sig-name descname"><span class="pre">locate_sites</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">site_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reach_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">active_area_shapefile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_column_in_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_column_in_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reach_id_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rno'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ireach_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ireach'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iseg_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'iseg'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site_number_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'site_no'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_columns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">perimeter_buffer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/observations.html#locate_sites"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.observations.locate_sites" title="Link to this definition">¶</a></dt>
 <dd><p>Get SFR reach locations corresponding to x, y points
 (e.g. measurement site locations).</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
 <dt><strong>site_data: (Geo)DataFrame or shapefile</strong></dt><dd><p>DataFrame or shapefile with point locations and attribute data for
 stream flow observation sites. Point locations can be specified
@@ -271,7 +270,7 @@ be included.</p>
 </dd>
 </dl>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
 <dt><strong>locs</strong><span class="classifier">DataFrame</span></dt><dd></dd>
 </dl>
@@ -281,9 +280,9 @@ be included.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="sfrmaker.observations.write_gage_package">
-<span class="sig-prename descclassname"><span class="pre">sfrmaker.observations.</span></span><span class="sig-name descname"><span class="pre">write_gage_package</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">location_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gage_package_filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gage_namfile_entries_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sitename_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'site_no'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gage_package_unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">25</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_gage_unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">200</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/observations.html#write_gage_package"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.observations.write_gage_package" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">sfrmaker.observations.</span></span><span class="sig-name descname"><span class="pre">write_gage_package</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">location_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gage_package_filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gage_namfile_entries_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sitename_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'site_no'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gage_package_unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">25</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_gage_unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">200</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/observations.html#write_gage_package"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.observations.write_gage_package" title="Link to this definition">¶</a></dt>
 <dd><dl class="field-list">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
 <dt><strong>location_data</strong><span class="classifier">pandas.DataFrame</span></dt><dd><p>Table of observation locations. Must have columns:
 ‘iseg’: segment number
@@ -317,17 +316,17 @@ By default, 200</p>
 </dd>
 </dl>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"></dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="sfrmaker.observations.write_mf6_sfr_obsfile">
-<span class="sig-prename descclassname"><span class="pre">sfrmaker.observations.</span></span><span class="sig-name descname"><span class="pre">write_mf6_sfr_obsfile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">observation_locations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sfr_output_filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">digits</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">print_input</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/observations.html#write_mf6_sfr_obsfile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.observations.write_mf6_sfr_obsfile" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">sfrmaker.observations.</span></span><span class="sig-name descname"><span class="pre">write_mf6_sfr_obsfile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">observation_locations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sfr_output_filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">digits</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">print_input</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/observations.html#write_mf6_sfr_obsfile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.observations.write_mf6_sfr_obsfile" title="Link to this definition">¶</a></dt>
 <dd><p>Write MODFLOW-6 observation input for the SFR package.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
 <dt><strong>observation_locations</strong><span class="classifier">DataFrame or str (filepath to csv file)</span></dt><dd><p>line_id : unique identifier for observation locations</p>
 </dd>
@@ -343,7 +342,7 @@ will be written to the listing file immediately after it is read.</p>
 </dd>
 </dl>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
 <dt>writes filename</dt><dd></dd>
 </dl>
@@ -365,7 +364,7 @@ will be written to the listing file immediately after it is read.</p>
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Nov 15, 2023.
+      <span class="lastupdated">Last updated on Jan 15, 2024.
       </span></p>
   </div>
 

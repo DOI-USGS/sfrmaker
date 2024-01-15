@@ -1,26 +1,25 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>The Utilities Module &mdash; SFRmaker 0.11.1.post6.dev0+gb19b63e documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+  <title>The Utilities Module &mdash; SFRmaker 0.11.1.post13.dev0+gf681dbf documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+
+  
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
-        <script src="../_static/clipboard.min.js"></script>
-        <script src="../_static/copybutton.js"></script>
+        <script src="../_static/documentation_options.js?v=9c7ba1cc"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../_static/copybutton.js?v=f281be69"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
         <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
         <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -43,7 +42,7 @@
             SFRmaker
           </a>
               <div class="version">
-                0.11.1.post6.dev0+gb19b63e
+                0.11.1.post13.dev0+gf681dbf
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -132,15 +131,15 @@
            <div itemprop="articleBody">
              
   <section id="module-sfrmaker.utils">
-<span id="the-utilities-module"></span><h1>The Utilities Module<a class="headerlink" href="#module-sfrmaker.utils" title="Permalink to this heading">¶</a></h1>
+<span id="the-utilities-module"></span><h1>The Utilities Module<a class="headerlink" href="#module-sfrmaker.utils" title="Link to this heading">¶</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="sfrmaker.utils.arbolate_sum">
-<span class="sig-prename descclassname"><span class="pre">sfrmaker.utils.</span></span><span class="sig-name descname"><span class="pre">arbolate_sum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">segment</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lengths</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">routing</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">starting_asums</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/utils.html#arbolate_sum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.utils.arbolate_sum" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">sfrmaker.utils.</span></span><span class="sig-name descname"><span class="pre">arbolate_sum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">segment</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lengths</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">routing</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">starting_asums</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/utils.html#arbolate_sum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.utils.arbolate_sum" title="Link to this definition">¶</a></dt>
 <dd><p>Compute the total length of all tributaries upstream from
 segment, including that segment, using the supplied lengths and
 routing connections.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
 <dt><strong>segment</strong><span class="classifier">int or list of ints</span></dt><dd><p>Segment or node number that is also a key in the lengths
 and routing dictionaries.</p>
@@ -156,7 +155,7 @@ the segments. By default, None.</p>
 </dd>
 </dl>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
 <dt><strong>asum</strong><span class="classifier">float or dict</span></dt><dd><p>Arbolate sums for each segment.</p>
 </dd>
@@ -167,13 +166,13 @@ the segments. By default, None.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="sfrmaker.utils.assign_layers">
-<span class="sig-prename descclassname"><span class="pre">sfrmaker.utils.</span></span><span class="sig-name descname"><span class="pre">assign_layers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reach_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">botm_array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strtop_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'strtop'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strthick_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'strthick'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">idomain</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pad</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inplace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/utils.html#assign_layers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.utils.assign_layers" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">sfrmaker.utils.</span></span><span class="sig-name descname"><span class="pre">assign_layers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reach_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">botm_array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strtop_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'strtop'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strthick_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'strthick'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">idomain</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pad</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inplace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/utils.html#assign_layers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.utils.assign_layers" title="Link to this definition">¶</a></dt>
 <dd><dl class="simple">
 <dt>Assigns the appropriate layer for each SFR reach,</dt><dd><p>based on cell bottoms at location of reach.</p>
 </dd>
 </dl>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
 <dt><strong>reach_data</strong><span class="classifier">DataFrame</span></dt><dd><p>Table of reach information, similar to SFRData.reach_data</p>
 </dd>
@@ -201,7 +200,7 @@ return 1D array of layer numbers and 2D array of new model botm elevations</p>
 </dd>
 </dl>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
 <dt>(if inplace=True)</dt><dd></dd>
 <dt><strong>layers</strong><span class="classifier">1D array of layer numbers</span></dt><dd></dd>
@@ -222,22 +221,22 @@ in determining the layer and any corrections to the model bottom.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="sfrmaker.utils.exe_exists">
-<span class="sig-prename descclassname"><span class="pre">sfrmaker.utils.</span></span><span class="sig-name descname"><span class="pre">exe_exists</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exe_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/utils.html#exe_exists"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.utils.exe_exists" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">sfrmaker.utils.</span></span><span class="sig-name descname"><span class="pre">exe_exists</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exe_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/utils.html#exe_exists"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.utils.exe_exists" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="sfrmaker.utils.get_input_arguments">
-<span class="sig-prename descclassname"><span class="pre">sfrmaker.utils.</span></span><span class="sig-name descname"><span class="pre">get_input_arguments</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kwargs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">function</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">warn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/utils.html#get_input_arguments"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.utils.get_input_arguments" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">sfrmaker.utils.</span></span><span class="sig-name descname"><span class="pre">get_input_arguments</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kwargs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">function</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">warn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/utils.html#get_input_arguments"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.utils.get_input_arguments" title="Link to this definition">¶</a></dt>
 <dd><p>Return subset of keyword arguments in kwargs dict
 that are valid parameters to a function or method.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
 <dt><strong>kwargs</strong><span class="classifier">dict (parameter names, values)</span></dt><dd></dd>
 <dt><strong>function</strong><span class="classifier">function of class method</span></dt><dd></dd>
 </dl>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
 <dt><strong>input_kwargs</strong><span class="classifier">dict</span></dt><dd></dd>
 </dl>
@@ -247,10 +246,10 @@ that are valid parameters to a function or method.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="sfrmaker.utils.get_layer">
-<span class="sig-prename descclassname"><span class="pre">sfrmaker.utils.</span></span><span class="sig-name descname"><span class="pre">get_layer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">botm_array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">j</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elev</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/utils.html#get_layer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.utils.get_layer" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">sfrmaker.utils.</span></span><span class="sig-name descname"><span class="pre">get_layer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">botm_array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">j</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elev</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/utils.html#get_layer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.utils.get_layer" title="Link to this definition">¶</a></dt>
 <dd><p>Return the layers for elevations at i, j locations.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
 <dt><strong>botm_array</strong><span class="classifier">3D numpy array of layer bottom elevations</span></dt><dd></dd>
 <dt><strong>i</strong><span class="classifier">scaler or sequence</span></dt><dd><p>row index (zero-based)</p>
@@ -261,7 +260,7 @@ that are valid parameters to a function or method.</p>
 </dd>
 </dl>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
 <dt><strong>k</strong><span class="classifier">np.ndarray (1-D) or scalar</span></dt><dd><p>zero-based layer index</p>
 </dd>
@@ -272,15 +271,15 @@ that are valid parameters to a function or method.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="sfrmaker.utils.get_method_args_values">
-<span class="sig-prename descclassname"><span class="pre">sfrmaker.utils.</span></span><span class="sig-name descname"><span class="pre">get_method_args_values</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/utils.html#get_method_args_values"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.utils.get_method_args_values" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">sfrmaker.utils.</span></span><span class="sig-name descname"><span class="pre">get_method_args_values</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/utils.html#get_method_args_values"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.utils.get_method_args_values" title="Link to this definition">¶</a></dt>
 <dd><p>Get arguments for a function or method and their default values.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
 <dt><strong>method</strong><span class="classifier">function or method</span></dt><dd></dd>
 </dl>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
 <dt><strong>args</strong><span class="classifier">dict</span></dt><dd></dd>
 </dl>
@@ -290,22 +289,22 @@ that are valid parameters to a function or method.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="sfrmaker.utils.get_sfr_package_format">
-<span class="sig-prename descclassname"><span class="pre">sfrmaker.utils.</span></span><span class="sig-name descname"><span class="pre">get_sfr_package_format</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sfr_package_file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/utils.html#get_sfr_package_format"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.utils.get_sfr_package_format" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">sfrmaker.utils.</span></span><span class="sig-name descname"><span class="pre">get_sfr_package_format</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sfr_package_file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/utils.html#get_sfr_package_format"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.utils.get_sfr_package_format" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="sfrmaker.utils.make_config_summary">
-<span class="sig-prename descclassname"><span class="pre">sfrmaker.utils.</span></span><span class="sig-name descname"><span class="pre">make_config_summary</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/utils.html#make_config_summary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.utils.make_config_summary" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">sfrmaker.utils.</span></span><span class="sig-name descname"><span class="pre">make_config_summary</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/utils.html#make_config_summary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.utils.make_config_summary" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="sfrmaker.utils.print_item">
-<span class="sig-prename descclassname"><span class="pre">sfrmaker.utils.</span></span><span class="sig-name descname"><span class="pre">print_item</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">k</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/utils.html#print_item"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.utils.print_item" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">sfrmaker.utils.</span></span><span class="sig-name descname"><span class="pre">print_item</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">k</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/utils.html#print_item"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.utils.print_item" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="sfrmaker.utils.update">
-<span class="sig-prename descclassname"><span class="pre">sfrmaker.utils.</span></span><span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/utils.html#update"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.utils.update" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">sfrmaker.utils.</span></span><span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/utils.html#update"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.utils.update" title="Link to this definition">¶</a></dt>
 <dd><p>Recursively update a dictionary of varying depth
 d with items from u.
 from: <a class="reference external" href="https://stackoverflow.com/questions/3232943/update-value-of-a-nested-dictionary-of-varying-depth">https://stackoverflow.com/questions/3232943/update-value-of-a-nested-dictionary-of-varying-depth</a></p>
@@ -313,21 +312,21 @@ from: <a class="reference external" href="https://stackoverflow.com/questions/32
 
 <dl class="py function">
 <dt class="sig sig-object py" id="sfrmaker.utils.which">
-<span class="sig-prename descclassname"><span class="pre">sfrmaker.utils.</span></span><span class="sig-name descname"><span class="pre">which</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">program</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/utils.html#which"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.utils.which" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">sfrmaker.utils.</span></span><span class="sig-name descname"><span class="pre">which</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">program</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/utils.html#which"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.utils.which" title="Link to this definition">¶</a></dt>
 <dd><p>Check for existance of executable.
 <a class="reference external" href="https://stackoverflow.com/questions/377017/test-if-executable-exists-in-python">https://stackoverflow.com/questions/377017/test-if-executable-exists-in-python</a></p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="sfrmaker.utils.width_from_arbolate_sum">
-<span class="sig-prename descclassname"><span class="pre">sfrmaker.utils.</span></span><span class="sig-name descname"><span class="pre">width_from_arbolate_sum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">asum</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1193</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5032</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimum_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'meters'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'meters'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/utils.html#width_from_arbolate_sum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.utils.width_from_arbolate_sum" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">sfrmaker.utils.</span></span><span class="sig-name descname"><span class="pre">width_from_arbolate_sum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">asum</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1193</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5032</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimum_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'meters'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'meters'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/utils.html#width_from_arbolate_sum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.utils.width_from_arbolate_sum" title="Link to this definition">¶</a></dt>
 <dd><p>Estimate stream width from arbolate sum, using a power law regression
 comparing measured channel widths to arbolate sum.
 (after Leaf, 2020 and Feinstein et al. 2010, Appendix 2, p 266.)</p>
 <div class="math notranslate nohighlight">
 \[width = unit\_conversion * a * {asum_{(meters)}}^b\]</div>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
 <dt><strong>asum: float or 1D array</strong></dt><dd><p>Arbolate sum in the input units.</p>
 </dd>
@@ -347,7 +346,7 @@ Leaf (2020; Mississippi Embayment): 0.5127</p>
 </dd>
 </dl>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
 <dt>width: float</dt><dd><p>Estimated width in feet</p>
 </dd>
@@ -383,7 +382,7 @@ from feet to the specified output units.</p>
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Nov 15, 2023.
+      <span class="lastupdated">Last updated on Jan 15, 2024.
       </span></p>
   </div>
 

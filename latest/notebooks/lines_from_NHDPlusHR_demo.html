@@ -1,27 +1,26 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Using SFRmaker with NHDPlus High Resolution &mdash; SFRmaker 0.11.1.post6.dev0+gb19b63e documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/nbsphinx-code-cells.css" type="text/css" />
+  <title>Using SFRmaker with NHDPlus High Resolution &mdash; SFRmaker 0.11.1.post13.dev0+gf681dbf documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css" />
+
+  
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
-        <script src="../_static/clipboard.min.js"></script>
-        <script src="../_static/copybutton.js"></script>
+        <script src="../_static/documentation_options.js?v=9c7ba1cc"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../_static/copybutton.js?v=f281be69"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
         <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
         <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -44,7 +43,7 @@
             SFRmaker
           </a>
               <div class="version">
-                0.11.1.post6.dev0+gb19b63e
+                0.11.1.post13.dev0+gf681dbf
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -128,7 +127,7 @@
            <div itemprop="articleBody">
              
   <section id="Using-SFRmaker-with-NHDPlus-High-Resolution">
-<h1>Using SFRmaker with NHDPlus High Resolution<a class="headerlink" href="#Using-SFRmaker-with-NHDPlus-High-Resolution" title="Permalink to this heading">¶</a></h1>
+<h1>Using SFRmaker with NHDPlus High Resolution<a class="headerlink" href="#Using-SFRmaker-with-NHDPlus-High-Resolution" title="Link to this heading">¶</a></h1>
 <p>This notebook demostrates how to use <code class="docutils literal notranslate"><span class="pre">sfrmaker</span></code> to build an SFR package with an NHDPlus HR file geodatabase (or set of file geodatabases) obtained from the USGS National Map download client.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
@@ -165,7 +164,7 @@
 </div>
 <p>In this demo, two HUC-4 file geodatabases (HUC0202 and HUC0204; each clipped to a reduced size) are used to make a single SFR network. NHDPlusHR networks for HUC-4 drainage basins are avaialble from the national map downloader as file geodatabases: <a class="reference external" href="https://apps.nationalmap.gov/downloader/#/">https://apps.nationalmap.gov/downloader/#/</a></p>
 <section id="1.-Preview-NHDPlusHR-geodatabases">
-<h2>1. Preview NHDPlusHR geodatabases<a class="headerlink" href="#1.-Preview-NHDPlusHR-geodatabases" title="Permalink to this heading">¶</a></h2>
+<h2>1. Preview NHDPlusHR geodatabases<a class="headerlink" href="#1.-Preview-NHDPlusHR-geodatabases" title="Link to this heading">¶</a></h2>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
@@ -181,7 +180,7 @@
 </div>
 </div>
 <section id="Plot-the-raw-NHD-HR-lines-from-the-two-geodatabases">
-<h3>Plot the raw NHD HR lines from the two geodatabases<a class="headerlink" href="#Plot-the-raw-NHD-HR-lines-from-the-two-geodatabases" title="Permalink to this heading">¶</a></h3>
+<h3>Plot the raw NHD HR lines from the two geodatabases<a class="headerlink" href="#Plot-the-raw-NHD-HR-lines-from-the-two-geodatabases" title="Link to this heading">¶</a></h3>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
@@ -202,7 +201,7 @@
 </div>
 </div>
 <section id="Note:-NHDPlusHR-fileGDBs-have-EPSG:4269-CRS">
-<h4>Note: NHDPlusHR fileGDBs have EPSG:4269 CRS<a class="headerlink" href="#Note:-NHDPlusHR-fileGDBs-have-EPSG:4269-CRS" title="Permalink to this heading">¶</a></h4>
+<h4>Note: NHDPlusHR fileGDBs have EPSG:4269 CRS<a class="headerlink" href="#Note:-NHDPlusHR-fileGDBs-have-EPSG:4269-CRS" title="Link to this heading">¶</a></h4>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
@@ -225,7 +224,7 @@ epsg:4269
 </section>
 </section>
 <section id="2.-Filter-network-using-shapefile-boundary">
-<h2>2. Filter network using shapefile boundary<a class="headerlink" href="#2.-Filter-network-using-shapefile-boundary" title="Permalink to this heading">¶</a></h2>
+<h2>2. Filter network using shapefile boundary<a class="headerlink" href="#2.-Filter-network-using-shapefile-boundary" title="Link to this heading">¶</a></h2>
 <p>The network can be filterd using a shapefile of the model domain</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
@@ -273,7 +272,7 @@ epsg:4269
 </div>
 </section>
 <section id="3.-Option-to-remove-reaches-with-unwated-FCodes">
-<h2>3. Option to remove reaches with unwated FCodes<a class="headerlink" href="#3.-Option-to-remove-reaches-with-unwated-FCodes" title="Permalink to this heading">¶</a></h2>
+<h2>3. Option to remove reaches with unwated FCodes<a class="headerlink" href="#3.-Option-to-remove-reaches-with-unwated-FCodes" title="Link to this heading">¶</a></h2>
 <p>NHDPlusHR flowlines include feature codes (FCodes) that describe reach attributes. In certain cases, a user may not wish to include certain types of features present in the NHDPlusHR geodatabase in the SFR network. A complete list of FCodes is show below:</p>
 <img alt="title" src="../_images/fcodes.png" />
 <p><strong>Look at FCodes in ``gdb2``</strong></p>
@@ -404,7 +403,7 @@ epsg:4269
 </div>
 </section>
 <section id="4.-Make-an-sfrmaker.lines-instance-using-from_nhdplus_hr">
-<h2>4. Make an <code class="docutils literal notranslate"><span class="pre">sfrmaker.lines</span></code> instance using <code class="docutils literal notranslate"><span class="pre">from_nhdplus_hr</span></code><a class="headerlink" href="#4.-Make-an-sfrmaker.lines-instance-using-from_nhdplus_hr" title="Permalink to this heading">¶</a></h2>
+<h2>4. Make an <code class="docutils literal notranslate"><span class="pre">sfrmaker.lines</span></code> instance using <code class="docutils literal notranslate"><span class="pre">from_nhdplus_hr</span></code><a class="headerlink" href="#4.-Make-an-sfrmaker.lines-instance-using-from_nhdplus_hr" title="Link to this heading">¶</a></h2>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
@@ -559,7 +558,7 @@ load finished in 0.51s
 </div></div>
 </div>
 <section id="visualize-the-SFR-network">
-<h3>visualize the SFR network<a class="headerlink" href="#visualize-the-SFR-network" title="Permalink to this heading">¶</a></h3>
+<h3>visualize the SFR network<a class="headerlink" href="#visualize-the-SFR-network" title="Link to this heading">¶</a></h3>
 <p>The extent is limited to lines that intersect the bounding box of the supplied model boundary shapefile. Note: the aqueduct pipeline (highlighted above) in the north central part of the network was also removed.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
@@ -593,7 +592,7 @@ load finished in 0.51s
 </section>
 </section>
 <section id="5.-Create-a-streamflow-routing-dataset-and-write-an-SFR-package-input-file-for-MODDLOW">
-<h2>5. Create a streamflow routing dataset and write an SFR package input file for MODDLOW<a class="headerlink" href="#5.-Create-a-streamflow-routing-dataset-and-write-an-SFR-package-input-file-for-MODDLOW" title="Permalink to this heading">¶</a></h2>
+<h2>5. Create a streamflow routing dataset and write an SFR package input file for MODDLOW<a class="headerlink" href="#5.-Create-a-streamflow-routing-dataset-and-write-an-SFR-package-input-file-for-MODDLOW" title="Link to this heading">¶</a></h2>
 <div class="line-block">
 <div class="line"><strong>This requires an ``sfrmaker.lines`` instance (created in step 4) and a ``sfrmaker.grid`` instance</strong></div>
 <div class="line">we can start by building a synthetic Flopy strucutred grid</div>
@@ -718,7 +717,7 @@ Time to create sfr dataset: 5.50s
 </pre></div></div>
 </div>
 <section id="write-the-sfr-data-set-to-a-MODFLOW-SFR-file">
-<h3>write the sfr data set to a MODFLOW SFR file<a class="headerlink" href="#write-the-sfr-data-set-to-a-MODFLOW-SFR-file" title="Permalink to this heading">¶</a></h3>
+<h3>write the sfr data set to a MODFLOW SFR file<a class="headerlink" href="#write-the-sfr-data-set-to-a-MODFLOW-SFR-file" title="Link to this heading">¶</a></h3>
 <p>Now, we can write the sfr data set to a MODFLOW SFR file. Normally, one likely would pass a Flopy model instance to <code class="docutils literal notranslate"><span class="pre">lines.to_sfr</span></code>. Here, no model instance is passed – the package is written independent of a model for illustrative purposes.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
@@ -753,7 +752,7 @@ No non-zero values of flow to export!
 </div>
 </section>
 <section id="Finally,-we-can-review-our-completed-SFR-network">
-<h3>Finally, we can review our completed SFR network<a class="headerlink" href="#Finally,-we-can-review-our-completed-SFR-network" title="Permalink to this heading">¶</a></h3>
+<h3>Finally, we can review our completed SFR network<a class="headerlink" href="#Finally,-we-can-review-our-completed-SFR-network" title="Link to this heading">¶</a></h3>
 <p>below, we plot sfr routing and outlets</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
@@ -813,7 +812,7 @@ No non-zero values of flow to export!
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Nov 15, 2023.
+      <span class="lastupdated">Last updated on Jan 15, 2024.
       </span></p>
   </div>
 

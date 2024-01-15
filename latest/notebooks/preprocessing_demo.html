@@ -1,27 +1,26 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Preprocessing hydrography &mdash; SFRmaker 0.11.1.post6.dev0+gb19b63e documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/nbsphinx-code-cells.css" type="text/css" />
+  <title>Preprocessing hydrography &mdash; SFRmaker 0.11.1.post13.dev0+gf681dbf documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css" />
+
+  
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
-        <script src="../_static/clipboard.min.js"></script>
-        <script src="../_static/copybutton.js"></script>
+        <script src="../_static/documentation_options.js?v=9c7ba1cc"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../_static/copybutton.js?v=f281be69"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
         <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
         <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -44,7 +43,7 @@
             SFRmaker
           </a>
               <div class="version">
-                0.11.1.post6.dev0+gb19b63e
+                0.11.1.post13.dev0+gf681dbf
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -119,7 +118,7 @@
            <div itemprop="articleBody">
              
   <section id="Preprocessing-hydrography">
-<h1>Preprocessing hydrography<a class="headerlink" href="#Preprocessing-hydrography" title="Permalink to this heading">¶</a></h1>
+<h1>Preprocessing hydrography<a class="headerlink" href="#Preprocessing-hydrography" title="Link to this heading">¶</a></h1>
 <p>Sometimes we might need to customize a pre-existing hydrography dataset in some way, for example by adding additional streams that weren’t mapped or fixing errors in mapped streams. If we’re working with a large area or with the High Resolution version of NHDPlus, we may also need to combine file sets from multiple areas, or prune intermittent headwater streams from the dataset.</p>
 <p>The preprocessing module of SFRmaker is intended to automate these tasks in a consistent, dependable way. Currently, the preprocessing module accepts NHDPlus version 2 data as input, and outputs either a culled and merged set of NHDPlus version 2 files (<code class="docutils literal notranslate"><span class="pre">cull_flowlines</span></code> function) or a single shapefile with all of the information needed to build an SFR package (<code class="docutils literal notranslate"><span class="pre">preprocess_preprocess_nhdplus</span></code> function).</p>
 <p>As of SFRmaker 0.9.3, the preprocessing module is still a work in progress, and liable to change as improvements are made to streamline the workflow. This page is based on the <code class="docutils literal notranslate"><span class="pre">preprocessing_demo.ipynb</span></code> notebook in the <code class="docutils literal notranslate"><span class="pre">examples/</span></code> folder, and therefore reflects the current state of the code.</p>
@@ -149,7 +148,7 @@
 </div>
 </div>
 <section id="Merging-and-culling-flowlines">
-<h2>Merging and culling flowlines<a class="headerlink" href="#Merging-and-culling-flowlines" title="Permalink to this heading">¶</a></h2>
+<h2>Merging and culling flowlines<a class="headerlink" href="#Merging-and-culling-flowlines" title="Link to this heading">¶</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">cull_flowlines()</span></code> function culls NHDPlus version 2 data to a bounding box defined by an <code class="docutils literal notranslate"><span class="pre">active_area</span></code> coordinate tuple or polygon, and to flowlines with arbolate sums greater than specified thresholds. There are two arbolate sum thresholds:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">asum_thresh</span></code>: all non perennial streams (with FCodes other than 46006) with arbolate sums less than this amount (in km) will be culled.</p></li>
@@ -205,6 +204,13 @@ reading ../tylerforks/NHDPlus/NHDPlusAttributes/elevslope.dbf...
 --&gt; building dataframe... (may take a while for large shapefiles)
 writing output/flowlines_gt3km.shp... Done
 writing output/PlusFlowlineVAA_gt3km.dbf... Done
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
 writing output/PlusFlow_gt3km.dbf... Done
 writing output/elevslope_gt3km.dbf... Done
 </pre></div></div>
@@ -298,7 +304,7 @@ writing output/elevslope_gt3km.dbf... Done
 </pre></div></div>
 </div>
 <section id="Plot-the-culled-flowlines">
-<h3>Plot the culled flowlines<a class="headerlink" href="#Plot-the-culled-flowlines" title="Permalink to this heading">¶</a></h3>
+<h3>Plot the culled flowlines<a class="headerlink" href="#Plot-the-culled-flowlines" title="Link to this heading">¶</a></h3>
 <p>We can use <code class="docutils literal notranslate"><span class="pre">geopandas</span></code> to quickly plot the results. As noted above, all perennial streams that intersect the active area bounding box are retained (blue lines). Within the active area, two intermittent streams with arbolate sums of less than 3km are culled (red lines).</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
@@ -336,7 +342,7 @@ writing output/elevslope_gt3km.dbf... Done
 </section>
 </section>
 <section id="Preprocessing-the-flowlines">
-<h2>Preprocessing the flowlines<a class="headerlink" href="#Preprocessing-the-flowlines" title="Permalink to this heading">¶</a></h2>
+<h2>Preprocessing the flowlines<a class="headerlink" href="#Preprocessing-the-flowlines" title="Link to this heading">¶</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">preprocess_nhdplus()</span></code> function creates a single shapefile with the information needed to build an SFR package (that can be input to <code class="docutils literal notranslate"><span class="pre">`sfrmaker.Lines.from_shapefile()</span></code> &lt;<a class="reference external" href="https://aleaf.github.io/sfrmaker/latest/api/sfrmaker.lines.html#sfrmaker.lines.Lines.from_shapefile">https://aleaf.github.io/sfrmaker/latest/api/sfrmaker.lines.html#sfrmaker.lines.Lines.from_shapefile</a>&gt;`__). The set of unified NHDPlus files from <code class="docutils literal notranslate"><span class="pre">cull_flowlines()</span></code> can be input or, if no culling is needed and the project area falls within a single drainage basin, an original set of NHDPlus version 2 files can be used.</p>
 <p>The shapefile output from <code class="docutils literal notranslate"><span class="pre">preprocess_nhdplus()</span></code> can be thought of as a grid-independent representation of the SFR package. Further editing can be done on the shapefile either manually in a GIS environment, or automatically with the <code class="docutils literal notranslate"><span class="pre">`preprocessing.edit_flowlines()</span></code> &lt;<a class="reference external" href="https://aleaf.github.io/sfrmaker/latest/api/sfrmaker.preprocessing.html#sfrmaker.preprocessing.edit_flowlines">https://aleaf.github.io/sfrmaker/latest/api/sfrmaker.preprocessing.html#sfrmaker.preprocessing.edit_flowlines</a>&gt;`__ function. Abstracting the key details of the SFR package to this shapefile allows for the SFR package to be easily
 regenerated if other apsects of the model (such as the grid) change.</p>
@@ -348,7 +354,7 @@ active during high water events, and therefore potentially not relevant to the g
 by the above power-law relationship (and that may also have greater streambed conductance).</div>
 </div>
 <section id="Additional-processing-options-not-shown-below">
-<h3>Additional processing options not shown below<a class="headerlink" href="#Additional-processing-options-not-shown-below" title="Permalink to this heading">¶</a></h3>
+<h3>Additional processing options not shown below<a class="headerlink" href="#Additional-processing-options-not-shown-below" title="Link to this heading">¶</a></h3>
 <ul class="simple">
 <li><p>for large project areas, additional width information from the North American Width Dataset (NARWidth) can be incorporated via the <code class="docutils literal notranslate"><span class="pre">narwidth_shapefile</span></code> argument (see Leaf, 2023; Allen and Pavelsky, 2015 and the <a class="reference external" href="https://aleaf.github.io/sfrmaker/latest/api/sfrmaker.preprocessing.html#sfrmaker.preprocessing.preprocess_nhdplus">code reference</a></p></li>
 <li><p>field measurements of streambed elevation can be incorporated into the smoothed streambed elevations produced for each line, via the <code class="docutils literal notranslate"><span class="pre">update_up_elevations</span></code> and <code class="docutils literal notranslate"><span class="pre">update_dn_elevations</span></code> arguments.</p></li>
@@ -391,6 +397,13 @@ reading output/PlusFlow_gt3km.dbf...
 
 reading output/elevslope_gt3km.dbf...
 --&gt; building dataframe... (may take a while for large shapefiles)
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
 writing output/flowlines_gt3km_buffers.shp... Done
 
 Smoothing elevations...
@@ -646,7 +659,7 @@ writing output/preprocessed_flowlines_gt3km.shp... Done
 </section>
 </section>
 <section id="Clipping-the-flowlines-to-a-specific-area">
-<h2>Clipping the flowlines to a specific area<a class="headerlink" href="#Clipping-the-flowlines-to-a-specific-area" title="Permalink to this heading">¶</a></h2>
+<h2>Clipping the flowlines to a specific area<a class="headerlink" href="#Clipping-the-flowlines-to-a-specific-area" title="Link to this heading">¶</a></h2>
 <p>As a final step, we may want to clip the flowlines to an irregular area where SFR will be included in the model. For large project areas, this can reduce the file size and make the preprocessed lines easier to work with. This step may be best done last, so that the information in the surrounding flowlines (routing, elevations, etc) can be used in the preprocessing above. For large study areas with an overly detailed active area boundary (for example, one generated from a raster), specifying a
 simplification tolerance (<code class="docutils literal notranslate"><span class="pre">simplify_tol</span></code>) for the active area boundary can greatly speed up the clipping. All lines that intersect the simplified active area will be retained.</p>
 <div class="nbinput docutils container">
@@ -667,6 +680,13 @@ simplification tolerance (<code class="docutils literal notranslate"><span class
 
 reading ../tylerforks/active_area.shp...
 --&gt; building dataframe... (may take a while for large shapefiles)
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
 starting lines: 19
 remaining lines: 11
 </pre></div></div>
@@ -719,7 +739,7 @@ remaining lines: 11
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Nov 15, 2023.
+      <span class="lastupdated">Last updated on Jan 15, 2024.
       </span></p>
   </div>
 

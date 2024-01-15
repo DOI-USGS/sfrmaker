@@ -1,25 +1,24 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>sfrmaker.preprocessing &mdash; SFRmaker 0.11.1.post6.dev0+gb19b63e documentation</title>
-      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/copybutton.css" type="text/css" />
+  <title>sfrmaker.preprocessing &mdash; SFRmaker 0.11.1.post13.dev0+gf681dbf documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+
+  
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/underscore.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="../../_static/doctools.js"></script>
-        <script src="../../_static/sphinx_highlight.js"></script>
-        <script src="../../_static/clipboard.min.js"></script>
-        <script src="../../_static/copybutton.js"></script>
+        <script src="../../_static/documentation_options.js?v=9c7ba1cc"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../_static/copybutton.js?v=f281be69"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
@@ -38,7 +37,7 @@
             SFRmaker
           </a>
               <div class="version">
-                0.11.1.post6.dev0+gb19b63e
+                0.11.1.post13.dev0+gf681dbf
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -140,7 +139,9 @@
 <span class="kn">from</span> <span class="nn">sfrmaker.utils</span> <span class="kn">import</span> <span class="n">width_from_arbolate_sum</span><span class="p">,</span> <span class="n">arbolate_sum</span>
 
 
-<div class="viewcode-block" id="get_flowline_routing"><a class="viewcode-back" href="../../api/sfrmaker.preprocessing.html#sfrmaker.preprocessing.get_flowline_routing">[docs]</a><span class="k">def</span> <span class="nf">get_flowline_routing</span><span class="p">(</span><span class="n">NHDPlus_paths</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">PlusFlow</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<div class="viewcode-block" id="get_flowline_routing">
+<a class="viewcode-back" href="../../api/sfrmaker.preprocessing.html#sfrmaker.preprocessing.get_flowline_routing">[docs]</a>
+<span class="k">def</span> <span class="nf">get_flowline_routing</span><span class="p">(</span><span class="n">NHDPlus_paths</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">PlusFlow</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                          <span class="n">mask_crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">nhdplus_crs</span><span class="o">=</span><span class="mi">4269</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Read a collection of NHDPlus version 2 PlusFlow (routing)</span>
 <span class="sd">    tables from one or more drainage basins and consolidate into a </span>
@@ -202,9 +203,12 @@
                           <span class="s2">&quot; NHDPlus_path or PlusFlow table.&quot;</span><span class="p">))</span>
     <span class="n">pf</span> <span class="o">=</span> <span class="n">pf</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">pf</span><span class="p">[</span><span class="s1">&#39;FROMCOMID&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">]</span>
     <span class="k">return</span> <span class="n">pf</span><span class="p">[[</span><span class="s1">&#39;FROMCOMID&#39;</span><span class="p">,</span> <span class="s1">&#39;TOCOMID&#39;</span><span class="p">]]</span></div>
+
         
     
-<div class="viewcode-block" id="cull_flowlines"><a class="viewcode-back" href="../../api/sfrmaker.preprocessing.html#sfrmaker.preprocessing.cull_flowlines">[docs]</a><span class="k">def</span> <span class="nf">cull_flowlines</span><span class="p">(</span><span class="n">NHDPlus_paths</span><span class="p">,</span>
+<div class="viewcode-block" id="cull_flowlines">
+<a class="viewcode-back" href="../../api/sfrmaker.preprocessing.html#sfrmaker.preprocessing.cull_flowlines">[docs]</a>
+<span class="k">def</span> <span class="nf">cull_flowlines</span><span class="p">(</span><span class="n">NHDPlus_paths</span><span class="p">,</span>
                    <span class="n">active_area</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                    <span class="n">asum_thresh</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                    <span class="n">intermittent_streams_asum_thresh</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -458,7 +462,10 @@
     <span class="k">return</span> <span class="n">results</span></div>
 
 
-<div class="viewcode-block" id="preprocess_nhdplus"><a class="viewcode-back" href="../../api/sfrmaker.preprocessing.html#sfrmaker.preprocessing.preprocess_nhdplus">[docs]</a><span class="k">def</span> <span class="nf">preprocess_nhdplus</span><span class="p">(</span><span class="n">flowlines_file</span><span class="p">,</span> <span class="n">pfvaa_file</span><span class="p">,</span>
+
+<div class="viewcode-block" id="preprocess_nhdplus">
+<a class="viewcode-back" href="../../api/sfrmaker.preprocessing.html#sfrmaker.preprocessing.preprocess_nhdplus">[docs]</a>
+<span class="k">def</span> <span class="nf">preprocess_nhdplus</span><span class="p">(</span><span class="n">flowlines_file</span><span class="p">,</span> <span class="n">pfvaa_file</span><span class="p">,</span>
                        <span class="n">pf_file</span><span class="p">,</span> <span class="n">elevslope_file</span><span class="p">,</span>
                        <span class="n">demfile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                        <span class="n">run_zonal_statistics</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -1079,7 +1086,10 @@
     <span class="k">return</span> <span class="n">flcc</span></div>
 
 
-<div class="viewcode-block" id="clip_flowlines_to_polygon"><a class="viewcode-back" href="../../api/sfrmaker.preprocessing.html#sfrmaker.preprocessing.clip_flowlines_to_polygon">[docs]</a><span class="k">def</span> <span class="nf">clip_flowlines_to_polygon</span><span class="p">(</span><span class="n">flowlines</span><span class="p">,</span> <span class="n">polygon</span><span class="p">,</span>
+
+<div class="viewcode-block" id="clip_flowlines_to_polygon">
+<a class="viewcode-back" href="../../api/sfrmaker.preprocessing.html#sfrmaker.preprocessing.clip_flowlines_to_polygon">[docs]</a>
+<span class="k">def</span> <span class="nf">clip_flowlines_to_polygon</span><span class="p">(</span><span class="n">flowlines</span><span class="p">,</span> <span class="n">polygon</span><span class="p">,</span>
                               <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                               <span class="n">simplify_tol</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Clip line features in a flowlines DataFrame to polygon</span>
@@ -1151,7 +1161,10 @@
     <span class="k">return</span> <span class="n">flc</span></div>
 
 
-<div class="viewcode-block" id="sample_NARWidth"><a class="viewcode-back" href="../../api/sfrmaker.preprocessing.html#sfrmaker.preprocessing.sample_NARWidth">[docs]</a><span class="k">def</span> <span class="nf">sample_NARWidth</span><span class="p">(</span><span class="n">flowlines</span><span class="p">,</span> <span class="n">narwidth_shapefile</span><span class="p">,</span> <span class="n">waterbodies</span><span class="p">,</span>
+
+<div class="viewcode-block" id="sample_NARWidth">
+<a class="viewcode-back" href="../../api/sfrmaker.preprocessing.html#sfrmaker.preprocessing.sample_NARWidth">[docs]</a>
+<span class="k">def</span> <span class="nf">sample_NARWidth</span><span class="p">(</span><span class="n">flowlines</span><span class="p">,</span> <span class="n">narwidth_shapefile</span><span class="p">,</span> <span class="n">waterbodies</span><span class="p">,</span>
                     <span class="n">bbox_filter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                     <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                     <span class="n">output_width_units</span><span class="o">=</span><span class="s1">&#39;meters&#39;</span><span class="p">,</span>
@@ -1295,7 +1308,10 @@
            <span class="n">crs</span><span class="o">=</span><span class="n">flowline_crs</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="edit_flowlines"><a class="viewcode-back" href="../../api/sfrmaker.preprocessing.html#sfrmaker.preprocessing.edit_flowlines">[docs]</a><span class="k">def</span> <span class="nf">edit_flowlines</span><span class="p">(</span><span class="n">flowlines</span><span class="p">,</span> <span class="n">config_file</span><span class="p">,</span>
+
+<div class="viewcode-block" id="edit_flowlines">
+<a class="viewcode-back" href="../../api/sfrmaker.preprocessing.html#sfrmaker.preprocessing.edit_flowlines">[docs]</a>
+<span class="k">def</span> <span class="nf">edit_flowlines</span><span class="p">(</span><span class="n">flowlines</span><span class="p">,</span> <span class="n">config_file</span><span class="p">,</span>
                    <span class="n">id_column</span><span class="o">=</span><span class="s1">&#39;COMID&#39;</span><span class="p">,</span> <span class="n">toid_column</span><span class="o">=</span><span class="s1">&#39;tocomid&#39;</span><span class="p">,</span>
                    <span class="n">logger</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Make edits to the flowlines in flowlines_file,</span>
@@ -1399,7 +1415,10 @@
     <span class="k">return</span> <span class="n">df</span></div>
 
 
-<div class="viewcode-block" id="recompute_asums_for_minor_distribs"><a class="viewcode-back" href="../../api/sfrmaker.preprocessing.html#sfrmaker.preprocessing.recompute_asums_for_minor_distribs">[docs]</a><span class="k">def</span> <span class="nf">recompute_asums_for_minor_distribs</span><span class="p">(</span><span class="n">minor_distrib_comids</span><span class="p">,</span> <span class="n">fl_lengths</span><span class="p">,</span> <span class="n">graph</span><span class="p">,</span> <span class="n">graph_r</span><span class="p">):</span>
+
+<div class="viewcode-block" id="recompute_asums_for_minor_distribs">
+<a class="viewcode-back" href="../../api/sfrmaker.preprocessing.html#sfrmaker.preprocessing.recompute_asums_for_minor_distribs">[docs]</a>
+<span class="k">def</span> <span class="nf">recompute_asums_for_minor_distribs</span><span class="p">(</span><span class="n">minor_distrib_comids</span><span class="p">,</span> <span class="n">fl_lengths</span><span class="p">,</span> <span class="n">graph</span><span class="p">,</span> <span class="n">graph_r</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Reset arbolate sums for minor distributaries and</span>
 <span class="sd">    downstream segments in their path, to the next confluence.</span>
 
@@ -1437,7 +1456,10 @@
     <span class="k">return</span> <span class="n">new_asums</span></div>
 
 
-<div class="viewcode-block" id="fix_invalid_asums"><a class="viewcode-back" href="../../api/sfrmaker.preprocessing.html#sfrmaker.preprocessing.fix_invalid_asums">[docs]</a><span class="k">def</span> <span class="nf">fix_invalid_asums</span><span class="p">(</span><span class="n">asums</span><span class="p">,</span> <span class="n">fl_lengths</span><span class="p">,</span> <span class="n">graph</span><span class="p">,</span> <span class="n">graph_r</span><span class="p">):</span>
+
+<div class="viewcode-block" id="fix_invalid_asums">
+<a class="viewcode-back" href="../../api/sfrmaker.preprocessing.html#sfrmaker.preprocessing.fix_invalid_asums">[docs]</a>
+<span class="k">def</span> <span class="nf">fix_invalid_asums</span><span class="p">(</span><span class="n">asums</span><span class="p">,</span> <span class="n">fl_lengths</span><span class="p">,</span> <span class="n">graph</span><span class="p">,</span> <span class="n">graph_r</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Recompute arbolate sum at any places in the network</span>
 <span class="sd">    where it decreases going downstream, and then for all lines</span>
 <span class="sd">    downstream of those locations. Decreases may be caused by</span>
@@ -1509,7 +1531,10 @@
     <span class="k">return</span> <span class="n">new_asums</span></div>
 
 
-<div class="viewcode-block" id="get_netcdf_crs_from_grid_mapping"><a class="viewcode-back" href="../../api/sfrmaker.preprocessing.html#sfrmaker.preprocessing.get_netcdf_crs_from_grid_mapping">[docs]</a><span class="k">def</span> <span class="nf">get_netcdf_crs_from_grid_mapping</span><span class="p">(</span><span class="n">grid_mapping</span><span class="p">):</span>
+
+<div class="viewcode-block" id="get_netcdf_crs_from_grid_mapping">
+<a class="viewcode-back" href="../../api/sfrmaker.preprocessing.html#sfrmaker.preprocessing.get_netcdf_crs_from_grid_mapping">[docs]</a>
+<span class="k">def</span> <span class="nf">get_netcdf_crs_from_grid_mapping</span><span class="p">(</span><span class="n">grid_mapping</span><span class="p">):</span>
     <span class="n">crs</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">crs</span> <span class="o">=</span> <span class="n">pyproj</span><span class="o">.</span><span class="n">CRS</span><span class="o">.</span><span class="n">from_cf</span><span class="p">(</span><span class="n">grid_mapping</span><span class="p">)</span>
@@ -1529,9 +1554,12 @@
             <span class="k">pass</span>
     <span class="c1"># could add more crazy try/excepts here</span>
     <span class="k">return</span> <span class="n">crs</span></div>
+
     
     
-<div class="viewcode-block" id="swb_runoff_to_csv"><a class="viewcode-back" href="../../api/sfrmaker.preprocessing.html#sfrmaker.preprocessing.swb_runoff_to_csv">[docs]</a><span class="k">def</span> <span class="nf">swb_runoff_to_csv</span><span class="p">(</span><span class="n">swb_runoff_netcdf_output</span><span class="p">,</span> <span class="n">nhdplus_catchments_file</span><span class="p">,</span>
+<div class="viewcode-block" id="swb_runoff_to_csv">
+<a class="viewcode-back" href="../../api/sfrmaker.preprocessing.html#sfrmaker.preprocessing.swb_runoff_to_csv">[docs]</a>
+<span class="k">def</span> <span class="nf">swb_runoff_to_csv</span><span class="p">(</span><span class="n">swb_runoff_netcdf_output</span><span class="p">,</span> <span class="n">nhdplus_catchments_file</span><span class="p">,</span>
                       <span class="n">runoff_output_variable</span><span class="o">=</span><span class="s1">&#39;runoff&#39;</span><span class="p">,</span>
                       <span class="n">swb_rejected_net_inf_output</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                       <span class="n">rejected_net_inf_variable</span><span class="o">=</span><span class="s1">&#39;rejected_net_infiltration&#39;</span><span class="p">,</span>
@@ -1902,6 +1930,7 @@
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;wrote </span><span class="si">{</span><span class="n">outfile</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
     
     <span class="k">return</span> <span class="n">aggregated</span></div>
+
 </pre></div>
 
            </div>
@@ -1912,7 +1941,7 @@
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Nov 15, 2023.
+      <span class="lastupdated">Last updated on Jan 15, 2024.
       </span></p>
   </div>
 

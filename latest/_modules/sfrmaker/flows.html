@@ -1,25 +1,24 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>sfrmaker.flows &mdash; SFRmaker 0.11.1.post6.dev0+gb19b63e documentation</title>
-      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/copybutton.css" type="text/css" />
+  <title>sfrmaker.flows &mdash; SFRmaker 0.11.1.post13.dev0+gf681dbf documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+
+  
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/underscore.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="../../_static/doctools.js"></script>
-        <script src="../../_static/sphinx_highlight.js"></script>
-        <script src="../../_static/clipboard.min.js"></script>
-        <script src="../../_static/copybutton.js"></script>
+        <script src="../../_static/documentation_options.js?v=9c7ba1cc"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../_static/copybutton.js?v=f281be69"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
@@ -38,7 +37,7 @@
             SFRmaker
           </a>
               <div class="version">
-                0.11.1.post6.dev0+gb19b63e
+                0.11.1.post13.dev0+gf681dbf
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -119,7 +118,9 @@
 <span class="kn">from</span> <span class="nn">sfrmaker.fileio</span> <span class="kn">import</span> <span class="n">load_modelgrid</span>
 
 
-<div class="viewcode-block" id="get_inflow_locations_from_parent_model"><a class="viewcode-back" href="../../api/sfrmaker.flows.html#sfrmaker.flows.get_inflow_locations_from_parent_model">[docs]</a><span class="k">def</span> <span class="nf">get_inflow_locations_from_parent_model</span><span class="p">(</span><span class="n">parent_reach_data</span><span class="p">,</span> <span class="n">inset_reach_data</span><span class="p">,</span>
+<div class="viewcode-block" id="get_inflow_locations_from_parent_model">
+<a class="viewcode-back" href="../../api/sfrmaker.flows.html#sfrmaker.flows.get_inflow_locations_from_parent_model">[docs]</a>
+<span class="k">def</span> <span class="nf">get_inflow_locations_from_parent_model</span><span class="p">(</span><span class="n">parent_reach_data</span><span class="p">,</span> <span class="n">inset_reach_data</span><span class="p">,</span>
                                            <span class="n">inset_grid</span><span class="p">,</span> <span class="n">active_area</span><span class="o">=</span><span class="kc">None</span>
                                            <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get places in an inset model SFR network where the parent SFR network crosses</span>
@@ -258,7 +259,10 @@
     <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="get_inflows_from_parent_model"><a class="viewcode-back" href="../../api/sfrmaker.flows.html#sfrmaker.flows.get_inflows_from_parent_model">[docs]</a><span class="k">def</span> <span class="nf">get_inflows_from_parent_model</span><span class="p">(</span><span class="n">parent_reach_data</span><span class="p">,</span> <span class="n">inset_reach_data</span><span class="p">,</span>
+
+<div class="viewcode-block" id="get_inflows_from_parent_model">
+<a class="viewcode-back" href="../../api/sfrmaker.flows.html#sfrmaker.flows.get_inflows_from_parent_model">[docs]</a>
+<span class="k">def</span> <span class="nf">get_inflows_from_parent_model</span><span class="p">(</span><span class="n">parent_reach_data</span><span class="p">,</span> <span class="n">inset_reach_data</span><span class="p">,</span>
                                   <span class="n">mf2005_parent_sfr_outputfile</span><span class="p">,</span> <span class="n">mf6_parent_sfr_budget_file</span><span class="p">,</span>
                                   <span class="n">inset_grid</span><span class="p">,</span> <span class="n">active_area</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get places in an inset model SFR network where the parent SFR network crosses</span>
@@ -311,7 +315,10 @@
     <span class="n">j</span><span class="o">=</span><span class="mi">2</span></div>
 
 
-<div class="viewcode-block" id="add_to_perioddata"><a class="viewcode-back" href="../../api/sfrmaker.flows.html#sfrmaker.flows.add_to_perioddata">[docs]</a><span class="k">def</span> <span class="nf">add_to_perioddata</span><span class="p">(</span><span class="n">sfrdata</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">flowline_routing</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+
+<div class="viewcode-block" id="add_to_perioddata">
+<a class="viewcode-back" href="../../api/sfrmaker.flows.html#sfrmaker.flows.add_to_perioddata">[docs]</a>
+<span class="k">def</span> <span class="nf">add_to_perioddata</span><span class="p">(</span><span class="n">sfrdata</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">flowline_routing</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                       <span class="n">variable</span><span class="o">=</span><span class="s1">&#39;inflow&#39;</span><span class="p">,</span>
                       <span class="n">line_id_column</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                       <span class="n">rno_column</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -567,7 +574,10 @@
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;done&#39;</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="add_to_segment_data"><a class="viewcode-back" href="../../api/sfrmaker.flows.html#sfrmaker.flows.add_to_segment_data">[docs]</a><span class="k">def</span> <span class="nf">add_to_segment_data</span><span class="p">(</span><span class="n">sfrdata</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">flowline_routing</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+
+<div class="viewcode-block" id="add_to_segment_data">
+<a class="viewcode-back" href="../../api/sfrmaker.flows.html#sfrmaker.flows.add_to_segment_data">[docs]</a>
+<span class="k">def</span> <span class="nf">add_to_segment_data</span><span class="p">(</span><span class="n">sfrdata</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">flowline_routing</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                         <span class="n">variable</span><span class="o">=</span><span class="s1">&#39;flow&#39;</span><span class="p">,</span>
                         <span class="n">line_id_column</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                         <span class="n">segment_column</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -685,6 +695,7 @@
         <span class="n">df</span><span class="p">[</span><span class="n">variable</span><span class="p">]</span> <span class="o">=</span> <span class="n">group</span><span class="p">[</span><span class="n">variable</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
         <span class="n">to_concat</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
     <span class="n">sfrd</span><span class="o">.</span><span class="n">segment_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">to_concat</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
 </pre></div>
 
            </div>
@@ -695,7 +706,7 @@
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Nov 15, 2023.
+      <span class="lastupdated">Last updated on Jan 15, 2024.
       </span></p>
   </div>
 

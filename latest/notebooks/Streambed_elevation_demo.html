@@ -1,27 +1,26 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Demonstration of how sfrmaker handles streambed elevations &mdash; SFRmaker 0.11.1.post6.dev0+gb19b63e documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/nbsphinx-code-cells.css" type="text/css" />
+  <title>Demonstration of how sfrmaker handles streambed elevations &mdash; SFRmaker 0.11.1.post13.dev0+gf681dbf documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css" />
+
+  
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
-        <script src="../_static/clipboard.min.js"></script>
-        <script src="../_static/copybutton.js"></script>
+        <script src="../_static/documentation_options.js?v=9c7ba1cc"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../_static/copybutton.js?v=f281be69"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
         <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
         <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -44,7 +43,7 @@
             SFRmaker
           </a>
               <div class="version">
-                0.11.1.post6.dev0+gb19b63e
+                0.11.1.post13.dev0+gf681dbf
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -123,7 +122,7 @@
            <div itemprop="articleBody">
              
   <section id="Demonstration-of-how-sfrmaker-handles-streambed-elevations">
-<h1>Demonstration of how <code class="docutils literal notranslate"><span class="pre">sfrmaker</span></code> handles streambed elevations<a class="headerlink" href="#Demonstration-of-how-sfrmaker-handles-streambed-elevations" title="Permalink to this heading">¶</a></h1>
+<h1>Demonstration of how <code class="docutils literal notranslate"><span class="pre">sfrmaker</span></code> handles streambed elevations<a class="headerlink" href="#Demonstration-of-how-sfrmaker-handles-streambed-elevations" title="Link to this heading">¶</a></h1>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
@@ -141,7 +140,7 @@
 </div>
 </div>
 <section id="Run-the-first-part-of-the-Tyler-Forks-example-problem-to-get-an-SFRData-instance">
-<h2>Run the first part of the Tyler Forks example problem to get an <code class="docutils literal notranslate"><span class="pre">SFRData</span></code> instance<a class="headerlink" href="#Run-the-first-part-of-the-Tyler-Forks-example-problem-to-get-an-SFRData-instance" title="Permalink to this heading">¶</a></h2>
+<h2>Run the first part of the Tyler Forks example problem to get an <code class="docutils literal notranslate"><span class="pre">SFRData</span></code> instance<a class="headerlink" href="#Run-the-first-part-of-the-Tyler-Forks-example-problem-to-get-an-SFRData-instance" title="Link to this heading">¶</a></h2>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
@@ -187,7 +186,7 @@
 </pre></div>
 </div>
 </div>
-<div class="nboutput nblast docutils container">
+<div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
@@ -200,18 +199,32 @@ for basins:
 reading ../tylerforks/NHDPlus/NHDPlusAttributes/PlusFlow.dbf...
 --&gt; building dataframe... (may take a while for large shapefiles)
 
-load finished in 0.12s
+load finished in 0.18s
 
 Getting routing information from NHDPlus Plusflow table...
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
 finished in 0.03s
 
 
-SFRmaker version 0.11.1.post6.dev0+gb19b63e
+SFRmaker version 0.11.1.post13.dev0+gf681dbf
 
 Creating sfr dataset...
 
 Creating grid class instance from flopy Grid instance...
-grid class created in 0.35s
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+grid class created in 0.46s
 
 Model grid information
 structured grid
@@ -241,14 +254,167 @@ finished in 0.00s
 Intersecting 42 flowlines with 17,760 grid cells...
 
 Building spatial index...
-finished in 0.92s
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+finished in 0.93s
 
-Intersecting 42 features...
-42
-finished in 0.13s
-
-Setting up reach data... (may take a few minutes for large grids)
-finished in 0.47s
+Intersecting 42 features...</div></div>
+</div>
+<p>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42</p>
+<blockquote>
+<div><blockquote>
+<div><p>finished in 0.13s</p>
+<p>Setting up reach data… (may take a few minutes for large grids)
+&lt;/pre&gt;</p>
+</div></blockquote>
+</div></blockquote>
+<p>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42</p>
+<blockquote>
+<div><blockquote>
+<div><p>finished in 0.13s</p>
+<p>Setting up reach data{ldots} (may take a few minutes for large grids)
+end{sphinxVerbatim}</p>
+</div></blockquote>
+</div></blockquote>
+<p>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42</p>
+<blockquote>
+<div><p>finished in 0.13s</p>
+<p>Setting up reach data… (may take a few minutes for large grids)</p>
+</div></blockquote>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+finished in 0.46s
 
 Computing widths...
 
@@ -270,20 +436,20 @@ bounds: 682688.00, 5139052.00, 694880.00, 5147510.20
 active area defined by: all cells
 
 
-Time to create sfr dataset: 2.02s
+Time to create sfr dataset: 2.14s
 
 </pre></div></div>
 </div>
 </section>
 <section id="Sample-elevations-from-the-DEM">
-<h2>Sample elevations from the DEM<a class="headerlink" href="#Sample-elevations-from-the-DEM" title="Permalink to this heading">¶</a></h2>
+<h2>Sample elevations from the DEM<a class="headerlink" href="#Sample-elevations-from-the-DEM" title="Link to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>the <strong>buffers</strong> method draws a buffer around each LineString representing a reach (default=100m), and then gets the minimum DEM elevation within that buffer, using the <strong>``rasterstats``</strong> package</p></li>
 <li><p>alternatively, the <strong>``cell polygons``</strong> method would do the same thing using the model cell polygons instead to represent the reaches</p></li>
 <li><p>get results with and without smoothing.</p></li>
 </ul>
 <section id="pseudo-code-for-the-smoothing-algoritm:">
-<h3>pseudo code for the smoothing algoritm:<a class="headerlink" href="#pseudo-code-for-the-smoothing-algoritm:" title="Permalink to this heading">¶</a></h3>
+<h3>pseudo code for the smoothing algoritm:<a class="headerlink" href="#pseudo-code-for-the-smoothing-algoritm:" title="Link to this heading">¶</a></h3>
 <div class="highlight-none notranslate"><div class="highlight"><pre><span></span>Starting at the outlets to the stream network, list the reaches at each level (reaches that route to an outlet, reaches that route to reaches that route to an outlet, etc...)
 For each level:
     For each stream reach within the level:
@@ -300,16 +466,30 @@ For each level:
 </pre></div>
 </div>
 </div>
-<div class="nboutput nblast docutils container">
+<div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 running rasterstats.zonal_stats on buffered LineStrings...
-finished in 5.10s
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+finished in 4.99s
 
 running rasterstats.zonal_stats on buffered LineStrings...
-finished in 5.05s
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+finished in 5.01s
 
 
 Smoothing elevations...
@@ -319,7 +499,7 @@ finished in 0.10s
 </section>
 </section>
 <section id="Make-comparison-plots-of-the-elevations-in-each-segment">
-<h2>Make comparison plots of the elevations in each segment<a class="headerlink" href="#Make-comparison-plots-of-the-elevations-in-each-segment" title="Permalink to this heading">¶</a></h2>
+<h2>Make comparison plots of the elevations in each segment<a class="headerlink" href="#Make-comparison-plots-of-the-elevations-in-each-segment" title="Link to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>model_top: elevations sampled from the DEM at the cell centers</p></li>
 <li><p>nhdplus_elevations: reach elevations linearly interpolated from original COMID end elevations in NHDPlus</p></li>
@@ -327,7 +507,7 @@ finished in 0.10s
 <li><p>smooth_sampled_elevs: minimum DEM elevations within each buffered LineString with smoothing applied</p></li>
 </ul>
 <section id="Note:">
-<h3>Note:<a class="headerlink" href="#Note:" title="Permalink to this heading">¶</a></h3>
+<h3>Note:<a class="headerlink" href="#Note:" title="Link to this heading">¶</a></h3>
 <p>One of the segments has NHDPlus elevations that are much higher than the model top or DEM. This is due to the segment originating outside of the model domain, which means the COMID start elevation from NHDPlus is invalid.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
@@ -687,7 +867,7 @@ finished in 0.10s
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Nov 15, 2023.
+      <span class="lastupdated">Last updated on Jan 15, 2024.
       </span></p>
   </div>
 
