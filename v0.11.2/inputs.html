@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Input data requirements &mdash; SFRmaker 0.11.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/documentation_options.js?v=60336169"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="_static/copybutton.js?v=f281be69"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Basic usage of SFRmaker in a scripting context" href="notebooks/SFRmaker_demo.html" />
+    <link rel="prev" title="Installation" href="installation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            SFRmaker
+          </a>
+              <div class="version">
+                0.11.2
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="philosophy.html"> Philosophy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html"> Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html"> Installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#"> Input Requirements</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#hydrography-data">1) Hydrography data</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#nhdplus-v2-hydrography-datasets">NHDPlus v2 hydrography datasets</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#notes">Notes:</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#custom-hydrography">Custom hydrography</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#model-grid-information">2) Model grid information</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html"> Using SFRmaker with a configuration file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/SFRmaker_demo.html"> Basic Usage in a scripting context</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/preprocessing_demo.html"> Preprocessing NHDPlus version 2 data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/lines_from_NHDPlusHR_demo.html"> Using SFRmaker with NHDPlus High Resolution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="concepts.html"> Concepts and methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/sfrmaker_tools.html"> Stand-alone tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html"> Troubleshooting</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api/index.html"> Code reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="config-summary.html"> Summary of configuration file options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="release-history.html"> Release History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html"> Contributing to SFRmaker</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Bibliography</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="references.html"> References cited</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">SFRmaker</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Input data requirements</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/inputs.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="input-data-requirements">
+<h1>Input data requirements<a class="headerlink" href="#input-data-requirements" title="Link to this heading">¶</a></h1>
+<section id="hydrography-data">
+<h2>1) Hydrography data<a class="headerlink" href="#hydrography-data" title="Link to this heading">¶</a></h2>
+<section id="nhdplus-v2-hydrography-datasets">
+<h3><a class="reference external" href="http://www.horizon-systems.com/NHDPlus/NHDPlusV2_data.php">NHDPlus v2 hydrography datasets</a><a class="headerlink" href="#nhdplus-v2-hydrography-datasets" title="Link to this heading">¶</a></h3>
+<p>Archives needed/relevant files:</p>
+<p><strong>NHDPlusV21_XX_YY_NHDSnapshot_*.7z</strong></p>
+<ul class="simple">
+<li><p>NHDFcode.dbf</p></li>
+<li><p>NHDFlowline.dbf, .prj, .shp, .shx</p></li>
+</ul>
+<p><strong>NHDPlusV21_XX_YY_NHDPlusAttributes_*.7z</strong></p>
+<ul class="simple">
+<li><p>elevslope.dbf</p></li>
+<li><p>PlusFlow.dbf</p></li>
+<li><p>PlusFlowlineVAA.dbf</p></li>
+</ul>
+<section id="notes">
+<h4>Notes:<a class="headerlink" href="#notes" title="Link to this heading">¶</a></h4>
+<p>XX is Drainage Area ID (e.g., GL for Great Lakes) and YY is the Vector Processing Unit (VPU; e.g. 04) in the  above (see NHDPlus website for details).</p>
+</section>
+</section>
+<section id="custom-hydrography">
+<h3>Custom hydrography<a class="headerlink" href="#custom-hydrography" title="Link to this heading">¶</a></h3>
+<p>Any Polyline shapefile can be supplied in lieu of NHDPlus, but it must have the following columns, as shown in the second example:</p>
+<ul class="simple">
+<li><p><strong>flowlines_file</strong>: path to shapefile</p></li>
+<li><p><strong>id_column</strong>: unique identifier for each polyline</p></li>
+<li><p><strong>routing_column</strong>: downstream connection (ID), 0 if none</p></li>
+<li><p><strong>width1_column</strong>: channel width at start of line, in <code class="docutils literal notranslate"><span class="pre">attr\_length\_units</span></code> (optional)</p></li>
+<li><p><strong>width2_column</strong>: channel width at end of line, in <code class="docutils literal notranslate"><span class="pre">attr_length_units</span></code> (optional)</p></li>
+<li><p><strong>up_elevation_column</strong>: streambed elevation at start of line, in <code class="docutils literal notranslate"><span class="pre">attr_height_units</span></code></p></li>
+<li><p><strong>dn_elevation_column</strong>: streambed elevation at end of line, in <code class="docutils literal notranslate"><span class="pre">attr_height_units</span></code></p></li>
+<li><p><strong>name_column</strong>: stream name (optional)</p></li>
+<li><p><strong>attr_length_units</strong>: channel width units</p></li>
+<li><p><strong>attr_height_units</strong>: streambed elevation units</p></li>
+</ul>
+</section>
+</section>
+<section id="model-grid-information">
+<h2>2) Model grid information<a class="headerlink" href="#model-grid-information" title="Link to this heading">¶</a></h2>
+<p>is supplied by creating a       <code class="docutils literal notranslate"><span class="pre">`flopy.discretization.Grid</span></code> instance`_, instance or <a class="reference external" href="https://aleaf.github.io/sfrmaker/usage.html#alternatively-the-model-grid-can-be-defined-with-a-sfrmaker-structuredgrid-instance">via a shapefile</a>, as shown in the <a class="reference internal" href="examples.html"><span class="doc">examples</span></a>.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="installation.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="notebooks/SFRmaker_demo.html" class="btn btn-neutral float-right" title="Basic usage of SFRmaker in a scripting context" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+      <span class="lastupdated">Last updated on Jan 15, 2024.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

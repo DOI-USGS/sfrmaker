@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Using SFRmaker with a configuration file &mdash; SFRmaker 0.11.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/documentation_options.js?v=60336169"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="_static/copybutton.js?v=f281be69"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Installation" href="installation.html" />
+    <link rel="prev" title="Philosophy" href="philosophy.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            SFRmaker
+          </a>
+              <div class="version">
+                0.11.2
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="philosophy.html"> Philosophy</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#"> Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#meras-3-creating-an-sfr-package-from-a-configuration-file-with-custom-hydrography">MERAS 3: Creating an SFR package from a configuration file with custom hydrography</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#meras-sfrmaker-config-yml">meras_sfrmaker_config.yml:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#make-sfr-py">make_sfr.py:</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#the-tyler-forks-watershed-creating-an-sfr-package-from-a-configuration-file-using-nhdplus">The Tyler Forks watershed: Creating an SFR package from a configuration file using NHDPlus</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#tf-sfrmaker-config-yml">tf_sfrmaker_config.yml:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tylerforks-make-sfr-py">tylerforks/make_sfr.py:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#running-the-tylerforks-model">Running the tylerforks model</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html"> Installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="inputs.html"> Input Requirements</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#"> Using SFRmaker with a configuration file</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#meras-3-creating-an-sfr-package-from-a-configuration-file-with-custom-hydrography">MERAS 3: Creating an SFR package from a configuration file with custom hydrography</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#meras-sfrmaker-config-yml">meras_sfrmaker_config.yml:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#make-sfr-py">make_sfr.py:</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#the-tyler-forks-watershed-creating-an-sfr-package-from-a-configuration-file-using-nhdplus">The Tyler Forks watershed: Creating an SFR package from a configuration file using NHDPlus</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#tf-sfrmaker-config-yml">tf_sfrmaker_config.yml:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tylerforks-make-sfr-py">tylerforks/make_sfr.py:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#running-the-tylerforks-model">Running the tylerforks model</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/SFRmaker_demo.html"> Basic Usage in a scripting context</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/preprocessing_demo.html"> Preprocessing NHDPlus version 2 data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/lines_from_NHDPlusHR_demo.html"> Using SFRmaker with NHDPlus High Resolution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="concepts.html"> Concepts and methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/sfrmaker_tools.html"> Stand-alone tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html"> Troubleshooting</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api/index.html"> Code reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="config-summary.html"> Summary of configuration file options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="release-history.html"> Release History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html"> Contributing to SFRmaker</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Bibliography</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="references.html"> References cited</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">SFRmaker</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Using SFRmaker with a configuration file</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/examples.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="using-sfrmaker-with-a-configuration-file">
+<h1>Using SFRmaker with a configuration file<a class="headerlink" href="#using-sfrmaker-with-a-configuration-file" title="Link to this heading">¶</a></h1>
+<p>For many applications, the easiest way to get started with SFRmaker is to create a configuration file that can then be used in a simple script to generate an SFR package. The two example problems below illustrate the use of SFRmaker with a configuration file. A <a class="reference internal" href="config-summary.html#sfrmaker-configuration-file-options"><span class="std std-ref">comprehensive summary of configuration file inputs</span></a> is provided in the reference section.</p>
+<section id="meras-3-creating-an-sfr-package-from-a-configuration-file-with-custom-hydrography">
+<h2>MERAS 3: Creating an SFR package from a configuration file with custom hydrography<a class="headerlink" href="#meras-3-creating-an-sfr-package-from-a-configuration-file-with-custom-hydrography" title="Link to this heading">¶</a></h2>
+<p>This example illustrates the use of custom hydrography with the configuration file, as well the scalability of SFRmaker. An SFR package is generated on a regular 1 km grid (Clark and others, 2018) that spans the Mississippi Embayment, a former bay of the Gulf of Mexico that includes portions of Missouri, Tennessee, Arkansas, Mississippi and Louisiana. The goal is to update the stream network for the Mississippi Embayment Regional Aquifer System (MERAS 2) model (Haugh and others, 2020; Clark and others, 2013) to include a realistic representation of the thousands of mapped streams (Figure 1). NHDPlus hydrography were preprocessed to only include the lines intersecting the MERAS footprint that had a total upstream drainage (arbolate sum) of 20 kilometers or greater (figure 1). Attribute information from NHDPlus, including routing connections, elevations at the upstream and downstream ends of line arcs and channel widths estimated from arbolate sum values (e.g. ref: Feinstein and others (2010, p 266)) were joined to the culled flowlines, which were then saved to a shapefile.</p>
+<figure class="align-left" id="id1">
+<a class="reference internal image-reference" href="_images/meras_comparison.png"><img alt="alternate text" src="_images/meras_comparison.png" style="width: 739.1999999999999px; height: 413.7px;" /></a>
+<figcaption>
+<p><span class="caption-text">Figure 1: Location of the MERAS model domain with streams represented in the MERAS 2 model (A); streams mapped in NHDPlus version 2 (B).</span><a class="headerlink" href="#id1" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
+<p>Many streams enter the Mississippi Embayment with appreciable flow, which must be accounted for in the SFR package to achieve a realistic mass balance. Inflows to the SFR network for this study were derived from a combination of streamgage records and estimates from a statistical model (ref: MS water res. conference abstract). Inflow values for each site and model stress period were saved in a comma-separated-variable (CSV) format.</p>
+<p>The configuration file for the Mississippi Embayment example is shown below. The configuration file, associate python script, and input files needed to reproduce the example are available on the <a class="reference external" href="https://github.com/aleaf/sfrmaker/examples/meras/">SFRmaker GitHub page</a>. The configuration file is specified in the <a class="reference external" href="yaml.org">YAML format</a>, which maps <code class="docutils literal notranslate"><span class="pre">key:</span> <span class="pre">value</span></code> pairs similar to a Python dictionary. In the SFRmaker configuration file, keys (to the left of the colons) indicate variables or groups of variables; values to apply to those variables are listed to the right of the colons.</p>
+<section id="meras-sfrmaker-config-yml">
+<h3>meras_sfrmaker_config.yml:<a class="headerlink" href="#meras-sfrmaker-config-yml" title="Link to this heading">¶</a></h3>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="nt">package_version</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;mf6&#39;</span>
+<span class="linenos"> 2</span><span class="nt">package_name</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;meras3&#39;</span>
+<span class="linenos"> 3</span><span class="nt">output_path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;meras3&#39;</span>
+<span class="linenos"> 4</span><span class="nt">modelgrid</span><span class="p">:</span>
+<span class="linenos"> 5</span><span class="w">  </span><span class="nt">xoffset</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">177955</span>
+<span class="linenos"> 6</span><span class="w">  </span><span class="nt">yoffset</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">938285</span>
+<span class="linenos"> 7</span><span class="w">  </span><span class="nt">nrow</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">666</span>
+<span class="linenos"> 8</span><span class="w">  </span><span class="nt">ncol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">634</span>
+<span class="linenos"> 9</span><span class="w">  </span><span class="nt">delr</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span><span class="w">  </span><span class="c1"># model spacing along a row</span>
+<span class="linenos">10</span><span class="w">  </span><span class="nt">delc</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span><span class="w">  </span><span class="c1"># model spacing along a column</span>
+<span class="linenos">11</span><span class="w">  </span><span class="nt">crs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5070</span><span class="w">  </span><span class="c1"># albers equal area</span>
+<span class="linenos">12</span><span class="nt">flowlines</span><span class="p">:</span>
+<span class="linenos">13</span><span class="w">  </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">flowlines.shp</span>
+<span class="linenos">14</span><span class="w">  </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">COMID</span><span class="w">  </span><span class="c1"># arguments to sfrmaker.Lines.from_shapefile</span>
+<span class="linenos">15</span><span class="w">  </span><span class="nt">routing_column</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tocomid</span>
+<span class="linenos">16</span><span class="w">  </span><span class="nt">width1_column</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">width1</span>
+<span class="linenos">17</span><span class="w">  </span><span class="nt">width2_column</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">width2</span>
+<span class="linenos">18</span><span class="w">  </span><span class="nt">up_elevation_column</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">elevupsmo</span>
+<span class="linenos">19</span><span class="w">  </span><span class="nt">dn_elevation_column</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">elevdnsmo</span>
+<span class="linenos">20</span><span class="w">  </span><span class="nt">name_column</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GNIS_NAME</span>
+<span class="linenos">21</span><span class="w">  </span><span class="nt">attr_length_units</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">feet</span><span class="w">  </span><span class="c1"># units of source data</span>
+<span class="linenos">22</span><span class="w">  </span><span class="nt">attr_height_units</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">feet</span><span class="w">  </span><span class="c1"># units of source data</span>
+<span class="linenos">23</span><span class="nt">inflows</span><span class="p">:</span><span class="w">  </span><span class="c1"># see sfrmaker.flows.add_to_perioddata for arguments</span>
+<span class="linenos">24</span><span class="w">  </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">inflows.csv</span>
+<span class="linenos">25</span><span class="w">  </span><span class="nt">line_id_column</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">line_id</span>
+<span class="linenos">26</span><span class="w">  </span><span class="nt">period_column</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">per</span><span class="w">  </span><span class="c1"># column with model stress periods</span>
+<span class="linenos">27</span><span class="w">  </span><span class="nt">data_column</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">inflow_m3d</span><span class="w">  </span><span class="c1"># column with flow values</span>
+<span class="linenos">28</span><span class="nt">observations</span><span class="p">:</span><span class="w">  </span><span class="c1"># see sfrmaker.observations.add_observations for arguments</span>
+<span class="linenos">29</span><span class="w">  </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">observations.csv</span>
+<span class="linenos">30</span><span class="w">  </span><span class="nt">obstype</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">downstream-flow</span><span class="w">  </span><span class="c1"># modflow-6 observation type</span>
+<span class="linenos">31</span><span class="w">  </span><span class="nt">x_location_column</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">x</span><span class="w">  </span><span class="c1"># observation locations, in CRS coordinates</span>
+<span class="linenos">32</span><span class="w">  </span><span class="nt">y_location_column</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">y</span>
+<span class="linenos">33</span><span class="w">  </span><span class="nt">obsname_column</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">site_no</span><span class="w">  </span><span class="c1"># column for naming observations</span>
+<span class="linenos">34</span><span class="nt">options</span><span class="p">:</span>
+<span class="linenos">35</span><span class="w">  </span><span class="nt">active_area</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MERAS_Extent.shp</span>
+<span class="linenos">36</span><span class="w">  </span><span class="nt">one_reach_per_cell</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"> </span><span class="c1">#  consolidate SFR reaches to one per i, j location</span>
+<span class="linenos">37</span><span class="w">  </span><span class="c1"># add breaks in routing at the following line ids</span>
+<span class="linenos">38</span><span class="w">  </span><span class="c1"># (flow downstream is controlled by dams, and specified as an inflow)</span>
+<span class="linenos">39</span><span class="w">  </span><span class="nt">add_outlets</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">18019782</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">15276792</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">15290344</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">15256386</span><span class="p p-Indicator">]</span>
+</pre></div>
+</div>
+<p>Information on the model grid is specified in the <code class="docutils literal notranslate"><span class="pre">modelgrid:</span></code> block of the configuration file. The <code class="docutils literal notranslate"><span class="pre">xoffset</span></code> and <code class="docutils literal notranslate"><span class="pre">yoffset</span></code> arguments are the location of the lower left corner of the model grid, in units of the CRS defined by the EPSG code (typically meters). Since this is a uniform grid, only scalar values are provided for the row and column spacing. Variable row and column spacings can be specified using the list notation in YAML, or more simply by loading a flopy model instance into a Python script. SFRmaker does not require a modflow model as input, but a model can be optionally be specified in the configuration file with the <code class="docutils literal notranslate"><span class="pre">model:</span></code> and <code class="docutils literal notranslate"><span class="pre">simulation:</span></code> blocks (the latter is only needed for MODFLOW-6 models).</p>
+<p>An advantage of specifying a model is that sfmaker will automatically assign stream reaches to the correct layer, based on the layer top and bottom elevations, and account for inactive cells. If the model has correct georeference information in the namefile header as assigned by <a class="reference external" href="https://github.com/modflowpy/flopy">FloPy</a>, the <code class="docutils literal notranslate"><span class="pre">modelgrid:</span></code> block is not needed. An optional active_area: allows geographic area for generation of the SFR package input (that may or may not coincide with the active area of the model) to be defined. Otherwise, SFR input will be generated for the extent of the model grid.</p>
+<p>While the MERAS hydrography includes elevations, this may not always be the case, or more accurate elevations may be available from a digital elevation model (DEM). If a <code class="docutils literal notranslate"><span class="pre">dem:</span></code> block is specified and <code class="docutils literal notranslate"><span class="pre">set_streambed_top_elevations_from_dem:</span> <span class="pre">True</span></code>, SFRmaker will sample the DEM to the stream reaches as described in the methods section. The default buffer distance is 100 in the units of the projected CRS, or another buffer distance can be specified with an optional <code class="docutils literal notranslate"><span class="pre">buffer_distance:</span></code> argument.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">inflows:</span></code> block allows for specification inflows to the SFR network. Inflow time series must include model stress period information (SFRmaker does not do any resampling) and column names in the input csv file must be specified. Similarly, an observations: block allows observation site locations to be specified in the coordinates of the projected CRS specified for the model grid, or using identifiers corresponding to flowlines in the input hydrography. With this information information, SFRmaker will generate input to the Gage Package (e.g. Prudic, 2004) or Modflow-6 observation utility (Langevin and others, 2017).</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">options:</span></code> block can include keyword arguments to <a class="reference internal" href="api/sfrmaker.lines.html#sfrmaker.lines.Lines.to_sfr" title="sfrmaker.lines.Lines.to_sfr"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sfrmaker.lines.Lines.to_sfr()</span></code></a>, or other options such as <code class="docutils literal notranslate"><span class="pre">set_streambed_top_elevations_from_dem:</span></code>.</p>
+<p>The above configuration file can be used to generate an SFR package with the following Python code:</p>
+</section>
+<section id="make-sfr-py">
+<h3>make_sfr.py:<a class="headerlink" href="#make-sfr-py" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="sd">&quot;&quot;&quot;Run the MERAS example.</span>
+<span class="linenos">2</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="linenos">3</span><span class="kn">import</span> <span class="nn">sfrmaker</span>
+<span class="linenos">4</span><span class="n">sfrdata</span> <span class="o">=</span> <span class="n">sfrmaker</span><span class="o">.</span><span class="n">SFRData</span><span class="o">.</span><span class="n">from_yaml</span><span class="p">(</span><span class="s1">&#39;meras_sfrmaker_config.yml&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This will produce an sfr package for MODFLOW-6, csv table representations of the SFR input, and shapefiles for visualizing the SFR package. The resulting SFR package is shown in Figure 2.</p>
+<figure class="align-left" id="id2">
+<a class="reference internal image-reference" href="_images/meras_results.png"><img alt="alternate text" src="_images/meras_results.png" style="width: 714.0px; height: 481.0px;" /></a>
+<figcaption>
+<p><span class="caption-text">Figure 2: MERAS 3 SFR package, as shown by the shapefiles output from SFRmaker. Visualization of routing connections is illustrated in the map inset, where a connection crossing several cells indicates an error in the input hydrography routing attributes.</span><a class="headerlink" href="#id2" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
+</section>
+</section>
+<section id="the-tyler-forks-watershed-creating-an-sfr-package-from-a-configuration-file-using-nhdplus">
+<h2>The Tyler Forks watershed: Creating an SFR package from a configuration file using NHDPlus<a class="headerlink" href="#the-tyler-forks-watershed-creating-an-sfr-package-from-a-configuration-file-using-nhdplus" title="Link to this heading">¶</a></h2>
+<p>This example shows how a configuration file can be used to build an SFR package from NHDPlus data, with a model grid specified using a MODFLOW model or a shapefile. The example is set in the Tyler Forks watershed in northern Wisconsin, where groundwater/surface interactions are the primary modeling interest.</p>
+<p>In the first configuration file, the Name file and workspace for a MODFLOW-NWT model are specified. An active area denoting where the SFR package will be built is provided with a shapefile. NHDPlus data are provided as a file path to the root folder level for a drainage basin (for example, 04, The Great Lakes), assuming the files within that path are in the same structure as the <a class="reference external" href="https://nhdplus.com/NHDPlus/NHDPlusV2_data.php">download from the NHDPlus website</a>. Finally, a dem is provided as a <a class="reference external" href="notebooks/Streambed_elevation_demo.html">a more accurate source of streambed elevations</a>.</p>
+<section id="tf-sfrmaker-config-yml">
+<h3>tf_sfrmaker_config.yml:<a class="headerlink" href="#tf-sfrmaker-config-yml" title="Link to this heading">¶</a></h3>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="nt">model</span><span class="p">:</span>
+<span class="linenos"> 2</span><span class="w">  </span><span class="nt">namefile</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tf.nam</span>
+<span class="linenos"> 3</span><span class="w">  </span><span class="nt">model_ws</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tylerforks/</span>
+<span class="linenos"> 4</span><span class="nt">flowlines</span><span class="p">:</span>
+<span class="linenos"> 5</span><span class="w">  </span><span class="nt">nhdplus_paths</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NHDPlus/</span>
+<span class="linenos"> 6</span><span class="nt">dem</span><span class="p">:</span>
+<span class="linenos"> 7</span><span class="w">  </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dem_26715.tif</span>
+<span class="linenos"> 8</span><span class="w">  </span><span class="nt">elevation_units</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">meters</span>
+<span class="linenos"> 9</span><span class="nt">options</span><span class="p">:</span>
+<span class="linenos">10</span><span class="w">  </span><span class="nt">active_area</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">active_area.shp</span>
+</pre></div>
+</div>
+<p>In the second configuration file, no model is specified, so a package version, name, output path and length units are specified. The model grid is specified from a shapefile that has attribute fields indicating the row, column location of each cell. NHPlus data a specified as individual files.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="nt">package_version</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;mfnwt&#39;</span>
+<span class="linenos"> 2</span><span class="nt">package_name</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;tf&#39;</span>
+<span class="linenos"> 3</span><span class="nt">output_path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;.&#39;</span>
+<span class="linenos"> 4</span><span class="nt">modelgrid</span><span class="p">:</span>
+<span class="linenos"> 5</span><span class="w">  </span><span class="nt">shapefile</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">grid.shp</span>
+<span class="linenos"> 6</span><span class="w">  </span><span class="nt">icol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">i</span><span class="w">  </span><span class="c1"># attribute field with row numbers</span>
+<span class="linenos"> 7</span><span class="w">  </span><span class="nt">jcol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">j</span><span class="w">  </span><span class="c1"># attribute field with column numbers</span>
+<span class="linenos"> 8</span><span class="nt">flowlines</span><span class="p">:</span>
+<span class="linenos"> 9</span><span class="w">  </span><span class="nt">NHDFlowlines</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NHDPlus/NHDSnapshot/Hydrography/NHDFlowline.shp</span>
+<span class="linenos">10</span><span class="w">  </span><span class="nt">PlusFlowlineVAA</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NHDPlus/NHDPlusAttributes/PlusFlowlineVAA.dbf</span>
+<span class="linenos">11</span><span class="w">  </span><span class="nt">PlusFlow</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NHDPlus/NHDPlusAttributes/PlusFlow.dbf</span>
+<span class="linenos">12</span><span class="w">  </span><span class="nt">elevslope</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NHDPlus/NHDPlusAttributes/elevslope.dbf</span>
+<span class="linenos">13</span><span class="nt">inflows</span><span class="p">:</span><span class="w"> </span><span class="c1"># see sfrmaker.flows.add_to_segment_data for arguments</span>
+<span class="linenos">14</span><span class="w">  </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">inflows.csv</span>
+<span class="linenos">15</span><span class="w">  </span><span class="nt">line_id_column</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">line_id_COMID</span>
+<span class="linenos">16</span><span class="w">  </span><span class="nt">period_column</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SP</span><span class="w">  </span><span class="c1"># column with model stress periods</span>
+<span class="linenos">17</span><span class="w">  </span><span class="nt">data_column</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">inflow_m3d</span><span class="w">  </span><span class="c1"># column with flow values</span>
+<span class="linenos">18</span><span class="nt">dem</span><span class="p">:</span>
+<span class="linenos">19</span><span class="w">  </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dem_26715.tif</span>
+<span class="linenos">20</span><span class="w">  </span><span class="nt">elevation_units</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">meters</span>
+<span class="linenos">21</span><span class="w">  </span><span class="nt">buffer_distance</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">50.</span>
+<span class="linenos">22</span><span class="nt">options</span><span class="p">:</span>
+<span class="linenos">23</span><span class="w">  </span><span class="nt">model_length_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span>
+</pre></div>
+</div>
+<p>Either of these configuration files can then be used with a python script similar to the following:</p>
+</section>
+<section id="tylerforks-make-sfr-py">
+<h3>tylerforks/make_sfr.py:<a class="headerlink" href="#tylerforks-make-sfr-py" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="sd">&quot;&quot;&quot;Run the Tyler Forks example.</span>
+<span class="linenos">2</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="linenos">3</span><span class="kn">import</span> <span class="nn">sfrmaker</span>
+<span class="linenos">4</span><span class="n">sfrdata</span> <span class="o">=</span> <span class="n">sfrmaker</span><span class="o">.</span><span class="n">SFRData</span><span class="o">.</span><span class="n">from_yaml</span><span class="p">(</span><span class="s1">&#39;tf_sfrmaker_config.yml&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This will produce an sfr package for MODFLOW-NWT, csv table representations of the SFR input, and shapefiles for visualizing the SFR package.</p>
+</section>
+<section id="running-the-tylerforks-model">
+<h3>Running the tylerforks model<a class="headerlink" href="#running-the-tylerforks-model" title="Link to this heading">¶</a></h3>
+<p>The above script can be found in the <a class="reference external" href="https://github.com/aleaf/sfrmaker/tree/develop/examples/tylerforks">examples/tylerforks folder</a> of the SFRmaker repository. Assuming the script was run from that location, the resulting MODFLOW model can then be run using the MODFLOW executable packaged with SFRmaker (on Windows):</p>
+<div class="highlight-doscon notranslate"><div class="highlight"><pre><span></span><span class="go">cd tylerforks</span>
+<span class="go">../../../bin/win/mfnwt.exe tf.nam</span>
+</pre></div>
+</div>
+<p>(or on OSX)</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>tylerforks
+../../../bin/mac/mfnwt<span class="w"> </span>tf.nam
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="philosophy.html" class="btn btn-neutral float-left" title="Philosophy" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="installation.html" class="btn btn-neutral float-right" title="Installation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+      <span class="lastupdated">Last updated on Jan 15, 2024.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

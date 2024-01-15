@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Lines Module &mdash; SFRmaker 0.11.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/documentation_options.js?v=60336169"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../_static/copybutton.js?v=f281be69"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="The MODFLOW-2005 to 6 Module" href="sfrmaker.mf5to6.html" />
+    <link rel="prev" title="The Grid Module" href="sfrmaker.grid.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            SFRmaker
+          </a>
+              <div class="version">
+                0.11.2
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../philosophy.html"> Philosophy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html"> Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html"> Installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../inputs.html"> Input Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html"> Using SFRmaker with a configuration file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebooks/SFRmaker_demo.html"> Basic Usage in a scripting context</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebooks/preprocessing_demo.html"> Preprocessing NHDPlus version 2 data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebooks/lines_from_NHDPlusHR_demo.html"> Using SFRmaker with NHDPlus High Resolution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../concepts.html"> Concepts and methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebooks/sfrmaker_tools.html"> Stand-alone tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../troubleshooting.html"> Troubleshooting</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html"> Code reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.flows.html">Flows Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.grid.html">Grid Module</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Lines Module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#sfrmaker.lines.Lines"><code class="docutils literal notranslate"><span class="pre">Lines</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.lines.Lines.cull"><code class="docutils literal notranslate"><span class="pre">Lines.cull()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.lines.Lines.from_dataframe"><code class="docutils literal notranslate"><span class="pre">Lines.from_dataframe()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.lines.Lines.from_nhdplus_hr"><code class="docutils literal notranslate"><span class="pre">Lines.from_nhdplus_hr()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.lines.Lines.from_nhdplus_v2"><code class="docutils literal notranslate"><span class="pre">Lines.from_nhdplus_v2()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.lines.Lines.from_shapefile"><code class="docutils literal notranslate"><span class="pre">Lines.from_shapefile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.lines.Lines.geometry_length_units"><code class="docutils literal notranslate"><span class="pre">Lines.geometry_length_units</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.lines.Lines.intersect"><code class="docutils literal notranslate"><span class="pre">Lines.intersect()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.lines.Lines.make_routing_one_to_one"><code class="docutils literal notranslate"><span class="pre">Lines.make_routing_one_to_one()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.lines.Lines.paths"><code class="docutils literal notranslate"><span class="pre">Lines.paths</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.lines.Lines.routing"><code class="docutils literal notranslate"><span class="pre">Lines.routing</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.lines.Lines.to_crs"><code class="docutils literal notranslate"><span class="pre">Lines.to_crs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.lines.Lines.to_sfr"><code class="docutils literal notranslate"><span class="pre">Lines.to_sfr()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfrmaker.lines.Lines.write_shapefile"><code class="docutils literal notranslate"><span class="pre">Lines.write_shapefile()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.mf5to6.html">MODFLOW-2005 to 6 Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.observations.html">Observations Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.preprocessing.html">Preprocessing Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.sfrdata.html">SFRData Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.utils.html">Utilities Module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../config-summary.html"> Summary of configuration file options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../release-history.html"> Release History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html"> Contributing to SFRmaker</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Bibliography</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../references.html"> References cited</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">SFRmaker</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Modules</a></li>
+      <li class="breadcrumb-item active">The Lines Module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/sfrmaker.lines.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-sfrmaker.lines">
+<span id="the-lines-module"></span><h1>The Lines Module<a class="headerlink" href="#module-sfrmaker.lines" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="sfrmaker.lines.Lines">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sfrmaker.lines.</span></span><span class="sig-name descname"><span class="pre">Lines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">asum_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'km'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'meters'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elevation_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'meters'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">crs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prjfile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/lines.html#Lines"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.lines.Lines" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Class for working with linestring feature input.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>df</strong><span class="classifier">DataFrame or GeoDataFrame</span></dt><dd><p>Dataframe with linestring features (flowlines) and attribute information.
+Column descriptions:</p>
+<table class="docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><strong>id</strong></p></td>
+<td><p>Sequential integers representing each flowline</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>toid</strong></p></td>
+<td><p>Integers representing downstream routing connections</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>arbolate_sum_column2</strong></p></td>
+<td><p>(optional) Arbolate sum at the end of each flowline</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>width1_column</strong></p></td>
+<td><p>(optional) Stream channel width at the start of each flowline</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>width2_column</strong></p></td>
+<td><p>(optional) Stream channel width at the end of each flowline</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>up_elevation_column</strong></p></td>
+<td><p>(optional) Streambed elevation at the start of each flowline</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>dn_elevation_column</strong></p></td>
+<td><p>(optional) Streambed elevation at the end of each flowline</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>name_column</strong></p></td>
+<td><p>(optional) Flowline name</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>geometry</strong></p></td>
+<td><p>shapely <a class="reference external" href="https://shapely.readthedocs.io/en/latest/manual.html#LineString" title="(in Shapely)"><code class="xref py py-class docutils literal notranslate"><span class="pre">LineString</span></code></a> objects for each feature</p></td>
+</tr>
+</tbody>
+</table>
+</dd>
+<dt><strong>asum_units</strong><span class="classifier">str, optional</span></dt><dd><p>Length units for values in <code class="docutils literal notranslate"><span class="pre">arbolate_sum_column2</span></code>; 
+by default ‘km’.</p>
+</dd>
+<dt><strong>width_units</strong><span class="classifier">str, optional</span></dt><dd><p>Length units for values in <code class="docutils literal notranslate"><span class="pre">width1_column</span></code> and <code class="docutils literal notranslate"><span class="pre">width2_column</span></code>; 
+by default ‘meters’.</p>
+</dd>
+<dt><strong>elevation_units</strong><span class="classifier">str, optional</span></dt><dd><p>Length units for values in <code class="docutils literal notranslate"><span class="pre">up_elevation_column</span></code> and <code class="docutils literal notranslate"><span class="pre">dn_elevation_column</span></code>; 
+by default ‘meters’.</p>
+</dd>
+<dt><strong>crs</strong><span class="classifier">obj, optional</span></dt><dd><p>Coordinate reference object for <code class="docutils literal notranslate"><span class="pre">df</span></code>. This argument is only needed
+if <code class="docutils literal notranslate"><span class="pre">df</span></code> is not a GeoDataFrame with a valid attached coordinate reference.
+Can be any of:
+- PROJ string
+- Dictionary of PROJ parameters
+- PROJ keyword arguments for parameters
+- JSON string with PROJ parameters
+- CRS WKT string
+- An authority string [i.e. ‘epsg:4326’]
+- An EPSG integer code [i.e. 4326]
+- A tuple of (“auth_name”: “auth_code”) [i.e (‘epsg’, ‘4326’)]
+- An object with a <cite>to_wkt</cite> method.
+- A <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.6.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> class</p>
+</dd>
+<dt><strong>prjfile: str, optional</strong></dt><dd><p>ESRI-style projection file with coordinate reference information for <code class="docutils literal notranslate"><span class="pre">df</span></code>. 
+This argument is only needed if <code class="docutils literal notranslate"><span class="pre">df</span></code> is not a GeoDataFrame 
+with a valid attached coordinate reference.</p>
+</dd>
+<dt><strong>**kwargs</strong><span class="classifier">dict, optional</span></dt><dd><p>Support for deprecated keyword options.</p>
+<div class="deprecated">
+<p><span class="versionmodified deprecated">Deprecated since version 0.13: </span>The following arguments will be removed in SFRmaker 0.13.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">attr_length_units</span></code> (str): use <code class="docutils literal notranslate"><span class="pre">width_units</span></code> or <code class="docutils literal notranslate"><span class="pre">asum_units</span></code> instead.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">attr_height_units</span></code> (str): use <code class="docutils literal notranslate"><span class="pre">elevation_units</span></code> instead.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">epsg</span></code> (int): use <code class="docutils literal notranslate"><span class="pre">crs</span></code> instead.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">proj_str</span></code> (str): use <code class="docutils literal notranslate"><span class="pre">crs</span></code> instead.</p></li>
+</ul>
+</div>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Attributes<span class="colon">:</span></dt>
+<dd class="field-even"><dl>
+<dt><strong>crs</strong><span class="classifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">sfrmaker.gis.CRS</span></code> instance</span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="sfrmaker.lines.Lines.cull">
+<span class="sig-name descname"><span class="pre">cull</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">feature</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">simplify</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature_crs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inplace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/lines.html#Lines.cull"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.lines.Lines.cull" title="Link to this definition">¶</a></dt>
+<dd><p>Cull linework; retaining only the
+lines that intersect a polygon feature.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>feature</strong><span class="classifier">shapely Polygon, list of Polygons, or shapefile path</span></dt><dd><p>Polygons must be in same CRS as linework; shapefile
+features will be reprojected if their crs is different.</p>
+</dd>
+<dt><strong>simplify</strong><span class="classifier">bool</span></dt><dd><p>Option to simplify the polygon, which can speed intersection 
+with the lines.</p>
+</dd>
+<dt><strong>tol: float</strong></dt><dd><p>Simplification tolerance (distance), in the units of the LineStrings
+(usually meters).</p>
+</dd>
+<dt><strong>feature_crs</strong><span class="classifier">obj</span></dt><dd><p>A Python int, dict, str, or <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.6.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> instance
+passed to the <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input" title="(in pyproj v3.6.1)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.crs.CRS.from_user_input()</span></code></a>
+See <a class="reference external" href="http://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input">http://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input</a>.
+Can be any of:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>PROJ string</p></li>
+<li><p>Dictionary of PROJ parameters</p></li>
+<li><p>PROJ keyword arguments for parameters</p></li>
+<li><p>JSON string with PROJ parameters</p></li>
+<li><p>CRS WKT string</p></li>
+<li><p>An authority string [i.e. ‘epsg:4326’]</p></li>
+<li><p>An EPSG integer code [i.e. 4326]</p></li>
+<li><p>A tuple of (“auth_name”: “auth_code”) [i.e (‘epsg’, ‘4326’)]</p></li>
+<li><p>An object with a <cite>to_wkt</cite> method.</p></li>
+<li><p>A <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.6.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> class</p></li>
+</ul>
+</div></blockquote>
+</dd>
+<dt><strong>inplace</strong><span class="classifier">bool</span></dt><dd><p>If True, the attribute .df is modified;
+if False, a copy of .df is returned.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>df</strong><span class="classifier">DataFrame</span></dt><dd><p>Version of the <code class="xref py py-attr docutils literal notranslate"><span class="pre">Lines.df</span></code> DataFrame
+containing only the lines that intersect the <code class="docutils literal notranslate"><span class="pre">feature</span></code>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sfrmaker.lines.Lines.from_dataframe">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_dataframe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'id'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">routing_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'toid'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arbolate_sum_column2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'asum2'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">asum_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'km'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width1_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'width1'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width2_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'width2'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'meters'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">up_elevation_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'elevup'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dn_elevation_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'elevdn'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elevation_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'meters'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geometry_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'geometry'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'name'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">crs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prjfile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/lines.html#Lines.from_dataframe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.lines.Lines.from_dataframe" title="Link to this definition">¶</a></dt>
+<dd><p>[summary]</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>df</strong><span class="classifier">DataFrame</span></dt><dd><p>Pandas DataFrame or Geopandas GeoDataFrame
+with flowline information, including
+shapely <a class="reference external" href="https://shapely.readthedocs.io/en/latest/manual.html#LineString" title="(in Shapely)"><code class="xref py py-class docutils literal notranslate"><span class="pre">LineStrings</span></code></a> in a <cite>‘geometry’</cite> column.</p>
+</dd>
+<dt><strong>id_column</strong><span class="classifier">str, optional</span></dt><dd><p>Attribute field with line identifiers, 
+by default ‘id’</p>
+</dd>
+<dt><strong>routing_column</strong><span class="classifier">str, optional</span></dt><dd><p>Attribute field with downstream routing connections,
+by default ‘toid’</p>
+</dd>
+<dt><strong>arbolate_sum_column2</strong><span class="classifier">str, optional</span></dt><dd><p>Attribute field with arbolate sums at downstream ends of lines, 
+by default ‘asum2’</p>
+</dd>
+<dt><strong>asum_units</strong><span class="classifier">str, optional</span></dt><dd><p>Length units for values in <code class="docutils literal notranslate"><span class="pre">arbolate_sum_column2</span></code>; 
+by default ‘km’.</p>
+</dd>
+<dt><strong>width1_column</strong><span class="classifier">str, optional</span></dt><dd><p>Attribute field with channel widths at upstream ends of lines,
+by default ‘width1’</p>
+</dd>
+<dt><strong>width2_column</strong><span class="classifier">str, optional</span></dt><dd><p>Attribute field with channel widths at downstream ends of lines, 
+by default ‘width2’</p>
+</dd>
+<dt><strong>width_units</strong><span class="classifier">str, optional</span></dt><dd><p>Length units for values in <code class="docutils literal notranslate"><span class="pre">width1_column</span></code> and <code class="docutils literal notranslate"><span class="pre">width2_column</span></code>; 
+by default ‘meters’.</p>
+</dd>
+<dt><strong>up_elevation_column</strong><span class="classifier">str, optional</span></dt><dd><p>Attribute field with elevations at upstream ends of lines, 
+by default ‘elevup’</p>
+</dd>
+<dt><strong>dn_elevation_column</strong><span class="classifier">str, optional</span></dt><dd><p>Attribute field with elevations at downstream ends of lines,
+by default ‘elevdn’</p>
+</dd>
+<dt><strong>elevation_units</strong><span class="classifier">str, optional</span></dt><dd><p>Length units for values in <code class="docutils literal notranslate"><span class="pre">up_elevation_column</span></code> and <code class="docutils literal notranslate"><span class="pre">dn_elevation_column</span></code>; 
+by default ‘meters’.</p>
+</dd>
+<dt><strong>name_column</strong><span class="classifier">str, optional</span></dt><dd><p>Attribute field with feature names, 
+by default ‘name’</p>
+</dd>
+<dt><strong>crs</strong><span class="classifier">obj, optional</span></dt><dd><p>Coordinate reference object for <code class="docutils literal notranslate"><span class="pre">df</span></code>. This argument is only needed
+if <code class="docutils literal notranslate"><span class="pre">df</span></code> is not a GeoDataFrame with a valid attached coordinate reference.
+Can be any of:
+- PROJ string
+- Dictionary of PROJ parameters
+- PROJ keyword arguments for parameters
+- JSON string with PROJ parameters
+- CRS WKT string
+- An authority string [i.e. ‘epsg:4326’]
+- An EPSG integer code [i.e. 4326]
+- A tuple of (“auth_name”: “auth_code”) [i.e (‘epsg’, ‘4326’)]
+- An object with a <cite>to_wkt</cite> method.
+- A <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.6.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> class</p>
+</dd>
+<dt><strong>prjfile: str, optional</strong></dt><dd><p>ESRI-style projection file with coordinate reference information for <code class="docutils literal notranslate"><span class="pre">df</span></code>. 
+This argument is only needed if <code class="docutils literal notranslate"><span class="pre">df</span></code> is not a GeoDataFrame 
+with a valid attached coordinate reference.</p>
+</dd>
+<dt><strong>**kwargs</strong><span class="classifier">dict, optional</span></dt><dd><p>Support for deprecated keyword options.</p>
+<div class="deprecated">
+<p><span class="versionmodified deprecated">Deprecated since version 0.13: </span>The following arguments will be removed in SFRmaker 0.13.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">attr_length_units</span></code> (str): use <code class="docutils literal notranslate"><span class="pre">width_units</span></code> or <code class="docutils literal notranslate"><span class="pre">asum_units</span></code> instead.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">attr_height_units</span></code> (str): use <code class="docutils literal notranslate"><span class="pre">elevation_units</span></code> instead.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">epsg</span></code> (int): use <code class="docutils literal notranslate"><span class="pre">crs</span></code> instead.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">proj_str</span></code> (str): use <code class="docutils literal notranslate"><span class="pre">crs</span></code> instead.</p></li>
+</ul>
+</div>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl>
+<dt><strong>lines</strong><span class="classifier"><a class="reference internal" href="#sfrmaker.lines.Lines" title="sfrmaker.lines.Lines"><code class="xref py py-class docutils literal notranslate"><span class="pre">Lines</span></code></a> instance</span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sfrmaker.lines.Lines.from_nhdplus_hr">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_nhdplus_hr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">NHDPlusHR_paths</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bbox_filter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drop_fcodes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drop_ftypes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drop_NHDPlusIDs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/lines.html#Lines.from_nhdplus_hr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.lines.Lines.from_nhdplus_hr" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>NHDPlusHR_paths</strong><span class="classifier">str or list of strings</span></dt><dd><p>path (or list of paths) to the NHDPlus High Resolution HU-4 Subregion 
+file geodatabase (.gdb) to include, assuming the file structure is 
+the same as when downloaded from the USGS National Map Downloader tool 
+(v2.0) website (<a class="reference external" href="https://apps.nationalmap.gov/downloader/#/">https://apps.nationalmap.gov/downloader/#/</a>). For example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NHDPlusHR_paths</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;/NHDPLUS_HR_1/NHDPLUS_H_0202_HU4_GDB.gdb&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;/NHDPLUS_HR_2/NHDPLUS_H_0204_HU4_GDB.gdb&#39;</span><span class="p">]</span> 
+</pre></div>
+</div>
+<p>for the 4-digit Hydrologic Units 0202 and 0204.</p>
+</dd>
+<dt><strong>bbox_filter</strong><span class="classifier">tuple or str, optional</span></dt><dd><p>Bounding box (tuple) or shapefile of model stream network area.</p>
+</dd>
+<dt><strong>drop_fcodes</strong><span class="classifier">int or list of ints, optional</span></dt><dd><p>fcode or list of NHDFlowline FCodes to drop from network. 
+For example, to remove underground aqueducts and general case
+water pipelines from line network:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">drop_fcodes</span> <span class="o">=</span> <span class="p">[</span><span class="mi">42803</span><span class="p">,</span> <span class="mi">42814</span><span class="p">]</span>
+</pre></div>
+</div>
+</dd>
+<dt><strong>drop_ftypes</strong><span class="classifier">int or list of ints, optional</span></dt><dd><p>List of NHDFlowline FTypes to drop from network.
+For example, to remove all pipelines from line network:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">drop_fcodes</span> <span class="o">=</span> <span class="p">[</span><span class="mi">428</span><span class="p">]</span>
+</pre></div>
+</div>
+</dd>
+<dt><strong>drop_NHDPlusIDs</strong><span class="classifier">int or list of ints, optional</span></dt><dd><p>List of NHDFlowlines (as NHDPlusIDs) to drop from network.</p>
+</dd>
+<dt><strong>**kwargs</strong><span class="classifier">dict, optional</span></dt><dd><p>Support for deprecated keyword options.</p>
+<div class="deprecated">
+<p><span class="versionmodified deprecated">Deprecated since version 0.13: </span>The following arguments will be removed in SFRmaker 0.13.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">crs</span></code>: NHDPlus HR data are assumed to include valid projection information.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">epsg</span></code> (int): NHDPlus HR data are assumed to include valid projection information.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">proj_str</span></code> (str): NHDPlus HR data are assumed to include valid projection information.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">filter</span></code> (tuble): use <code class="docutils literal notranslate"><span class="pre">bbox_filter</span></code> instead.</p></li>
+</ul>
+</div>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl>
+<dt><strong>lines</strong><span class="classifier"><a class="reference internal" href="#sfrmaker.lines.Lines" title="sfrmaker.lines.Lines"><code class="xref py py-class docutils literal notranslate"><span class="pre">Lines</span></code></a> instance</span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sfrmaker.lines.Lines.from_nhdplus_v2">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_nhdplus_v2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">NHDPlus_paths</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NHDFlowlines</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">PlusFlowlineVAA</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">PlusFlow</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elevslope</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bbox_filter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">crs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prjfile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/lines.html#Lines.from_nhdplus_v2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.lines.Lines.from_nhdplus_v2" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>NHDPlus_paths</strong><span class="classifier">str or list of strings</span></dt><dd><p>List of paths to the root folders of NHDPlus drainage basins
+to include, assuming the file structure is the same as
+downloaded from the NHDPlus version 2 website. For example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NHDPlus_paths</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;/NHDPlusGL/NHDPlus04/&#39;</span><span class="p">,</span>
+               <span class="s1">&#39;/NHDPlusMS/NHDPlus07/&#39;</span><span class="p">]</span>    
+</pre></div>
+</div>
+<p>for the Great Lakes (04) and Upper Mississippi (07) basins.</p>
+</dd>
+<dt><strong>NHDFlowlines</strong><span class="classifier">str or list of strings.</span></dt><dd><p>Shapefile or list of NHDFlowline shapefiles containing
+feature geometries (line arcs) for stream network. Must contain
+the following attribute fields:
+COMID : common identifier number</p>
+</dd>
+<dt><strong>PlusFlowlineVAA</strong><span class="classifier">str or list of strings.</span></dt><dd><p>DBF file or list of DBF files with NHDPlus attribute information.
+Must contain the following attribute fields:
+COMID : common identifier number</p>
+</dd>
+<dt><strong>PlusFlow</strong><span class="classifier">str or list of strings.</span></dt><dd><p>DBF file or list of DBF files with NHDPlus routing information.
+Must contain the following attribute fields:
+COMID : common identifier number</p>
+</dd>
+<dt><strong>elevslope</strong><span class="classifier">str or list of strings.</span></dt><dd><p>DBF file or list of DBF files with end elevations for each
+line arc in NHDFlowlines. Must contain the following attribute fields:
+COMID : common identifier number</p>
+</dd>
+<dt><strong>bbox_filter</strong><span class="classifier">tuple or str</span></dt><dd><p>Bounding box (tuple) or shapefile of model stream network area.</p>
+</dd>
+<dt><strong>crs</strong><span class="classifier">obj, optional</span></dt><dd><p>Coordinate reference object for <code class="docutils literal notranslate"><span class="pre">df</span></code>. This argument is only needed
+if the input flowlines don’t have a valid projection file.
+Can be any of:
+- PROJ string
+- Dictionary of PROJ parameters
+- PROJ keyword arguments for parameters
+- JSON string with PROJ parameters
+- CRS WKT string
+- An authority string [i.e. ‘epsg:4326’]
+- An EPSG integer code [i.e. 4326]
+- A tuple of (“auth_name”: “auth_code”) [i.e (‘epsg’, ‘4326’)]
+- An object with a <cite>to_wkt</cite> method.
+- A <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.6.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> class</p>
+</dd>
+<dt><strong>prjfile: str, optional</strong></dt><dd><p>ESRI-style projection file with coordinate reference information for <code class="docutils literal notranslate"><span class="pre">df</span></code>. 
+This argument is only needed
+if the input flowlines don’t have a valid projection file.</p>
+</dd>
+<dt><strong>**kwargs</strong><span class="classifier">dict, optional</span></dt><dd><p>Support for deprecated keyword options.</p>
+<div class="deprecated">
+<p><span class="versionmodified deprecated">Deprecated since version 0.13: </span>The following arguments will be removed in SFRmaker 0.13.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">epsg</span></code> (int): use <code class="docutils literal notranslate"><span class="pre">crs</span></code> instead.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">proj_str</span></code> (str): use <code class="docutils literal notranslate"><span class="pre">crs</span></code> instead.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">filter</span></code> (tuble): use <code class="docutils literal notranslate"><span class="pre">bbox_filter</span></code> instead.</p></li>
+</ul>
+</div>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl>
+<dt><strong>lines</strong><span class="classifier"><a class="reference internal" href="#sfrmaker.lines.Lines" title="sfrmaker.lines.Lines"><code class="xref py py-class docutils literal notranslate"><span class="pre">Lines</span></code></a> instance</span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sfrmaker.lines.Lines.from_shapefile">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_shapefile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shapefile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'id'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">routing_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'toid'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arbolate_sum_column2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'asum2'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">asum_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'km'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width1_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'width1'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width2_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'width2'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'meters'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">up_elevation_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'elevup'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dn_elevation_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'elevdn'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elevation_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'meters'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'name'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bbox_filter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">crs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prjfile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/lines.html#Lines.from_shapefile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.lines.Lines.from_shapefile" title="Link to this definition">¶</a></dt>
+<dd><p>Create a Lines instance from a shapefile.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>shapefile</strong><span class="classifier">str or pathlike</span></dt><dd><p>Input shapefile</p>
+</dd>
+<dt><strong>id_column</strong><span class="classifier">str, optional</span></dt><dd><p>Attribute field with line identifiers, 
+by default ‘id’</p>
+</dd>
+<dt><strong>routing_column</strong><span class="classifier">str, optional</span></dt><dd><p>Attribute field with downstream routing connections,
+by default ‘toid’</p>
+</dd>
+<dt><strong>arbolate_sum_column2</strong><span class="classifier">str, optional</span></dt><dd><p>Attribute field with arbolate sums at downstream ends of lines, 
+by default ‘asum2’</p>
+</dd>
+<dt><strong>asum_units</strong><span class="classifier">str, optional</span></dt><dd><p>Length units for values in <code class="docutils literal notranslate"><span class="pre">arbolate_sum_column2</span></code>; 
+by default ‘km’.</p>
+</dd>
+<dt><strong>width1_column</strong><span class="classifier">str, optional</span></dt><dd><p>Attribute field with channel widths at upstream ends of lines,
+by default ‘width1’</p>
+</dd>
+<dt><strong>width2_column</strong><span class="classifier">str, optional</span></dt><dd><p>Attribute field with channel widths at downstream ends of lines, 
+by default ‘width2’</p>
+</dd>
+<dt><strong>width_units</strong><span class="classifier">str, optional</span></dt><dd><p>Length units for values in <code class="docutils literal notranslate"><span class="pre">width1_column</span></code> and <code class="docutils literal notranslate"><span class="pre">width2_column</span></code>; 
+by default ‘meters’.</p>
+</dd>
+<dt><strong>up_elevation_column</strong><span class="classifier">str, optional</span></dt><dd><p>Attribute field with elevations at upstream ends of lines, 
+by default ‘elevup’</p>
+</dd>
+<dt><strong>dn_elevation_column</strong><span class="classifier">str, optional</span></dt><dd><p>Attribute field with elevations at downstream ends of lines,
+by default ‘elevdn’</p>
+</dd>
+<dt><strong>elevation_units</strong><span class="classifier">str, optional</span></dt><dd><p>Length units for values in <code class="docutils literal notranslate"><span class="pre">up_elevation_column</span></code> and <code class="docutils literal notranslate"><span class="pre">dn_elevation_column</span></code>; 
+by default ‘meters’.</p>
+</dd>
+<dt><strong>name_column</strong><span class="classifier">str, optional</span></dt><dd><p>Attribute field with feature names, 
+by default ‘name’</p>
+</dd>
+<dt><strong>bbox_filter</strong><span class="classifier">tuple, optional</span></dt><dd><p>(xmin, ymin, xmax, ymax) bounding box to filter which records 
+are read from the shapefile. By default None.</p>
+</dd>
+<dt><strong>crs</strong><span class="classifier">obj, optional</span></dt><dd><p>Coordinate reference object for <code class="docutils literal notranslate"><span class="pre">shapefile</span></code>. This argument is only needed
+if <code class="docutils literal notranslate"><span class="pre">shapefile</span></code> does not include a valid projection file.
+Can be any of:
+- PROJ string
+- Dictionary of PROJ parameters
+- PROJ keyword arguments for parameters
+- JSON string with PROJ parameters
+- CRS WKT string
+- An authority string [i.e. ‘epsg:4326’]
+- An EPSG integer code [i.e. 4326]
+- A tuple of (“auth_name”: “auth_code”) [i.e (‘epsg’, ‘4326’)]
+- An object with a <cite>to_wkt</cite> method.
+- A <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.6.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> class</p>
+</dd>
+<dt><strong>prjfile: str, optional</strong></dt><dd><p>ESRI-style projection file with coordinate reference information for <code class="docutils literal notranslate"><span class="pre">df</span></code>. 
+This argument is only needed
+if <code class="docutils literal notranslate"><span class="pre">shapefile</span></code> does not include a valid projection file.</p>
+</dd>
+<dt><strong>**kwargs</strong><span class="classifier">dict, optional</span></dt><dd><p>Support for deprecated keyword options.</p>
+<div class="deprecated">
+<p><span class="versionmodified deprecated">Deprecated since version 0.13: </span>The following arguments will be removed in SFRmaker 0.13.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">attr_length_units</span></code> (str): use <code class="docutils literal notranslate"><span class="pre">width_units</span></code> or <code class="docutils literal notranslate"><span class="pre">asum_units</span></code> instead.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">attr_height_units</span></code> (str): use <code class="docutils literal notranslate"><span class="pre">elevation_units</span></code> instead.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">epsg</span></code> (int): use <code class="docutils literal notranslate"><span class="pre">crs</span></code> instead.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">proj_str</span></code> (str): use <code class="docutils literal notranslate"><span class="pre">crs</span></code> instead.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">filter</span></code> (tuple): use <code class="docutils literal notranslate"><span class="pre">bbox_filter</span></code> instead.</p></li>
+</ul>
+</div>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl>
+<dt><strong>lines</strong><span class="classifier"><a class="reference internal" href="#sfrmaker.lines.Lines" title="sfrmaker.lines.Lines"><code class="xref py py-class docutils literal notranslate"><span class="pre">Lines</span></code></a> instance</span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="sfrmaker.lines.Lines.geometry_length_units">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">geometry_length_units</span></span><a class="headerlink" href="#sfrmaker.lines.Lines.geometry_length_units" title="Link to this definition">¶</a></dt>
+<dd><p>Length units of reach LineString geometries.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sfrmaker.lines.Lines.intersect">
+<span class="sig-name descname"><span class="pre">intersect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size_thresh</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100000.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/lines.html#Lines.intersect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.lines.Lines.intersect" title="Link to this definition">¶</a></dt>
+<dd><p>Intersect linework with a model grid.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>grid</strong><span class="classifier">instance of sfrmaker.grid</span></dt><dd><p>Must have a valid Coordinate Reference System (CRS).</p>
+</dd>
+<dt><strong>size_thresh</strong><span class="classifier">int</span></dt><dd><p>Determines whether spatial indexing will be used. If
+number of grid cells x number of flowlines &gt; size_thresh,
+a spatial index (rtree package) will be used to speed
+up the intersections.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>reach_data</strong><span class="classifier">DataFrame</span></dt><dd><p>DataFrame containing intersected reaches with grid cell information
+and original linework IDs.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sfrmaker.lines.Lines.make_routing_one_to_one">
+<span class="sig-name descname"><span class="pre">make_routing_one_to_one</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/lines.html#Lines.make_routing_one_to_one"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.lines.Lines.make_routing_one_to_one" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="sfrmaker.lines.Lines.paths">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">paths</span></span><a class="headerlink" href="#sfrmaker.lines.Lines.paths" title="Link to this definition">¶</a></dt>
+<dd><p>Dictionary of paths, where each value is a list
+of downstream lines constituting a flow path to an outlet
+for a given line (key).</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="sfrmaker.lines.Lines.routing">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">routing</span></span><a class="headerlink" href="#sfrmaker.lines.Lines.routing" title="Link to this definition">¶</a></dt>
+<dd><p>Dictionary of routing connections from ids (keys)
+to to_ids (values).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sfrmaker.lines.Lines.to_crs">
+<span class="sig-name descname"><span class="pre">to_crs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dest_crs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/lines.html#Lines.to_crs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.lines.Lines.to_crs" title="Link to this definition">¶</a></dt>
+<dd><p>Reproject the LineStrings in <code class="xref py py-attr docutils literal notranslate"><span class="pre">Lines.df</span></code> to
+a different Coordinate Reference System.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>dest_crs</strong><span class="classifier">obj</span></dt><dd><p>A Python int, dict, str, or <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.6.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> instance
+passed to the <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input" title="(in pyproj v3.6.1)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.crs.CRS.from_user_input()</span></code></a>
+See <a class="reference external" href="http://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input">http://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input</a>.
+Can be any of:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>PROJ string</p></li>
+<li><p>Dictionary of PROJ parameters</p></li>
+<li><p>PROJ keyword arguments for parameters</p></li>
+<li><p>JSON string with PROJ parameters</p></li>
+<li><p>CRS WKT string</p></li>
+<li><p>An authority string [i.e. ‘epsg:4326’]</p></li>
+<li><p>An EPSG integer code [i.e. 4326]</p></li>
+<li><p>A tuple of (“auth_name”: “auth_code”) [i.e (‘epsg’, ‘4326’)]</p></li>
+<li><p>An object with a <cite>to_wkt</cite> method.</p></li>
+<li><p>A <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.6.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> class</p></li>
+</ul>
+</div></blockquote>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sfrmaker.lines.Lines.to_sfr">
+<span class="sig-name descname"><span class="pre">to_sfr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">active_area</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">isfr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_length_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'undefined'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_time_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'days'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimum_reach_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width_from_asum_a_param</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1193</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width_from_asum_b_param</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5032</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimum_reach_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">consolidate_conductance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">one_reach_per_cell</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_outlets</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">package_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/lines.html#Lines.to_sfr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.lines.Lines.to_sfr" title="Link to this definition">¶</a></dt>
+<dd><p>Create a streamflow routing dataset from the information
+in sfrmaker.lines class instance and a supplied sfrmaker.grid class instance.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>grid</strong><span class="classifier">sfrmaker.grid or flopy.discretization.StructuredGrid</span></dt><dd><p>Numerical model grid instance. Required unless an attached model
+has a valid modelgrid attribute.</p>
+</dd>
+<dt><strong>active_area</strong><span class="classifier">shapely Polygon, list of shapely Polygons, or shapefile path; optional</span></dt><dd><p>Shapely Polygons must be in same CRS as input flowlines; shapefile
+features will be reprojected if their crs is different.</p>
+</dd>
+<dt><strong>isfr</strong><span class="classifier">ndarray, optional</span></dt><dd><p>Numpy integer array of the same size as the model grid, designating area that will
+be populated with SFR reaches (0=no SFR; 1=SFR). An isfr array of shape
+nrow x ncol will be broadcast to all layers. Only required if a model is not
+supplied, or if SFR is only desired in a subset of active model cells.
+By default, None, in which case the model ibound or idomain array will be used.</p>
+</dd>
+<dt><strong>model</strong><span class="classifier">flopy.modflow.Modflow or flopy.mf6.ModflowGwf, optional</span></dt><dd><p>Flopy model instance</p>
+</dd>
+<dt><strong>model_length_units</strong><span class="classifier">str; e.g. {‘ft’, ‘feet’, ‘meters’, etc.}, optional</span></dt><dd><p>Length units of the model. While SFRmaker will try to read these
+from a supplied grid (first) and then a supplied model (second),
+it is good practice to specify them explicitly here.</p>
+</dd>
+<dt><strong>model_time_units</strong><span class="classifier">str; e.g. {‘d’, ‘days’}, optional</span></dt><dd><p>Time units for model. By default, days.</p>
+</dd>
+<dt><strong>minimum_reach_length</strong><span class="classifier">float, optional</span></dt><dd><p>Minimum reach length to retain. Default is to compute
+an effective mean model cell length by taking the square root
+of the average cell area, and then set minimum_reach_length
+to 5% of effective mean cell length.</p>
+</dd>
+<dt><strong>width_from_asum_a_param</strong><span class="classifier">float, optional</span></dt><dd><p><span class="math notranslate nohighlight">\(a\)</span> parameter used for estimating channel width from arbolate sum.
+Only needed if input flowlines are lacking width information.
+See <code class="xref py py-func docutils literal notranslate"><span class="pre">width_from_arbolate()</span></code>. By default, 0.1193.</p>
+</dd>
+<dt><strong>width_from_asum_b_param</strong><span class="classifier">float, optional</span></dt><dd><p><span class="math notranslate nohighlight">\(b\)</span> parameter used for estimating channel width from arbolate sum.
+Only needed if input flowlines are lacking width information.
+See <code class="xref py py-func docutils literal notranslate"><span class="pre">width_from_arbolate()</span></code>. By default, 0.5032.</p>
+</dd>
+<dt><strong>minimum_reach_width</strong><span class="classifier">float, optional</span></dt><dd><p>Minimum reach width to specify (in model units), if computing widths from
+arbolate sum values. (default = 1)</p>
+</dd>
+<dt><strong>consolidate_conductance</strong><span class="classifier">bool</span></dt><dd><p>If True, total reach conductance each cell is computed, and
+assigned to the most downstream reach via the hydraulic conductivity
+parameter.</p>
+</dd>
+<dt><strong>one_reach_per_cell</strong><span class="classifier">bool</span></dt><dd><p>If True, streambed conductance in each reach is consolidated
+(consolidate_conductance = True), and additional reaches besides
+the most downstream reach are dropped.</p>
+</dd>
+<dt><strong>add_outlets</strong><span class="classifier">sequence of ints</span></dt><dd><p>Option to add breaks in routing at specified line ids. For example
+if controlled flows out of a reservoir are specified as inflows
+to the SFR network, an outlet can be added above to the dam to
+prevent double-counting of flow. By default, None</p>
+</dd>
+<dt><strong>package_name</strong><span class="classifier">str</span></dt><dd><p>Base name for writing sfr output.</p>
+</dd>
+<dt><strong>kwargs</strong><span class="classifier">keyword arguments to <code class="xref py py-class docutils literal notranslate"><span class="pre">SFRData</span></code></span></dt><dd></dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>sfrdata</strong><span class="classifier">sfrmaker.SFRData instance</span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sfrmaker.lines.Lines.write_shapefile">
+<span class="sig-name descname"><span class="pre">write_shapefile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">outshp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'flowlines.shp'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/lines.html#Lines.write_shapefile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.lines.Lines.write_shapefile" title="Link to this definition">¶</a></dt>
+<dd><p>Write a shapefile of <code class="xref py py-attr docutils literal notranslate"><span class="pre">Lines.df</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>outshp</strong><span class="classifier">str, optional</span></dt><dd><p>Shapefile name, by default ‘flowlines.shp’</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="sfrmaker.grid.html" class="btn btn-neutral float-left" title="The Grid Module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="sfrmaker.mf5to6.html" class="btn btn-neutral float-right" title="The MODFLOW-2005 to 6 Module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+      <span class="lastupdated">Last updated on Jan 15, 2024.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
