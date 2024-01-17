@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Basic usage of SFRmaker in a scripting context &mdash; SFRmaker 0.11.2.post0.dev0+g2c4daff documentation</title>
+  <title>Basic usage of SFRmaker in a scripting context &mdash; SFRmaker 0.11.2.post1.dev0+g56dac8e documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
@@ -16,7 +16,7 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../_static/documentation_options.js?v=2e2dfa67"></script>
+        <script src="../_static/documentation_options.js?v=8cc1cc41"></script>
         <script src="../_static/doctools.js?v=888ff710"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -43,7 +43,7 @@
             SFRmaker
           </a>
               <div class="version">
-                0.11.2.post0.dev0+g2c4daff
+                0.11.2.post1.dev0+g56dac8e
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -193,7 +193,7 @@ for basins:
 reading ../tylerforks/NHDPlus/NHDPlusAttributes/PlusFlow.dbf...
 --&gt; building dataframe... (may take a while for large shapefiles)
 
-load finished in 0.13s
+load finished in 0.12s
 
 Getting routing information from NHDPlus Plusflow table...
 finished in 0.03s
@@ -341,7 +341,7 @@ reading ../tylerforks/active_area.shp...
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.image.AxesImage at 0x7fe754b2c920&gt;
+&lt;matplotlib.image.AxesImage at 0x7fcd0837eb70&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -396,7 +396,7 @@ MODFLOW 5 layer(s) 111 row(s) 160 column(s) 1 stress period(s)
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 
-SFRmaker version 0.11.2.post0.dev0+g2c4daff
+SFRmaker version 0.11.2.post1.dev0+g56dac8e
 
 Creating sfr dataset...
 
@@ -408,7 +408,7 @@ Creating grid class instance from flopy Grid instance...
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-grid class created in 0.40s
+grid class created in 0.38s
 
 Model grid information
 structured grid
@@ -493,7 +493,7 @@ Intersecting 42 features...</div></div>
 42</p>
 <blockquote>
 <div><blockquote>
-<div><p>finished in 0.14s</p>
+<div><p>finished in 0.13s</p>
 <p>Setting up reach data… (may take a few minutes for large grids)
 &lt;/pre&gt;</p>
 </div></blockquote>
@@ -542,7 +542,7 @@ Intersecting 42 features...</div></div>
 42</p>
 <blockquote>
 <div><blockquote>
-<div><p>finished in 0.14s</p>
+<div><p>finished in 0.13s</p>
 <p>Setting up reach data{ldots} (may take a few minutes for large grids)
 end{sphinxVerbatim}</p>
 </div></blockquote>
@@ -590,7 +590,7 @@ end{sphinxVerbatim}</p>
 41
 42</p>
 <blockquote>
-<div><p>finished in 0.14s</p>
+<div><p>finished in 0.13s</p>
 <p>Setting up reach data… (may take a few minutes for large grids)</p>
 </div></blockquote>
 <div class="nboutput nblast docutils container">
@@ -620,7 +620,7 @@ bounds: 682688.00, 5139052.00, 694880.00, 5147510.20
 active area defined by: all cells
 
 
-Time to create sfr dataset: 2.08s
+Time to create sfr dataset: 2.12s
 
 </pre></div></div>
 </div>
@@ -1023,7 +1023,7 @@ running rasterstats.zonal_stats on buffered LineStrings...
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-finished in 5.06s
+finished in 5.04s
 
 
 Smoothing elevations...
@@ -1267,7 +1267,7 @@ wrote tf_SFR.chk
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-SFRmaker v. 0.11.2.post0.dev0+g2c4daff
+SFRmaker v. 0.11.2.post1.dev0+g56dac8e
 
 Running Flopy v. 3.6.0.dev0 diagnostics...
 passed.
@@ -1292,13 +1292,6 @@ At segments:
 
 
 Checking for model cells with multiple non-zero SFR conductances...
-</pre></div></div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
 24 model cells with multiple non-zero SFR conductances found.
 This may lead to circular routing between collocated reaches.
 Nodes with overlapping conductances:
@@ -1370,6 +1363,13 @@ Segment elevup and elevdn not specified for nstrm=-1439 and isfropt=1
 passed.
 
 Checking reach_data for downstream rises in streambed elevation...
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
 passed.
 
 Checking reach_data for inconsistencies between streambed elevations and the model grid...
@@ -1410,7 +1410,7 @@ wrote /home/runner/work/sfrmaker/sfrmaker/examples/Notebooks/../tylerforks/tyler
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-SFRmaker v. 0.11.2.post0.dev0+g2c4daff
+SFRmaker v. 0.11.2.post1.dev0+g56dac8e
 
 Running Flopy v. 3.6.0.dev0 diagnostics...
 passed.
@@ -1665,7 +1665,7 @@ No non-zero values of flow to export!
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Jan 15, 2024.
+      <span class="lastupdated">Last updated on Jan 17, 2024.
       </span></p>
   </div>
 

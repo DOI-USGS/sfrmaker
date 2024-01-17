@@ -19,10 +19,10 @@
    "id": "08783e35",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2024-01-15T17:12:16.630998Z",
-     "iopub.status.busy": "2024-01-15T17:12:16.630837Z",
-     "iopub.status.idle": "2024-01-15T17:12:17.649144Z",
-     "shell.execute_reply": "2024-01-15T17:12:17.648689Z"
+     "iopub.execute_input": "2024-01-17T17:18:52.500293Z",
+     "iopub.status.busy": "2024-01-17T17:18:52.499913Z",
+     "iopub.status.idle": "2024-01-17T17:18:53.487630Z",
+     "shell.execute_reply": "2024-01-17T17:18:53.487188Z"
     }
    },
    "outputs": [],
@@ -51,10 +51,10 @@
    "id": "f61d69a1",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2024-01-15T17:12:17.651617Z",
-     "iopub.status.busy": "2024-01-15T17:12:17.651176Z",
-     "iopub.status.idle": "2024-01-15T17:12:17.653930Z",
-     "shell.execute_reply": "2024-01-15T17:12:17.653467Z"
+     "iopub.execute_input": "2024-01-17T17:18:53.490270Z",
+     "iopub.status.busy": "2024-01-17T17:18:53.489815Z",
+     "iopub.status.idle": "2024-01-17T17:18:53.492366Z",
+     "shell.execute_reply": "2024-01-17T17:18:53.491910Z"
     }
    },
    "outputs": [],
@@ -93,10 +93,10 @@
    "id": "84909bed",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2024-01-15T17:12:17.655960Z",
-     "iopub.status.busy": "2024-01-15T17:12:17.655602Z",
-     "iopub.status.idle": "2024-01-15T17:12:17.892104Z",
-     "shell.execute_reply": "2024-01-15T17:12:17.891592Z"
+     "iopub.execute_input": "2024-01-17T17:18:53.494371Z",
+     "iopub.status.busy": "2024-01-17T17:18:53.494083Z",
+     "iopub.status.idle": "2024-01-17T17:18:53.719819Z",
+     "shell.execute_reply": "2024-01-17T17:18:53.719302Z"
     }
    },
    "outputs": [
@@ -123,15 +123,14 @@
       "reading ../tylerforks/NHDPlus/NHDPlusAttributes/elevslope.dbf...\n",
       "--> building dataframe... (may take a while for large shapefiles)\n",
       "writing output/flowlines_gt3km.shp... Done\n",
-      "writing output/PlusFlowlineVAA_gt3km.dbf..."
+      "writing output/PlusFlowlineVAA_gt3km.dbf... Done\n",
+      "writing output/PlusFlow_gt3km.dbf... Done\n"
      ]
     },
     {
      "name": "stdout",
      "output_type": "stream",
      "text": [
-      " Done\n",
-      "writing output/PlusFlow_gt3km.dbf... Done\n",
       "writing output/elevslope_gt3km.dbf... Done\n"
      ]
     },
@@ -227,10 +226,10 @@
    "id": "ec5ad987",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2024-01-15T17:12:17.894240Z",
-     "iopub.status.busy": "2024-01-15T17:12:17.893839Z",
-     "iopub.status.idle": "2024-01-15T17:12:17.898855Z",
-     "shell.execute_reply": "2024-01-15T17:12:17.898387Z"
+     "iopub.execute_input": "2024-01-17T17:18:53.721994Z",
+     "iopub.status.busy": "2024-01-17T17:18:53.721672Z",
+     "iopub.status.idle": "2024-01-17T17:18:53.726758Z",
+     "shell.execute_reply": "2024-01-17T17:18:53.726258Z"
     }
    },
    "outputs": [
@@ -267,10 +266,10 @@
    "id": "20e6d318",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2024-01-15T17:12:17.900779Z",
-     "iopub.status.busy": "2024-01-15T17:12:17.900469Z",
-     "iopub.status.idle": "2024-01-15T17:12:18.185852Z",
-     "shell.execute_reply": "2024-01-15T17:12:18.185332Z"
+     "iopub.execute_input": "2024-01-17T17:18:53.728882Z",
+     "iopub.status.busy": "2024-01-17T17:18:53.728519Z",
+     "iopub.status.idle": "2024-01-17T17:18:53.981402Z",
+     "shell.execute_reply": "2024-01-17T17:18:53.980902Z"
     }
    },
    "outputs": [
@@ -336,10 +335,10 @@
    "id": "7ce511f7",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2024-01-15T17:12:18.188039Z",
-     "iopub.status.busy": "2024-01-15T17:12:18.187721Z",
-     "iopub.status.idle": "2024-01-15T17:12:18.559942Z",
-     "shell.execute_reply": "2024-01-15T17:12:18.559374Z"
+     "iopub.execute_input": "2024-01-17T17:18:53.983566Z",
+     "iopub.status.busy": "2024-01-17T17:18:53.983259Z",
+     "iopub.status.idle": "2024-01-17T17:18:54.348451Z",
+     "shell.execute_reply": "2024-01-17T17:18:54.347957Z"
     }
    },
    "outputs": [
@@ -418,10 +417,10 @@
    "id": "d659de74",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2024-01-15T17:12:18.562332Z",
-     "iopub.status.busy": "2024-01-15T17:12:18.562017Z",
-     "iopub.status.idle": "2024-01-15T17:12:18.577828Z",
-     "shell.execute_reply": "2024-01-15T17:12:18.577357Z"
+     "iopub.execute_input": "2024-01-17T17:18:54.350480Z",
+     "iopub.status.busy": "2024-01-17T17:18:54.350183Z",
+     "iopub.status.idle": "2024-01-17T17:18:54.365527Z",
+     "shell.execute_reply": "2024-01-17T17:18:54.365084Z"
     }
    },
    "outputs": [
@@ -670,10 +669,10 @@
    "id": "50dba987",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2024-01-15T17:12:18.579815Z",
-     "iopub.status.busy": "2024-01-15T17:12:18.579411Z",
-     "iopub.status.idle": "2024-01-15T17:12:18.732293Z",
-     "shell.execute_reply": "2024-01-15T17:12:18.731794Z"
+     "iopub.execute_input": "2024-01-17T17:18:54.367495Z",
+     "iopub.status.busy": "2024-01-17T17:18:54.367192Z",
+     "iopub.status.idle": "2024-01-17T17:18:54.496208Z",
+     "shell.execute_reply": "2024-01-17T17:18:54.495604Z"
     }
    },
    "outputs": [
@@ -718,10 +717,10 @@
    "id": "39a289bb",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2024-01-15T17:12:18.734284Z",
-     "iopub.status.busy": "2024-01-15T17:12:18.734118Z",
-     "iopub.status.idle": "2024-01-15T17:12:18.783705Z",
-     "shell.execute_reply": "2024-01-15T17:12:18.783283Z"
+     "iopub.execute_input": "2024-01-17T17:18:54.498249Z",
+     "iopub.status.busy": "2024-01-17T17:18:54.497928Z",
+     "iopub.status.idle": "2024-01-17T17:18:54.548543Z",
+     "shell.execute_reply": "2024-01-17T17:18:54.547989Z"
     }
    },
    "outputs": [
@@ -730,7 +729,13 @@
      "output_type": "stream",
      "text": [
       "\n",
-      "reading ../tylerforks/active_area.shp...\n",
+      "reading ../tylerforks/active_area.shp...\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
       "--> building dataframe... (may take a while for large shapefiles)\n",
       "starting lines: 19\n",
       "remaining lines: 11\n"
@@ -757,10 +762,10 @@
    "id": "a60e8b64",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2024-01-15T17:12:18.785983Z",
-     "iopub.status.busy": "2024-01-15T17:12:18.785663Z",
-     "iopub.status.idle": "2024-01-15T17:12:18.906376Z",
-     "shell.execute_reply": "2024-01-15T17:12:18.905904Z"
+     "iopub.execute_input": "2024-01-17T17:18:54.550361Z",
+     "iopub.status.busy": "2024-01-17T17:18:54.550204Z",
+     "iopub.status.idle": "2024-01-17T17:18:54.643154Z",
+     "shell.execute_reply": "2024-01-17T17:18:54.642676Z"
     }
    },
    "outputs": [
