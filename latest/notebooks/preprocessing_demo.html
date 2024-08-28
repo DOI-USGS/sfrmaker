@@ -4,20 +4,20 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Preprocessing hydrography &mdash; SFRmaker 0.11.2.post3.dev0+gee5d4d4 documentation</title>
+  <title>Preprocessing hydrography &mdash; SFRmaker 0.11.2.post6.dev0+gb2233e6 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
       <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
-      <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
 
   
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../_static/documentation_options.js?v=1b2d1fe1"></script>
-        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/documentation_options.js?v=c5073680"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
         <script src="../_static/copybutton.js?v=f281be69"></script>
@@ -43,7 +43,7 @@
             SFRmaker
           </a>
               <div class="version">
-                0.11.2.post3.dev0+gee5d4d4
+                0.11.2.post6.dev0+gb2233e6
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -203,15 +203,7 @@ reading ../tylerforks/NHDPlus/NHDPlusAttributes/PlusFlow.dbf...
 reading ../tylerforks/NHDPlus/NHDPlusAttributes/elevslope.dbf...
 --&gt; building dataframe... (may take a while for large shapefiles)
 writing output/flowlines_gt3km.shp... Done
-writing output/PlusFlowlineVAA_gt3km.dbf...
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
- Done
+writing output/PlusFlowlineVAA_gt3km.dbf... Done
 writing output/PlusFlow_gt3km.dbf... Done
 writing output/elevslope_gt3km.dbf... Done
 </pre></div></div>
@@ -398,13 +390,6 @@ reading output/PlusFlow_gt3km.dbf...
 
 reading output/elevslope_gt3km.dbf...
 --&gt; building dataframe... (may take a while for large shapefiles)
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
 writing output/flowlines_gt3km_buffers.shp... Done
 
 Smoothing elevations...
@@ -676,29 +661,22 @@ simplification tolerance (<code class="docutils literal notranslate"><span class
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
-<div class="output_area docutils container">
+<div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-
-reading ../tylerforks/active_area.shp...
---&gt; building dataframe... (may take a while for large shapefiles)
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-starting lines: 19
-remaining lines: 11
+/home/runner/micromamba/envs/sfrmaker_ci/lib/python3.12/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
+  props[&#39;geometry&#39;] = line.get(&#39;geometry&#39;, None)
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
-<div class="output_area stderr docutils container">
+<div class="output_area docutils container">
 <div class="highlight"><pre>
-/home/runner/micromamba/envs/sfrmaker_ci/lib/python3.12/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
-  props[&#39;geometry&#39;] = line.get(&#39;geometry&#39;, None)
+
+reading ../tylerforks/active_area.shp...
+--&gt; building dataframe... (may take a while for large shapefiles)
+starting lines: 19
+remaining lines: 11
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -740,7 +718,7 @@ remaining lines: 11
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Mar 28, 2024.
+      <span class="lastupdated">Last updated on Aug 28, 2024.
       </span></p>
   </div>
 
