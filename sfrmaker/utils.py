@@ -113,7 +113,7 @@ def assign_layers(reach_data, botm_array,
             botm_array = new_botm_array
         reach_data['k'] = layers
     elif return_3d or new_botm_array is None:
-        return layers, new_botm_array[-1]
+        return layers, new_botm_array
     else:
         warnings.warn('Previously, assign_layers has returned a 2D (model bottom) array. '
                       'Now, if idomain is specified, a 3D array of model cell bottoms is returned. '
