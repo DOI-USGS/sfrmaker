@@ -67,6 +67,7 @@ simulation:
   verify_data: False
   write_headers: True
   lazy_io: False
+  use_pandas: True
 
 model:
   # MODFLOW-NWT or MODFLOW-2005 information
