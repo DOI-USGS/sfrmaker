@@ -48,13 +48,12 @@ def test_data_path():
 
 @pytest.fixture(scope="session", autouse=True)
 def outdir(project_root_path):
-    folder = os.path.join(project_root_path, 'sfrmaker/test/temp/')
+    folder = project_root_path / 'sfrmaker/test/temp/'
     reset = True
     if reset:
-        if os.path.isdir(folder):
-            shutil.rmtree(folder)
-        os.makedirs(folder)
-    return Path(folder)
+        shutil.rmtree(folder, ignore_errors=True)
+        folder.mkdir()
+    return folder
 
 
 @pytest.fixture(scope="session")
