@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 import time
 import warnings
+import numpy as np
 import pandas as pd
 import geopandas as gpd
 from gisutils import shp2df, get_shapefile_crs
@@ -260,44 +261,90 @@ def read_nhdplus(shapefiles, bbox_filter=None,
         return df
 
 
-def read_nhdplus_hr(NHDPlusHR_path, bbox_filter=None, drop_fcodes=None):
+def read_nhdplus_hr(NHDPlusHR_paths, bbox_filter=None, drop_fcodes=None):
+    """_summary_
+
+    Parameters
+    ----------
+    NHDPlusHR_paths : str, pathlike or sequence of paths
+        NHDPlus High Resolution (HR) geodatabases.
+    bbox_filter : tuple or polygon shapefile, optional
+        Only read NHDPlus HR content within this area, 
+        by default None
+    drop_fcodes : int or sequence of ints, optional
+        Exclude NHDPlus data with these FCodes, 
+        by default None
+
+    Returns
+    -------
+    fl : pandas DataFrame
+        NHDPlus HR Flowlines including the following attributes:
+        
+        ========== ===========================================================================
+        NHDPlusID  Unique identifier for each flowline and it's attributes
+        ArbolateSu Total length of upstream drainage, in km (from NHDPlusFlowlineVAA table)
+        StreamOrde Strahler stream order (from NHDPlusFlowlineVAA table)
+        MaxElevSmo Starting elevation for each flowline, in cm (from NHDPlusFlowlineVAA table)
+        MinElevSmo Ending elevation for each flowline, in cm (from NHDPlusFlowlineVAA table)
+        Divergence Distributary number (from NHDPlusFlowlineVAA table)
+        ToNHDPID   Next downstream NHDPlusID (from NHDPlusFlow table)
+        ========== ===========================================================================
+        
+    Notes
+    -----
+    * At divergences where there are multiple downstream flowlines, 
+        those with Divergence == 2 (minor distributaries) are removed,
+        so that there is only one downstream NHDPlusID.
+    """    
     ta = time.time()
-    print('reading {}...'.format(NHDPlusHR_path))
     #  read NHDFLowlines from NHDPlusHR_path (NHDPlus HR OpenFileGDB)
-    fl = gpd.read_file(NHDPlusHR_path, driver='OpenFileGDB', layer='NHDFlowline')
-    #  get crs information from flowlines
-    fl_crs = fl.crs
-    
-    if filter is not None:
-        print('filtering flowlines...')
-    
-    #  ensure that filter bbox is in same crs as flowlines
-    #  get filters from shapefiles, shapley Polygons or GeoJSON polygons
-    if bbox_filter is not None:
-        if bbox_filter is not isinstance(bbox_filter, tuple):
-            bbox_filter = get_bbox(bbox_filter, dest_crs=fl_crs)
+    if isinstance(NHDPlusHR_paths, str) or isinstance(NHDPlusHR_paths, Path):
+        NHDPlusHR_paths = [NHDPlusHR_paths]
+    fls = []
+    for f in NHDPlusHR_paths:
+        print(f'reading {f}...')
+        fl = gpd.read_file(f, driver='OpenFileGDB', layer='NHDFlowline')
+        #  get crs information from flowlines
+        fl_crs = fl.crs
         
-        #  filter to bbox using geopandas spatial indexing
-        fl = fl.cx[bbox_filter[0]:bbox_filter[2], bbox_filter[1]:bbox_filter[3]]
+        if filter is not None:
+            print('filtering flowlines...')
         
-    #  read NHDPlusFlowlineVAA file from NHDPlusHR_path (NHDPlus HR OpenFileGDB) and merge with flowlines
-    flvaa = gpd.read_file(NHDPlusHR_path, driver='OpenFileGDB', layer='NHDPlusFlowlineVAA')
-    fl = fl.merge(flvaa[['NHDPlusID', 'ArbolateSu','StreamOrde', 'MaxElevSmo', 'MinElevSmo', 'Divergence']],
-                  on='NHDPlusID', how='left'
-               )
-    
-    # read NHDPlusFlow file from NHDPlusHR_path (NHDPlus HR OpenFileGDB) 
-    pf = gpd.read_file(NHDPlusHR_path, driver='OpenFileGDB', layer='NHDPlusFlow')
-    
-    #  Remove features classified as minor divergence pathways (Divergence == 2)
-    #  from PlusFlow table
-    pf_routing_dict = get_hr_routing(pf, fl)
-    
-    #  Add routing information from PlusFlow table.
-    #  Set any remaining comids not in fromcomid_list to zero
-    #  (outlets or inlets from outside model)
-    fl['ToNHDPID'] = [pf_routing_dict[i] if i in pf_routing_dict else 0.0 for i in fl.NHDPlusID]
-    print("finished in {:.2f}s\n".format(time.time() - ta))
+        #  ensure that filter bbox is in same crs as flowlines
+        #  get filters from shapefiles, shapley Polygons or GeoJSON polygons
+        if bbox_filter is not None:
+            if not isinstance(bbox_filter, tuple):
+                bbox_filter = get_bbox(bbox_filter, dest_crs=fl_crs)
+            
+            #  filter to bbox using geopandas spatial indexing
+            fl = fl.cx[bbox_filter[0]:bbox_filter[2], bbox_filter[1]:bbox_filter[3]]
+            
+        #  read NHDPlusFlowlineVAA file from NHDPlusHR_path (NHDPlus HR OpenFileGDB) and merge with flowlines
+        flvaa = gpd.read_file(f, driver='OpenFileGDB', layer='NHDPlusFlowlineVAA')
+        fl = fl.merge(flvaa[['NHDPlusID', 'ArbolateSu','StreamOrde', 'MaxElevSmo', 'MinElevSmo', 'Divergence']],
+                    on='NHDPlusID', how='left'
+                )
+        
+        # read NHDPlusFlow file from NHDPlusHR_path (NHDPlus HR OpenFileGDB) 
+        pf = gpd.read_file(f, driver='OpenFileGDB', layer='NHDPlusFlow')
+        
+        #  Remove features classified as minor divergence pathways (Divergence == 2)
+        #  from PlusFlow table
+        pf_routing_dict = get_hr_routing(pf, fl)
+        
+        #  Add routing information from PlusFlow table.
+        #  Set any remaining comids not in fromcomid_list to zero
+        #  (outlets or inlets from outside model)
+        fl['ToNHDPID'] = [pf_routing_dict[i] if i in pf_routing_dict else 0.0 for i in fl.NHDPlusID]
+        print("finished in {:.2f}s\n".format(time.time() - ta))
+        fls.append(fl)
+    fl = pd.concat(fls, axis=0)
+    if drop_fcodes is not None:
+        if np.isscalar(drop_fcodes):
+            keep = fl['FCode'] != drop_fcodes
+        else:
+            keep = ~fl['FCode'].isin(drop_fcodes)
+        fl = fl.loc[keep].copy()
     return fl
 
 
