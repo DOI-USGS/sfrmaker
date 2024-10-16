@@ -352,7 +352,7 @@ def width_from_arbolate_sum(asum, a=0.1193, b=0.5032, minimum_width=1., input_un
     Original equation from Feinstein et al (2010), for arbolate sum of 1,000 km:
     >>> width = width_from_arbolate_sum(1000, 0.1193, 0.5032, input_units='kilometers', output_units='feet')
     >>> round(width, 2)
-    124.69
+    np.float64(124.69)
     """
     if not np.isscalar(asum):
         asum = np.atleast_1d(np.squeeze(asum))
