@@ -80,7 +80,7 @@ def culled_flowlines(test_data_path, outfolder, active_area):
 
 
 @pytest.fixture(scope='module')
-def preprocessed_flowlines(test_data_path, culled_flowlines, outfolder, project_root_path):
+def preprocessed_flowlines_module(test_data_path, culled_flowlines, outfolder, project_root_path):
 
     kwargs = culled_flowlines.copy()
     #kwargs['demfile'] = os.path.join(test_data_path, 'meras_100m_dem.tif')
@@ -112,6 +112,11 @@ def preprocessed_flowlines(test_data_path, culled_flowlines, outfolder, project_
     df2shp(preprocessed_flowlines, out_shapefile, crs=5070)
     return preprocessed_flowlines
 
+
+@pytest.fixture(scope='function')
+def preprocessed_flowlines(preprocessed_flowlines_module):
+    return preprocessed_flowlines_module.copy()
+    
 
 def test_cull_flowlines(clipped_flowlines, culled_flowlines, test_data_path,
                                     outfolder, active_area):
@@ -180,6 +185,7 @@ def test_preprocess_nhdplus_no_zonal_stats(culled_flowlines, preprocessed_flowli
                                            test_data_path, outfolder):
 
     kwargs = culled_flowlines.copy()
+    preprocessed_flowlines = preprocessed_flowlines.copy()
     # kwargs['demfile'] = os.path.join(test_data_path, 'meras_100m_dem.tif')
     kwargs['run_zonal_statistics'] = False
     kwargs['flowline_elevations_file'] = Path(outfolder, 'flowlines_gt20km_buffers.shp')
