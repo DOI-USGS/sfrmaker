@@ -117,7 +117,7 @@ def test_add_observations_from_line_ids(shellmound_sfrdata, flux_observation_dat
     # get the last reach in each segment
     rd = shellmound_sfrdata.reach_data.sort_values(by=['iseg', 'ireach'], axis=0).groupby('iseg').last()
     rno = dict(zip(rd.line_id, rd.rno))
-    assert set(obs.rno) == set([rno[lid] for lid in flux_observation_data.line_id])
+    assert set(obs.rno) == set([rno[str(lid)] for lid in flux_observation_data.line_id])
     rd = shellmound_sfrdata.reach_data
     iseg_ireach = dict(list(zip(rd.rno, zip(rd.iseg, rd.ireach))))
     for i, r in obs.iterrows():

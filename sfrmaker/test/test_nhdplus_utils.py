@@ -1,6 +1,7 @@
 """Unit tests for test_nhdplus_utils.py"""
 import pytest
 from sfrmaker.nhdplus_utils import (
+    load_nhdplus_v2,
     read_nhdplus,
     read_nhdplus_hr
 )
@@ -62,3 +63,22 @@ def test_read_nhdplus(nhdplus_files, bbox_filter, expected_nrows,
     # NHDPlusIDs should be treated as strings
     comid_col = [c for c in results.columns if c.lower() in {'comid', 'froncomid', 'tocomid'}]
     assert all([type(s) == str for s in results[comid_col].astype(int).astype(str)])
+
+
+@pytest.mark.parametrize('kwargs,bbox_filter', (
+    ({'NHDPlus_paths': 'tylerforks/NHDPlus'}, 'tylerforks/active_area.shp'),
+    ({'NHDFlowlines': 'tylerforks/NHDPlus/NHDSnapshot/Hydrography/NHDFlowline.shp',
+      'elevslope': 'tylerforks/NHDPlus/NHDPlusAttributes/elevslope.dbf',
+      'PlusFlowlineVAA': 'tylerforks/NHDPlus/NHDPlusAttributes/PlusFlowlineVAA.dbf',
+      'PlusFlow': 'tylerforks/NHDPlus/NHDPlusAttributes/PlusFlow.dbf'
+      }, 'tylerforks/active_area.shp')
+))
+def test_load_nhdplus_v2(kwargs, bbox_filter, datapath):
+    kwargs = {k: datapath / v for k, v in kwargs.items()}
+    if isinstance(bbox_filter, str):
+        bbox_filter = datapath / bbox_filter
+    results = load_nhdplus_v2(**kwargs, bbox_filter=bbox_filter)
+    # all comids and tocomids should be strings
+    assert all([type(s) == str for s in results['COMID'].astype(int).astype(str)])
+    assert all([type(s) == str for comids in results['COMID'].astype(int).astype(str) 
+         for s in comids ])

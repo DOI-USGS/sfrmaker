@@ -423,6 +423,6 @@ def test_preprocess_nhdplus_hr_waterbodies(project_root_path, outdir):
                                       dest_crs=26905, outfile=outfile)
     df = gpd.read_file(outfile)
     df.crs == 26905
-    assert 'Beaver Lake' in df['GNIS_Name']
+    assert 'Beaver Lake' in df['GNIS_Name'].values
     # the next line shouldn't be there either
     assert 75004400012864 not in df['NHDPlusID'].values

@@ -39,14 +39,14 @@ def test_get_inflow_locations_from_parent_model(outdir, shellmound_grid, shellmo
                                                 )
     shellmound_sfrdata.export_cells('{}/shellmound_sfr_cells.shp'.format(outdir))
     shellmound_sfrdata.export_lines('{}/shellmound_sfr_lines.shp'.format(outdir))
-    expected_line_ids = {1000005,  # yazoo
-                         18046670,  # Tallahatchie River
-                         938030409,  # unnamed stream along southern boundary
-                         17955337,  # unnamed stream in NW corner
-                         17955371,  # downstream of "Wild Bill Bayou"
-                         17955445,  # unnamed stream just east of 17955281
-                         17958187,  # big sunflower river
-                         17956547,  # unnamed trib to BSR on west side
+    expected_line_ids = {'1000005',  # yazoo
+                         '18046670',  # Tallahatchie River
+                         '938030409',  # unnamed stream along southern boundary
+                         '17955337',  # unnamed stream in NW corner
+                         '17955371',  # downstream of "Wild Bill Bayou"
+                         '17955445',  # unnamed stream just east of 17955281
+                         '17958187',  # big sunflower river
+                         '17956547',  # unnamed trib to BSR on west side
                          }
     symmetric_diff = expected_line_ids ^ set(df.line_id)
     assert len(symmetric_diff) == 0
@@ -95,7 +95,7 @@ def test_add_to_perioddata(shellmound_sfrdata):
     # two inflows applied upstream of model on different paths;
     # inflows should be applied to the first lines in the model 
     # along their respective paths
-    flowline_routing[6] = 1000005
+    flowline_routing['6'] = '1000005'
     flows = pd.DataFrame({'Q_avg': [100., 10., 200., 20.],
                           'per': [0, 1, 0, 1],
                           'line_id': [6, 6, 4, 4]})
@@ -109,7 +109,7 @@ def test_add_to_perioddata(shellmound_sfrdata):
     assert np.allclose(sfrd.period_data['inflow'].sort_values(), flows['Q_avg'].sort_values())
     assert np.allclose(sfrd.period_data.index.get_level_values(0), 
                        sorted(flows['per']))
-    lines = {flowline_routing[6], seq[-1]}
+    lines = {flowline_routing['6'], seq[-1]}
     rnos = rd.loc[rd.line_id.isin(lines), 'rno']
     assert not set(sfrd.period_data.index.levels[1]).difference(rnos)
     assert len(set(sfrd.period_data.index.levels[1])) == 2
@@ -132,7 +132,12 @@ def test_add_to_perioddata(shellmound_sfrdata):
                       data_column='Q_avg',
                       one_inflow_per_path=True)
     assert np.allclose(sfrd.period_data['inflow'].values, [300., 100., 30., 10.])
-    assert np.allclose(sfrd.period_data.index.levels[1], [354, 394])
+    # these reach numbers are liable to change
+    rnos = [
+        sfrd.reach_data.loc[sfrd.reach_data['line_id'] == seq[-1], 'rno'].min(),
+        sfrd.reach_data.loc[sfrd.reach_data['line_id'] == '1000005', 'rno'].min()
+    ]
+    assert np.allclose(sfrd.period_data.index.levels[1], rnos)
 
     # two inflows applied along same path in model;
     # one_inflow_per_path=False
@@ -140,9 +145,9 @@ def test_add_to_perioddata(shellmound_sfrdata):
 
     flows = pd.DataFrame({'Q_avg': [100., 10., 200., 20.],
                           'per': [0, 1, 0, 1],
-                          'line_id': [17955337, 17955337, 
-                                      flowline_routing[17955337], 
-                                      flowline_routing[17955337]
+                          'line_id': ['17955337', '17955337', 
+                                      flowline_routing['17955337'], 
+                                      flowline_routing['17955337']
                                       ]})
     sfrd._period_data = None
     add_to_perioddata(sfrd, flows,

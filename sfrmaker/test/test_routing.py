@@ -6,21 +6,23 @@ from ..routing import (get_next_id_in_subset, renumber_segments, find_path,
                        get_previous_ids_in_subset)
 
 
-def add_line_sequence(routing, nlines=4):
+def add_line_sequence(routing, nlines=4, string_ids=False):
     headwater_line_ids = set(routing.keys()).difference(routing.values())
     # add in some lines upstream of a headwater
     n = nlines
     new_lines = set(range(n + 2)).difference(routing)
     new_routing = {}
-    id = new_lines.pop()
-    sequence = [id]
+    lid = new_lines.pop()
+    sequence = [lid]
     for i in range(n):
         nextid = new_lines.pop()
-        new_routing[id] = nextid
-        id = nextid
+        new_routing[lid] = nextid
+        lid = nextid
         sequence.append(nextid)
     end = headwater_line_ids.pop()
-    new_routing[id] = end
+    new_routing[lid] = end
+    if string_ids:
+        new_routing = {str(k): str(v) for k, v in new_routing.items()}
     sequence.append(end)
     routing.update(new_routing)
     return sequence
@@ -32,15 +34,16 @@ def test_get_next_id_in_subset(shellmound_sfrdata):
     sfr_routing = shellmound_sfrdata.segment_routing.copy()
 
     # routing for source hydrography
-    routing = {line_id.get(k, 0): line_id.get(v, 0)
+    routing = {str(line_id.get(k, 0)): line_id.get(v, '0')
                for k, v in sfr_routing.items()}
     nlines = 4
-    seq = add_line_sequence(routing, nlines=nlines)
+    seq = add_line_sequence(routing, nlines=nlines, string_ids=True)
 
-    result = get_next_id_in_subset(rd.line_id, routing, set(range(nlines + 2)))
-    assert set(result).difference(rd.line_id) == {0}
-    assert set(result) == {0, seq[-1]}
-    assert len(result) == len(range(nlines + 2))
+    ids = {str(lid) for lid in set(range(nlines + 1))}
+    result = get_next_id_in_subset(rd.line_id, routing, ids)
+    assert set(result).difference(rd.line_id) == {'0'}
+    assert set(result) == {'0', seq[-1]}
+    assert len(result) == len(range(nlines + 1))
 
 
 def test_get_previous_ids_in_subset():
