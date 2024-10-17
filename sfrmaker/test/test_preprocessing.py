@@ -393,7 +393,7 @@ def test_preprocess_nhdplus_hr_flowlines(project_root_path, outdir):
                    }
     
     # drop these IDs and all IDs above them
-    drop_ids = {10000700059483}
+    drop_ids = {'10000700059483'}
     
     preprocess_nhdplus_hr_flowlines(nhdplus_paths, active_area=model_outline,
                           keep_fcodes=keep_fcodes,
@@ -404,9 +404,9 @@ def test_preprocess_nhdplus_hr_flowlines(project_root_path, outdir):
     df = gpd.read_file(outfile)
     assert df.crs == 26918
     assert not set(df['FCode']).difference(keep_fcodes)
-    assert 10000700059483 not in df['NHDPlusID'].values
+    assert '10000700059483' not in df['NHDPlusID'].values
     # the next line up shouldn't be there either
-    assert 10000700020952 not in df['NHDPlusID'].values
+    assert '10000700020952' not in df['NHDPlusID'].values
 
 
 def test_preprocess_nhdplus_hr_waterbodies(project_root_path, outdir):
