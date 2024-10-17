@@ -123,6 +123,7 @@ def add_observations(sfrdata, data, flowline_routing=None,
 
         # get reach number from site locations in source hydrography (line_ids)
         elif line_id_column in data.columns:
+            data[line_id_column] = data[line_id_column].astype(int).astype(str)
             # map NHDPlus COMIDs to reach numbers
             if flowline_routing is None:
                 line_id = dict(zip(reach_data.iseg, reach_data.line_id))

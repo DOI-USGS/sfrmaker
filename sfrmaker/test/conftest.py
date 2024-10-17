@@ -261,9 +261,10 @@ def lines_from_shapefile(test_data_path):
 def shellmound_sfrdata(shellmound_model, lines_from_shapefile,
                        shellmound_grid):
     m = shellmound_model
+    lines = copy.deepcopy(lines_from_shapefile)
     # from the lines and StructuredGrid instances, make a sfrmaker.sfrdata instance
     # (lines are intersected with the model grid and converted to reaches, etc.)
-    sfrdata = lines_from_shapefile.to_sfr(grid=shellmound_grid,
+    sfrdata = lines.to_sfr(grid=shellmound_grid,
                                           model=m)
     return sfrdata
 

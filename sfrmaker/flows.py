@@ -5,6 +5,7 @@ from pathlib import Path
 import warnings
 import numpy as np
 import pandas as pd
+import geopandas as gpd
 from shapely.geometry import box
 import flopy
 from sfrmaker.routing import find_path, make_graph
@@ -68,7 +69,7 @@ def get_inflow_locations_from_parent_model(parent_reach_data, inset_reach_data,
 
     # parent and inset reach data
     if isinstance(parent_reach_data, str) or isinstance(parent_reach_data, Path):
-        prd = shp2df(parent_reach_data)
+        prd = gpd.read_file(parent_reach_data)
     elif isinstance(parent_reach_data, pd.DataFrame):
         prd = parent_reach_data.copy()
     else:
@@ -78,10 +79,11 @@ def get_inflow_locations_from_parent_model(parent_reach_data, inset_reach_data,
         prd['ireach'] = 1
     mustinclude_cols = {'line_id', 'rno', 'iseg', 'ireach', 'geometry'}
     assert len(mustinclude_cols.intersection(prd.columns)) == len(mustinclude_cols)
-
+    prd['line_id'] = prd['line_id'].astype(int).astype(str)
+    
     if isinstance(inset_reach_data, str) or isinstance(inset_reach_data, Path):
         if inset_reach_data.endswith('.shp'):
-            ird = shp2df(inset_reach_data)
+            ird = gpd.read_file(inset_reach_data)
         else:
             ird = pd.read_csv(inset_reach_data)
     elif isinstance(inset_reach_data, pd.DataFrame):
@@ -93,7 +95,8 @@ def get_inflow_locations_from_parent_model(parent_reach_data, inset_reach_data,
         ird['ireach'] = 1
     mustinclude_cols = {'line_id', 'rno', 'iseg', 'ireach'}
     assert len(mustinclude_cols.intersection(ird.columns)) == len(mustinclude_cols)
-
+    ird['line_id'] = ird['line_id'].astype(int).astype(str)
+    
     graph = make_graph(ird.rno.values, ird.outreach.values, one_to_many=False)
 
     # cull parent reach data to only lines that cross or are just upstream of inset boundary
@@ -267,6 +270,10 @@ def add_to_perioddata(sfrdata, data, flowline_routing=None,
 
     # cull data to valid periods
     data = data.loc[data[period_column] >= 0].copy()
+    
+    # convert line IDs to strings
+    if line_id_column in data.columns:
+        data[line_id_column] = data[line_id_column].astype(int).astype(str)
 
     # map NHDPlus COMIDs to reach numbers
     if flowline_routing is not None:
@@ -274,7 +281,8 @@ def add_to_perioddata(sfrdata, data, flowline_routing=None,
             "Data need an id column so {} locations can be mapped to reach numbers".format(variable)
         # replace ids that are not keys (those outside the network) with zeros
         # (0 is the exit condition for finding paths in get_next_id_in_subset)
-        flowline_routing = {k: v if v in flowline_routing.keys() else 0 
+        # also force all IDs to strings
+        flowline_routing = {str(int(k)): str(int(v)) if v in flowline_routing.keys() else '0' 
                             for k, v in flowline_routing.items()}
         rno_column = 'rno'
         r1 = sfrd.reach_data.loc[sfrd.reach_data.ireach == 1]

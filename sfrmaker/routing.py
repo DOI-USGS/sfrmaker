@@ -98,7 +98,7 @@ def get_upsegs(graph_r, seg):
     return all_upsegs
 
 
-def find_path(graph, start, end=0, limit=None):
+def find_path(graph, start, end='0', limit=None):
     """Get a path through the routing network,
     from a segment to an outlet.
 
@@ -122,11 +122,11 @@ def find_path(graph, start, end=0, limit=None):
     if limit is None:
         limit = len(graph)
     path = [start]
-    next = start
+    next_id = start
     for i in range(limit):
-        next = graph[next]
-        path.append(next)
-        if next == end:
+        next_id = graph[next_id]
+        path.append(next_id)
+        if str(next_id) == str(end):
             break
     return path
 
@@ -299,7 +299,7 @@ def get_next_id_in_subset(subset, routing, ids):
     ids : revised list of first values downstream of the values in ids (determined by routing)
         that are also in subset.
     """
-    subset = set(subset).union({0})
+    subset = set(subset).union({'0'})
     routing = routing.copy()
     if np.isscalar(ids):
         ids = [ids]

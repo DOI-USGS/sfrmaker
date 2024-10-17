@@ -110,7 +110,7 @@ class SFRData(DataPackage):
               'thts2', 'thti2', 'eps2', 'uhc2']
 
     dtypes = {'rno': int, 'node': int, 'k': int, 'i': int, 'j': int,
-              'iseg': int, 'ireach': int, 'outreach': int, 'line_id': 'int64',
+              'iseg': int, 'ireach': int, 'outreach': int, 'line_id': 'object',
               'per': int, 'nseg': int, 'icalc': int, 'outseg': int,
               'iupseg': int, 'iprior': int, 'nstrpts': int,
               'name': object, 'geometry': object}
@@ -1326,6 +1326,8 @@ class SFRData(DataPackage):
             # resample inflows to model stress periods
             inflows_input['id_column'] = inflows_input['line_id_column']
             inflows_by_stress_period = pd.read_csv(inflows_input['filename'])
+            inflows_by_stress_period[inflows_input['id_column']] =\
+                inflows_by_stress_period[inflows_input['id_column']].astype(int).astype(str)
 
             # check if all inflow sites are included in sfr network
             missing_sites = set(inflows_by_stress_period[inflows_input['id_column']]). \
@@ -1392,7 +1394,7 @@ class SFRData(DataPackage):
         rno : sequence of ints
             Convert the listed reach numbers (nro), and all downstream reaches,
             to the RIV package. If None, all reaches are converted (default).
-        line_ids : sequence of ints
+        line_ids : sequence of ints or strings
             Convert the segments corresponding to the line_ids 
             (unique identifiers for LineString features in the source hydrography), 
             and all downstream segments to the RIV package. If None, all reaches 
@@ -1420,6 +1422,7 @@ class SFRData(DataPackage):
         if line_ids is not None:
             if np.isscalar(line_ids):
                 line_ids = [line_ids]
+            line_ids = [str(lid) for lid in line_ids]
             loc = loc & self.reach_data.line_id.isin(line_ids)
         if rno is not None:
             if np.isscalar(rno):
