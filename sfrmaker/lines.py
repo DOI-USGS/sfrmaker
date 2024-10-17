@@ -1191,7 +1191,6 @@ class Lines:
         # add any outlets to the stream network
         # for now handle int or str ids
         if add_outlets is not None:
-            # get the
             if isinstance(add_outlets, str) or isinstance(add_outlets, int):
                 add_outlets = [add_outlets]
             for outlet_id in add_outlets:
@@ -1201,7 +1200,7 @@ class Lines:
                 else:
                     outlet_id = int(outlet_id)
                     outlet_toid = 0
-                valid_outlet_ids = get_previous_ids_in_subset(rd.line_id, self.routing, outlet_id)
+                valid_outlet_ids = get_previous_ids_in_subset(rd.line_id, self._original_routing, outlet_id)
                 loc = rd.line_id.isin(valid_outlet_ids)
                 rd.loc[loc, 'toid'] = outlet_toid
                 for valid_outlet_id in valid_outlet_ids:
