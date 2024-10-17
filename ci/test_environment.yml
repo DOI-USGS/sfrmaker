@@ -2,14 +2,14 @@ name: sfrmaker_ci
 channels:
   - conda-forge
 dependencies:
-  - python
+  - python=3.12
   - ipython
   - jupyter
   - notebook
   - ipykernel
   - matplotlib
   - pyyaml
-  - numpy<2
+  - numpy
   - scipy
   - pandas
   - xarray
