@@ -173,10 +173,10 @@ def make_graph(fromcomids, tocomids, one_to_many=True):
     #    return graph121
     # return graph
     from collections import defaultdict
-    fromcomids = np.array([int(i) for i in fromcomids])
+    fromcomids = np.array(list(fromcomids))
     scalar_tocomids = np.all([np.isscalar(v) for v in tocomids])
     if scalar_tocomids:
-        tocomid_sets = [{int(v)} for v in tocomids]
+        tocomid_sets = [{v} for v in tocomids]
     else:
         tocomid_sets = [set(a.astype('int64').tolist()) for a in map(np.array, tocomids)]
     tuples = zip(fromcomids, tocomid_sets)

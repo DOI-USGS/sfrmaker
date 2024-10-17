@@ -1803,7 +1803,7 @@ def swb_runoff_to_csv(swb_runoff_netcdf_output, nhdplus_catchments_file,
 
 def preprocess_nhdplus_hr_flowlines(nhdplus_path, active_area=None,
                           keep_fcodes=None,
-                          drop_ids_upstream=None,
+                          drop_ids_upstream=None, drop_ids=None,
                           drop_isolated=False,
                           dest_crs=None, 
                           outfile='preprocessed_flowlines.shp'):
@@ -1831,6 +1831,8 @@ def preprocess_nhdplus_hr_flowlines(nhdplus_path, active_area=None,
     drop_ids_upstream : sequence, optional
         Option to drop specified flowlines and
         all flowlines upstream of them, by default None
+    drop_ids: sequence, optional
+        Option to drop specified flowlines.
     drop_isolated : bool
         Option to drop flowlines that have outlets lines
         that are wholly inside the active area.
@@ -1847,32 +1849,25 @@ def preprocess_nhdplus_hr_flowlines(nhdplus_path, active_area=None,
         
     """
     # read in the flowlines, filtering them to a designated bounding box
-    if isinstance(nhdplus_path, str) or isinstance(nhdplus_path, Path):
-        nhdplus_path = [nhdplus_path]
-    dfs = []
-    for f in nhdplus_path:
-        df = read_nhdplus_hr(f, bbox_filter=active_area)
-        dfs.append(df)
-    df = pd.concat(dfs)
-    
-    # cast nhdplus IDs to ints
-    df['NHDPlusID'] = df['NHDPlusID'].astype(int)
-    df['ToNHDPID'] = df['ToNHDPID'].astype(int)
+    df = read_nhdplus_hr(nhdplus_path, bbox_filter=active_area)
     
     # drop undesired line types (storm sewers and aquaducts, etc.)
     if keep_fcodes is not None:
         df = df.loc[df['FCode'].isin(keep_fcodes)].copy()
     
     # drop drop_ids_upstream and all IDs above them
+    routing = make_graph(df['NHDPlusID'], df['ToNHDPID'], one_to_many=False)
+    routing_r = make_reverse_graph(routing)
     if drop_ids_upstream is not None:
-        routing = make_graph(df['NHDPlusID'], df['ToNHDPID'], one_to_many=False)
-        routing_r = make_reverse_graph(routing)
         all_drop_ids = drop_ids_upstream.copy()
         for nhdplusid in drop_ids_upstream:
             upstream_ids = get_upsegs(routing_r, nhdplusid)
             all_drop_ids.update(upstream_ids)
-        df = df.loc[~df['NHDPlusID'].isin(all_drop_ids)]
-    
+        df = df.loc[~df['NHDPlusID'].isin(all_drop_ids)].copy()
+    # drop just specified IDs    
+    if drop_ids is not None:
+        df = df.loc[~df['NHDPlusID'].isin(drop_ids)].copy()
+        
     # update the routing dicts
     df.loc[~df['ToNHDPID'].isin(df['NHDPlusID']), 'ToNHDPID'] = 0
     routing = make_graph(df['NHDPlusID'], df['ToNHDPID'], one_to_many=False)
@@ -1881,6 +1876,7 @@ def preprocess_nhdplus_hr_flowlines(nhdplus_path, active_area=None,
     
     # option to cull isolated groups of flowlines
     if drop_isolated:
+        drop_isolated_ids = set()
         if isinstance(active_area, tuple):
             extent_poly_nhd_crs = box(*active_area)
         elif active_area is not None:
@@ -1903,7 +1899,7 @@ def preprocess_nhdplus_hr_flowlines(nhdplus_path, active_area=None,
                     upstream_ids.update(get_upsegs(
                         routing_r, 
                         nhdplusid))
-                all_drop_ids.update(upstream_ids)
+                drop_isolated_ids.update(upstream_ids)
         df = df.loc[~df['NHDPlusID'].isin(all_drop_ids)]
     
     # repoject to dest_crs
