@@ -141,13 +141,14 @@ class Lines:
                        'foot': 'feet',
                        'meters': 'meters',
                        'metre': 'meters'}
-        if self.crs.is_geographic:
-            raise ValueError('Flowline geometries need to be in a '
-                             'projected coordinate system; supply a model grid '
-                             'with a projected CRS to the Lines.to_sfr() method or '
-                             'run Lines.to_crs() to reproject the flowlines.'
-                             )
-        self._geometry_length_units = valid_units.get(self.crs.axis_info[0].unit_name)
+        if self.crs is not None:
+            if self.crs.is_geographic:
+                raise ValueError('Flowline geometries need to be in a '
+                                'projected coordinate system; supply a model grid '
+                                'with a projected CRS to the Lines.to_sfr() method or '
+                                'run Lines.to_crs() to reproject the flowlines.'
+                                )
+            self._geometry_length_units = valid_units.get(self.crs.axis_info[0].unit_name)
         if self._geometry_length_units is None:
             print("Warning: No length units specified in CRS for input LineStrings "
                   "or length units not recognized"
@@ -195,10 +196,10 @@ class Lines:
                     routing = pick_toids(routing, self.elevup)
                 # set toids not in routing dataset to 0
                 # (outlet condition)
-                routing = {k: v if v in routing.keys() else 0 
+                routing = {k: v if v in routing.keys() else '0' 
                             for k, v in routing.items()}
             else:
-                routing = {self.df.id.values[0]: 0}
+                routing = {self.df.id.values[0]: '0'}
             self._routing = routing
             self._last_routing_dict_update = time.time()
         return self._routing
@@ -569,7 +570,7 @@ class Lines:
         df = gpd.read_file(shapefile, bbox=bbox_filter)
         assert 'geometry' in df.columns, "No feature geometries found in {}.".format(shapefile)
 
-        return cls.from_dataframe(df,
+        return cls.from_dataframe(df,   
                                   id_column=id_column,
                                   routing_column=routing_column,
                                   arbolate_sum_column2=arbolate_sum_column2,
@@ -697,6 +698,14 @@ class Lines:
         to_drop = set(rename_cols.values()).intersection(df.columns)
         df.drop(to_drop, axis=1, inplace=True)
         df.rename(columns=rename_cols, inplace=True)
+        
+        # convert IDs to strings
+        df['id'] = df['id'].astype(int).astype(str)
+        # if reading from NHDPlus, to-ids may already be in lists
+        if np.isscalar(df['toid'].values[0]):
+            df['toid'] = df['toid'].astype(int).astype(str)
+        else:
+            df['toid'] = [[str(int(toid)) for toid in toids] for toids in df['toid']]
 
         column_order = ['id', 'toid',
                         'asum1', 'asum2',
@@ -1078,13 +1087,14 @@ class Lines:
         groups = lengths.groupby('line_id')  # fragments grouped by parent line
 
         reach_cumsums = []
-        ordered_ids = rd.line_id.loc[rd.line_id.diff() != 0].values
-        for id in ordered_ids:
-            grp = groups.get_group(id).sort_values(by='ireach')
+        #ordered_ids = rd.line_id.loc[rd.line_id.diff() != 0].values
+        ordered_ids = lengths['line_id'].unique()
+        for line_id in ordered_ids:
+            grp = groups.get_group(line_id).sort_values(by='ireach')
             dist = np.cumsum(grp.rchlen.values) - 0.5 * grp.rchlen.values
             reach_cumsums.append(dist)
         reach_cumsums = np.concatenate(reach_cumsums)
-        segment_asums = [asum1s[id] for id in lengths.line_id]
+        segment_asums = [asum1s[line_id] for line_id in lengths.line_id]
         reach_asums = segment_asums + reach_cumsums *\
             convert_length_units(self.geometry_length_units, self.asum_units)
         # maintain positive asums; lengths in NHD often aren't exactly equal to feature lengths
