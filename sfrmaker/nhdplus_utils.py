@@ -167,7 +167,7 @@ def load_nhdplus_v2(NHDPlus_paths=None,
     # read flowlines and attribute tables into dataframes
     fl = read_nhdplus(NHDFlowlines, bbox_filter=bbox_filter)
     pfvaa = read_nhdplus(PlusFlowlineVAA)
-    pf = shp2df(PlusFlow)
+    pf = read_nhdplus(PlusFlow)
     elevs = read_nhdplus(elevslope)
 
     # join flowline and attribute dataframes
@@ -195,7 +195,7 @@ def get_tocomids(pf, fromcomid_list):
     # subset PlusFlow entries for comids that are not in fromcomid_list
     # comids may be missing because they are outside of the model
     # or if the fromcomid_list dataset was edited (resulting in breaks in the routing)
-    missing_tocomids = ~pf.TOCOMID.isin(comids) & (pf.TOCOMID != 0)
+    missing_tocomids = ~pf.TOCOMID.isin(comids) & (pf.TOCOMID != '0')
     missing = pf.loc[missing_tocomids, ['FROMCOMID', 'TOCOMID']].copy()
     # recursively crawl the PlusFlow table
     # to try to find a downstream comid that is in fromcomid_list
@@ -205,7 +205,7 @@ def get_tocomids(pf, fromcomid_list):
 
     # set any remaining comids not in fromcomid_list to zero
     # (outlets or inlets from outside model)
-    pf.loc[~pf.FROMCOMID.isin(comids), 'FROMCOMID'] = 0
+    pf.loc[~pf.FROMCOMID.isin(comids), 'FROMCOMID'] = '0'
     tocomid = pf.TOCOMID.values
     fromcomid = pf.FROMCOMID.values
     tocomids = [tocomid[fromcomid == c].tolist() for c in comids]
@@ -228,7 +228,7 @@ def find_next_comid(comid, pftable, comids, max_levels=10):
             # (often these will be in different levelpaths,
             # so there is no way to determine a preferred routing path)
             return list(set(nextocomid).intersection(comids))[0]
-    return 0
+    return '0'
 
 
 def read_nhdplus(shapefiles, bbox_filter=None,
