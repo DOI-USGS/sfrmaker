@@ -1,6 +1,7 @@
 """Unit tests for test_nhdplus_utils.py"""
 import pytest
 from sfrmaker.nhdplus_utils import (
+    read_nhdplus,
     read_nhdplus_hr
 )
 
@@ -30,3 +31,34 @@ def test_read_nhdplus_hr(nhdplus_files, bbox_filter, expected_nrows, drop_fcodes
                      'MinElevSmo', 'Divergence', 'ToNHDPID']
     assert not set(expected_cols).difference(results.columns)
     assert len(results) == expected_nrows
+    # NHDPlusIDs should be treated as strings
+    assert all([type(s) == str for s in results['NHDPlusID'].astype(int).astype(str)])
+    assert all([type(s) == str for s in results['ToNHDPID'].astype(int).astype(str)])
+
+
+@pytest.mark.parametrize('nhdplus_files,bbox_filter,expected_nrows', (
+    ('tylerforks/NHDPlus/NHDSnapshot/Hydrography/NHDFlowline.shp', 
+     (-90.59552642527598, 46.37324928457199, -90.45520721646749, 46.43603727904705),
+     27),
+    ('tylerforks/NHDPlus/NHDPlusAttributes/elevslope.dbf', None, 101),
+    ('tylerforks/NHDPlus/NHDPlusAttributes/PlusFlow.dbf', None, 101),
+    ('tylerforks/NHDPlus/NHDPlusAttributes/PlusFlowlineVAA.dbf', None, 101),
+    (['tylerforks/NHDPlus/NHDSnapshot/Hydrography/NHDFlowline.shp', 
+      'tylerforks/NHDPlus/NHDSnapshot/Hydrography/NHDFlowline.shp'],
+     'tylerforks/active_area.shp', 27*2
+     )
+)
+)
+def test_read_nhdplus(nhdplus_files, bbox_filter, expected_nrows,
+                      datapath):
+    if not isinstance(nhdplus_files, str):
+        nhdplus_paths = [datapath / f for f in nhdplus_files]
+    else:
+        nhdplus_paths = datapath / nhdplus_files
+    if isinstance(bbox_filter, str):
+        bbox_filter = datapath / bbox_filter
+    results = read_nhdplus(nhdplus_paths, bbox_filter=bbox_filter)
+    assert len(results) == expected_nrows
+    # NHDPlusIDs should be treated as strings
+    comid_col = [c for c in results.columns if c.lower() in {'comid', 'froncomid', 'tocomid'}]
+    assert all([type(s) == str for s in results[comid_col].astype(int).astype(str)])

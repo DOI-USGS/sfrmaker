@@ -232,10 +232,39 @@ def find_next_comid(comid, pftable, comids, max_levels=10):
 
 
 def read_nhdplus(shapefiles, bbox_filter=None,
-                 index_col='comid'):
-    # read shapefile into dataframe and find the index column
+                 index_col='comid', 
+                 cast_columns_to_strings=['comid', 'fromcomid', 'tocomid']):
+    """Read one or more NHDPlus v2 shapefiles or DBF tables into a DataFrame.
+    Multiple files must be of the same type (Flowlines, PlusFlowVAA, etc) representing
+    multiple basins.
+    
+    Parameters
+    ----------
+    NHDPlusHR_paths : str, pathlike or sequence of paths
+        NHDPlus version 2 shapefiles or DBF files.
+    bbox_filter : tuple or polygon shapefile, optional
+        Only read NHDPlus flowlines within this area (does not apply to DBF tables, 
+        since these don't include spatial information)
+        by default None
+    cast_columns_to_strings : sequence
+        Cast these column names (case-insensitive) to strings.
+        by default, ['comid', 'fromcomid', 'tocomid']
+        
+    Returns
+    -------
+    df : pandas DataFrame
+        Shapefile or DBF file contents
+    """
+    
     if isinstance(shapefiles, str) or isinstance(shapefiles, Path):
         shapefiles = [shapefiles]
+    #  ensure that filter bbox is in same crs as flowlines
+    #  get filters from shapefiles, shapley Polygons or GeoJSON polygons
+    fl_crs = get_shapefile_crs(shapefiles[0])
+    if bbox_filter is not None:
+        if not isinstance(bbox_filter, tuple):
+            bbox_filter = get_bbox(bbox_filter, dest_crs=fl_crs)
+            
     dfs = []
     for i, f in enumerate(shapefiles):
         df = gpd.read_file(f, bbox=bbox_filter)
@@ -247,16 +276,20 @@ def read_nhdplus(shapefiles, bbox_filter=None,
                 raise ValueError(f'{f} has a different CRS than {shapefiles[i-1]}')
         dfs.append(df)
     df = pd.concat(dfs)
-        
-    #df = shp2df(shpfiles, filter=bbox_filter)
+    
+    for col in cast_columns_to_strings:
+        column_name = [c for c in df.columns if c.lower() == col]
+        df[column_name] = df[column_name].astype(int).astype(str)
+            
     if len(df) > 0:
-        index_col = [c for c in df.columns if c.lower() == index_col]
+        index_col = [c for c in df.columns if c.lower() == index_col or c.lower() == 'fromcomid']
         if len(index_col) == 0:
-            if isinstance(shpfiles, list):
-                shpfiles = '\n'.join(shpfiles)
+            if isinstance(shapefiles, list):
+                shapefiles = '\n'.join(shapefiles)
             raise IndexError('No {} column found in: \n{}'.format(index_col,
-                                                                  shpfiles))
+                                                                  shapefiles))
         else:
+            # cast COMIDs to strings
             df.index = df[index_col[0]]
         return df
 
@@ -303,7 +336,10 @@ def read_nhdplus_hr(NHDPlusHR_paths, bbox_filter=None, drop_fcodes=None):
     fls = []
     for f in NHDPlusHR_paths:
         print(f'reading {f}...')
-        fl = gpd.read_file(f, driver='OpenFileGDB', layer='NHDFlowline')
+        fl = gpd.read_file(f, driver='OpenFileGDB', layer='NHDFlowline', dtype={'NHDPlusID': str})
+        # cast NHDPlusIDs to strings (pandas dtype arg doesn't guarentee this)
+        fl['NHDPlusID'] = fl['NHDPlusID'].astype(int).astype(str)
+        
         #  get crs information from flowlines
         fl_crs = fl.crs
         
@@ -321,12 +357,15 @@ def read_nhdplus_hr(NHDPlusHR_paths, bbox_filter=None, drop_fcodes=None):
             
         #  read NHDPlusFlowlineVAA file from NHDPlusHR_path (NHDPlus HR OpenFileGDB) and merge with flowlines
         flvaa = gpd.read_file(f, driver='OpenFileGDB', layer='NHDPlusFlowlineVAA')
+        flvaa['NHDPlusID'] = flvaa['NHDPlusID'].astype(int).astype(str)
         fl = fl.merge(flvaa[['NHDPlusID', 'ArbolateSu','StreamOrde', 'MaxElevSmo', 'MinElevSmo', 'Divergence']],
                     on='NHDPlusID', how='left'
                 )
         
         # read NHDPlusFlow file from NHDPlusHR_path (NHDPlus HR OpenFileGDB) 
         pf = gpd.read_file(f, driver='OpenFileGDB', layer='NHDPlusFlow')
+        pf['FromNHDPID'] = pf['FromNHDPID'].astype(int).astype(str)
+        pf['ToNHDPID'] = pf['ToNHDPID'].astype(int).astype(str)
         
         #  Remove features classified as minor divergence pathways (Divergence == 2)
         #  from PlusFlow table
@@ -335,7 +374,7 @@ def read_nhdplus_hr(NHDPlusHR_paths, bbox_filter=None, drop_fcodes=None):
         #  Add routing information from PlusFlow table.
         #  Set any remaining comids not in fromcomid_list to zero
         #  (outlets or inlets from outside model)
-        fl['ToNHDPID'] = [pf_routing_dict[i] if i in pf_routing_dict else 0.0 for i in fl.NHDPlusID]
+        fl['ToNHDPID'] = [pf_routing_dict[i] if i in pf_routing_dict else 0.0 for i in fl['NHDPlusID']]
         print("finished in {:.2f}s\n".format(time.time() - ta))
         fls.append(fl)
     fl = pd.concat(fls, axis=0)
