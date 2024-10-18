@@ -14,7 +14,7 @@ def name_path():
 
 
 @pytest.fixture(scope="module")
-def lines(test_data_path, name_path):
+def get_lines(test_data_path, name_path):
     name, path = name_path
     lns = sfrmaker.Lines.from_shapefile(
         test_data_path / f'{path}/flowlines.shp'.format(test_data_path, path),
@@ -31,15 +31,27 @@ def lines(test_data_path, name_path):
     return lns
 
 
+@pytest.fixture(scope='function')
+def lines(get_lines):
+    return copy.deepcopy(get_lines)
+
+
 @pytest.fixture(scope="module")
-def grid(test_data_path, name_path):
+def get_grid(test_data_path, name_path):
     name, path = name_path
     grd = sfrmaker.StructuredGrid.from_json('{0}/{1}/{1}/{1}_grid.json'.format(test_data_path, path))
     return grd
 
 
+@pytest.fixture(scope='function')
+def grid(get_grid):
+    return copy.deepcopy(get_grid)
+
+
 @pytest.fixture(scope="module")
-def sfr(lines, grid):
+def get_sfr(get_lines, get_grid):
+    lines = copy.deepcopy(get_lines)
+    grid = copy.deepcopy(get_grid)
     sfr = lines.to_sfr(grid=grid,
                        isfr=None,
                        cull_flowlines_to_active_area=True,
@@ -48,8 +60,14 @@ def sfr(lines, grid):
     return sfr
 
 
+@pytest.fixture(scope='function')
+def sfr(get_sfr):
+    return copy.deepcopy(get_sfr)
+
+
 @pytest.fixture(scope="module")
-def sfr_with_inflows(sfr):
+def sfr_with_inflows(get_sfr):
+    copy.deepcopy(get_sfr)
     # add some inflows
     tmp = sfr.segment_data.loc[sfr.segment_data.nseg.isin([17, 18])].sort_values(by='nseg').copy()
     dfs = []
@@ -101,10 +119,37 @@ def test_lines_to_sfr(lines, grid):
                        default_slope=0.011, minimum_slope=0.01,
                        maximum_slope=0.012,
                        )
+    # test slope computation
+    reach_data = sfr.reach_data.copy()
+    reach_data.index = reach_data['rno']
+    path = sfrmaker.routing.find_path(sfr._routing, 1)[:-1]
+    strtop = reach_data.loc[path, 'strtop']
+    rchlen = reach_data.loc[path, 'rchlen']
+    slopes = -np.diff(strtop)/rchlen[:-1]
+    
     assert np.all(sfr.reach_data.loc[sfr.reach_data.outreach == 0, \
                                      'slope'] == 0.011)
     assert sfr.reach_data.slope.min() == 0.01
     assert sfr.reach_data.slope.max() == 0.012
     # check that CRS was successfully passed to SFRData object
     assert lines.crs == sfr.crs == grid.crs
+    
+    
+def test_reach_data_slopes(lines, grid):
+    sfr = lines.to_sfr(grid=grid,
+                       isfr=None,
+                       cull_flowlines_to_active_area=True,
+                       one_reach_per_cell=True,
+                       minimum_slope=0.,
+                       #default_slope=0.011, minimum_slope=0.01,
+                       #maximum_slope=0.012,
+                       )
+    # test slope computation
+    reach_data = sfr.reach_data.copy()
+    reach_data.index = reach_data['rno']
+    path = sfrmaker.routing.find_path(sfr.rno_routing, 1)[:-1]
+    strtop = reach_data.loc[path, 'strtop']
+    rchlen = reach_data.loc[path, 'rchlen']
+    slopes = -np.diff(strtop)/rchlen[:-1]
+    assert np.allclose(slopes.values, reach_data.loc[path, 'slope'].values[:-1])
     

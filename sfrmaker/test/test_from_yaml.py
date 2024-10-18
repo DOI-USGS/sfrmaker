@@ -181,6 +181,19 @@ def test_tylerforks_from_config(config_file, dem):
     assert np.allclose(rd.strtop.values.min(), 1125, rtol=0.01)
     assert sfrdata.grid.crs.srs == 'EPSG:26715'
     
+    # check that slopes were updated after sampling streambed tops from the DEM
+    reach_data = sfrdata.reach_data.copy()
+    reach_data.index = reach_data['rno']
+    path = sfrmaker.routing.find_path(sfrdata.rno_routing, 1)[:-1]
+    strtop = reach_data.loc[path, 'strtop']
+    rchlen = reach_data.loc[path, 'rchlen']
+    slopes = -np.diff(strtop)/rchlen[:-1]
+    slopes[slopes > sfrdata._maximum_slope] = sfrdata._maximum_slope
+    slopes[slopes < sfrdata._minimum_slope] = sfrdata._minimum_slope
+    outlets = reach_data.loc[path, 'outreach'] == 0
+    slopes[outlets] = sfrdata._default_slope
+    assert np.allclose(slopes.values, reach_data.loc[path, 'slope'].values[:-1])
+    
     # check that inflows were written correctly
     if 'inflows' in cfg:
         m1 = sfrdata.modflow_sfr2.parent

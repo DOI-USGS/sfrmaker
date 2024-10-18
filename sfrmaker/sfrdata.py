@@ -12,7 +12,7 @@ from shapely.geometry import LineString
 from gisutils import df2shp, get_authority_crs
 from sfrmaker.routing import find_path, renumber_segments
 from sfrmaker.checks import valid_rnos, valid_nsegs, rno_nseg_routing_consistent
-from sfrmaker.elevations import smooth_elevations
+from sfrmaker.elevations import get_slopes, smooth_elevations
 from sfrmaker.flows import add_to_perioddata, add_to_segment_data
 from sfrmaker.gis import export_reach_data, project
 from sfrmaker.observations import write_gage_package, write_mf6_sfr_obsfile, add_observations
@@ -149,6 +149,9 @@ class SFRData(DataPackage):
         self._period_data = None
         self._observations = None
         self._observations_filename = None
+        self._minimum_slope = minimum_slope
+        self._default_slope = default_slope
+        self._maximum_slope = maximum_slope
 
         # convert any modflow6 kwargs to modflow5
         kwargs = {SFRData.mf5names[k] if k in SFRData.mf6names else k:
@@ -175,7 +178,7 @@ class SFRData(DataPackage):
         # not the ideal logic for MODFLOW 6 case where only
         # rno and connections are supplied
         self.set_outreaches()
-        self.get_slopes(default_slope=default_slope, minimum_slope=minimum_slope,
+        self.update_slopes(default_slope=default_slope, minimum_slope=minimum_slope,
                         maximum_slope=maximum_slope)
 
         # have to set the model last, because it also sets up a flopy sfr package instance
@@ -1018,11 +1021,13 @@ class SFRData(DataPackage):
         self.reach_data['strtop'] = [sampled_elevs[rno]
                                      for rno in self.reach_data['rno'].values]
         self.reach_data['strtop'] *= mult
+        # update the slopes as well
+        self.update_slopes()
 
-    def get_slopes(self, default_slope=0.001, minimum_slope=0.0001,
-                   maximum_slope=1.):
+    def update_slopes(self, default_slope=None, minimum_slope=None,
+                   maximum_slope=None):
         """Compute slopes by reach using values in strtop (streambed top) and rchlen (reach length)
-        columns of reach_data. The slope for a reach n is computed as strtop(n+1) - strtop(n) / rchlen(n).
+        columns of reach_data. The slope for a reach n is computed as strtop(n) - strtop(n+1) / rchlen(n).
         Slopes for outlet reaches are set equal to a default value (default_slope).
         Populates the slope column in reach_data.
 
@@ -1030,28 +1035,33 @@ class SFRData(DataPackage):
         ----------
         default_slope : float
             Slope value applied to outlet reaches (where water leaves the model).
-            Default value is 0.001
+            By default None, in which case '_default_slope' attribute is used.
         minimum_slope : float
             Assigned to reaches with computed slopes less than this value.
             This ensures that the Manning's equation won't produce unreasonable values of stage
             (in other words, that stage is consistent with assumption that
             streamflow is primarily drive by the streambed gradient).
-            Default value is 0.0001.
+            By default None, in which case '_minimum_slope' attribute is used.
         maximum_slope : float
             Assigned to reaches with computed slopes more than this value.
-            Default value is 1.
+            By default None, in which case '_maximum_slope' attribute is used.
+            
+        Notes
+        -----
+        If default_slope, minimum_slope or maximum_slope are not None, the
+        respective attribute (for example '_default_slope') will be set with the supplied value.
         """
+        if default_slope is not None:
+            self._default_slope = default_slope
+        if minimum_slope is not None:
+            self._minimum_slope = minimum_slope
+        if maximum_slope is not None:
+            self._maximum_slope = maximum_slope
         rd = self.reach_data
-        assert rd.outreach.sum() > 0, "requires reach routing, must be called after set_outreaches()"
-        elev = dict(zip(rd.rno, rd.strtop))
-        dist = dict(zip(rd.rno, rd.rchlen))
-        dnelev = {rid: elev[rd.outreach.values[i]] if rd.outreach.values[i] != 0
-        else -9999 for i, rid in enumerate(rd.rno)}
-        slopes = np.array(
-            [(elev[i] - dnelev[i]) / dist[i] if dnelev[i] != -9999 and dist[i] > 0
-             else default_slope for i in rd.rno])
-        slopes[slopes < minimum_slope] = minimum_slope
-        slopes[slopes > maximum_slope] = maximum_slope
+        slopes = get_slopes(rd['strtop'], rd['rchlen'], rd['rno'], rd['outreach'], 
+                            default_slope=self._default_slope, 
+                            minimum_slope=self._minimum_slope,
+                            maximum_slope=self._maximum_slope)
         self.reach_data['slope'] = slopes
 
     @classmethod
@@ -1293,6 +1303,7 @@ class SFRData(DataPackage):
             sfrdata.set_streambed_top_elevations_from_dem(**dem_kwargs)
         else:
             sfrdata.reach_data['strtop'] = sfrdata.interpolate_to_reaches('elevup', 'elevdn')
+            sfrdata.update_slopes()
 
         # assign layers to the sfr reaches
         if model is not None:
