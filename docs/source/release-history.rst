@@ -2,6 +2,11 @@
 Release History
 ===============
 
+Version 0.11.3 (2024-10-18)
+---------------------------
+* fix issue where SFR reach slopes were not being updated when streambed top elevations were resampled from a DEM
+* fix issue with utils.assign_layers where a 2D array of the model bottom elevations was being returned instead of a 3D array of all layer bottom elevations.
+
 Version 0.11.2 (2024-01-15)
 ---------------------------
 * fix issue with line_id dtypes, so that NHDPlus Hi-Res COMIDs (which require 64-bits as integers) work more robustly on Windows.
