@@ -122,6 +122,7 @@ jobs:
   publish:
     name: Publish package
     # runs only after release is published (manually promoted from draft)
+    # (allows editing of release notes, etc.)
     if: ${{ github.event_name == 'release' }}
     runs-on: ubuntu-latest  #ubuntu-22.04
     permissions:
