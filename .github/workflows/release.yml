@@ -1,18 +1,158 @@
 name: Publish release
-
 on:
   push:
-    # Sequence of patterns matched against refs/tags
-    tags:
-      - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+    branches:
+      - master
+      - v[0-9]+.[0-9]+.[0-9]+*
+  release:
+    types:
+      - published
 
 jobs:
+  prep:
+    name: Prepare release
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'push' && github.ref_name != 'master' }}
+    permissions:
+      contents: write
+    defaults:
+      run:
+        shell: bash
+    steps:
+
+      - name: Checkout release branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get latest release version number
+        id: get_version
+        uses: battila7/get-version-action@v2
+
+      - name: Setup Micromamba
+        uses: mamba-org/setup-micromamba@v1
+        with:
+          environment-file: ci/test_environment.yml
+          cache-environment: true
+          cache-downloads: true
+          create-args: >-
+            python=${{ matrix.python-version }}
+          init-shell: >-
+            bash
+
+      - name: Conda info
+        shell: bash -l {0}
+        run: micromamba info
+
+      - name: Install dependencies
+        shell: bash -l {0}
+        run: |
+          if [[ ! -d "$HOME/.local/bin" ]]; then
+              mkdir -p "$HOME/.local/bin";
+          fi
+          # copy modflow bins to local dir to add to PATH later
+          if [ "$RUNNER_OS" == "Windows" ]; then
+              d="win"
+          elif [ "$RUNNER_OS" == "macOS" ]; then
+              d="mac"
+          elif [ "$RUNNER_OS" == "Linux" ]; then
+              d="linux"
+          else
+              d="unexpectedos"
+              exit 1
+          fi
+          echo bin/$d/. >> $GITHUB_PATH
+          echo $GITHUB_PATH
+
+      - name: Test install from git
+        shell: bash -l {0}
+        run: |
+          pip install git+https://github.com/doi-usgs/sfrmaker@develop
+          cd ..
+          python -c "import sfrmaker"
+          cd sfrmaker
+
+      - name: Install SFRmaker and ipykernel
+        shell: bash -l {0}
+        run: |
+          pip install -e .
+          python -m ipykernel install --user --name sfrmaker_ci --display-name "sfrmaker_ci"
+
+      - name: Test with latest PyPI flopy
+        shell: bash -l {0}
+        if: ${{ matrix.python-version == 3.11}}
+        run: pip install flopy --force-reinstall
+
+      - name: Conda list
+        shell: bash -l {0}
+        run: |
+          micromamba list
+          pip list
+
+      - name: Run tests and upload coverage
+        shell: bash -l {0}
+        timeout-minutes: 60
+        run: |
+          coverage run -m pytest -v --durations=20 --timeout=120
+      - name: Upload coverage
+        shell: bash -l {0}
+        run: |
+          coverage report -m
+          codecov
+
+      - name: Push release branch
+        run: |
+          git config core.sharedRepository true
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git commit -m --allow-empty "ci(release): Version ${{ steps.get_version.outputs.version }}"
+          git push origin "${{ github.ref_name }}"
+          
+  pr:
+    name: Draft release PR
+    needs: prep
+    if: ${{ github.event_name == 'push' && !(contains(github.ref_name, 'rc')) }}
+    runs-on: ubuntu-latest  #ubuntu-22.04
+    permissions:
+      contents: write
+      pull-requests: write
+    defaults:
+      run:
+        shell: bash -l {0}
+    steps:
+
+      - name: Checkout release branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+
+      - name: Draft pull request
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          ref="${{ github.ref_name }}"
+          ver="${ref#"v"}"
+          title="Release $ver"
+          body='
+          # SFRmaker '$ver'
+          
+          The release can be approved by merging this pull request into `master`. This will trigger a final job to publish the release to PyPI.
+          '
+          gh pr create -B "master" -H "$ref" --title "$title" --draft --body "$body"
+
   release:
     name: Create Release
+    # runs only when changes are merged to master
+    if: ${{ github.event_name == 'push' && github.ref_name == 'master' }}
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
-      - name: Checkout source
-        uses: actions/checkout@v3
+      - name: Checkout master branch
+        uses: actions/checkout@v4
+        with:
+          ref: master
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -101,23 +241,50 @@ jobs:
         CLEAN: false
         TARGET_FOLDER: ${{ steps.get_version.outputs.version }}
 
-  deploy:
-    needs: release
-    runs-on: ubuntu-latest
+  publish:
+    name: Publish package
+    # runs only after release is published (manually promoted from draft)
+    if: ${{ github.event_name == 'release' }}
+    runs-on: ubuntu-latest  #ubuntu-22.04
+    permissions:
+      contents: write
+      pull-requests: write
+      id-token: write  # mandatory for trusted publishing
+    environment:  # requires a 'release' environment in repo settings
+      name: release
+      url: https://pypi.org/p/sfrmaker
     steps:
-    - uses: actions/checkout@v3
-    - name: Set up Python
-      uses: actions/setup-python@v1
-      with:
-        python-version: '3.x'
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install setuptools wheel twine
-    - name: Build and publish
-      env:
-        TWINE_USERNAME: __token__
-        TWINE_PASSWORD: ${{ secrets.ALL_PROJECTS }}
-      run: |
-        python setup.py sdist bdist_wheel
-        twine upload dist/*
+
+      - name: Checkout master branch
+        uses: actions/checkout@v4
+        with:
+          ref: master
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+          cache: 'pip'
+          cache-dependency-path: pyproject.toml
+
+      - name: Install Python dependencies
+        run: |
+          pip install --upgrade pip
+          pip install build twine
+          pip install .
+          pip install ".[lint, test, optional]"     
+
+      - name: Build package
+        run: python -m build
+
+      - name: Check package
+        run: twine check --strict dist/*
+
+      - name: Upload package
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
