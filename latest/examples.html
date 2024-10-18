@@ -1,26 +1,24 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="./">
 <head>
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Using SFRmaker with a configuration file &mdash; SFRmaker 0.11.2.post6.dev0+gb2233e6 documentation</title>
+  <title>Using SFRmaker with a configuration file &mdash; SFRmaker 0.11.2.post7.dev0+g31a0190 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=7ab3649f" />
       <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
       <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
 
   
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="_static/documentation_options.js?v=c5073680"></script>
-        <script src="_static/doctools.js?v=9a2dae69"></script>
-        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
-        <script src="_static/clipboard.min.js?v=a7894cd8"></script>
-        <script src="_static/copybutton.js?v=f281be69"></script>
-        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+      <script src="_static/documentation_options.js?v=553056c7"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="_static/copybutton.js?v=f281be69"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -39,9 +37,6 @@
           <a href="index.html" class="icon icon-home">
             SFRmaker
           </a>
-              <div class="version">
-                0.11.2.post6.dev0+gb2233e6
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -136,7 +131,8 @@
 <h2>MERAS 3: Creating an SFR package from a configuration file with custom hydrography<a class="headerlink" href="#meras-3-creating-an-sfr-package-from-a-configuration-file-with-custom-hydrography" title="Link to this heading">¶</a></h2>
 <p>This example illustrates the use of custom hydrography with the configuration file, as well the scalability of SFRmaker. An SFR package is generated on a regular 1 km grid (Clark and others, 2018) that spans the Mississippi Embayment, a former bay of the Gulf of Mexico that includes portions of Missouri, Tennessee, Arkansas, Mississippi and Louisiana. The goal is to update the stream network for the Mississippi Embayment Regional Aquifer System (MERAS 2) model (Haugh and others, 2020; Clark and others, 2013) to include a realistic representation of the thousands of mapped streams (Figure 1). NHDPlus hydrography were preprocessed to only include the lines intersecting the MERAS footprint that had a total upstream drainage (arbolate sum) of 20 kilometers or greater (figure 1). Attribute information from NHDPlus, including routing connections, elevations at the upstream and downstream ends of line arcs and channel widths estimated from arbolate sum values (e.g. ref: Feinstein and others (2010, p 266)) were joined to the culled flowlines, which were then saved to a shapefile.</p>
 <figure class="align-left" id="id1">
-<a class="reference internal image-reference" href="_images/meras_comparison.png"><img alt="alternate text" src="_images/meras_comparison.png" style="width: 739.1999999999999px; height: 413.7px;" /></a>
+<a class="reference internal image-reference" href="_images/meras_comparison.png"><img alt="alternate text" src="_images/meras_comparison.png" style="width: 739.1999999999999px; height: 413.7px;" />
+</a>
 <figcaption>
 <p><span class="caption-text">Figure 1: Location of the MERAS model domain with streams represented in the MERAS 2 model (A); streams mapped in NHDPlus version 2 (B).</span><a class="headerlink" href="#id1" title="Link to this image">¶</a></p>
 </figcaption>
@@ -203,7 +199,8 @@
 </div>
 <p>This will produce an sfr package for MODFLOW-6, csv table representations of the SFR input, and shapefiles for visualizing the SFR package. The resulting SFR package is shown in Figure 2.</p>
 <figure class="align-left" id="id2">
-<a class="reference internal image-reference" href="_images/meras_results.png"><img alt="alternate text" src="_images/meras_results.png" style="width: 714.0px; height: 481.0px;" /></a>
+<a class="reference internal image-reference" href="_images/meras_results.png"><img alt="alternate text" src="_images/meras_results.png" style="width: 714.0px; height: 481.0px;" />
+</a>
 <figcaption>
 <p><span class="caption-text">Figure 2: MERAS 3 SFR package, as shown by the shapefiles output from SFRmaker. Visualization of routing connections is illustrated in the map inset, where a connection crossing several cells indicates an error in the input hydrography routing attributes.</span><a class="headerlink" href="#id2" title="Link to this image">¶</a></p>
 </figcaption>
@@ -294,7 +291,7 @@
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Aug 28, 2024.
+      <span class="lastupdated">Last updated on Oct 18, 2024.
       </span></p>
   </div>
 

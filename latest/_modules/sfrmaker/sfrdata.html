@@ -1,25 +1,23 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>sfrmaker.sfrdata &mdash; SFRmaker 0.11.2.post6.dev0+gb2233e6 documentation</title>
+  <title>sfrmaker.sfrdata &mdash; SFRmaker 0.11.2.post7.dev0+g31a0190 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
-      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=7ab3649f" />
       <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../../_static/documentation_options.js?v=c5073680"></script>
-        <script src="../../_static/doctools.js?v=9a2dae69"></script>
-        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
-        <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
-        <script src="../../_static/copybutton.js?v=f281be69"></script>
-        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+      <script src="../../_static/documentation_options.js?v=553056c7"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -36,9 +34,6 @@
           <a href="../../index.html" class="icon icon-home">
             SFRmaker
           </a>
-              <div class="version">
-                0.11.2.post6.dev0+gb2233e6
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -115,7 +110,7 @@
 <span class="kn">from</span> <span class="nn">gisutils</span> <span class="kn">import</span> <span class="n">df2shp</span><span class="p">,</span> <span class="n">get_authority_crs</span>
 <span class="kn">from</span> <span class="nn">sfrmaker.routing</span> <span class="kn">import</span> <span class="n">find_path</span><span class="p">,</span> <span class="n">renumber_segments</span>
 <span class="kn">from</span> <span class="nn">sfrmaker.checks</span> <span class="kn">import</span> <span class="n">valid_rnos</span><span class="p">,</span> <span class="n">valid_nsegs</span><span class="p">,</span> <span class="n">rno_nseg_routing_consistent</span>
-<span class="kn">from</span> <span class="nn">sfrmaker.elevations</span> <span class="kn">import</span> <span class="n">smooth_elevations</span>
+<span class="kn">from</span> <span class="nn">sfrmaker.elevations</span> <span class="kn">import</span> <span class="n">get_slopes</span><span class="p">,</span> <span class="n">smooth_elevations</span>
 <span class="kn">from</span> <span class="nn">sfrmaker.flows</span> <span class="kn">import</span> <span class="n">add_to_perioddata</span><span class="p">,</span> <span class="n">add_to_segment_data</span>
 <span class="kn">from</span> <span class="nn">sfrmaker.gis</span> <span class="kn">import</span> <span class="n">export_reach_data</span><span class="p">,</span> <span class="n">project</span>
 <span class="kn">from</span> <span class="nn">sfrmaker.observations</span> <span class="kn">import</span> <span class="n">write_gage_package</span><span class="p">,</span> <span class="n">write_mf6_sfr_obsfile</span><span class="p">,</span> <span class="n">add_observations</span>
@@ -254,6 +249,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_period_data</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_observations</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_observations_filename</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_minimum_slope</span> <span class="o">=</span> <span class="n">minimum_slope</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_default_slope</span> <span class="o">=</span> <span class="n">default_slope</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_maximum_slope</span> <span class="o">=</span> <span class="n">maximum_slope</span>
 
         <span class="c1"># convert any modflow6 kwargs to modflow5</span>
         <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="n">SFRData</span><span class="o">.</span><span class="n">mf5names</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">SFRData</span><span class="o">.</span><span class="n">mf6names</span> <span class="k">else</span> <span class="n">k</span><span class="p">:</span>
@@ -280,7 +278,7 @@
         <span class="c1"># not the ideal logic for MODFLOW 6 case where only</span>
         <span class="c1"># rno and connections are supplied</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_outreaches</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">get_slopes</span><span class="p">(</span><span class="n">default_slope</span><span class="o">=</span><span class="n">default_slope</span><span class="p">,</span> <span class="n">minimum_slope</span><span class="o">=</span><span class="n">minimum_slope</span><span class="p">,</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_slopes</span><span class="p">(</span><span class="n">default_slope</span><span class="o">=</span><span class="n">default_slope</span><span class="p">,</span> <span class="n">minimum_slope</span><span class="o">=</span><span class="n">minimum_slope</span><span class="p">,</span>
                         <span class="n">maximum_slope</span><span class="o">=</span><span class="n">maximum_slope</span><span class="p">)</span>
 
         <span class="c1"># have to set the model last, because it also sets up a flopy sfr package instance</span>
@@ -1169,15 +1167,17 @@
         <span class="n">mult</span> <span class="o">=</span> <span class="n">convert_length_units</span><span class="p">(</span><span class="n">elevation_units</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_length_units</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">reach_data</span><span class="p">[</span><span class="s1">&#39;strtop&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">sampled_elevs</span><span class="p">[</span><span class="n">rno</span><span class="p">]</span>
                                      <span class="k">for</span> <span class="n">rno</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">reach_data</span><span class="p">[</span><span class="s1">&#39;rno&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">reach_data</span><span class="p">[</span><span class="s1">&#39;strtop&#39;</span><span class="p">]</span> <span class="o">*=</span> <span class="n">mult</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reach_data</span><span class="p">[</span><span class="s1">&#39;strtop&#39;</span><span class="p">]</span> <span class="o">*=</span> <span class="n">mult</span>
+        <span class="c1"># update the slopes as well</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_slopes</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="SFRData.get_slopes">
-<a class="viewcode-back" href="../../api/sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.get_slopes">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_slopes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">default_slope</span><span class="o">=</span><span class="mf">0.001</span><span class="p">,</span> <span class="n">minimum_slope</span><span class="o">=</span><span class="mf">0.0001</span><span class="p">,</span>
-                   <span class="n">maximum_slope</span><span class="o">=</span><span class="mf">1.</span><span class="p">):</span>
+<div class="viewcode-block" id="SFRData.update_slopes">
+<a class="viewcode-back" href="../../api/sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.update_slopes">[docs]</a>
+    <span class="k">def</span> <span class="nf">update_slopes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">default_slope</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">minimum_slope</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                   <span class="n">maximum_slope</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute slopes by reach using values in strtop (streambed top) and rchlen (reach length)</span>
-<span class="sd">        columns of reach_data. The slope for a reach n is computed as strtop(n+1) - strtop(n) / rchlen(n).</span>
+<span class="sd">        columns of reach_data. The slope for a reach n is computed as strtop(n) - strtop(n+1) / rchlen(n).</span>
 <span class="sd">        Slopes for outlet reaches are set equal to a default value (default_slope).</span>
 <span class="sd">        Populates the slope column in reach_data.</span>
 
@@ -1185,28 +1185,33 @@
 <span class="sd">        ----------</span>
 <span class="sd">        default_slope : float</span>
 <span class="sd">            Slope value applied to outlet reaches (where water leaves the model).</span>
-<span class="sd">            Default value is 0.001</span>
+<span class="sd">            By default None, in which case &#39;_default_slope&#39; attribute is used.</span>
 <span class="sd">        minimum_slope : float</span>
 <span class="sd">            Assigned to reaches with computed slopes less than this value.</span>
 <span class="sd">            This ensures that the Manning&#39;s equation won&#39;t produce unreasonable values of stage</span>
 <span class="sd">            (in other words, that stage is consistent with assumption that</span>
 <span class="sd">            streamflow is primarily drive by the streambed gradient).</span>
-<span class="sd">            Default value is 0.0001.</span>
+<span class="sd">            By default None, in which case &#39;_minimum_slope&#39; attribute is used.</span>
 <span class="sd">        maximum_slope : float</span>
 <span class="sd">            Assigned to reaches with computed slopes more than this value.</span>
-<span class="sd">            Default value is 1.</span>
+<span class="sd">            By default None, in which case &#39;_maximum_slope&#39; attribute is used.</span>
+<span class="sd">            </span>
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        If default_slope, minimum_slope or maximum_slope are not None, the</span>
+<span class="sd">        respective attribute (for example &#39;_default_slope&#39;) will be set with the supplied value.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">default_slope</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_default_slope</span> <span class="o">=</span> <span class="n">default_slope</span>
+        <span class="k">if</span> <span class="n">minimum_slope</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_minimum_slope</span> <span class="o">=</span> <span class="n">minimum_slope</span>
+        <span class="k">if</span> <span class="n">maximum_slope</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_maximum_slope</span> <span class="o">=</span> <span class="n">maximum_slope</span>
         <span class="n">rd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reach_data</span>
-        <span class="k">assert</span> <span class="n">rd</span><span class="o">.</span><span class="n">outreach</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;requires reach routing, must be called after set_outreaches()&quot;</span>
-        <span class="n">elev</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">rd</span><span class="o">.</span><span class="n">rno</span><span class="p">,</span> <span class="n">rd</span><span class="o">.</span><span class="n">strtop</span><span class="p">))</span>
-        <span class="n">dist</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">rd</span><span class="o">.</span><span class="n">rno</span><span class="p">,</span> <span class="n">rd</span><span class="o">.</span><span class="n">rchlen</span><span class="p">))</span>
-        <span class="n">dnelev</span> <span class="o">=</span> <span class="p">{</span><span class="n">rid</span><span class="p">:</span> <span class="n">elev</span><span class="p">[</span><span class="n">rd</span><span class="o">.</span><span class="n">outreach</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="k">if</span> <span class="n">rd</span><span class="o">.</span><span class="n">outreach</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span>
-        <span class="k">else</span> <span class="o">-</span><span class="mi">9999</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">rid</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">rd</span><span class="o">.</span><span class="n">rno</span><span class="p">)}</span>
-        <span class="n">slopes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
-            <span class="p">[(</span><span class="n">elev</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">dnelev</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">/</span> <span class="n">dist</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">if</span> <span class="n">dnelev</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">9999</span> <span class="ow">and</span> <span class="n">dist</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span>
-             <span class="k">else</span> <span class="n">default_slope</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">rd</span><span class="o">.</span><span class="n">rno</span><span class="p">])</span>
-        <span class="n">slopes</span><span class="p">[</span><span class="n">slopes</span> <span class="o">&lt;</span> <span class="n">minimum_slope</span><span class="p">]</span> <span class="o">=</span> <span class="n">minimum_slope</span>
-        <span class="n">slopes</span><span class="p">[</span><span class="n">slopes</span> <span class="o">&gt;</span> <span class="n">maximum_slope</span><span class="p">]</span> <span class="o">=</span> <span class="n">maximum_slope</span>
+        <span class="n">slopes</span> <span class="o">=</span> <span class="n">get_slopes</span><span class="p">(</span><span class="n">rd</span><span class="p">[</span><span class="s1">&#39;strtop&#39;</span><span class="p">],</span> <span class="n">rd</span><span class="p">[</span><span class="s1">&#39;rchlen&#39;</span><span class="p">],</span> <span class="n">rd</span><span class="p">[</span><span class="s1">&#39;rno&#39;</span><span class="p">],</span> <span class="n">rd</span><span class="p">[</span><span class="s1">&#39;outreach&#39;</span><span class="p">],</span> 
+                            <span class="n">default_slope</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_default_slope</span><span class="p">,</span> 
+                            <span class="n">minimum_slope</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_minimum_slope</span><span class="p">,</span>
+                            <span class="n">maximum_slope</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_maximum_slope</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">reach_data</span><span class="p">[</span><span class="s1">&#39;slope&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">slopes</span></div>
 
 
@@ -1457,6 +1462,7 @@
             <span class="n">sfrdata</span><span class="o">.</span><span class="n">set_streambed_top_elevations_from_dem</span><span class="p">(</span><span class="o">**</span><span class="n">dem_kwargs</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">sfrdata</span><span class="o">.</span><span class="n">reach_data</span><span class="p">[</span><span class="s1">&#39;strtop&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sfrdata</span><span class="o">.</span><span class="n">interpolate_to_reaches</span><span class="p">(</span><span class="s1">&#39;elevup&#39;</span><span class="p">,</span> <span class="s1">&#39;elevdn&#39;</span><span class="p">)</span>
+            <span class="n">sfrdata</span><span class="o">.</span><span class="n">update_slopes</span><span class="p">()</span>
 
         <span class="c1"># assign layers to the sfr reaches</span>
         <span class="k">if</span> <span class="n">model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -2012,7 +2018,7 @@
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Aug 28, 2024.
+      <span class="lastupdated">Last updated on Oct 18, 2024.
       </span></p>
   </div>
 
