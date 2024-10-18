@@ -41,7 +41,7 @@ jobs:
           body: |
             Changes in this Release: 
             ${{ steps.tag_version.outputs.changelog }}
-          draft: false
+          draft: true
           prerelease: false
 
   docs:
