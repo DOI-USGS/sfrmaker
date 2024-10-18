@@ -6,14 +6,14 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Release History &mdash; SFRmaker 0.11.2.post7.dev0+g31a0190 documentation</title>
+  <title>Release History &mdash; SFRmaker 0.11.2.post10.dev0+g0509d94 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=7ab3649f" />
       <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
       <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
 
   
-      <script src="_static/documentation_options.js?v=553056c7"></script>
+      <script src="_static/documentation_options.js?v=69248e04"></script>
       <script src="_static/doctools.js?v=9bcbadda"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="_static/clipboard.min.js?v=a7894cd8"></script>
@@ -67,6 +67,7 @@
 <li class="toctree-l1"><a class="reference internal" href="api/index.html"> Code reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="config-summary.html"> Summary of configuration file options</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#"> Release History</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#version-0-11-3-2024-10-18">Version 0.11.3 (2024-10-18)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#version-0-11-2-2024-01-15">Version 0.11.2 (2024-01-15)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#version-0-11-1-2023-08-14">Version 0.11.1 (2023-08-14)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#version-0-11-0-2023-07-25">Version 0.11.0 (2023-07-25)</a></li>
@@ -124,6 +125,13 @@
              
   <section id="release-history">
 <h1>Release History<a class="headerlink" href="#release-history" title="Link to this heading">¶</a></h1>
+<section id="version-0-11-3-2024-10-18">
+<h2>Version 0.11.3 (2024-10-18)<a class="headerlink" href="#version-0-11-3-2024-10-18" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>fix issue where SFR reach slopes were not being updated when streambed top elevations were resampled from a DEM</p></li>
+<li><p>fix issue with utils.assign_layers where a 2D array of the model bottom elevations was being returned instead of a 3D array of all layer bottom elevations.</p></li>
+</ul>
+</section>
 <section id="version-0-11-2-2024-01-15">
 <h2>Version 0.11.2 (2024-01-15)<a class="headerlink" href="#version-0-11-2-2024-01-15" title="Link to this heading">¶</a></h2>
 <ul class="simple">
