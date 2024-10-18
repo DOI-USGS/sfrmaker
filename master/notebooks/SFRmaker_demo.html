@@ -1,0 +1,1445 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Basic usage of SFRmaker in a scripting context &mdash; SFRmaker 0.post1+g86084ab documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=7ab3649f" />
+      <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
+
+  
+      <script src="../_static/documentation_options.js?v=c6ba2d9e"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=f281be69"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+      <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Preprocessing hydrography" href="preprocessing_demo.html" />
+    <link rel="prev" title="Input data requirements" href="../inputs.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            SFRmaker
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../philosophy.html"> Philosophy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html"> Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html"> Installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../inputs.html"> Input Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html"> Using SFRmaker with a configuration file</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#"> Basic Usage in a scripting context</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#Input-requirements">Input requirements</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#Hydrography">Hydrography</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#Creating-a-Lines-instance-from-NHDPlus">Creating a <code class="docutils literal notranslate"><span class="pre">Lines</span></code> instance from NHDPlus</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Creating-a-Lines-instance-from-custom-hydrography">Creating a <code class="docutils literal notranslate"><span class="pre">Lines</span></code> instance from custom hydrography</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Specifying-a-model-grid-from-a-flopy-StructuredGrid-instance">Specifying a model grid from a flopy <code class="docutils literal notranslate"><span class="pre">StructuredGrid</span></code> instance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Specifying-a-model-grid-from-a-shapefile">Specifying a model grid from a shapefile</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Using-the-modelgrid-attached-to-a-flopy-model">Using the <code class="docutils literal notranslate"><span class="pre">modelgrid</span></code> attached to a flopy model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Specifying-a-model">Specifying a model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Creating-an-SFRData-instance">Creating an SFRData instance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#The-SFRData-class">The <code class="docutils literal notranslate"><span class="pre">SFRData</span></code> class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Sampling-streambed-top-elevations-from-a-DEM">Sampling streambed top elevations from a DEM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Assigning-layers-to-the-reaches">Assigning layers to the reaches</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Running-diagnostics">Running diagnostics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Writing-an-SFR-package">Writing an SFR package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Writing-a-MODFLOW-6-SFR-package">Writing a MODFLOW-6 SFR package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Writing-tables">Writing tables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Writing-shapefiles">Writing shapefiles</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="preprocessing_demo.html"> Preprocessing NHDPlus version 2 data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lines_from_NHDPlusHR_demo.html"> Using SFRmaker with NHDPlus High Resolution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../concepts.html"> Concepts and methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sfrmaker_tools.html"> Stand-alone tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../troubleshooting.html"> Troubleshooting</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html"> Code reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../config-summary.html"> Summary of configuration file options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../release-history.html"> Release History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html"> Contributing to SFRmaker</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Bibliography</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../references.html"> References cited</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">SFRmaker</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Basic usage of SFRmaker in a scripting context</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/notebooks/SFRmaker_demo.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="Basic-usage-of-SFRmaker-in-a-scripting-context">
+<h1>Basic usage of SFRmaker in a scripting context<a class="headerlink" href="#Basic-usage-of-SFRmaker-in-a-scripting-context" title="Link to this heading">¶</a></h1>
+<p>This example illustrates basic usage of SFRmaker in a scripting context. For examples of using SFRmaker with a configuration file, see the MERAS and Tyler Forks examples.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">flopy</span>
+<span class="kn">import</span> <span class="nn">sfrmaker</span>
+</pre></div>
+</div>
+</div>
+<section id="Input-requirements">
+<h2>Input requirements<a class="headerlink" href="#Input-requirements" title="Link to this heading">¶</a></h2>
+<p>The most basic input requirements of SFRmaker are hydrography and a model grid. Optionally, a model and a DEM can be input, as demonstrated below. See the <a class="reference external" href="https://aleaf.github.io/sfrmaker/inputs.html">documentation</a> for a more detailed description of inputs.</p>
+<section id="Hydrography">
+<h3>Hydrography<a class="headerlink" href="#Hydrography" title="Link to this heading">¶</a></h3>
+<p>In this example, we will use data that has been downloaded from <a class="reference external" href="https://nhdplus.com/NHDPlus/NHDPlusV2_data.php">NHDPlus</a>. The original file structure in the download has been maintained, allowing us to simply supply SFRmaker with a path to the NHDPlus files:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">NHDPlus_paths</span> <span class="o">=</span> <span class="s1">&#39;../tylerforks/NHDPlus/&#39;</span>
+</pre></div>
+</div>
+</div>
+<p>If we were dealing with more than one drainage basin, the NHDPlus file paths could be included in a list:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">NHDPlus_paths_list</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;/NHDPlusGL/NHDPlus04/&#39;</span><span class="p">,</span>
+                      <span class="s1">&#39;/NHDPlusMS/NHDPlus07/&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+<section id="Creating-a-Lines-instance-from-NHDPlus">
+<h2>Creating a <code class="docutils literal notranslate"><span class="pre">Lines</span></code> instance from NHDPlus<a class="headerlink" href="#Creating-a-Lines-instance-from-NHDPlus" title="Link to this heading">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">sfrmaker.Lines</span></code> class includes functionality for reading and processing hydrography flowlines. This example shows how to create a <code class="docutils literal notranslate"><span class="pre">Lines</span></code> instance from NHDPlus data.</p>
+<p>For large hydrography datasets, it is advantageous to filter the data when it is read in. The <code class="docutils literal notranslate"><span class="pre">filter</span></code> argument to <code class="docutils literal notranslate"><span class="pre">sfrmaker.Lines</span></code> accepts a shapefile path or tuple of bounding box coordinates. In either case, a bounding box tuple is created and passed to the <code class="docutils literal notranslate"><span class="pre">filter</span></code> method in the <code class="docutils literal notranslate"><span class="pre">`fiona</span></code> package &lt;<a class="reference external" href="https://fiona.readthedocs.io/en/latest/manual.html">https://fiona.readthedocs.io/en/latest/manual.html</a>&gt;`__, which is fast.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">lns</span> <span class="o">=</span> <span class="n">sfrmaker</span><span class="o">.</span><span class="n">Lines</span><span class="o">.</span><span class="n">from_nhdplus_v2</span><span class="p">(</span><span class="n">NHDPlus_paths</span><span class="o">=</span><span class="s1">&#39;../tylerforks/NHDPlus/&#39;</span><span class="p">,</span>
+                            <span class="n">bbox_filter</span><span class="o">=</span><span class="s1">&#39;../tylerforks/grid.shp&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+
+loading NHDPlus v2 hydrography data...
+for basins:
+../tylerforks/NHDPlus/
+
+reading ../tylerforks/NHDPlus/NHDPlusAttributes/PlusFlow.dbf...
+--&gt; building dataframe... (may take a while for large shapefiles)
+
+load finished in 0.48s
+
+Getting routing information from NHDPlus Plusflow table...
+finished in 0.03s
+
+</pre></div></div>
+</div>
+<p>Alternatively, <code class="docutils literal notranslate"><span class="pre">sfrmaker.Lines</span></code> can be instantiated with separate arguments for each NHDPlus file used:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">lines</span> <span class="o">=</span> <span class="n">sfrmaker</span><span class="o">.</span><span class="n">Lines</span><span class="o">.</span><span class="n">from_nhdplus_v2</span><span class="p">(</span><span class="n">NHDFlowlines</span><span class="o">=</span><span class="s1">&#39;../tylerforks/NHDPlus/NHDSnapshot/Hydrography/NHDFlowline.shp&#39;</span><span class="p">,</span>
+                                       <span class="n">PlusFlowlineVAA</span><span class="o">=</span><span class="s1">&#39;../tylerforks/NHDPlus/NHDPlusAttributes/PlusFlowlineVAA.dbf&#39;</span><span class="p">,</span>
+                                       <span class="n">PlusFlow</span><span class="o">=</span><span class="s1">&#39;../tylerforks/NHDPlus/NHDPlusAttributes/PlusFlow.dbf&#39;</span><span class="p">,</span>
+                                       <span class="n">elevslope</span><span class="o">=</span><span class="s1">&#39;../tylerforks/NHDPlus/NHDPlusAttributes/elevslope.dbf&#39;</span><span class="p">,</span>
+                                       <span class="n">bbox_filter</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mf">90.625</span><span class="p">,</span> <span class="mf">46.3788</span><span class="p">,</span> <span class="o">-</span><span class="mf">90.4634</span><span class="p">,</span> <span class="mf">46.4586</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+
+loading NHDPlus v2 hydrography data...
+
+reading ../tylerforks/NHDPlus/NHDPlusAttributes/PlusFlow.dbf...
+--&gt; building dataframe... (may take a while for large shapefiles)
+
+load finished in 0.02s
+
+Getting routing information from NHDPlus Plusflow table...
+finished in 0.03s
+
+</pre></div></div>
+</div>
+</section>
+<section id="Creating-a-Lines-instance-from-custom-hydrography">
+<h2>Creating a <code class="docutils literal notranslate"><span class="pre">Lines</span></code> instance from custom hydrography<a class="headerlink" href="#Creating-a-Lines-instance-from-custom-hydrography" title="Link to this heading">¶</a></h2>
+<p>Alternatively, a <code class="docutils literal notranslate"><span class="pre">Lines</span></code> instance can be created from any hydrography that includes the pertinent attribute fields, which must be specified:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">custom_lines</span> <span class="o">=</span> <span class="n">sfrmaker</span><span class="o">.</span><span class="n">Lines</span><span class="o">.</span><span class="n">from_shapefile</span><span class="p">(</span><span class="n">shapefile</span><span class="o">=</span><span class="s1">&#39;../meras/flowlines.shp&#39;</span><span class="p">,</span>
+                                             <span class="n">id_column</span><span class="o">=</span><span class="s1">&#39;COMID&#39;</span><span class="p">,</span>  <span class="c1"># arguments to sfrmaker.Lines.from_shapefile</span>
+                                             <span class="n">routing_column</span><span class="o">=</span><span class="s1">&#39;tocomid&#39;</span><span class="p">,</span>
+                                             <span class="n">width1_column</span><span class="o">=</span><span class="s1">&#39;width1&#39;</span><span class="p">,</span>
+                                             <span class="n">width2_column</span><span class="o">=</span><span class="s1">&#39;width2&#39;</span><span class="p">,</span>
+                                             <span class="n">up_elevation_column</span><span class="o">=</span><span class="s1">&#39;elevupsmo&#39;</span><span class="p">,</span>
+                                             <span class="n">dn_elevation_column</span><span class="o">=</span><span class="s1">&#39;elevdnsmo&#39;</span><span class="p">,</span>
+                                             <span class="n">name_column</span><span class="o">=</span><span class="s1">&#39;GNIS_NAME&#39;</span><span class="p">,</span>
+                                             <span class="n">attr_length_units</span><span class="o">=</span><span class="s1">&#39;feet&#39;</span><span class="p">,</span>  <span class="c1"># units of source data</span>
+                                             <span class="n">attr_height_units</span><span class="o">=</span><span class="s1">&#39;feet&#39;</span><span class="p">,</span>  <span class="c1"># units of source data</span>
+                                             <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Specifying-a-model-grid-from-a-flopy-StructuredGrid-instance">
+<h2>Specifying a model grid from a flopy <code class="docutils literal notranslate"><span class="pre">StructuredGrid</span></code> instance<a class="headerlink" href="#Specifying-a-model-grid-from-a-flopy-StructuredGrid-instance" title="Link to this heading">¶</a></h2>
+<p>The next step is to specify a model grid. One option is to specify a flopy <code class="docutils literal notranslate"><span class="pre">StructuredGrid</span></code> instance. SFRmaker will then use this internally to create an instance of its own <code class="docutils literal notranslate"><span class="pre">StructuredGrid</span></code> class. In this case, the row and column spacing must be provided in the units of the projected coordinate reference system (CRS) that the model is in, which is typically meters. In this case, our model grid spacing is 250 feet, so we have to convert.</p>
+<p>Specifying a CRS (via the <code class="docutils literal notranslate"><span class="pre">crs</span></code> argument) is also important, as it allows SFRmaker to automatically reproject any input data to the same CRS as the model grid. <a class="reference external" href="https://proj.org/faq.html#what-is-the-best-format-for-describing-coordinate-reference-systems">The best way to do this is with an EPSG code</a>, as shown below.</p>
+<p>See the flopy documentation for more details about <code class="docutils literal notranslate"><span class="pre">StructuredGrid</span></code>.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">delr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">250</span> <span class="o">*</span> <span class="mf">0.3048</span><span class="p">]</span> <span class="o">*</span> <span class="mi">160</span><span class="p">)</span>  <span class="c1"># cell spacing along a row</span>
+<span class="n">delc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">250</span> <span class="o">*</span> <span class="mf">0.3048</span><span class="p">]</span> <span class="o">*</span> <span class="mi">111</span><span class="p">)</span>  <span class="c1"># cell spacing along a column</span>
+
+<span class="n">flopy_grid</span> <span class="o">=</span> <span class="n">flopy</span><span class="o">.</span><span class="n">discretization</span><span class="o">.</span><span class="n">StructuredGrid</span><span class="p">(</span><span class="n">delr</span><span class="o">=</span><span class="n">delr</span><span class="p">,</span> <span class="n">delc</span><span class="o">=</span><span class="n">delc</span><span class="p">,</span>
+                                                 <span class="n">xoff</span><span class="o">=</span><span class="mi">682688</span><span class="p">,</span> <span class="n">yoff</span><span class="o">=</span><span class="mi">5139052</span><span class="p">,</span>  <span class="c1"># lower left corner of model grid</span>
+                                                 <span class="n">angrot</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>  <span class="c1"># grid is unrotated</span>
+                                                 <span class="c1"># projected coordinate system of model (UTM NAD27 zone 15 North)</span>
+                                                 <span class="n">crs</span><span class="o">=</span><span class="mi">26715</span>
+                                                 <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Specifying-a-model-grid-from-a-shapefile">
+<h2>Specifying a model grid from a shapefile<a class="headerlink" href="#Specifying-a-model-grid-from-a-shapefile" title="Link to this heading">¶</a></h2>
+<p>Another option is to create an SFRmaker <code class="docutils literal notranslate"><span class="pre">StructuredGrid</span></code> directly using a shapefile. While the basic underpinings are in place for SFRmaker to support unstructured grids, this option hasn’t been fully implemented yet.</p>
+<p>Attribute fields with row and column information must be specified. An polygon defining the area where the SFR network will be created can optionally be specified here, or later in the creation of <code class="docutils literal notranslate"><span class="pre">SFRData</span></code> (see below).</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">grid</span> <span class="o">=</span> <span class="n">sfrmaker</span><span class="o">.</span><span class="n">StructuredGrid</span><span class="o">.</span><span class="n">from_shapefile</span><span class="p">(</span><span class="n">shapefile</span><span class="o">=</span><span class="s1">&#39;../tylerforks/grid.shp&#39;</span><span class="p">,</span>
+                                              <span class="n">icol</span><span class="o">=</span><span class="s1">&#39;i&#39;</span><span class="p">,</span>  <span class="c1"># attribute field with row information</span>
+                                              <span class="n">jcol</span><span class="o">=</span><span class="s1">&#39;j&#39;</span><span class="p">,</span>  <span class="c1"># attribute field with column information</span>
+                                              <span class="n">active_area</span><span class="o">=</span><span class="s1">&#39;../tylerforks/active_area.shp&#39;</span>
+                                              <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+
+reading ../tylerforks/grid.shp...
+--&gt; building dataframe... (may take a while for large shapefiles)
+
+reading ../tylerforks/active_area.shp...
+--&gt; building dataframe... (may take a while for large shapefiles)
+</pre></div></div>
+</div>
+<p>With specification of <code class="docutils literal notranslate"><span class="pre">active_area</span></code>, the grid created above has an <strong>``isfr``</strong> array attribute designating which cells can have SFR:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">isfr</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="s1">&#39;nearest&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;matplotlib.image.AxesImage at 0x7f9f0c1a5430&gt;
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_SFRmaker_demo_17_1.png" src="../_images/notebooks_SFRmaker_demo_17_1.png" />
+</div>
+</div>
+</section>
+<section id="Using-the-modelgrid-attached-to-a-flopy-model">
+<h2>Using the <code class="docutils literal notranslate"><span class="pre">modelgrid</span></code> attached to a flopy model<a class="headerlink" href="#Using-the-modelgrid-attached-to-a-flopy-model" title="Link to this heading">¶</a></h2>
+<p>If no grid is supplied as input, SFRmaker will try to use <code class="docutils literal notranslate"><span class="pre">modelgrid</span></code> attribute attached to a supplied flopy model instance. This only works if <code class="docutils literal notranslate"><span class="pre">modelgrid</span></code> is valid. Loading a flopy model with a valid model grid requires the grid information to be specified in the namefile header, and that the model be in the same units as the projected CRS. See the flopy documentation for more details</p>
+</section>
+<section id="Specifying-a-model">
+<h2>Specifying a model<a class="headerlink" href="#Specifying-a-model" title="Link to this heading">¶</a></h2>
+<p>While a model is not required to run SFRmaker, specifying a model is advantageous in that it allows SFRmaker to assign valid model layers for reaches. Models are specified as flopy model instances, which can be loaded or created from scratch (see the flopy documentation). In this case, we are loading a model:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">m</span> <span class="o">=</span> <span class="n">flopy</span><span class="o">.</span><span class="n">modflow</span><span class="o">.</span><span class="n">Modflow</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">&#39;tf.nam&#39;</span><span class="p">,</span> <span class="n">model_ws</span><span class="o">=</span><span class="s1">&#39;../tylerforks/tylerforks&#39;</span><span class="p">)</span>
+<span class="n">m</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+MODFLOW 5 layer(s) 111 row(s) 160 column(s) 1 stress period(s)
+</pre></div></div>
+</div>
+</section>
+<section id="Creating-an-SFRData-instance">
+<h2>Creating an SFRData instance<a class="headerlink" href="#Creating-an-SFRData-instance" title="Link to this heading">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">sfrmaker.SFRData</span></code> class is the primary object for creating or modifying an SFR dataset. A <code class="docutils literal notranslate"><span class="pre">SFRData</span></code> instance can be created from the <code class="docutils literal notranslate"><span class="pre">Lines</span></code> class using the <code class="docutils literal notranslate"><span class="pre">to_sfr()</span></code> method.</p>
+<p>Either a flopy <code class="docutils literal notranslate"><span class="pre">StructuredGrid</span></code> or sfrmaker <code class="docutils literal notranslate"><span class="pre">StructuredGrid</span></code> can be supplied. While MODFLOW and flopy support specification of length units, these aren’t always specified in the model input files, so it is good practice to specifiy the units explicitly to SFRmaker.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sfrdata</span> <span class="o">=</span> <span class="n">lines</span><span class="o">.</span><span class="n">to_sfr</span><span class="p">(</span><span class="n">grid</span><span class="o">=</span><span class="n">flopy_grid</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">m</span><span class="p">,</span> <span class="n">model_length_units</span><span class="o">=</span><span class="s1">&#39;feet&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+
+SFRmaker version 0.post1+g86084ab
+
+Creating sfr dataset...
+
+Creating grid class instance from flopy Grid instance...
+grid class created in 0.43s
+
+Model grid information
+structured grid
+nnodes: 17,760
+nlay: 1
+nrow: 111
+ncol: 160
+model length units: undefined
+crs: EPSG:26715
+bounds: 682688.00, 5139052.00, 694880.00, 5147510.20
+active area defined by: all cells
+
+MODFLOW 5 layer(s) 111 row(s) 160 column(s) 1 stress period(s)
+
+reprojecting hydrography from
+EPSG:4269
+to
+EPSG:26715
+
+
+Culling hydrography to active area...
+starting lines: 45
+remaining lines: 42
+finished in 0.00s
+
+
+Intersecting 42 flowlines with 17,760 grid cells...
+
+Building spatial index...
+finished in 0.84s
+
+Intersecting 42 features...
+42
+finished in 0.14s
+
+Setting up reach data... (may take a few minutes for large grids)
+finished in 0.45s
+
+Computing widths...
+
+Dropping 48 reaches with length &lt; 12.50 feet...
+
+Repairing routing connections...
+enforcing best segment numbering...
+
+Setting up segment data...
+Model grid information
+structured grid
+nnodes: 17,760
+nlay: 1
+nrow: 111
+ncol: 160
+model length units: undefined
+crs: EPSG:26715
+bounds: 682688.00, 5139052.00, 694880.00, 5147510.20
+active area defined by: all cells
+
+
+Time to create sfr dataset: 2.06s
+
+</pre></div></div>
+</div>
+</section>
+<section id="The-SFRData-class">
+<h2>The <code class="docutils literal notranslate"><span class="pre">SFRData</span></code> class<a class="headerlink" href="#The-SFRData-class" title="Link to this heading">¶</a></h2>
+<p>Internally, the SFRData class mostly uses the data model for the MODFLOW-2005 style SFR2 package (which includes MODFLOW-NWT), which organizes the input into segments and reaches. Segment and reach data are stored in the <code class="docutils literal notranslate"><span class="pre">reach_data</span></code> and <code class="docutils literal notranslate"><span class="pre">segment_data</span></code> attribute DataFrames. In addition to the MODFLOW-2005 data, reach numbers and their routing connections (as needed for MODFLOW-6) are also stored. On writing of SFR package input, MODFLOW-6 style input can be created via the
+<code class="docutils literal notranslate"><span class="pre">sfrmaker.mf5to6</span></code> module.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sfrdata</span><span class="o">.</span><span class="n">reach_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sfrdata</span><span class="o">.</span><span class="n">reach_data</span><span class="p">[</span><span class="s1">&#39;rno&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;strhc1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">5</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sfrdata</span><span class="o">.</span><span class="n">reach_data</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>rno</th>
+      <th>node</th>
+      <th>k</th>
+      <th>i</th>
+      <th>j</th>
+      <th>iseg</th>
+      <th>ireach</th>
+      <th>rchlen</th>
+      <th>width</th>
+      <th>slope</th>
+      <th>...</th>
+      <th>thts</th>
+      <th>thti</th>
+      <th>eps</th>
+      <th>uhc</th>
+      <th>outreach</th>
+      <th>outseg</th>
+      <th>asum</th>
+      <th>line_id</th>
+      <th>name</th>
+      <th>geometry</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>511</th>
+      <td>1</td>
+      <td>17714</td>
+      <td>0</td>
+      <td>110</td>
+      <td>114</td>
+      <td>1</td>
+      <td>1</td>
+      <td>208.807938</td>
+      <td>1.000000</td>
+      <td>0.127779</td>
+      <td>...</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>2</td>
+      <td>4</td>
+      <td>31.822330</td>
+      <td>1815013</td>
+      <td>None</td>
+      <td>LINESTRING (691394.6396657812 5139052, 691410....</td>
+    </tr>
+    <tr>
+      <th>512</th>
+      <td>2</td>
+      <td>17715</td>
+      <td>0</td>
+      <td>110</td>
+      <td>115</td>
+      <td>1</td>
+      <td>2</td>
+      <td>294.098938</td>
+      <td>1.261243</td>
+      <td>0.060563</td>
+      <td>...</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>3</td>
+      <td>4</td>
+      <td>108.465340</td>
+      <td>1815013</td>
+      <td>None</td>
+      <td>LINESTRING (691451 5139079.028908214, 691471.0...</td>
+    </tr>
+    <tr>
+      <th>513</th>
+      <td>3</td>
+      <td>17716</td>
+      <td>0</td>
+      <td>110</td>
+      <td>116</td>
+      <td>1</td>
+      <td>3</td>
+      <td>41.622536</td>
+      <td>1.531957</td>
+      <td>0.333944</td>
+      <td>...</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>4</td>
+      <td>4</td>
+      <td>159.629288</td>
+      <td>1815013</td>
+      <td>None</td>
+      <td>LINESTRING (691527.2 5139123.064392628, 691538...</td>
+    </tr>
+    <tr>
+      <th>514</th>
+      <td>4</td>
+      <td>17556</td>
+      <td>0</td>
+      <td>109</td>
+      <td>116</td>
+      <td>1</td>
+      <td>4</td>
+      <td>220.366440</td>
+      <td>1.714090</td>
+      <td>0.092205</td>
+      <td>...</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>5</td>
+      <td>4</td>
+      <td>199.556412</td>
+      <td>1815013</td>
+      <td>None</td>
+      <td>LINESTRING (691538.8006061709 5139128.2, 69156...</td>
+    </tr>
+    <tr>
+      <th>515</th>
+      <td>5</td>
+      <td>17557</td>
+      <td>0</td>
+      <td>109</td>
+      <td>117</td>
+      <td>1</td>
+      <td>5</td>
+      <td>162.617325</td>
+      <td>1.950304</td>
+      <td>0.097331</td>
+      <td>...</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>6</td>
+      <td>4</td>
+      <td>257.923126</td>
+      <td>1815013</td>
+      <td>None</td>
+      <td>LINESTRING (691603.4 5139143.66283342, 691624....</td>
+    </tr>
+  </tbody>
+</table>
+<p>5 rows × 23 columns</p>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sfrdata</span><span class="o">.</span><span class="n">segment_data</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>per</th>
+      <th>nseg</th>
+      <th>icalc</th>
+      <th>outseg</th>
+      <th>iupseg</th>
+      <th>iprior</th>
+      <th>nstrpts</th>
+      <th>flow</th>
+      <th>runoff</th>
+      <th>etsw</th>
+      <th>...</th>
+      <th>uhc1</th>
+      <th>hcond2</th>
+      <th>thickm2</th>
+      <th>elevdn</th>
+      <th>width2</th>
+      <th>depth2</th>
+      <th>thts2</th>
+      <th>thti2</th>
+      <th>eps2</th>
+      <th>uhc2</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>4</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>...</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>1297.867432</td>
+      <td>5.638623</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>0</td>
+      <td>2</td>
+      <td>1</td>
+      <td>4</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>...</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>1297.867432</td>
+      <td>37.791649</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>0</td>
+      <td>3</td>
+      <td>1</td>
+      <td>6</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>...</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>1278.149658</td>
+      <td>7.069631</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>0</td>
+      <td>4</td>
+      <td>1</td>
+      <td>6</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>...</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>1278.149658</td>
+      <td>38.638088</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>0</td>
+      <td>5</td>
+      <td>1</td>
+      <td>10</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>...</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>1211.286133</td>
+      <td>6.470501</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+    </tr>
+  </tbody>
+</table>
+<p>5 rows × 35 columns</p>
+</div></div>
+</div>
+</section>
+<section id="Sampling-streambed-top-elevations-from-a-DEM">
+<h2>Sampling streambed top elevations from a DEM<a class="headerlink" href="#Sampling-streambed-top-elevations-from-a-DEM" title="Link to this heading">¶</a></h2>
+<p>While the above dataset contains streambed top elevations read from NHDPlus, a DEM can be sampled to obtain more accurate elevations. If the DEM elevation units are specified, SFRmaker will convert the elevations to model units if needed. See the Streambed_elevation_demo notebook for more information on how this works.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sfrdata</span><span class="o">.</span><span class="n">set_streambed_top_elevations_from_dem</span><span class="p">(</span><span class="s1">&#39;../tylerforks/dem_26715.tif&#39;</span><span class="p">,</span>
+                                              <span class="n">elevation_units</span><span class="o">=</span><span class="s1">&#39;meters&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+running rasterstats.zonal_stats on buffered LineStrings...
+finished in 8.40s
+
+
+Smoothing elevations...
+finished in 0.09s
+</pre></div></div>
+</div>
+</section>
+<section id="Assigning-layers-to-the-reaches">
+<h2>Assigning layers to the reaches<a class="headerlink" href="#Assigning-layers-to-the-reaches" title="Link to this heading">¶</a></h2>
+<p>Once we have a valid set of streambed elevations, the reaches can be assigned to model layers.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sfrdata</span><span class="o">.</span><span class="n">assign_layers</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sfrdata</span><span class="o">.</span><span class="n">reach_data</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>rno</th>
+      <th>node</th>
+      <th>k</th>
+      <th>i</th>
+      <th>j</th>
+      <th>iseg</th>
+      <th>ireach</th>
+      <th>rchlen</th>
+      <th>width</th>
+      <th>slope</th>
+      <th>...</th>
+      <th>thts</th>
+      <th>thti</th>
+      <th>eps</th>
+      <th>uhc</th>
+      <th>outreach</th>
+      <th>outseg</th>
+      <th>asum</th>
+      <th>line_id</th>
+      <th>name</th>
+      <th>geometry</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>511</th>
+      <td>1</td>
+      <td>17714</td>
+      <td>2</td>
+      <td>110</td>
+      <td>114</td>
+      <td>1</td>
+      <td>1</td>
+      <td>208.807938</td>
+      <td>1.000000</td>
+      <td>0.040094</td>
+      <td>...</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>2</td>
+      <td>4</td>
+      <td>31.822330</td>
+      <td>1815013</td>
+      <td>None</td>
+      <td>LINESTRING (691394.6396657812 5139052, 691410....</td>
+    </tr>
+    <tr>
+      <th>512</th>
+      <td>2</td>
+      <td>17715</td>
+      <td>2</td>
+      <td>110</td>
+      <td>115</td>
+      <td>1</td>
+      <td>2</td>
+      <td>294.098938</td>
+      <td>1.261243</td>
+      <td>0.003117</td>
+      <td>...</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>3</td>
+      <td>4</td>
+      <td>108.465340</td>
+      <td>1815013</td>
+      <td>None</td>
+      <td>LINESTRING (691451 5139079.028908214, 691471.0...</td>
+    </tr>
+    <tr>
+      <th>513</th>
+      <td>3</td>
+      <td>17716</td>
+      <td>2</td>
+      <td>110</td>
+      <td>116</td>
+      <td>1</td>
+      <td>3</td>
+      <td>41.622536</td>
+      <td>1.531957</td>
+      <td>0.207275</td>
+      <td>...</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>4</td>
+      <td>4</td>
+      <td>159.629288</td>
+      <td>1815013</td>
+      <td>None</td>
+      <td>LINESTRING (691527.2 5139123.064392628, 691538...</td>
+    </tr>
+    <tr>
+      <th>514</th>
+      <td>4</td>
+      <td>17556</td>
+      <td>2</td>
+      <td>109</td>
+      <td>116</td>
+      <td>1</td>
+      <td>4</td>
+      <td>220.366440</td>
+      <td>1.714090</td>
+      <td>0.028292</td>
+      <td>...</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>5</td>
+      <td>4</td>
+      <td>199.556412</td>
+      <td>1815013</td>
+      <td>None</td>
+      <td>LINESTRING (691538.8006061709 5139128.2, 69156...</td>
+    </tr>
+    <tr>
+      <th>515</th>
+      <td>5</td>
+      <td>17557</td>
+      <td>2</td>
+      <td>109</td>
+      <td>117</td>
+      <td>1</td>
+      <td>5</td>
+      <td>162.617325</td>
+      <td>1.950304</td>
+      <td>0.015271</td>
+      <td>...</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>6</td>
+      <td>4</td>
+      <td>257.923126</td>
+      <td>1815013</td>
+      <td>None</td>
+      <td>LINESTRING (691603.4 5139143.66283342, 691624....</td>
+    </tr>
+  </tbody>
+</table>
+<p>5 rows × 23 columns</p>
+</div></div>
+</div>
+</section>
+<section id="Running-diagnostics">
+<h2>Running diagnostics<a class="headerlink" href="#Running-diagnostics" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">SFRData</span></code> includes a <code class="docutils literal notranslate"><span class="pre">run_diagnostics()</span></code> method that executes the Flopy checker on the SFR package input. While the Flopy checks are only implemented for MODFLOW-2005 style SFR packages, <code class="docutils literal notranslate"><span class="pre">run_diagnostics()</span></code> works on MODFLOW-6 packages as well, by working of an attached MODFLOW-2005 representation of the MODFLOW-6 SFR input. The following checks are executed: * <strong>NaNs</strong> (not a number values, which will cause MODFLOW to crash) * <strong>consecutive segment and reach numbering</strong> * <strong>segment
+numbering that only increases</strong> in the downstream direction * <strong>circular routing sequences</strong> (reaches or segments routing back to themselves) * <strong>routing connection proximity:</strong> The length of routing connections, as determined by the distance between their cell centers, is compared to 1.25 times the diagonal distance across the cell containing the upstream reach. This benchmark length is equivalent to a diagonal connection between two square cells, where one cell had a spacing of 1.5 times the
+other cell (the maximum recommended increase in spacing between two adjacent cells; see Anderson and others, 2015). While this routing proximity check can be helpful for identifying egregious routing issues, in practice, it may not be uncommon for valid routing connections to violate this rule. For example, if the <code class="docutils literal notranslate"><span class="pre">one_reach_per_cell</span></code> option is used in constructing the SFR package with a large grid size, there may be numerous routing connections that extend across several cells. When
+non-adjacent routing connections are identified, the user can check the shapefile of routing connections to verify the results. * <strong>overlapping conductances:</strong> This check identifies instances of collocated reaches, where more than one reach has a connection to the groundwater flow solution in that cell. Collocated reaches may or may not present an issue for a particular model solution, but can potentially promote instability or spurious circulation of flow between the collocated reaches. *
+<strong>spurious streambed top elevations:</strong> Values &lt; -10 or &gt; 15,000 are flagged * <strong>downstream rises in streambed elevation</strong> * <strong>inconsistencies between streambed elevation and the model grid:</strong> This check looks for streambed bottoms below their respective cell bottoms, which will cause MODFLOW to halt execution, and streambed tops that are above the model top. The latter issue will not prevent MODFLOW from running, but may indicate problems with the input if the differences are large. For coarse
+grids in areas of high stream density (where there are often multiple streams in a cell), it may be impossible to ensure that all streambed top elevations are at or below the model top. Oftentimes, these reaches are dry anyways (for example, and ephemeral gully that runs off a bluff into a perennial stream, where the cell elevation is based on the elevation of the perennial stream). In any case, it is good practice to check the largest violations by comparing the SFRmaker shapefile output to a
+DEM and other data in a GIS environment. * <strong>suprious slopes:</strong> slopes of less than 0.0001 (which can lead to excessive stages with the SFR package’s Manning approximation) and greater than 1.0 are flagged.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sfrdata</span><span class="o">.</span><span class="n">run_diagnostics</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+
+Running Flopy v. 3.9.0.dev2 diagnostics...
+wrote tf_SFR.chk
+</pre></div></div>
+</div>
+</section>
+<section id="Writing-an-SFR-package">
+<h2>Writing an SFR package<a class="headerlink" href="#Writing-an-SFR-package" title="Link to this heading">¶</a></h2>
+<p>Now we can write the package. By default, a MODFLOW-2005 style package is written to the current working directory or the model workspace of the attached model instance.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sfrdata</span><span class="o">.</span><span class="n">write_package</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+SFRmaker v. 0.post1+g86084ab
+
+Running Flopy v. 3.9.0.dev2 diagnostics...
+passed.
+
+Checking for continuity in segment and reach numbering...
+passed.
+
+Checking for increasing segment numbers in downstream direction...
+passed.
+
+Checking for circular routing...
+passed.
+
+Checking reach connections for proximity...
+5 segments with non-adjacent reaches found.
+At segments:
+41 20 21 22 23
+
+5 segments with non-adjacent reaches found.
+At segments:
+41 20 21 22 23
+
+
+Checking for model cells with multiple non-zero SFR conductances...
+24 model cells with multiple non-zero SFR conductances found.
+This may lead to circular routing between collocated reaches.
+Nodes with overlapping conductances:
+k       i       j       iseg    ireach  rchlen  strthick        strhc1
+2       110     119     1       8       268.5836486816406       1.0     1.0
+2       110     119     2       1       72.61438751220703       1.0     1.0
+0       87      122     3       54      35.35249328613281       1.0     1.0
+0       87      122     4       33      231.09567260742188      1.0     1.0
+0       76      110     5       47      204.88766479492188      1.0     1.0
+0       87      122     6       1       30.414600372314453      1.0     1.0
+2       84      119     6       7       271.24835205078125      1.0     1.0
+2       84      119     6       9       26.37481117248535       1.0     1.0
+0       76      110     6       27      75.33216094970703       1.0     1.0
+2       25      24      7       42      95.27275085449219       1.0     1.0
+2       25      24      8       47      230.57635498046875      1.0     1.0
+1       58      132     9       25      48.14010238647461       1.0     1.0
+1       58      132     9       27      92.92947387695312       1.0     1.0
+0       48      109     9       64      251.07447814941406      1.0     1.0
+0       76      110     10      1       69.20076751708984       1.0     1.0
+0       48      108     10      40      19.56378746032715       1.0     1.0
+0       48      109     10      41      122.84815216064453      1.0     1.0
+0       48      108     10      42      28.33331871032715       1.0     1.0
+2       25      24      11      1       21.51937484741211       1.0     1.0
+2       18      17      11      15      148.96444702148438      1.0     1.0
+2       18      17      12      57      76.79739379882812       1.0     1.0
+1       80      49      13      70      159.26600646972656      1.0     1.0
+0       48      108     14      1       125.24523162841797      1.0     1.0
+0       47      98      14      22      67.60189056396484       1.0     1.0
+0       47      98      14      24      103.03018188476562      1.0     1.0
+0       54      89      14      39      34.45417785644531       1.0     1.0
+0       54      89      14      41      60.66257095336914       1.0     1.0
+0       53      78      14      57      61.411861419677734      1.0     1.0
+0       53      78      14      59      28.438196182250977      1.0     1.0
+0       52      76      14      62      63.360740661621094      1.0     1.0
+0       52      76      14      64      294.8589782714844       1.0     1.0
+1       54      73      14      69      341.6566162109375       1.0     1.0
+1       54      73      14      71      27.671581268310547      1.0     1.0
+1       80      49      14      125     39.762516021728516      1.0     1.0
+2       18      17      16      1       185.54652404785156      1.0     1.0
+2       15      3       16      21      32.64251708984375       1.0     1.0
+2       36      11      17      38      57.836700439453125      1.0     1.0
+2       110     159     19      2       201.63583374023438      1.0     1.0
+0       38      85      21      8       72.7103042602539        1.0     1.0
+0       38      85      21      9       54.39541244506836       1.0     1.0
+2       108     57      24      8       237.04415893554688      1.0     1.0
+2       108     57      24      9       46.142940521240234      1.0     1.0
+0       94      35      24      45      96.94855499267578       1.0     1.0
+0       94      35      24      47      91.54985046386719       1.0     1.0
+2       91      35      24      50      60.89990997314453       1.0     1.0
+2       91      34      24      51      61.16813278198242       1.0     1.0
+1       80      49      25      1       146.93106079101562      1.0     1.0
+2       91      35      25      26      308.2864685058594       1.0     1.0
+2       91      34      25      27      75.82389068603516       1.0     1.0
+2       15      3       31      1       273.603271484375        1.0     1.0
+2       36      11      36      1       263.1260681152344       1.0     1.0
+2       110     159     38      1       24.2677001953125        1.0     1.0
+2       91      34      42      1       130.52822875976562      1.0     1.0
+1       92      30      42      6       66.65867614746094       1.0     1.0
+1       92      30      42      8       252.91909790039062      1.0     1.0
+
+Checking for streambed tops of less than -10...
+passed.
+
+Checking for streambed tops of greater than 15000...
+passed.
+
+Checking segment_data for downstream rises in streambed elevation...
+Segment elevup and elevdn not specified for nstrm=-1439 and isfropt=1
+passed.
+
+Checking reach_data for downstream rises in streambed elevation...
+passed.
+
+Checking reach_data for inconsistencies between streambed elevations and the model grid...
+1 reaches encountered with streambed above model top.
+Model top violations:
+i j iseg ireach strtop modeltop strhc1 reachID diff
+49 15 18 19 922.1929321289062 920.3099975585938 1.0 786 -1.8829345703125
+
+
+Checking segment_data for inconsistencies between segment end elevations and the model grid...
+Segment elevup and elevdn not specified for nstrm=-1439 and isfropt=1
+passed.
+
+Checking for streambed slopes of less than 0.0001...
+passed.
+
+Checking for streambed slopes of greater than 1.0...
+passed.
+
+wrote tf_SFR.chk
+wrote /home/runner/work/sfrmaker/sfrmaker/examples/Notebooks/../tylerforks/tylerforks/tf.sfr.
+</pre></div></div>
+</div>
+</section>
+<section id="Writing-a-MODFLOW-6-SFR-package">
+<h2>Writing a MODFLOW-6 SFR package<a class="headerlink" href="#Writing-a-MODFLOW-6-SFR-package" title="Link to this heading">¶</a></h2>
+<p>Alternatively, a MODFLOW-6 style SFR package can be written by specifying <code class="docutils literal notranslate"><span class="pre">version='mf6'</span></code></p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sfrdata</span><span class="o">.</span><span class="n">write_package</span><span class="p">(</span><span class="n">version</span><span class="o">=</span><span class="s1">&#39;mf6&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+SFRmaker v. 0.post1+g86084ab
+
+Running Flopy v. 3.9.0.dev2 diagnostics...
+passed.
+
+Checking for continuity in segment and reach numbering...
+passed.
+
+Checking for increasing segment numbers in downstream direction...
+passed.
+
+Checking for circular routing...
+passed.
+
+Checking reach connections for proximity...
+5 segments with non-adjacent reaches found.
+At segments:
+41 20 21 22 23
+
+5 segments with non-adjacent reaches found.
+At segments:
+41 20 21 22 23
+
+
+Checking for model cells with multiple non-zero SFR conductances...
+24 model cells with multiple non-zero SFR conductances found.
+This may lead to circular routing between collocated reaches.
+Nodes with overlapping conductances:
+k       i       j       iseg    ireach  rchlen  strthick        strhc1
+2       110     119     1       8       268.5836486816406       1.0     1.0
+2       110     119     2       1       72.61438751220703       1.0     1.0
+0       87      122     3       54      35.35249328613281       1.0     1.0
+0       87      122     4       33      231.09567260742188      1.0     1.0
+0       76      110     5       47      204.88766479492188      1.0     1.0
+0       87      122     6       1       30.414600372314453      1.0     1.0
+2       84      119     6       7       271.24835205078125      1.0     1.0
+2       84      119     6       9       26.37481117248535       1.0     1.0
+0       76      110     6       27      75.33216094970703       1.0     1.0
+2       25      24      7       42      95.27275085449219       1.0     1.0
+2       25      24      8       47      230.57635498046875      1.0     1.0
+1       58      132     9       25      48.14010238647461       1.0     1.0
+1       58      132     9       27      92.92947387695312       1.0     1.0
+0       48      109     9       64      251.07447814941406      1.0     1.0
+0       76      110     10      1       69.20076751708984       1.0     1.0
+0       48      108     10      40      19.56378746032715       1.0     1.0
+0       48      109     10      41      122.84815216064453      1.0     1.0
+0       48      108     10      42      28.33331871032715       1.0     1.0
+2       25      24      11      1       21.51937484741211       1.0     1.0
+2       18      17      11      15      148.96444702148438      1.0     1.0
+2       18      17      12      57      76.79739379882812       1.0     1.0
+1       80      49      13      70      159.26600646972656      1.0     1.0
+0       48      108     14      1       125.24523162841797      1.0     1.0
+0       47      98      14      22      67.60189056396484       1.0     1.0
+0       47      98      14      24      103.03018188476562      1.0     1.0
+0       54      89      14      39      34.45417785644531       1.0     1.0
+0       54      89      14      41      60.66257095336914       1.0     1.0
+0       53      78      14      57      61.411861419677734      1.0     1.0
+0       53      78      14      59      28.438196182250977      1.0     1.0
+0       52      76      14      62      63.360740661621094      1.0     1.0
+0       52      76      14      64      294.8589782714844       1.0     1.0
+1       54      73      14      69      341.6566162109375       1.0     1.0
+1       54      73      14      71      27.671581268310547      1.0     1.0
+1       80      49      14      125     39.762516021728516      1.0     1.0
+2       18      17      16      1       185.54652404785156      1.0     1.0
+2       15      3       16      21      32.64251708984375       1.0     1.0
+2       36      11      17      38      57.836700439453125      1.0     1.0
+2       110     159     19      2       201.63583374023438      1.0     1.0
+0       38      85      21      8       72.7103042602539        1.0     1.0
+0       38      85      21      9       54.39541244506836       1.0     1.0
+2       108     57      24      8       237.04415893554688      1.0     1.0
+2       108     57      24      9       46.142940521240234      1.0     1.0
+0       94      35      24      45      96.94855499267578       1.0     1.0
+0       94      35      24      47      91.54985046386719       1.0     1.0
+2       91      35      24      50      60.89990997314453       1.0     1.0
+2       91      34      24      51      61.16813278198242       1.0     1.0
+1       80      49      25      1       146.93106079101562      1.0     1.0
+2       91      35      25      26      308.2864685058594       1.0     1.0
+2       91      34      25      27      75.82389068603516       1.0     1.0
+2       15      3       31      1       273.603271484375        1.0     1.0
+2       36      11      36      1       263.1260681152344       1.0     1.0
+2       110     159     38      1       24.2677001953125        1.0     1.0
+2       91      34      42      1       130.52822875976562      1.0     1.0
+1       92      30      42      6       66.65867614746094       1.0     1.0
+1       92      30      42      8       252.91909790039062      1.0     1.0
+
+Checking for streambed tops of less than -10...
+passed.
+
+Checking for streambed tops of greater than 15000...
+passed.
+
+Checking segment_data for downstream rises in streambed elevation...
+Segment elevup and elevdn not specified for nstrm=-1439 and isfropt=1
+passed.
+
+Checking reach_data for downstream rises in streambed elevation...
+passed.
+
+Checking reach_data for inconsistencies between streambed elevations and the model grid...
+1 reaches encountered with streambed above model top.
+Model top violations:
+i j iseg ireach strtop modeltop strhc1 reachID diff
+49 15 18 19 922.1929321289062 920.3099975585938 1.0 786 -1.8829345703125
+
+
+Checking segment_data for inconsistencies between segment end elevations and the model grid...
+Segment elevup and elevdn not specified for nstrm=-1439 and isfropt=1
+passed.
+
+Checking for streambed slopes of less than 0.0001...
+passed.
+
+Checking for streambed slopes of greater than 1.0...
+passed.
+
+wrote tf_SFR.chk
+converting segment data to period data...
+converting reach and segment data to package data...
+wrote /home/runner/work/sfrmaker/sfrmaker/examples/Notebooks/../tylerforks/tylerforks/tf.sfr
+</pre></div></div>
+</div>
+</section>
+<section id="Writing-tables">
+<h2>Writing tables<a class="headerlink" href="#Writing-tables" title="Link to this heading">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">reach_data</span></code> and <code class="docutils literal notranslate"><span class="pre">segment_data</span></code> tables can be written out to csv files for further processing:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sfrdata</span><span class="o">.</span><span class="n">write_tables</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+wrote tables/tf_sfr_reach_data.csv
+wrote tables/tf_sfr_segment_data.csv
+</pre></div></div>
+</div>
+<p>and then read back in to create an <code class="docutils literal notranslate"><span class="pre">SFRData</span></code> instance</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sfrdata2</span> <span class="o">=</span> <span class="n">sfrmaker</span><span class="o">.</span><span class="n">SFRData</span><span class="o">.</span><span class="n">from_tables</span><span class="p">(</span><span class="s1">&#39;tables/tf_sfr_reach_data.csv&#39;</span><span class="p">,</span> <span class="s1">&#39;tables/tf_sfr_segment_data.csv&#39;</span><span class="p">,</span>
+                                        <span class="n">grid</span><span class="o">=</span><span class="n">grid</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Model grid information
+structured grid
+nnodes: 17,760
+nlay: 1
+nrow: 111
+ncol: 160
+model length units: undefined
+crs: EPSG:26715
+bounds: 682688.00, 5139052.00, 694880.00, 5147510.20
+active area defined by: isfr array
+
+</pre></div></div>
+</div>
+</section>
+<section id="Writing-shapefiles">
+<h2>Writing shapefiles<a class="headerlink" href="#Writing-shapefiles" title="Link to this heading">¶</a></h2>
+<p>Shapefiles can also be written to visualize the SFR package. These include: * hydrography linestrings associated with each reach * model cell polygons associated with each reach * outlet locations where water is leaving the model * routing connections (as lines drawn between cell centers) * the locations of specified inflows or any other period data * observation locations (if observations were supplied as input)</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sfrdata</span><span class="o">.</span><span class="n">write_shapefiles</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+writing shps/tf_sfr_cells.shp... Done
+writing shps/tf_sfr_outlets.shp... Done
+writing shps/tf_sfr_lines.shp... Done
+writing shps/tf_sfr_routing.shp... Done
+No period data to export!
+No observations to export!
+No non-zero values of flow to export!
+</pre></div></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../inputs.html" class="btn btn-neutral float-left" title="Input data requirements" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="preprocessing_demo.html" class="btn btn-neutral float-right" title="Preprocessing hydrography" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+      <span class="lastupdated">Last updated on Oct 18, 2024.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
