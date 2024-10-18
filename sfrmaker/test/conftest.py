@@ -142,9 +142,9 @@ def shellmound_model(get_shellmound_model):
     return copy.deepcopy(get_shellmound_model)
 
 
-@pytest.fixture(scope='function')
-def shellmound_grid(shellmound_model):
-    m = shellmound_model
+@pytest.fixture(scope='module')
+def get_shellmound_grid(get_shellmound_model):
+    m = copy.deepcopy(get_shellmound_model)
     mg = flopy.discretization.StructuredGrid(delr=m.dis.delr.array,  # cell spacing along a row
                                              delc=m.dis.delc.array,  # cell spacing along a column
                                              xoff=500955.0, yoff=1176285.0,  # lower left corner of model grid
@@ -154,6 +154,9 @@ def shellmound_grid(shellmound_model):
     m._modelgrid = mg
     return mg
 
+@pytest.fixture(scope='function')
+def shellmound_grid(get_shellmound_grid):
+    return copy.deepcopy(get_shellmound_grid)
 
 @pytest.fixture(scope='function')
 def shellmound_sfrmaker_grid(shellmound_grid):
@@ -239,7 +242,7 @@ def tylerforks_sfrdata(tylerforks_model, tylerforks_lines_from_NHDPlus,
 
 
 @pytest.fixture(scope='module')
-def lines_from_shapefile(test_data_path):
+def get_lines_from_shapefile(test_data_path):
     flowlines_file = '{}/shellmound/flowlines.shp'.format(test_data_path)
     lns = sfrmaker.Lines.from_shapefile(flowlines_file,
                                         id_column='COMID',
@@ -258,16 +261,25 @@ def lines_from_shapefile(test_data_path):
 
 
 @pytest.fixture(scope='function')
-def shellmound_sfrdata(shellmound_model, lines_from_shapefile,
-                       shellmound_grid):
-    m = shellmound_model
-    lines = copy.deepcopy(lines_from_shapefile)
+def lines_from_shapefile(get_lines_from_shapefile):
+    return copy.deepcopy(get_lines_from_shapefile)
+
+
+@pytest.fixture(scope='module')
+def get_shellmound_sfrdata(get_shellmound_model, get_lines_from_shapefile,
+                       get_shellmound_grid):
+    m = copy.deepcopy(get_shellmound_model)
+    lines = copy.deepcopy(get_lines_from_shapefile)
+    shellmound_grid = copy.deepcopy(get_shellmound_grid)
     # from the lines and StructuredGrid instances, make a sfrmaker.sfrdata instance
     # (lines are intersected with the model grid and converted to reaches, etc.)
     sfrdata = lines.to_sfr(grid=shellmound_grid,
                                           model=m)
     return sfrdata
 
+@pytest.fixture(scope='function')
+def shellmound_sfrdata(get_shellmound_sfrdata):
+    return copy.deepcopy(get_shellmound_sfrdata)
 
 @pytest.fixture(params=['shellmound_sfrdata',
                         'tylerforks_sfrdata'])
@@ -276,7 +288,6 @@ def sfrdata(request,
             tylerforks_sfrdata):
     return {'shellmound_sfrdata': shellmound_sfrdata,
             'tylerforks_sfrdata': tylerforks_sfrdata}[request.param]
-
 
 @pytest.fixture(scope='function')
 def neversink_lines_from_nhdplus_hr(datapath):
