@@ -107,7 +107,7 @@ def test_add_to_perioddata2(data):
     sfrd = data['sfrd']
     flowline_routing = data['flowline_routing']
     rd = data['rd']
-    flowline_routing['6'] = '1000005'
+    flowline_routing['6'] = '18046688'
     flows = pd.DataFrame({'Q_avg': [100., 10., 200., 20.],
                         'per': [0, 1, 0, 1],
                         'line_id': [6, 6, 4, 4]})
