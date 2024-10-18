@@ -61,59 +61,72 @@ def test_get_inflows_from_parent_model(shellmound_sfrdata):
                                            #inset_grid, active_area=None
                                            )
 
-
-def test_add_to_perioddata(shellmound_sfrdata):
-    sfrd = shellmound_sfrdata  # copy.deepcopy(shellmound_sfrdata)
-    rd = shellmound_sfrdata.reach_data.copy()
-    line_id = dict(zip(rd.iseg, rd.line_id))
+@pytest.fixture(scope='function')
+def data(shellmound_sfrdata):
     sfr_routing = shellmound_sfrdata.segment_routing.copy()
+    data = {
+        'sfrd': shellmound_sfrdata,  # copy.deepcopy(shellmound_sfrdata)
+        'rd': shellmound_sfrdata.reach_data.copy()
+    }
+    line_id = dict(zip(data['rd'].iseg, data['rd'].line_id))
 
-    # routing for source hydrography
-    flowline_routing = {line_id.get(k, 0): line_id.get(v, 0)
-                        for k, v in sfr_routing.items()}
+        # routing for source hydrography
+    data['flowline_routing'] = {line_id.get(k, 0): line_id.get(v, 0)
+                            for k, v in sfr_routing.items()}
     nlines = 4
-    seq = add_line_sequence(flowline_routing, nlines=nlines)
-    
+    data['seq'] = add_line_sequence(data['flowline_routing'], nlines=nlines)
+    return data
+
+def test_add_to_perioddata1(data):
     # two inflows applied upstream of model on same path;
     # results should be summed an applied to first line_id in model
+    sfrd = data['sfrd']
+    flowline_routing = data['flowline_routing']
+    rd = data['rd']
     flows = pd.DataFrame({'Q_avg': [100., 10., 200., 20.],
-                          'per': [0, 1, 0, 1],
-                          'line_id': [2, 2, 4, 4]})
+                        'per': [0, 1, 0, 1],
+                        'line_id': [2, 2, 4, 4]})
     add_to_perioddata(sfrd, flows,
-                      flowline_routing=flowline_routing,
-                      variable='inflow',
-                      line_id_column='line_id',
-                      period_column='per',
-                      data_column='Q_avg',
-                      one_inflow_per_path=False)
+                    flowline_routing=flowline_routing,
+                    variable='inflow',
+                    line_id_column='line_id',
+                    period_column='per',
+                    data_column='Q_avg',
+                    one_inflow_per_path=False)
     flows = flows.groupby('per').sum()
     assert np.allclose(sfrd.period_data['inflow'].values, flows['Q_avg'].values)
     assert np.allclose(sfrd.period_data.index.get_level_values(0), 
-                       flows.index.values)
-    assert rd.loc[rd.line_id == seq[-1], 'rno'].values[0] == sfrd.period_data.index.levels[1].values[0]
-    
+                    flows.index.values)
+    assert rd.loc[rd.line_id == data['seq'][-1], 'rno'].values[0] ==\
+        sfrd.period_data.index.levels[1].values[0]
+
+def test_add_to_perioddata2(data):
     # two inflows applied upstream of model on different paths;
     # inflows should be applied to the first lines in the model 
     # along their respective paths
+    sfrd = data['sfrd']
+    flowline_routing = data['flowline_routing']
+    rd = data['rd']
     flowline_routing['6'] = '1000005'
     flows = pd.DataFrame({'Q_avg': [100., 10., 200., 20.],
-                          'per': [0, 1, 0, 1],
-                          'line_id': [6, 6, 4, 4]})
+                        'per': [0, 1, 0, 1],
+                        'line_id': [6, 6, 4, 4]})
     add_to_perioddata(sfrd, flows,
-                      flowline_routing=flowline_routing,
-                      variable='inflow',
-                      line_id_column='line_id',
-                      period_column='per',
-                      data_column='Q_avg',
-                      one_inflow_per_path=False)
+                    flowline_routing=flowline_routing,
+                    variable='inflow',
+                    line_id_column='line_id',
+                    period_column='per',
+                    data_column='Q_avg',
+                    one_inflow_per_path=False)
     assert np.allclose(sfrd.period_data['inflow'].sort_values(), flows['Q_avg'].sort_values())
     assert np.allclose(sfrd.period_data.index.get_level_values(0), 
-                       sorted(flows['per']))
-    lines = {flowline_routing['6'], seq[-1]}
+                    sorted(flows['per']))
+    lines = {flowline_routing['6'], data['seq'][-1]}
     rnos = rd.loc[rd.line_id.isin(lines), 'rno']
     assert not set(sfrd.period_data.index.levels[1]).difference(rnos)
     assert len(set(sfrd.period_data.index.levels[1])) == 2
 
+def test_add_to_perioddata3(data):
     # two inflows applied along same path in model;
     # one_inflow_per_path=True
     # inflows should be summed and applied to most downstream reach
@@ -121,44 +134,48 @@ def test_add_to_perioddata(shellmound_sfrdata):
     # sfrd.period_data wasn't reset, so should contain
     # updated values of 300 and 30 at reach 354
     # and existing values of 100 and 10 at 395
+    sfrd = data['sfrd']
+    flowline_routing = data['flowline_routing']
     flows = pd.DataFrame({'Q_avg': [100., 10., 200., 20.],
-                          'per': [0, 1, 0, 1],
-                          'line_id': [2, 2, 4, 4]})
+                        'per': [0, 1, 0, 1],
+                        'line_id': [2, 2, 4, 4]})
     add_to_perioddata(sfrd, flows,
-                      flowline_routing=flowline_routing,
-                      variable='inflow',
-                      line_id_column='line_id',
-                      period_column='per',
-                      data_column='Q_avg',
-                      one_inflow_per_path=True)
+                    flowline_routing=flowline_routing,
+                    variable='inflow',
+                    line_id_column='line_id',
+                    period_column='per',
+                    data_column='Q_avg',
+                    one_inflow_per_path=True)
     assert np.allclose(sfrd.period_data['inflow'].values, [300., 100., 30., 10.])
     # these reach numbers are liable to change
     rnos = [
-        sfrd.reach_data.loc[sfrd.reach_data['line_id'] == seq[-1], 'rno'].min(),
+        sfrd.reach_data.loc[sfrd.reach_data['line_id'] == data['seq'][-1], 'rno'].min(),
         sfrd.reach_data.loc[sfrd.reach_data['line_id'] == '1000005', 'rno'].min()
     ]
     assert np.allclose(sfrd.period_data.index.levels[1], rnos)
 
+def test_add_to_perioddata3(data):
     # two inflows applied along same path in model;
     # one_inflow_per_path=False
     # inflows should be applied to their respective reaches
-
+    sfrd = data['sfrd']
+    flowline_routing = data['flowline_routing']
     flows = pd.DataFrame({'Q_avg': [100., 10., 200., 20.],
-                          'per': [0, 1, 0, 1],
-                          'line_id': ['17955337', '17955337', 
-                                      flowline_routing['17955337'], 
-                                      flowline_routing['17955337']
-                                      ]})
+                        'per': [0, 1, 0, 1],
+                        'line_id': ['17955337', '17955337', 
+                                    flowline_routing['17955337'], 
+                                    flowline_routing['17955337']
+                                    ]})
     sfrd._period_data = None
     add_to_perioddata(sfrd, flows,
-                      flowline_routing=flowline_routing,
-                      variable='inflow',
-                      line_id_column='line_id',
-                      period_column='per',
-                      data_column='Q_avg',
-                      one_inflow_per_path=False)
+                    flowline_routing=flowline_routing,
+                    variable='inflow',
+                    line_id_column='line_id',
+                    period_column='per',
+                    data_column='Q_avg',
+                    one_inflow_per_path=False)
     assert np.allclose(sfrd.period_data['inflow'].sort_index(level='rno').values, 
-                       [100., 10., 200., 20.])
+                    [100., 10., 200., 20.])
     assert np.allclose(sfrd.period_data.index.levels[1], [354, 401])
     
     
