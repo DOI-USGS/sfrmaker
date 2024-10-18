@@ -15,10 +15,10 @@
    "id": "9ff268d2",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2024-10-18T20:32:10.049808Z",
-     "iopub.status.busy": "2024-10-18T20:32:10.049647Z",
-     "iopub.status.idle": "2024-10-18T20:32:11.144204Z",
-     "shell.execute_reply": "2024-10-18T20:32:11.143748Z"
+     "iopub.execute_input": "2024-10-18T20:55:57.020556Z",
+     "iopub.status.busy": "2024-10-18T20:55:57.020397Z",
+     "iopub.status.idle": "2024-10-18T20:55:58.143224Z",
+     "shell.execute_reply": "2024-10-18T20:55:58.142677Z"
     }
    },
    "outputs": [],
@@ -46,10 +46,10 @@
    "id": "1fde68c1",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2024-10-18T20:32:11.146214Z",
-     "iopub.status.busy": "2024-10-18T20:32:11.145875Z",
-     "iopub.status.idle": "2024-10-18T20:32:13.356337Z",
-     "shell.execute_reply": "2024-10-18T20:32:13.355763Z"
+     "iopub.execute_input": "2024-10-18T20:55:58.145486Z",
+     "iopub.status.busy": "2024-10-18T20:55:58.144929Z",
+     "iopub.status.idle": "2024-10-18T20:56:00.430309Z",
+     "shell.execute_reply": "2024-10-18T20:56:00.429873Z"
     },
     "tags": [
      "\"hide-output\""
@@ -96,10 +96,10 @@
    "id": "f5867efe",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2024-10-18T20:32:13.358576Z",
-     "iopub.status.busy": "2024-10-18T20:32:13.357952Z",
-     "iopub.status.idle": "2024-10-18T20:32:13.363298Z",
-     "shell.execute_reply": "2024-10-18T20:32:13.362817Z"
+     "iopub.execute_input": "2024-10-18T20:56:00.432374Z",
+     "iopub.status.busy": "2024-10-18T20:56:00.432056Z",
+     "iopub.status.idle": "2024-10-18T20:56:00.437397Z",
+     "shell.execute_reply": "2024-10-18T20:56:00.436931Z"
     }
    },
    "outputs": [
@@ -125,10 +125,10 @@
    "id": "edb2d15c",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2024-10-18T20:32:13.364932Z",
-     "iopub.status.busy": "2024-10-18T20:32:13.364515Z",
-     "iopub.status.idle": "2024-10-18T20:32:13.368106Z",
-     "shell.execute_reply": "2024-10-18T20:32:13.367619Z"
+     "iopub.execute_input": "2024-10-18T20:56:00.439014Z",
+     "iopub.status.busy": "2024-10-18T20:56:00.438706Z",
+     "iopub.status.idle": "2024-10-18T20:56:00.442130Z",
+     "shell.execute_reply": "2024-10-18T20:56:00.441736Z"
     }
    },
    "outputs": [
@@ -162,10 +162,10 @@
    "id": "d4fa3676",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2024-10-18T20:32:13.369682Z",
-     "iopub.status.busy": "2024-10-18T20:32:13.369377Z",
-     "iopub.status.idle": "2024-10-18T20:32:13.372637Z",
-     "shell.execute_reply": "2024-10-18T20:32:13.372265Z"
+     "iopub.execute_input": "2024-10-18T20:56:00.443710Z",
+     "iopub.status.busy": "2024-10-18T20:56:00.443480Z",
+     "iopub.status.idle": "2024-10-18T20:56:00.446822Z",
+     "shell.execute_reply": "2024-10-18T20:56:00.446320Z"
     }
    },
    "outputs": [
@@ -200,10 +200,10 @@
    "id": "a64e5605",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2024-10-18T20:32:13.374141Z",
-     "iopub.status.busy": "2024-10-18T20:32:13.373886Z",
-     "iopub.status.idle": "2024-10-18T20:32:13.377203Z",
-     "shell.execute_reply": "2024-10-18T20:32:13.376808Z"
+     "iopub.execute_input": "2024-10-18T20:56:00.448494Z",
+     "iopub.status.busy": "2024-10-18T20:56:00.448123Z",
+     "iopub.status.idle": "2024-10-18T20:56:00.451406Z",
+     "shell.execute_reply": "2024-10-18T20:56:00.450939Z"
     }
    },
    "outputs": [
@@ -238,10 +238,10 @@
    "id": "b2250a66",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2024-10-18T20:32:13.378574Z",
-     "iopub.status.busy": "2024-10-18T20:32:13.378427Z",
-     "iopub.status.idle": "2024-10-18T20:32:13.474391Z",
-     "shell.execute_reply": "2024-10-18T20:32:13.473947Z"
+     "iopub.execute_input": "2024-10-18T20:56:00.453000Z",
+     "iopub.status.busy": "2024-10-18T20:56:00.452699Z",
+     "iopub.status.idle": "2024-10-18T20:56:00.550502Z",
+     "shell.execute_reply": "2024-10-18T20:56:00.550034Z"
     }
    },
    "outputs": [
@@ -299,10 +299,10 @@
    "id": "ee910bc5",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2024-10-18T20:32:13.476005Z",
-     "iopub.status.busy": "2024-10-18T20:32:13.475838Z",
-     "iopub.status.idle": "2024-10-18T20:32:13.479214Z",
-     "shell.execute_reply": "2024-10-18T20:32:13.478837Z"
+     "iopub.execute_input": "2024-10-18T20:56:00.552357Z",
+     "iopub.status.busy": "2024-10-18T20:56:00.551953Z",
+     "iopub.status.idle": "2024-10-18T20:56:00.555553Z",
+     "shell.execute_reply": "2024-10-18T20:56:00.555125Z"
     }
    },
    "outputs": [
