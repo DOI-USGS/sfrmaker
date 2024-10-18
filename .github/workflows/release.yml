@@ -105,7 +105,7 @@ jobs:
           git config core.sharedRepository true
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git commit -m --allow-empty "ci(release): Version ${{ steps.get_version.outputs.version }}"
+          git commit --allow-empty -m "ci(release): Version ${{ steps.get_version.outputs.version }}"
           git push origin "${{ github.ref_name }}"
           
   pr:
