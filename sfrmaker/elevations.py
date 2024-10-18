@@ -6,6 +6,57 @@ import numpy as np
 from sfrmaker.routing import get_nextupsegs, get_upsegs, make_graph
 
 
+def get_slopes(streambed_tops, reach_lengths, reach_numbers, outreach_numbers, 
+               default_slope=0.001, minimum_slope=0.0001,
+                maximum_slope=1.):
+    """Compute slopes by reach using values in strtop (streambed top) and rchlen (reach length)
+    columns of reach_data. The slope for a reach n is computed as strtop(n) - strtop(n+1) / rchlen(n).
+    Slopes for outlet reaches are set equal to a default value (default_slope).
+    Populates the slope column in reach_data.
+
+    Parameters
+    ----------
+    streambed_top : sequence
+        Streambed top elevations
+    reach_lengths : sequence
+        Reach lengths
+    reach_numbers : sequence
+        Unique identifiers for each reach.
+    outreach_numbers : sequence
+        Unique identifier of next downtream reach.
+    default_slope : float
+        Slope value applied to outlet reaches (where water leaves the model).
+        Default value is 0.001
+    minimum_slope : float
+        Assigned to reaches with computed slopes less than this value.
+        This ensures that the Manning's equation won't produce unreasonable values of stage
+        (in other words, that stage is consistent with assumption that
+        streamflow is primarily drive by the streambed gradient).
+        Default value is 0.0001.
+    maximum_slope : float
+        Assigned to reaches with computed slopes more than this value.
+        Default value is 1.
+    """
+    # cast everything to lists to avoid confusion with numpy vs. pandas indexers
+    streambed_tops = list(streambed_tops)
+    reach_lengths = list(reach_lengths)
+    reach_numbers = list(reach_numbers)
+    outreach_numbers = list(outreach_numbers)
+    assert np.sum(outreach_numbers) > 0, \
+        ("outreach_numbers appear to be invalid; make sure outreaches are popluated, "
+         "for example by running SFRData.set_outreaches()")
+    elev = dict(zip(reach_numbers, streambed_tops))
+    dist = dict(zip(reach_numbers, reach_lengths))
+    dnelev = {rno: elev[outreach_numbers[i]] if outreach_numbers[i] != 0
+              else -9999 for i, rno in enumerate(reach_numbers)}
+    slopes = np.array(
+        [(elev[rno] - dnelev[rno]) / dist[rno] if dnelev[rno] != -9999 and dist[rno] > 0
+            else default_slope for rno in reach_numbers])
+    slopes[slopes < minimum_slope] = minimum_slope
+    slopes[slopes > maximum_slope] = maximum_slope
+    return slopes
+        
+        
 def smooth_elevations(fromids, toids, elevations, start_elevations=None):  # elevup, elevdn):
     """
 
