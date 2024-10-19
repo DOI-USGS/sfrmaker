@@ -149,9 +149,7 @@ jobs:
       - name: Install Python dependencies
         run: |
           pip install --upgrade pip
-          pip install build twine
-          pip install .
-          pip install ".[lint, test, optional]"     
+          pip install build twine   
 
       - name: Build package
         run: python -m build
