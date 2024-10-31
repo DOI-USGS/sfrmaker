@@ -10,6 +10,7 @@ import numpy as np
 import pyproj
 from shapely.geometry import shape, Polygon, box
 from shapely.ops import unary_union
+from shapely.validation import make_valid
 import gisutils
 from gisutils import df2shp, shp2df, project, get_shapefile_crs, get_authority_crs
 import sfrmaker
@@ -103,15 +104,20 @@ def intersect_rtree(geom1, geom2, index=None):
     geom1 : list
         list of shapely geometry objects
     geom2 : list
-        list of shapely polygon objects to be intersected with features in geom1
+        list of shapely geometry objects to be intersected with features in geom1
     index :
-        use an index that has already been created
+        use an index that has already been created for geom1
 
     Returns:
     -------
     A list of the same length as geom2; containing for each feature in geom2,
     a list of indicies of intersecting geometries in geom1.
     """
+
+    #make certain that the objects in geom1 and geom2 are all considered valid shapely geometries using "make_valid()"
+    for i in range(len(geom1)): geom1[i] = make_valid(geom1[i])
+    for i in range(len(geom2)): geom2[i] = make_valid(geom2[i])
+    
     if index is None:
         idx = build_rtree_index(geom1)
     else:
@@ -119,12 +125,12 @@ def intersect_rtree(geom1, geom2, index=None):
     isfr = []
     print('\nIntersecting {} features...'.format(len(geom2)))
     ta = time.time()
-    for pind, poly in enumerate(geom2):
+    for pind, geom in enumerate(geom2):
         print('\r{}'.format(pind + 1), end='')
-        # test for intersection with bounding box of each polygon feature in geom2 using spatial index
-        inds = [i for i in idx.intersection(poly.bounds)]
-        # test each feature inside the bounding box for intersection with the polygon geometry
-        inds = [i for i in inds if geom1[i].intersects(poly)]
+        # test for intersection with bounding box of each feature in geom2 using spatial index
+        inds = [i for i in idx.intersection(geom.bounds)]
+        # test each feature inside the bounding box for intersection with the geometry
+        inds = [i for i in inds if geom1[i].intersects(geom)]
         isfr.append(inds)
     print("\nfinished in {:.2f}s".format(time.time() - ta))
     return isfr
@@ -139,7 +145,7 @@ def intersect(geom1, geom2):
     geom1 : list
         list of shapely geometry objects
     geom2 : list
-        list of shapely polygon objects to be intersected with features in geom1
+        list of shapely geometry objects to be intersected with features in geom1
 
     Returns:
     -------
@@ -147,6 +153,10 @@ def intersect(geom1, geom2):
     a list of indicies of intersecting geometries in geom1.
     """
 
+    #make certain that the objects in geom1 and geom2 are all considered valid shapely geometries using "make_valid()"
+    for i in range(len(geom1)): geom1[i] = make_valid(geom1[i])
+    for i in range(len(geom2)): geom2[i] = make_valid(geom2[i])
+    
     isfr = []
     ngeom1 = len(geom1)
     print('Intersecting {} features...'.format(len(geom2)))
