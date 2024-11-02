@@ -50,7 +50,8 @@ def get_crs(prjfile=None, crs=None, **kwargs):
 
 
 def build_rtree_index(geom):
-    """Builds an rtree index. Useful for multiple intersections with same index.
+    """Builds an :class:`rtree.index.Index` (spatial index) object. 
+    Useful for multiple intersections with same index.
 
     Parameters
     ==========
@@ -99,16 +100,19 @@ def intersect_rtree(geom1, geom2, index=None):
     """Intersect features in geom1 with those in geom2. For each feature in geom2, return a list of
      the indices of the intersecting features in geom1.
 
-    Parameters:
+    Parameters
     ----------
     geom1 : list
         list of shapely geometry objects
     geom2 : list
         list of shapely geometry objects to be intersected with features in geom1
-    index :
-        use an index that has already been created for geom1
+    index : rtree spatial index
+        Option to use an r-tree spatial index that has already been created for geom1.
+        The :func:`sfrmaker.gis.build_rtree_index` function can be used to
+        create a spatial index for a list of shapely geometriy objects.
+        by default, None.
 
-    Returns:
+    Returns
     -------
     A list of the same length as geom2; containing for each feature in geom2,
     a list of indicies of intersecting geometries in geom1.
@@ -140,14 +144,14 @@ def intersect(geom1, geom2):
     """Same as intersect_rtree, except without spatial indexing. Fine for smaller datasets,
     but scales by 10^4 with the side of the problem domain.
 
-    Parameters:
+    Parameters
     ----------
     geom1 : list
         list of shapely geometry objects
     geom2 : list
         list of shapely geometry objects to be intersected with features in geom1
 
-    Returns:
+    Returns
     -------
     A list of the same length as geom2; containing for each feature in geom2,
     a list of indicies of intersecting geometries in geom1.
