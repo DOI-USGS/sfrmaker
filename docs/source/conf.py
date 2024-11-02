@@ -109,9 +109,6 @@ todo_include_todos = False
 # a list of builtin themes.
 #
 html_theme = 'sphinx_rtd_theme'
-import sphinx_rtd_theme
-
-html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -206,5 +203,6 @@ intersphinx_mapping = {
     'flopy': ('https://flopy.readthedocs.io/en/latest/', None),
     'rasterstats': ('https://pythonhosted.org/rasterstats/', None),
     'shapely': ('https://shapely.readthedocs.io/en/latest/', None),
-    'pyproj': ('http://pyproj4.github.io/pyproj/stable/', None)
+    'pyproj': ('http://pyproj4.github.io/pyproj/stable/', None),
+    'rtree': ('https://rtree.readthedocs.io/en/latest/', None)
 }
