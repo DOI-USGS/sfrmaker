@@ -775,8 +775,8 @@ class SFRData(DataPackage):
                             rno += 1
                     zero_based_record.append(rno)
                 #zero_based_record = tuple(i - 1 if i > 0 else i + 1 for i in record)
-                if len(zero_based_record) == 1:
-                    zero_based_record.append(None)
+                #if len(zero_based_record) == 1:
+                #    zero_based_record.append(None)
                 zero_based_connectiondata.append(zero_based_record)
             connectiondata = zero_based_connectiondata
         assert packagedata['rno'].min() == 0
