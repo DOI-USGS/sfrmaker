@@ -35,11 +35,10 @@ version |version|
   :caption: User Guide
 
    Input Requirements <inputs>
-   Basic Usage in a scripting context <notebooks/SFRmaker_demo>
-   Preprocessing NHDPlus version 2 data <notebooks/preprocessing_demo>
-   Using SFRmaker with NHDPlus High Resolution <notebooks/lines_from_NHDPlusHR_demo>
+   Preprocessing <notebooks/preprocessing_demo>
+   Using SFRmaker <examples/index.rst>
    Concepts and methods <concepts.rst>
-   Stand-alone tools <notebooks/sfrmaker_tools>
+   Other stand-alone tools <notebooks/sfrmaker_tools>
    Troubleshooting <troubleshooting>
 
 .. toctree::
