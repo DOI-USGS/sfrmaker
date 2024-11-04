@@ -6,15 +6,17 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Basic usage of SFRmaker in a scripting context &mdash; SFRmaker 0.11.3.post10.dev0+g23088f1 documentation</title>
+  <title>Basic usage of SFRmaker in a scripting context &mdash; SFRmaker 0.11.3.post13.dev0+gb72646a documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=7ab3649f" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
       <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
       <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
 
   
-      <script src="../_static/documentation_options.js?v=36f1d7d1"></script>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=6c3111b1"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -123,7 +125,7 @@
            <div itemprop="articleBody">
              
   <section id="Basic-usage-of-SFRmaker-in-a-scripting-context">
-<h1>Basic usage of SFRmaker in a scripting context<a class="headerlink" href="#Basic-usage-of-SFRmaker-in-a-scripting-context" title="Link to this heading">¶</a></h1>
+<h1>Basic usage of SFRmaker in a scripting context<a class="headerlink" href="#Basic-usage-of-SFRmaker-in-a-scripting-context" title="Link to this heading"></a></h1>
 <p>This example illustrates basic usage of SFRmaker in a scripting context. For examples of using SFRmaker with a configuration file, see the MERAS and Tyler Forks examples.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
@@ -137,10 +139,10 @@
 </div>
 </div>
 <section id="Input-requirements">
-<h2>Input requirements<a class="headerlink" href="#Input-requirements" title="Link to this heading">¶</a></h2>
+<h2>Input requirements<a class="headerlink" href="#Input-requirements" title="Link to this heading"></a></h2>
 <p>The most basic input requirements of SFRmaker are hydrography and a model grid. Optionally, a model and a DEM can be input, as demonstrated below. See the <a class="reference external" href="https://aleaf.github.io/sfrmaker/inputs.html">documentation</a> for a more detailed description of inputs.</p>
 <section id="Hydrography">
-<h3>Hydrography<a class="headerlink" href="#Hydrography" title="Link to this heading">¶</a></h3>
+<h3>Hydrography<a class="headerlink" href="#Hydrography" title="Link to this heading"></a></h3>
 <p>In this example, we will use data that has been downloaded from <a class="reference external" href="https://nhdplus.com/NHDPlus/NHDPlusV2_data.php">NHDPlus</a>. The original file structure in the download has been maintained, allowing us to simply supply SFRmaker with a path to the NHDPlus files:</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
@@ -163,7 +165,7 @@
 </section>
 </section>
 <section id="Creating-a-Lines-instance-from-NHDPlus">
-<h2>Creating a <code class="docutils literal notranslate"><span class="pre">Lines</span></code> instance from NHDPlus<a class="headerlink" href="#Creating-a-Lines-instance-from-NHDPlus" title="Link to this heading">¶</a></h2>
+<h2>Creating a <code class="docutils literal notranslate"><span class="pre">Lines</span></code> instance from NHDPlus<a class="headerlink" href="#Creating-a-Lines-instance-from-NHDPlus" title="Link to this heading"></a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">sfrmaker.Lines</span></code> class includes functionality for reading and processing hydrography flowlines. This example shows how to create a <code class="docutils literal notranslate"><span class="pre">Lines</span></code> instance from NHDPlus data.</p>
 <p>For large hydrography datasets, it is advantageous to filter the data when it is read in. The <code class="docutils literal notranslate"><span class="pre">filter</span></code> argument to <code class="docutils literal notranslate"><span class="pre">sfrmaker.Lines</span></code> accepts a shapefile path or tuple of bounding box coordinates. In either case, a bounding box tuple is created and passed to the <code class="docutils literal notranslate"><span class="pre">filter</span></code> method in the <code class="docutils literal notranslate"><span class="pre">`fiona</span></code> package &lt;<a class="reference external" href="https://fiona.readthedocs.io/en/latest/manual.html">https://fiona.readthedocs.io/en/latest/manual.html</a>&gt;`__, which is fast.</p>
 <div class="nbinput docutils container">
@@ -228,7 +230,7 @@ finished in 0.03s
 </div>
 </section>
 <section id="Creating-a-Lines-instance-from-custom-hydrography">
-<h2>Creating a <code class="docutils literal notranslate"><span class="pre">Lines</span></code> instance from custom hydrography<a class="headerlink" href="#Creating-a-Lines-instance-from-custom-hydrography" title="Link to this heading">¶</a></h2>
+<h2>Creating a <code class="docutils literal notranslate"><span class="pre">Lines</span></code> instance from custom hydrography<a class="headerlink" href="#Creating-a-Lines-instance-from-custom-hydrography" title="Link to this heading"></a></h2>
 <p>Alternatively, a <code class="docutils literal notranslate"><span class="pre">Lines</span></code> instance can be created from any hydrography that includes the pertinent attribute fields, which must be specified:</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
@@ -250,7 +252,7 @@ finished in 0.03s
 </div>
 </section>
 <section id="Specifying-a-model-grid-from-a-flopy-StructuredGrid-instance">
-<h2>Specifying a model grid from a flopy <code class="docutils literal notranslate"><span class="pre">StructuredGrid</span></code> instance<a class="headerlink" href="#Specifying-a-model-grid-from-a-flopy-StructuredGrid-instance" title="Link to this heading">¶</a></h2>
+<h2>Specifying a model grid from a flopy <code class="docutils literal notranslate"><span class="pre">StructuredGrid</span></code> instance<a class="headerlink" href="#Specifying-a-model-grid-from-a-flopy-StructuredGrid-instance" title="Link to this heading"></a></h2>
 <p>The next step is to specify a model grid. One option is to specify a flopy <code class="docutils literal notranslate"><span class="pre">StructuredGrid</span></code> instance. SFRmaker will then use this internally to create an instance of its own <code class="docutils literal notranslate"><span class="pre">StructuredGrid</span></code> class. In this case, the row and column spacing must be provided in the units of the projected coordinate reference system (CRS) that the model is in, which is typically meters. In this case, our model grid spacing is 250 feet, so we have to convert.</p>
 <p>Specifying a CRS (via the <code class="docutils literal notranslate"><span class="pre">crs</span></code> argument) is also important, as it allows SFRmaker to automatically reproject any input data to the same CRS as the model grid. <a class="reference external" href="https://proj.org/faq.html#what-is-the-best-format-for-describing-coordinate-reference-systems">The best way to do this is with an EPSG code</a>, as shown below.</p>
 <p>See the flopy documentation for more details about <code class="docutils literal notranslate"><span class="pre">StructuredGrid</span></code>.</p>
@@ -272,7 +274,7 @@ finished in 0.03s
 </div>
 </section>
 <section id="Specifying-a-model-grid-from-a-shapefile">
-<h2>Specifying a model grid from a shapefile<a class="headerlink" href="#Specifying-a-model-grid-from-a-shapefile" title="Link to this heading">¶</a></h2>
+<h2>Specifying a model grid from a shapefile<a class="headerlink" href="#Specifying-a-model-grid-from-a-shapefile" title="Link to this heading"></a></h2>
 <p>Another option is to create an SFRmaker <code class="docutils literal notranslate"><span class="pre">StructuredGrid</span></code> directly using a shapefile. While the basic underpinings are in place for SFRmaker to support unstructured grids, this option hasn’t been fully implemented yet.</p>
 <p>Attribute fields with row and column information must be specified. An polygon defining the area where the SFR network will be created can optionally be specified here, or later in the creation of <code class="docutils literal notranslate"><span class="pre">SFRData</span></code> (see below).</p>
 <div class="nbinput docutils container">
@@ -315,7 +317,7 @@ reading ../tylerforks/active_area.shp...
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.image.AxesImage at 0x7f51c07ebaa0&gt;
+&lt;matplotlib.image.AxesImage at 0x7fcd514e5040&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -327,11 +329,11 @@ reading ../tylerforks/active_area.shp...
 </div>
 </section>
 <section id="Using-the-modelgrid-attached-to-a-flopy-model">
-<h2>Using the <code class="docutils literal notranslate"><span class="pre">modelgrid</span></code> attached to a flopy model<a class="headerlink" href="#Using-the-modelgrid-attached-to-a-flopy-model" title="Link to this heading">¶</a></h2>
+<h2>Using the <code class="docutils literal notranslate"><span class="pre">modelgrid</span></code> attached to a flopy model<a class="headerlink" href="#Using-the-modelgrid-attached-to-a-flopy-model" title="Link to this heading"></a></h2>
 <p>If no grid is supplied as input, SFRmaker will try to use <code class="docutils literal notranslate"><span class="pre">modelgrid</span></code> attribute attached to a supplied flopy model instance. This only works if <code class="docutils literal notranslate"><span class="pre">modelgrid</span></code> is valid. Loading a flopy model with a valid model grid requires the grid information to be specified in the namefile header, and that the model be in the same units as the projected CRS. See the flopy documentation for more details</p>
 </section>
 <section id="Specifying-a-model">
-<h2>Specifying a model<a class="headerlink" href="#Specifying-a-model" title="Link to this heading">¶</a></h2>
+<h2>Specifying a model<a class="headerlink" href="#Specifying-a-model" title="Link to this heading"></a></h2>
 <p>While a model is not required to run SFRmaker, specifying a model is advantageous in that it allows SFRmaker to assign valid model layers for reaches. Models are specified as flopy model instances, which can be loaded or created from scratch (see the flopy documentation). In this case, we are loading a model:</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
@@ -353,7 +355,7 @@ MODFLOW 5 layer(s) 111 row(s) 160 column(s) 1 stress period(s)
 </div>
 </section>
 <section id="Creating-an-SFRData-instance">
-<h2>Creating an SFRData instance<a class="headerlink" href="#Creating-an-SFRData-instance" title="Link to this heading">¶</a></h2>
+<h2>Creating an SFRData instance<a class="headerlink" href="#Creating-an-SFRData-instance" title="Link to this heading"></a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">sfrmaker.SFRData</span></code> class is the primary object for creating or modifying an SFR dataset. A <code class="docutils literal notranslate"><span class="pre">SFRData</span></code> instance can be created from the <code class="docutils literal notranslate"><span class="pre">Lines</span></code> class using the <code class="docutils literal notranslate"><span class="pre">to_sfr()</span></code> method.</p>
 <p>Either a flopy <code class="docutils literal notranslate"><span class="pre">StructuredGrid</span></code> or sfrmaker <code class="docutils literal notranslate"><span class="pre">StructuredGrid</span></code> can be supplied. While MODFLOW and flopy support specification of length units, these aren’t always specified in the model input files, so it is good practice to specifiy the units explicitly to SFRmaker.</p>
 <div class="nbinput docutils container">
@@ -370,12 +372,12 @@ MODFLOW 5 layer(s) 111 row(s) 160 column(s) 1 stress period(s)
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 
-SFRmaker version 0.11.3.post10.dev0+g23088f1
+SFRmaker version 0.11.3.post13.dev0+gb72646a
 
 Creating sfr dataset...
 
 Creating grid class instance from flopy Grid instance...
-grid class created in 0.50s
+grid class created in 0.45s
 
 Model grid information
 structured grid
@@ -412,7 +414,7 @@ Intersecting 42 features...
 finished in 0.14s
 
 Setting up reach data... (may take a few minutes for large grids)
-finished in 0.45s
+finished in 0.47s
 
 Computing widths...
 
@@ -434,13 +436,13 @@ bounds: 682688.00, 5139052.00, 694880.00, 5147510.20
 active area defined by: all cells
 
 
-Time to create sfr dataset: 2.08s
+Time to create sfr dataset: 2.19s
 
 </pre></div></div>
 </div>
 </section>
 <section id="The-SFRData-class">
-<h2>The <code class="docutils literal notranslate"><span class="pre">SFRData</span></code> class<a class="headerlink" href="#The-SFRData-class" title="Link to this heading">¶</a></h2>
+<h2>The <code class="docutils literal notranslate"><span class="pre">SFRData</span></code> class<a class="headerlink" href="#The-SFRData-class" title="Link to this heading"></a></h2>
 <p>Internally, the SFRData class mostly uses the data model for the MODFLOW-2005 style SFR2 package (which includes MODFLOW-NWT), which organizes the input into segments and reaches. Segment and reach data are stored in the <code class="docutils literal notranslate"><span class="pre">reach_data</span></code> and <code class="docutils literal notranslate"><span class="pre">segment_data</span></code> attribute DataFrames. In addition to the MODFLOW-2005 data, reach numbers and their routing connections (as needed for MODFLOW-6) are also stored. On writing of SFR package input, MODFLOW-6 style input can be created via the
 <code class="docutils literal notranslate"><span class="pre">sfrmaker.mf5to6</span></code> module.</p>
 <div class="nbinput nblast docutils container">
@@ -813,7 +815,7 @@ Time to create sfr dataset: 2.08s
 </div>
 </section>
 <section id="Sampling-streambed-top-elevations-from-a-DEM">
-<h2>Sampling streambed top elevations from a DEM<a class="headerlink" href="#Sampling-streambed-top-elevations-from-a-DEM" title="Link to this heading">¶</a></h2>
+<h2>Sampling streambed top elevations from a DEM<a class="headerlink" href="#Sampling-streambed-top-elevations-from-a-DEM" title="Link to this heading"></a></h2>
 <p>While the above dataset contains streambed top elevations read from NHDPlus, a DEM can be sampled to obtain more accurate elevations. If the DEM elevation units are specified, SFRmaker will convert the elevations to model units if needed. See the Streambed_elevation_demo notebook for more information on how this works.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
@@ -830,16 +832,16 @@ Time to create sfr dataset: 2.08s
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 running rasterstats.zonal_stats on buffered LineStrings...
-finished in 8.40s
+finished in 8.48s
 
 
 Smoothing elevations...
-finished in 0.09s
+finished in 0.10s
 </pre></div></div>
 </div>
 </section>
 <section id="Assigning-layers-to-the-reaches">
-<h2>Assigning layers to the reaches<a class="headerlink" href="#Assigning-layers-to-the-reaches" title="Link to this heading">¶</a></h2>
+<h2>Assigning layers to the reaches<a class="headerlink" href="#Assigning-layers-to-the-reaches" title="Link to this heading"></a></h2>
 <p>Once we have a valid set of streambed elevations, the reaches can be assigned to model layers.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
@@ -1031,7 +1033,7 @@ finished in 0.09s
 </div>
 </section>
 <section id="Running-diagnostics">
-<h2>Running diagnostics<a class="headerlink" href="#Running-diagnostics" title="Link to this heading">¶</a></h2>
+<h2>Running diagnostics<a class="headerlink" href="#Running-diagnostics" title="Link to this heading"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">SFRData</span></code> includes a <code class="docutils literal notranslate"><span class="pre">run_diagnostics()</span></code> method that executes the Flopy checker on the SFR package input. While the Flopy checks are only implemented for MODFLOW-2005 style SFR packages, <code class="docutils literal notranslate"><span class="pre">run_diagnostics()</span></code> works on MODFLOW-6 packages as well, by working of an attached MODFLOW-2005 representation of the MODFLOW-6 SFR input. The following checks are executed: * <strong>NaNs</strong> (not a number values, which will cause MODFLOW to crash) * <strong>consecutive segment and reach numbering</strong> * <strong>segment
 numbering that only increases</strong> in the downstream direction * <strong>circular routing sequences</strong> (reaches or segments routing back to themselves) * <strong>routing connection proximity:</strong> The length of routing connections, as determined by the distance between their cell centers, is compared to 1.25 times the diagonal distance across the cell containing the upstream reach. This benchmark length is equivalent to a diagonal connection between two square cells, where one cell had a spacing of 1.5 times the
 other cell (the maximum recommended increase in spacing between two adjacent cells; see Anderson and others, 2015). While this routing proximity check can be helpful for identifying egregious routing issues, in practice, it may not be uncommon for valid routing connections to violate this rule. For example, if the <code class="docutils literal notranslate"><span class="pre">one_reach_per_cell</span></code> option is used in constructing the SFR package with a large grid size, there may be numerous routing connections that extend across several cells. When
@@ -1059,7 +1061,7 @@ wrote tf_SFR.chk
 </div>
 </section>
 <section id="Writing-an-SFR-package">
-<h2>Writing an SFR package<a class="headerlink" href="#Writing-an-SFR-package" title="Link to this heading">¶</a></h2>
+<h2>Writing an SFR package<a class="headerlink" href="#Writing-an-SFR-package" title="Link to this heading"></a></h2>
 <p>Now we can write the package. By default, a MODFLOW-2005 style package is written to the current working directory or the model workspace of the attached model instance.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
@@ -1074,7 +1076,7 @@ wrote tf_SFR.chk
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-SFRmaker v. 0.11.3.post10.dev0+g23088f1
+SFRmaker v. 0.11.3.post13.dev0+gb72646a
 
 Running Flopy v. 3.9.0.dev2 diagnostics...
 passed.
@@ -1195,7 +1197,7 @@ wrote /home/runner/work/sfrmaker/sfrmaker/examples/Notebooks/../tylerforks/tyler
 </div>
 </section>
 <section id="Writing-a-MODFLOW-6-SFR-package">
-<h2>Writing a MODFLOW-6 SFR package<a class="headerlink" href="#Writing-a-MODFLOW-6-SFR-package" title="Link to this heading">¶</a></h2>
+<h2>Writing a MODFLOW-6 SFR package<a class="headerlink" href="#Writing-a-MODFLOW-6-SFR-package" title="Link to this heading"></a></h2>
 <p>Alternatively, a MODFLOW-6 style SFR package can be written by specifying <code class="docutils literal notranslate"><span class="pre">version='mf6'</span></code></p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
@@ -1210,7 +1212,7 @@ wrote /home/runner/work/sfrmaker/sfrmaker/examples/Notebooks/../tylerforks/tyler
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-SFRmaker v. 0.11.3.post10.dev0+g23088f1
+SFRmaker v. 0.11.3.post13.dev0+gb72646a
 
 Running Flopy v. 3.9.0.dev2 diagnostics...
 passed.
@@ -1333,7 +1335,7 @@ wrote /home/runner/work/sfrmaker/sfrmaker/examples/Notebooks/../tylerforks/tyler
 </div>
 </section>
 <section id="Writing-tables">
-<h2>Writing tables<a class="headerlink" href="#Writing-tables" title="Link to this heading">¶</a></h2>
+<h2>Writing tables<a class="headerlink" href="#Writing-tables" title="Link to this heading"></a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">reach_data</span></code> and <code class="docutils literal notranslate"><span class="pre">segment_data</span></code> tables can be written out to csv files for further processing:</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
@@ -1382,7 +1384,7 @@ active area defined by: isfr array
 </div>
 </section>
 <section id="Writing-shapefiles">
-<h2>Writing shapefiles<a class="headerlink" href="#Writing-shapefiles" title="Link to this heading">¶</a></h2>
+<h2>Writing shapefiles<a class="headerlink" href="#Writing-shapefiles" title="Link to this heading"></a></h2>
 <p>Shapefiles can also be written to visualize the SFR package. These include: * hydrography linestrings associated with each reach * model cell polygons associated with each reach * outlet locations where water is leaving the model * routing connections (as lines drawn between cell centers) * the locations of specified inflows or any other period data * observation locations (if observations were supplied as input)</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
@@ -1421,7 +1423,7 @@ No non-zero values of flow to export!
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Oct 19, 2024.
+      <span class="lastupdated">Last updated on Nov 04, 2024.
       </span></p>
   </div>
 

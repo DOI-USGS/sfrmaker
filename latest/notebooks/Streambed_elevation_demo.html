@@ -6,15 +6,17 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Demonstration of how sfrmaker handles streambed elevations &mdash; SFRmaker 0.11.3.post10.dev0+g23088f1 documentation</title>
+  <title>Demonstration of how sfrmaker handles streambed elevations &mdash; SFRmaker 0.11.3.post13.dev0+gb72646a documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=7ab3649f" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
       <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
       <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
 
   
-      <script src="../_static/documentation_options.js?v=36f1d7d1"></script>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=6c3111b1"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -117,7 +119,7 @@
            <div itemprop="articleBody">
              
   <section id="Demonstration-of-how-sfrmaker-handles-streambed-elevations">
-<h1>Demonstration of how <code class="docutils literal notranslate"><span class="pre">sfrmaker</span></code> handles streambed elevations<a class="headerlink" href="#Demonstration-of-how-sfrmaker-handles-streambed-elevations" title="Link to this heading">¶</a></h1>
+<h1>Demonstration of how <code class="docutils literal notranslate"><span class="pre">sfrmaker</span></code> handles streambed elevations<a class="headerlink" href="#Demonstration-of-how-sfrmaker-handles-streambed-elevations" title="Link to this heading"></a></h1>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
@@ -135,7 +137,7 @@
 </div>
 </div>
 <section id="Run-the-first-part-of-the-Tyler-Forks-example-problem-to-get-an-SFRData-instance">
-<h2>Run the first part of the Tyler Forks example problem to get an <code class="docutils literal notranslate"><span class="pre">SFRData</span></code> instance<a class="headerlink" href="#Run-the-first-part-of-the-Tyler-Forks-example-problem-to-get-an-SFRData-instance" title="Link to this heading">¶</a></h2>
+<h2>Run the first part of the Tyler Forks example problem to get an <code class="docutils literal notranslate"><span class="pre">SFRData</span></code> instance<a class="headerlink" href="#Run-the-first-part-of-the-Tyler-Forks-example-problem-to-get-an-SFRData-instance" title="Link to this heading"></a></h2>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
@@ -194,18 +196,18 @@ for basins:
 reading ../tylerforks/NHDPlus/NHDPlusAttributes/PlusFlow.dbf...
 --&gt; building dataframe... (may take a while for large shapefiles)
 
-load finished in 0.08s
+load finished in 0.07s
 
 Getting routing information from NHDPlus Plusflow table...
 finished in 0.03s
 
 
-SFRmaker version 0.11.3.post10.dev0+g23088f1
+SFRmaker version 0.11.3.post13.dev0+gb72646a
 
 Creating sfr dataset...
 
 Creating grid class instance from flopy Grid instance...
-grid class created in 0.39s
+grid class created in 0.38s
 
 Model grid information
 structured grid
@@ -235,11 +237,11 @@ finished in 0.00s
 Intersecting 42 flowlines with 17,760 grid cells...
 
 Building spatial index...
-finished in 0.90s
+finished in 0.89s
 
 Intersecting 42 features...
 42
-finished in 0.13s
+finished in 0.14s
 
 Setting up reach data... (may take a few minutes for large grids)
 finished in 0.45s
@@ -264,20 +266,20 @@ bounds: 682688.00, 5139052.00, 694880.00, 5147510.20
 active area defined by: all cells
 
 
-Time to create sfr dataset: 2.03s
+Time to create sfr dataset: 2.13s
 
 </pre></div></div>
 </div>
 </section>
 <section id="Sample-elevations-from-the-DEM">
-<h2>Sample elevations from the DEM<a class="headerlink" href="#Sample-elevations-from-the-DEM" title="Link to this heading">¶</a></h2>
+<h2>Sample elevations from the DEM<a class="headerlink" href="#Sample-elevations-from-the-DEM" title="Link to this heading"></a></h2>
 <ul class="simple">
 <li><p>the <strong>buffers</strong> method draws a buffer around each LineString representing a reach (default=100m), and then gets the minimum DEM elevation within that buffer, using the <strong>``rasterstats``</strong> package</p></li>
 <li><p>alternatively, the <strong>``cell polygons``</strong> method would do the same thing using the model cell polygons instead to represent the reaches</p></li>
 <li><p>get results with and without smoothing.</p></li>
 </ul>
 <section id="pseudo-code-for-the-smoothing-algoritm:">
-<h3>pseudo code for the smoothing algoritm:<a class="headerlink" href="#pseudo-code-for-the-smoothing-algoritm:" title="Link to this heading">¶</a></h3>
+<h3>pseudo code for the smoothing algoritm:<a class="headerlink" href="#pseudo-code-for-the-smoothing-algoritm:" title="Link to this heading"></a></h3>
 <div class="highlight-none notranslate"><div class="highlight"><pre><span></span>Starting at the outlets to the stream network, list the reaches at each level (reaches that route to an outlet, reaches that route to reaches that route to an outlet, etc...)
 For each level:
     For each stream reach within the level:
@@ -303,7 +305,7 @@ running rasterstats.zonal_stats on buffered LineStrings...
 finished in 8.40s
 
 running rasterstats.zonal_stats on buffered LineStrings...
-finished in 8.43s
+finished in 8.38s
 
 
 Smoothing elevations...
@@ -313,7 +315,7 @@ finished in 0.10s
 </section>
 </section>
 <section id="Make-comparison-plots-of-the-elevations-in-each-segment">
-<h2>Make comparison plots of the elevations in each segment<a class="headerlink" href="#Make-comparison-plots-of-the-elevations-in-each-segment" title="Link to this heading">¶</a></h2>
+<h2>Make comparison plots of the elevations in each segment<a class="headerlink" href="#Make-comparison-plots-of-the-elevations-in-each-segment" title="Link to this heading"></a></h2>
 <ul class="simple">
 <li><p>model_top: elevations sampled from the DEM at the cell centers</p></li>
 <li><p>nhdplus_elevations: reach elevations linearly interpolated from original COMID end elevations in NHDPlus</p></li>
@@ -321,7 +323,7 @@ finished in 0.10s
 <li><p>smooth_sampled_elevs: minimum DEM elevations within each buffered LineString with smoothing applied</p></li>
 </ul>
 <section id="Note:">
-<h3>Note:<a class="headerlink" href="#Note:" title="Link to this heading">¶</a></h3>
+<h3>Note:<a class="headerlink" href="#Note:" title="Link to this heading"></a></h3>
 <p>One of the segments has NHDPlus elevations that are much higher than the model top or DEM. This is due to the segment originating outside of the model domain, which means the COMID start elevation from NHDPlus is invalid.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
@@ -681,7 +683,7 @@ finished in 0.10s
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Oct 19, 2024.
+      <span class="lastupdated">Last updated on Nov 04, 2024.
       </span></p>
   </div>
 

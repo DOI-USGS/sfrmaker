@@ -6,14 +6,16 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Using SFRmaker with a configuration file &mdash; SFRmaker 0.11.3.post10.dev0+g23088f1 documentation</title>
+  <title>Using SFRmaker with a configuration file &mdash; SFRmaker 0.11.3.post13.dev0+gb72646a documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=7ab3649f" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
       <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
 
   
-      <script src="_static/documentation_options.js?v=36f1d7d1"></script>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=6c3111b1"></script>
       <script src="_static/doctools.js?v=9bcbadda"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="_static/clipboard.min.js?v=a7894cd8"></script>
@@ -125,22 +127,22 @@
            <div itemprop="articleBody">
              
   <section id="using-sfrmaker-with-a-configuration-file">
-<h1>Using SFRmaker with a configuration file<a class="headerlink" href="#using-sfrmaker-with-a-configuration-file" title="Link to this heading">¶</a></h1>
+<h1>Using SFRmaker with a configuration file<a class="headerlink" href="#using-sfrmaker-with-a-configuration-file" title="Link to this heading"></a></h1>
 <p>For many applications, the easiest way to get started with SFRmaker is to create a configuration file that can then be used in a simple script to generate an SFR package. The two example problems below illustrate the use of SFRmaker with a configuration file. A <a class="reference internal" href="config-summary.html#sfrmaker-configuration-file-options"><span class="std std-ref">comprehensive summary of configuration file inputs</span></a> is provided in the reference section.</p>
 <section id="meras-3-creating-an-sfr-package-from-a-configuration-file-with-custom-hydrography">
-<h2>MERAS 3: Creating an SFR package from a configuration file with custom hydrography<a class="headerlink" href="#meras-3-creating-an-sfr-package-from-a-configuration-file-with-custom-hydrography" title="Link to this heading">¶</a></h2>
+<h2>MERAS 3: Creating an SFR package from a configuration file with custom hydrography<a class="headerlink" href="#meras-3-creating-an-sfr-package-from-a-configuration-file-with-custom-hydrography" title="Link to this heading"></a></h2>
 <p>This example illustrates the use of custom hydrography with the configuration file, as well the scalability of SFRmaker. An SFR package is generated on a regular 1 km grid (Clark and others, 2018) that spans the Mississippi Embayment, a former bay of the Gulf of Mexico that includes portions of Missouri, Tennessee, Arkansas, Mississippi and Louisiana. The goal is to update the stream network for the Mississippi Embayment Regional Aquifer System (MERAS 2) model (Haugh and others, 2020; Clark and others, 2013) to include a realistic representation of the thousands of mapped streams (Figure 1). NHDPlus hydrography were preprocessed to only include the lines intersecting the MERAS footprint that had a total upstream drainage (arbolate sum) of 20 kilometers or greater (figure 1). Attribute information from NHDPlus, including routing connections, elevations at the upstream and downstream ends of line arcs and channel widths estimated from arbolate sum values (e.g. ref: Feinstein and others (2010, p 266)) were joined to the culled flowlines, which were then saved to a shapefile.</p>
 <figure class="align-left" id="id1">
 <a class="reference internal image-reference" href="_images/meras_comparison.png"><img alt="alternate text" src="_images/meras_comparison.png" style="width: 739.1999999999999px; height: 413.7px;" />
 </a>
 <figcaption>
-<p><span class="caption-text">Figure 1: Location of the MERAS model domain with streams represented in the MERAS 2 model (A); streams mapped in NHDPlus version 2 (B).</span><a class="headerlink" href="#id1" title="Link to this image">¶</a></p>
+<p><span class="caption-text">Figure 1: Location of the MERAS model domain with streams represented in the MERAS 2 model (A); streams mapped in NHDPlus version 2 (B).</span><a class="headerlink" href="#id1" title="Link to this image"></a></p>
 </figcaption>
 </figure>
 <p>Many streams enter the Mississippi Embayment with appreciable flow, which must be accounted for in the SFR package to achieve a realistic mass balance. Inflows to the SFR network for this study were derived from a combination of streamgage records and estimates from a statistical model (ref: MS water res. conference abstract). Inflow values for each site and model stress period were saved in a comma-separated-variable (CSV) format.</p>
 <p>The configuration file for the Mississippi Embayment example is shown below. The configuration file, associate python script, and input files needed to reproduce the example are available on the <a class="reference external" href="https://github.com/aleaf/sfrmaker/examples/meras/">SFRmaker GitHub page</a>. The configuration file is specified in the <a class="reference external" href="yaml.org">YAML format</a>, which maps <code class="docutils literal notranslate"><span class="pre">key:</span> <span class="pre">value</span></code> pairs similar to a Python dictionary. In the SFRmaker configuration file, keys (to the left of the colons) indicate variables or groups of variables; values to apply to those variables are listed to the right of the colons.</p>
 <section id="meras-sfrmaker-config-yml">
-<h3>meras_sfrmaker_config.yml:<a class="headerlink" href="#meras-sfrmaker-config-yml" title="Link to this heading">¶</a></h3>
+<h3>meras_sfrmaker_config.yml:<a class="headerlink" href="#meras-sfrmaker-config-yml" title="Link to this heading"></a></h3>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="nt">package_version</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;mf6&#39;</span>
 <span class="linenos"> 2</span><span class="nt">package_name</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;meras3&#39;</span>
 <span class="linenos"> 3</span><span class="nt">output_path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;meras3&#39;</span>
@@ -190,7 +192,7 @@
 <p>The above configuration file can be used to generate an SFR package with the following Python code:</p>
 </section>
 <section id="make-sfr-py">
-<h3>make_sfr.py:<a class="headerlink" href="#make-sfr-py" title="Link to this heading">¶</a></h3>
+<h3>make_sfr.py:<a class="headerlink" href="#make-sfr-py" title="Link to this heading"></a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="sd">&quot;&quot;&quot;Run the MERAS example.</span>
 <span class="linenos">2</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="linenos">3</span><span class="kn">import</span> <span class="nn">sfrmaker</span>
@@ -202,17 +204,17 @@
 <a class="reference internal image-reference" href="_images/meras_results.png"><img alt="alternate text" src="_images/meras_results.png" style="width: 714.0px; height: 481.0px;" />
 </a>
 <figcaption>
-<p><span class="caption-text">Figure 2: MERAS 3 SFR package, as shown by the shapefiles output from SFRmaker. Visualization of routing connections is illustrated in the map inset, where a connection crossing several cells indicates an error in the input hydrography routing attributes.</span><a class="headerlink" href="#id2" title="Link to this image">¶</a></p>
+<p><span class="caption-text">Figure 2: MERAS 3 SFR package, as shown by the shapefiles output from SFRmaker. Visualization of routing connections is illustrated in the map inset, where a connection crossing several cells indicates an error in the input hydrography routing attributes.</span><a class="headerlink" href="#id2" title="Link to this image"></a></p>
 </figcaption>
 </figure>
 </section>
 </section>
 <section id="the-tyler-forks-watershed-creating-an-sfr-package-from-a-configuration-file-using-nhdplus">
-<h2>The Tyler Forks watershed: Creating an SFR package from a configuration file using NHDPlus<a class="headerlink" href="#the-tyler-forks-watershed-creating-an-sfr-package-from-a-configuration-file-using-nhdplus" title="Link to this heading">¶</a></h2>
+<h2>The Tyler Forks watershed: Creating an SFR package from a configuration file using NHDPlus<a class="headerlink" href="#the-tyler-forks-watershed-creating-an-sfr-package-from-a-configuration-file-using-nhdplus" title="Link to this heading"></a></h2>
 <p>This example shows how a configuration file can be used to build an SFR package from NHDPlus data, with a model grid specified using a MODFLOW model or a shapefile. The example is set in the Tyler Forks watershed in northern Wisconsin, where groundwater/surface interactions are the primary modeling interest.</p>
 <p>In the first configuration file, the Name file and workspace for a MODFLOW-NWT model are specified. An active area denoting where the SFR package will be built is provided with a shapefile. NHDPlus data are provided as a file path to the root folder level for a drainage basin (for example, 04, The Great Lakes), assuming the files within that path are in the same structure as the <a class="reference external" href="https://nhdplus.com/NHDPlus/NHDPlusV2_data.php">download from the NHDPlus website</a>. Finally, a dem is provided as a <a class="reference external" href="notebooks/Streambed_elevation_demo.html">a more accurate source of streambed elevations</a>.</p>
 <section id="tf-sfrmaker-config-yml">
-<h3>tf_sfrmaker_config.yml:<a class="headerlink" href="#tf-sfrmaker-config-yml" title="Link to this heading">¶</a></h3>
+<h3>tf_sfrmaker_config.yml:<a class="headerlink" href="#tf-sfrmaker-config-yml" title="Link to this heading"></a></h3>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="nt">model</span><span class="p">:</span>
 <span class="linenos"> 2</span><span class="w">  </span><span class="nt">namefile</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tf.nam</span>
 <span class="linenos"> 3</span><span class="w">  </span><span class="nt">model_ws</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tylerforks/</span>
@@ -254,7 +256,7 @@
 <p>Either of these configuration files can then be used with a python script similar to the following:</p>
 </section>
 <section id="tylerforks-make-sfr-py">
-<h3>tylerforks/make_sfr.py:<a class="headerlink" href="#tylerforks-make-sfr-py" title="Link to this heading">¶</a></h3>
+<h3>tylerforks/make_sfr.py:<a class="headerlink" href="#tylerforks-make-sfr-py" title="Link to this heading"></a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="sd">&quot;&quot;&quot;Run the Tyler Forks example.</span>
 <span class="linenos">2</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="linenos">3</span><span class="kn">import</span> <span class="nn">sfrmaker</span>
@@ -264,7 +266,7 @@
 <p>This will produce an sfr package for MODFLOW-NWT, csv table representations of the SFR input, and shapefiles for visualizing the SFR package.</p>
 </section>
 <section id="running-the-tylerforks-model">
-<h3>Running the tylerforks model<a class="headerlink" href="#running-the-tylerforks-model" title="Link to this heading">¶</a></h3>
+<h3>Running the tylerforks model<a class="headerlink" href="#running-the-tylerforks-model" title="Link to this heading"></a></h3>
 <p>The above script can be found in the <a class="reference external" href="https://github.com/aleaf/sfrmaker/tree/develop/examples/tylerforks">examples/tylerforks folder</a> of the SFRmaker repository. Assuming the script was run from that location, the resulting MODFLOW model can then be run using the MODFLOW executable packaged with SFRmaker (on Windows):</p>
 <div class="highlight-doscon notranslate"><div class="highlight"><pre><span></span><span class="go">cd tylerforks</span>
 <span class="go">../../../bin/win/mfnwt.exe tf.nam</span>
@@ -291,7 +293,7 @@
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Oct 19, 2024.
+      <span class="lastupdated">Last updated on Nov 04, 2024.
       </span></p>
   </div>
 
