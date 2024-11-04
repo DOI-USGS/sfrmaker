@@ -45,13 +45,13 @@ extensions = [
     'numpydoc',
     'nbsphinx',
     'sphinx_copybutton',
-    'sphinx_gallery.gen_gallery'
+    #'sphinx_gallery.gen_gallery'
 ]
 
-sphinx_gallery_conf = {
-     'examples_dirs': 'examples',   # path to your example scripts
-     'gallery_dirs': 'gallery',  # path to where to save gallery generated output
-}
+#sphinx_gallery_conf = {
+#     'examples_dirs': 'examples',   # path to your example scripts
+#     'gallery_dirs': 'gallery',  # path to where to save gallery generated output
+#}
 
 # Configuration options for plot_directive. See:
 # https://github.com/matplotlib/matplotlib/blob/f3ed922d935751e08494e5fb5311d3050a3b637b/lib/matplotlib/sphinxext/plot_directive.py#L81
