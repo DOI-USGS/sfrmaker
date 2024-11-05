@@ -69,7 +69,7 @@ def test_write_shapefile(tylerforks_lines_from_NHDPlus, test_data_path):
     assert outshp.exists()
 
 
-@pytest.mark.skipif(platform.system() == 'Linux', reason="Fiona FileGDB driver error")
+@pytest.mark.skipif(platform.system() == 'Linux', reason="inscrutable pyogrio.errors.DataSourceError")
 def test_load_nhdplus_hr(neversink_lines_from_nhdplus_hr):
     
     lines = neversink_lines_from_nhdplus_hr
@@ -77,7 +77,7 @@ def test_load_nhdplus_hr(neversink_lines_from_nhdplus_hr):
     assert is_to_one(lines._original_routing)
 
 
-@pytest.mark.skipif(platform.system() == 'Linux', reason="Fiona FileGDB driver error")
+@pytest.mark.skipif(platform.system() == 'Linux', reason="inscrutable pyogrio.errors.DataSourceError")
 @pytest.mark.parametrize('kwargs', (
     {'drop_ftypes': [428], 'drop_NHDPlusIDs': [10000200240966]},
 ))

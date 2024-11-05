@@ -22,11 +22,11 @@ jobs:
       matrix:
         os: [ ubuntu-latest, macos-latest, windows-latest ]
         python-version: ['3.12', '3.11', '3.10'] # ['3.8', '3.x']
-        exclude:
-          # tests with ubuntu-latest, python latest
-          # are executed by build_docs.yaml
-          - os: ubuntu-latest
-            python-version: 3.12
+        # exclude:
+        #   # tests with ubuntu-latest, python latest
+        #   # are executed by build_docs.yaml
+        #   - os: ubuntu-latest
+        #     python-version: 3.12
 
     steps:
     - name: Checkout source
