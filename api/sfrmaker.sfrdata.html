@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>The SFRData Module &mdash; SFRmaker 0.11.3.post14.dev0+g18ad00f documentation</title>
+  <title>The SFRData Module &mdash; SFRmaker 0.11.3.post35.dev0+g0f15d42 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
@@ -15,7 +15,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=104bccf0"></script>
+      <script src="../_static/documentation_options.js?v=186c18ab"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -50,18 +50,14 @@
               <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../philosophy.html"> Philosophy</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../examples.html"> Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html"> Installation</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../inputs.html"> Input Requirements</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../examples.html"> Using SFRmaker with a configuration file</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../notebooks/SFRmaker_demo.html"> Basic Usage in a scripting context</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../notebooks/preprocessing_demo.html"> Preprocessing NHDPlus version 2 data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../notebooks/lines_from_NHDPlusHR_demo.html"> Using SFRmaker with NHDPlus High Resolution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebooks/preprocessing_demo.html"> Preprocessing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../concepts.html"> Concepts and methods</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../notebooks/sfrmaker_tools.html"> Stand-alone tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebooks/sfrmaker_tools.html"> Other stand-alone tools</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../troubleshooting.html"> Troubleshooting</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
@@ -280,7 +276,7 @@ elevations, by default, ‘.’</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="sfrmaker.sfrdata.SFRData.dtypes">
-<span class="sig-name descname"><span class="pre">dtypes</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'geometry':</span> <span class="pre">&lt;class</span> <span class="pre">'object'&gt;,</span> <span class="pre">'i':</span> <span class="pre">&lt;class</span> <span class="pre">'int'&gt;,</span> <span class="pre">'icalc':</span> <span class="pre">&lt;class</span> <span class="pre">'int'&gt;,</span> <span class="pre">'iprior':</span> <span class="pre">&lt;class</span> <span class="pre">'int'&gt;,</span> <span class="pre">'ireach':</span> <span class="pre">&lt;class</span> <span class="pre">'int'&gt;,</span> <span class="pre">'iseg':</span> <span class="pre">&lt;class</span> <span class="pre">'int'&gt;,</span> <span class="pre">'iupseg':</span> <span class="pre">&lt;class</span> <span class="pre">'int'&gt;,</span> <span class="pre">'j':</span> <span class="pre">&lt;class</span> <span class="pre">'int'&gt;,</span> <span class="pre">'k':</span> <span class="pre">&lt;class</span> <span class="pre">'int'&gt;,</span> <span class="pre">'line_id':</span> <span class="pre">'int64',</span> <span class="pre">'name':</span> <span class="pre">&lt;class</span> <span class="pre">'object'&gt;,</span> <span class="pre">'node':</span> <span class="pre">&lt;class</span> <span class="pre">'int'&gt;,</span> <span class="pre">'nseg':</span> <span class="pre">&lt;class</span> <span class="pre">'int'&gt;,</span> <span class="pre">'nstrpts':</span> <span class="pre">&lt;class</span> <span class="pre">'int'&gt;,</span> <span class="pre">'outreach':</span> <span class="pre">&lt;class</span> <span class="pre">'int'&gt;,</span> <span class="pre">'outseg':</span> <span class="pre">&lt;class</span> <span class="pre">'int'&gt;,</span> <span class="pre">'per':</span> <span class="pre">&lt;class</span> <span class="pre">'int'&gt;,</span> <span class="pre">'rno':</span> <span class="pre">&lt;class</span> <span class="pre">'int'&gt;}</span></em><a class="headerlink" href="#sfrmaker.sfrdata.SFRData.dtypes" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">dtypes</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'geometry':</span> <span class="pre">&lt;class</span> <span class="pre">'object'&gt;,</span> <span class="pre">'i':</span> <span class="pre">&lt;class</span> <span class="pre">'int'&gt;,</span> <span class="pre">'icalc':</span> <span class="pre">&lt;class</span> <span class="pre">'int'&gt;,</span> <span class="pre">'iprior':</span> <span class="pre">&lt;class</span> <span class="pre">'int'&gt;,</span> <span class="pre">'ireach':</span> <span class="pre">&lt;class</span> <span class="pre">'int'&gt;,</span> <span class="pre">'iseg':</span> <span class="pre">&lt;class</span> <span class="pre">'int'&gt;,</span> <span class="pre">'iupseg':</span> <span class="pre">&lt;class</span> <span class="pre">'int'&gt;,</span> <span class="pre">'j':</span> <span class="pre">&lt;class</span> <span class="pre">'int'&gt;,</span> <span class="pre">'k':</span> <span class="pre">&lt;class</span> <span class="pre">'int'&gt;,</span> <span class="pre">'line_id':</span> <span class="pre">'object',</span> <span class="pre">'name':</span> <span class="pre">&lt;class</span> <span class="pre">'object'&gt;,</span> <span class="pre">'node':</span> <span class="pre">&lt;class</span> <span class="pre">'int'&gt;,</span> <span class="pre">'nseg':</span> <span class="pre">&lt;class</span> <span class="pre">'int'&gt;,</span> <span class="pre">'nstrpts':</span> <span class="pre">&lt;class</span> <span class="pre">'int'&gt;,</span> <span class="pre">'outreach':</span> <span class="pre">&lt;class</span> <span class="pre">'int'&gt;,</span> <span class="pre">'outseg':</span> <span class="pre">&lt;class</span> <span class="pre">'int'&gt;,</span> <span class="pre">'per':</span> <span class="pre">&lt;class</span> <span class="pre">'int'&gt;,</span> <span class="pre">'rno':</span> <span class="pre">&lt;class</span> <span class="pre">'int'&gt;}</span></em><a class="headerlink" href="#sfrmaker.sfrdata.SFRData.dtypes" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -640,7 +636,7 @@ to the RIV package. If None, all segments are converted (default).</p>
 <dt><strong>rno</strong><span class="classifier">sequence of ints</span></dt><dd><p>Convert the listed reach numbers (nro), and all downstream reaches,
 to the RIV package. If None, all reaches are converted (default).</p>
 </dd>
-<dt><strong>line_ids</strong><span class="classifier">sequence of ints</span></dt><dd><p>Convert the segments corresponding to the line_ids 
+<dt><strong>line_ids</strong><span class="classifier">sequence of ints or strings</span></dt><dd><p>Convert the segments corresponding to the line_ids 
 (unique identifiers for LineString features in the source hydrography), 
 and all downstream segments to the RIV package. If None, all reaches 
 are converted (default).</p>
@@ -809,7 +805,7 @@ and <a class="reference internal" href="#sfrmaker.sfrdata.SFRData.period_data" t
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Nov 04, 2024.
+      <span class="lastupdated">Last updated on Nov 12, 2024.
       </span></p>
   </div>
 

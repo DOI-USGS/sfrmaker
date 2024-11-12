@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>The Preprocessing Module &mdash; SFRmaker 0.11.3.post14.dev0+g18ad00f documentation</title>
+  <title>The Preprocessing Module &mdash; SFRmaker 0.11.3.post35.dev0+g0f15d42 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
@@ -15,7 +15,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=104bccf0"></script>
+      <script src="../_static/documentation_options.js?v=186c18ab"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -52,18 +52,14 @@
               <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../philosophy.html"> Philosophy</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../examples.html"> Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html"> Installation</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../inputs.html"> Input Requirements</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../examples.html"> Using SFRmaker with a configuration file</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../notebooks/SFRmaker_demo.html"> Basic Usage in a scripting context</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../notebooks/preprocessing_demo.html"> Preprocessing NHDPlus version 2 data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../notebooks/lines_from_NHDPlusHR_demo.html"> Using SFRmaker with NHDPlus High Resolution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebooks/preprocessing_demo.html"> Preprocessing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../concepts.html"> Concepts and methods</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../notebooks/sfrmaker_tools.html"> Stand-alone tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebooks/sfrmaker_tools.html"> Other stand-alone tools</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../troubleshooting.html"> Troubleshooting</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
@@ -82,6 +78,8 @@
 <li class="toctree-l3"><a class="reference internal" href="#sfrmaker.preprocessing.get_flowline_routing"><code class="docutils literal notranslate"><span class="pre">get_flowline_routing()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#sfrmaker.preprocessing.get_netcdf_crs_from_grid_mapping"><code class="docutils literal notranslate"><span class="pre">get_netcdf_crs_from_grid_mapping()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#sfrmaker.preprocessing.preprocess_nhdplus"><code class="docutils literal notranslate"><span class="pre">preprocess_nhdplus()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sfrmaker.preprocessing.preprocess_nhdplus_hr_flowlines"><code class="docutils literal notranslate"><span class="pre">preprocess_nhdplus_hr_flowlines()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sfrmaker.preprocessing.preprocess_nhdplus_hr_waterbodies"><code class="docutils literal notranslate"><span class="pre">preprocess_nhdplus_hr_waterbodies()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#sfrmaker.preprocessing.recompute_asums_for_minor_distribs"><code class="docutils literal notranslate"><span class="pre">recompute_asums_for_minor_distribs()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#sfrmaker.preprocessing.sample_NARWidth"><code class="docutils literal notranslate"><span class="pre">sample_NARWidth()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#sfrmaker.preprocessing.swb_runoff_to_csv"><code class="docutils literal notranslate"><span class="pre">swb_runoff_to_csv()</span></code></a></li>
@@ -597,6 +595,88 @@ included here. Columns:</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="sfrmaker.preprocessing.preprocess_nhdplus_hr_flowlines">
+<span class="sig-prename descclassname"><span class="pre">sfrmaker.preprocessing.</span></span><span class="sig-name descname"><span class="pre">preprocess_nhdplus_hr_flowlines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nhdplus_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">active_area</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_fcodes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drop_ids_upstream</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drop_ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drop_isolated</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dest_crs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'preprocessed_flowlines.shp'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/preprocessing.html#preprocess_nhdplus_hr_flowlines"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.preprocessing.preprocess_nhdplus_hr_flowlines" title="Link to this definition"></a></dt>
+<dd><p>Preprocess NHDPlus HR flowline and associated attribute data
+to a shapefile.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>nhdplus_path</strong><span class="classifier">str, pathlike or list of pathlikes</span></dt><dd><p>Path to NHDPlus HR dataset(s) (FileGDB format)</p>
+</dd>
+<dt><strong>active_area</strong><span class="classifier">str, shapely polygon or tuple, optional</span></dt><dd><p>A polygon shapefile, or shapely polygon or bounding box tuple
+(left, bottom, top, right) in the NAD83 GCS (EPSG:4269). The active area
+is converted to a bounding box, which is then used to filter the flowlines
+that are read in. If none, no filtering is performed, and the whole
+area encompased by the input NHDPlus data will be retained. Must be
+in the same CRS as <cite>nhdplus_path</cite> (typically 4269) if
+CRS information isn’t included in the object (i.e. if it
+is a tuple or polygon, or shapefile without a .prj file).
+by default, None</p>
+</dd>
+<dt><strong>keep_fcodes</strong><span class="classifier">sequence, optional</span></dt><dd><p>Option to only retain certain line types
+(e.g. perennial streams), as indicated by their FCodes.
+by default None</p>
+</dd>
+<dt><strong>drop_ids_upstream</strong><span class="classifier">sequence, optional</span></dt><dd><p>Option to drop specified flowlines and
+all flowlines upstream of them, by default None</p>
+</dd>
+<dt><strong>drop_ids: sequence, optional</strong></dt><dd><p>Option to drop specified flowlines.</p>
+</dd>
+<dt><strong>drop_isolated</strong><span class="classifier">bool</span></dt><dd><p>Option to drop flowlines that have outlets lines
+that are wholly inside the active area.
+by default, False</p>
+</dd>
+<dt><strong>dest_crs</strong><span class="classifier">CRS-like, optional</span></dt><dd><p>Reproject preprocessed flowlines to this 
+coorindate reference system (CRS), for example as 
+specified by an EPSG code. See the documentation for 
+<a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input" title="(in pyproj v3.7.0)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.crs.CRS.from_user_input()</span></code></a> for other examples, 
+by default None</p>
+</dd>
+<dt><strong>outfile</strong><span class="classifier">str or pathlike, optional</span></dt><dd><p>Output shapefile path, 
+by default ‘preprocessed_flowlines.shp’</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="sfrmaker.preprocessing.preprocess_nhdplus_hr_waterbodies">
+<span class="sig-prename descclassname"><span class="pre">sfrmaker.preprocessing.</span></span><span class="sig-name descname"><span class="pre">preprocess_nhdplus_hr_waterbodies</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nhdplus_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">active_area</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drop_waterbodies</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_areasqkm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dest_crs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'preprocessed_waterbodies.shp'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/preprocessing.html#preprocess_nhdplus_hr_waterbodies"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.preprocessing.preprocess_nhdplus_hr_waterbodies" title="Link to this definition"></a></dt>
+<dd><p>_summary_</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>nhdplus_path</strong><span class="classifier">str, pathlike or list of pathlikes</span></dt><dd><p>Path to NHDPlus HR dataset(s) (FileGDB format)</p>
+</dd>
+<dt><strong>active_area</strong><span class="classifier">str, shapely polygon or tuple, optional</span></dt><dd><p>A polygon shapefile, or shapely polygon or bounding box tuple
+(left, bottom, top, right). Must be
+in the same CRS as <cite>nhdplus_path</cite> (typically 4269) if
+CRS information isn’t included in the object (i.e. if it
+is a tuple or polygon, or shapefile without a .prj file).
+by default, None</p>
+</dd>
+<dt><strong>drop_waterbodies</strong><span class="classifier">sequence, optional</span></dt><dd><p>Option to drop specified waterbodies (by NHDPlusID), by default None</p>
+</dd>
+<dt><strong>min_areasqkm</strong><span class="classifier">float, optional</span></dt><dd><p>Exclude waterbodies smaller than this size in the output, 
+by default 0.</p>
+</dd>
+<dt><strong>dest_crs</strong><span class="classifier">CRS-like, optional</span></dt><dd><p>Reproject preprocessed flowlines to this 
+coorindate reference system (CRS), for example as 
+specified by an EPSG code. See the documentation for 
+<a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input" title="(in pyproj v3.7.0)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.crs.CRS.from_user_input()</span></code></a> for other examples, 
+by default None</p>
+</dd>
+<dt><strong>outfile</strong><span class="classifier">str or pathlike, optional</span></dt><dd><p>Output shapefile path, 
+by default ‘preprocessed_waterbodies.shp’</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="sfrmaker.preprocessing.recompute_asums_for_minor_distribs">
 <span class="sig-prename descclassname"><span class="pre">sfrmaker.preprocessing.</span></span><span class="sig-name descname"><span class="pre">recompute_asums_for_minor_distribs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">minor_distrib_comids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fl_lengths</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">graph</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">graph_r</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/preprocessing.html#recompute_asums_for_minor_distribs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.preprocessing.recompute_asums_for_minor_distribs" title="Link to this definition"></a></dt>
 <dd><p>Reset arbolate sums for minor distributaries and
@@ -807,7 +887,7 @@ In this case, one would most likely supply both <code class="docutils literal no
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Nov 04, 2024.
+      <span class="lastupdated">Last updated on Nov 12, 2024.
       </span></p>
   </div>
 

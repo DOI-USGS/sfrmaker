@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>sfrmaker.preprocessing &mdash; SFRmaker 0.11.3.post14.dev0+g18ad00f documentation</title>
+  <title>sfrmaker.preprocessing &mdash; SFRmaker 0.11.3.post35.dev0+g0f15d42 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=104bccf0"></script>
+      <script src="../../_static/documentation_options.js?v=186c18ab"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -47,18 +47,14 @@
               <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../philosophy.html"> Philosophy</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../examples.html"> Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html"> Installation</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../inputs.html"> Input Requirements</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../examples.html"> Using SFRmaker with a configuration file</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../notebooks/SFRmaker_demo.html"> Basic Usage in a scripting context</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../notebooks/preprocessing_demo.html"> Preprocessing NHDPlus version 2 data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../notebooks/lines_from_NHDPlusHR_demo.html"> Using SFRmaker with NHDPlus High Resolution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../notebooks/preprocessing_demo.html"> Preprocessing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../concepts.html"> Concepts and methods</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../notebooks/sfrmaker_tools.html"> Stand-alone tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../notebooks/sfrmaker_tools.html"> Other stand-alone tools</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../troubleshooting.html"> Troubleshooting</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
@@ -130,8 +126,9 @@
                           <span class="n">get_bbox</span><span class="p">,</span> <span class="n">read_polygon_feature</span><span class="p">)</span>
 <span class="kn">from</span> <span class="nn">sfrmaker.elevations</span> <span class="kn">import</span> <span class="n">smooth_elevations</span>
 <span class="kn">from</span> <span class="nn">sfrmaker.logger</span> <span class="kn">import</span> <span class="n">Logger</span>
-<span class="kn">from</span> <span class="nn">sfrmaker.nhdplus_utils</span> <span class="kn">import</span> <span class="n">get_nhdplus_v2_filepaths</span><span class="p">,</span> <span class="n">get_prj_file</span>
-<span class="kn">from</span> <span class="nn">sfrmaker.routing</span> <span class="kn">import</span> <span class="n">find_path</span><span class="p">,</span> <span class="n">make_graph</span><span class="p">,</span> <span class="n">get_upsegs</span>
+<span class="kn">from</span> <span class="nn">sfrmaker.nhdplus_utils</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">get_nhdplus_v2_filepaths</span><span class="p">,</span> <span class="n">get_prj_file</span><span class="p">,</span> <span class="n">read_nhdplus_hr</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">sfrmaker.routing</span> <span class="kn">import</span> <span class="n">find_path</span><span class="p">,</span> <span class="n">make_graph</span><span class="p">,</span> <span class="n">make_reverse_graph</span><span class="p">,</span> <span class="n">get_upsegs</span>
 <span class="kn">from</span> <span class="nn">sfrmaker.units</span> <span class="kn">import</span> <span class="n">convert_length_units</span><span class="p">,</span> <span class="n">unit_abbreviations</span>
 <span class="kn">from</span> <span class="nn">sfrmaker.utils</span> <span class="kn">import</span> <span class="n">width_from_arbolate_sum</span><span class="p">,</span> <span class="n">arbolate_sum</span>
 
@@ -1928,6 +1925,188 @@
     
     <span class="k">return</span> <span class="n">aggregated</span></div>
 
+
+
+<div class="viewcode-block" id="preprocess_nhdplus_hr_flowlines">
+<a class="viewcode-back" href="../../api/sfrmaker.preprocessing.html#sfrmaker.preprocessing.preprocess_nhdplus_hr_flowlines">[docs]</a>
+<span class="k">def</span> <span class="nf">preprocess_nhdplus_hr_flowlines</span><span class="p">(</span><span class="n">nhdplus_path</span><span class="p">,</span> <span class="n">active_area</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                          <span class="n">keep_fcodes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                          <span class="n">drop_ids_upstream</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">drop_ids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                          <span class="n">drop_isolated</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                          <span class="n">dest_crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+                          <span class="n">outfile</span><span class="o">=</span><span class="s1">&#39;preprocessed_flowlines.shp&#39;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Preprocess NHDPlus HR flowline and associated attribute data</span>
+<span class="sd">    to a shapefile.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    nhdplus_path : str, pathlike or list of pathlikes</span>
+<span class="sd">        Path to NHDPlus HR dataset(s) (FileGDB format)</span>
+<span class="sd">    active_area : str, shapely polygon or tuple, optional</span>
+<span class="sd">        A polygon shapefile, or shapely polygon or bounding box tuple</span>
+<span class="sd">        (left, bottom, top, right) in the NAD83 GCS (EPSG:4269). The active area</span>
+<span class="sd">        is converted to a bounding box, which is then used to filter the flowlines</span>
+<span class="sd">        that are read in. If none, no filtering is performed, and the whole</span>
+<span class="sd">        area encompased by the input NHDPlus data will be retained. Must be</span>
+<span class="sd">        in the same CRS as `nhdplus_path` (typically 4269) if</span>
+<span class="sd">        CRS information isn&#39;t included in the object (i.e. if it</span>
+<span class="sd">        is a tuple or polygon, or shapefile without a .prj file).</span>
+<span class="sd">        by default, None</span>
+<span class="sd">    keep_fcodes : sequence, optional</span>
+<span class="sd">        Option to only retain certain line types</span>
+<span class="sd">        (e.g. perennial streams), as indicated by their FCodes.</span>
+<span class="sd">        by default None</span>
+<span class="sd">    drop_ids_upstream : sequence, optional</span>
+<span class="sd">        Option to drop specified flowlines and</span>
+<span class="sd">        all flowlines upstream of them, by default None</span>
+<span class="sd">    drop_ids: sequence, optional</span>
+<span class="sd">        Option to drop specified flowlines.</span>
+<span class="sd">    drop_isolated : bool</span>
+<span class="sd">        Option to drop flowlines that have outlets lines</span>
+<span class="sd">        that are wholly inside the active area.</span>
+<span class="sd">        by default, False</span>
+<span class="sd">    dest_crs : CRS-like, optional</span>
+<span class="sd">        Reproject preprocessed flowlines to this </span>
+<span class="sd">        coorindate reference system (CRS), for example as </span>
+<span class="sd">        specified by an EPSG code. See the documentation for </span>
+<span class="sd">        :meth:`pyproj.crs.CRS.from_user_input` for other examples, </span>
+<span class="sd">        by default None</span>
+<span class="sd">    outfile : str or pathlike, optional</span>
+<span class="sd">        Output shapefile path, </span>
+<span class="sd">        by default &#39;preprocessed_flowlines.shp&#39;</span>
+<span class="sd">        </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># read in the flowlines, filtering them to a designated bounding box</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">read_nhdplus_hr</span><span class="p">(</span><span class="n">nhdplus_path</span><span class="p">,</span> <span class="n">bbox_filter</span><span class="o">=</span><span class="n">active_area</span><span class="p">)</span>
+    
+    <span class="c1"># drop undesired line types (storm sewers and aquaducts, etc.)</span>
+    <span class="k">if</span> <span class="n">keep_fcodes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;FCode&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">keep_fcodes</span><span class="p">)]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    
+    <span class="c1"># drop drop_ids_upstream and all IDs above them</span>
+    <span class="n">routing</span> <span class="o">=</span> <span class="n">make_graph</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;NHDPlusID&#39;</span><span class="p">],</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;ToNHDPID&#39;</span><span class="p">],</span> <span class="n">one_to_many</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">routing_r</span> <span class="o">=</span> <span class="n">make_reverse_graph</span><span class="p">(</span><span class="n">routing</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">drop_ids_upstream</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">all_drop_ids</span> <span class="o">=</span> <span class="n">drop_ids_upstream</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">nhdplusid</span> <span class="ow">in</span> <span class="n">drop_ids_upstream</span><span class="p">:</span>
+            <span class="n">upstream_ids</span> <span class="o">=</span> <span class="n">get_upsegs</span><span class="p">(</span><span class="n">routing_r</span><span class="p">,</span> <span class="n">nhdplusid</span><span class="p">)</span>
+            <span class="n">all_drop_ids</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">upstream_ids</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">~</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;NHDPlusID&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">all_drop_ids</span><span class="p">)]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="c1"># drop just specified IDs    </span>
+    <span class="k">if</span> <span class="n">drop_ids</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">~</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;NHDPlusID&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">drop_ids</span><span class="p">)]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        
+    <span class="c1"># update the routing dicts</span>
+    <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">~</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;ToNHDPID&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;NHDPlusID&#39;</span><span class="p">]),</span> <span class="s1">&#39;ToNHDPID&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">routing</span> <span class="o">=</span> <span class="n">make_graph</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;NHDPlusID&#39;</span><span class="p">],</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;ToNHDPID&#39;</span><span class="p">],</span> <span class="n">one_to_many</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">routing_r</span> <span class="o">=</span> <span class="n">make_reverse_graph</span><span class="p">(</span><span class="n">routing</span><span class="p">)</span>
+    <span class="n">df</span><span class="p">[</span><span class="s1">&#39;ToNHDPID&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">routing</span><span class="p">[</span><span class="n">nhdplusid</span><span class="p">]</span> <span class="k">for</span> <span class="n">nhdplusid</span> <span class="ow">in</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;NHDPlusID&#39;</span><span class="p">]]</span>
+    
+    <span class="c1"># option to cull isolated groups of flowlines</span>
+    <span class="k">if</span> <span class="n">drop_isolated</span><span class="p">:</span>
+        <span class="n">drop_isolated_ids</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">active_area</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+            <span class="n">extent_poly_nhd_crs</span> <span class="o">=</span> <span class="n">box</span><span class="p">(</span><span class="o">*</span><span class="n">active_area</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">active_area</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">extent_poly_nhd_crs</span> <span class="o">=</span> <span class="n">read_polygon_feature</span><span class="p">(</span>
+                <span class="n">active_area</span><span class="p">,</span> <span class="n">dest_crs</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;drop_isolated option requires a valid active_area.&#39;</span><span class="p">)</span>
+        <span class="c1"># outlets are nhdplus IDs that don&#39;t route to anywhere</span>
+        <span class="n">outlets</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">routing</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">v</span> <span class="o">==</span> <span class="mi">0</span><span class="p">}</span>
+        <span class="c1"># evaluate only outlets still in the dataset</span>
+        <span class="n">outlets</span> <span class="o">=</span> <span class="n">outlets</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;NHDPlusID&#39;</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">nhdplusid</span> <span class="ow">in</span> <span class="n">outlets</span><span class="p">:</span>
+            <span class="n">geom</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;NHDPlusID&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">nhdplusid</span><span class="p">,</span> <span class="s1">&#39;geometry&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="c1"># remove outlet streams that are inside the model area</span>
+            <span class="k">if</span> <span class="n">geom</span><span class="o">.</span><span class="n">within</span><span class="p">(</span><span class="n">extent_poly_nhd_crs</span><span class="p">):</span>
+                <span class="c1"># include the outlet</span>
+                <span class="n">upstream_ids</span> <span class="o">=</span> <span class="p">{</span><span class="n">nhdplusid</span><span class="p">}</span>
+                <span class="c1"># and any upstream lines</span>
+                <span class="k">if</span> <span class="n">nhdplusid</span> <span class="ow">in</span> <span class="n">routing_r</span><span class="p">:</span>
+                    <span class="n">upstream_ids</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">get_upsegs</span><span class="p">(</span>
+                        <span class="n">routing_r</span><span class="p">,</span> 
+                        <span class="n">nhdplusid</span><span class="p">))</span>
+                <span class="n">drop_isolated_ids</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">upstream_ids</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">~</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;NHDPlusID&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">all_drop_ids</span><span class="p">)]</span>
+    
+    <span class="c1"># repoject to dest_crs</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">dest_crs</span><span class="p">)</span>
+    
+    <span class="c1"># write out to shapefile</span>
+    <span class="n">df</span><span class="p">[</span><span class="s1">&#39;FDate&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;FDate&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">df</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="n">outfile</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;wrote </span><span class="si">{</span><span class="n">outfile</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
+    
+
+<div class="viewcode-block" id="preprocess_nhdplus_hr_waterbodies">
+<a class="viewcode-back" href="../../api/sfrmaker.preprocessing.html#sfrmaker.preprocessing.preprocess_nhdplus_hr_waterbodies">[docs]</a>
+<span class="k">def</span> <span class="nf">preprocess_nhdplus_hr_waterbodies</span><span class="p">(</span><span class="n">nhdplus_path</span><span class="p">,</span> <span class="n">active_area</span><span class="p">,</span>
+                                      <span class="n">drop_waterbodies</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">min_areasqkm</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span>
+                                      <span class="n">dest_crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                      <span class="n">outfile</span><span class="o">=</span><span class="s1">&#39;preprocessed_waterbodies.shp&#39;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;_summary_</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    nhdplus_path : str, pathlike or list of pathlikes</span>
+<span class="sd">        Path to NHDPlus HR dataset(s) (FileGDB format)</span>
+<span class="sd">    active_area : str, shapely polygon or tuple, optional</span>
+<span class="sd">        A polygon shapefile, or shapely polygon or bounding box tuple</span>
+<span class="sd">        (left, bottom, top, right). Must be</span>
+<span class="sd">        in the same CRS as `nhdplus_path` (typically 4269) if</span>
+<span class="sd">        CRS information isn&#39;t included in the object (i.e. if it</span>
+<span class="sd">        is a tuple or polygon, or shapefile without a .prj file).</span>
+<span class="sd">        by default, None</span>
+<span class="sd">    drop_waterbodies : sequence, optional</span>
+<span class="sd">        Option to drop specified waterbodies (by NHDPlusID), by default None</span>
+<span class="sd">    min_areasqkm : float, optional</span>
+<span class="sd">        Exclude waterbodies smaller than this size in the output, </span>
+<span class="sd">        by default 0.</span>
+<span class="sd">    dest_crs : CRS-like, optional</span>
+<span class="sd">        Reproject preprocessed flowlines to this </span>
+<span class="sd">        coorindate reference system (CRS), for example as </span>
+<span class="sd">        specified by an EPSG code. See the documentation for </span>
+<span class="sd">        :meth:`pyproj.crs.CRS.from_user_input` for other examples, </span>
+<span class="sd">        by default None</span>
+<span class="sd">    outfile : str or pathlike, optional</span>
+<span class="sd">        Output shapefile path, </span>
+<span class="sd">        by default &#39;preprocessed_waterbodies.shp&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>    
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">nhdplus_path</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">nhdplus_path</span><span class="p">,</span> <span class="n">Path</span><span class="p">):</span>
+        <span class="n">nhdplus_path</span> <span class="o">=</span> <span class="p">[</span><span class="n">nhdplus_path</span><span class="p">]</span>
+    <span class="n">dfs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">nhdplus_path</span><span class="p">:</span>
+        <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;layer&#39;</span><span class="p">:</span> <span class="s1">&#39;NHDWaterbody&#39;</span><span class="p">}</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">active_area</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;bbox&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">active_area</span>
+        <span class="c1"># handle shapefile for testing</span>
+        <span class="k">if</span> <span class="n">Path</span><span class="p">(</span><span class="n">f</span><span class="p">)</span><span class="o">.</span><span class="n">suffix</span> <span class="o">==</span> <span class="s2">&quot;.shp&quot;</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;layer&#39;</span><span class="p">]</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">dfs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">dfs</span><span class="p">)</span>
+    <span class="n">wb_crs</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">crs</span>
+    <span class="k">if</span> <span class="n">dest_crs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">dest_crs</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">crs</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">dest_crs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">active_area</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+        <span class="n">intersects</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="kc">True</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">))</span>
+    <span class="k">elif</span> <span class="n">active_area</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">extent_poly</span> <span class="o">=</span> <span class="n">read_polygon_feature</span><span class="p">(</span>
+            <span class="n">active_area</span><span class="p">,</span> <span class="n">dest_crs</span><span class="o">=</span><span class="n">dest_crs</span><span class="p">)</span>
+        <span class="n">intersects</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">g</span><span class="o">.</span><span class="n">intersects</span><span class="p">(</span><span class="n">extent_poly</span><span class="p">)</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">geometry</span><span class="p">])</span>
+    <span class="n">loc</span> <span class="o">=</span> <span class="n">intersects</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;NHDPlusID&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">drop_waterbodies</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;AreaSqKm&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">min_areasqkm</span><span class="p">)</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">loc</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">df</span><span class="p">[</span><span class="s1">&#39;NHDPlusID&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;NHDPlusID&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">df</span><span class="p">[</span><span class="s1">&#39;FDate&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;FDate&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">df</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="n">outfile</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;wrote </span><span class="si">{</span><span class="n">outfile</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
 </pre></div>
 
            </div>
@@ -1938,7 +2117,7 @@
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Nov 04, 2024.
+      <span class="lastupdated">Last updated on Nov 12, 2024.
       </span></p>
   </div>
 

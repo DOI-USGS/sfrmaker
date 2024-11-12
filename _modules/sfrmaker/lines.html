@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>sfrmaker.lines &mdash; SFRmaker 0.11.3.post14.dev0+g18ad00f documentation</title>
+  <title>sfrmaker.lines &mdash; SFRmaker 0.11.3.post35.dev0+g0f15d42 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=104bccf0"></script>
+      <script src="../../_static/documentation_options.js?v=186c18ab"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -47,18 +47,14 @@
               <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../philosophy.html"> Philosophy</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../examples.html"> Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html"> Installation</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../inputs.html"> Input Requirements</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../examples.html"> Using SFRmaker with a configuration file</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../notebooks/SFRmaker_demo.html"> Basic Usage in a scripting context</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../notebooks/preprocessing_demo.html"> Preprocessing NHDPlus version 2 data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../notebooks/lines_from_NHDPlusHR_demo.html"> Using SFRmaker with NHDPlus High Resolution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../notebooks/preprocessing_demo.html"> Preprocessing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../concepts.html"> Concepts and methods</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../notebooks/sfrmaker_tools.html"> Stand-alone tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../notebooks/sfrmaker_tools.html"> Other stand-alone tools</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../troubleshooting.html"> Troubleshooting</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
@@ -243,13 +239,14 @@
                        <span class="s1">&#39;foot&#39;</span><span class="p">:</span> <span class="s1">&#39;feet&#39;</span><span class="p">,</span>
                        <span class="s1">&#39;meters&#39;</span><span class="p">:</span> <span class="s1">&#39;meters&#39;</span><span class="p">,</span>
                        <span class="s1">&#39;metre&#39;</span><span class="p">:</span> <span class="s1">&#39;meters&#39;</span><span class="p">}</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">is_geographic</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Flowline geometries need to be in a &#39;</span>
-                             <span class="s1">&#39;projected coordinate system; supply a model grid &#39;</span>
-                             <span class="s1">&#39;with a projected CRS to the Lines.to_sfr() method or &#39;</span>
-                             <span class="s1">&#39;run Lines.to_crs() to reproject the flowlines.&#39;</span>
-                             <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_geometry_length_units</span> <span class="o">=</span> <span class="n">valid_units</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">axis_info</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">unit_name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">is_geographic</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Flowline geometries need to be in a &#39;</span>
+                                <span class="s1">&#39;projected coordinate system; supply a model grid &#39;</span>
+                                <span class="s1">&#39;with a projected CRS to the Lines.to_sfr() method or &#39;</span>
+                                <span class="s1">&#39;run Lines.to_crs() to reproject the flowlines.&#39;</span>
+                                <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_geometry_length_units</span> <span class="o">=</span> <span class="n">valid_units</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">axis_info</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">unit_name</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_geometry_length_units</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Warning: No length units specified in CRS for input LineStrings &quot;</span>
                   <span class="s2">&quot;or length units not recognized&quot;</span>
@@ -297,10 +294,10 @@
                     <span class="n">routing</span> <span class="o">=</span> <span class="n">pick_toids</span><span class="p">(</span><span class="n">routing</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">elevup</span><span class="p">)</span>
                 <span class="c1"># set toids not in routing dataset to 0</span>
                 <span class="c1"># (outlet condition)</span>
-                <span class="n">routing</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">routing</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">else</span> <span class="mi">0</span> 
+                <span class="n">routing</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">routing</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">else</span> <span class="s1">&#39;0&#39;</span> 
                             <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">routing</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">routing</span> <span class="o">=</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">id</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span> <span class="mi">0</span><span class="p">}</span>
+                <span class="n">routing</span> <span class="o">=</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">id</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span> <span class="s1">&#39;0&#39;</span><span class="p">}</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_routing</span> <span class="o">=</span> <span class="n">routing</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_last_routing_dict_update</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_routing</span>
@@ -688,7 +685,7 @@
         <span class="n">df</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">shapefile</span><span class="p">,</span> <span class="n">bbox</span><span class="o">=</span><span class="n">bbox_filter</span><span class="p">)</span>
         <span class="k">assert</span> <span class="s1">&#39;geometry&#39;</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> <span class="s2">&quot;No feature geometries found in </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">shapefile</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_dataframe</span><span class="p">(</span><span class="n">df</span><span class="p">,</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_dataframe</span><span class="p">(</span><span class="n">df</span><span class="p">,</span>   
                                   <span class="n">id_column</span><span class="o">=</span><span class="n">id_column</span><span class="p">,</span>
                                   <span class="n">routing_column</span><span class="o">=</span><span class="n">routing_column</span><span class="p">,</span>
                                   <span class="n">arbolate_sum_column2</span><span class="o">=</span><span class="n">arbolate_sum_column2</span><span class="p">,</span>
@@ -819,6 +816,14 @@
         <span class="n">to_drop</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">rename_cols</span><span class="o">.</span><span class="n">values</span><span class="p">())</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
         <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">to_drop</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">df</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">rename_cols</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        
+        <span class="c1"># convert IDs to strings</span>
+        <span class="n">df</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+        <span class="c1"># if reading from NHDPlus, to-ids may already be in lists</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;toid&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="n">df</span><span class="p">[</span><span class="s1">&#39;toid&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;toid&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">df</span><span class="p">[</span><span class="s1">&#39;toid&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[[</span><span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">toid</span><span class="p">))</span> <span class="k">for</span> <span class="n">toid</span> <span class="ow">in</span> <span class="n">toids</span><span class="p">]</span> <span class="k">for</span> <span class="n">toids</span> <span class="ow">in</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;toid&#39;</span><span class="p">]]</span>
 
         <span class="n">column_order</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">,</span> <span class="s1">&#39;toid&#39;</span><span class="p">,</span>
                         <span class="s1">&#39;asum1&#39;</span><span class="p">,</span> <span class="s1">&#39;asum2&#39;</span><span class="p">,</span>
@@ -1209,13 +1214,14 @@
         <span class="n">groups</span> <span class="o">=</span> <span class="n">lengths</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;line_id&#39;</span><span class="p">)</span>  <span class="c1"># fragments grouped by parent line</span>
 
         <span class="n">reach_cumsums</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">ordered_ids</span> <span class="o">=</span> <span class="n">rd</span><span class="o">.</span><span class="n">line_id</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">rd</span><span class="o">.</span><span class="n">line_id</span><span class="o">.</span><span class="n">diff</span><span class="p">()</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
-        <span class="k">for</span> <span class="nb">id</span> <span class="ow">in</span> <span class="n">ordered_ids</span><span class="p">:</span>
-            <span class="n">grp</span> <span class="o">=</span> <span class="n">groups</span><span class="o">.</span><span class="n">get_group</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s1">&#39;ireach&#39;</span><span class="p">)</span>
+        <span class="c1">#ordered_ids = rd.line_id.loc[rd.line_id.diff() != 0].values</span>
+        <span class="n">ordered_ids</span> <span class="o">=</span> <span class="n">lengths</span><span class="p">[</span><span class="s1">&#39;line_id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">line_id</span> <span class="ow">in</span> <span class="n">ordered_ids</span><span class="p">:</span>
+            <span class="n">grp</span> <span class="o">=</span> <span class="n">groups</span><span class="o">.</span><span class="n">get_group</span><span class="p">(</span><span class="n">line_id</span><span class="p">)</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s1">&#39;ireach&#39;</span><span class="p">)</span>
             <span class="n">dist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">grp</span><span class="o">.</span><span class="n">rchlen</span><span class="o">.</span><span class="n">values</span><span class="p">)</span> <span class="o">-</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">grp</span><span class="o">.</span><span class="n">rchlen</span><span class="o">.</span><span class="n">values</span>
             <span class="n">reach_cumsums</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dist</span><span class="p">)</span>
         <span class="n">reach_cumsums</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">reach_cumsums</span><span class="p">)</span>
-        <span class="n">segment_asums</span> <span class="o">=</span> <span class="p">[</span><span class="n">asum1s</span><span class="p">[</span><span class="nb">id</span><span class="p">]</span> <span class="k">for</span> <span class="nb">id</span> <span class="ow">in</span> <span class="n">lengths</span><span class="o">.</span><span class="n">line_id</span><span class="p">]</span>
+        <span class="n">segment_asums</span> <span class="o">=</span> <span class="p">[</span><span class="n">asum1s</span><span class="p">[</span><span class="n">line_id</span><span class="p">]</span> <span class="k">for</span> <span class="n">line_id</span> <span class="ow">in</span> <span class="n">lengths</span><span class="o">.</span><span class="n">line_id</span><span class="p">]</span>
         <span class="n">reach_asums</span> <span class="o">=</span> <span class="n">segment_asums</span> <span class="o">+</span> <span class="n">reach_cumsums</span> <span class="o">*</span>\
             <span class="n">convert_length_units</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">geometry_length_units</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">asum_units</span><span class="p">)</span>
         <span class="c1"># maintain positive asums; lengths in NHD often aren&#39;t exactly equal to feature lengths</span>
@@ -1312,7 +1318,6 @@
         <span class="c1"># add any outlets to the stream network</span>
         <span class="c1"># for now handle int or str ids</span>
         <span class="k">if</span> <span class="n">add_outlets</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="c1"># get the</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">add_outlets</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">add_outlets</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
                 <span class="n">add_outlets</span> <span class="o">=</span> <span class="p">[</span><span class="n">add_outlets</span><span class="p">]</span>
             <span class="k">for</span> <span class="n">outlet_id</span> <span class="ow">in</span> <span class="n">add_outlets</span><span class="p">:</span>
@@ -1322,7 +1327,7 @@
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">outlet_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">outlet_id</span><span class="p">)</span>
                     <span class="n">outlet_toid</span> <span class="o">=</span> <span class="mi">0</span>
-                <span class="n">valid_outlet_ids</span> <span class="o">=</span> <span class="n">get_previous_ids_in_subset</span><span class="p">(</span><span class="n">rd</span><span class="o">.</span><span class="n">line_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">routing</span><span class="p">,</span> <span class="n">outlet_id</span><span class="p">)</span>
+                <span class="n">valid_outlet_ids</span> <span class="o">=</span> <span class="n">get_previous_ids_in_subset</span><span class="p">(</span><span class="n">rd</span><span class="o">.</span><span class="n">line_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_original_routing</span><span class="p">,</span> <span class="n">outlet_id</span><span class="p">)</span>
                 <span class="n">loc</span> <span class="o">=</span> <span class="n">rd</span><span class="o">.</span><span class="n">line_id</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">valid_outlet_ids</span><span class="p">)</span>
                 <span class="n">rd</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">loc</span><span class="p">,</span> <span class="s1">&#39;toid&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">outlet_toid</span>
                 <span class="k">for</span> <span class="n">valid_outlet_id</span> <span class="ow">in</span> <span class="n">valid_outlet_ids</span><span class="p">:</span>
@@ -1399,7 +1404,7 @@
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Nov 04, 2024.
+      <span class="lastupdated">Last updated on Nov 12, 2024.
       </span></p>
   </div>
 

@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>sfrmaker.flows &mdash; SFRmaker 0.11.3.post14.dev0+g18ad00f documentation</title>
+  <title>sfrmaker.flows &mdash; SFRmaker 0.11.3.post35.dev0+g0f15d42 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=104bccf0"></script>
+      <script src="../../_static/documentation_options.js?v=186c18ab"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -47,18 +47,14 @@
               <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../philosophy.html"> Philosophy</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../examples.html"> Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html"> Installation</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../inputs.html"> Input Requirements</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../examples.html"> Using SFRmaker with a configuration file</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../notebooks/SFRmaker_demo.html"> Basic Usage in a scripting context</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../notebooks/preprocessing_demo.html"> Preprocessing NHDPlus version 2 data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../notebooks/lines_from_NHDPlusHR_demo.html"> Using SFRmaker with NHDPlus High Resolution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../notebooks/preprocessing_demo.html"> Preprocessing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../concepts.html"> Concepts and methods</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../notebooks/sfrmaker_tools.html"> Stand-alone tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../notebooks/sfrmaker_tools.html"> Other stand-alone tools</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../troubleshooting.html"> Troubleshooting</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
@@ -105,6 +101,7 @@
 <span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">geopandas</span> <span class="k">as</span> <span class="nn">gpd</span>
 <span class="kn">from</span> <span class="nn">shapely.geometry</span> <span class="kn">import</span> <span class="n">box</span>
 <span class="kn">import</span> <span class="nn">flopy</span>
 <span class="kn">from</span> <span class="nn">sfrmaker.routing</span> <span class="kn">import</span> <span class="n">find_path</span><span class="p">,</span> <span class="n">make_graph</span>
@@ -170,7 +167,7 @@
 
     <span class="c1"># parent and inset reach data</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parent_reach_data</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parent_reach_data</span><span class="p">,</span> <span class="n">Path</span><span class="p">):</span>
-        <span class="n">prd</span> <span class="o">=</span> <span class="n">shp2df</span><span class="p">(</span><span class="n">parent_reach_data</span><span class="p">)</span>
+        <span class="n">prd</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">parent_reach_data</span><span class="p">)</span>
     <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parent_reach_data</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
         <span class="n">prd</span> <span class="o">=</span> <span class="n">parent_reach_data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
     <span class="k">else</span><span class="p">:</span>
@@ -180,10 +177,11 @@
         <span class="n">prd</span><span class="p">[</span><span class="s1">&#39;ireach&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="n">mustinclude_cols</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;line_id&#39;</span><span class="p">,</span> <span class="s1">&#39;rno&#39;</span><span class="p">,</span> <span class="s1">&#39;iseg&#39;</span><span class="p">,</span> <span class="s1">&#39;ireach&#39;</span><span class="p">,</span> <span class="s1">&#39;geometry&#39;</span><span class="p">}</span>
     <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">mustinclude_cols</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">prd</span><span class="o">.</span><span class="n">columns</span><span class="p">))</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">mustinclude_cols</span><span class="p">)</span>
-
+    <span class="n">prd</span><span class="p">[</span><span class="s1">&#39;line_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">prd</span><span class="p">[</span><span class="s1">&#39;line_id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+    
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">inset_reach_data</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">inset_reach_data</span><span class="p">,</span> <span class="n">Path</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">inset_reach_data</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.shp&#39;</span><span class="p">):</span>
-            <span class="n">ird</span> <span class="o">=</span> <span class="n">shp2df</span><span class="p">(</span><span class="n">inset_reach_data</span><span class="p">)</span>
+            <span class="n">ird</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">inset_reach_data</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">ird</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">inset_reach_data</span><span class="p">)</span>
     <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">inset_reach_data</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
@@ -195,7 +193,8 @@
         <span class="n">ird</span><span class="p">[</span><span class="s1">&#39;ireach&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="n">mustinclude_cols</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;line_id&#39;</span><span class="p">,</span> <span class="s1">&#39;rno&#39;</span><span class="p">,</span> <span class="s1">&#39;iseg&#39;</span><span class="p">,</span> <span class="s1">&#39;ireach&#39;</span><span class="p">}</span>
     <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">mustinclude_cols</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">ird</span><span class="o">.</span><span class="n">columns</span><span class="p">))</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">mustinclude_cols</span><span class="p">)</span>
-
+    <span class="n">ird</span><span class="p">[</span><span class="s1">&#39;line_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ird</span><span class="p">[</span><span class="s1">&#39;line_id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+    
     <span class="n">graph</span> <span class="o">=</span> <span class="n">make_graph</span><span class="p">(</span><span class="n">ird</span><span class="o">.</span><span class="n">rno</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">ird</span><span class="o">.</span><span class="n">outreach</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">one_to_many</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
     <span class="c1"># cull parent reach data to only lines that cross or are just upstream of inset boundary</span>
@@ -375,6 +374,10 @@
 
     <span class="c1"># cull data to valid periods</span>
     <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="n">period_column</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    
+    <span class="c1"># convert line IDs to strings</span>
+    <span class="k">if</span> <span class="n">line_id_column</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+        <span class="n">data</span><span class="p">[</span><span class="n">line_id_column</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">line_id_column</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
 
     <span class="c1"># map NHDPlus COMIDs to reach numbers</span>
     <span class="k">if</span> <span class="n">flowline_routing</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -382,7 +385,8 @@
             <span class="s2">&quot;Data need an id column so </span><span class="si">{}</span><span class="s2"> locations can be mapped to reach numbers&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">variable</span><span class="p">)</span>
         <span class="c1"># replace ids that are not keys (those outside the network) with zeros</span>
         <span class="c1"># (0 is the exit condition for finding paths in get_next_id_in_subset)</span>
-        <span class="n">flowline_routing</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">flowline_routing</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">else</span> <span class="mi">0</span> 
+        <span class="c1"># also force all IDs to strings</span>
+        <span class="n">flowline_routing</span> <span class="o">=</span> <span class="p">{</span><span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">k</span><span class="p">)):</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">v</span><span class="p">))</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">flowline_routing</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">else</span> <span class="s1">&#39;0&#39;</span> 
                             <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">flowline_routing</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
         <span class="n">rno_column</span> <span class="o">=</span> <span class="s1">&#39;rno&#39;</span>
         <span class="n">r1</span> <span class="o">=</span> <span class="n">sfrd</span><span class="o">.</span><span class="n">reach_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sfrd</span><span class="o">.</span><span class="n">reach_data</span><span class="o">.</span><span class="n">ireach</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span>
@@ -703,7 +707,7 @@
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Nov 04, 2024.
+      <span class="lastupdated">Last updated on Nov 12, 2024.
       </span></p>
   </div>
 

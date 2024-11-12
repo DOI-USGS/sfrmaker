@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>sfrmaker.sfrdata &mdash; SFRmaker 0.11.3.post14.dev0+g18ad00f documentation</title>
+  <title>sfrmaker.sfrdata &mdash; SFRmaker 0.11.3.post35.dev0+g0f15d42 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=104bccf0"></script>
+      <script src="../../_static/documentation_options.js?v=186c18ab"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -47,18 +47,14 @@
               <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../philosophy.html"> Philosophy</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../examples.html"> Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html"> Installation</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../inputs.html"> Input Requirements</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../examples.html"> Using SFRmaker with a configuration file</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../notebooks/SFRmaker_demo.html"> Basic Usage in a scripting context</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../notebooks/preprocessing_demo.html"> Preprocessing NHDPlus version 2 data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../notebooks/lines_from_NHDPlusHR_demo.html"> Using SFRmaker with NHDPlus High Resolution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../notebooks/preprocessing_demo.html"> Preprocessing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../concepts.html"> Concepts and methods</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../notebooks/sfrmaker_tools.html"> Stand-alone tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../notebooks/sfrmaker_tools.html"> Other stand-alone tools</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../troubleshooting.html"> Troubleshooting</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
@@ -212,7 +208,7 @@
               <span class="s1">&#39;thts2&#39;</span><span class="p">,</span> <span class="s1">&#39;thti2&#39;</span><span class="p">,</span> <span class="s1">&#39;eps2&#39;</span><span class="p">,</span> <span class="s1">&#39;uhc2&#39;</span><span class="p">]</span>
 
     <span class="n">dtypes</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;rno&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="s1">&#39;node&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="s1">&#39;i&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="s1">&#39;j&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-              <span class="s1">&#39;iseg&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="s1">&#39;ireach&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="s1">&#39;outreach&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="s1">&#39;line_id&#39;</span><span class="p">:</span> <span class="s1">&#39;int64&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;iseg&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="s1">&#39;ireach&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="s1">&#39;outreach&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="s1">&#39;line_id&#39;</span><span class="p">:</span> <span class="s1">&#39;object&#39;</span><span class="p">,</span>
               <span class="s1">&#39;per&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="s1">&#39;nseg&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="s1">&#39;icalc&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="s1">&#39;outseg&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
               <span class="s1">&#39;iupseg&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="s1">&#39;iprior&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="s1">&#39;nstrpts&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
               <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="nb">object</span><span class="p">,</span> <span class="s1">&#39;geometry&#39;</span><span class="p">:</span> <span class="nb">object</span><span class="p">}</span>
@@ -909,8 +905,8 @@
                             <span class="n">rno</span> <span class="o">+=</span> <span class="mi">1</span>
                     <span class="n">zero_based_record</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rno</span><span class="p">)</span>
                 <span class="c1">#zero_based_record = tuple(i - 1 if i &gt; 0 else i + 1 for i in record)</span>
-                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">zero_based_record</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-                    <span class="n">zero_based_record</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+                <span class="c1">#if len(zero_based_record) == 1:</span>
+                <span class="c1">#    zero_based_record.append(None)</span>
                 <span class="n">zero_based_connectiondata</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">zero_based_record</span><span class="p">)</span>
             <span class="n">connectiondata</span> <span class="o">=</span> <span class="n">zero_based_connectiondata</span>
         <span class="k">assert</span> <span class="n">packagedata</span><span class="p">[</span><span class="s1">&#39;rno&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span>
@@ -1487,6 +1483,8 @@
             <span class="c1"># resample inflows to model stress periods</span>
             <span class="n">inflows_input</span><span class="p">[</span><span class="s1">&#39;id_column&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">inflows_input</span><span class="p">[</span><span class="s1">&#39;line_id_column&#39;</span><span class="p">]</span>
             <span class="n">inflows_by_stress_period</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">inflows_input</span><span class="p">[</span><span class="s1">&#39;filename&#39;</span><span class="p">])</span>
+            <span class="n">inflows_by_stress_period</span><span class="p">[</span><span class="n">inflows_input</span><span class="p">[</span><span class="s1">&#39;id_column&#39;</span><span class="p">]]</span> <span class="o">=</span>\
+                <span class="n">inflows_by_stress_period</span><span class="p">[</span><span class="n">inflows_input</span><span class="p">[</span><span class="s1">&#39;id_column&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
 
             <span class="c1"># check if all inflow sites are included in sfr network</span>
             <span class="n">missing_sites</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">inflows_by_stress_period</span><span class="p">[</span><span class="n">inflows_input</span><span class="p">[</span><span class="s1">&#39;id_column&#39;</span><span class="p">]])</span><span class="o">.</span> \
@@ -1556,7 +1554,7 @@
 <span class="sd">        rno : sequence of ints</span>
 <span class="sd">            Convert the listed reach numbers (nro), and all downstream reaches,</span>
 <span class="sd">            to the RIV package. If None, all reaches are converted (default).</span>
-<span class="sd">        line_ids : sequence of ints</span>
+<span class="sd">        line_ids : sequence of ints or strings</span>
 <span class="sd">            Convert the segments corresponding to the line_ids </span>
 <span class="sd">            (unique identifiers for LineString features in the source hydrography), </span>
 <span class="sd">            and all downstream segments to the RIV package. If None, all reaches </span>
@@ -1584,6 +1582,7 @@
         <span class="k">if</span> <span class="n">line_ids</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">line_ids</span><span class="p">):</span>
                 <span class="n">line_ids</span> <span class="o">=</span> <span class="p">[</span><span class="n">line_ids</span><span class="p">]</span>
+            <span class="n">line_ids</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">lid</span><span class="p">)</span> <span class="k">for</span> <span class="n">lid</span> <span class="ow">in</span> <span class="n">line_ids</span><span class="p">]</span>
             <span class="n">loc</span> <span class="o">=</span> <span class="n">loc</span> <span class="o">&amp;</span> <span class="bp">self</span><span class="o">.</span><span class="n">reach_data</span><span class="o">.</span><span class="n">line_id</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">line_ids</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">rno</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">rno</span><span class="p">):</span>
@@ -2020,7 +2019,7 @@
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Nov 04, 2024.
+      <span class="lastupdated">Last updated on Nov 12, 2024.
       </span></p>
   </div>
 

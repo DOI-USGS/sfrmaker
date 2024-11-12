@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Preprocessing hydrography &mdash; SFRmaker 0.11.3.post14.dev0+g18ad00f documentation</title>
+  <title>Preprocessing hydrography &mdash; SFRmaker 0.11.3.post35.dev0+g0f15d42 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
@@ -16,7 +16,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=104bccf0"></script>
+      <script src="../_static/documentation_options.js?v=186c18ab"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -27,8 +27,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Using SFRmaker with NHDPlus High Resolution" href="lines_from_NHDPlusHR_demo.html" />
-    <link rel="prev" title="Basic usage of SFRmaker in a scripting context" href="SFRmaker_demo.html" /> 
+    <link rel="next" title="Sfrmaker concepts and methods" href="../concepts.html" />
+    <link rel="prev" title="Input data requirements" href="../inputs.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -53,29 +53,29 @@
               <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../philosophy.html"> Philosophy</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../examples.html"> Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html"> Installation</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../inputs.html"> Input Requirements</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../examples.html"> Using SFRmaker with a configuration file</a></li>
-<li class="toctree-l1"><a class="reference internal" href="SFRmaker_demo.html"> Basic Usage in a scripting context</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#"> Preprocessing NHDPlus version 2 data</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#Merging-and-culling-flowlines">Merging and culling flowlines</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#Plot-the-culled-flowlines">Plot the culled flowlines</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#"> Preprocessing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#NHDPlus-High-Resolution">NHDPlus High Resolution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#NHDPlus-version-2">NHDPlus version 2</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#Merging-and-culling-flowlines">Merging and culling flowlines</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#Plot-the-culled-flowlines">Plot the culled flowlines</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#Preprocessing-the-flowlines">Preprocessing the flowlines</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#Additional-processing-options-not-shown-below">Additional processing options not shown below</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Preprocessing-the-flowlines">Preprocessing the flowlines</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#Additional-processing-options-not-shown-below">Additional processing options not shown below</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#Clipping-the-flowlines-to-a-specific-area">Clipping the flowlines to a specific area</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Clipping-the-flowlines-to-a-specific-area">Clipping the flowlines to a specific area</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="lines_from_NHDPlusHR_demo.html"> Using SFRmaker with NHDPlus High Resolution</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="../concepts.html"> Concepts and methods</a></li>
-<li class="toctree-l1"><a class="reference internal" href="sfrmaker_tools.html"> Stand-alone tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sfrmaker_tools.html"> Other stand-alone tools</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../troubleshooting.html"> Troubleshooting</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
@@ -117,10 +117,123 @@
   <section id="Preprocessing-hydrography">
 <h1>Preprocessing hydrography<a class="headerlink" href="#Preprocessing-hydrography" title="Link to this heading"></a></h1>
 <p>Sometimes we might need to customize a pre-existing hydrography dataset in some way, for example by adding additional streams that weren’t mapped or fixing errors in mapped streams. If we’re working with a large area or with the High Resolution version of NHDPlus, we may also need to combine file sets from multiple areas, or prune intermittent headwater streams from the dataset.</p>
-<p>The preprocessing module of SFRmaker is intended to automate these tasks in a consistent, dependable way. Currently, the preprocessing module accepts NHDPlus version 2 data as input, and outputs either a culled and merged set of NHDPlus version 2 files (<code class="docutils literal notranslate"><span class="pre">cull_flowlines</span></code> function) or a single shapefile with all of the information needed to build an SFR package (<code class="docutils literal notranslate"><span class="pre">preprocess_preprocess_nhdplus</span></code> function).</p>
-<p>As of SFRmaker 0.9.3, the preprocessing module is still a work in progress, and liable to change as improvements are made to streamline the workflow. This page is based on the <code class="docutils literal notranslate"><span class="pre">preprocessing_demo.ipynb</span></code> notebook in the <code class="docutils literal notranslate"><span class="pre">examples/</span></code> folder, and therefore reflects the current state of the code.</p>
+<p>The preprocessing module of SFRmaker contains functions for working with both NHDPlus version 2 and NHDPlus High Resolution (HR) data.</p>
+<p>As of SFRmaker 0.11.3, the preprocessing module is still a work in progress, and liable to change as improvements are made to streamline the workflow. This page is based on the <code class="docutils literal notranslate"><span class="pre">preprocessing_demo.ipynb</span></code> notebook in the <code class="docutils literal notranslate"><span class="pre">examples/</span></code> folder, and therefore reflects the current state of the code.</p>
+<section id="NHDPlus-High-Resolution">
+<h2>NHDPlus High Resolution<a class="headerlink" href="#NHDPlus-High-Resolution" title="Link to this heading"></a></h2>
+<p>The functions below accept NHDPlus High Resolution geodatabase files as input, and output single shapefiles of merged and culled flowlines with all of the information needed to build an SFR package.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">sfrmaker.preprocessing</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">preprocess_nhdplus_hr_flowlines</span><span class="p">,</span>
+    <span class="n">preprocess_nhdplus_hr_waterbodies</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>In this example, we have two NHDPlus HR databases for adjacent watersheds, that we want to merge and cull to a model extent. Plots of these datasets are displayed in the <a class="reference external" href="https://doi-usgs.github.io/sfrmaker/notebooks/lines_from_NHDPlusHR_demo.html">Using SFRmaker with NHDPlus High Resolution</a> example.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">nhdplus_paths</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;../neversink_rondout/NHDPLUS_HR_1.gdb&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;../neversink_rondout/NHDPLUS_HR_2.gdb&#39;</span>
+    <span class="p">]</span>
+
+<span class="n">model_outline</span> <span class="o">=</span> <span class="s1">&#39;../neversink_rondout/Model_Extent.shp&#39;</span>
+
+<span class="n">outfolder</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s1">&#39;output&#39;</span><span class="p">)</span>
+<span class="n">outfolder</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>With <code class="docutils literal notranslate"><span class="pre">preprocess_nhdplus_hr_flowlines()</span></code> function, we can categorically exclude flowlines by FCODE (feature type), by selecting the FCODEs that we want to retain. We can also drop specific lines by their <code class="docutils literal notranslate"><span class="pre">NHDPlusID</span></code>, and optionally, all of the flowlines that route to them. With the <code class="docutils literal notranslate"><span class="pre">active_area</span></code> argument, flowlines can be clipped to a model area specified as a polygon shapefile or bounding box in the same coordinate reference system as the input flowlines.</p>
+<p><strong>Pending features (not implemented yet):</strong> * <code class="docutils literal notranslate"><span class="pre">drop_ids_downstream</span></code> argument that removes a specified line and all lines downstream * adapting the other funtions (below) to work with NHDPlus HR</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># drop lines representing storm sewers and aquaducts, etc.</span>
+<span class="n">keep_fcodes</span> <span class="o">=</span> <span class="p">{</span><span class="mi">46003</span><span class="p">,</span>  <span class="c1"># intermittent streams</span>
+               <span class="mi">46006</span><span class="p">,</span>  <span class="c1"># perennial streams</span>
+               <span class="mi">55800</span><span class="p">,</span>  <span class="c1"># artificial path (thru lakes)</span>
+               <span class="mi">33600</span><span class="p">,</span>  <span class="c1"># canal/ditch (includes many wetlands, and the MS River)</span>
+               <span class="mi">33400</span>  <span class="c1"># connector (some wetlands)</span>
+               <span class="p">}</span>
+
+<span class="c1"># drop these NHDPlusIDs and all IDs above them</span>
+<span class="n">drop_ids_upstream_of</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;10000700059483&#39;</span><span class="p">}</span>
+
+<span class="c1"># drop specific IDs</span>
+<span class="n">drop_ids</span> <span class="o">=</span> <span class="kc">None</span>
+
+<span class="n">preprocess_nhdplus_hr_flowlines</span><span class="p">(</span><span class="n">nhdplus_paths</span><span class="p">,</span> <span class="n">active_area</span><span class="o">=</span><span class="n">model_outline</span><span class="p">,</span>
+                        <span class="n">keep_fcodes</span><span class="o">=</span><span class="n">keep_fcodes</span><span class="p">,</span>
+                        <span class="n">drop_ids_upstream</span><span class="o">=</span><span class="n">drop_ids_upstream_of</span><span class="p">,</span>
+                        <span class="n">dest_crs</span><span class="o">=</span><span class="mi">26918</span><span class="p">,</span> <span class="n">outfile</span><span class="o">=</span><span class="n">outfolder</span> <span class="o">/</span> <span class="s1">&#39;preprocessed_flowlines.shp&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+reading ../neversink_rondout/NHDPLUS_HR_1.gdb...
+filtering flowlines...
+
+Getting routing information from NHDPlus HR Plusflow table...
+finished in 0.00s
+
+finished in 0.07s
+
+reading ../neversink_rondout/NHDPLUS_HR_2.gdb...
+filtering flowlines...
+
+Getting routing information from NHDPlus HR Plusflow table...
+finished in 0.00s
+
+finished in 0.10s
+
+wrote output/preprocessed_flowlines.shp
+</pre></div></div>
+</div>
+<p>A similar function merges and culls waterbody (polygon) features from one or more NHDPlus HR datasets. Waterbodies can be culled by their <code class="docutils literal notranslate"><span class="pre">NHDPlusID</span></code> or by specifying a minimum area in km2.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">nhdplus_path</span> <span class="o">=</span> <span class="s1">&#39;../../sfrmaker/test/data/nhdplus_hr_waterbodies.shp&#39;</span>
+
+<span class="c1"># drop these waterbodies, regardless of size</span>
+<span class="n">drop_waterbodies</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+<span class="n">preprocess_nhdplus_hr_waterbodies</span><span class="p">(</span><span class="n">nhdplus_path</span><span class="p">,</span>
+                                    <span class="n">active_area</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mf">151.00350</span><span class="p">,</span> <span class="mf">60.64855</span><span class="p">,</span> <span class="o">-</span><span class="mf">150.96778</span><span class="p">,</span> <span class="mf">60.67559</span><span class="p">),</span>
+                                    <span class="n">drop_waterbodies</span><span class="o">=</span><span class="n">drop_waterbodies</span><span class="p">,</span>
+                                    <span class="n">min_areasqkm</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
+                                    <span class="n">dest_crs</span><span class="o">=</span><span class="mi">26905</span><span class="p">,</span> <span class="n">outfile</span><span class="o">=</span><span class="n">outfolder</span> <span class="o">/</span> <span class="s1">&#39;preprocessed_flowlines.shp&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+wrote output/preprocessed_flowlines.shp
+</pre></div></div>
+</div>
+</section>
+<section id="NHDPlus-version-2">
+<h2>NHDPlus version 2<a class="headerlink" href="#NHDPlus-version-2" title="Link to this heading"></a></h2>
+<p>The functions below accept NHDPlus version 2 data as input, and output either a culled and merged set of NHDPlus version 2 files (<code class="docutils literal notranslate"><span class="pre">cull_flowlines</span></code> function) or a single shapefile with all of the information needed to build an SFR package (<code class="docutils literal notranslate"><span class="pre">preprocess_preprocess_nhdplus</span></code> function).</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
@@ -136,7 +249,7 @@
 </div>
 <p>We start by supplying one or more paths to NHDPlus data (in the same structure as downloaded). Multiple drainage basins can be combined by included multiple paths in the list (for example, the Great Lakes and Upper Mississippi basins as shown here:</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">NHDPlus_paths_list</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;/NHDPlusGL/NHDPlus04/&#39;</span><span class="p">,</span>
@@ -145,7 +258,7 @@
 </div>
 </div>
 <section id="Merging-and-culling-flowlines">
-<h2>Merging and culling flowlines<a class="headerlink" href="#Merging-and-culling-flowlines" title="Link to this heading"></a></h2>
+<h3>Merging and culling flowlines<a class="headerlink" href="#Merging-and-culling-flowlines" title="Link to this heading"></a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">cull_flowlines()</span></code> function culls NHDPlus version 2 data to a bounding box defined by an <code class="docutils literal notranslate"><span class="pre">active_area</span></code> coordinate tuple or polygon, and to flowlines with arbolate sums greater than specified thresholds. There are two arbolate sum thresholds:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">asum_thresh</span></code>: all non perennial streams (with FCodes other than 46006) with arbolate sums less than this amount (in km) will be culled.</p></li>
@@ -162,7 +275,7 @@ NHDFlowline.shp
 </div>
 <p>The Tyler Forks example is contained in the Great Lakes basin, so we just need one path. We also need to specify a folder for writing the merged and culled files.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">outfolder</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s1">&#39;output&#39;</span><span class="p">)</span>
@@ -210,71 +323,71 @@ writing output/elevslope_gt3km.dbf... Done
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/home/runner/micromamba/envs/sfrmaker_ci/lib/python3.12/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
+/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.13/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
   props[&#39;geometry&#39;] = line.get(&#39;geometry&#39;, None)
-/home/runner/micromamba/envs/sfrmaker_ci/lib/python3.12/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
+/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.13/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
   props[&#39;geometry&#39;] = line.get(&#39;geometry&#39;, None)
-/home/runner/micromamba/envs/sfrmaker_ci/lib/python3.12/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
+/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.13/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
   props[&#39;geometry&#39;] = line.get(&#39;geometry&#39;, None)
-/home/runner/micromamba/envs/sfrmaker_ci/lib/python3.12/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
+/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.13/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
   props[&#39;geometry&#39;] = line.get(&#39;geometry&#39;, None)
-/home/runner/micromamba/envs/sfrmaker_ci/lib/python3.12/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
+/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.13/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
   props[&#39;geometry&#39;] = line.get(&#39;geometry&#39;, None)
-/home/runner/micromamba/envs/sfrmaker_ci/lib/python3.12/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
+/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.13/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
   props[&#39;geometry&#39;] = line.get(&#39;geometry&#39;, None)
-/home/runner/micromamba/envs/sfrmaker_ci/lib/python3.12/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
+/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.13/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
   props[&#39;geometry&#39;] = line.get(&#39;geometry&#39;, None)
-/home/runner/micromamba/envs/sfrmaker_ci/lib/python3.12/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
+/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.13/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
   props[&#39;geometry&#39;] = line.get(&#39;geometry&#39;, None)
-/home/runner/micromamba/envs/sfrmaker_ci/lib/python3.12/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
+/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.13/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
   props[&#39;geometry&#39;] = line.get(&#39;geometry&#39;, None)
-/home/runner/micromamba/envs/sfrmaker_ci/lib/python3.12/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
+/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.13/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
   props[&#39;geometry&#39;] = line.get(&#39;geometry&#39;, None)
-/home/runner/micromamba/envs/sfrmaker_ci/lib/python3.12/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
+/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.13/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
   props[&#39;geometry&#39;] = line.get(&#39;geometry&#39;, None)
-/home/runner/micromamba/envs/sfrmaker_ci/lib/python3.12/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
+/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.13/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
   props[&#39;geometry&#39;] = line.get(&#39;geometry&#39;, None)
-/home/runner/micromamba/envs/sfrmaker_ci/lib/python3.12/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
+/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.13/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
   props[&#39;geometry&#39;] = line.get(&#39;geometry&#39;, None)
-/home/runner/micromamba/envs/sfrmaker_ci/lib/python3.12/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
+/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.13/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
   props[&#39;geometry&#39;] = line.get(&#39;geometry&#39;, None)
-/home/runner/micromamba/envs/sfrmaker_ci/lib/python3.12/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
+/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.13/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
   props[&#39;geometry&#39;] = line.get(&#39;geometry&#39;, None)
-/home/runner/micromamba/envs/sfrmaker_ci/lib/python3.12/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
+/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.13/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
   props[&#39;geometry&#39;] = line.get(&#39;geometry&#39;, None)
-/home/runner/micromamba/envs/sfrmaker_ci/lib/python3.12/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
+/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.13/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
   props[&#39;geometry&#39;] = line.get(&#39;geometry&#39;, None)
-/home/runner/micromamba/envs/sfrmaker_ci/lib/python3.12/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
+/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.13/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
   props[&#39;geometry&#39;] = line.get(&#39;geometry&#39;, None)
-/home/runner/micromamba/envs/sfrmaker_ci/lib/python3.12/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
+/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.13/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
   props[&#39;geometry&#39;] = line.get(&#39;geometry&#39;, None)
-/home/runner/micromamba/envs/sfrmaker_ci/lib/python3.12/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
+/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.13/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
   props[&#39;geometry&#39;] = line.get(&#39;geometry&#39;, None)
-/home/runner/micromamba/envs/sfrmaker_ci/lib/python3.12/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
+/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.13/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
   props[&#39;geometry&#39;] = line.get(&#39;geometry&#39;, None)
-/home/runner/micromamba/envs/sfrmaker_ci/lib/python3.12/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
+/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.13/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
   props[&#39;geometry&#39;] = line.get(&#39;geometry&#39;, None)
-/home/runner/micromamba/envs/sfrmaker_ci/lib/python3.12/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
+/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.13/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
   props[&#39;geometry&#39;] = line.get(&#39;geometry&#39;, None)
-/home/runner/micromamba/envs/sfrmaker_ci/lib/python3.12/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
+/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.13/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
   props[&#39;geometry&#39;] = line.get(&#39;geometry&#39;, None)
-/home/runner/micromamba/envs/sfrmaker_ci/lib/python3.12/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
+/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.13/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
   props[&#39;geometry&#39;] = line.get(&#39;geometry&#39;, None)
-/home/runner/micromamba/envs/sfrmaker_ci/lib/python3.12/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
+/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.13/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
   props[&#39;geometry&#39;] = line.get(&#39;geometry&#39;, None)
-/home/runner/micromamba/envs/sfrmaker_ci/lib/python3.12/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
+/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.13/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
   props[&#39;geometry&#39;] = line.get(&#39;geometry&#39;, None)
-/home/runner/micromamba/envs/sfrmaker_ci/lib/python3.12/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
+/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.13/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
   props[&#39;geometry&#39;] = line.get(&#39;geometry&#39;, None)
-/home/runner/micromamba/envs/sfrmaker_ci/lib/python3.12/site-packages/gisutils/shapefile.py:117: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.
+/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.13/site-packages/gisutils/shapefile.py:117: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.
   if LooseVersion(fiona.__gdal_version__) &lt; LooseVersion(&#34;3.0.0&#34;):
-/home/runner/micromamba/envs/sfrmaker_ci/lib/python3.12/site-packages/gisutils/shapefile.py:117: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.
+/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.13/site-packages/gisutils/shapefile.py:117: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.
   if LooseVersion(fiona.__gdal_version__) &lt; LooseVersion(&#34;3.0.0&#34;):
 </pre></div></div>
 </div>
 <p>The output files are listed in a returned <code class="docutils literal notranslate"><span class="pre">results</span></code> dictionary, and are named based on <code class="docutils literal notranslate"><span class="pre">asum_thresh</span></code>. This allows for easy experimentation with variuos arbolate sum thresholds, without a lot of extra file wrangling.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">results</span>
@@ -282,7 +395,7 @@ writing output/elevslope_gt3km.dbf... Done
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -294,10 +407,10 @@ writing output/elevslope_gt3km.dbf... Done
 </pre></div></div>
 </div>
 <section id="Plot-the-culled-flowlines">
-<h3>Plot the culled flowlines<a class="headerlink" href="#Plot-the-culled-flowlines" title="Link to this heading"></a></h3>
+<h4>Plot the culled flowlines<a class="headerlink" href="#Plot-the-culled-flowlines" title="Link to this heading"></a></h4>
 <p>We can use <code class="docutils literal notranslate"><span class="pre">geopandas</span></code> to quickly plot the results. As noted above, all perennial streams that intersect the active area bounding box are retained (blue lines). Within the active area, two intermittent streams with arbolate sums of less than 3km are culled (red lines).</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">original_fl</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="s1">&#39;../tylerforks/NHDPlus/NHDSnapshot/Hydrography/NHDFlowline.shp&#39;</span><span class="p">)</span>
@@ -314,7 +427,7 @@ writing output/elevslope_gt3km.dbf... Done
 </div>
 </div>
 <div class="nboutput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -326,13 +439,13 @@ writing output/elevslope_gt3km.dbf... Done
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/notebooks_preprocessing_demo_9_1.png" src="../_images/notebooks_preprocessing_demo_9_1.png" />
+<img alt="../_images/notebooks_preprocessing_demo_18_1.png" src="../_images/notebooks_preprocessing_demo_18_1.png" />
 </div>
 </div>
 </section>
 </section>
 <section id="Preprocessing-the-flowlines">
-<h2>Preprocessing the flowlines<a class="headerlink" href="#Preprocessing-the-flowlines" title="Link to this heading"></a></h2>
+<h3>Preprocessing the flowlines<a class="headerlink" href="#Preprocessing-the-flowlines" title="Link to this heading"></a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">preprocess_nhdplus()</span></code> function creates a single shapefile with the information needed to build an SFR package (that can be input to <code class="docutils literal notranslate"><span class="pre">`sfrmaker.Lines.from_shapefile()</span></code> &lt;<a class="reference external" href="https://aleaf.github.io/sfrmaker/latest/api/sfrmaker.lines.html#sfrmaker.lines.Lines.from_shapefile">https://aleaf.github.io/sfrmaker/latest/api/sfrmaker.lines.html#sfrmaker.lines.Lines.from_shapefile</a>&gt;`__). The set of unified NHDPlus files from <code class="docutils literal notranslate"><span class="pre">cull_flowlines()</span></code> can be input or, if no culling is needed and the project area falls within a single drainage basin, an original set of NHDPlus version 2 files can be used.</p>
 <p>The shapefile output from <code class="docutils literal notranslate"><span class="pre">preprocess_nhdplus()</span></code> can be thought of as a grid-independent representation of the SFR package. Further editing can be done on the shapefile either manually in a GIS environment, or automatically with the <code class="docutils literal notranslate"><span class="pre">`preprocessing.edit_flowlines()</span></code> &lt;<a class="reference external" href="https://aleaf.github.io/sfrmaker/latest/api/sfrmaker.preprocessing.html#sfrmaker.preprocessing.edit_flowlines">https://aleaf.github.io/sfrmaker/latest/api/sfrmaker.preprocessing.html#sfrmaker.preprocessing.edit_flowlines</a>&gt;`__ function. Abstracting the key details of the SFR package to this shapefile allows for the SFR package to be easily
 regenerated if other apsects of the model (such as the grid) change.</p>
@@ -344,13 +457,13 @@ active during high water events, and therefore potentially not relevant to the g
 by the above power-law relationship (and that may also have greater streambed conductance).</div>
 </div>
 <section id="Additional-processing-options-not-shown-below">
-<h3>Additional processing options not shown below<a class="headerlink" href="#Additional-processing-options-not-shown-below" title="Link to this heading"></a></h3>
+<h4>Additional processing options not shown below<a class="headerlink" href="#Additional-processing-options-not-shown-below" title="Link to this heading"></a></h4>
 <ul class="simple">
 <li><p>for large project areas, additional width information from the North American Width Dataset (NARWidth) can be incorporated via the <code class="docutils literal notranslate"><span class="pre">narwidth_shapefile</span></code> argument (see Leaf, 2023; Allen and Pavelsky, 2015 and the <a class="reference external" href="https://aleaf.github.io/sfrmaker/latest/api/sfrmaker.preprocessing.html#sfrmaker.preprocessing.preprocess_nhdplus">code reference</a></p></li>
 <li><p>field measurements of streambed elevation can be incorporated into the smoothed streambed elevations produced for each line, via the <code class="docutils literal notranslate"><span class="pre">update_up_elevations</span></code> and <code class="docutils literal notranslate"><span class="pre">update_dn_elevations</span></code> arguments.</p></li>
 </ul>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">preprocessed_flowlines</span> <span class="o">=</span> <span class="n">preprocess_nhdplus</span><span class="p">(</span>
@@ -399,19 +512,19 @@ writing output/preprocessed_flowlines_gt3km.shp... Done
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/home/runner/micromamba/envs/sfrmaker_ci/lib/python3.12/site-packages/gisutils/shapefile.py:117: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.
+/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.13/site-packages/gisutils/shapefile.py:117: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.
   if LooseVersion(fiona.__gdal_version__) &lt; LooseVersion(&#34;3.0.0&#34;):
-/home/runner/micromamba/envs/sfrmaker_ci/lib/python3.12/site-packages/gisutils/shapefile.py:117: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.
+/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.13/site-packages/gisutils/shapefile.py:117: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.
   if LooseVersion(fiona.__gdal_version__) &lt; LooseVersion(&#34;3.0.0&#34;):
-/home/runner/micromamba/envs/sfrmaker_ci/lib/python3.12/site-packages/gisutils/shapefile.py:117: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.
+/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.13/site-packages/gisutils/shapefile.py:117: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.
   if LooseVersion(fiona.__gdal_version__) &lt; LooseVersion(&#34;3.0.0&#34;):
-/home/runner/micromamba/envs/sfrmaker_ci/lib/python3.12/site-packages/gisutils/shapefile.py:117: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.
+/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.13/site-packages/gisutils/shapefile.py:117: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.
   if LooseVersion(fiona.__gdal_version__) &lt; LooseVersion(&#34;3.0.0&#34;):
 </pre></div></div>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">preprocess_nhdplus()</span></code> writes a shapefile of the preprocessed flowlines, and returns a GeoDataFrame representation that is described in detail in the <a class="reference external" href="https://aleaf.github.io/sfrmaker/latest/api/sfrmaker.preprocessing.html#sfrmaker.preprocessing.preprocess_nhdplus">code reference</a>.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">preprocessed_flowlines</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
@@ -419,7 +532,7 @@ writing output/preprocessed_flowlines_gt3km.shp... Done
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -502,10 +615,10 @@ writing output/preprocessed_flowlines_gt3km.shp... Done
       <td>0</td>
       <td>StreamRiver</td>
       <td>...</td>
-      <td>343.306821</td>
-      <td>340.423085</td>
-      <td>343.306821</td>
-      <td>340.423085</td>
+      <td>343.306824</td>
+      <td>340.423096</td>
+      <td>343.306824</td>
+      <td>340.423096</td>
       <td>133.052</td>
       <td>0.0</td>
       <td>7.558493</td>
@@ -527,9 +640,9 @@ writing output/preprocessed_flowlines_gt3km.shp... Done
       <td>StreamRiver</td>
       <td>...</td>
       <td>344.879608</td>
-      <td>343.306821</td>
+      <td>343.306824</td>
       <td>344.879608</td>
-      <td>343.306821</td>
+      <td>343.306824</td>
       <td>125.007</td>
       <td>0.0</td>
       <td>7.359996</td>
@@ -550,9 +663,9 @@ writing output/preprocessed_flowlines_gt3km.shp... Done
       <td>0</td>
       <td>StreamRiver</td>
       <td>...</td>
-      <td>353.597050</td>
+      <td>353.597046</td>
       <td>344.879608</td>
-      <td>353.597050</td>
+      <td>353.597046</td>
       <td>344.879608</td>
       <td>119.314</td>
       <td>0.0</td>
@@ -574,10 +687,10 @@ writing output/preprocessed_flowlines_gt3km.shp... Done
       <td>0</td>
       <td>StreamRiver</td>
       <td>...</td>
-      <td>367.337701</td>
-      <td>353.597050</td>
-      <td>367.337701</td>
-      <td>353.597050</td>
+      <td>367.337708</td>
+      <td>353.597046</td>
+      <td>367.337708</td>
+      <td>353.597046</td>
       <td>107.771</td>
       <td>0.0</td>
       <td>6.778782</td>
@@ -598,10 +711,10 @@ writing output/preprocessed_flowlines_gt3km.shp... Done
       <td>0</td>
       <td>StreamRiver</td>
       <td>...</td>
-      <td>389.698828</td>
-      <td>367.337701</td>
-      <td>389.698828</td>
-      <td>367.337701</td>
+      <td>389.698822</td>
+      <td>367.337708</td>
+      <td>389.698822</td>
+      <td>367.337708</td>
       <td>102.417</td>
       <td>0.0</td>
       <td>6.631250</td>
@@ -615,7 +728,7 @@ writing output/preprocessed_flowlines_gt3km.shp... Done
 </div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ax</span> <span class="o">=</span> <span class="n">preprocessed_flowlines</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
@@ -624,7 +737,7 @@ writing output/preprocessed_flowlines_gt3km.shp... Done
 </div>
 </div>
 <div class="nboutput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -636,17 +749,17 @@ writing output/preprocessed_flowlines_gt3km.shp... Done
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/notebooks_preprocessing_demo_14_1.png" src="../_images/notebooks_preprocessing_demo_14_1.png" />
+<img alt="../_images/notebooks_preprocessing_demo_23_1.png" src="../_images/notebooks_preprocessing_demo_23_1.png" />
 </div>
 </div>
 </section>
 </section>
 <section id="Clipping-the-flowlines-to-a-specific-area">
-<h2>Clipping the flowlines to a specific area<a class="headerlink" href="#Clipping-the-flowlines-to-a-specific-area" title="Link to this heading"></a></h2>
+<h3>Clipping the flowlines to a specific area<a class="headerlink" href="#Clipping-the-flowlines-to-a-specific-area" title="Link to this heading"></a></h3>
 <p>As a final step, we may want to clip the flowlines to an irregular area where SFR will be included in the model. For large project areas, this can reduce the file size and make the preprocessed lines easier to work with. This step may be best done last, so that the information in the surrounding flowlines (routing, elevations, etc) can be used in the preprocessing above. For large study areas with an overly detailed active area boundary (for example, one generated from a raster), specifying a
 simplification tolerance (<code class="docutils literal notranslate"><span class="pre">simplify_tol</span></code>) for the active area boundary can greatly speed up the clipping. All lines that intersect the simplified active area will be retained.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">clipped_flowlines</span> <span class="o">=</span> <span class="n">clip_flowlines_to_polygon</span><span class="p">(</span>
@@ -658,15 +771,6 @@ simplification tolerance (<code class="docutils literal notranslate"><span class
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-/home/runner/micromamba/envs/sfrmaker_ci/lib/python3.12/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
-  props[&#39;geometry&#39;] = line.get(&#39;geometry&#39;, None)
-</pre></div></div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 
@@ -676,8 +780,17 @@ starting lines: 19
 remaining lines: 11
 </pre></div></div>
 </div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.13/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
+  props[&#39;geometry&#39;] = line.get(&#39;geometry&#39;, None)
+</pre></div></div>
+</div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">clipped_flowlines</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
@@ -685,7 +798,7 @@ remaining lines: 11
 </div>
 </div>
 <div class="nboutput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -697,9 +810,10 @@ remaining lines: 11
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/notebooks_preprocessing_demo_17_1.png" src="../_images/notebooks_preprocessing_demo_17_1.png" />
+<img alt="../_images/notebooks_preprocessing_demo_26_1.png" src="../_images/notebooks_preprocessing_demo_26_1.png" />
 </div>
 </div>
+</section>
 </section>
 </section>
 
@@ -707,15 +821,15 @@ remaining lines: 11
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="SFRmaker_demo.html" class="btn btn-neutral float-left" title="Basic usage of SFRmaker in a scripting context" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="lines_from_NHDPlusHR_demo.html" class="btn btn-neutral float-right" title="Using SFRmaker with NHDPlus High Resolution" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="../inputs.html" class="btn btn-neutral float-left" title="Input data requirements" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../concepts.html" class="btn btn-neutral float-right" title="Sfrmaker concepts and methods" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Nov 04, 2024.
+      <span class="lastupdated">Last updated on Nov 12, 2024.
       </span></p>
   </div>
 

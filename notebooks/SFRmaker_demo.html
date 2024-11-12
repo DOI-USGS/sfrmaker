@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Basic usage of SFRmaker in a scripting context &mdash; SFRmaker 0.11.3.post14.dev0+g18ad00f documentation</title>
+  <title>Basic usage of SFRmaker in a scripting context &mdash; SFRmaker 0.11.3.post35.dev0+g0f15d42 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
@@ -16,7 +16,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=104bccf0"></script>
+      <script src="../_static/documentation_options.js?v=186c18ab"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -26,9 +26,7 @@
       <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Preprocessing hydrography" href="preprocessing_demo.html" />
-    <link rel="prev" title="Input data requirements" href="../inputs.html" /> 
+    <link rel="search" title="Search" href="../search.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -53,39 +51,14 @@
               <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../philosophy.html"> Philosophy</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../examples.html"> Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html"> Installation</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
-<ul class="current">
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="../inputs.html"> Input Requirements</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../examples.html"> Using SFRmaker with a configuration file</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#"> Basic Usage in a scripting context</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#Input-requirements">Input requirements</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#Hydrography">Hydrography</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#Creating-a-Lines-instance-from-NHDPlus">Creating a <code class="docutils literal notranslate"><span class="pre">Lines</span></code> instance from NHDPlus</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#Creating-a-Lines-instance-from-custom-hydrography">Creating a <code class="docutils literal notranslate"><span class="pre">Lines</span></code> instance from custom hydrography</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#Specifying-a-model-grid-from-a-flopy-StructuredGrid-instance">Specifying a model grid from a flopy <code class="docutils literal notranslate"><span class="pre">StructuredGrid</span></code> instance</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#Specifying-a-model-grid-from-a-shapefile">Specifying a model grid from a shapefile</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#Using-the-modelgrid-attached-to-a-flopy-model">Using the <code class="docutils literal notranslate"><span class="pre">modelgrid</span></code> attached to a flopy model</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#Specifying-a-model">Specifying a model</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#Creating-an-SFRData-instance">Creating an SFRData instance</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#The-SFRData-class">The <code class="docutils literal notranslate"><span class="pre">SFRData</span></code> class</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#Sampling-streambed-top-elevations-from-a-DEM">Sampling streambed top elevations from a DEM</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#Assigning-layers-to-the-reaches">Assigning layers to the reaches</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#Running-diagnostics">Running diagnostics</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#Writing-an-SFR-package">Writing an SFR package</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#Writing-a-MODFLOW-6-SFR-package">Writing a MODFLOW-6 SFR package</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#Writing-tables">Writing tables</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#Writing-shapefiles">Writing shapefiles</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="preprocessing_demo.html"> Preprocessing NHDPlus version 2 data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="lines_from_NHDPlusHR_demo.html"> Using SFRmaker with NHDPlus High Resolution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="preprocessing_demo.html"> Preprocessing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../concepts.html"> Concepts and methods</a></li>
-<li class="toctree-l1"><a class="reference internal" href="sfrmaker_tools.html"> Stand-alone tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sfrmaker_tools.html"> Other stand-alone tools</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../troubleshooting.html"> Troubleshooting</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
@@ -187,13 +160,10 @@ loading NHDPlus v2 hydrography data...
 for basins:
 ../tylerforks/NHDPlus/
 
-reading ../tylerforks/NHDPlus/NHDPlusAttributes/PlusFlow.dbf...
---&gt; building dataframe... (may take a while for large shapefiles)
-
-load finished in 0.07s
+load finished in 0.08s
 
 Getting routing information from NHDPlus Plusflow table...
-finished in 0.03s
+finished in 0.01s
 
 </pre></div></div>
 </div>
@@ -218,13 +188,10 @@ finished in 0.03s
 
 loading NHDPlus v2 hydrography data...
 
-reading ../tylerforks/NHDPlus/NHDPlusAttributes/PlusFlow.dbf...
---&gt; building dataframe... (may take a while for large shapefiles)
-
 load finished in 0.02s
 
 Getting routing information from NHDPlus Plusflow table...
-finished in 0.03s
+finished in 0.01s
 
 </pre></div></div>
 </div>
@@ -317,7 +284,7 @@ reading ../tylerforks/active_area.shp...
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.image.AxesImage at 0x7f11d13a9670&gt;
+&lt;matplotlib.image.AxesImage at 0x13ad00590&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -372,12 +339,12 @@ MODFLOW 5 layer(s) 111 row(s) 160 column(s) 1 stress period(s)
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 
-SFRmaker version 0.11.3.post14.dev0+g18ad00f
+SFRmaker version 0.11.3.post35.dev0+g0f15d42
 
 Creating sfr dataset...
 
 Creating grid class instance from flopy Grid instance...
-grid class created in 0.47s
+grid class created in 0.29s
 
 Model grid information
 structured grid
@@ -407,14 +374,14 @@ finished in 0.00s
 Intersecting 42 flowlines with 17,760 grid cells...
 
 Building spatial index...
-finished in 0.85s
+finished in 0.66s
 
 Intersecting 42 features...
 42
-finished in 0.14s
+finished in 0.12s
 
 Setting up reach data... (may take a few minutes for large grids)
-finished in 0.46s
+finished in 0.33s
 
 Computing widths...
 
@@ -436,7 +403,7 @@ bounds: 682688.00, 5139052.00, 694880.00, 5147510.20
 active area defined by: all cells
 
 
-Time to create sfr dataset: 2.18s
+Time to create sfr dataset: 1.60s
 
 </pre></div></div>
 </div>
@@ -530,7 +497,7 @@ Time to create sfr dataset: 2.18s
       <td>31.822330</td>
       <td>1815013</td>
       <td>None</td>
-      <td>LINESTRING (691394.6396657812 5139052, 691410....</td>
+      <td>LINESTRING (691394.6396657807 5139052, 691410....</td>
     </tr>
     <tr>
       <th>512</th>
@@ -554,7 +521,7 @@ Time to create sfr dataset: 2.18s
       <td>108.465340</td>
       <td>1815013</td>
       <td>None</td>
-      <td>LINESTRING (691451 5139079.028908214, 691471.0...</td>
+      <td>LINESTRING (691451 5139079.0289082145, 691471....</td>
     </tr>
     <tr>
       <th>513</th>
@@ -832,11 +799,11 @@ Time to create sfr dataset: 2.18s
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 running rasterstats.zonal_stats on buffered LineStrings...
-finished in 8.53s
+finished in 10.30s
 
 
 Smoothing elevations...
-finished in 0.09s
+finished in 0.12s
 </pre></div></div>
 </div>
 </section>
@@ -928,7 +895,7 @@ finished in 0.09s
       <td>31.822330</td>
       <td>1815013</td>
       <td>None</td>
-      <td>LINESTRING (691394.6396657812 5139052, 691410....</td>
+      <td>LINESTRING (691394.6396657807 5139052, 691410....</td>
     </tr>
     <tr>
       <th>512</th>
@@ -952,7 +919,7 @@ finished in 0.09s
       <td>108.465340</td>
       <td>1815013</td>
       <td>None</td>
-      <td>LINESTRING (691451 5139079.028908214, 691471.0...</td>
+      <td>LINESTRING (691451 5139079.0289082145, 691471....</td>
     </tr>
     <tr>
       <th>513</th>
@@ -1076,7 +1043,7 @@ wrote tf_SFR.chk
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-SFRmaker v. 0.11.3.post14.dev0+g18ad00f
+SFRmaker v. 0.11.3.post35.dev0+g0f15d42
 
 Running Flopy v. 3.9.0.dev2 diagnostics...
 passed.
@@ -1192,7 +1159,7 @@ Checking for streambed slopes of greater than 1.0...
 passed.
 
 wrote tf_SFR.chk
-wrote /home/runner/work/sfrmaker/sfrmaker/examples/Notebooks/../tylerforks/tylerforks/tf.sfr.
+wrote /Users/runner/work/sfrmaker/sfrmaker/examples/Notebooks/../tylerforks/tylerforks/tf.sfr.
 </pre></div></div>
 </div>
 </section>
@@ -1212,7 +1179,7 @@ wrote /home/runner/work/sfrmaker/sfrmaker/examples/Notebooks/../tylerforks/tyler
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-SFRmaker v. 0.11.3.post14.dev0+g18ad00f
+SFRmaker v. 0.11.3.post35.dev0+g0f15d42
 
 Running Flopy v. 3.9.0.dev2 diagnostics...
 passed.
@@ -1330,7 +1297,7 @@ passed.
 wrote tf_SFR.chk
 converting segment data to period data...
 converting reach and segment data to package data...
-wrote /home/runner/work/sfrmaker/sfrmaker/examples/Notebooks/../tylerforks/tylerforks/tf.sfr
+wrote /Users/runner/work/sfrmaker/sfrmaker/examples/Notebooks/../tylerforks/tylerforks/tf.sfr
 </pre></div></div>
 </div>
 </section>
@@ -1414,16 +1381,13 @@ No non-zero values of flow to export!
 
            </div>
           </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="../inputs.html" class="btn btn-neutral float-left" title="Input data requirements" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="preprocessing_demo.html" class="btn btn-neutral float-right" title="Preprocessing hydrography" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-    </div>
+          <footer>
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Nov 04, 2024.
+      <span class="lastupdated">Last updated on Nov 12, 2024.
       </span></p>
   </div>
 
