@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Preprocessing hydrography &mdash; SFRmaker 0.11.3.post36.dev0+g91a40ad documentation</title>
+  <title>Preprocessing hydrography &mdash; SFRmaker 0.11.3.post37.dev0+gad8cb97 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
@@ -16,7 +16,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=c827ac3a"></script>
+      <script src="../_static/documentation_options.js?v=27cd7d7b"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -152,7 +152,11 @@
 </div>
 </div>
 <p>With <code class="docutils literal notranslate"><span class="pre">preprocess_nhdplus_hr_flowlines()</span></code> function, we can categorically exclude flowlines by FCODE (feature type), by selecting the FCODEs that we want to retain. We can also drop specific lines by their <code class="docutils literal notranslate"><span class="pre">NHDPlusID</span></code>, and optionally, all of the flowlines that route to them. With the <code class="docutils literal notranslate"><span class="pre">active_area</span></code> argument, flowlines can be clipped to a model area specified as a polygon shapefile or bounding box in the same coordinate reference system as the input flowlines.</p>
-<p><strong>Pending features (not implemented yet):</strong> * <code class="docutils literal notranslate"><span class="pre">drop_ids_downstream</span></code> argument that removes a specified line and all lines downstream * adapting the other funtions (below) to work with NHDPlus HR</p>
+<p><strong>Pending features (not implemented yet):</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">drop_ids_downstream</span></code> argument that removes a specified line and all lines downstream</p></li>
+<li><p>adapting the other funtions (below) to work with NHDPlus HR</p></li>
+</ul>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
@@ -189,7 +193,7 @@ filtering flowlines...
 Getting routing information from NHDPlus HR Plusflow table...
 finished in 0.00s
 
-finished in 0.14s
+finished in 0.07s
 
 reading ../neversink_rondout/NHDPLUS_HR_2.gdb...
 filtering flowlines...
@@ -197,7 +201,7 @@ filtering flowlines...
 Getting routing information from NHDPlus HR Plusflow table...
 finished in 0.00s
 
-finished in 0.19s
+finished in 0.09s
 
 wrote output/preprocessed_flowlines.shp
 </pre></div></div>
@@ -449,13 +453,17 @@ writing output/elevslope_gt3km.dbf... Done
 <p>The <code class="docutils literal notranslate"><span class="pre">preprocess_nhdplus()</span></code> function creates a single shapefile with the information needed to build an SFR package (that can be input to <code class="docutils literal notranslate"><span class="pre">`sfrmaker.Lines.from_shapefile()</span></code> &lt;<a class="reference external" href="https://aleaf.github.io/sfrmaker/latest/api/sfrmaker.lines.html#sfrmaker.lines.Lines.from_shapefile">https://aleaf.github.io/sfrmaker/latest/api/sfrmaker.lines.html#sfrmaker.lines.Lines.from_shapefile</a>&gt;`__). The set of unified NHDPlus files from <code class="docutils literal notranslate"><span class="pre">cull_flowlines()</span></code> can be input or, if no culling is needed and the project area falls within a single drainage basin, an original set of NHDPlus version 2 files can be used.</p>
 <p>The shapefile output from <code class="docutils literal notranslate"><span class="pre">preprocess_nhdplus()</span></code> can be thought of as a grid-independent representation of the SFR package. Further editing can be done on the shapefile either manually in a GIS environment, or automatically with the <code class="docutils literal notranslate"><span class="pre">`preprocessing.edit_flowlines()</span></code> &lt;<a class="reference external" href="https://aleaf.github.io/sfrmaker/latest/api/sfrmaker.preprocessing.html#sfrmaker.preprocessing.edit_flowlines">https://aleaf.github.io/sfrmaker/latest/api/sfrmaker.preprocessing.html#sfrmaker.preprocessing.edit_flowlines</a>&gt;`__ function. Abstracting the key details of the SFR package to this shapefile allows for the SFR package to be easily
 regenerated if other apsects of the model (such as the grid) change.</p>
-<div class="line-block">
-<div class="line">To make a suitable SFR dataset, <code class="docutils literal notranslate"><span class="pre">preprocess_nhdplus()</span></code> does some additional processing that is described in more detail in the <a class="reference external" href="https://aleaf.github.io/sfrmaker/latest/api/sfrmaker.preprocessing.html#sfrmaker.preprocessing.preprocess_nhdplus">code reference</a>, including:</div>
-<div class="line">* selecting a single downstream segment at each divergence, using zonal statistics computed on buffered areas (customizable with <code class="docutils literal notranslate"><span class="pre">buffersize_meters</span></code>) around the lines. * for instances where the automated proceedure selects the wrong distributary, or where routing information is absent in NHDPlus, connections can be established manually via a dictionary of <code class="docutils literal notranslate"><span class="pre">FROMCOMID:TOCOMID</span></code> pairs * smoothed streambed elevations are also produced in the zonal statistics sampling; for large models with
-cell sizes of several hundred meters or more (in which zonal statistics may take a hour or longer to run), this may be preferable to sampling the elevations during the construction of the SFR package, which would greatly slow (re)building of the model. * after the divergences are pruned to single downstream segments, arbolate sums are recomputed, and the lines can optionally be culled again with the <code class="docutils literal notranslate"><span class="pre">asum_thresh</span></code> argument here. This can be used to remove minor distributies that are only
-active during high water events, and therefore potentially not relevant to the groundwater model. * the computed arbolate sums are also used to estimate channel widths, using the relationship <span class="math notranslate nohighlight">\(a\cdot arbolate\_sum ^b\)</span> (Leaf, 2023; Feinstein et al, 2010). The <span class="math notranslate nohighlight">\(a\)</span> and <span class="math notranslate nohighlight">\(b\)</span> parameters in this relationship can be adjusted as needed to achieve the desired widths for a study area. A <code class="docutils literal notranslate"><span class="pre">minimum_width</span></code> can also be specified for headwater tributaries that may not be well represented
-by the above power-law relationship (and that may also have greater streambed conductance).</div>
-</div>
+<p>To make a suitable SFR dataset, <code class="docutils literal notranslate"><span class="pre">preprocess_nhdplus()</span></code> does some additional processing that is described in more detail in the <a class="reference external" href="https://aleaf.github.io/sfrmaker/latest/api/sfrmaker.preprocessing.html#sfrmaker.preprocessing.preprocess_nhdplus">code reference</a>, including:</p>
+<ul class="simple">
+<li><p>selecting a single downstream segment at each divergence, using zonal statistics computed on buffered areas (customizable with <code class="docutils literal notranslate"><span class="pre">buffersize_meters</span></code>) around the lines.</p>
+<ul>
+<li><p>for instances where the automated proceedure selects the wrong distributary, or where routing information is absent in NHDPlus, connections can be established manually via a dictionary of <code class="docutils literal notranslate"><span class="pre">FROMCOMID:TOCOMID</span></code> pairs</p></li>
+</ul>
+</li>
+<li><p>smoothed streambed elevations are also produced in the zonal statistics sampling; for large models with cell sizes of several hundred meters or more (in which zonal statistics may take a hour or longer to run), this may be preferable to sampling the elevations during the construction of the SFR package, which would greatly slow (re)building of the model.</p></li>
+<li><p>after the divergences are pruned to single downstream segments, arbolate sums are recomputed, and the lines can optionally be culled again with the <code class="docutils literal notranslate"><span class="pre">asum_thresh</span></code> argument here. This can be used to remove minor distributies that are only active during high water events, and therefore potentially not relevant to the groundwater model.</p></li>
+<li><p>the computed arbolate sums are also used to estimate channel widths, using the relationship <span class="math notranslate nohighlight">\(a\cdot arbolate\_sum ^b\)</span> (Leaf, 2023; Feinstein et al, 2010). The <span class="math notranslate nohighlight">\(a\)</span> and <span class="math notranslate nohighlight">\(b\)</span> parameters in this relationship can be adjusted as needed to achieve the desired widths for a study area. A <code class="docutils literal notranslate"><span class="pre">minimum_width</span></code> can also be specified for headwater tributaries that may not be well represented by the above power-law relationship (and that may also have greater streambed conductance).</p></li>
+</ul>
 <section id="Additional-processing-options-not-shown-below">
 <h4>Additional processing options not shown below<a class="headerlink" href="#Additional-processing-options-not-shown-below" title="Link to this heading"></a></h4>
 <ul class="simple">
@@ -771,15 +779,6 @@ simplification tolerance (<code class="docutils literal notranslate"><span class
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.13/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
-  props[&#39;geometry&#39;] = line.get(&#39;geometry&#39;, None)
-</pre></div></div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 
@@ -787,6 +786,15 @@ reading ../tylerforks/active_area.shp...
 --&gt; building dataframe... (may take a while for large shapefiles)
 starting lines: 19
 remaining lines: 11
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.13/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
+  props[&#39;geometry&#39;] = line.get(&#39;geometry&#39;, None)
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -829,7 +837,7 @@ remaining lines: 11
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Dec 05, 2024.
+      <span class="lastupdated">Last updated on Jan 03, 2025.
       </span></p>
   </div>
 

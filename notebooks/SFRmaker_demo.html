@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Basic usage of SFRmaker in a scripting context &mdash; SFRmaker 0.11.3.post36.dev0+g91a40ad documentation</title>
+  <title>Basic usage of SFRmaker in a scripting context &mdash; SFRmaker 0.11.3.post37.dev0+gad8cb97 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
@@ -16,7 +16,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=c827ac3a"></script>
+      <script src="../_static/documentation_options.js?v=27cd7d7b"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -191,7 +191,7 @@ loading NHDPlus v2 hydrography data...
 load finished in 0.03s
 
 Getting routing information from NHDPlus Plusflow table...
-finished in 0.02s
+finished in 0.01s
 
 </pre></div></div>
 </div>
@@ -284,7 +284,7 @@ reading ../tylerforks/active_area.shp...
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.image.AxesImage at 0x13691c1a0&gt;
+&lt;matplotlib.image.AxesImage at 0x1276a01a0&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -339,12 +339,12 @@ MODFLOW 5 layer(s) 111 row(s) 160 column(s) 1 stress period(s)
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 
-SFRmaker version 0.11.3.post36.dev0+g91a40ad
+SFRmaker version 0.11.3.post37.dev0+gad8cb97
 
 Creating sfr dataset...
 
 Creating grid class instance from flopy Grid instance...
-grid class created in 0.62s
+grid class created in 0.25s
 
 Model grid information
 structured grid
@@ -374,14 +374,14 @@ finished in 0.00s
 Intersecting 42 flowlines with 17,760 grid cells...
 
 Building spatial index...
-finished in 0.99s
+finished in 0.65s
 
 Intersecting 42 features...
 42
-finished in 0.20s
+finished in 0.06s
 
 Setting up reach data... (may take a few minutes for large grids)
-finished in 0.49s
+finished in 0.16s
 
 Computing widths...
 
@@ -403,7 +403,7 @@ bounds: 682688.00, 5139052.00, 694880.00, 5147510.20
 active area defined by: all cells
 
 
-Time to create sfr dataset: 2.63s
+Time to create sfr dataset: 1.30s
 
 </pre></div></div>
 </div>
@@ -799,11 +799,11 @@ Time to create sfr dataset: 2.63s
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 running rasterstats.zonal_stats on buffered LineStrings...
-finished in 5.27s
+finished in 2.95s
 
 
 Smoothing elevations...
-finished in 0.09s
+finished in 0.07s
 </pre></div></div>
 </div>
 </section>
@@ -1001,13 +1001,21 @@ finished in 0.09s
 </section>
 <section id="Running-diagnostics">
 <h2>Running diagnostics<a class="headerlink" href="#Running-diagnostics" title="Link to this heading"></a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">SFRData</span></code> includes a <code class="docutils literal notranslate"><span class="pre">run_diagnostics()</span></code> method that executes the Flopy checker on the SFR package input. While the Flopy checks are only implemented for MODFLOW-2005 style SFR packages, <code class="docutils literal notranslate"><span class="pre">run_diagnostics()</span></code> works on MODFLOW-6 packages as well, by working of an attached MODFLOW-2005 representation of the MODFLOW-6 SFR input. The following checks are executed: * <strong>NaNs</strong> (not a number values, which will cause MODFLOW to crash) * <strong>consecutive segment and reach numbering</strong> * <strong>segment
-numbering that only increases</strong> in the downstream direction * <strong>circular routing sequences</strong> (reaches or segments routing back to themselves) * <strong>routing connection proximity:</strong> The length of routing connections, as determined by the distance between their cell centers, is compared to 1.25 times the diagonal distance across the cell containing the upstream reach. This benchmark length is equivalent to a diagonal connection between two square cells, where one cell had a spacing of 1.5 times the
-other cell (the maximum recommended increase in spacing between two adjacent cells; see Anderson and others, 2015). While this routing proximity check can be helpful for identifying egregious routing issues, in practice, it may not be uncommon for valid routing connections to violate this rule. For example, if the <code class="docutils literal notranslate"><span class="pre">one_reach_per_cell</span></code> option is used in constructing the SFR package with a large grid size, there may be numerous routing connections that extend across several cells. When
-non-adjacent routing connections are identified, the user can check the shapefile of routing connections to verify the results. * <strong>overlapping conductances:</strong> This check identifies instances of collocated reaches, where more than one reach has a connection to the groundwater flow solution in that cell. Collocated reaches may or may not present an issue for a particular model solution, but can potentially promote instability or spurious circulation of flow between the collocated reaches. *
-<strong>spurious streambed top elevations:</strong> Values &lt; -10 or &gt; 15,000 are flagged * <strong>downstream rises in streambed elevation</strong> * <strong>inconsistencies between streambed elevation and the model grid:</strong> This check looks for streambed bottoms below their respective cell bottoms, which will cause MODFLOW to halt execution, and streambed tops that are above the model top. The latter issue will not prevent MODFLOW from running, but may indicate problems with the input if the differences are large. For coarse
-grids in areas of high stream density (where there are often multiple streams in a cell), it may be impossible to ensure that all streambed top elevations are at or below the model top. Oftentimes, these reaches are dry anyways (for example, and ephemeral gully that runs off a bluff into a perennial stream, where the cell elevation is based on the elevation of the perennial stream). In any case, it is good practice to check the largest violations by comparing the SFRmaker shapefile output to a
-DEM and other data in a GIS environment. * <strong>suprious slopes:</strong> slopes of less than 0.0001 (which can lead to excessive stages with the SFR package’s Manning approximation) and greater than 1.0 are flagged.</p>
+<p><code class="docutils literal notranslate"><span class="pre">SFRData</span></code> includes a <code class="docutils literal notranslate"><span class="pre">run_diagnostics()</span></code> method that executes the Flopy checker on the SFR package input. While the Flopy checks are only implemented for MODFLOW-2005 style SFR packages, <code class="docutils literal notranslate"><span class="pre">run_diagnostics()</span></code> works on MODFLOW-6 packages as well, by working of an attached MODFLOW-2005 representation of the MODFLOW-6 SFR input. The following checks are executed:</p>
+<ul class="simple">
+<li><p><strong>NaNs</strong> (not a number values, which will cause MODFLOW to crash)</p></li>
+<li><p><strong>consecutive segment and reach numbering</strong></p></li>
+<li><p><strong>segment numbering that only increases</strong> in the downstream direction</p></li>
+<li><p><strong>circular routing sequences</strong> (reaches or segments routing back to themselves)</p></li>
+<li><p><strong>routing connection proximity:</strong> The length of routing connections, as determined by the distance between their cell centers, is compared to 1.25 times the diagonal distance across the cell containing the upstream reach. This benchmark length is equivalent to a diagonal connection between two square cells, where one cell had a spacing of 1.5 times the other cell (the maximum recommended increase in spacing between two adjacent cells; see Anderson and others, 2015). While this routing
+proximity check can be helpful for identifying egregious routing issues, in practice, it may not be uncommon for valid routing connections to violate this rule. For example, if the <code class="docutils literal notranslate"><span class="pre">one_reach_per_cell</span></code> option is used in constructing the SFR package with a large grid size, there may be numerous routing connections that extend across several cells. When non-adjacent routing connections are identified, the user can check the shapefile of routing connections to verify the results.</p></li>
+<li><p><strong>overlapping conductances:</strong> This check identifies instances of collocated reaches, where more than one reach has a connection to the groundwater flow solution in that cell. Collocated reaches may or may not present an issue for a particular model solution, but can potentially promote instability or spurious circulation of flow between the collocated reaches.</p></li>
+<li><p><strong>spurious streambed top elevations:</strong> Values &lt; -10 or &gt; 15,000 are flagged</p></li>
+<li><p><strong>downstream rises in streambed elevation</strong></p></li>
+<li><p><strong>inconsistencies between streambed elevation and the model grid:</strong> This check looks for streambed bottoms below their respective cell bottoms, which will cause MODFLOW to halt execution, and streambed tops that are above the model top. The latter issue will not prevent MODFLOW from running, but may indicate problems with the input if the differences are large. For coarse grids in areas of high stream density (where there are often multiple streams in a cell), it may be impossible to ensure
+that all streambed top elevations are at or below the model top. Oftentimes, these reaches are dry anyways (for example, and ephemeral gully that runs off a bluff into a perennial stream, where the cell elevation is based on the elevation of the perennial stream). In any case, it is good practice to check the largest violations by comparing the SFRmaker shapefile output to a DEM and other data in a GIS environment.</p></li>
+<li><p><strong>suprious slopes:</strong> slopes of less than 0.0001 (which can lead to excessive stages with the SFR package’s Manning approximation) and greater than 1.0 are flagged.</p></li>
+</ul>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
 </pre></div>
@@ -1022,7 +1030,7 @@ DEM and other data in a GIS environment. * <strong>suprious slopes:</strong> slo
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 
-Running Flopy v. 3.9.0.dev2 diagnostics...
+Running Flopy v. 3.10.0.dev1 diagnostics...
 wrote tf_SFR.chk
 </pre></div></div>
 </div>
@@ -1043,9 +1051,9 @@ wrote tf_SFR.chk
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-SFRmaker v. 0.11.3.post36.dev0+g91a40ad
+SFRmaker v. 0.11.3.post37.dev0+gad8cb97
 
-Running Flopy v. 3.9.0.dev2 diagnostics...
+Running Flopy v. 3.10.0.dev1 diagnostics...
 passed.
 
 Checking for continuity in segment and reach numbering...
@@ -1179,9 +1187,9 @@ wrote /Users/runner/work/sfrmaker/sfrmaker/examples/Notebooks/../tylerforks/tyle
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-SFRmaker v. 0.11.3.post36.dev0+g91a40ad
+SFRmaker v. 0.11.3.post37.dev0+gad8cb97
 
-Running Flopy v. 3.9.0.dev2 diagnostics...
+Running Flopy v. 3.10.0.dev1 diagnostics...
 passed.
 
 Checking for continuity in segment and reach numbering...
@@ -1352,7 +1360,15 @@ active area defined by: isfr array
 </section>
 <section id="Writing-shapefiles">
 <h2>Writing shapefiles<a class="headerlink" href="#Writing-shapefiles" title="Link to this heading"></a></h2>
-<p>Shapefiles can also be written to visualize the SFR package. These include: * hydrography linestrings associated with each reach * model cell polygons associated with each reach * outlet locations where water is leaving the model * routing connections (as lines drawn between cell centers) * the locations of specified inflows or any other period data * observation locations (if observations were supplied as input)</p>
+<p>Shapefiles can also be written to visualize the SFR package. These include:</p>
+<ul class="simple">
+<li><p>hydrography linestrings associated with each reach</p></li>
+<li><p>model cell polygons associated with each reach</p></li>
+<li><p>outlet locations where water is leaving the model</p></li>
+<li><p>routing connections (as lines drawn between cell centers)</p></li>
+<li><p>the locations of specified inflows or any other period data</p></li>
+<li><p>observation locations (if observations were supplied as input)</p></li>
+</ul>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
 </pre></div>
@@ -1387,7 +1403,7 @@ No non-zero values of flow to export!
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Dec 05, 2024.
+      <span class="lastupdated">Last updated on Jan 03, 2025.
       </span></p>
   </div>
 
