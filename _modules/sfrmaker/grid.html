@@ -5,8 +5,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>sfrmaker.grid &mdash; SFRmaker 0.11.3.post37.dev0+gad8cb97 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+  <title>sfrmaker.grid &mdash; SFRmaker 0.11.3.post38.dev0+g036ea3e documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=27cd7d7b"></script>
+      <script src="../../_static/documentation_options.js?v=7c9f994c"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -99,19 +99,19 @@
 <span class="sd">up a StructuredGrid instance, see :ref:`Basic usage of SFRmaker in a scripting context`.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
 
-<span class="kn">import</span> <span class="nn">fiona</span>
-<span class="kn">import</span> <span class="nn">flopy</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">from</span> <span class="nn">rasterio</span> <span class="kn">import</span> <span class="n">Affine</span>
-<span class="kn">from</span> <span class="nn">rasterio</span> <span class="kn">import</span> <span class="n">features</span>
-<span class="kn">from</span> <span class="nn">shapely.geometry</span> <span class="kn">import</span> <span class="n">Polygon</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">box</span>
-<span class="kn">from</span> <span class="nn">shapely.ops</span> <span class="kn">import</span> <span class="n">unary_union</span>
-<span class="kn">from</span> <span class="nn">gisutils</span> <span class="kn">import</span> <span class="n">shp2df</span><span class="p">,</span> <span class="n">df2shp</span><span class="p">,</span> <span class="n">get_shapefile_crs</span>
-<span class="kn">from</span> <span class="nn">.gis</span> <span class="kn">import</span> <span class="n">get_crs</span><span class="p">,</span> <span class="n">read_polygon_feature</span><span class="p">,</span> \
+<span class="kn">import</span><span class="w"> </span><span class="nn">fiona</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">flopy</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rasterio</span><span class="w"> </span><span class="kn">import</span> <span class="n">Affine</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rasterio</span><span class="w"> </span><span class="kn">import</span> <span class="n">features</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Polygon</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">box</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">shapely.ops</span><span class="w"> </span><span class="kn">import</span> <span class="n">unary_union</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">gisutils</span><span class="w"> </span><span class="kn">import</span> <span class="n">shp2df</span><span class="p">,</span> <span class="n">df2shp</span><span class="p">,</span> <span class="n">get_shapefile_crs</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.gis</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_crs</span><span class="p">,</span> <span class="n">read_polygon_feature</span><span class="p">,</span> \
     <span class="n">build_rtree_index</span><span class="p">,</span> <span class="n">intersect</span>
 
 <span class="n">fm</span> <span class="o">=</span> <span class="n">flopy</span><span class="o">.</span><span class="n">modflow</span>
@@ -119,7 +119,7 @@
 
 <div class="viewcode-block" id="Grid">
 <a class="viewcode-back" href="../../api/sfrmaker.grid.html#sfrmaker.grid.Grid">[docs]</a>
-<span class="k">class</span> <span class="nc">Grid</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Grid</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for model grids. Has methods and attributes</span>
 <span class="sd">    that are common to both Structured and Unstructured Grids. Not</span>
 <span class="sd">    meant to be called directly.</span>
@@ -127,7 +127,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">units_dict</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="s1">&#39;undefined&#39;</span><span class="p">,</span> <span class="s1">&#39;feet&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;meters&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">}</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span>
                  <span class="n">model_units</span><span class="o">=</span><span class="s1">&#39;undefined&#39;</span><span class="p">,</span> <span class="n">crs_units</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">bounds</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">prjfile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 
@@ -148,13 +148,13 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_active_area</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_active_area_defined_by</span> <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="k">def</span> <span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">&quot;active_area&quot;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_set_active_area</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="nb">super</span><span class="p">(</span><span class="n">Grid</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">s</span> <span class="o">=</span> <span class="s1">&#39;Model grid information</span><span class="se">\n</span><span class="s1">&#39;</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">StructuredGrid</span><span class="p">):</span>
             <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39;structured grid</span><span class="se">\n</span><span class="s1">nnodes: </span><span class="si">{:,d}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">))</span>
@@ -170,7 +170,7 @@
         <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
         <span class="k">return</span> <span class="n">s</span>
 
-    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Grid</span><span class="p">):</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;not an sfrmaker.Grid instance&#39;</span><span class="p">)</span>
             <span class="k">return</span> <span class="kc">False</span>
@@ -198,12 +198,12 @@
         <span class="k">return</span> <span class="kc">True</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">active_area</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">active_area</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Shapely Polygon delinating area where SFR will be simulated.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_active_area</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bounds</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">allX</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># all x coordinates</span>
             <span class="n">allY</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># all y coordinatess</span>
@@ -218,21 +218,21 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bounds</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">spatial_index</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">spatial_index</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Rtree index for intersecting features with model grid.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_idx</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_idx</span> <span class="o">=</span> <span class="n">build_rtree_index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_idx</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">lenuni</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">lenuni</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">units_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_units</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_set_active_area</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">feature</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_set_active_area</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">feature</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Establish a polygon that defines the portion of the</span>
 <span class="sd">        grid where streams will be represented.</span>
 
@@ -272,7 +272,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">create_active_area_polygon_from_isfr</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_active_area_defined_by</span> <span class="o">=</span> <span class="s1">&#39;isfr array&#39;</span>
 
-    <span class="k">def</span> <span class="nf">_set_isfr_from_active_area</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_set_isfr_from_active_area</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Intersect model grid cells with active area polygon,</span>
 <span class="sd">        assign isfr = 1 to cells that intersect.&quot;&quot;&quot;</span>
         <span class="c1"># intersections = intersect_rtree(self.df.geometry.tolist(),</span>
@@ -287,7 +287,7 @@
 
 <div class="viewcode-block" id="Grid.create_active_area_polygon_from_isfr">
 <a class="viewcode-back" href="../../api/sfrmaker.grid.html#sfrmaker.grid.Grid.create_active_area_polygon_from_isfr">[docs]</a>
-    <span class="k">def</span> <span class="nf">create_active_area_polygon_from_isfr</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">create_active_area_polygon_from_isfr</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;The StructuredGrid and UnstructuredGrid classes</span>
 <span class="sd">        have their own ways of doing this.&quot;&quot;&quot;</span>
         <span class="k">return</span></div>
@@ -295,13 +295,13 @@
 
 <div class="viewcode-block" id="Grid.get_node">
 <a class="viewcode-back" href="../../api/sfrmaker.grid.html#sfrmaker.grid.Grid.get_node">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_node</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_node</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">k</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">nrow</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">ncol</span> <span class="o">+</span> <span class="n">i</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">ncol</span> <span class="o">+</span> <span class="n">j</span></div>
 
 
 <div class="viewcode-block" id="Grid.write_active_area_shapefile">
 <a class="viewcode-back" href="../../api/sfrmaker.grid.html#sfrmaker.grid.Grid.write_active_area_shapefile">[docs]</a>
-    <span class="k">def</span> <span class="nf">write_active_area_shapefile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outshp</span><span class="o">=</span><span class="s1">&#39;active_area.shp&#39;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">write_active_area_shapefile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outshp</span><span class="o">=</span><span class="s1">&#39;active_area.shp&#39;</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_active_area</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">create_active_area_polygon_from_isfr</span><span class="p">()</span>
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_active_area</span><span class="p">,</span> <span class="n">Polygon</span><span class="p">),</span> \
@@ -313,7 +313,7 @@
 
 <div class="viewcode-block" id="Grid.write_grid_shapefile">
 <a class="viewcode-back" href="../../api/sfrmaker.grid.html#sfrmaker.grid.Grid.write_grid_shapefile">[docs]</a>
-    <span class="k">def</span> <span class="nf">write_grid_shapefile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outshp</span><span class="o">=</span><span class="s1">&#39;grid.shp&#39;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">write_grid_shapefile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outshp</span><span class="o">=</span><span class="s1">&#39;grid.shp&#39;</span><span class="p">):</span>
         <span class="n">df2shp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">,</span> <span class="n">outshp</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span></div>
 </div>
 
@@ -321,7 +321,7 @@
 
 <div class="viewcode-block" id="StructuredGrid">
 <a class="viewcode-back" href="../../api/sfrmaker.grid.html#sfrmaker.grid.StructuredGrid">[docs]</a>
-<span class="k">class</span> <span class="nc">StructuredGrid</span><span class="p">(</span><span class="n">Grid</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">StructuredGrid</span><span class="p">(</span><span class="n">Grid</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Class representing a model grid that has a row/column structure.</span>
 
 
@@ -394,7 +394,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">_structured</span> <span class="o">=</span> <span class="kc">True</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span>
                  <span class="n">xul</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">yul</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dx</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dy</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span>
                  <span class="n">uniform</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">model_units</span><span class="o">=</span><span class="s1">&#39;undefined&#39;</span><span class="p">,</span> <span class="n">crs_units</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -424,12 +424,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_active_area</span><span class="p">(</span><span class="n">active_area</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">isfr</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">isfr</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">isfr</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
                           <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nrow</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ncol</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">uniform</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">uniform</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if cells are uniform by comparing their areas.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_uniform</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">areas</span> <span class="o">=</span> <span class="p">[</span><span class="n">g</span><span class="o">.</span><span class="n">area</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">geometry</span><span class="p">]</span>
@@ -437,7 +437,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_uniform</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Rasterio-style affine transform object.</span>
 <span class="sd">        https://www.perrygeo.com/python-affine-transforms.html</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -452,7 +452,7 @@
 
 <div class="viewcode-block" id="StructuredGrid.create_active_area_polygon_from_isfr">
 <a class="viewcode-back" href="../../api/sfrmaker.grid.html#sfrmaker.grid.StructuredGrid.create_active_area_polygon_from_isfr">[docs]</a>
-    <span class="k">def</span> <span class="nf">create_active_area_polygon_from_isfr</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">create_active_area_polygon_from_isfr</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert 2D numpy array representing active area where</span>
 <span class="sd">        SFR will be simulated (isfr) to a polygon (if multiple</span>
 <span class="sd">        polygons area created, the largest one by area is retained).</span>
@@ -473,9 +473,9 @@
 <div class="viewcode-block" id="StructuredGrid.from_json">
 <a class="viewcode-back" href="../../api/sfrmaker.grid.html#sfrmaker.grid.StructuredGrid.from_json">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_json</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">jsonfile</span><span class="p">,</span> <span class="n">active_area</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">isfr</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_json</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">jsonfile</span><span class="p">,</span> <span class="n">active_area</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">isfr</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                   <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">prjfile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="kn">from</span> <span class="nn">sfrmaker.fileio</span> <span class="kn">import</span> <span class="n">load_modelgrid</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">sfrmaker.fileio</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_modelgrid</span>
         <span class="n">grid</span> <span class="o">=</span> <span class="n">load_modelgrid</span><span class="p">(</span><span class="n">jsonfile</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_modelgrid</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">active_area</span><span class="o">=</span><span class="n">active_area</span><span class="p">,</span> <span class="n">isfr</span><span class="o">=</span><span class="n">isfr</span><span class="p">,</span>
                                   <span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">,</span> <span class="n">prjfile</span><span class="o">=</span><span class="n">prjfile</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
@@ -484,7 +484,7 @@
 <div class="viewcode-block" id="StructuredGrid.from_sr">
 <a class="viewcode-back" href="../../api/sfrmaker.grid.html#sfrmaker.grid.StructuredGrid.from_sr">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_sr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_sr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s2">&quot;the from_sr method is depricated. Please use from_modelgrid,&quot;</span>
                              <span class="s2">&quot;as demonstrated in the examples.&quot;</span><span class="p">)</span></div>
 
@@ -492,7 +492,7 @@
 <div class="viewcode-block" id="StructuredGrid.from_modelgrid">
 <a class="viewcode-back" href="../../api/sfrmaker.grid.html#sfrmaker.grid.StructuredGrid.from_modelgrid">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_modelgrid</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">mg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">active_area</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">isfr</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_modelgrid</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">mg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">active_area</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">isfr</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                        <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">prjfile</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create StructureGrid class instance from a</span>
 <span class="sd">        flopy.discretization.StructuredGrid instance.&quot;&quot;&quot;</span>
@@ -543,7 +543,7 @@
 <div class="viewcode-block" id="StructuredGrid.from_shapefile">
 <a class="viewcode-back" href="../../api/sfrmaker.grid.html#sfrmaker.grid.StructuredGrid.from_shapefile">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_shapefile</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">shapefile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_shapefile</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">shapefile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                        <span class="n">node_col</span><span class="o">=</span><span class="s1">&#39;node&#39;</span><span class="p">,</span> <span class="n">kcol</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">icol</span><span class="o">=</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="n">jcol</span><span class="o">=</span><span class="s1">&#39;j&#39;</span><span class="p">,</span>
                        <span class="n">isfr_col</span><span class="o">=</span><span class="s1">&#39;isfr&#39;</span><span class="p">,</span>
                        <span class="n">active_area</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -568,7 +568,7 @@
 <div class="viewcode-block" id="StructuredGrid.from_dataframe">
 <a class="viewcode-back" href="../../api/sfrmaker.grid.html#sfrmaker.grid.StructuredGrid.from_dataframe">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_dataframe</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">df</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">uniform</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_dataframe</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">df</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">uniform</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                        <span class="n">kcol</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">icol</span><span class="o">=</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="n">jcol</span><span class="o">=</span><span class="s1">&#39;j&#39;</span><span class="p">,</span>
                        <span class="n">isfr_col</span><span class="o">=</span><span class="s1">&#39;isfr&#39;</span><span class="p">,</span>
                        <span class="n">geometry_column</span><span class="o">=</span><span class="s1">&#39;geometry&#39;</span><span class="p">,</span>
@@ -638,11 +638,11 @@
 
 <div class="viewcode-block" id="UnstructuredGrid">
 <a class="viewcode-back" href="../../api/sfrmaker.grid.html#sfrmaker.grid.UnstructuredGrid">[docs]</a>
-<span class="k">class</span> <span class="nc">UnstructuredGrid</span><span class="p">(</span><span class="n">Grid</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">UnstructuredGrid</span><span class="p">(</span><span class="n">Grid</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Class representing an unstructured model grid.&quot;&quot;&quot;</span>
     <span class="n">_structured</span> <span class="o">=</span> <span class="kc">False</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span>
                  <span class="n">model_units</span><span class="o">=</span><span class="s1">&#39;undefined&#39;</span><span class="p">,</span> <span class="n">crs_units</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">bounds</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">active_area</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">prjfile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -657,7 +657,7 @@
 
 <div class="viewcode-block" id="UnstructuredGrid.create_active_area_polygon_from_isfr">
 <a class="viewcode-back" href="../../api/sfrmaker.grid.html#sfrmaker.grid.UnstructuredGrid.create_active_area_polygon_from_isfr">[docs]</a>
-    <span class="k">def</span> <span class="nf">create_active_area_polygon_from_isfr</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">create_active_area_polygon_from_isfr</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create active area polygon from union of cells where isfr=1.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Creating active area polygon from shapely.ops.unary_union &#39;</span>
@@ -672,7 +672,7 @@
 <div class="viewcode-block" id="UnstructuredGrid.from_dataframe">
 <a class="viewcode-back" href="../../api/sfrmaker.grid.html#sfrmaker.grid.UnstructuredGrid.from_dataframe">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_dataframe</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">df</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_dataframe</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">df</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                        <span class="n">node_col</span><span class="o">=</span><span class="s1">&#39;node&#39;</span><span class="p">,</span>
                        <span class="n">isfr_col</span><span class="o">=</span><span class="s1">&#39;isfr&#39;</span><span class="p">,</span>
                        <span class="n">geometry_column</span><span class="o">=</span><span class="s1">&#39;geometry&#39;</span><span class="p">,</span>
@@ -715,7 +715,7 @@
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Jan 03, 2025.
+      <span class="lastupdated">Last updated on Jan 16, 2025.
       </span></p>
   </div>
 

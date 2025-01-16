@@ -5,8 +5,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>sfrmaker.mf5to6 &mdash; SFRmaker 0.11.3.post37.dev0+gad8cb97 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+  <title>sfrmaker.mf5to6 &mdash; SFRmaker 0.11.3.post38.dev0+g036ea3e documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=27cd7d7b"></script>
+      <script src="../../_static/documentation_options.js?v=7c9f994c"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -96,18 +96,18 @@
   <h1>Source code for sfrmaker.mf5to6</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Code for converting MODFLOW-2005 style SFR Package input to MODFLOW-6 style SFR package input.</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">copy</span>
-<span class="kn">import</span> <span class="nn">warnings</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">sfrmaker</span>
-<span class="kn">from</span> <span class="nn">sfrmaker.reaches</span> <span class="kn">import</span> <span class="n">interpolate_to_reaches</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">copy</span><span class="w"> </span><span class="kn">import</span> <span class="n">copy</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sfrmaker</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sfrmaker.reaches</span><span class="w"> </span><span class="kn">import</span> <span class="n">interpolate_to_reaches</span>
 
 
 <div class="viewcode-block" id="Mf6SFR">
 <a class="viewcode-back" href="../../api/sfrmaker.mf5to6.html#sfrmaker.mf5to6.Mf6SFR">[docs]</a>
-<span class="k">class</span> <span class="nc">Mf6SFR</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Mf6SFR</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Class for writing MODFLOW-6 SFR package input</span>
 <span class="sd">    from a (MODFLOW-2005 style) flopy.modflow.ModflowSfr2 instance or</span>
 <span class="sd">    an sfrmaker.SFRData instance.</span>
@@ -161,7 +161,7 @@
 
     <span class="n">cols</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;rno&#39;</span><span class="p">,</span> <span class="s1">&#39;cellid&#39;</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="s1">&#39;j&#39;</span><span class="p">,</span> <span class="s1">&#39;rlen&#39;</span><span class="p">,</span> <span class="s1">&#39;rwid&#39;</span><span class="p">,</span> <span class="s1">&#39;rgrd&#39;</span><span class="p">,</span>
             <span class="s1">&#39;rtp&#39;</span><span class="p">,</span> <span class="s1">&#39;rbth&#39;</span><span class="p">,</span> <span class="s1">&#39;rhk&#39;</span><span class="p">,</span> <span class="s1">&#39;man&#39;</span><span class="p">,</span> <span class="s1">&#39;ncon&#39;</span><span class="p">,</span> <span class="s1">&#39;ustrf&#39;</span><span class="p">,</span> <span class="s1">&#39;ndv&#39;</span><span class="p">,</span> <span class="s1">&#39;idomain&#39;</span><span class="p">,</span> <span class="s1">&#39;line_id&#39;</span><span class="p">]</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ModflowSfr2</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">SFRData</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ModflowSfr2</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">SFRData</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">period_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">idomain</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">options</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">auxiliary_line_numbers</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 
@@ -229,7 +229,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">dimensions_block</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">BEGIN Dimensions</span><span class="se">\n</span><span class="s1">  NREACHES </span><span class="si">{:d}</span><span class="se">\n</span><span class="s1">END Dimensions</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nreaches</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">graph_r</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">graph_r</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph_r</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">outreaches</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rd</span><span class="o">.</span><span class="n">outreach</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_graph_r</span> <span class="o">=</span> <span class="p">{</span><span class="n">o</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">rd</span><span class="o">.</span><span class="n">rno</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">rd</span><span class="o">.</span><span class="n">outreach</span> <span class="o">==</span> <span class="n">o</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
@@ -239,11 +239,11 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph_r</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">options_block</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">options_block</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_options_block</span>
     
     <span class="nd">@options_block</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">options_block</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">options</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">options_block</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">options</span><span class="p">):</span>
         <span class="c1"># stuff to write</span>
         <span class="n">options_block</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">BEGIN Options</span><span class="se">\n</span><span class="s1">&#39;</span>
         <span class="k">if</span> <span class="n">options</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -257,13 +257,13 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_options_block</span> <span class="o">=</span> <span class="n">options_block</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">packagedata</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">packagedata</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_package_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_package_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_packagedata</span><span class="p">()</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_package_data</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">connections</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">connections</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connections</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">connections</span> <span class="o">=</span> <span class="p">{}</span>
             <span class="k">for</span> <span class="n">rno</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nreaches</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span>
@@ -281,12 +281,12 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connections</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">period_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">period_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_period_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_period_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_period_data</span><span class="p">()</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_period_data</span>
 
-    <span class="k">def</span> <span class="nf">_segment_data2reach_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_segment_data2reach_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var</span><span class="p">):</span>
         <span class="n">reach_values</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">sd0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ModflowSfr2</span><span class="o">.</span><span class="n">segment_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">sd0</span><span class="p">[</span><span class="n">var</span><span class="p">]))</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
@@ -298,7 +298,7 @@
             <span class="n">reach_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rd</span><span class="p">))</span> <span class="o">*</span> <span class="n">sd0</span><span class="p">[</span><span class="n">var</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">reach_values</span>
 
-    <span class="k">def</span> <span class="nf">_get_segment_dataframe</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_segment_dataframe</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">sd</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
         <span class="n">dfs</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ModflowSfr2</span><span class="o">.</span><span class="n">segment_data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -309,7 +309,7 @@
         <span class="n">keepcols</span> <span class="o">=</span> <span class="p">(</span><span class="n">sd</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">in1d</span><span class="p">(</span><span class="n">sd</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;per&#39;</span><span class="p">])</span>
         <span class="k">return</span> <span class="n">sd</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">keepcols</span><span class="p">]</span>
 
-    <span class="k">def</span> <span class="nf">_get_packagedata</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_packagedata</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># [rno, cellid, rlen, rwid, rgrd, rtp, rbth, rhk, man, ncon,</span>
         <span class="c1"># ustrf, ndv, aux, boundname]</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;converting reach and segment data to package data...&#39;</span><span class="p">)</span>
@@ -351,13 +351,13 @@
         <span class="n">cols</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cols</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">packagedata</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">packagedata</span><span class="p">[</span><span class="n">cols</span><span class="p">]</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s1">&#39;rno&#39;</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_get_period_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_period_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;converting segment data to period data...&#39;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">segment_data_to_period_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sd</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rd</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Mf6SFR.write_file">
 <a class="viewcode-back" href="../../api/sfrmaker.mf5to6.html#sfrmaker.mf5to6.Mf6SFR.write_file">[docs]</a>
-    <span class="k">def</span> <span class="nf">write_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">outpath</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">write_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">outpath</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                    <span class="n">external_files_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Write a MODFLOW-6 format SFR package file.</span>
 
@@ -478,8 +478,8 @@
 
 <div class="viewcode-block" id="mf6sfr">
 <a class="viewcode-back" href="../../api/sfrmaker.mf5to6.html#sfrmaker.mf5to6.mf6sfr">[docs]</a>
-<span class="k">class</span> <span class="nc">mf6sfr</span><span class="p">(</span><span class="n">Mf6SFR</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">mf6sfr</span><span class="p">(</span><span class="n">Mf6SFR</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;The &#39;mf6sfr&#39; class was renamed to Mf6SFR to better follow pep 8.&quot;</span><span class="p">,</span>
                       <span class="ne">DeprecationWarning</span><span class="p">)</span>
         <span class="n">Mf6SFR</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
@@ -488,7 +488,7 @@
 
 <div class="viewcode-block" id="segment_data_to_period_data">
 <a class="viewcode-back" href="../../api/sfrmaker.mf5to6.html#sfrmaker.mf5to6.segment_data_to_period_data">[docs]</a>
-<span class="k">def</span> <span class="nf">segment_data_to_period_data</span><span class="p">(</span><span class="n">segment_data</span><span class="p">,</span> <span class="n">reach_data</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">segment_data_to_period_data</span><span class="p">(</span><span class="n">segment_data</span><span class="p">,</span> <span class="n">reach_data</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert modflow-2005 style segment data to modflow-6 period data.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">idx_cols</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;per&#39;</span><span class="p">,</span> <span class="s1">&#39;iseg&#39;</span><span class="p">,</span> <span class="s1">&#39;ireach&#39;</span><span class="p">,</span> <span class="s1">&#39;rno&#39;</span><span class="p">,</span> <span class="s1">&#39;icalc&#39;</span><span class="p">]</span>
@@ -610,7 +610,7 @@
 
 <div class="viewcode-block" id="cellids_to_kij">
 <a class="viewcode-back" href="../../api/sfrmaker.mf5to6.html#sfrmaker.mf5to6.cellids_to_kij">[docs]</a>
-<span class="k">def</span> <span class="nf">cellids_to_kij</span><span class="p">(</span><span class="n">cellids</span><span class="p">,</span> <span class="n">drop_inactive</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">cellids_to_kij</span><span class="p">(</span><span class="n">cellids</span><span class="p">,</span> <span class="n">drop_inactive</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Unpack tuples of MODFLOW-6 cellids (k, i, j) to</span>
 <span class="sd">    lists of k, i, j values; ignoring instances</span>
 <span class="sd">    where cellid is None (unconnected cells).</span>
@@ -645,7 +645,7 @@
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Jan 03, 2025.
+      <span class="lastupdated">Last updated on Jan 16, 2025.
       </span></p>
   </div>
 

@@ -5,8 +5,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>sfrmaker.utils &mdash; SFRmaker 0.11.3.post37.dev0+gad8cb97 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+  <title>sfrmaker.utils &mdash; SFRmaker 0.11.3.post38.dev0+g036ea3e documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=27cd7d7b"></script>
+      <script src="../../_static/documentation_options.js?v=7c9f994c"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -94,18 +94,18 @@
            <div itemprop="articleBody">
              
   <h1>Source code for sfrmaker.utils</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">Mapping</span>
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">inspect</span>
-<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">import</span> <span class="nn">pprint</span>
-<span class="kn">import</span> <span class="nn">warnings</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Mapping</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">inspect</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pprint</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">flopy</span>
-<span class="kn">import</span> <span class="nn">sfrmaker</span>
-<span class="kn">from</span> <span class="nn">sfrmaker.routing</span> <span class="kn">import</span> <span class="n">get_upsegs</span><span class="p">,</span> <span class="n">make_graph</span>
-<span class="kn">from</span> <span class="nn">sfrmaker.units</span> <span class="kn">import</span> <span class="n">convert_length_units</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">flopy</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sfrmaker</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sfrmaker.routing</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_upsegs</span><span class="p">,</span> <span class="n">make_graph</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sfrmaker.units</span><span class="w"> </span><span class="kn">import</span> <span class="n">convert_length_units</span>
 
 <span class="n">unit_conversion</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;feetmeters&#39;</span><span class="p">:</span> <span class="mf">0.3048</span><span class="p">,</span>
                    <span class="s1">&#39;metersfeet&#39;</span><span class="p">:</span> <span class="mi">1</span> <span class="o">/</span> <span class="mf">.3048</span><span class="p">}</span>
@@ -113,7 +113,7 @@
 
 <div class="viewcode-block" id="assign_layers">
 <a class="viewcode-back" href="../../api/sfrmaker.utils.html#sfrmaker.utils.assign_layers">[docs]</a>
-<span class="k">def</span> <span class="nf">assign_layers</span><span class="p">(</span><span class="n">reach_data</span><span class="p">,</span> <span class="n">botm_array</span><span class="p">,</span> 
+<span class="k">def</span><span class="w"> </span><span class="nf">assign_layers</span><span class="p">(</span><span class="n">reach_data</span><span class="p">,</span> <span class="n">botm_array</span><span class="p">,</span> 
                   <span class="n">strtop_col</span><span class="o">=</span><span class="s1">&#39;strtop&#39;</span><span class="p">,</span> <span class="n">strthick_col</span><span class="o">=</span><span class="s1">&#39;strthick&#39;</span><span class="p">,</span>
                   <span class="n">idomain</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span> 
                   <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
@@ -223,7 +223,7 @@
 
 <div class="viewcode-block" id="get_layer">
 <a class="viewcode-back" href="../../api/sfrmaker.utils.html#sfrmaker.utils.get_layer">[docs]</a>
-<span class="k">def</span> <span class="nf">get_layer</span><span class="p">(</span><span class="n">botm_array</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">elev</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_layer</span><span class="p">(</span><span class="n">botm_array</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">elev</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the layers for elevations at i, j locations.</span>
 
 <span class="sd">    Parameters</span>
@@ -242,7 +242,7 @@
 <span class="sd">        zero-based layer index</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">to_array</span><span class="p">(</span><span class="n">arg</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_array</span><span class="p">(</span><span class="n">arg</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">arg</span><span class="p">])</span>
         <span class="k">else</span><span class="p">:</span>
@@ -265,7 +265,7 @@
 
 <div class="viewcode-block" id="get_sfr_package_format">
 <a class="viewcode-back" href="../../api/sfrmaker.utils.html#sfrmaker.utils.get_sfr_package_format">[docs]</a>
-<span class="k">def</span> <span class="nf">get_sfr_package_format</span><span class="p">(</span><span class="n">sfr_package_file</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_sfr_package_format</span><span class="p">(</span><span class="n">sfr_package_file</span><span class="p">):</span>
     <span class="nb">format</span> <span class="o">=</span> <span class="s1">&#39;mf2005&#39;</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">sfr_package_file</span><span class="p">)</span> <span class="k">as</span> <span class="n">src</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">src</span><span class="p">:</span>
@@ -281,7 +281,7 @@
 
 <div class="viewcode-block" id="arbolate_sum">
 <a class="viewcode-back" href="../../api/sfrmaker.utils.html#sfrmaker.utils.arbolate_sum">[docs]</a>
-<span class="k">def</span> <span class="nf">arbolate_sum</span><span class="p">(</span><span class="n">segment</span><span class="p">,</span> <span class="n">lengths</span><span class="p">,</span> <span class="n">routing</span><span class="p">,</span> <span class="n">starting_asums</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">arbolate_sum</span><span class="p">(</span><span class="n">segment</span><span class="p">,</span> <span class="n">lengths</span><span class="p">,</span> <span class="n">routing</span><span class="p">,</span> <span class="n">starting_asums</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute the total length of all tributaries upstream from</span>
 <span class="sd">    segment, including that segment, using the supplied lengths and</span>
 <span class="sd">    routing connections.</span>
@@ -326,7 +326,7 @@
 
 <div class="viewcode-block" id="get_input_arguments">
 <a class="viewcode-back" href="../../api/sfrmaker.utils.html#sfrmaker.utils.get_input_arguments">[docs]</a>
-<span class="k">def</span> <span class="nf">get_input_arguments</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">function</span><span class="p">,</span> <span class="n">warn</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_input_arguments</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">function</span><span class="p">,</span> <span class="n">warn</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return subset of keyword arguments in kwargs dict</span>
 <span class="sd">    that are valid parameters to a function or method.</span>
 
@@ -362,7 +362,7 @@
 
 <div class="viewcode-block" id="print_item">
 <a class="viewcode-back" href="../../api/sfrmaker.utils.html#sfrmaker.utils.print_item">[docs]</a>
-<span class="k">def</span> <span class="nf">print_item</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">print_item</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">: &#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">k</span><span class="p">),</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
         <span class="c1"># print(json.dumps(v, indent=4))</span>
@@ -376,11 +376,11 @@
 
 <div class="viewcode-block" id="which">
 <a class="viewcode-back" href="../../api/sfrmaker.utils.html#sfrmaker.utils.which">[docs]</a>
-<span class="k">def</span> <span class="nf">which</span><span class="p">(</span><span class="n">program</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">which</span><span class="p">(</span><span class="n">program</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Check for existance of executable.</span>
 <span class="sd">    https://stackoverflow.com/questions/377017/test-if-executable-exists-in-python</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="nf">is_exe</span><span class="p">(</span><span class="n">fpath</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">is_exe</span><span class="p">(</span><span class="n">fpath</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">fpath</span><span class="p">)</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">access</span><span class="p">(</span><span class="n">fpath</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">X_OK</span><span class="p">)</span>
 
     <span class="n">fpath</span><span class="p">,</span> <span class="n">fname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">program</span><span class="p">)</span>
@@ -397,7 +397,7 @@
 
 <div class="viewcode-block" id="exe_exists">
 <a class="viewcode-back" href="../../api/sfrmaker.utils.html#sfrmaker.utils.exe_exists">[docs]</a>
-<span class="k">def</span> <span class="nf">exe_exists</span><span class="p">(</span><span class="n">exe_name</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">exe_exists</span><span class="p">(</span><span class="n">exe_name</span><span class="p">):</span>
     <span class="n">exe_path</span> <span class="o">=</span> <span class="n">which</span><span class="p">(</span><span class="n">exe_name</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">exe_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">exe_path</span><span class="p">)</span> <span class="ow">and</span> \
@@ -407,7 +407,7 @@
 
 <div class="viewcode-block" id="update">
 <a class="viewcode-back" href="../../api/sfrmaker.utils.html#sfrmaker.utils.update">[docs]</a>
-<span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">u</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">u</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Recursively update a dictionary of varying depth</span>
 <span class="sd">    d with items from u.</span>
 <span class="sd">    from: https://stackoverflow.com/questions/3232943/update-value-of-a-nested-dictionary-of-varying-depth</span>
@@ -426,7 +426,7 @@
 
 <div class="viewcode-block" id="width_from_arbolate_sum">
 <a class="viewcode-back" href="../../api/sfrmaker.utils.html#sfrmaker.utils.width_from_arbolate_sum">[docs]</a>
-<span class="k">def</span> <span class="nf">width_from_arbolate_sum</span><span class="p">(</span><span class="n">asum</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="mf">0.1193</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mf">0.5032</span><span class="p">,</span> <span class="n">minimum_width</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span> <span class="n">input_units</span><span class="o">=</span><span class="s1">&#39;meters&#39;</span><span class="p">,</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">width_from_arbolate_sum</span><span class="p">(</span><span class="n">asum</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="mf">0.1193</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mf">0.5032</span><span class="p">,</span> <span class="n">minimum_width</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span> <span class="n">input_units</span><span class="o">=</span><span class="s1">&#39;meters&#39;</span><span class="p">,</span>
                             <span class="n">output_units</span><span class="o">=</span><span class="s1">&#39;meters&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Estimate stream width from arbolate sum, using a power law regression</span>
 <span class="sd">    comparing measured channel widths to arbolate sum.</span>
@@ -497,7 +497,7 @@
 
 <div class="viewcode-block" id="get_method_args_values">
 <a class="viewcode-back" href="../../api/sfrmaker.utils.html#sfrmaker.utils.get_method_args_values">[docs]</a>
-<span class="k">def</span> <span class="nf">get_method_args_values</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_method_args_values</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get arguments for a function or method and their default values.</span>
 
 <span class="sd">    Parameters</span>
@@ -525,7 +525,7 @@
 
 <div class="viewcode-block" id="make_config_summary">
 <a class="viewcode-back" href="../../api/sfrmaker.utils.html#sfrmaker.utils.make_config_summary">[docs]</a>
-<span class="k">def</span> <span class="nf">make_config_summary</span><span class="p">():</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">make_config_summary</span><span class="p">():</span>
 
     <span class="c1"># methods called by SFRData.from_yaml</span>
     <span class="c1"># &lt;block name in yaml&gt;: [methods called by block]</span>
@@ -647,7 +647,7 @@
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Jan 03, 2025.
+      <span class="lastupdated">Last updated on Jan 16, 2025.
       </span></p>
   </div>
 

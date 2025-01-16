@@ -5,8 +5,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>sfrmaker.observations &mdash; SFRmaker 0.11.3.post37.dev0+gad8cb97 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+  <title>sfrmaker.observations &mdash; SFRmaker 0.11.3.post38.dev0+g036ea3e documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=27cd7d7b"></script>
+      <script src="../../_static/documentation_options.js?v=7c9f994c"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -97,26 +97,26 @@
 <span></span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Functions for handling observations of SFR package output.</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">geopandas</span> <span class="k">as</span> <span class="nn">gpd</span>
-<span class="kn">from</span> <span class="nn">shapely.geometry</span> <span class="kn">import</span> <span class="n">Polygon</span>
-<span class="kn">from</span> <span class="nn">gisutils</span> <span class="kn">import</span> <span class="n">shp2df</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gpd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Polygon</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">gisutils</span><span class="w"> </span><span class="kn">import</span> <span class="n">shp2df</span>
 <span class="k">try</span><span class="p">:</span>
-    <span class="kn">import</span> <span class="nn">flopy</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">flopy</span>
     <span class="n">fm</span> <span class="o">=</span> <span class="n">flopy</span><span class="o">.</span><span class="n">modflow</span>
 <span class="k">except</span><span class="p">:</span>
     <span class="n">flopy</span> <span class="o">=</span> <span class="kc">False</span>
-<span class="kn">from</span> <span class="nn">.gis</span> <span class="kn">import</span> <span class="n">get_shapefile_crs</span><span class="p">,</span> <span class="n">project</span>
-<span class="kn">from</span> <span class="nn">.fileio</span> <span class="kn">import</span> <span class="n">read_tables</span>
-<span class="kn">from</span> <span class="nn">.routing</span> <span class="kn">import</span> <span class="n">get_next_id_in_subset</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.gis</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_shapefile_crs</span><span class="p">,</span> <span class="n">project</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.fileio</span><span class="w"> </span><span class="kn">import</span> <span class="n">read_tables</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.routing</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_next_id_in_subset</span>
 
 
 <div class="viewcode-block" id="add_observations">
 <a class="viewcode-back" href="../../api/sfrmaker.observations.html#sfrmaker.observations.add_observations">[docs]</a>
-<span class="k">def</span> <span class="nf">add_observations</span><span class="p">(</span><span class="n">sfrdata</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">flowline_routing</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">add_observations</span><span class="p">(</span><span class="n">sfrdata</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">flowline_routing</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                      <span class="n">obstype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sfrlines_shapefile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                      <span class="n">rno_column_in_sfrlines</span><span class="o">=</span><span class="s1">&#39;rno&#39;</span><span class="p">,</span>
                      <span class="n">x_location_column</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -290,7 +290,7 @@
 
 <div class="viewcode-block" id="get_closest_reach">
 <a class="viewcode-back" href="../../api/sfrmaker.observations.html#sfrmaker.observations.get_closest_reach">[docs]</a>
-<span class="k">def</span> <span class="nf">get_closest_reach</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">sfrlines</span><span class="p">,</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_closest_reach</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">sfrlines</span><span class="p">,</span>
                       <span class="n">rno_column</span><span class="o">=</span><span class="s1">&#39;rno&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the SFR reach number closest to a point feature.</span>
 
@@ -361,7 +361,7 @@
 
 <div class="viewcode-block" id="locate_sites">
 <a class="viewcode-back" href="../../api/sfrmaker.observations.html#sfrmaker.observations.locate_sites">[docs]</a>
-<span class="k">def</span> <span class="nf">locate_sites</span><span class="p">(</span><span class="n">site_data</span><span class="p">,</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">locate_sites</span><span class="p">(</span><span class="n">site_data</span><span class="p">,</span>
                  <span class="n">reach_data</span><span class="p">,</span>
                  <span class="n">active_area_shapefile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">x_column_in_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -512,7 +512,7 @@
 
 <div class="viewcode-block" id="write_gage_package">
 <a class="viewcode-back" href="../../api/sfrmaker.observations.html#sfrmaker.observations.write_gage_package">[docs]</a>
-<span class="k">def</span> <span class="nf">write_gage_package</span><span class="p">(</span><span class="n">location_data</span><span class="p">,</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">write_gage_package</span><span class="p">(</span><span class="n">location_data</span><span class="p">,</span>
                        <span class="n">gage_package_filename</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                        <span class="n">gage_namfile_entries_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                        <span class="n">model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -599,7 +599,7 @@
 
 <div class="viewcode-block" id="write_mf6_sfr_obsfile">
 <a class="viewcode-back" href="../../api/sfrmaker.observations.html#sfrmaker.observations.write_mf6_sfr_obsfile">[docs]</a>
-<span class="k">def</span> <span class="nf">write_mf6_sfr_obsfile</span><span class="p">(</span><span class="n">observation_locations</span><span class="p">,</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">write_mf6_sfr_obsfile</span><span class="p">(</span><span class="n">observation_locations</span><span class="p">,</span>
                           <span class="n">filename</span><span class="p">,</span>
                           <span class="n">sfr_output_filename</span><span class="p">,</span> <span class="n">digits</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
                           <span class="n">print_input</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
@@ -650,7 +650,7 @@
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Jan 03, 2025.
+      <span class="lastupdated">Last updated on Jan 16, 2025.
       </span></p>
   </div>
 
