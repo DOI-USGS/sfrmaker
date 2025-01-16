@@ -420,15 +420,22 @@ def test_preprocess_nhdplus_hr_waterbodies(project_root_path, outdir):
     outfile = outdir / 'preprocessed_waterbodies.shp'
   
     # drop these waterbodies, regardless of size
-    drop_waterbodies = set()
+    drop_waterbodies = {'75004400013339'}
+    
+    expected_lakes = {#'75004400013854', 
+                      '75004400011923', 
+                      '75004400012773'}
     
     preprocess_nhdplus_hr_waterbodies(nhdplus_path, 
-                                      active_area=(-151.00350, 60.64855, -150.96778, 60.67559), 
+                                      active_area=(-151.02, 60.64855, -150.96778, 60.67559), 
                                       drop_waterbodies=drop_waterbodies,
                                       min_areasqkm=0.05,
                                       dest_crs=26905, outfile=outfile)
     df = gpd.read_file(outfile)
     df.crs == 26905
-    assert 'Beaver Lake' in df['GNIS_Name'].values
-    # the next line shouldn't be there either
-    assert 75004400012864 not in df['NHDPlusID'].values
+    df['NHDPlusID'] = df['NHDPlusID'].astype(int).astype(str)
+    assert set(df['NHDPlusID']) == expected_lakes
+    # this lake is < 0.05 km2; should have been culled
+    assert '75004400012864' not in df['NHDPlusID'].values
+    for nhdplusid in drop_waterbodies:
+        assert int(nhdplusid) not in df['NHDPlusID'].values

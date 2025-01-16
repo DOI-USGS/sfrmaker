@@ -1957,7 +1957,7 @@ def preprocess_nhdplus_hr_waterbodies(nhdplus_path, active_area,
         df = gpd.read_file(f, **kwargs)
         dfs.append(df)
     df = pd.concat(dfs)
-    wb_crs = df.crs
+    df['NHDPlusID'] = df['NHDPlusID'].astype(int).astype(str)
     if dest_crs is None:
         dest_crs = df.crs
     else:
@@ -1969,9 +1969,9 @@ def preprocess_nhdplus_hr_waterbodies(nhdplus_path, active_area,
         extent_poly = read_polygon_feature(
             active_area, dest_crs=dest_crs)
         intersects = np.array([g.intersects(extent_poly) for g in df.geometry])
-    loc = intersects & ~df['NHDPlusID'].isin(drop_waterbodies) & (df['AreaSqKm'] > min_areasqkm)
+    loc = intersects & ~df['NHDPlusID'].isin(drop_waterbodies) & (df['AreaSqKm'] >= min_areasqkm)
     df = df.loc[loc].copy()
-    df['NHDPlusID'] = df['NHDPlusID'].astype(int)
+    
     df['FDate'] = pd.to_datetime(df['FDate']).dt.strftime('%Y-%m-%d')
     df.to_file(outfile)
     print(f'wrote {outfile}')
