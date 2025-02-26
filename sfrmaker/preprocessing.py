@@ -21,8 +21,8 @@ from gisutils import (
     get_shapefile_crs, 
     write_raster, 
     project, 
+    df2shp,
     shp2df, 
-    df2shp, 
     get_shapefile_crs,
     get_authority_crs
     )
@@ -347,7 +347,8 @@ def cull_flowlines(NHDPlus_paths,
                'pf_file': '{}/PlusFlow{}.dbf'.format(outfolder, version),
                'elevslope_file': '{}/elevslope{}.dbf'.format(outfolder, version)
                }
-    df2shp(fl, results['flowlines_file'], crs=4269)
+    fl = gpd.GeoDataFrame(fl, crs=4269)
+    fl.to_file(results['flowlines_file'], index=False)
     df2shp(pfvaa, results['pfvaa_file'])
     df2shp(pf, results['pf_file'])
     df2shp(elevslope, results['elevslope_file'])
@@ -694,16 +695,16 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
             outfile = outfile.format(f'gt{asum_thresh:.0f}km_')
         else:
             outfile = outfile.format('')
-        df2shp(flccb.drop('buffpoly', axis=1),
-               outfolder / outfile,
-               index=False, crs=dest_crs)
+        flccb.drop('buffpoly', axis=1).to_file(
+            outfolder / outfile, index=False
+        )
     else:
         if not Path(flowline_elevations_file).exists():
             raise ValueError(
                 "If run_zonal_statistics=False a flowline_elevations_file produced by"
                 "a previous run of the sfrmaker.preprocessing.preprocess_nhdplus() "
                 "function is needed.")
-        flccb = shp2df(flowline_elevations_file)
+        flccb = gpd.read_file(flowline_elevations_file)
         flccb.index = flccb['COMID']
         flccb['buffpoly'] = flccb['geometry']
         merge_cols = [c for c in flccb.columns if c not in fl.columns]
@@ -945,9 +946,8 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
         narwidth_crs = get_crs(narwidth_shapefile)
         narwidth_bbox = project(flowline_bbox, flowline_crs, narwidth_crs)
         sample_NARWidth(flcc, narwidth_shapefile,
-                        waterbodies=waterbody_shapefiles,
+                        waterbody_shapefiles=waterbody_shapefiles,
                         bbox_filter=narwidth_bbox.bounds,
-                        crs=project_crs,
                         output_width_units=output_length_units)
         logger.log('Sampling widths from NARWidth database')
 
@@ -969,8 +969,7 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
         outfile = outfile.format(f'_gt{asum_thresh:.0f}km')
     else:
         outfile = outfile.format('')
-    df2shp(flcc.drop('buffpoly', axis=1), outfolder / outfile,
-           index=False, crs=dest_crs)
+    flcc.drop('buffpoly', axis=1, errors='ignore').to_file(outfolder / outfile, index=False)
     logger.log('Preprocessing Flowlines')
 
     return flcc
@@ -1048,9 +1047,8 @@ def clip_flowlines_to_polygon(flowlines, polygon,
     return flc
 
 
-def sample_NARWidth(flowlines, narwidth_shapefile, waterbodies,
+def sample_NARWidth(flowlines, narwidth_shapefile, waterbody_shapefiles,
                     bbox_filter=None,
-                    crs=None,
                     output_width_units='meters',
                     outpath='shps/'):
     """
@@ -1060,32 +1058,15 @@ def sample_NARWidth(flowlines, narwidth_shapefile, waterbodies,
 
     Parameters
     ----------
-    flowlines : DataFrame
+    flowlines : GeoDataFrame
         flowlines dataframe from preprocess_nhdplus().
-        Flowlines must be in a projected Coordinate reference system (CRS).
+        Flowlines must be in a projected Coordinate reference system (CRS),
+        specified by a valid .crs attribute.
     narwidth_shapefile : str
         Path to shapefile from the NARWidth database (Allen and Pavelsky, 2015).
     waterbody_shapefiles : str or list of strings, optional
         Path(s) to NHDPlus NHDWaterbody shapefile(s). Only required if a
         ``narwidth_shapefile`` is specified.
-    crs : obj
-        Coordinate reference system of flowlines.
-        A Python int, dict, str, or :class:`pyproj.crs.CRS` instance
-        passed to :meth:`pyproj.crs.CRS.from_user_input`
-
-        Can be any of:
-          - PROJ string
-          - Dictionary of PROJ parameters
-          - PROJ keyword arguments for parameters
-          - JSON string with PROJ parameters
-          - CRS WKT string
-          - An authority string [i.e. 'epsg:4326']
-          - An EPSG integer code [i.e. 4326]
-          - A tuple of ("auth_name": "auth_code") [i.e ('epsg', '4326')]
-          - An object with a `to_wkt` method.
-          - A :class:`pyproj.crs.CRS` class
-
-        By default, None
     filter : tuple
         Bounds (most likely in lat/lon) for filtering NARWidth lines that are read in
         (left, bottom, right, top)
@@ -1102,13 +1083,12 @@ def sample_NARWidth(flowlines, narwidth_shapefile, waterbodies,
     To avoid erroneous overlap between main-stem NARWidth estimates and minor tributaries, flowlines with arbolate sums less than 500 km only receive widths from NARWidth lines that have at least 50% of their length inside of the 1-km buffer. NARWidth values are generally higher than arbolate sum-based estimates, because the NARWidth estimates represent mean flows and include all reaches of the stream, whereas the arbolate sum estimates are based on field measurements taken at narrower than average, well-behaved channel sections near stream gages, under base flow conditions. Therefore, measured channel widths may be biased low compared to actual widths throughout the stream network (Allen and Pavelsky, 2015; Park, 1977).
     """
 
-    wb = shp2df(waterbodies)
+    wb = shp2df(waterbody_shapefiles)
 
     if not os.path.isdir(outpath):
         os.makedirs(outpath)
 
-    flowline_crs = get_crs(crs=crs)
-    if flowline_crs.is_geographic:
+    if flowlines.crs.is_geographic:
         msg = ("Flowlines must be in a projected Coordinate Reference System "
                "(CRS; i.e. with units of meters).")
         raise ValueError(msg)
@@ -1116,14 +1096,16 @@ def sample_NARWidth(flowlines, narwidth_shapefile, waterbodies,
     # read in narwidth shapefile; to_crs to flowline CRS
     nw = shp2df(narwidth_shapefile, filter=bbox_filter)
     narwidth_crs = get_shapefile_crs(narwidth_shapefile)
-    nw['geometry'] = project(nw.geometry, narwidth_crs, flowline_crs)
+    nw['geometry'] = project(nw.geometry, narwidth_crs, flowlines.crs)
 
     # draw buffers around flowlines
     buffdist = 1000  # m
     buffers = [g.buffer(buffdist) for g in flowlines.geometry]
     flbuff = flowlines.copy()
     flbuff['geometry'] = buffers
-    df2shp(flbuff, '{}/flowlines_edited_buffers_{}.shp'.format(outpath, buffdist), crs=flowline_crs)
+    assert flbuff.crs == flowlines.crs
+    flbuff.drop('buffpoly', axis=1).to_file(
+        f'{outpath}/flowlines_edited_buffers_{buffdist}.shp', index=False)
 
     # determine which narwidth segments intersect the flowline buffers
     results = intersect_rtree(nw.geometry.tolist(), flbuff.geometry.tolist())
@@ -1187,9 +1169,9 @@ def sample_NARWidth(flowlines, narwidth_shapefile, waterbodies,
     rivers_with_widths = ~flowlines.is_wb & (flowlines.nhd_asum > 500) & ~np.isnan(flowlines.narwd_mean)
     wbs = flowlines.is_wb & ~np.isnan(flowlines.narwd_mean)
     criteria = rivers_with_widths | wbs
-
-    df2shp(flowlines.loc[criteria, :], '{}/flowlines_w_sampled_narwidth_elevations.shp'.format(outpath),
-           crs=flowline_crs)
+    flowlines.drop('buffpoly', axis=1, inplace=True, errors='ignore')
+    flowlines.loc[criteria, :].to_file(f'{outpath}/flowlines_w_sampled_narwidth_elevations.shp', 
+                                    index=False)
 
 
 def edit_flowlines(flowlines, config_file,
@@ -1232,7 +1214,7 @@ def edit_flowlines(flowlines, config_file,
 
     if isinstance(flowlines, str) or isinstance(flowlines, Path):
         logger.log_file_and_date_modified(flowlines)
-        df = shp2df(flowlines)
+        df = gpd.read_file(flowlines)
         # make a backup
         for ext in '.shp', '.dbf', '.shx', '.prj':
             source = flowlines[:-4] + ext
@@ -1248,7 +1230,7 @@ def edit_flowlines(flowlines, config_file,
     if 'add_flowlines' in cfg:
         add_flowlines_file = os.path.join(config_path,
                                           cfg['add_flowlines']['filename'])
-        df2 = shp2df(add_flowlines_file)
+        df2 = gpd.read_file(add_flowlines_file)
 
         # resolve case differences in column names
         # conform columns to flowlines
@@ -1291,7 +1273,7 @@ def edit_flowlines(flowlines, config_file,
 
     # write out an updated version of the input flowlines file
     if isinstance(flowlines, str) or isinstance(flowlines, Path):
-        df2shp(df, flowlines, prj=prj_file)
+        df.to_file(flowlines, index=False)
         logger.statement('wrote {}'.format(flowlines))
     return df
 
