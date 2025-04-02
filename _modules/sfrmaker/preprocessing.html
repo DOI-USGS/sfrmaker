@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>sfrmaker.preprocessing &mdash; SFRmaker 0.11.3.post38.dev0+g036ea3e documentation</title>
+  <title>sfrmaker.preprocessing &mdash; SFRmaker 0.11.3.post41.dev0+gba43b7d documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=7c9f994c"></script>
+      <script src="../../_static/documentation_options.js?v=286afb6f"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -117,8 +117,8 @@
     <span class="n">get_shapefile_crs</span><span class="p">,</span> 
     <span class="n">write_raster</span><span class="p">,</span> 
     <span class="n">project</span><span class="p">,</span> 
+    <span class="n">df2shp</span><span class="p">,</span>
     <span class="n">shp2df</span><span class="p">,</span> 
-    <span class="n">df2shp</span><span class="p">,</span> 
     <span class="n">get_shapefile_crs</span><span class="p">,</span>
     <span class="n">get_authority_crs</span>
     <span class="p">)</span>
@@ -448,7 +448,8 @@
                <span class="s1">&#39;pf_file&#39;</span><span class="p">:</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">/PlusFlow</span><span class="si">{}</span><span class="s1">.dbf&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">outfolder</span><span class="p">,</span> <span class="n">version</span><span class="p">),</span>
                <span class="s1">&#39;elevslope_file&#39;</span><span class="p">:</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">/elevslope</span><span class="si">{}</span><span class="s1">.dbf&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">outfolder</span><span class="p">,</span> <span class="n">version</span><span class="p">)</span>
                <span class="p">}</span>
-    <span class="n">df2shp</span><span class="p">(</span><span class="n">fl</span><span class="p">,</span> <span class="n">results</span><span class="p">[</span><span class="s1">&#39;flowlines_file&#39;</span><span class="p">],</span> <span class="n">crs</span><span class="o">=</span><span class="mi">4269</span><span class="p">)</span>
+    <span class="n">fl</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">fl</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="mi">4269</span><span class="p">)</span>
+    <span class="n">fl</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;flowlines_file&#39;</span><span class="p">],</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
     <span class="n">df2shp</span><span class="p">(</span><span class="n">pfvaa</span><span class="p">,</span> <span class="n">results</span><span class="p">[</span><span class="s1">&#39;pfvaa_file&#39;</span><span class="p">])</span>
     <span class="n">df2shp</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">results</span><span class="p">[</span><span class="s1">&#39;pf_file&#39;</span><span class="p">])</span>
     <span class="n">df2shp</span><span class="p">(</span><span class="n">elevslope</span><span class="p">,</span> <span class="n">results</span><span class="p">[</span><span class="s1">&#39;elevslope_file&#39;</span><span class="p">])</span>
@@ -798,16 +799,16 @@
             <span class="n">outfile</span> <span class="o">=</span> <span class="n">outfile</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;gt</span><span class="si">{</span><span class="n">asum_thresh</span><span class="si">:</span><span class="s1">.0f</span><span class="si">}</span><span class="s1">km_&#39;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">outfile</span> <span class="o">=</span> <span class="n">outfile</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
-        <span class="n">df2shp</span><span class="p">(</span><span class="n">flccb</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s1">&#39;buffpoly&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
-               <span class="n">outfolder</span> <span class="o">/</span> <span class="n">outfile</span><span class="p">,</span>
-               <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="n">dest_crs</span><span class="p">)</span>
+        <span class="n">flccb</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s1">&#39;buffpoly&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span>
+            <span class="n">outfolder</span> <span class="o">/</span> <span class="n">outfile</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span>
+        <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">Path</span><span class="p">(</span><span class="n">flowline_elevations_file</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                 <span class="s2">&quot;If run_zonal_statistics=False a flowline_elevations_file produced by&quot;</span>
                 <span class="s2">&quot;a previous run of the sfrmaker.preprocessing.preprocess_nhdplus() &quot;</span>
                 <span class="s2">&quot;function is needed.&quot;</span><span class="p">)</span>
-        <span class="n">flccb</span> <span class="o">=</span> <span class="n">shp2df</span><span class="p">(</span><span class="n">flowline_elevations_file</span><span class="p">)</span>
+        <span class="n">flccb</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">flowline_elevations_file</span><span class="p">)</span>
         <span class="n">flccb</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">flccb</span><span class="p">[</span><span class="s1">&#39;COMID&#39;</span><span class="p">]</span>
         <span class="n">flccb</span><span class="p">[</span><span class="s1">&#39;buffpoly&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">flccb</span><span class="p">[</span><span class="s1">&#39;geometry&#39;</span><span class="p">]</span>
         <span class="n">merge_cols</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">flccb</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">fl</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
@@ -1049,9 +1050,8 @@
         <span class="n">narwidth_crs</span> <span class="o">=</span> <span class="n">get_crs</span><span class="p">(</span><span class="n">narwidth_shapefile</span><span class="p">)</span>
         <span class="n">narwidth_bbox</span> <span class="o">=</span> <span class="n">project</span><span class="p">(</span><span class="n">flowline_bbox</span><span class="p">,</span> <span class="n">flowline_crs</span><span class="p">,</span> <span class="n">narwidth_crs</span><span class="p">)</span>
         <span class="n">sample_NARWidth</span><span class="p">(</span><span class="n">flcc</span><span class="p">,</span> <span class="n">narwidth_shapefile</span><span class="p">,</span>
-                        <span class="n">waterbodies</span><span class="o">=</span><span class="n">waterbody_shapefiles</span><span class="p">,</span>
+                        <span class="n">waterbody_shapefiles</span><span class="o">=</span><span class="n">waterbody_shapefiles</span><span class="p">,</span>
                         <span class="n">bbox_filter</span><span class="o">=</span><span class="n">narwidth_bbox</span><span class="o">.</span><span class="n">bounds</span><span class="p">,</span>
-                        <span class="n">crs</span><span class="o">=</span><span class="n">project_crs</span><span class="p">,</span>
                         <span class="n">output_width_units</span><span class="o">=</span><span class="n">output_length_units</span><span class="p">)</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s1">&#39;Sampling widths from NARWidth database&#39;</span><span class="p">)</span>
 
@@ -1073,8 +1073,7 @@
         <span class="n">outfile</span> <span class="o">=</span> <span class="n">outfile</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;_gt</span><span class="si">{</span><span class="n">asum_thresh</span><span class="si">:</span><span class="s1">.0f</span><span class="si">}</span><span class="s1">km&#39;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">outfile</span> <span class="o">=</span> <span class="n">outfile</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
-    <span class="n">df2shp</span><span class="p">(</span><span class="n">flcc</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s1">&#39;buffpoly&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">outfolder</span> <span class="o">/</span> <span class="n">outfile</span><span class="p">,</span>
-           <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="n">dest_crs</span><span class="p">)</span>
+    <span class="n">flcc</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s1">&#39;buffpoly&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="n">outfolder</span> <span class="o">/</span> <span class="n">outfile</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s1">&#39;Preprocessing Flowlines&#39;</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">flcc</span></div>
@@ -1158,9 +1157,8 @@
 
 <div class="viewcode-block" id="sample_NARWidth">
 <a class="viewcode-back" href="../../api/sfrmaker.preprocessing.html#sfrmaker.preprocessing.sample_NARWidth">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">sample_NARWidth</span><span class="p">(</span><span class="n">flowlines</span><span class="p">,</span> <span class="n">narwidth_shapefile</span><span class="p">,</span> <span class="n">waterbodies</span><span class="p">,</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">sample_NARWidth</span><span class="p">(</span><span class="n">flowlines</span><span class="p">,</span> <span class="n">narwidth_shapefile</span><span class="p">,</span> <span class="n">waterbody_shapefiles</span><span class="p">,</span>
                     <span class="n">bbox_filter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                    <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                     <span class="n">output_width_units</span><span class="o">=</span><span class="s1">&#39;meters&#39;</span><span class="p">,</span>
                     <span class="n">outpath</span><span class="o">=</span><span class="s1">&#39;shps/&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1170,32 +1168,15 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    flowlines : DataFrame</span>
+<span class="sd">    flowlines : GeoDataFrame</span>
 <span class="sd">        flowlines dataframe from preprocess_nhdplus().</span>
-<span class="sd">        Flowlines must be in a projected Coordinate reference system (CRS).</span>
+<span class="sd">        Flowlines must be in a projected Coordinate reference system (CRS),</span>
+<span class="sd">        specified by a valid .crs attribute.</span>
 <span class="sd">    narwidth_shapefile : str</span>
 <span class="sd">        Path to shapefile from the NARWidth database (Allen and Pavelsky, 2015).</span>
 <span class="sd">    waterbody_shapefiles : str or list of strings, optional</span>
 <span class="sd">        Path(s) to NHDPlus NHDWaterbody shapefile(s). Only required if a</span>
 <span class="sd">        ``narwidth_shapefile`` is specified.</span>
-<span class="sd">    crs : obj</span>
-<span class="sd">        Coordinate reference system of flowlines.</span>
-<span class="sd">        A Python int, dict, str, or :class:`pyproj.crs.CRS` instance</span>
-<span class="sd">        passed to :meth:`pyproj.crs.CRS.from_user_input`</span>
-
-<span class="sd">        Can be any of:</span>
-<span class="sd">          - PROJ string</span>
-<span class="sd">          - Dictionary of PROJ parameters</span>
-<span class="sd">          - PROJ keyword arguments for parameters</span>
-<span class="sd">          - JSON string with PROJ parameters</span>
-<span class="sd">          - CRS WKT string</span>
-<span class="sd">          - An authority string [i.e. &#39;epsg:4326&#39;]</span>
-<span class="sd">          - An EPSG integer code [i.e. 4326]</span>
-<span class="sd">          - A tuple of (&quot;auth_name&quot;: &quot;auth_code&quot;) [i.e (&#39;epsg&#39;, &#39;4326&#39;)]</span>
-<span class="sd">          - An object with a `to_wkt` method.</span>
-<span class="sd">          - A :class:`pyproj.crs.CRS` class</span>
-
-<span class="sd">        By default, None</span>
 <span class="sd">    filter : tuple</span>
 <span class="sd">        Bounds (most likely in lat/lon) for filtering NARWidth lines that are read in</span>
 <span class="sd">        (left, bottom, right, top)</span>
@@ -1212,13 +1193,12 @@
 <span class="sd">    To avoid erroneous overlap between main-stem NARWidth estimates and minor tributaries, flowlines with arbolate sums less than 500 km only receive widths from NARWidth lines that have at least 50% of their length inside of the 1-km buffer. NARWidth values are generally higher than arbolate sum-based estimates, because the NARWidth estimates represent mean flows and include all reaches of the stream, whereas the arbolate sum estimates are based on field measurements taken at narrower than average, well-behaved channel sections near stream gages, under base flow conditions. Therefore, measured channel widths may be biased low compared to actual widths throughout the stream network (Allen and Pavelsky, 2015; Park, 1977).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">wb</span> <span class="o">=</span> <span class="n">shp2df</span><span class="p">(</span><span class="n">waterbodies</span><span class="p">)</span>
+    <span class="n">wb</span> <span class="o">=</span> <span class="n">shp2df</span><span class="p">(</span><span class="n">waterbody_shapefiles</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">outpath</span><span class="p">):</span>
         <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">outpath</span><span class="p">)</span>
 
-    <span class="n">flowline_crs</span> <span class="o">=</span> <span class="n">get_crs</span><span class="p">(</span><span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">flowline_crs</span><span class="o">.</span><span class="n">is_geographic</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">flowlines</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">is_geographic</span><span class="p">:</span>
         <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Flowlines must be in a projected Coordinate Reference System &quot;</span>
                <span class="s2">&quot;(CRS; i.e. with units of meters).&quot;</span><span class="p">)</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
@@ -1226,14 +1206,16 @@
     <span class="c1"># read in narwidth shapefile; to_crs to flowline CRS</span>
     <span class="n">nw</span> <span class="o">=</span> <span class="n">shp2df</span><span class="p">(</span><span class="n">narwidth_shapefile</span><span class="p">,</span> <span class="nb">filter</span><span class="o">=</span><span class="n">bbox_filter</span><span class="p">)</span>
     <span class="n">narwidth_crs</span> <span class="o">=</span> <span class="n">get_shapefile_crs</span><span class="p">(</span><span class="n">narwidth_shapefile</span><span class="p">)</span>
-    <span class="n">nw</span><span class="p">[</span><span class="s1">&#39;geometry&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">project</span><span class="p">(</span><span class="n">nw</span><span class="o">.</span><span class="n">geometry</span><span class="p">,</span> <span class="n">narwidth_crs</span><span class="p">,</span> <span class="n">flowline_crs</span><span class="p">)</span>
+    <span class="n">nw</span><span class="p">[</span><span class="s1">&#39;geometry&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">project</span><span class="p">(</span><span class="n">nw</span><span class="o">.</span><span class="n">geometry</span><span class="p">,</span> <span class="n">narwidth_crs</span><span class="p">,</span> <span class="n">flowlines</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
 
     <span class="c1"># draw buffers around flowlines</span>
     <span class="n">buffdist</span> <span class="o">=</span> <span class="mi">1000</span>  <span class="c1"># m</span>
     <span class="n">buffers</span> <span class="o">=</span> <span class="p">[</span><span class="n">g</span><span class="o">.</span><span class="n">buffer</span><span class="p">(</span><span class="n">buffdist</span><span class="p">)</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">flowlines</span><span class="o">.</span><span class="n">geometry</span><span class="p">]</span>
     <span class="n">flbuff</span> <span class="o">=</span> <span class="n">flowlines</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
     <span class="n">flbuff</span><span class="p">[</span><span class="s1">&#39;geometry&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">buffers</span>
-    <span class="n">df2shp</span><span class="p">(</span><span class="n">flbuff</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">/flowlines_edited_buffers_</span><span class="si">{}</span><span class="s1">.shp&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">outpath</span><span class="p">,</span> <span class="n">buffdist</span><span class="p">),</span> <span class="n">crs</span><span class="o">=</span><span class="n">flowline_crs</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">flbuff</span><span class="o">.</span><span class="n">crs</span> <span class="o">==</span> <span class="n">flowlines</span><span class="o">.</span><span class="n">crs</span>
+    <span class="n">flbuff</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s1">&#39;buffpoly&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">outpath</span><span class="si">}</span><span class="s1">/flowlines_edited_buffers_</span><span class="si">{</span><span class="n">buffdist</span><span class="si">}</span><span class="s1">.shp&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
     <span class="c1"># determine which narwidth segments intersect the flowline buffers</span>
     <span class="n">results</span> <span class="o">=</span> <span class="n">intersect_rtree</span><span class="p">(</span><span class="n">nw</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span> <span class="n">flbuff</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
@@ -1297,9 +1279,9 @@
     <span class="n">rivers_with_widths</span> <span class="o">=</span> <span class="o">~</span><span class="n">flowlines</span><span class="o">.</span><span class="n">is_wb</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">flowlines</span><span class="o">.</span><span class="n">nhd_asum</span> <span class="o">&gt;</span> <span class="mi">500</span><span class="p">)</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">flowlines</span><span class="o">.</span><span class="n">narwd_mean</span><span class="p">)</span>
     <span class="n">wbs</span> <span class="o">=</span> <span class="n">flowlines</span><span class="o">.</span><span class="n">is_wb</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">flowlines</span><span class="o">.</span><span class="n">narwd_mean</span><span class="p">)</span>
     <span class="n">criteria</span> <span class="o">=</span> <span class="n">rivers_with_widths</span> <span class="o">|</span> <span class="n">wbs</span>
-
-    <span class="n">df2shp</span><span class="p">(</span><span class="n">flowlines</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">criteria</span><span class="p">,</span> <span class="p">:],</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">/flowlines_w_sampled_narwidth_elevations.shp&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">outpath</span><span class="p">),</span>
-           <span class="n">crs</span><span class="o">=</span><span class="n">flowline_crs</span><span class="p">)</span></div>
+    <span class="n">flowlines</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s1">&#39;buffpoly&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">)</span>
+    <span class="n">flowlines</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">criteria</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">outpath</span><span class="si">}</span><span class="s1">/flowlines_w_sampled_narwidth_elevations.shp&#39;</span><span class="p">,</span> 
+                                    <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
 
 
 
@@ -1345,7 +1327,7 @@
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">flowlines</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">flowlines</span><span class="p">,</span> <span class="n">Path</span><span class="p">):</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">log_file_and_date_modified</span><span class="p">(</span><span class="n">flowlines</span><span class="p">)</span>
-        <span class="n">df</span> <span class="o">=</span> <span class="n">shp2df</span><span class="p">(</span><span class="n">flowlines</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">flowlines</span><span class="p">)</span>
         <span class="c1"># make a backup</span>
         <span class="k">for</span> <span class="n">ext</span> <span class="ow">in</span> <span class="s1">&#39;.shp&#39;</span><span class="p">,</span> <span class="s1">&#39;.dbf&#39;</span><span class="p">,</span> <span class="s1">&#39;.shx&#39;</span><span class="p">,</span> <span class="s1">&#39;.prj&#39;</span><span class="p">:</span>
             <span class="n">source</span> <span class="o">=</span> <span class="n">flowlines</span><span class="p">[:</span><span class="o">-</span><span class="mi">4</span><span class="p">]</span> <span class="o">+</span> <span class="n">ext</span>
@@ -1361,7 +1343,7 @@
     <span class="k">if</span> <span class="s1">&#39;add_flowlines&#39;</span> <span class="ow">in</span> <span class="n">cfg</span><span class="p">:</span>
         <span class="n">add_flowlines_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">config_path</span><span class="p">,</span>
                                           <span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;add_flowlines&#39;</span><span class="p">][</span><span class="s1">&#39;filename&#39;</span><span class="p">])</span>
-        <span class="n">df2</span> <span class="o">=</span> <span class="n">shp2df</span><span class="p">(</span><span class="n">add_flowlines_file</span><span class="p">)</span>
+        <span class="n">df2</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">add_flowlines_file</span><span class="p">)</span>
 
         <span class="c1"># resolve case differences in column names</span>
         <span class="c1"># conform columns to flowlines</span>
@@ -1404,7 +1386,7 @@
 
     <span class="c1"># write out an updated version of the input flowlines file</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">flowlines</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">flowlines</span><span class="p">,</span> <span class="n">Path</span><span class="p">):</span>
-        <span class="n">df2shp</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">flowlines</span><span class="p">,</span> <span class="n">prj</span><span class="o">=</span><span class="n">prj_file</span><span class="p">)</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="n">flowlines</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">statement</span><span class="p">(</span><span class="s1">&#39;wrote </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">flowlines</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">df</span></div>
 
@@ -2117,7 +2099,7 @@
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Jan 16, 2025.
+      <span class="lastupdated">Last updated on Apr 02, 2025.
       </span></p>
   </div>
 

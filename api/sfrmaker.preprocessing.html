@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>The Preprocessing Module &mdash; SFRmaker 0.11.3.post38.dev0+g036ea3e documentation</title>
+  <title>The Preprocessing Module &mdash; SFRmaker 0.11.3.post41.dev0+gba43b7d documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
@@ -15,7 +15,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=7c9f994c"></script>
+      <script src="../_static/documentation_options.js?v=286afb6f"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -137,8 +137,8 @@ features in polygon.</p>
 </dd>
 <dt><strong>crs</strong><span class="classifier">obj</span></dt><dd><p>Coordinate reference system of flowlines. Only needed if
 the data do not have a valid ESRI projection (.prj) file.
-A Python int, dict, str, or <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.7.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> instance
-passed to <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input" title="(in pyproj v3.7.0)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.crs.CRS.from_user_input()</span></code></a></p>
+A Python int, dict, str, or <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.7.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> instance
+passed to <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input" title="(in pyproj v3.7.1)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.crs.CRS.from_user_input()</span></code></a></p>
 <dl class="simple">
 <dt>Can be any of:</dt><dd><ul class="simple">
 <li><p>PROJ string</p></li>
@@ -150,7 +150,7 @@ passed to <a class="reference external" href="https://pyproj4.github.io/pyproj/s
 <li><p>An EPSG integer code [i.e. 4326]</p></li>
 <li><p>A tuple of (“auth_name”: “auth_code”) [i.e (‘epsg’, ‘4326’)]</p></li>
 <li><p>An object with a <cite>to_wkt</cite> method.</p></li>
-<li><p>A <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.7.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> class</p></li>
+<li><p>A <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.7.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> class</p></li>
 </ul>
 </dd>
 </dl>
@@ -432,8 +432,8 @@ by default None</p>
 </dd>
 <dt><strong>flowline_crs</strong><span class="classifier">obj</span></dt><dd><p>Coordinate reference system of the NHDPlus data. Only needed if
 the data do not have a valid ESRI projection (.prj) file.
-A Python int, dict, str, or <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.7.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> instance
-passed to <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input" title="(in pyproj v3.7.0)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.crs.CRS.from_user_input()</span></code></a></p>
+A Python int, dict, str, or <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.7.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> instance
+passed to <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input" title="(in pyproj v3.7.1)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.crs.CRS.from_user_input()</span></code></a></p>
 <dl class="simple">
 <dt>Can be any of:</dt><dd><ul class="simple">
 <li><p>PROJ string</p></li>
@@ -445,7 +445,7 @@ passed to <a class="reference external" href="https://pyproj4.github.io/pyproj/s
 <li><p>An EPSG integer code [i.e. 4326]</p></li>
 <li><p>A tuple of (“auth_name”: “auth_code”) [i.e (‘epsg’, ‘4326’)]</p></li>
 <li><p>An object with a <cite>to_wkt</cite> method.</p></li>
-<li><p>A <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.7.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> class</p></li>
+<li><p>A <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.7.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> class</p></li>
 </ul>
 </dd>
 </dl>
@@ -630,7 +630,7 @@ by default, False</p>
 <dt><strong>dest_crs</strong><span class="classifier">CRS-like, optional</span></dt><dd><p>Reproject preprocessed flowlines to this 
 coorindate reference system (CRS), for example as 
 specified by an EPSG code. See the documentation for 
-<a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input" title="(in pyproj v3.7.0)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.crs.CRS.from_user_input()</span></code></a> for other examples, 
+<a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input" title="(in pyproj v3.7.1)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.crs.CRS.from_user_input()</span></code></a> for other examples, 
 by default None</p>
 </dd>
 <dt><strong>outfile</strong><span class="classifier">str or pathlike, optional</span></dt><dd><p>Output shapefile path, 
@@ -665,7 +665,7 @@ by default 0.</p>
 <dt><strong>dest_crs</strong><span class="classifier">CRS-like, optional</span></dt><dd><p>Reproject preprocessed flowlines to this 
 coorindate reference system (CRS), for example as 
 specified by an EPSG code. See the documentation for 
-<a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input" title="(in pyproj v3.7.0)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.crs.CRS.from_user_input()</span></code></a> for other examples, 
+<a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input" title="(in pyproj v3.7.1)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.crs.CRS.from_user_input()</span></code></a> for other examples, 
 by default None</p>
 </dd>
 <dt><strong>outfile</strong><span class="classifier">str or pathlike, optional</span></dt><dd><p>Output shapefile path, 
@@ -707,40 +707,21 @@ in same units as asums.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="sfrmaker.preprocessing.sample_NARWidth">
-<span class="sig-prename descclassname"><span class="pre">sfrmaker.preprocessing.</span></span><span class="sig-name descname"><span class="pre">sample_NARWidth</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">flowlines</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">narwidth_shapefile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">waterbodies</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bbox_filter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">crs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_width_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'meters'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outpath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'shps/'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/preprocessing.html#sample_NARWidth"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.preprocessing.sample_NARWidth" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">sfrmaker.preprocessing.</span></span><span class="sig-name descname"><span class="pre">sample_NARWidth</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">flowlines</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">narwidth_shapefile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">waterbody_shapefiles</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bbox_filter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_width_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'meters'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outpath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'shps/'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/preprocessing.html#sample_NARWidth"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.preprocessing.sample_NARWidth" title="Link to this definition"></a></dt>
 <dd><p>Sample the North American River Width Database by
 doing a spatial join (transfer width information from
 NARWidth shapefile to flowlines shapefile based on proximity).</p>
-<dl class="field-list">
+<dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl>
-<dt><strong>flowlines</strong><span class="classifier">DataFrame</span></dt><dd><p>flowlines dataframe from preprocess_nhdplus().
-Flowlines must be in a projected Coordinate reference system (CRS).</p>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>flowlines</strong><span class="classifier">GeoDataFrame</span></dt><dd><p>flowlines dataframe from preprocess_nhdplus().
+Flowlines must be in a projected Coordinate reference system (CRS),
+specified by a valid .crs attribute.</p>
 </dd>
 <dt><strong>narwidth_shapefile</strong><span class="classifier">str</span></dt><dd><p>Path to shapefile from the NARWidth database (Allen and Pavelsky, 2015).</p>
 </dd>
 <dt><strong>waterbody_shapefiles</strong><span class="classifier">str or list of strings, optional</span></dt><dd><p>Path(s) to NHDPlus NHDWaterbody shapefile(s). Only required if a
 <code class="docutils literal notranslate"><span class="pre">narwidth_shapefile</span></code> is specified.</p>
-</dd>
-<dt><strong>crs</strong><span class="classifier">obj</span></dt><dd><p>Coordinate reference system of flowlines.
-A Python int, dict, str, or <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.7.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> instance
-passed to <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input" title="(in pyproj v3.7.0)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.crs.CRS.from_user_input()</span></code></a></p>
-<dl class="simple">
-<dt>Can be any of:</dt><dd><ul class="simple">
-<li><p>PROJ string</p></li>
-<li><p>Dictionary of PROJ parameters</p></li>
-<li><p>PROJ keyword arguments for parameters</p></li>
-<li><p>JSON string with PROJ parameters</p></li>
-<li><p>CRS WKT string</p></li>
-<li><p>An authority string [i.e. ‘epsg:4326’]</p></li>
-<li><p>An EPSG integer code [i.e. 4326]</p></li>
-<li><p>A tuple of (“auth_name”: “auth_code”) [i.e (‘epsg’, ‘4326’)]</p></li>
-<li><p>An object with a <cite>to_wkt</cite> method.</p></li>
-<li><p>A <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.7.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> class</p></li>
-</ul>
-</dd>
-</dl>
-<p>By default, None</p>
 </dd>
 <dt><strong>filter</strong><span class="classifier">tuple</span></dt><dd><p>Bounds (most likely in lat/lon) for filtering NARWidth lines that are read in
 (left, bottom, right, top)</p>
@@ -887,7 +868,7 @@ In this case, one would most likely supply both <code class="docutils literal no
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Jan 16, 2025.
+      <span class="lastupdated">Last updated on Apr 02, 2025.
       </span></p>
   </div>
 

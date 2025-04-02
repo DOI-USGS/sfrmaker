@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Preprocessing hydrography &mdash; SFRmaker 0.11.3.post38.dev0+g036ea3e documentation</title>
+  <title>Preprocessing hydrography &mdash; SFRmaker 0.11.3.post41.dev0+gba43b7d documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
@@ -16,7 +16,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=7c9f994c"></script>
+      <script src="../_static/documentation_options.js?v=286afb6f"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -193,7 +193,7 @@ filtering flowlines...
 Getting routing information from NHDPlus HR Plusflow table...
 finished in 0.00s
 
-finished in 0.08s
+finished in 0.07s
 
 reading ../neversink_rondout/NHDPLUS_HR_2.gdb...
 filtering flowlines...
@@ -201,7 +201,7 @@ filtering flowlines...
 Getting routing information from NHDPlus HR Plusflow table...
 finished in 0.00s
 
-finished in 0.11s
+finished in 0.09s
 
 wrote output/preprocessed_flowlines.shp
 </pre></div></div>
@@ -316,7 +316,6 @@ reading ../tylerforks/NHDPlus/NHDPlusAttributes/PlusFlow.dbf...
 
 reading ../tylerforks/NHDPlus/NHDPlusAttributes/elevslope.dbf...
 --&gt; building dataframe... (may take a while for large shapefiles)
-writing output/flowlines_gt3km.shp... Done
 writing output/PlusFlowlineVAA_gt3km.dbf... Done
 writing output/PlusFlow_gt3km.dbf... Done
 writing output/elevslope_gt3km.dbf... Done
@@ -383,10 +382,6 @@ writing output/elevslope_gt3km.dbf... Done
   props[&#39;geometry&#39;] = line.get(&#39;geometry&#39;, None)
 /Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.13/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
   props[&#39;geometry&#39;] = line.get(&#39;geometry&#39;, None)
-/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.13/site-packages/gisutils/shapefile.py:117: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.
-  if LooseVersion(fiona.__gdal_version__) &lt; LooseVersion(&#34;3.0.0&#34;):
-/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.13/site-packages/gisutils/shapefile.py:117: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.
-  if LooseVersion(fiona.__gdal_version__) &lt; LooseVersion(&#34;3.0.0&#34;):
 </pre></div></div>
 </div>
 <p>The output files are listed in a returned <code class="docutils literal notranslate"><span class="pre">results</span></code> dictionary, and are named based on <code class="docutils literal notranslate"><span class="pre">asum_thresh</span></code>. This allows for easy experimentation with variuos arbolate sum thresholds, without a lot of extra file wrangling.</p>
@@ -494,7 +489,7 @@ regenerated if other apsects of the model (such as the grid) change.</p>
 </pre></div>
 </div>
 </div>
-<div class="nboutput docutils container">
+<div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
@@ -508,26 +503,9 @@ reading output/PlusFlow_gt3km.dbf...
 
 reading output/elevslope_gt3km.dbf...
 --&gt; building dataframe... (may take a while for large shapefiles)
-writing output/flowlines_gt3km_buffers.shp... Done
 
 Smoothing elevations...
 finished in 0.00s
-writing output/preprocessed_flowlines_gt3km.shp... Done
-</pre></div></div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.13/site-packages/gisutils/shapefile.py:117: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.
-  if LooseVersion(fiona.__gdal_version__) &lt; LooseVersion(&#34;3.0.0&#34;):
-/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.13/site-packages/gisutils/shapefile.py:117: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.
-  if LooseVersion(fiona.__gdal_version__) &lt; LooseVersion(&#34;3.0.0&#34;):
-/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.13/site-packages/gisutils/shapefile.py:117: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.
-  if LooseVersion(fiona.__gdal_version__) &lt; LooseVersion(&#34;3.0.0&#34;):
-/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.13/site-packages/gisutils/shapefile.py:117: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.
-  if LooseVersion(fiona.__gdal_version__) &lt; LooseVersion(&#34;3.0.0&#34;):
 </pre></div></div>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">preprocess_nhdplus()</span></code> writes a shapefile of the preprocessed flowlines, and returns a GeoDataFrame representation that is described in detail in the <a class="reference external" href="https://aleaf.github.io/sfrmaker/latest/api/sfrmaker.preprocessing.html#sfrmaker.preprocessing.preprocess_nhdplus">code reference</a>.</p>
@@ -837,7 +815,7 @@ remaining lines: 11
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Jan 16, 2025.
+      <span class="lastupdated">Last updated on Apr 02, 2025.
       </span></p>
   </div>
 
