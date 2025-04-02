@@ -13,7 +13,7 @@ SFRmaker is a python package for automating construction of stream flow routing 
 
 Getting Started
 ----------------------------------------------- 
-See the [SFRmaker documentation](https://doi-usgs.github.io/sfrmaker/index.html)
+See the [SFRmaker documentation](https://doi-usgs.github.io/sfrmaker/latest/index.html)
 
 
 Installation
