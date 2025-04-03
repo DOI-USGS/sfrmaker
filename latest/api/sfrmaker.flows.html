@@ -1,0 +1,347 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Flows Module &mdash; SFRmaker 0.11.3.post44.dev0+gcd9ad3a documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=8a7c9b88"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=f281be69"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="The Grid Module" href="sfrmaker.grid.html" />
+    <link rel="prev" title="Modules" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            SFRmaker
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../philosophy.html"> Philosophy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/index.html"> Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html"> Installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../inputs.html"> Input Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/index.html"> Using SFRmaker</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../concepts.html"> Concepts and methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebooks/sfrmaker_tools.html"> Other stand-alone tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../troubleshooting.html"> Troubleshooting</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html"> Code reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Flows Module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#sfrmaker.flows.add_to_perioddata"><code class="docutils literal notranslate"><span class="pre">add_to_perioddata()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sfrmaker.flows.add_to_segment_data"><code class="docutils literal notranslate"><span class="pre">add_to_segment_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sfrmaker.flows.get_inflow_locations_from_parent_model"><code class="docutils literal notranslate"><span class="pre">get_inflow_locations_from_parent_model()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sfrmaker.flows.get_inflows_from_parent_model"><code class="docutils literal notranslate"><span class="pre">get_inflows_from_parent_model()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.grid.html">Grid Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.lines.html">Lines Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.mf5to6.html">MODFLOW-2005 to 6 Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.observations.html">Observations Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.preprocessing.html">Preprocessing Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.sfrdata.html">SFRData Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfrmaker.utils.html">Utilities Module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../config-summary.html"> Summary of configuration file options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../release-history.html"> Release History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html"> Contributing to SFRmaker</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Bibliography</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../references.html"> References cited</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">SFRmaker</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Modules</a></li>
+      <li class="breadcrumb-item active">The Flows Module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/sfrmaker.flows.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-sfrmaker.flows">
+<span id="the-flows-module"></span><h1>The Flows Module<a class="headerlink" href="#module-sfrmaker.flows" title="Link to this heading"></a></h1>
+<p>Functions for getting or adding specified flows or other stress-period-based inputs to the SFR package.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="sfrmaker.flows.add_to_perioddata">
+<span class="sig-prename descclassname"><span class="pre">sfrmaker.flows.</span></span><span class="sig-name descname"><span class="pre">add_to_perioddata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sfrdata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flowline_routing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variable</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'inflow'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line_id_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rno_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">period_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'per'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Q_avg'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">one_inflow_per_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distribute_flows_to_reaches</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/flows.html#add_to_perioddata"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.flows.add_to_perioddata" title="Link to this definition"></a></dt>
+<dd><p>Add data to the period data table (sfrdata.period_data)
+for a MODFLOW-6 style SFR package.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>sfrdata</strong><span class="classifier">sfrmaker.SFRData instance</span></dt><dd><p>SFRData instance with reach_data table attribute. To add data from x, y coordinates,
+the reach_data table must have a geometry column with LineStrings representing each reach, or
+an sfrlines_shapefile is required. Reach numbers are assumed to be in an ‘rno’ column.</p>
+</dd>
+<dt><strong>data</strong><span class="classifier">DataFrame, path to csv file, or list of DataFrames or file paths</span></dt><dd><p>Table with information on the observation sites to be located. Must have
+either reach numbers (rno_column), line_ids (line_id_column),
+or x and y locations (x_column_in_data and y_column_in_data).</p>
+</dd>
+<dt><strong>flowline_routing</strong><span class="classifier">dict</span></dt><dd><p>Optional dictionary of routing for source hydrography. Only needed
+if locating by line_id, and SFR network is a subset of the full source
+hydrography (i.e. some lines were dropped in the creation of the SFR packge,
+or if the sites are inflow points corresponding to lines outside of the model perimeter).
+In this case, observation points referenced to line_ids that are missing from the SFR
+network are placed at the first reach corresponding to the next downstream line_id
+that is represented in the SFR network. By default, None.</p>
+</dd>
+<dt><strong>variable</strong><span class="classifier">str, optional</span></dt><dd><p>Modflow-6 period variable (see Modflow-6 Description of Input and Outpu), by default ‘inflow’</p>
+</dd>
+<dt><strong>line_id_column</strong><span class="classifier">str</span></dt><dd><p>Column in data matching observation sites to line_ids in the source hydrography data.
+Either line_id_column or rno_column must be specified. By default, None</p>
+</dd>
+<dt><strong>rno_column</strong><span class="classifier">str</span></dt><dd><p>Column in data matching observation sites to reach numbers in the SFR network. By default, None.</p>
+</dd>
+<dt><strong>period_column</strong><span class="classifier">str, optional</span></dt><dd><p>Column with modflow stress period for each inflow value, by default ‘per’, by default, ‘per’.</p>
+</dd>
+<dt><strong>data_column</strong><span class="classifier">str, optional</span></dt><dd><p>Column with flow values, by default ‘Q_avg’</p>
+</dd>
+<dt><strong>one_inflow_per_path</strong><span class="classifier">bool, optional</span></dt><dd><p>Limit inflows to one per (headwater to outlet) routing path, choosing the inflow location 
+that is furthest downstream. By default, False.</p>
+</dd>
+<dt><strong>distribute_flows_to_reaches</strong><span class="classifier">bool, optional</span></dt><dd><p>Option to distribute any flows specified by line_id evenly across the reaches
+associated with that line. Otherwise, all flow is applied to the first reach.
+By default, False.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>Updates the sfrdata.perioddata DataFrame.</dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="sfrmaker.flows.add_to_segment_data">
+<span class="sig-prename descclassname"><span class="pre">sfrmaker.flows.</span></span><span class="sig-name descname"><span class="pre">add_to_segment_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sfrdata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flowline_routing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variable</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'flow'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line_id_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">segment_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">period_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'per'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Q_avg'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">one_inflow_per_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/flows.html#add_to_segment_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.flows.add_to_segment_data" title="Link to this definition"></a></dt>
+<dd><p>Add data to the segment data table (sfrdata.segment_data)
+for a MODFLOW-2005 style SFR package.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>sfrdata</strong><span class="classifier">sfrmaker.SFRData instance</span></dt><dd><p>SFRData instance with reach_data table attribute. To add data from x, y coordinates,
+the reach_data table must have a geometry column with LineStrings representing each reach, or
+an sfrlines_shapefile is required. Reach numbers are assumed to be in an ‘rno’ column.</p>
+</dd>
+<dt><strong>data</strong><span class="classifier">DataFrame, path to csv file, or list of DataFrames or file paths</span></dt><dd><p>Table with information on the inflow or other data sites to be located. Must have
+either reach numbers (rno_column), line_ids (line_id_column),
+or x and y locations (x_column_in_data and y_column_in_data).</p>
+</dd>
+<dt><strong>flowline_routing</strong><span class="classifier">dict</span></dt><dd><p>Optional dictionary of routing for source hydrography. Only needed
+if locating by line_id, and SFR network is a subset of the full source
+hydrography (i.e. some lines were dropped in the creation of the SFR package,
+or if the sites are inflow points corresponding to lines outside of the model perimeter).
+In this case, points referenced to line_ids that are missing from the SFR
+network are placed at the first reach corresponding to the next downstream line_id
+that is represented in the SFR network. By default, None.</p>
+</dd>
+<dt><strong>variable</strong><span class="classifier">str, optional</span></dt><dd><p>Modflow-2005 SFR Package variable (see the SFR2 Package documentation), by default ‘flow’</p>
+</dd>
+<dt><strong>line_id_column</strong><span class="classifier">str</span></dt><dd><p>Column in data matching observation sites to line_ids in the source hydrography data.
+Either line_id_column or rno_column must be specified. By default, None</p>
+</dd>
+<dt><strong>rno_column</strong><span class="classifier">str</span></dt><dd><p>Column in data matching observation sites to reach numbers in the SFR network. By default, None.</p>
+</dd>
+<dt><strong>period_column</strong><span class="classifier">str, optional</span></dt><dd><p>Column with modflow stress period for each inflow value, by default ‘per’, by default, ‘per’.</p>
+</dd>
+<dt><strong>data_column</strong><span class="classifier">str, optional</span></dt><dd><p>Column with flow values, by default ‘Q_avg’</p>
+</dd>
+<dt><strong>one_inflow_per_path</strong><span class="classifier">bool, optional</span></dt><dd><p>Limit inflows to one per (headwater to outlet) routing path, choosing the inflow location 
+that is furthest downstream. By default, False.</p>
+</dd>
+<dt><strong>distribute_flows_to_reaches</strong><span class="classifier">bool, optional</span></dt><dd><p>Not implemented yet for MODFLOW-2005.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>Updates the sfrdata.segment_data DataFrame.</dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="sfrmaker.flows.get_inflow_locations_from_parent_model">
+<span class="sig-prename descclassname"><span class="pre">sfrmaker.flows.</span></span><span class="sig-name descname"><span class="pre">get_inflow_locations_from_parent_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent_reach_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inset_reach_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inset_grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">active_area</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/flows.html#get_inflow_locations_from_parent_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.flows.get_inflow_locations_from_parent_model" title="Link to this definition"></a></dt>
+<dd><p>Get places in an inset model SFR network where the parent SFR network crosses
+the inset model boundary, using common line ID numbers from parent and inset reach datasets.
+MF2005 or MF6 supported; if either dataset contains only reach numbers (is MODFLOW-6),
+the reach numbers are used as segment numbers, with each segment only having one reach.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>parent_reach_data</strong><span class="classifier">str (filepath) or DataFrame</span></dt><dd><p>SFR reach data for parent model. Must include columns:
+line_id : int; unique identifier for hydrography line that each reach is based on
+rno : int; unique identifier for each reach. Optional if iseg and ireach columns are included.
+iseg : int; unique identifier for each segment. Optional if rno is included.
+ireach : int; unique identifier for each reach. Optional if rno is included.
+geometry : shapely.geometry object representing location of each reach</p>
+</dd>
+<dt><strong>inset_reach_data</strong><span class="classifier">str (filepath) or DataFrame</span></dt><dd><p>SFR reach data for inset model. Same columns as parent_reach_data,
+except a geometry column isn’t needed. line_id values must correspond to
+same source hydrography as those in parent_reach_data.</p>
+</dd>
+<dt><strong>inset_grid</strong><span class="classifier">flopy.discretization.StructuredGrid instance describing model grid</span></dt><dd><p>Must be in same coordinate system as geometries in parent_reach_data.
+Required only if active_area is None.</p>
+</dd>
+<dt><strong>active_area</strong><span class="classifier">shapely.geometry.Polygon object</span></dt><dd><p>Describes the area of the inset model where SFR is applied. Used to find
+inset reaches from parent model. Must be in same coordinate system as
+geometries in parent_reach_data. Required only if inset_grid is None.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>locations</strong><span class="classifier">DataFrame</span></dt><dd><p>Columns:
+parent_segment : parent model segment
+parent_reach : parent model reach
+parent_rno : parent model reach number
+line_id : unique identifier for hydrography line that each reach is based on</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="sfrmaker.flows.get_inflows_from_parent_model">
+<span class="sig-prename descclassname"><span class="pre">sfrmaker.flows.</span></span><span class="sig-name descname"><span class="pre">get_inflows_from_parent_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent_reach_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inset_reach_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mf2005_parent_sfr_outputfile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mf6_parent_sfr_budget_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inset_grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">active_area</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/flows.html#get_inflows_from_parent_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.flows.get_inflows_from_parent_model" title="Link to this definition"></a></dt>
+<dd><p>Get places in an inset model SFR network where the parent SFR network crosses
+the inset model boundary, using common line ID numbers from parent and inset reach datasets.
+MF2005 or MF6 supported; if either dataset contains only reach numbers (is MODFLOW-6),
+the reach numbers are used as segment numbers, with each segment only having one reach.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>parent_reach_data</strong><span class="classifier">str (filepath) or DataFrame</span></dt><dd><p>SFR reach data for parent model. Must include columns:
+line_id : int; unique identifier for hydrography line that each reach is based on
+rno : int; unique identifier for each reach. Optional if iseg and ireach columns are included.
+iseg : int; unique identifier for each segment. Optional if rno is included.
+ireach : int; unique identifier for each reach. Optional if rno is included.
+geometry : shapely.geometry object representing location of each reach</p>
+</dd>
+<dt><strong>inset_reach_data</strong><span class="classifier">str (filepath) or DataFrame</span></dt><dd><p>SFR reach data for inset model. Same columns as parent_reach_data,
+except a geometry column isn’t needed. line_id values must correspond to
+same source hydrography as those in parent_reach_data.</p>
+</dd>
+<dt><strong>mf2005_parent_sfr_outputfile</strong><span class="classifier">str (filepath)</span></dt><dd><p>Modflow-2005 style SFR text file budget output.</p>
+</dd>
+<dt><strong>mf6_parent_sfr_budget_file</strong><span class="classifier">str (filepath)</span></dt><dd><p>Modflow-6 style SFR binary budget output</p>
+</dd>
+<dt><strong>inset_grid</strong><span class="classifier">flopy.discretization.StructuredGrid instance describing model grid</span></dt><dd><p>Must be in same coordinate system as geometries in parent_reach_data.
+Required only if active_area is None.</p>
+</dd>
+<dt><strong>active_area</strong><span class="classifier">shapely.geometry.Polygon object</span></dt><dd><p>Describes the area of the inset model where SFR is applied. Used to find
+inset reaches from parent model. Must be in same coordinate system as
+geometries in parent_reach_data. Required only if inset_grid is None.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>inflows</strong><span class="classifier">DataFrame</span></dt><dd><p>Columns:
+parent_segment : parent model segment
+parent_reach : parent model reach
+parent_rno : parent model reach number
+line_id : unique identifier for hydrography line that each reach is based on</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Modules" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="sfrmaker.grid.html" class="btn btn-neutral float-right" title="The Grid Module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+      <span class="lastupdated">Last updated on Apr 03, 2025.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

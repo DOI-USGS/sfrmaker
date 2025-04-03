@@ -1,0 +1,202 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Converting a MODFLOW-2005 style SFR Package to MODFLOW 6 &mdash; SFRmaker 0.11.3.post44.dev0+gcd9ad3a documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=8a7c9b88"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=f281be69"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+      <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Installation" href="../installation.html" />
+    <link rel="prev" title="Using SFRmaker with NHDPlus High Resolution" href="lines_from_NHDPlusHR_demo.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            SFRmaker
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../philosophy.html"> Philosophy</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../examples/index.html"> Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../examples/meras.html">Using SFRmaker with a configuration file: MERAS 3 example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/tf.html">Using SFRmaker with a configuration file: Tyler Forks example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="SFRmaker_demo.html">Using SFRMaker in a script</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lines_from_NHDPlusHR_demo.html">Using SFRmaker with NHDPlus High Resolution</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Converting a MODFLOW-2005 (SFR2) Package to MODFLOW 6</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html"> Installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../inputs.html"> Input Requirements</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../examples/index.html"> Using SFRmaker</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../examples/meras.html">Using SFRmaker with a configuration file: MERAS 3 example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/tf.html">Using SFRmaker with a configuration file: Tyler Forks example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="SFRmaker_demo.html">Using SFRMaker in a script</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lines_from_NHDPlusHR_demo.html">Using SFRmaker with NHDPlus High Resolution</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Converting a MODFLOW-2005 (SFR2) Package to MODFLOW 6</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../concepts.html"> Concepts and methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sfrmaker_tools.html"> Other stand-alone tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../troubleshooting.html"> Troubleshooting</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html"> Code reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../config-summary.html"> Summary of configuration file options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../release-history.html"> Release History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html"> Contributing to SFRmaker</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Bibliography</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../references.html"> References cited</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">SFRmaker</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../examples/index.html">Using SFRmaker</a></li>
+      <li class="breadcrumb-item active">Converting a MODFLOW-2005 style SFR Package to MODFLOW 6</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/notebooks/mf5to6.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="Converting-a-MODFLOW-2005-style-SFR-Package-to-MODFLOW-6">
+<h1>Converting a MODFLOW-2005 style SFR Package to MODFLOW 6<a class="headerlink" href="#Converting-a-MODFLOW-2005-style-SFR-Package-to-MODFLOW-6" title="Link to this heading"></a></h1>
+<p>Sometimes you may want to convert a MODFLOW-2005 or MODFLOW-NWT model to MODFLOW 6, but the USGS <code class="docutils literal notranslate"><span class="pre">mf5to6</span></code> converter fails on the SFR Package. This notebook demonstrates how to convert a MODFLOW-2005 (or MODFLOW-NWT) SFR Package input file to MODFLOW 6 using SFRmaker.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">flopy</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sfrmaker</span>
+
+<span class="c1"># Load the model using Flopy</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">flopy</span><span class="o">.</span><span class="n">modflow</span><span class="o">.</span><span class="n">Modflow</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">&#39;tf_with_sfr.nam&#39;</span><span class="p">,</span> <span class="n">model_ws</span><span class="o">=</span><span class="s1">&#39;../tylerforks/tylerforks&#39;</span><span class="p">)</span>
+
+<span class="c1">#Check that the SFR package was loaded</span>
+<span class="n">model</span><span class="o">.</span><span class="n">get_package_list</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[&#39;DIS&#39;, &#39;BAS6&#39;, &#39;UPW&#39;, &#39;RCH&#39;, &#39;OC&#39;, &#39;NWT&#39;, &#39;CHD&#39;, &#39;SFR&#39;]
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Instantiate an `Mf6SFR` object (with the Flopy MODFLOW-2005 style SFR instance)</span>
+<span class="n">mf5to6</span> <span class="o">=</span> <span class="n">sfrmaker</span><span class="o">.</span><span class="n">Mf6SFR</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">sfr</span><span class="p">)</span>
+
+<span class="c1"># Write the MODFLOW 6 SFR Package file</span>
+<span class="n">mf5to6</span><span class="o">.</span><span class="n">write_file</span><span class="p">(</span><span class="s1">&#39;tf_mf6.sfr&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+converting reach and segment data to package data...
+converting segment data to period data...
+wrote tf_mf6.sfr
+</pre></div></div>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="lines_from_NHDPlusHR_demo.html" class="btn btn-neutral float-left" title="Using SFRmaker with NHDPlus High Resolution" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../installation.html" class="btn btn-neutral float-right" title="Installation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+      <span class="lastupdated">Last updated on Apr 03, 2025.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
