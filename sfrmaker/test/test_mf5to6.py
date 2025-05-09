@@ -6,6 +6,7 @@ import platform
 import numpy as np
 import pandas as pd
 import pytest
+import flopy
 import sfrmaker
 
 
@@ -128,3 +129,15 @@ def test_write(shellmound_sfrdata, mf6sfr_instance_SFRdata, outdir, external_fil
             assert os.path.exists(os.path.join(os.path.split(outfile2)[0],
                                             external_files_path,
                                             '{}_packagedata.dat'.format(version)))
+
+
+def test_convert_mf5_to_6(datapath):
+    model = flopy.modflow.Modflow.load('tf_with_sfr.nam', model_ws=datapath / 'tylerforks/tylerforks')
+    mf5to6 = sfrmaker.Mf6SFR(model.sfr)
+    
+    # check that aux columns, including default line_id, are included in packagedata
+    # otherwise MODFLOW 6 with throw an error
+    if 'auxiliary' in mf5to6.options_block:
+        cols = mf5to6.options_block.split('auxiliary')[1].strip().split('\n')[0].split()
+        for col in cols:
+            assert col in mf5to6.packagedata.columns

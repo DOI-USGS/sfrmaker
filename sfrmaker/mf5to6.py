@@ -249,7 +249,12 @@ class Mf6SFR:
             for var in aux_variables:
                 if var in self.rd.columns:
                     packagedata[var] = self.rd[var]
-            
+                elif var == 'line_id':  # included by default
+                    # if no line_id column; use SFR2 segment
+                    packagedata[var] = self.rd['iseg']
+                else:
+                    raise ValueError(f"Auxiliary variable {var} not in packagedata!")
+                    
         cols = [c for c in self.cols if c in packagedata.columns]
         return packagedata[cols].sort_values(by='rno')
 
