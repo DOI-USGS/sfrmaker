@@ -2,7 +2,11 @@
 Release History
 ===============
 
-Version 0.12.0 (2025-04-28)
+Version 0.12.1 (2025-05-09)
+---------------------------
+* Fix Flopy packagedata error when there are auxiliary columns in the packagedata.
+
+Version 0.12.0 (2025-05-09)
 ---------------------------
 New Features:
 **************
