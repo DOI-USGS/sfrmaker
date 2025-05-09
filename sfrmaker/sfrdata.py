@@ -798,13 +798,16 @@ class SFRData(DataPackage):
             # raise NotImplemented("Support for mf6 period_data input not implemented yet. "
             #                     "Use sfrdata.write_package(version='mf6') instead.")
             pass
-
+        auxiliary = None
+        if 'auxiliary' in sfr6.options_block:
+            auxiliary = sfr6.options_block.split('auxiliary')[1].strip().split('\n')[0].split()
         mf6sfr = mf6.ModflowGwfsfr(model=m, unit_conversion=unit_conversion,
                                    stage_filerecord=stage_filerecord,
                                    budget_filerecord=budget_filerecord,
                                    nreaches=len(self.reach_data),
                                    packagedata=packagedata,
                                    connectiondata=connectiondata,
+                                   auxiliary=auxiliary,
                                    diversions=None,  # TODO: add support for diversions
                                    perioddata=period_data,  # TODO: add support for creating mf6 perioddata input
                                    **kwargs)
