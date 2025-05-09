@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>sfrmaker.mf5to6 &mdash; SFRmaker 0.11.3.post44.dev0+gcd9ad3a documentation</title>
+  <title>sfrmaker.mf5to6 &mdash; SFRmaker 0.12.0.post1.dev0+g47043eb documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=8a7c9b88"></script>
+      <script src="../../_static/documentation_options.js?v=c5a2d052"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -348,7 +348,12 @@
             <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">aux_variables</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">var</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">rd</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
                     <span class="n">packagedata</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rd</span><span class="p">[</span><span class="n">var</span><span class="p">]</span>
-            
+                <span class="k">elif</span> <span class="n">var</span> <span class="o">==</span> <span class="s1">&#39;line_id&#39;</span><span class="p">:</span>  <span class="c1"># included by default</span>
+                    <span class="c1"># if no line_id column; use SFR2 segment</span>
+                    <span class="n">packagedata</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rd</span><span class="p">[</span><span class="s1">&#39;iseg&#39;</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Auxiliary variable </span><span class="si">{</span><span class="n">var</span><span class="si">}</span><span class="s2"> not in packagedata!&quot;</span><span class="p">)</span>
+                    
         <span class="n">cols</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cols</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">packagedata</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">packagedata</span><span class="p">[</span><span class="n">cols</span><span class="p">]</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s1">&#39;rno&#39;</span><span class="p">)</span>
 
@@ -646,7 +651,7 @@
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Apr 03, 2025.
+      <span class="lastupdated">Last updated on May 09, 2025.
       </span></p>
   </div>
 
