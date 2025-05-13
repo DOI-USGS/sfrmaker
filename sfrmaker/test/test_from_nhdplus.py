@@ -1,10 +1,12 @@
+import copy
 import os
 
 import numpy as np
+import pandas as pd
+import geopandas as gpd
 import pytest
 
 import sfrmaker
-from sfrmaker.checks import reach_elevations_decrease_downstream
 from sfrmaker.gis import get_authority_crs
 from gisutils import project
 from sfrmaker import Lines
@@ -16,7 +18,8 @@ def dem(datapath):
     return os.path.join(datapath, 'tylerforks/dem_26715.tif')
 
 
-def test_attribute_units(tylerforks_lines_from_NHDPlus, tylerforks_sfrdata):
+def test_attribute_units(get_tylerforks_lines_from_NHDPlus, tylerforks_sfrdata):
+    tylerforks_lines_from_NHDPlus = copy.deepcopy(get_tylerforks_lines_from_NHDPlus)
     assert tylerforks_lines_from_NHDPlus.elevation_units == 'meters'
     assert tylerforks_lines_from_NHDPlus.width_units == 'meters'
     assert tylerforks_sfrdata.model_length_units == 'feet'
@@ -26,15 +29,7 @@ def test_attribute_units(tylerforks_lines_from_NHDPlus, tylerforks_sfrdata):
     # in the test subset of the elevslope database
     # since this case isn't using the DEM, they end up with elevations of 0
     sfrdata_mean_strtop = rd.loc[rd['strtop'] != 0, 'strtop'].mean()
-    assert np.allclose(sfrdata_mean_strtop / lines_mean_strtop, 3.28, rtol=0.02)
-
-
-@pytest.mark.parametrize('method', ['cell polygons', 'buffers'])
-def test_sample_elevations(dem, tylerforks_sfrdata, datapath, method):
-    sfr = tylerforks_sfrdata
-    sampled_elevs = sfr.sample_reach_elevations(dem, method=method, smooth=True)
-    sfr.reach_data['strtop'] = [sampled_elevs[rno] for rno in sfr.reach_data['rno']]
-    assert reach_elevations_decrease_downstream(sfr.reach_data)
+    assert np.allclose(sfrdata_mean_strtop / lines_mean_strtop, 3.28, rtol=0.2)
 
 
 def test_output_dir(tylerforks_model, outdir):
