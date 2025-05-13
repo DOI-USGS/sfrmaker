@@ -6,13 +6,14 @@ import warnings
 import yaml
 import numpy as np
 import pandas as pd
+import geopandas as gpd
 import rasterio
 from rasterstats import zonal_stats
-from shapely.geometry import LineString
+from shapely.geometry import LineString, Point
 from gisutils import df2shp, get_authority_crs
 from sfrmaker.routing import find_path, renumber_segments
 from sfrmaker.checks import valid_rnos, valid_nsegs, rno_nseg_routing_consistent
-from sfrmaker.elevations import get_slopes, smooth_elevations
+from sfrmaker.elevations import get_slopes, smooth_elevations, sample_reach_elevations
 from sfrmaker.flows import add_to_perioddata, add_to_segment_data
 from sfrmaker.gis import export_reach_data, project
 from sfrmaker.observations import write_gage_package, write_mf6_sfr_obsfile, add_observations
@@ -21,6 +22,7 @@ from sfrmaker.utils import get_sfr_package_format, get_input_arguments, assign_l
 import sfrmaker
 from sfrmaker.base import DataPackage
 from sfrmaker.mf5to6 import segment_data_to_period_data
+from sfrmaker.observations import get_closest_reach
 from sfrmaker.reaches import consolidate_reach_conductances
 from sfrmaker.rivdata import RivData
 
@@ -908,7 +910,11 @@ class SFRData(DataPackage):
     def sample_reach_elevations(self, dem,
                                 method='buffers',
                                 buffer_distance=100,
-                                smooth=True
+                                smooth=True,
+                                elevation_data=None,
+                                elevation_data_crs=None,
+                                elevation_data_layer=None,
+                                elevation_data_errors='raise',
                                 ):
         """Computes zonal statistics on a raster for SFR reaches, using
         either buffer polygons around the reach LineStrings, or the model
@@ -927,63 +933,60 @@ class SFRData(DataPackage):
             Run sfrmaker.elevations.smooth_elevations on sampled elevations
             to ensure that they decrease monotonically in the downstream direction
             (default=True).
+        elevation_data : str/pathlike or DataFrame
+            Optional table of streambed top elevations at x, y locations. These will be mapped to
+            individual reaches using the selected method, replacing the DEM-derived elevations.
+            The points must fall within the selected buffer distance or cell polygon, otherwise
+            an error will be raised. Points can be specified in a shapefile, geopackage, CSV file or
+            (Geo)DataFrame, which must contain the following fields:
+            
+            ========= ===============================================================================
+            x         x-coordinate. If a CSV or regular DataFrame is provided, 
+                      this must be in the CRS of the model or an elevation_data_crs must be provided.
+            y         y-coordinate.
+            elevation Elevation in the model units.
+            ========= ================================================================================
+            
+            By default, None.
+        elevation_data_layer : None
+            Layer name for the elevation data, if the data are being supplied in a multi-layer GeoPackage.
+            by default, None.
+        elevation_data_crs : obj
+            Coordinate reference system of the x,y points in elevation-data. 
+            Only needed if the data do not have a valid ESRI projection (.prj) file.
+            A Python int, dict, str, or :class:`pyproj.crs.CRS` instance
+            passed to :meth:`pyproj.crs.CRS.from_user_input`
 
+            Can be any of:
+            - PROJ string
+            - Dictionary of PROJ parameters
+            - PROJ keyword arguments for parameters
+            - JSON string with PROJ parameters
+            - CRS WKT string
+            - An authority string [i.e. 'epsg:4326']
+            - An EPSG integer code [i.e. 4326]
+            - A tuple of ("auth_name": "auth_code") [i.e ('epsg', '4326')]
+            - An object with a `to_wkt` method.
+            - A :class:`pyproj.crs.CRS` class
+        elevation_data_errors : {‘ignore’, ‘raise’}
+            If ‘ignore’, suppress error when one or more points in elevation data is
+            not associated with a stream reach (is out of geographic proximity).
+            By default, ‘raise’.
         Returns
         -------
-        elevs : dict of sampled elevations keyed by reach number
+        streambed_tops : dict of sampled elevations keyed by reach number
         """
+        return sample_reach_elevations(self.reach_data, dem,
+                            sfrmaker_modelgrid=self.grid,
+                            model_crs=self.crs,
+                            method=method,
+                            buffer_distance=buffer_distance,
+                            smooth=smooth,
+                            elevation_data=elevation_data,
+                            elevation_data_crs=elevation_data_crs,
+                            elevation_data_layer=elevation_data_layer,
+                            elevation_data_errors=elevation_data_errors)
 
-        # get the CRS and pixel size for the DEM
-        with rasterio.open(dem) as src:
-            raster_crs = get_authority_crs(src.crs)
-
-            # make sure buffer is large enough for DEM pixel size
-            buffer_distance = np.max([np.sqrt(src.res[0] *
-                                              src.res[1]) * 1.01,
-                                      buffer_distance])
-
-        if method == 'buffers':
-            assert isinstance(self.reach_data.geometry[0], LineString), \
-                "Need LineString geometries in reach_data.geometry column to use buffer option."
-            features = [g.buffer(buffer_distance) for g in self.reach_data.geometry]
-            txt = 'buffered LineStrings'
-        elif method == 'cell polygons':
-            assert self.grid is not None, \
-                "Need an attached sfrmaker.Grid instance to use cell polygons option."
-            features = self.grid.df.loc[self.reach_data.node, 'geometry'].tolist()
-            txt = method
-
-        # to_crs features if they're not in the same crs
-        if raster_crs != self.crs:
-            features = project(features,
-                               self.crs,
-                               raster_crs)
-
-        print('running rasterstats.zonal_stats on {}...'.format(txt))
-        t0 = time.time()
-        def get_min(x):
-            return np.min(x[x > -1e38])
-        results = zonal_stats(features,
-                              dem,
-                              add_stats={'nanmin': get_min}
-                              )
-        elevs = [r['nanmin'] for r in results]
-        print("finished in {:.2f}s\n".format(time.time() - t0))
-
-        if all(v is None for v in elevs):
-            raise Exception('No {} intersected with {}. Check projections.'.format(txt, dem))
-        if any(v is None for v in elevs):
-            raise Exception('Some {} not intersected with {}. '
-                            'Check that DEM covers the area of the stream network.'
-                            '.'.format(txt, dem))
-
-        if smooth:
-            elevs = smooth_elevations(self.reach_data.rno.tolist(),
-                                      self.reach_data.outreach.tolist(),
-                                      elevs)
-        else:
-            elevs = dict(zip(self.reach_data.rno, elevs))
-        return elevs
 
     def set_streambed_top_elevations_from_dem(self, filename, elevation_units=None,
                                               dem=None,

@@ -165,7 +165,7 @@ def shellmound_sfrmaker_grid(shellmound_grid):
     return grid
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope='module')
 def tylerforks_active_area_shapefile(datapath):
     return '{}/tylerforks/active_area.shp'.format(datapath)
 
@@ -194,9 +194,9 @@ def tylerforks_model(get_tylerforks_model):
     return m
 
 
-@pytest.fixture(scope='function')
-def tylerforks_model_grid(tylerforks_model):
-    m = tylerforks_model
+@pytest.fixture(scope='module')
+def tylerforks_model_grid(get_tylerforks_model):
+    m = get_tylerforks_model
     mg = flopy.discretization.StructuredGrid(delr=np.round((m.dis.delr.array * .3048).astype(np.float64), 4),  # cell spacing along a row
                                              delc=np.round((m.dis.delc.array * .3048).astype(np.float64), 4),  # cell spacing along a column
                                              xoff=682688, yoff=5139052,  # lower left corner of model grid
@@ -205,18 +205,18 @@ def tylerforks_model_grid(tylerforks_model):
                                              # projected coordinate system of model (UTM NAD27 zone 15 North)
                                              )
     m.modelgrid = mg
-    return mg
+    return copy.deepcopy(mg)
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope='module')
 def tylerforks_sfrmaker_grid_from_flopy(tylerforks_model_grid, tylerforks_active_area_shapefile):
     grid = sfrmaker.StructuredGrid.from_modelgrid(mg=tylerforks_model_grid,
                                                   active_area=tylerforks_active_area_shapefile)
-    return grid
+    return copy.deepcopy(grid)
 
 
-@pytest.fixture(scope='function')
-def tylerforks_lines_from_NHDPlus(datapath):
+@pytest.fixture(scope='module')
+def get_tylerforks_lines_from_NHDPlus(datapath):
     pfvaa_files = ['{}/tylerforks/NHDPlus/NHDPlusAttributes/PlusFlowlineVAA.dbf'.format(datapath)]
     plusflow_files = ['{}/tylerforks/NHDPlus/NHDPlusAttributes/PlusFlow.dbf'.format(datapath)]
     elevslope_files = ['{}/tylerforks/NHDPlus/NHDPlusAttributes/elevslope.dbf'.format(datapath)]
@@ -230,15 +230,26 @@ def tylerforks_lines_from_NHDPlus(datapath):
     return lns
 
 
-@pytest.fixture
-def tylerforks_sfrdata(tylerforks_model, tylerforks_lines_from_NHDPlus,
+@pytest.fixture(scope='function')
+def tylerforks_lines_from_NHDPlus(get_tylerforks_lines_from_NHDPlus):
+    return copy.deepcopy(get_tylerforks_lines_from_NHDPlus)
+
+
+@pytest.fixture(scope='module')
+def get_tylerforks_sfrdata(get_tylerforks_model, get_tylerforks_lines_from_NHDPlus,
                        tylerforks_sfrmaker_grid_from_flopy):
-    m = tylerforks_model
+    m = get_tylerforks_model
+    tylerforks_lines_from_NHDPlus = copy.deepcopy(get_tylerforks_lines_from_NHDPlus)
     # from the lines and StructuredGrid instances, make a sfrmaker.tylerforks_sfrdata instance
     # (lines are intersected with the model grid and converted to reaches, etc.)
     sfrdata = tylerforks_lines_from_NHDPlus.to_sfr(grid=tylerforks_sfrmaker_grid_from_flopy,
                                                    model=m)
     return sfrdata
+
+
+@pytest.fixture(scope='function')
+def tylerforks_sfrdata(get_tylerforks_sfrdata):
+    return copy.deepcopy(get_tylerforks_sfrdata)
 
 
 @pytest.fixture(scope='module')
