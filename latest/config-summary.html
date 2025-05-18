@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SFRmaker configuration file options &mdash; SFRmaker 0.12.1.post49.dev0+ge6d125d documentation</title>
+  <title>SFRmaker configuration file options &mdash; SFRmaker 0.12.1.post51.dev0+g30bc74e documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
@@ -15,7 +15,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=5c3c1868"></script>
+      <script src="_static/documentation_options.js?v=7197016a"></script>
       <script src="_static/doctools.js?v=9bcbadda"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="_static/clipboard.min.js?v=a7894cd8"></script>
@@ -99,7 +99,7 @@
              
   <section id="sfrmaker-configuration-file-options">
 <h1>SFRmaker configuration file options<a class="headerlink" href="#sfrmaker-configuration-file-options" title="Link to this heading"></a></h1>
-<p>Below is a comprehensive summary of the input options supported in the SFRmaker configuration file. Most keys in the YAML blocks represent arguments to methods within SFRmaker or <a class="reference external" href="https://flopy.readthedocs.io/en/latest/tutorials.html#flopy" title="(in FloPy v3.10.0.dev2)"><span class="xref std std-ref">Flopy</span></a>. Additional description of method arguments is available in the <a class="reference internal" href="api/index.html#modules"><span class="std std-ref">SFRmaker code reference</span></a> and <a class="reference external" href="https://flopy.readthedocs.io/en/latest/tutorials.html#flopy" title="(in FloPy v3.10.0.dev2)"><span class="xref std std-ref">Flopy documentation</span></a>.</p>
+<p>Below is a comprehensive summary of the input options supported in the SFRmaker configuration file. Most keys in the YAML blocks represent arguments to methods within SFRmaker or <a class="reference external" href="https://flopy.readthedocs.io/en/latest/tutorials.html#flopy" title="(in FloPy v3.10.0.dev3)"><span class="xref std std-ref">Flopy</span></a>. Additional description of method arguments is available in the <a class="reference internal" href="api/index.html#modules"><span class="std std-ref">SFRmaker code reference</span></a> and <a class="reference external" href="https://flopy.readthedocs.io/en/latest/tutorials.html#flopy" title="(in FloPy v3.10.0.dev3)"><span class="xref std std-ref">Flopy documentation</span></a>.</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="linenos">  1</span><span class="c1"># Summary of SFRmaker configuration file options</span>
 <span class="linenos">  2</span>
 <span class="linenos">  3</span><span class="nt">package_version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mf6</span><span class="w">  </span><span class="c1"># mf6, mfnwt or mf2005</span>
@@ -196,61 +196,65 @@
 <span class="linenos"> 94</span><span class="w">  </span><span class="c1"># keyword arguments to sfrmaker.SFRData.sample_reach_elevations:</span>
 <span class="linenos"> 95</span><span class="w">  </span><span class="nt">buffer_distance</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
 <span class="linenos"> 96</span><span class="w">  </span><span class="nt">smooth</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
-<span class="linenos"> 97</span>
-<span class="linenos"> 98</span><span class="nt">inflows</span><span class="p">:</span>
-<span class="linenos"> 99</span><span class="w">  </span><span class="c1"># Option to add specified inflows</span>
-<span class="linenos">100</span><span class="w">  </span><span class="c1"># (arguments to sfrmaker.SFRData.add_to_perioddata for MODFLOW-6):</span>
-<span class="linenos">101</span><span class="w">  </span><span class="nt">data</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
-<span class="linenos">102</span><span class="w">  </span><span class="nt">flowline_routing</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
-<span class="linenos">103</span><span class="w">  </span><span class="nt">variable</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">inflow</span>
-<span class="linenos">104</span><span class="w">  </span><span class="nt">line_id_column</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
-<span class="linenos">105</span><span class="w">  </span><span class="nt">rno_column</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
-<span class="linenos">106</span><span class="w">  </span><span class="nt">period_column</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">per</span>
-<span class="linenos">107</span><span class="w">  </span><span class="nt">data_column</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Q_avg</span>
-<span class="linenos">108</span><span class="w">  </span><span class="nt">one_inflow_per_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
-<span class="linenos">109</span><span class="w">  </span><span class="nt">distribute_flows_to_reaches</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
-<span class="linenos">110</span><span class="w">  </span><span class="c1"># (arguments to sfrmaker.SFRData.add_to_segment_data for MODFLOW-2005):</span>
-<span class="linenos">111</span><span class="w">  </span><span class="nt">segment_column</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">segment</span>
-<span class="linenos">112</span>
-<span class="linenos">113</span><span class="nt">observations</span><span class="p">:</span>
-<span class="linenos">114</span><span class="w">  </span><span class="c1"># Option to add SFR observation input</span>
-<span class="linenos">115</span><span class="w">  </span><span class="c1"># (arguments to sfrmaker.SFRData.add_observations):</span>
-<span class="linenos">116</span><span class="w">  </span><span class="nt">data</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
-<span class="linenos">117</span><span class="w">  </span><span class="nt">flowline_routing</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
-<span class="linenos">118</span><span class="w">  </span><span class="nt">obstype</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
-<span class="linenos">119</span><span class="w">  </span><span class="nt">sfrlines_shapefile</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
-<span class="linenos">120</span><span class="w">  </span><span class="nt">x_location_column</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
-<span class="linenos">121</span><span class="w">  </span><span class="nt">y_location_column</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
-<span class="linenos">122</span><span class="w">  </span><span class="nt">line_id_column</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
-<span class="linenos">123</span><span class="w">  </span><span class="nt">rno_column</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
-<span class="linenos">124</span><span class="w">  </span><span class="nt">obstype_column</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
-<span class="linenos">125</span><span class="w">  </span><span class="nt">obsname_column</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">site_no</span>
-<span class="linenos">126</span><span class="w">  </span><span class="nt">gage_starting_unit_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">250</span>
-<span class="linenos">127</span>
-<span class="linenos">128</span><span class="nt">to_riv</span><span class="p">:</span>
-<span class="linenos">129</span><span class="w">  </span><span class="c1"># Option to convert parts of the SFR network</span>
-<span class="linenos">130</span><span class="w">  </span><span class="c1"># downstream of specified line_ids to the RIV package:</span>
-<span class="linenos">131</span><span class="w">  </span><span class="nt">line_ids</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
-<span class="linenos">132</span><span class="w">  </span><span class="nt">drop_in_sfr</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
-<span class="linenos">133</span>
-<span class="linenos">134</span><span class="nt">options</span><span class="p">:</span>
-<span class="linenos">135</span><span class="w">  </span><span class="c1"># SFR options (arguments to sfrmaker.Lines.to_sfr):</span>
-<span class="linenos">136</span><span class="w">  </span><span class="nt">active_area</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
-<span class="linenos">137</span><span class="w">  </span><span class="nt">isfr</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
-<span class="linenos">138</span><span class="w">  </span><span class="nt">model_length_units</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">undefined</span>
-<span class="linenos">139</span><span class="w">  </span><span class="nt">model_time_units</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">days</span>
-<span class="linenos">140</span><span class="w">  </span><span class="nt">minimum_reach_length</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
-<span class="linenos">141</span><span class="w">  </span><span class="nt">width_from_asum_a_param</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1193</span>
-<span class="linenos">142</span><span class="w">  </span><span class="nt">width_from_asum_b_param</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.5032</span>
-<span class="linenos">143</span><span class="w">  </span><span class="nt">minimum_reach_width</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
-<span class="linenos">144</span><span class="w">  </span><span class="nt">consolidate_conductance</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
-<span class="linenos">145</span><span class="w">  </span><span class="nt">one_reach_per_cell</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
-<span class="linenos">146</span><span class="w">  </span><span class="nt">add_outlets</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
-<span class="linenos">147</span><span class="w">  </span><span class="c1"># keyword arguments to sfrmaker.SFRData:</span>
-<span class="linenos">148</span><span class="w">  </span><span class="nt">enforce_increasing_nsegs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
-<span class="linenos">149</span><span class="w">  </span><span class="nt">default_slope</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.001</span>
-<span class="linenos">150</span><span class="w">  </span><span class="nt">minimum_slope</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0001</span>
-<span class="linenos">151</span><span class="w">  </span><span class="nt">maximum_slope</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
+<span class="linenos"> 97</span><span class="w">  </span><span class="nt">elevation_data</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
+<span class="linenos"> 98</span><span class="w">  </span><span class="nt">elevation_data_crs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
+<span class="linenos"> 99</span><span class="w">  </span><span class="nt">elevation_data_layer</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
+<span class="linenos">100</span><span class="w">  </span><span class="nt">elevation_data_errors</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">raise</span>
+<span class="linenos">101</span>
+<span class="linenos">102</span><span class="nt">inflows</span><span class="p">:</span>
+<span class="linenos">103</span><span class="w">  </span><span class="c1"># Option to add specified inflows</span>
+<span class="linenos">104</span><span class="w">  </span><span class="c1"># (arguments to sfrmaker.SFRData.add_to_perioddata for MODFLOW-6):</span>
+<span class="linenos">105</span><span class="w">  </span><span class="nt">data</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
+<span class="linenos">106</span><span class="w">  </span><span class="nt">flowline_routing</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
+<span class="linenos">107</span><span class="w">  </span><span class="nt">variable</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">inflow</span>
+<span class="linenos">108</span><span class="w">  </span><span class="nt">line_id_column</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
+<span class="linenos">109</span><span class="w">  </span><span class="nt">rno_column</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
+<span class="linenos">110</span><span class="w">  </span><span class="nt">period_column</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">per</span>
+<span class="linenos">111</span><span class="w">  </span><span class="nt">data_column</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Q_avg</span>
+<span class="linenos">112</span><span class="w">  </span><span class="nt">one_inflow_per_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
+<span class="linenos">113</span><span class="w">  </span><span class="nt">distribute_flows_to_reaches</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
+<span class="linenos">114</span><span class="w">  </span><span class="c1"># (arguments to sfrmaker.SFRData.add_to_segment_data for MODFLOW-2005):</span>
+<span class="linenos">115</span><span class="w">  </span><span class="nt">segment_column</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">segment</span>
+<span class="linenos">116</span>
+<span class="linenos">117</span><span class="nt">observations</span><span class="p">:</span>
+<span class="linenos">118</span><span class="w">  </span><span class="c1"># Option to add SFR observation input</span>
+<span class="linenos">119</span><span class="w">  </span><span class="c1"># (arguments to sfrmaker.SFRData.add_observations):</span>
+<span class="linenos">120</span><span class="w">  </span><span class="nt">data</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
+<span class="linenos">121</span><span class="w">  </span><span class="nt">flowline_routing</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
+<span class="linenos">122</span><span class="w">  </span><span class="nt">obstype</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
+<span class="linenos">123</span><span class="w">  </span><span class="nt">sfrlines_shapefile</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
+<span class="linenos">124</span><span class="w">  </span><span class="nt">x_location_column</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
+<span class="linenos">125</span><span class="w">  </span><span class="nt">y_location_column</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
+<span class="linenos">126</span><span class="w">  </span><span class="nt">line_id_column</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
+<span class="linenos">127</span><span class="w">  </span><span class="nt">rno_column</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
+<span class="linenos">128</span><span class="w">  </span><span class="nt">obstype_column</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
+<span class="linenos">129</span><span class="w">  </span><span class="nt">obsname_column</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">site_no</span>
+<span class="linenos">130</span><span class="w">  </span><span class="nt">gage_starting_unit_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">250</span>
+<span class="linenos">131</span>
+<span class="linenos">132</span><span class="nt">to_riv</span><span class="p">:</span>
+<span class="linenos">133</span><span class="w">  </span><span class="c1"># Option to convert parts of the SFR network</span>
+<span class="linenos">134</span><span class="w">  </span><span class="c1"># downstream of specified line_ids to the RIV package:</span>
+<span class="linenos">135</span><span class="w">  </span><span class="nt">line_ids</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
+<span class="linenos">136</span><span class="w">  </span><span class="nt">drop_in_sfr</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="linenos">137</span>
+<span class="linenos">138</span><span class="nt">options</span><span class="p">:</span>
+<span class="linenos">139</span><span class="w">  </span><span class="c1"># SFR options (arguments to sfrmaker.Lines.to_sfr):</span>
+<span class="linenos">140</span><span class="w">  </span><span class="nt">active_area</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
+<span class="linenos">141</span><span class="w">  </span><span class="nt">isfr</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
+<span class="linenos">142</span><span class="w">  </span><span class="nt">model_length_units</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">undefined</span>
+<span class="linenos">143</span><span class="w">  </span><span class="nt">model_time_units</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">days</span>
+<span class="linenos">144</span><span class="w">  </span><span class="nt">minimum_reach_length</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
+<span class="linenos">145</span><span class="w">  </span><span class="nt">width_from_asum_a_param</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1193</span>
+<span class="linenos">146</span><span class="w">  </span><span class="nt">width_from_asum_b_param</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.5032</span>
+<span class="linenos">147</span><span class="w">  </span><span class="nt">minimum_reach_width</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
+<span class="linenos">148</span><span class="w">  </span><span class="nt">consolidate_conductance</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
+<span class="linenos">149</span><span class="w">  </span><span class="nt">one_reach_per_cell</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
+<span class="linenos">150</span><span class="w">  </span><span class="nt">add_outlets</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
+<span class="linenos">151</span><span class="w">  </span><span class="c1"># keyword arguments to sfrmaker.SFRData:</span>
+<span class="linenos">152</span><span class="w">  </span><span class="nt">enforce_increasing_nsegs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="linenos">153</span><span class="w">  </span><span class="nt">default_slope</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.001</span>
+<span class="linenos">154</span><span class="w">  </span><span class="nt">minimum_slope</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0001</span>
+<span class="linenos">155</span><span class="w">  </span><span class="nt">maximum_slope</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
 </pre></div>
 </div>
 </section>
@@ -267,7 +271,7 @@
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on May 09, 2025.
+      <span class="lastupdated">Last updated on May 18, 2025.
       </span></p>
   </div>
 

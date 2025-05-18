@@ -13,10 +13,10 @@
    "execution_count": 1,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2025-05-09T18:15:31.229483Z",
-     "iopub.status.busy": "2025-05-09T18:15:31.229321Z",
-     "iopub.status.idle": "2025-05-09T18:15:32.277603Z",
-     "shell.execute_reply": "2025-05-09T18:15:32.277174Z"
+     "iopub.execute_input": "2025-05-18T16:09:41.635828Z",
+     "iopub.status.busy": "2025-05-18T16:09:41.635668Z",
+     "iopub.status.idle": "2025-05-18T16:09:42.663670Z",
+     "shell.execute_reply": "2025-05-18T16:09:42.663249Z"
     }
    },
    "outputs": [],
@@ -43,10 +43,10 @@
    "execution_count": 2,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2025-05-09T18:15:32.279671Z",
-     "iopub.status.busy": "2025-05-09T18:15:32.279342Z",
-     "iopub.status.idle": "2025-05-09T18:15:32.281931Z",
-     "shell.execute_reply": "2025-05-09T18:15:32.281544Z"
+     "iopub.execute_input": "2025-05-18T16:09:42.665585Z",
+     "iopub.status.busy": "2025-05-18T16:09:42.665276Z",
+     "iopub.status.idle": "2025-05-18T16:09:42.667788Z",
+     "shell.execute_reply": "2025-05-18T16:09:42.667417Z"
     }
    },
    "outputs": [],
@@ -66,10 +66,10 @@
    "execution_count": 3,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2025-05-09T18:15:32.283426Z",
-     "iopub.status.busy": "2025-05-09T18:15:32.283270Z",
-     "iopub.status.idle": "2025-05-09T18:15:32.285516Z",
-     "shell.execute_reply": "2025-05-09T18:15:32.285149Z"
+     "iopub.execute_input": "2025-05-18T16:09:42.669262Z",
+     "iopub.status.busy": "2025-05-18T16:09:42.669072Z",
+     "iopub.status.idle": "2025-05-18T16:09:42.671448Z",
+     "shell.execute_reply": "2025-05-18T16:09:42.670988Z"
     }
    },
    "outputs": [],
@@ -93,10 +93,10 @@
    "execution_count": 4,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2025-05-09T18:15:32.287104Z",
-     "iopub.status.busy": "2025-05-09T18:15:32.286733Z",
-     "iopub.status.idle": "2025-05-09T18:15:32.411990Z",
-     "shell.execute_reply": "2025-05-09T18:15:32.411426Z"
+     "iopub.execute_input": "2025-05-18T16:09:42.672992Z",
+     "iopub.status.busy": "2025-05-18T16:09:42.672715Z",
+     "iopub.status.idle": "2025-05-18T16:09:42.795340Z",
+     "shell.execute_reply": "2025-05-18T16:09:42.794853Z"
     }
    },
    "outputs": [
@@ -134,10 +134,10 @@
    "execution_count": 5,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2025-05-09T18:15:32.440544Z",
-     "iopub.status.busy": "2025-05-09T18:15:32.440202Z",
-     "iopub.status.idle": "2025-05-09T18:15:32.512524Z",
-     "shell.execute_reply": "2025-05-09T18:15:32.511994Z"
+     "iopub.execute_input": "2025-05-18T16:09:42.822719Z",
+     "iopub.status.busy": "2025-05-18T16:09:42.822202Z",
+     "iopub.status.idle": "2025-05-18T16:09:42.891351Z",
+     "shell.execute_reply": "2025-05-18T16:09:42.890971Z"
     }
    },
    "outputs": [
@@ -177,10 +177,10 @@
    "execution_count": 6,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2025-05-09T18:15:32.514588Z",
-     "iopub.status.busy": "2025-05-09T18:15:32.514180Z",
-     "iopub.status.idle": "2025-05-09T18:15:33.433717Z",
-     "shell.execute_reply": "2025-05-09T18:15:33.433209Z"
+     "iopub.execute_input": "2025-05-18T16:09:42.892828Z",
+     "iopub.status.busy": "2025-05-18T16:09:42.892679Z",
+     "iopub.status.idle": "2025-05-18T16:09:43.787611Z",
+     "shell.execute_reply": "2025-05-18T16:09:43.787074Z"
     }
    },
    "outputs": [],
@@ -215,10 +215,10 @@
    "execution_count": 7,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2025-05-09T18:15:33.435554Z",
-     "iopub.status.busy": "2025-05-09T18:15:33.435389Z",
-     "iopub.status.idle": "2025-05-09T18:15:33.438785Z",
-     "shell.execute_reply": "2025-05-09T18:15:33.438323Z"
+     "iopub.execute_input": "2025-05-18T16:09:43.789403Z",
+     "iopub.status.busy": "2025-05-18T16:09:43.789249Z",
+     "iopub.status.idle": "2025-05-18T16:09:43.792269Z",
+     "shell.execute_reply": "2025-05-18T16:09:43.791897Z"
     }
    },
    "outputs": [],
@@ -249,10 +249,10 @@
    "execution_count": 8,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2025-05-09T18:15:33.440418Z",
-     "iopub.status.busy": "2025-05-09T18:15:33.440168Z",
-     "iopub.status.idle": "2025-05-09T18:15:35.504591Z",
-     "shell.execute_reply": "2025-05-09T18:15:35.504077Z"
+     "iopub.execute_input": "2025-05-18T16:09:43.793634Z",
+     "iopub.status.busy": "2025-05-18T16:09:43.793492Z",
+     "iopub.status.idle": "2025-05-18T16:09:45.776170Z",
+     "shell.execute_reply": "2025-05-18T16:09:45.775631Z"
     }
    },
    "outputs": [
@@ -301,17 +301,17 @@
    "execution_count": 9,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2025-05-09T18:15:35.506249Z",
-     "iopub.status.busy": "2025-05-09T18:15:35.506075Z",
-     "iopub.status.idle": "2025-05-09T18:15:35.609161Z",
-     "shell.execute_reply": "2025-05-09T18:15:35.608604Z"
+     "iopub.execute_input": "2025-05-18T16:09:45.777911Z",
+     "iopub.status.busy": "2025-05-18T16:09:45.777589Z",
+     "iopub.status.idle": "2025-05-18T16:09:45.876585Z",
+     "shell.execute_reply": "2025-05-18T16:09:45.876073Z"
     }
    },
    "outputs": [
     {
      "data": {
       "text/plain": [
-       "<matplotlib.image.AxesImage at 0x7f7e74aed2b0>"
+       "<matplotlib.image.AxesImage at 0x7fac0ba9fb60>"
       ]
      },
      "execution_count": 9,
@@ -320,7 +320,7 @@
     },
     {
      "data": {
-      "image/png": "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sO7upTutOz09vVPjuEgWAABYh4ACAACsE9cBxev16plnnpHX6431VLoU62bd3QHrZt3dQXddd2fE5UWyAAAgscV1BQUAACQmAgoAALAOAQUAAFiHgAIAAKxDQAEAANaJ24CyZs0aZWZmqk+fPsrJydEHH3wQ6ym5qqioSLfeeqtSU1M1aNAgTZ48WQcOHIgYY4xRQUGBAoGAkpOTlZeXp+rq6hjNODqKiork8XgUDAadY4m67q+++kqPPvqoBgwYoJSUFN18882qrKx0zifiultbW/XUU08pMzNTycnJGj58uFasWKG2tv//IrlEWPfOnTt13333KRAIyOPx6LXXXos435k1NjU1af78+Ro4cKD69u2rSZMm6ciRI124ikt3sXW3tLRoyZIlGjlypPr27atAIKAZM2bo6NGjEc+RaOs+36xZs+TxeLR69eqI4/G4brfFZUDZsmWLgsGgli9frn379un73/++7r77bh0+fDjWU3NNeXm55s6dqw8//FBlZWVqbW1Vfn6+Tpw44YwpLi5WSUmJSktLVVFRIb/frwkTJqixsTGGM3dPRUWF1q1bpxtvvDHieCKuu76+XmPHjlWvXr305ptv6rPPPtMvf/lLXXXVVc6YRFz3qlWr9PLLL6u0tFSff/65iouL9cILL+ill15yxiTCuk+cOKGbbrpJpaWlHZ7vzBqDwaC2bdumzZs3a9euXTp+/LjuvfdenT59uquWcckutu6TJ09q7969evrpp7V3715t3bpVBw8e1KRJkyLGJdq6z/Xaa6/p73//uwKBQLtz8bhu15k49N3vftfMnj074tiIESPM0qVLYzSj6KurqzOSTHl5uTHGmLa2NuP3+83zzz/vjPnmm29Menq6efnll2M1Tdc0NjaarKwsU1ZWZsaPH28WLFhgjEncdS9ZssSMGzfugucTdd0TJ040jz32WMSxKVOmmEcffdQYk5jrlmS2bdvm3O/MGv/73/+aXr16mc2bNztjvvrqK9OjRw/z17/+tcvmfiXOX3dH9uzZYySZQ4cOGWMSe91HjhwxV199tfn000/NsGHDzIsvvuicS4R1uyHuKijNzc2qrKxUfn5+xPH8/Hzt3r07RrOKvoaGBklS//79JUk1NTUKhUIRr4PX69X48eMT4nWYO3euJk6cqDvvvDPieKKue/v27Ro9erQeeOABDRo0SKNGjdIrr7zinE/UdY8bN07vvPOODh48KEn6+OOPtWvXLt1zzz2SEnfd5+rMGisrK9XS0hIxJhAIKDs7O2FeB+nM+5zH43Eqh4m67ra2Nk2fPl2LFi3SDTfc0O58oq77UsXdtxl//fXXOn36tHw+X8Rxn8+nUCgUo1lFlzFGCxcu1Lhx45SdnS1Jzlo7eh0OHTrU5XN00+bNm7V3715VVFS0O5eo6/7yyy+1du1aLVy4UD/72c+0Z88ePf744/J6vZoxY0bCrnvJkiVqaGjQiBEj1LNnT50+fVorV67UI488Iilxf9/n6swaQ6GQevfurX79+rUbkyjve998842WLl2qqVOnOt/qm6jrXrVqlZKSkvT44493eD5R132p4i6gnOXxeCLuG2PaHUsU8+bN0yeffKJdu3a1O5dor0Ntba0WLFigHTt2qE+fPhccl2jrbmtr0+jRo1VYWChJGjVqlKqrq7V27VrNmDHDGZdo696yZYs2btyoTZs26YYbblBVVZWCwaACgYBmzpzpjEu0dXfkctaYKK9DS0uLHn74YbW1tWnNmjXfOj6e111ZWalf/epX2rt37yWvIZ7XfTnirsUzcOBA9ezZs12KrKura/f/QBLB/PnztX37dr333nsaMmSIc9zv90tSwr0OlZWVqqurU05OjpKSkpSUlKTy8nL9+te/VlJSkrO2RFv34MGDdf3110ccu+6665wLvxP1971o0SItXbpUDz/8sEaOHKnp06friSeeUFFRkaTEXfe5OrNGv9+v5uZm1dfXX3BMvGppadGDDz6ompoalZWVOdUTKTHX/cEHH6iurk5Dhw513uMOHTqkJ598Utdcc42kxFz35Yi7gNK7d2/l5OSorKws4nhZWZlyc3NjNCv3GWM0b948bd26Ve+++64yMzMjzmdmZsrv90e8Ds3NzSovL4/r1+GOO+7Q/v37VVVV5dxGjx6tadOmqaqqSsOHD0/IdY8dO7bdNvKDBw9q2LBhkhL3933y5En16BH5NtSzZ09nm3GirvtcnVljTk6OevXqFTHm2LFj+vTTT+P6dTgbTr744gu9/fbbGjBgQMT5RFz39OnT9cknn0S8xwUCAS1atEhvvfWWpMRc92WJ0cW5V2Tz5s2mV69e5ne/+5357LPPTDAYNH379jX/+te/Yj011/zkJz8x6enp5v333zfHjh1zbidPnnTGPP/88yY9Pd1s3brV7N+/3zzyyCNm8ODBJhwOx3Dm7jt3F48xibnuPXv2mKSkJLNy5UrzxRdfmD/+8Y8mJSXFbNy40RmTiOueOXOmufrqq81f/vIXU1NTY7Zu3WoGDhxoFi9e7IxJhHU3Njaaffv2mX379hlJpqSkxOzbt8/ZrdKZNc6ePdsMGTLEvP3222bv3r3mBz/4gbnppptMa2trrJb1rS627paWFjNp0iQzZMgQU1VVFfE+19TU5DxHoq27I+fv4jEmPtfttrgMKMYY85vf/MYMGzbM9O7d29xyyy3O9ttEIanD26uvvuqMaWtrM88884zx+/3G6/Wa2267zezfvz92k46S8wNKoq77z3/+s8nOzjZer9eMGDHCrFu3LuJ8Iq47HA6bBQsWmKFDh5o+ffqY4cOHm+XLl0f8ByoR1v3ee+91+O955syZxpjOrfHUqVNm3rx5pn///iY5Odnce++95vDhwzFYTeddbN01NTUXfJ977733nOdItHV3pKOAEo/rdpvHGGO6olIDAADQWXF3DQoAAEh8BBQAAGAdAgoAALAOAQUAAFiHgAIAAKxDQAEAANYhoAAAAOsQUAAAgHUIKAAAwDoEFAAAYB0CCgAAsM7/AQSgze8xtu77AAAAAElFTkSuQmCC",
+      "image/png": "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sO7upTutOz09vVPjuEgWAABYh4ACAACsE9cBxev16plnnpHX6431VLoU62bd3QHrZt3dQXddd2fE5UWyAAAgscV1BQUAACQmAgoAALAOAQUAAFiHgAIAAKxDQAEAANaJ24CyZs0aZWZmqk+fPsrJydEHH3wQ6ym5qqioSLfeeqtSU1M1aNAgTZ48WQcOHIgYY4xRQUGBAoGAkpOTlZeXp+rq6hjNODqKiork8XgUDAadY4m67q+++kqPPvqoBgwYoJSUFN18882qrKx0zifiultbW/XUU08pMzNTycnJGj58uFasWKG2tv//IrlEWPfOnTt13333KRAIyOPx6LXXXos435k1NjU1af78+Ro4cKD69u2rSZMm6ciRI124ikt3sXW3tLRoyZIlGjlypPr27atAIKAZM2bo6NGjEc+RaOs+36xZs+TxeLR69eqI4/G4brfFZUDZsmWLgsGgli9frn379un73/++7r77bh0+fDjWU3NNeXm55s6dqw8//FBlZWVqbW1Vfn6+Tpw44YwpLi5WSUmJSktLVVFRIb/frwkTJqixsTGGM3dPRUWF1q1bpxtvvDHieCKuu76+XmPHjlWvXr305ptv6rPPPtMvf/lLXXXVVc6YRFz3qlWr9PLLL6u0tFSff/65iouL9cILL+ill15yxiTCuk+cOKGbbrpJpaWlHZ7vzBqDwaC2bdumzZs3a9euXTp+/LjuvfdenT59uquWcckutu6TJ09q7969evrpp7V3715t3bpVBw8e1KRJkyLGJdq6z/Xaa6/p73//uwKBQLtz8bhu15k49N3vftfMnj074tiIESPM0qVLYzSj6KurqzOSTHl5uTHGmLa2NuP3+83zzz/vjPnmm29Menq6efnll2M1Tdc0NjaarKwsU1ZWZsaPH28WLFhgjEncdS9ZssSMGzfugucTdd0TJ040jz32WMSxKVOmmEcffdQYk5jrlmS2bdvm3O/MGv/73/+aXr16mc2bNztjvvrqK9OjRw/z17/+tcvmfiXOX3dH9uzZYySZQ4cOGWMSe91HjhwxV199tfn000/NsGHDzIsvvuicS4R1uyHuKijNzc2qrKxUfn5+xPH8/Hzt3r07RrOKvoaGBklS//79JUk1NTUKhUIRr4PX69X48eMT4nWYO3euJk6cqDvvvDPieKKue/v27Ro9erQeeOABDRo0SKNGjdIrr7zinE/UdY8bN07vvPOODh48KEn6+OOPtWvXLt1zzz2SEnfd5+rMGisrK9XS0hIxJhAIKDs7O2FeB+nM+5zH43Eqh4m67ra2Nk2fPl2LFi3SDTfc0O58oq77UsXdtxl//fXXOn36tHw+X8Rxn8+nUCgUo1lFlzFGCxcu1Lhx45SdnS1Jzlo7eh0OHTrU5XN00+bNm7V3715VVFS0O5eo6/7yyy+1du1aLVy4UD/72c+0Z88ePf744/J6vZoxY0bCrnvJkiVqaGjQiBEj1LNnT50+fVorV67UI488Iilxf9/n6swaQ6GQevfurX79+rUbkyjve998842WLl2qqVOnOt/qm6jrXrVqlZKSkvT44493eD5R132p4i6gnOXxeCLuG2PaHUsU8+bN0yeffKJdu3a1O5dor0Ntba0WLFigHTt2qE+fPhccl2jrbmtr0+jRo1VYWChJGjVqlKqrq7V27VrNmDHDGZdo696yZYs2btyoTZs26YYbblBVVZWCwaACgYBmzpzpjEu0dXfkctaYKK9DS0uLHn74YbW1tWnNmjXfOj6e111ZWalf/epX2rt37yWvIZ7XfTnirsUzcOBA9ezZs12KrKura/f/QBLB/PnztX37dr333nsaMmSIc9zv90tSwr0OlZWVqqurU05OjpKSkpSUlKTy8nL9+te/VlJSkrO2RFv34MGDdf3110ccu+6665wLvxP1971o0SItXbpUDz/8sEaOHKnp06friSeeUFFRkaTEXfe5OrNGv9+v5uZm1dfXX3BMvGppadGDDz6ompoalZWVOdUTKTHX/cEHH6iurk5Dhw513uMOHTqkJ598Utdcc42kxFz35Yi7gNK7d2/l5OSorKws4nhZWZlyc3NjNCv3GWM0b948bd26Ve+++64yMzMjzmdmZsrv90e8Ds3NzSovL4/r1+GOO+7Q/v37VVVV5dxGjx6tadOmqaqqSsOHD0/IdY8dO7bdNvKDBw9q2LBhkhL3933y5En16BH5NtSzZ09nm3GirvtcnVljTk6OevXqFTHm2LFj+vTTT+P6dTgbTr744gu9/fbbGjBgQMT5RFz39OnT9cknn0S8xwUCAS1atEhvvfWWpMRc92WJ0cW5V2Tz5s2mV69e5ne/+5357LPPTDAYNH379jX/+te/Yj011/zkJz8x6enp5v333zfHjh1zbidPnnTGPP/88yY9Pd1s3brV7N+/3zzyyCNm8ODBJhwOx3Dm7jt3F48xibnuPXv2mKSkJLNy5UrzxRdfmD/+8Y8mJSXFbNy40RmTiOueOXOmufrqq81f/vIXU1NTY7Zu3WoGDhxoFi9e7IxJhHU3Njaaffv2mX379hlJpqSkxOzbt8/ZrdKZNc6ePdsMGTLEvP3222bv3r3mBz/4gbnppptMa2trrJb1rS627paWFjNp0iQzZMgQU1VVFfE+19TU5DxHoq27I+fv4jEmPtfttrgMKMYY85vf/MYMGzbM9O7d29xyyy3O9ttEIanD26uvvuqMaWtrM88884zx+/3G6/Wa2267zezfvz92k46S8wNKoq77z3/+s8nOzjZer9eMGDHCrFu3LuJ8Iq47HA6bBQsWmKFDh5o+ffqY4cOHm+XLl0f8ByoR1v3ee+91+O955syZxpjOrfHUqVNm3rx5pn///iY5Odnce++95vDhwzFYTeddbN01NTUXfJ977733nOdItHV3pKOAEo/rdpvHGGO6olIDAADQWXF3DQoAAEh8BBQAAGAdAgoAALAOAQUAAFiHgAIAAKxDQAEAANYhoAAAAOsQUAAAgHUIKAAAwDoEFAAAYB0CCgAAsM7/AQSgze8xtu77AAAAAElFTkSuQmCC",
       "text/plain": [
        "<Figure size 640x480 with 1 Axes>"
       ]
@@ -354,10 +354,10 @@
    "execution_count": 10,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2025-05-09T18:15:35.611108Z",
-     "iopub.status.busy": "2025-05-09T18:15:35.610734Z",
-     "iopub.status.idle": "2025-05-09T18:15:35.696137Z",
-     "shell.execute_reply": "2025-05-09T18:15:35.695665Z"
+     "iopub.execute_input": "2025-05-18T16:09:45.878230Z",
+     "iopub.status.busy": "2025-05-18T16:09:45.878039Z",
+     "iopub.status.idle": "2025-05-18T16:09:45.962437Z",
+     "shell.execute_reply": "2025-05-18T16:09:45.961926Z"
     }
    },
    "outputs": [
@@ -392,10 +392,10 @@
    "execution_count": 11,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2025-05-09T18:15:35.697987Z",
-     "iopub.status.busy": "2025-05-09T18:15:35.697575Z",
-     "iopub.status.idle": "2025-05-09T18:15:38.462610Z",
-     "shell.execute_reply": "2025-05-09T18:15:38.462139Z"
+     "iopub.execute_input": "2025-05-18T16:09:45.964278Z",
+     "iopub.status.busy": "2025-05-18T16:09:45.963841Z",
+     "iopub.status.idle": "2025-05-18T16:09:48.749791Z",
+     "shell.execute_reply": "2025-05-18T16:09:48.749382Z"
     }
    },
    "outputs": [
@@ -404,7 +404,7 @@
      "output_type": "stream",
      "text": [
       "\n",
-      "SFRmaker version 0.12.1.post49.dev0+ge6d125d\n",
+      "SFRmaker version 0.12.1.post51.dev0+g30bc74e\n",
       "\n",
       "Creating sfr dataset...\n",
       "\n",
@@ -415,7 +415,7 @@
      "name": "stdout",
      "output_type": "stream",
      "text": [
-      "grid class created in 1.29s\n",
+      "grid class created in 1.31s\n",
       "\n",
       "Model grid information\n",
       "structured grid\n",
@@ -451,7 +451,7 @@
      "name": "stdout",
      "output_type": "stream",
      "text": [
-      "finished in 0.71s\n",
+      "finished in 0.70s\n",
       "\n",
       "Intersecting 42 features...\n",
       "\r",
@@ -506,7 +506,7 @@
      "name": "stdout",
      "output_type": "stream",
      "text": [
-      "finished in 0.45s\n",
+      "finished in 0.47s\n",
       "\n",
       "Computing widths...\n",
       "\n",
@@ -528,7 +528,7 @@
       "active area defined by: all cells\n",
       "\n",
       "\n",
-      "Time to create sfr dataset: 2.76s\n",
+      "Time to create sfr dataset: 2.78s\n",
       "\n"
      ]
     }
@@ -550,10 +550,10 @@
    "execution_count": 12,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2025-05-09T18:15:38.464240Z",
-     "iopub.status.busy": "2025-05-09T18:15:38.464056Z",
-     "iopub.status.idle": "2025-05-09T18:15:38.467260Z",
-     "shell.execute_reply": "2025-05-09T18:15:38.466775Z"
+     "iopub.execute_input": "2025-05-18T16:09:48.751462Z",
+     "iopub.status.busy": "2025-05-18T16:09:48.751299Z",
+     "iopub.status.idle": "2025-05-18T16:09:48.754344Z",
+     "shell.execute_reply": "2025-05-18T16:09:48.753876Z"
     }
    },
    "outputs": [],
@@ -566,10 +566,10 @@
    "execution_count": 13,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2025-05-09T18:15:38.468845Z",
-     "iopub.status.busy": "2025-05-09T18:15:38.468535Z",
-     "iopub.status.idle": "2025-05-09T18:15:38.481725Z",
-     "shell.execute_reply": "2025-05-09T18:15:38.481344Z"
+     "iopub.execute_input": "2025-05-18T16:09:48.755968Z",
+     "iopub.status.busy": "2025-05-18T16:09:48.755588Z",
+     "iopub.status.idle": "2025-05-18T16:09:48.769209Z",
+     "shell.execute_reply": "2025-05-18T16:09:48.768831Z"
     }
    },
    "outputs": [
@@ -782,10 +782,10 @@
    "execution_count": 14,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2025-05-09T18:15:38.483113Z",
-     "iopub.status.busy": "2025-05-09T18:15:38.482951Z",
-     "iopub.status.idle": "2025-05-09T18:15:38.496046Z",
-     "shell.execute_reply": "2025-05-09T18:15:38.495666Z"
+     "iopub.execute_input": "2025-05-18T16:09:48.770583Z",
+     "iopub.status.busy": "2025-05-18T16:09:48.770425Z",
+     "iopub.status.idle": "2025-05-18T16:09:48.783944Z",
+     "shell.execute_reply": "2025-05-18T16:09:48.783493Z"
     }
    },
    "outputs": [
@@ -1006,10 +1006,10 @@
    "execution_count": 15,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2025-05-09T18:15:38.497477Z",
-     "iopub.status.busy": "2025-05-09T18:15:38.497314Z",
-     "iopub.status.idle": "2025-05-09T18:15:43.187576Z",
-     "shell.execute_reply": "2025-05-09T18:15:43.187142Z"
+     "iopub.execute_input": "2025-05-18T16:09:48.785429Z",
+     "iopub.status.busy": "2025-05-18T16:09:48.785286Z",
+     "iopub.status.idle": "2025-05-18T16:09:53.029009Z",
+     "shell.execute_reply": "2025-05-18T16:09:53.028527Z"
     }
    },
    "outputs": [
@@ -1024,7 +1024,7 @@
      "name": "stdout",
      "output_type": "stream",
      "text": [
-      "finished in 4.41s\n",
+      "finished in 3.98s\n",
       "\n",
       "\n",
       "Smoothing elevations...\n",
@@ -1050,10 +1050,10 @@
    "execution_count": 16,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2025-05-09T18:15:43.189322Z",
-     "iopub.status.busy": "2025-05-09T18:15:43.189052Z",
-     "iopub.status.idle": "2025-05-09T18:15:43.192986Z",
-     "shell.execute_reply": "2025-05-09T18:15:43.192538Z"
+     "iopub.execute_input": "2025-05-18T16:09:53.030629Z",
+     "iopub.status.busy": "2025-05-18T16:09:53.030472Z",
+     "iopub.status.idle": "2025-05-18T16:09:53.034548Z",
+     "shell.execute_reply": "2025-05-18T16:09:53.034196Z"
     }
    },
    "outputs": [],
@@ -1066,10 +1066,10 @@
    "execution_count": 17,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2025-05-09T18:15:43.194562Z",
-     "iopub.status.busy": "2025-05-09T18:15:43.194315Z",
-     "iopub.status.idle": "2025-05-09T18:15:43.206841Z",
-     "shell.execute_reply": "2025-05-09T18:15:43.206436Z"
+     "iopub.execute_input": "2025-05-18T16:09:53.035897Z",
+     "iopub.status.busy": "2025-05-18T16:09:53.035745Z",
+     "iopub.status.idle": "2025-05-18T16:09:53.048639Z",
+     "shell.execute_reply": "2025-05-18T16:09:53.048259Z"
     }
    },
    "outputs": [
@@ -1129,7 +1129,7 @@
        "      <td>1</td>\n",
        "      <td>208.807938</td>\n",
        "      <td>1.000000</td>\n",
-       "      <td>0.040094</td>\n",
+       "      <td>0.034189</td>\n",
        "      <td>...</td>\n",
        "      <td>0.0</td>\n",
        "      <td>0.0</td>\n",
@@ -1153,7 +1153,7 @@
        "      <td>2</td>\n",
        "      <td>294.098938</td>\n",
        "      <td>1.261243</td>\n",
-       "      <td>0.003117</td>\n",
+       "      <td>0.000750</td>\n",
        "      <td>...</td>\n",
        "      <td>0.0</td>\n",
        "      <td>0.0</td>\n",
@@ -1170,14 +1170,14 @@
        "      <th>513</th>\n",
        "      <td>3</td>\n",
        "      <td>17716</td>\n",
-       "      <td>2</td>\n",
+       "      <td>1</td>\n",
        "      <td>110</td>\n",
        "      <td>116</td>\n",
        "      <td>1</td>\n",
        "      <td>3</td>\n",
        "      <td>41.622536</td>\n",
        "      <td>1.531957</td>\n",
-       "      <td>0.207275</td>\n",
+       "      <td>0.165061</td>\n",
        "      <td>...</td>\n",
        "      <td>0.0</td>\n",
        "      <td>0.0</td>\n",
@@ -1201,7 +1201,7 @@
        "      <td>4</td>\n",
        "      <td>220.366440</td>\n",
        "      <td>1.714090</td>\n",
-       "      <td>0.028292</td>\n",
+       "      <td>0.027078</td>\n",
        "      <td>...</td>\n",
        "      <td>0.0</td>\n",
        "      <td>0.0</td>\n",
@@ -1225,7 +1225,7 @@
        "      <td>5</td>\n",
        "      <td>162.617325</td>\n",
        "      <td>1.950304</td>\n",
-       "      <td>0.015271</td>\n",
+       "      <td>0.023848</td>\n",
        "      <td>...</td>\n",
        "      <td>0.0</td>\n",
        "      <td>0.0</td>\n",
@@ -1245,11 +1245,11 @@
       ],
       "text/plain": [
        "     rno   node  k    i    j  iseg  ireach      rchlen     width     slope  \\\n",
-       "511    1  17714  2  110  114     1       1  208.807938  1.000000  0.040094   \n",
-       "512    2  17715  2  110  115     1       2  294.098938  1.261243  0.003117   \n",
-       "513    3  17716  2  110  116     1       3   41.622536  1.531957  0.207275   \n",
-       "514    4  17556  2  109  116     1       4  220.366440  1.714090  0.028292   \n",
-       "515    5  17557  2  109  117     1       5  162.617325  1.950304  0.015271   \n",
+       "511    1  17714  2  110  114     1       1  208.807938  1.000000  0.034189   \n",
+       "512    2  17715  2  110  115     1       2  294.098938  1.261243  0.000750   \n",
+       "513    3  17716  1  110  116     1       3   41.622536  1.531957  0.165061   \n",
+       "514    4  17556  2  109  116     1       4  220.366440  1.714090  0.027078   \n",
+       "515    5  17557  2  109  117     1       5  162.617325  1.950304  0.023848   \n",
        "\n",
        "     ...  thts  thti  eps  uhc  outreach  outseg        asum  line_id  name  \\\n",
        "511  ...   0.0   0.0  0.0  0.0         2       4   31.822330  1815013  None   \n",
@@ -1300,10 +1300,10 @@
    "execution_count": 18,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2025-05-09T18:15:43.208228Z",
-     "iopub.status.busy": "2025-05-09T18:15:43.208084Z",
-     "iopub.status.idle": "2025-05-09T18:15:43.276275Z",
-     "shell.execute_reply": "2025-05-09T18:15:43.275858Z"
+     "iopub.execute_input": "2025-05-18T16:09:53.050240Z",
+     "iopub.status.busy": "2025-05-18T16:09:53.049878Z",
+     "iopub.status.idle": "2025-05-18T16:09:53.118831Z",
+     "shell.execute_reply": "2025-05-18T16:09:53.118455Z"
     }
    },
    "outputs": [
@@ -1312,7 +1312,7 @@
      "output_type": "stream",
      "text": [
       "\n",
-      "Running Flopy v. 3.10.0.dev2 diagnostics...\n",
+      "Running Flopy v. 3.10.0.dev3 diagnostics...\n",
       "wrote tf_SFR.chk\n"
      ]
     }
@@ -1334,10 +1334,10 @@
    "execution_count": 19,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2025-05-09T18:15:43.277994Z",
-     "iopub.status.busy": "2025-05-09T18:15:43.277666Z",
-     "iopub.status.idle": "2025-05-09T18:15:43.381997Z",
-     "shell.execute_reply": "2025-05-09T18:15:43.381492Z"
+     "iopub.execute_input": "2025-05-18T16:09:53.120397Z",
+     "iopub.status.busy": "2025-05-18T16:09:53.120240Z",
+     "iopub.status.idle": "2025-05-18T16:09:53.222669Z",
+     "shell.execute_reply": "2025-05-18T16:09:53.222175Z"
     }
    },
    "outputs": [
@@ -1345,9 +1345,9 @@
      "name": "stdout",
      "output_type": "stream",
      "text": [
-      "SFRmaker v. 0.12.1.post49.dev0+ge6d125d\n",
+      "SFRmaker v. 0.12.1.post51.dev0+g30bc74e\n",
       "\n",
-      "Running Flopy v. 3.10.0.dev2 diagnostics...\n",
+      "Running Flopy v. 3.10.0.dev3 diagnostics...\n",
       "passed.\n",
       "\n",
       "Checking for continuity in segment and reach numbering...\n",
@@ -1375,7 +1375,7 @@
       "Nodes with overlapping conductances:\n",
       "k\ti\tj\tiseg\tireach\trchlen\tstrthick\tstrhc1\n",
       "2\t110\t119\t1\t8\t268.5836486816406\t1.0\t1.0\n",
-      "2\t110\t119\t2\t1\t72.61438751220703\t1.0\t1.0\n",
+      "1\t110\t119\t2\t1\t72.61438751220703\t1.0\t1.0\n",
       "0\t87\t122\t3\t54\t35.35249328613281\t1.0\t1.0\n",
       "0\t87\t122\t4\t33\t231.09567260742188\t1.0\t1.0\n",
       "0\t76\t110\t5\t47\t204.88766479492188\t1.0\t1.0\n",
@@ -1410,7 +1410,7 @@
       "1\t80\t49\t14\t125\t39.762516021728516\t1.0\t1.0\n",
       "2\t18\t17\t16\t1\t185.54652404785156\t1.0\t1.0\n",
       "2\t15\t3\t16\t21\t32.64251708984375\t1.0\t1.0\n",
-      "2\t36\t11\t17\t38\t57.836700439453125\t1.0\t1.0\n",
+      "1\t36\t11\t17\t38\t57.836700439453125\t1.0\t1.0\n",
       "2\t110\t159\t19\t2\t201.63583374023438\t1.0\t1.0\n",
       "0\t38\t85\t21\t8\t72.7103042602539\t1.0\t1.0\n",
       "0\t38\t85\t21\t9\t54.39541244506836\t1.0\t1.0\n",
@@ -1450,10 +1450,195 @@
       "passed.\n",
       "\n",
       "Checking reach_data for inconsistencies between streambed elevations and the model grid...\n",
-      "1 reaches encountered with streambed above model top.\n",
+      "186 reaches encountered with streambed above model top.\n",
       "Model top violations:\n",
       "i j iseg ireach strtop modeltop strhc1 reachID diff\n",
-      "49 15 18 19 922.1929321289062 920.3099975585938 1.0 786 -1.8829345703125\n",
+      "44 51 8 2 1096.0574951171875 1084.9100341796875 1.0 214 -11.1474609375\n",
+      "31 53 23 10 1008.349853515625 998.0900268554688 1.0 931 -10.25982666015625\n",
+      "34 50 12 5 1016.0361328125 1006.780029296875 1.0 385 -9.256103515625\n",
+      "42 49 8 6 1066.8226318359375 1057.7900390625 1.0 218 -9.0325927734375\n",
+      "3 76 27 3 1009.2495727539062 1002.1099853515625 1.0 1082 -7.13958740234375\n",
+      "94 3 37 21 1073.4644775390625 1066.4599609375 1.0 1360 -7.0045166015625\n",
+      "61 22 18 2 1029.281982421875 1022.3200073242188 1.0 769 -6.96197509765625\n",
+      "84 111 5 34 1261.253662109375 1254.3699951171875 1.0 130 -6.8836669921875\n",
+      "47 29 15 21 965.2784423828125 958.4199829101562 1.0 653 -6.85845947265625\n",
+      "61 18 33 3 996.3890991210938 989.6300048828125 1.0 1246 -6.75909423828125\n",
+      "71 5 35 9 990.4193725585938 983.8200073242188 1.0 1310 -6.599365234375\n",
+      "43 50 8 4 1078.9158935546875 1072.3599853515625 1.0 216 -6.555908203125\n",
+      "84 9 34 2 1085.3753662109375 1079.010009765625 1.0 1287 -6.3653564453125\n",
+      "35 51 12 3 1028.656494140625 1022.8200073242188 1.0 383 -5.83648681640625\n",
+      "108 54 24 12 1228.1346435546875 1222.3299560546875 1.0 1010 -5.8046875\n",
+      "33 4 36 10 834.1530151367188 828.52001953125 1.0 1334 -5.63299560546875\n",
+      "0 100 40 1 1027.534423828125 1022.1199951171875 1.0 1384 -5.4144287109375\n",
+      "5 25 28 45 817.1793823242188 811.8099975585938 1.0 1135 -5.369384765625\n",
+      "22 12 15 62 824.2842407226562 819.0800170898438 1.0 694 -5.2042236328125\n",
+      "52 37 15 9 1054.0181884765625 1048.8399658203125 1.0 641 -5.17822265625\n",
+      "65 1 35 19 944.7957153320312 939.6599731445312 1.0 1320 -5.1357421875\n",
+      "49 15 18 19 925.3494262695312 920.3099975585938 1.0 786 -5.0394287109375\n",
+      "51 24 17 11 963.3839721679688 958.3800048828125 1.0 740 -5.00396728515625\n",
+      "26 47 23 21 942.5027465820312 937.5900268554688 1.0 942 -4.9127197265625\n",
+      "1 23 28 51 778.961669921875 774.219970703125 1.0 1141 -4.74169921875\n",
+      "73 5 35 7 1003.2875366210938 998.5999755859375 1.0 1308 -4.68756103515625\n",
+      "45 28 15 24 947.1143188476562 942.72998046875 1.0 656 -4.38433837890625\n",
+      "80 116 6 18 1229.7757568359375 1225.4599609375 1.0 161 -4.3157958984375\n",
+      "27 18 15 51 863.89599609375 859.6300048828125 1.0 683 -4.2659912109375\n",
+      "82 112 5 39 1242.8052978515625 1238.5400390625 1.0 135 -4.2652587890625\n",
+      "35 31 7 25 922.0911254882812 918.2000122070312 1.0 195 -3.89111328125\n",
+      "30 52 23 12 991.4169921875 987.5700073242188 1.0 933 -3.84698486328125\n",
+      "71 4 35 10 981.303466796875 977.6799926757812 1.0 1311 -3.62347412109375\n",
+      "58 19 18 6 986.8626708984375 983.260009765625 1.0 773 -3.6026611328125\n",
+      "87 110 5 30 1283.4881591796875 1279.989990234375 1.0 126 -3.4981689453125\n",
+      "59 17 33 5 976.4671630859375 973.0399780273438 1.0 1248 -3.42718505859375\n",
+      "85 111 5 33 1264.7679443359375 1261.3499755859375 1.0 129 -3.41796875\n",
+      "41 12 18 31 892.8302001953125 889.469970703125 1.0 798 -3.3602294921875\n",
+      "54 12 33 15 932.0604248046875 928.719970703125 1.0 1258 -3.3404541015625\n",
+      "16 32 23 46 867.0645751953125 863.75 1.0 967 -3.3145751953125\n",
+      "28 40 12 21 934.5240478515625 931.27001953125 1.0 401 -3.2540283203125\n",
+      "1 138 26 1 1154.71630859375 1151.489990234375 1.0 1077 -3.226318359375\n",
+      "10 25 23 59 824.5831909179688 821.3699951171875 1.0 980 -3.21319580078125\n",
+      "36 32 7 23 927.737060546875 924.5399780273438 1.0 193 -3.19708251953125\n",
+      "51 15 18 17 930.7290649414062 927.5700073242188 1.0 784 -3.1590576171875\n",
+      "67 2 35 16 953.3693237304688 950.25 1.0 1317 -3.11932373046875\n",
+      "82 140 3 27 1305.33447265625 1302.239990234375 1.0 36 -3.094482421875\n",
+      "58 4 32 22 912.39599609375 909.3099975585938 1.0 1234 -3.08599853515625\n",
+      "31 28 7 32 902.4729614257812 899.4500122070312 1.0 202 -3.02294921875\n",
+      "18 0 30 40 762.85107421875 759.8400268554688 1.0 1204 -3.01104736328125\n",
+      "88 110 5 29 1288.3612060546875 1285.3800048828125 1.0 125 -2.981201171875\n",
+      "34 30 7 27 917.8261108398438 914.8599853515625 1.0 197 -2.96612548828125\n",
+      "33 13 30 13 879.4591674804688 876.5599975585938 1.0 1177 -2.899169921875\n",
+      "1 137 26 2 1149.9388427734375 1147.0799560546875 1.0 1078 -2.85888671875\n",
+      "109 58 24 6 1244.657470703125 1241.8199462890625 1.0 1004 -2.8375244140625\n",
+      "6 22 23 66 783.7332153320312 780.9299926757812 1.0 987 -2.80322265625\n",
+      "28 7 30 24 838.6741943359375 835.8900146484375 1.0 1188 -2.7841796875\n",
+      "83 51 13 65 1143.177490234375 1140.4300537109375 1.0 502 -2.7474365234375\n",
+      "20 9 15 67 797.5311279296875 794.7999877929688 1.0 699 -2.73114013671875\n",
+      "83 145 3 21 1313.221923828125 1310.52001953125 1.0 30 -2.701904296875\n",
+      "34 43 8 20 971.7984619140625 969.0999755859375 1.0 232 -2.698486328125\n",
+      "43 39 7 10 1002.135009765625 999.4600219726562 1.0 180 -2.67498779296875\n",
+      "18 16 16 2 816.8546142578125 814.1799926757812 1.0 710 -2.67462158203125\n",
+      "80 2 34 13 1005.6331176757812 1002.989990234375 1.0 1298 -2.64312744140625\n",
+      "57 27 17 2 1030.468994140625 1027.8399658203125 1.0 731 -2.6290283203125\n",
+      "98 6 37 14 1130.2991943359375 1127.739990234375 1.0 1353 -2.5592041015625\n",
+      "96 6 37 16 1109.81494140625 1107.27001953125 1.0 1355 -2.544921875\n",
+      "41 27 15 29 922.3822631835938 919.8499755859375 1.0 661 -2.53228759765625\n",
+      "93 35 24 48 1133.5345458984375 1131.030029296875 1.0 1046 -2.5045166015625\n",
+      "11 26 23 57 835.0635986328125 832.5999755859375 1.0 978 -2.463623046875\n",
+      "57 18 18 8 976.854248046875 974.4600219726562 1.0 775 -2.39422607421875\n",
+      "43 27 15 27 935.5574951171875 933.1699829101562 1.0 659 -2.38751220703125\n",
+      "29 19 15 48 875.1234130859375 872.77001953125 1.0 680 -2.3533935546875\n",
+      "97 6 37 15 1122.60205078125 1120.280029296875 1.0 1354 -2.322021484375\n",
+      "76 110 6 27 1202.379638671875 1200.0799560546875 1.0 170 -2.2996826171875\n",
+      "13 29 23 52 853.8441162109375 851.5800170898438 1.0 973 -2.26409912109375\n",
+      "28 50 23 16 969.1011352539062 966.8800048828125 1.0 937 -2.22113037109375\n",
+      "41 0 33 40 858.0049438476562 855.7899780273438 1.0 1283 -2.2149658203125\n",
+      "25 16 15 55 848.8750610351562 846.7100219726562 1.0 687 -2.1650390625\n",
+      "3 24 28 48 797.5549926757812 795.4099731445312 1.0 1138 -2.14501953125\n",
+      "65 10 32 9 973.0398559570312 970.9299926757812 1.0 1221 -2.10986328125\n",
+      "98 100 5 9 1381.1871337890625 1379.1099853515625 1.0 105 -2.0771484375\n",
+      "21 25 12 43 869.5907592773438 867.52001953125 1.0 423 -2.07073974609375\n",
+      "78 111 5 44 1220.5587158203125 1218.530029296875 1.0 140 -2.0286865234375\n",
+      "55 25 17 6 996.66845703125 994.6400146484375 1.0 735 -2.0284423828125\n",
+      "51 36 15 11 1035.9466552734375 1033.9599609375 1.0 643 -1.9866943359375\n",
+      "30 34 8 32 918.734375 916.7899780273438 1.0 244 -1.94439697265625\n",
+      "32 21 15 44 887.8782348632812 885.9400024414062 1.0 676 -1.938232421875\n",
+      "4 77 27 1 1019.9188232421875 1018.0 1.0 1080 -1.9188232421875\n",
+      "51 9 33 21 916.0432739257812 914.1300048828125 1.0 1264 -1.91326904296875\n",
+      "27 6 30 26 830.7896118164062 828.9600219726562 1.0 1190 -1.82958984375\n",
+      "6 26 28 43 833.5056762695312 831.719970703125 1.0 1133 -1.78570556640625\n",
+      "22 2 30 34 786.0257568359375 784.25 1.0 1198 -1.7757568359375\n",
+      "7 26 28 42 844.1419677734375 842.3800048828125 1.0 1132 -1.761962890625\n",
+      "48 6 33 27 898.0303955078125 896.2899780273438 1.0 1270 -1.74041748046875\n",
+      "18 21 12 51 847.4663696289062 845.739990234375 1.0 431 -1.72637939453125\n",
+      "89 64 13 41 1181.4326171875 1179.72998046875 1.0 478 -1.70263671875\n",
+      "74 6 35 5 1011.9109497070312 1010.219970703125 1.0 1306 -1.69097900390625\n",
+      "8 69 22 4 1005.525390625 1003.8599853515625 1.0 904 -1.6654052734375\n",
+      "13 45 28 18 909.0931396484375 907.5 1.0 1108 -1.5931396484375\n",
+      "43 13 18 28 900.6517333984375 899.0599975585938 1.0 795 -1.59173583984375\n",
+      "46 14 18 24 910.212890625 908.7100219726562 1.0 791 -1.50286865234375\n",
+      "15 6 16 16 769.787109375 768.2899780273438 1.0 724 -1.49713134765625\n",
+      "3 39 29 12 893.4083862304688 891.9400024414062 1.0 1155 -1.4683837890625\n",
+      "84 145 3 20 1316.32958984375 1314.9100341796875 1.0 29 -1.4195556640625\n",
+      "12 28 23 54 846.7885131835938 845.3699951171875 1.0 975 -1.41851806640625\n",
+      "20 1 30 37 775.9326171875 774.530029296875 1.0 1201 -1.402587890625\n",
+      "47 5 33 29 893.9849243164062 892.5900268554688 1.0 1272 -1.3948974609375\n",
+      "57 3 32 24 906.1943359375 904.8900146484375 1.0 1236 -1.3043212890625\n",
+      "37 20 30 2 917.4218139648438 916.1199951171875 1.0 1166 -1.30181884765625\n",
+      "76 110 5 47 1201.3443603515625 1200.0799560546875 1.0 143 -1.264404296875\n",
+      "76 110 10 1 1201.3443603515625 1200.0799560546875 1.0 324 -1.264404296875\n",
+      "68 3 35 14 962.5520629882812 961.3599853515625 1.0 1315 -1.19207763671875\n",
+      "51 119 9 45 1191.214111328125 1190.050048828125 1.0 304 -1.1640625\n",
+      "25 46 23 23 935.9991455078125 934.8499755859375 1.0 944 -1.149169921875\n",
+      "39 26 15 32 915.0709838867188 913.97998046875 1.0 664 -1.09100341796875\n",
+      "70 3 35 12 969.0398559570312 967.9500122070312 1.0 1313 -1.08984375\n",
+      "6 158 39 3 1123.38037109375 1122.300048828125 1.0 1372 -1.080322265625\n",
+      "37 25 15 35 908.1263427734375 907.0700073242188 1.0 667 -1.05633544921875\n",
+      "26 25 7 40 879.2858276367188 878.239990234375 1.0 210 -1.04583740234375\n",
+      "97 41 24 35 1150.635498046875 1149.6500244140625 1.0 1033 -0.9854736328125\n",
+      "60 107 10 26 1175.4578857421875 1174.52001953125 1.0 349 -0.9378662109375\n",
+      "46 21 17 19 923.8571166992188 922.9199829101562 1.0 748 -0.9371337890625\n",
+      "25 158 20 3 1172.1849365234375 1171.27001953125 1.0 807 -0.9149169921875\n",
+      "39 48 8 10 1029.3406982421875 1028.449951171875 1.0 222 -0.8907470703125\n",
+      "14 99 21 61 1097.334716796875 1096.469970703125 1.0 879 -0.86474609375\n",
+      "40 86 21 5 1143.69384765625 1142.8499755859375 1.0 823 -0.8438720703125\n",
+      "85 52 13 62 1149.013427734375 1148.1700439453125 1.0 499 -0.8433837890625\n",
+      "52 109 10 35 1164.787353515625 1163.969970703125 1.0 358 -0.8173828125\n",
+      "38 12 17 36 880.8272094726562 880.030029296875 1.0 765 -0.79718017578125\n",
+      "74 8 35 3 1025.747314453125 1024.9599609375 1.0 1304 -0.787353515625\n",
+      "105 51 24 18 1209.4859619140625 1208.699951171875 1.0 1016 -0.7860107421875\n",
+      "51 108 10 37 1162.79296875 1162.010009765625 1.0 360 -0.782958984375\n",
+      "25 33 12 31 903.5383911132812 902.760009765625 1.0 411 -0.77838134765625\n",
+      "28 25 7 38 886.2448120117188 885.5 1.0 208 -0.74481201171875\n",
+      "0 71 27 11 967.5951538085938 966.8599853515625 1.0 1090 -0.73516845703125\n",
+      "66 10 32 8 977.9095458984375 977.219970703125 1.0 1220 -0.6895751953125\n",
+      "5 157 39 5 1121.365966796875 1120.6800537109375 1.0 1374 -0.6859130859375\n",
+      "45 13 18 26 906.5974731445312 905.9299926757812 1.0 793 -0.66748046875\n",
+      "26 158 20 2 1174.694580078125 1174.030029296875 1.0 806 -0.66455078125\n",
+      "62 19 33 1 1005.5029296875 1004.8400268554688 1.0 1244 -0.66290283203125\n",
+      "56 18 18 9 967.2000732421875 966.5399780273438 1.0 776 -0.66009521484375\n",
+      "33 80 21 19 1128.41845703125 1127.780029296875 1.0 837 -0.638427734375\n",
+      "101 41 24 31 1158.5797119140625 1157.969970703125 1.0 1029 -0.6097412109375\n",
+      "74 109 10 4 1198.0435791015625 1197.43994140625 1.0 327 -0.6036376953125\n",
+      "30 10 30 19 857.75048828125 857.1599731445312 1.0 1183 -0.59051513671875\n",
+      "96 36 24 42 1141.318359375 1140.72998046875 1.0 1040 -0.58837890625\n",
+      "33 22 15 42 892.9962768554688 892.4299926757812 1.0 674 -0.5662841796875\n",
+      "6 104 21 74 1082.59326171875 1082.06005859375 1.0 892 -0.533203125\n",
+      "104 44 24 26 1173.2772216796875 1172.8199462890625 1.0 1024 -0.457275390625\n",
+      "42 27 15 28 927.3306884765625 926.8800048828125 1.0 660 -0.45068359375\n",
+      "26 17 15 53 855.5484008789062 855.1099853515625 1.0 685 -0.43841552734375\n",
+      "93 122 4 27 1282.7025146484375 1282.2900390625 1.0 90 -0.4124755859375\n",
+      "20 89 21 45 1108.5118408203125 1108.0999755859375 1.0 863 -0.411865234375\n",
+      "32 29 7 30 907.5672607421875 907.1599731445312 1.0 200 -0.40728759765625\n",
+      "6 44 29 4 923.0087890625 922.6599731445312 1.0 1147 -0.34881591796875\n",
+      "98 41 24 34 1152.4619140625 1152.1199951171875 1.0 1032 -0.3419189453125\n",
+      "60 6 32 18 933.5938720703125 933.260009765625 1.0 1230 -0.3338623046875\n",
+      "37 21 30 1 919.2725830078125 918.9400024414062 1.0 1165 -0.33258056640625\n",
+      "89 122 4 31 1278.8204345703125 1278.5 1.0 94 -0.3204345703125\n",
+      "57 108 10 30 1171.8583984375 1171.5400390625 1.0 353 -0.318359375\n",
+      "34 81 21 17 1129.405517578125 1129.0899658203125 1.0 835 -0.3155517578125\n",
+      "82 50 13 67 1139.371337890625 1139.06005859375 1.0 504 -0.311279296875\n",
+      "53 108 10 34 1166.6656494140625 1166.4000244140625 1.0 357 -0.265625\n",
+      "88 55 13 55 1161.44287109375 1161.199951171875 1.0 492 -0.242919921875\n",
+      "47 105 14 7 1156.3297119140625 1156.0999755859375 1.0 514 -0.229736328125\n",
+      "58 108 10 29 1172.513916015625 1172.2900390625 1.0 352 -0.223876953125\n",
+      "99 123 4 18 1290.2703857421875 1290.0999755859375 1.0 81 -0.17041015625\n",
+      "101 95 5 1 1400.4940185546875 1400.3399658203125 1.0 97 -0.154052734375\n",
+      "36 19 30 4 910.9712524414062 910.8200073242188 1.0 1168 -0.1512451171875\n",
+      "86 52 13 61 1151.74169921875 1151.5999755859375 1.0 498 -0.1417236328125\n",
+      "23 2 30 33 790.0592651367188 789.9199829101562 1.0 1197 -0.1392822265625\n",
+      "36 46 8 15 997.1134033203125 996.97998046875 1.0 227 -0.1334228515625\n",
+      "15 31 23 48 859.490234375 859.3599853515625 1.0 969 -0.1302490234375\n",
+      "16 3 15 76 757.1549682617188 757.0399780273438 1.0 708 -0.114990234375\n",
+      "99 14 37 5 1152.94384765625 1152.8499755859375 1.0 1344 -0.0938720703125\n",
+      "89 56 13 53 1164.082763671875 1163.989990234375 1.0 490 -0.0927734375\n",
+      "91 122 4 29 1280.729736328125 1280.6400146484375 1.0 92 -0.0897216796875\n",
+      "35 58 23 1 1069.680419921875 1069.5999755859375 1.0 922 -0.0804443359375\n",
+      "52 81 14 51 1142.7772216796875 1142.699951171875 1.0 558 -0.0772705078125\n",
+      "46 120 9 51 1181.7955322265625 1181.719970703125 1.0 310 -0.0755615234375\n",
+      "40 48 8 9 1038.634765625 1038.56005859375 1.0 221 -0.07470703125\n",
+      "99 41 24 33 1153.8238525390625 1153.75 1.0 1031 -0.0738525390625\n",
+      "75 110 10 2 1199.30908203125 1199.25 1.0 325 -0.05908203125\n",
+      "47 120 9 50 1182.4256591796875 1182.3699951171875 1.0 309 -0.0556640625\n",
+      "98 123 4 19 1289.3104248046875 1289.2900390625 1.0 82 -0.0203857421875\n",
       "\n",
       "\n",
       "Checking segment_data for inconsistencies between segment end elevations and the model grid...\n",
@@ -1488,10 +1673,10 @@
    "execution_count": 20,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2025-05-09T18:15:43.383780Z",
-     "iopub.status.busy": "2025-05-09T18:15:43.383511Z",
-     "iopub.status.idle": "2025-05-09T18:15:43.672424Z",
-     "shell.execute_reply": "2025-05-09T18:15:43.671897Z"
+     "iopub.execute_input": "2025-05-18T16:09:53.224294Z",
+     "iopub.status.busy": "2025-05-18T16:09:53.224134Z",
+     "iopub.status.idle": "2025-05-18T16:09:53.505903Z",
+     "shell.execute_reply": "2025-05-18T16:09:53.505431Z"
     }
    },
    "outputs": [
@@ -1499,9 +1684,9 @@
      "name": "stdout",
      "output_type": "stream",
      "text": [
-      "SFRmaker v. 0.12.1.post49.dev0+ge6d125d\n",
+      "SFRmaker v. 0.12.1.post51.dev0+g30bc74e\n",
       "\n",
-      "Running Flopy v. 3.10.0.dev2 diagnostics...\n",
+      "Running Flopy v. 3.10.0.dev3 diagnostics...\n",
       "passed.\n",
       "\n",
       "Checking for continuity in segment and reach numbering...\n",
@@ -1513,29 +1698,29 @@
       "Checking for circular routing...\n",
       "passed.\n",
       "\n",
-      "Checking reach connections for proximity...\n",
-      "5 segments with non-adjacent reaches found.\n",
-      "At segments:\n",
-      "41 20 21 22 23\n",
-      "\n",
-      "5 segments with non-adjacent reaches found.\n",
-      "At segments:\n",
-      "41 20 21 22 23\n",
-      "\n",
-      "\n",
-      "Checking for model cells with multiple non-zero SFR conductances...\n"
+      "Checking reach connections for proximity...\n"
      ]
     },
     {
      "name": "stdout",
      "output_type": "stream",
      "text": [
+      "5 segments with non-adjacent reaches found.\n",
+      "At segments:\n",
+      "41 20 21 22 23\n",
+      "\n",
+      "5 segments with non-adjacent reaches found.\n",
+      "At segments:\n",
+      "41 20 21 22 23\n",
+      "\n",
+      "\n",
+      "Checking for model cells with multiple non-zero SFR conductances...\n",
       "24 model cells with multiple non-zero SFR conductances found.\n",
       "This may lead to circular routing between collocated reaches.\n",
       "Nodes with overlapping conductances:\n",
       "k\ti\tj\tiseg\tireach\trchlen\tstrthick\tstrhc1\n",
       "2\t110\t119\t1\t8\t268.5836486816406\t1.0\t1.0\n",
-      "2\t110\t119\t2\t1\t72.61438751220703\t1.0\t1.0\n",
+      "1\t110\t119\t2\t1\t72.61438751220703\t1.0\t1.0\n",
       "0\t87\t122\t3\t54\t35.35249328613281\t1.0\t1.0\n",
       "0\t87\t122\t4\t33\t231.09567260742188\t1.0\t1.0\n",
       "0\t76\t110\t5\t47\t204.88766479492188\t1.0\t1.0\n",
@@ -1570,7 +1755,7 @@
       "1\t80\t49\t14\t125\t39.762516021728516\t1.0\t1.0\n",
       "2\t18\t17\t16\t1\t185.54652404785156\t1.0\t1.0\n",
       "2\t15\t3\t16\t21\t32.64251708984375\t1.0\t1.0\n",
-      "2\t36\t11\t17\t38\t57.836700439453125\t1.0\t1.0\n",
+      "1\t36\t11\t17\t38\t57.836700439453125\t1.0\t1.0\n",
       "2\t110\t159\t19\t2\t201.63583374023438\t1.0\t1.0\n",
       "0\t38\t85\t21\t8\t72.7103042602539\t1.0\t1.0\n",
       "0\t38\t85\t21\t9\t54.39541244506836\t1.0\t1.0\n",
@@ -1604,10 +1789,195 @@
       "passed.\n",
       "\n",
       "Checking reach_data for inconsistencies between streambed elevations and the model grid...\n",
-      "1 reaches encountered with streambed above model top.\n",
+      "186 reaches encountered with streambed above model top.\n",
       "Model top violations:\n",
       "i j iseg ireach strtop modeltop strhc1 reachID diff\n",
-      "49 15 18 19 922.1929321289062 920.3099975585938 1.0 786 -1.8829345703125\n",
+      "44 51 8 2 1096.0574951171875 1084.9100341796875 1.0 214 -11.1474609375\n",
+      "31 53 23 10 1008.349853515625 998.0900268554688 1.0 931 -10.25982666015625\n",
+      "34 50 12 5 1016.0361328125 1006.780029296875 1.0 385 -9.256103515625\n",
+      "42 49 8 6 1066.8226318359375 1057.7900390625 1.0 218 -9.0325927734375\n",
+      "3 76 27 3 1009.2495727539062 1002.1099853515625 1.0 1082 -7.13958740234375\n",
+      "94 3 37 21 1073.4644775390625 1066.4599609375 1.0 1360 -7.0045166015625\n",
+      "61 22 18 2 1029.281982421875 1022.3200073242188 1.0 769 -6.96197509765625\n",
+      "84 111 5 34 1261.253662109375 1254.3699951171875 1.0 130 -6.8836669921875\n",
+      "47 29 15 21 965.2784423828125 958.4199829101562 1.0 653 -6.85845947265625\n",
+      "61 18 33 3 996.3890991210938 989.6300048828125 1.0 1246 -6.75909423828125\n",
+      "71 5 35 9 990.4193725585938 983.8200073242188 1.0 1310 -6.599365234375\n",
+      "43 50 8 4 1078.9158935546875 1072.3599853515625 1.0 216 -6.555908203125\n",
+      "84 9 34 2 1085.3753662109375 1079.010009765625 1.0 1287 -6.3653564453125\n",
+      "35 51 12 3 1028.656494140625 1022.8200073242188 1.0 383 -5.83648681640625\n",
+      "108 54 24 12 1228.1346435546875 1222.3299560546875 1.0 1010 -5.8046875\n",
+      "33 4 36 10 834.1530151367188 828.52001953125 1.0 1334 -5.63299560546875\n",
+      "0 100 40 1 1027.534423828125 1022.1199951171875 1.0 1384 -5.4144287109375\n",
+      "5 25 28 45 817.1793823242188 811.8099975585938 1.0 1135 -5.369384765625\n",
+      "22 12 15 62 824.2842407226562 819.0800170898438 1.0 694 -5.2042236328125\n",
+      "52 37 15 9 1054.0181884765625 1048.8399658203125 1.0 641 -5.17822265625\n",
+      "65 1 35 19 944.7957153320312 939.6599731445312 1.0 1320 -5.1357421875\n",
+      "49 15 18 19 925.3494262695312 920.3099975585938 1.0 786 -5.0394287109375\n",
+      "51 24 17 11 963.3839721679688 958.3800048828125 1.0 740 -5.00396728515625\n",
+      "26 47 23 21 942.5027465820312 937.5900268554688 1.0 942 -4.9127197265625\n",
+      "1 23 28 51 778.961669921875 774.219970703125 1.0 1141 -4.74169921875\n",
+      "73 5 35 7 1003.2875366210938 998.5999755859375 1.0 1308 -4.68756103515625\n",
+      "45 28 15 24 947.1143188476562 942.72998046875 1.0 656 -4.38433837890625\n",
+      "80 116 6 18 1229.7757568359375 1225.4599609375 1.0 161 -4.3157958984375\n",
+      "27 18 15 51 863.89599609375 859.6300048828125 1.0 683 -4.2659912109375\n",
+      "82 112 5 39 1242.8052978515625 1238.5400390625 1.0 135 -4.2652587890625\n",
+      "35 31 7 25 922.0911254882812 918.2000122070312 1.0 195 -3.89111328125\n",
+      "30 52 23 12 991.4169921875 987.5700073242188 1.0 933 -3.84698486328125\n",
+      "71 4 35 10 981.303466796875 977.6799926757812 1.0 1311 -3.62347412109375\n",
+      "58 19 18 6 986.8626708984375 983.260009765625 1.0 773 -3.6026611328125\n",
+      "87 110 5 30 1283.4881591796875 1279.989990234375 1.0 126 -3.4981689453125\n",
+      "59 17 33 5 976.4671630859375 973.0399780273438 1.0 1248 -3.42718505859375\n",
+      "85 111 5 33 1264.7679443359375 1261.3499755859375 1.0 129 -3.41796875\n",
+      "41 12 18 31 892.8302001953125 889.469970703125 1.0 798 -3.3602294921875\n",
+      "54 12 33 15 932.0604248046875 928.719970703125 1.0 1258 -3.3404541015625\n",
+      "16 32 23 46 867.0645751953125 863.75 1.0 967 -3.3145751953125\n",
+      "28 40 12 21 934.5240478515625 931.27001953125 1.0 401 -3.2540283203125\n",
+      "1 138 26 1 1154.71630859375 1151.489990234375 1.0 1077 -3.226318359375\n",
+      "10 25 23 59 824.5831909179688 821.3699951171875 1.0 980 -3.21319580078125\n",
+      "36 32 7 23 927.737060546875 924.5399780273438 1.0 193 -3.19708251953125\n",
+      "51 15 18 17 930.7290649414062 927.5700073242188 1.0 784 -3.1590576171875\n",
+      "67 2 35 16 953.3693237304688 950.25 1.0 1317 -3.11932373046875\n",
+      "82 140 3 27 1305.33447265625 1302.239990234375 1.0 36 -3.094482421875\n",
+      "58 4 32 22 912.39599609375 909.3099975585938 1.0 1234 -3.08599853515625\n",
+      "31 28 7 32 902.4729614257812 899.4500122070312 1.0 202 -3.02294921875\n",
+      "18 0 30 40 762.85107421875 759.8400268554688 1.0 1204 -3.01104736328125\n",
+      "88 110 5 29 1288.3612060546875 1285.3800048828125 1.0 125 -2.981201171875\n",
+      "34 30 7 27 917.8261108398438 914.8599853515625 1.0 197 -2.96612548828125\n",
+      "33 13 30 13 879.4591674804688 876.5599975585938 1.0 1177 -2.899169921875\n",
+      "1 137 26 2 1149.9388427734375 1147.0799560546875 1.0 1078 -2.85888671875\n",
+      "109 58 24 6 1244.657470703125 1241.8199462890625 1.0 1004 -2.8375244140625\n",
+      "6 22 23 66 783.7332153320312 780.9299926757812 1.0 987 -2.80322265625\n",
+      "28 7 30 24 838.6741943359375 835.8900146484375 1.0 1188 -2.7841796875\n",
+      "83 51 13 65 1143.177490234375 1140.4300537109375 1.0 502 -2.7474365234375\n",
+      "20 9 15 67 797.5311279296875 794.7999877929688 1.0 699 -2.73114013671875\n",
+      "83 145 3 21 1313.221923828125 1310.52001953125 1.0 30 -2.701904296875\n",
+      "34 43 8 20 971.7984619140625 969.0999755859375 1.0 232 -2.698486328125\n",
+      "43 39 7 10 1002.135009765625 999.4600219726562 1.0 180 -2.67498779296875\n",
+      "18 16 16 2 816.8546142578125 814.1799926757812 1.0 710 -2.67462158203125\n",
+      "80 2 34 13 1005.6331176757812 1002.989990234375 1.0 1298 -2.64312744140625\n",
+      "57 27 17 2 1030.468994140625 1027.8399658203125 1.0 731 -2.6290283203125\n",
+      "98 6 37 14 1130.2991943359375 1127.739990234375 1.0 1353 -2.5592041015625\n",
+      "96 6 37 16 1109.81494140625 1107.27001953125 1.0 1355 -2.544921875\n",
+      "41 27 15 29 922.3822631835938 919.8499755859375 1.0 661 -2.53228759765625\n",
+      "93 35 24 48 1133.5345458984375 1131.030029296875 1.0 1046 -2.5045166015625\n",
+      "11 26 23 57 835.0635986328125 832.5999755859375 1.0 978 -2.463623046875\n",
+      "57 18 18 8 976.854248046875 974.4600219726562 1.0 775 -2.39422607421875\n",
+      "43 27 15 27 935.5574951171875 933.1699829101562 1.0 659 -2.38751220703125\n",
+      "29 19 15 48 875.1234130859375 872.77001953125 1.0 680 -2.3533935546875\n",
+      "97 6 37 15 1122.60205078125 1120.280029296875 1.0 1354 -2.322021484375\n",
+      "76 110 6 27 1202.379638671875 1200.0799560546875 1.0 170 -2.2996826171875\n",
+      "13 29 23 52 853.8441162109375 851.5800170898438 1.0 973 -2.26409912109375\n",
+      "28 50 23 16 969.1011352539062 966.8800048828125 1.0 937 -2.22113037109375\n",
+      "41 0 33 40 858.0049438476562 855.7899780273438 1.0 1283 -2.2149658203125\n",
+      "25 16 15 55 848.8750610351562 846.7100219726562 1.0 687 -2.1650390625\n",
+      "3 24 28 48 797.5549926757812 795.4099731445312 1.0 1138 -2.14501953125\n",
+      "65 10 32 9 973.0398559570312 970.9299926757812 1.0 1221 -2.10986328125\n",
+      "98 100 5 9 1381.1871337890625 1379.1099853515625 1.0 105 -2.0771484375\n",
+      "21 25 12 43 869.5907592773438 867.52001953125 1.0 423 -2.07073974609375\n",
+      "78 111 5 44 1220.5587158203125 1218.530029296875 1.0 140 -2.0286865234375\n",
+      "55 25 17 6 996.66845703125 994.6400146484375 1.0 735 -2.0284423828125\n",
+      "51 36 15 11 1035.9466552734375 1033.9599609375 1.0 643 -1.9866943359375\n",
+      "30 34 8 32 918.734375 916.7899780273438 1.0 244 -1.94439697265625\n",
+      "32 21 15 44 887.8782348632812 885.9400024414062 1.0 676 -1.938232421875\n",
+      "4 77 27 1 1019.9188232421875 1018.0 1.0 1080 -1.9188232421875\n",
+      "51 9 33 21 916.0432739257812 914.1300048828125 1.0 1264 -1.91326904296875\n",
+      "27 6 30 26 830.7896118164062 828.9600219726562 1.0 1190 -1.82958984375\n",
+      "6 26 28 43 833.5056762695312 831.719970703125 1.0 1133 -1.78570556640625\n",
+      "22 2 30 34 786.0257568359375 784.25 1.0 1198 -1.7757568359375\n",
+      "7 26 28 42 844.1419677734375 842.3800048828125 1.0 1132 -1.761962890625\n",
+      "48 6 33 27 898.0303955078125 896.2899780273438 1.0 1270 -1.74041748046875\n",
+      "18 21 12 51 847.4663696289062 845.739990234375 1.0 431 -1.72637939453125\n",
+      "89 64 13 41 1181.4326171875 1179.72998046875 1.0 478 -1.70263671875\n",
+      "74 6 35 5 1011.9109497070312 1010.219970703125 1.0 1306 -1.69097900390625\n",
+      "8 69 22 4 1005.525390625 1003.8599853515625 1.0 904 -1.6654052734375\n",
+      "13 45 28 18 909.0931396484375 907.5 1.0 1108 -1.5931396484375\n",
+      "43 13 18 28 900.6517333984375 899.0599975585938 1.0 795 -1.59173583984375\n",
+      "46 14 18 24 910.212890625 908.7100219726562 1.0 791 -1.50286865234375\n",
+      "15 6 16 16 769.787109375 768.2899780273438 1.0 724 -1.49713134765625\n",
+      "3 39 29 12 893.4083862304688 891.9400024414062 1.0 1155 -1.4683837890625\n",
+      "84 145 3 20 1316.32958984375 1314.9100341796875 1.0 29 -1.4195556640625\n",
+      "12 28 23 54 846.7885131835938 845.3699951171875 1.0 975 -1.41851806640625\n",
+      "20 1 30 37 775.9326171875 774.530029296875 1.0 1201 -1.402587890625\n",
+      "47 5 33 29 893.9849243164062 892.5900268554688 1.0 1272 -1.3948974609375\n",
+      "57 3 32 24 906.1943359375 904.8900146484375 1.0 1236 -1.3043212890625\n",
+      "37 20 30 2 917.4218139648438 916.1199951171875 1.0 1166 -1.30181884765625\n",
+      "76 110 5 47 1201.3443603515625 1200.0799560546875 1.0 143 -1.264404296875\n",
+      "76 110 10 1 1201.3443603515625 1200.0799560546875 1.0 324 -1.264404296875\n",
+      "68 3 35 14 962.5520629882812 961.3599853515625 1.0 1315 -1.19207763671875\n",
+      "51 119 9 45 1191.214111328125 1190.050048828125 1.0 304 -1.1640625\n",
+      "25 46 23 23 935.9991455078125 934.8499755859375 1.0 944 -1.149169921875\n",
+      "39 26 15 32 915.0709838867188 913.97998046875 1.0 664 -1.09100341796875\n",
+      "70 3 35 12 969.0398559570312 967.9500122070312 1.0 1313 -1.08984375\n",
+      "6 158 39 3 1123.38037109375 1122.300048828125 1.0 1372 -1.080322265625\n",
+      "37 25 15 35 908.1263427734375 907.0700073242188 1.0 667 -1.05633544921875\n",
+      "26 25 7 40 879.2858276367188 878.239990234375 1.0 210 -1.04583740234375\n",
+      "97 41 24 35 1150.635498046875 1149.6500244140625 1.0 1033 -0.9854736328125\n",
+      "60 107 10 26 1175.4578857421875 1174.52001953125 1.0 349 -0.9378662109375\n",
+      "46 21 17 19 923.8571166992188 922.9199829101562 1.0 748 -0.9371337890625\n",
+      "25 158 20 3 1172.1849365234375 1171.27001953125 1.0 807 -0.9149169921875\n",
+      "39 48 8 10 1029.3406982421875 1028.449951171875 1.0 222 -0.8907470703125\n",
+      "14 99 21 61 1097.334716796875 1096.469970703125 1.0 879 -0.86474609375\n",
+      "40 86 21 5 1143.69384765625 1142.8499755859375 1.0 823 -0.8438720703125\n",
+      "85 52 13 62 1149.013427734375 1148.1700439453125 1.0 499 -0.8433837890625\n",
+      "52 109 10 35 1164.787353515625 1163.969970703125 1.0 358 -0.8173828125\n",
+      "38 12 17 36 880.8272094726562 880.030029296875 1.0 765 -0.79718017578125\n",
+      "74 8 35 3 1025.747314453125 1024.9599609375 1.0 1304 -0.787353515625\n",
+      "105 51 24 18 1209.4859619140625 1208.699951171875 1.0 1016 -0.7860107421875\n",
+      "51 108 10 37 1162.79296875 1162.010009765625 1.0 360 -0.782958984375\n",
+      "25 33 12 31 903.5383911132812 902.760009765625 1.0 411 -0.77838134765625\n",
+      "28 25 7 38 886.2448120117188 885.5 1.0 208 -0.74481201171875\n",
+      "0 71 27 11 967.5951538085938 966.8599853515625 1.0 1090 -0.73516845703125\n",
+      "66 10 32 8 977.9095458984375 977.219970703125 1.0 1220 -0.6895751953125\n",
+      "5 157 39 5 1121.365966796875 1120.6800537109375 1.0 1374 -0.6859130859375\n",
+      "45 13 18 26 906.5974731445312 905.9299926757812 1.0 793 -0.66748046875\n",
+      "26 158 20 2 1174.694580078125 1174.030029296875 1.0 806 -0.66455078125\n",
+      "62 19 33 1 1005.5029296875 1004.8400268554688 1.0 1244 -0.66290283203125\n",
+      "56 18 18 9 967.2000732421875 966.5399780273438 1.0 776 -0.66009521484375\n",
+      "33 80 21 19 1128.41845703125 1127.780029296875 1.0 837 -0.638427734375\n",
+      "101 41 24 31 1158.5797119140625 1157.969970703125 1.0 1029 -0.6097412109375\n",
+      "74 109 10 4 1198.0435791015625 1197.43994140625 1.0 327 -0.6036376953125\n",
+      "30 10 30 19 857.75048828125 857.1599731445312 1.0 1183 -0.59051513671875\n",
+      "96 36 24 42 1141.318359375 1140.72998046875 1.0 1040 -0.58837890625\n",
+      "33 22 15 42 892.9962768554688 892.4299926757812 1.0 674 -0.5662841796875\n",
+      "6 104 21 74 1082.59326171875 1082.06005859375 1.0 892 -0.533203125\n",
+      "104 44 24 26 1173.2772216796875 1172.8199462890625 1.0 1024 -0.457275390625\n",
+      "42 27 15 28 927.3306884765625 926.8800048828125 1.0 660 -0.45068359375\n",
+      "26 17 15 53 855.5484008789062 855.1099853515625 1.0 685 -0.43841552734375\n",
+      "93 122 4 27 1282.7025146484375 1282.2900390625 1.0 90 -0.4124755859375\n",
+      "20 89 21 45 1108.5118408203125 1108.0999755859375 1.0 863 -0.411865234375\n",
+      "32 29 7 30 907.5672607421875 907.1599731445312 1.0 200 -0.40728759765625\n",
+      "6 44 29 4 923.0087890625 922.6599731445312 1.0 1147 -0.34881591796875\n",
+      "98 41 24 34 1152.4619140625 1152.1199951171875 1.0 1032 -0.3419189453125\n",
+      "60 6 32 18 933.5938720703125 933.260009765625 1.0 1230 -0.3338623046875\n",
+      "37 21 30 1 919.2725830078125 918.9400024414062 1.0 1165 -0.33258056640625\n",
+      "89 122 4 31 1278.8204345703125 1278.5 1.0 94 -0.3204345703125\n",
+      "57 108 10 30 1171.8583984375 1171.5400390625 1.0 353 -0.318359375\n",
+      "34 81 21 17 1129.405517578125 1129.0899658203125 1.0 835 -0.3155517578125\n",
+      "82 50 13 67 1139.371337890625 1139.06005859375 1.0 504 -0.311279296875\n",
+      "53 108 10 34 1166.6656494140625 1166.4000244140625 1.0 357 -0.265625\n",
+      "88 55 13 55 1161.44287109375 1161.199951171875 1.0 492 -0.242919921875\n",
+      "47 105 14 7 1156.3297119140625 1156.0999755859375 1.0 514 -0.229736328125\n",
+      "58 108 10 29 1172.513916015625 1172.2900390625 1.0 352 -0.223876953125\n",
+      "99 123 4 18 1290.2703857421875 1290.0999755859375 1.0 81 -0.17041015625\n",
+      "101 95 5 1 1400.4940185546875 1400.3399658203125 1.0 97 -0.154052734375\n",
+      "36 19 30 4 910.9712524414062 910.8200073242188 1.0 1168 -0.1512451171875\n",
+      "86 52 13 61 1151.74169921875 1151.5999755859375 1.0 498 -0.1417236328125\n",
+      "23 2 30 33 790.0592651367188 789.9199829101562 1.0 1197 -0.1392822265625\n",
+      "36 46 8 15 997.1134033203125 996.97998046875 1.0 227 -0.1334228515625\n",
+      "15 31 23 48 859.490234375 859.3599853515625 1.0 969 -0.1302490234375\n",
+      "16 3 15 76 757.1549682617188 757.0399780273438 1.0 708 -0.114990234375\n",
+      "99 14 37 5 1152.94384765625 1152.8499755859375 1.0 1344 -0.0938720703125\n",
+      "89 56 13 53 1164.082763671875 1163.989990234375 1.0 490 -0.0927734375\n",
+      "91 122 4 29 1280.729736328125 1280.6400146484375 1.0 92 -0.0897216796875\n",
+      "35 58 23 1 1069.680419921875 1069.5999755859375 1.0 922 -0.0804443359375\n",
+      "52 81 14 51 1142.7772216796875 1142.699951171875 1.0 558 -0.0772705078125\n",
+      "46 120 9 51 1181.7955322265625 1181.719970703125 1.0 310 -0.0755615234375\n",
+      "40 48 8 9 1038.634765625 1038.56005859375 1.0 221 -0.07470703125\n",
+      "99 41 24 33 1153.8238525390625 1153.75 1.0 1031 -0.0738525390625\n",
+      "75 110 10 2 1199.30908203125 1199.25 1.0 325 -0.05908203125\n",
+      "47 120 9 50 1182.4256591796875 1182.3699951171875 1.0 309 -0.0556640625\n",
+      "98 123 4 19 1289.3104248046875 1289.2900390625 1.0 82 -0.0203857421875\n",
       "\n",
       "\n",
       "Checking segment_data for inconsistencies between segment end elevations and the model grid...\n",
@@ -1650,10 +2020,10 @@
    "execution_count": 21,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2025-05-09T18:15:43.674205Z",
-     "iopub.status.busy": "2025-05-09T18:15:43.673932Z",
-     "iopub.status.idle": "2025-05-09T18:15:43.690709Z",
-     "shell.execute_reply": "2025-05-09T18:15:43.690309Z"
+     "iopub.execute_input": "2025-05-18T16:09:53.507710Z",
+     "iopub.status.busy": "2025-05-18T16:09:53.507325Z",
+     "iopub.status.idle": "2025-05-18T16:09:53.524066Z",
+     "shell.execute_reply": "2025-05-18T16:09:53.523623Z"
     }
    },
    "outputs": [
@@ -1682,10 +2052,10 @@
    "execution_count": 22,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2025-05-09T18:15:43.692152Z",
-     "iopub.status.busy": "2025-05-09T18:15:43.691979Z",
-     "iopub.status.idle": "2025-05-09T18:15:43.741421Z",
-     "shell.execute_reply": "2025-05-09T18:15:43.740929Z"
+     "iopub.execute_input": "2025-05-18T16:09:53.525872Z",
+     "iopub.status.busy": "2025-05-18T16:09:53.525465Z",
+     "iopub.status.idle": "2025-05-18T16:09:53.575543Z",
+     "shell.execute_reply": "2025-05-18T16:09:53.575027Z"
     }
    },
    "outputs": [
@@ -1731,10 +2101,10 @@
    "execution_count": 23,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2025-05-09T18:15:43.743372Z",
-     "iopub.status.busy": "2025-05-09T18:15:43.742933Z",
-     "iopub.status.idle": "2025-05-09T18:15:44.369061Z",
-     "shell.execute_reply": "2025-05-09T18:15:44.368618Z"
+     "iopub.execute_input": "2025-05-18T16:09:53.577332Z",
+     "iopub.status.busy": "2025-05-18T16:09:53.576988Z",
+     "iopub.status.idle": "2025-05-18T16:09:54.192521Z",
+     "shell.execute_reply": "2025-05-18T16:09:54.192021Z"
     }
    },
    "outputs": [

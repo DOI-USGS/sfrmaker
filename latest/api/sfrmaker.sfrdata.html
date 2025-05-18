@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>The SFRData Module &mdash; SFRmaker 0.12.1.post49.dev0+ge6d125d documentation</title>
+  <title>The SFRData Module &mdash; SFRmaker 0.12.1.post51.dev0+g30bc74e documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
@@ -15,7 +15,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=5c3c1868"></script>
+      <script src="../_static/documentation_options.js?v=7197016a"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -541,13 +541,13 @@ SFRData.package_name attribute.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="sfrmaker.sfrdata.SFRData.sample_reach_elevations">
-<span class="sig-name descname"><span class="pre">sample_reach_elevations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dem</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'buffers'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffer_distance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smooth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/sfrdata.html#SFRData.sample_reach_elevations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.sfrdata.SFRData.sample_reach_elevations" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">sample_reach_elevations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dem</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'buffers'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffer_distance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smooth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elevation_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elevation_data_crs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elevation_data_layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elevation_data_errors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'raise'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/sfrdata.html#SFRData.sample_reach_elevations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.sfrdata.SFRData.sample_reach_elevations" title="Link to this definition"></a></dt>
 <dd><p>Computes zonal statistics on a raster for SFR reaches, using
 either buffer polygons around the reach LineStrings, or the model
 grid cell polygons containing each reach.</p>
-<dl class="field-list simple">
+<dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
+<dd class="field-odd"><dl>
 <dt><strong>dem</strong><span class="classifier">path to valid raster dataset</span></dt><dd><p>Must be in same Coordinate Reference System as model grid.</p>
 </dd>
 <dt><strong>method</strong><span class="classifier">str; ‘buffers’ or ‘cell polygons’</span></dt><dd><p>If ‘buffers’, buffers (with flat caps; cap_style=2 in LineString.buffer())
@@ -559,11 +559,39 @@ will be created around the reach LineStrings (geometry column in reach_data).</p
 to ensure that they decrease monotonically in the downstream direction
 (default=True).</p>
 </dd>
-</dl>
+<dt><strong>elevation_data</strong><span class="classifier">str/pathlike or DataFrame</span></dt><dd><p>Optional table of streambed top elevations at x, y locations. These will be mapped to
+individual reaches using the selected method, replacing the DEM-derived elevations.
+The points must fall within the selected buffer distance or cell polygon, otherwise
+an error will be raised. Points can be specified in a shapefile, geopackage, CSV file or
+(Geo)DataFrame, which must contain the following fields:</p>
+<p>By default, None.</p>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl class="simple">
-<dt><strong>elevs</strong><span class="classifier">dict of sampled elevations keyed by reach number</span></dt><dd></dd>
+<dt><strong>elevation_data_layer</strong><span class="classifier">None</span></dt><dd><p>Layer name for the elevation data, if the data are being supplied in a multi-layer GeoPackage.
+by default, None.</p>
+</dd>
+<dt><strong>elevation_data_crs</strong><span class="classifier">obj</span></dt><dd><p>Coordinate reference system of the x,y points in elevation-data. 
+Only needed if the data do not have a valid ESRI projection (.prj) file.
+A Python int, dict, str, or <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.7.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> instance
+passed to <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input" title="(in pyproj v3.7.1)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.crs.CRS.from_user_input()</span></code></a></p>
+<p>Can be any of:
+- PROJ string
+- Dictionary of PROJ parameters
+- PROJ keyword arguments for parameters
+- JSON string with PROJ parameters
+- CRS WKT string
+- An authority string [i.e. ‘epsg:4326’]
+- An EPSG integer code [i.e. 4326]
+- A tuple of (“auth_name”: “auth_code”) [i.e (‘epsg’, ‘4326’)]
+- An object with a <cite>to_wkt</cite> method.
+- A <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.7.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> class</p>
+</dd>
+<dt><strong>elevation_data_errors</strong><span class="classifier">{‘ignore’, ‘raise’}</span></dt><dd><p>If ‘ignore’, suppress error when one or more points in elevation data is
+not associated with a stream reach (is out of geographic proximity).
+By default, ‘raise’.</p>
+</dd>
+<dt><strong>Returns</strong></dt><dd></dd>
+<dt><strong>——-</strong></dt><dd></dd>
+<dt><strong>streambed_tops</strong><span class="classifier">dict of sampled elevations keyed by reach number</span></dt><dd></dd>
 </dl>
 </dd>
 </dl>
@@ -709,7 +737,7 @@ by default None</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl>
-<dt><strong>gag</strong><span class="classifier"><a class="reference external" href="https://flopy.readthedocs.io/en/latest/source/flopy.modflow.mfgage.html#flopy.modflow.mfgage.ModflowGage" title="(in FloPy v3.10.0.dev2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">flopy.modflow.mfgage.ModflowGage</span></code></a> instance</span></dt><dd></dd>
+<dt><strong>gag</strong><span class="classifier"><a class="reference external" href="https://flopy.readthedocs.io/en/latest/source/flopy.modflow.mfgage.html#flopy.modflow.mfgage.ModflowGage" title="(in FloPy v3.10.0.dev3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">flopy.modflow.mfgage.ModflowGage</span></code></a> instance</span></dt><dd></dd>
 </dl>
 </dd>
 </dl>
@@ -728,7 +756,7 @@ by default None</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
 <dt><strong>filename</strong><span class="classifier">str, optional</span></dt><dd><p>File name for SFR package. By default None, in which
-case the filename of the attached <a class="reference external" href="https://flopy.readthedocs.io/en/latest/source/flopy.modflow.mfsfr2.html#flopy.modflow.mfsfr2.ModflowSfr2" title="(in FloPy v3.10.0.dev2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">flopy.modflow.mfsfr2.ModflowSfr2</span></code></a> instance
+case the filename of the attached <a class="reference external" href="https://flopy.readthedocs.io/en/latest/source/flopy.modflow.mfsfr2.html#flopy.modflow.mfsfr2.ModflowSfr2" title="(in FloPy v3.10.0.dev3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">flopy.modflow.mfsfr2.ModflowSfr2</span></code></a> instance
 (<code class="docutils literal notranslate"><span class="pre">SFRData.modflow_sfr2.fn_path</span></code>) is used.</p>
 </dd>
 <dt><strong>version</strong><span class="classifier">str, optional, {‘mf2005’, ‘mfnwt’, ‘mf6’}</span></dt><dd><p>MODFLOW version for the SFR package, by default ‘mf2005’</p>
@@ -806,7 +834,7 @@ and <a class="reference internal" href="#sfrmaker.sfrdata.SFRData.period_data" t
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on May 09, 2025.
+      <span class="lastupdated">Last updated on May 18, 2025.
       </span></p>
   </div>
 

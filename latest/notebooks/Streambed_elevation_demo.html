@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Demonstration of how sfrmaker handles streambed elevations &mdash; SFRmaker 0.12.1.post49.dev0+ge6d125d documentation</title>
+  <title>Demonstration of how sfrmaker handles streambed elevations &mdash; SFRmaker 0.12.1.post51.dev0+g30bc74e documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
@@ -16,7 +16,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=5c3c1868"></script>
+      <script src="../_static/documentation_options.js?v=7197016a"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -67,6 +67,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#pseudo-code-for-the-smoothing-algoritm:">pseudo code for the smoothing algoritm:</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="#Including-field-measurements-of-streambed-top-elevation">Including field measurements of streambed top elevation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#Make-comparison-plots-of-the-elevations-in-each-segment">Make comparison plots of the elevations in each segment</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#Note:">Note:</a></li>
 </ul>
@@ -196,12 +197,12 @@ Getting routing information from NHDPlus Plusflow table...
 finished in 0.03s
 
 
-SFRmaker version 0.12.1.post49.dev0+ge6d125d
+SFRmaker version 0.12.1.post51.dev0+g30bc74e
 
 Creating sfr dataset...
 
 Creating grid class instance from flopy Grid instance...
-grid class created in 1.27s
+grid class created in 1.24s
 
 Model grid information
 structured grid
@@ -231,14 +232,14 @@ finished in 0.01s
 Intersecting 42 flowlines with 17,760 grid cells...
 
 Building spatial index...
-finished in 0.77s
+finished in 0.76s
 
 Intersecting 42 features...
 42
 finished in 0.08s
 
 Setting up reach data... (may take a few minutes for large grids)
-finished in 0.46s
+finished in 0.45s
 
 Computing widths...
 
@@ -260,8 +261,26 @@ bounds: 682688.00, 5139052.00, 694880.00, 5147510.20
 active area defined by: all cells
 
 
-Time to create sfr dataset: 2.81s
+Time to create sfr dataset: 2.77s
 
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pyproj</span>
+<span class="n">pyproj</span><span class="o">.</span><span class="n">datadir</span><span class="o">.</span><span class="n">get_data_dir</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&#39;/home/runner/micromamba/envs/sfrmaker_ci/share/proj&#39;
 </pre></div></div>
 </div>
 </section>
@@ -282,7 +301,7 @@ For each level:
 </pre></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">raw_sampled_elevs</span> <span class="o">=</span> <span class="n">sfr</span><span class="o">.</span><span class="n">sample_reach_elevations</span><span class="p">(</span><span class="n">dem</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;buffers&#39;</span><span class="p">,</span> <span class="n">smooth</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
@@ -296,10 +315,10 @@ For each level:
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 running rasterstats.zonal_stats on buffered LineStrings...
-finished in 4.41s
+finished in 4.01s
 
 running rasterstats.zonal_stats on buffered LineStrings...
-finished in 4.37s
+finished in 3.99s
 
 
 Smoothing elevations...
@@ -308,19 +327,106 @@ finished in 0.10s
 </div>
 </section>
 </section>
+<section id="Including-field-measurements-of-streambed-top-elevation">
+<h2>Including field measurements of streambed top elevation<a class="headerlink" href="#Including-field-measurements-of-streambed-top-elevation" title="Link to this heading"></a></h2>
+<p>Oftentimes, streambed elevations sampled from a DEM and smoothed are still biased high, because even the lowest DEM pixels near the stream don’t capture the true streambed top elevation, which is typically found within a channel that is narrow relative to the DEM pixel width, beneath some amount of water. When getting the streambed top elevations right is important, we may want to measure these in the field, and incorporate this data into the SFR Package. In SFRmaker this can be done by
+supplying a table of streambed top measurements with x, y locations. Suppose we collected some additional elevations for ‘Segment 3’ in the plots below:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;../tylerforks/streambed_elevations.csv&#39;</span><span class="p">)</span>
+<br/></pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>x</th>
+      <th>y</th>
+      <th>elevation</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>692396.7</td>
+      <td>5140825.5</td>
+      <td>392.02</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>692608.2</td>
+      <td>5141000.6</td>
+      <td>392.91</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>We can include these in the streambed top elevation sampling via an <code class="docutils literal notranslate"><span class="pre">elevation_data</span></code> argument. Elevation data must be supplied in a tabular format as shown above. CSV, shapefiles or GeoPackages are supported, as are pandas DataFrames or Geopandas GeoDataFrames. If a CSV or regular DataFrame is supplied, the coordinates must be in the same CRS as the model/SFR Package, or an <code class="docutils literal notranslate"><span class="pre">elevation_data_crs</span></code> must be supplied.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">smooth_elevs_with_field_measurements</span> <span class="o">=</span> <span class="n">sfr</span><span class="o">.</span><span class="n">sample_reach_elevations</span><span class="p">(</span><span class="n">dem</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;buffers&#39;</span><span class="p">,</span> <span class="n">smooth</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                                                   <span class="n">elevation_data</span><span class="o">=</span><span class="s1">&#39;../tylerforks/streambed_elevations.csv&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+running rasterstats.zonal_stats on buffered LineStrings...
+finished in 3.98s
+
+
+Smoothing elevations...
+finished in 0.10s
+</pre></div></div>
+</div>
+</section>
 <section id="Make-comparison-plots-of-the-elevations-in-each-segment">
 <h2>Make comparison plots of the elevations in each segment<a class="headerlink" href="#Make-comparison-plots-of-the-elevations-in-each-segment" title="Link to this heading"></a></h2>
 <ul class="simple">
-<li><p>model_top: elevations sampled from the DEM at the cell centers</p></li>
-<li><p>nhdplus_elevations: reach elevations linearly interpolated from original COMID end elevations in NHDPlus</p></li>
-<li><p>raw_sampled_elevs: minimum DEM elevations within each buffered LineString</p></li>
-<li><p>smooth_sampled_elevs: minimum DEM elevations within each buffered LineString with smoothing applied</p></li>
+<li><p>Model top: elevations sampled from the DEM at the cell centers</p></li>
+<li><p>NHDPlus_elevations: reach elevations linearly interpolated from original COMID end elevations in NHDPlus</p></li>
+<li><p>Raw sampled elevations: minimum DEM elevations within each buffered LineString</p></li>
+<li><p>Smoothed sampled elevations: minimum DEM elevations within each buffered LineString with smoothing applied</p></li>
+<li><p>Segment 3 only:</p>
+<ul>
+<li><p>Smoothed sampled with field meas.: Minimum DEM elevations, replaced by any field elevations that were sampled near the reach (determined by intersection with the model cell, or within a <code class="docutils literal notranslate"><span class="pre">buffer_distance</span></code>).</p></li>
+<li><p>In the case of segment 3, the additional elevation measurements are lower than the minimum DEM elevations, resulting in lower streambed tops at those points, and continuing downstream until a lower elevation is encountered in the DEM.</p></li>
+</ul>
+</li>
 </ul>
 <section id="Note:">
 <h3>Note:<a class="headerlink" href="#Note:" title="Link to this heading"></a></h3>
 <p>One of the segments has NHDPlus elevations that are much higher than the model top or DEM. This is due to the segment originating outside of the model domain, which means the COMID start elevation from NHDPlus is invalid.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dfs</span> <span class="o">=</span> <span class="p">[]</span>
@@ -331,27 +437,34 @@ finished in 0.10s
     <span class="n">df</span><span class="p">[</span><span class="s1">&#39;NHDPlus elevations&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">strtop</span>
     <span class="n">dfs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df</span><span class="p">[[</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="s1">&#39;j&#39;</span><span class="p">,</span> <span class="s1">&#39;rno&#39;</span><span class="p">,</span> <span class="s1">&#39;iseg&#39;</span><span class="p">,</span> <span class="s1">&#39;ireach&#39;</span><span class="p">,</span> <span class="s1">&#39;dist&#39;</span><span class="p">,</span> <span class="s1">&#39;NHDPlus elevations&#39;</span><span class="p">]])</span>
 <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">dfs</span><span class="p">)</span>
-<span class="n">df</span><span class="p">[</span><span class="s1">&#39;model top&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sfr</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">top</span><span class="o">.</span><span class="n">array</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">i</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">j</span><span class="p">]</span>
-<span class="n">df</span><span class="p">[</span><span class="s1">&#39;raw sampled elevations&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">raw_sampled_elevs</span><span class="p">[</span><span class="n">rno</span><span class="p">]</span>
+<span class="n">df</span><span class="p">[</span><span class="s1">&#39;Model top&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sfr</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">top</span><span class="o">.</span><span class="n">array</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">i</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">j</span><span class="p">]</span>
+<span class="n">df</span><span class="p">[</span><span class="s1">&#39;Raw sampled elevations&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">raw_sampled_elevs</span><span class="p">[</span><span class="n">rno</span><span class="p">]</span>
                               <span class="k">for</span> <span class="n">rno</span> <span class="ow">in</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;rno&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">]</span>
-<span class="n">df</span><span class="p">[</span><span class="s1">&#39;smoothed sampled elevations&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">smooth_sampled_elevs</span><span class="p">[</span><span class="n">rno</span><span class="p">]</span>
+<span class="n">df</span><span class="p">[</span><span class="s1">&#39;Smoothed sampled elevations&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">smooth_sampled_elevs</span><span class="p">[</span><span class="n">rno</span><span class="p">]</span>
                               <span class="k">for</span> <span class="n">rno</span> <span class="ow">in</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;rno&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">]</span>
-<span class="n">df</span><span class="p">[</span><span class="s1">&#39;smoothed sampled elevations&#39;</span><span class="p">]</span> <span class="o">/=</span> <span class="mf">.3048</span> <span class="c1"># convert from meters to feet</span>
-<span class="n">df</span><span class="p">[</span><span class="s1">&#39;raw sampled elevations&#39;</span><span class="p">]</span> <span class="o">/=</span> <span class="mf">.3048</span>
+<span class="n">df</span><span class="p">[</span><span class="s1">&#39;Smoothed sampled with field meas.&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">smooth_elevs_with_field_measurements</span><span class="p">[</span><span class="n">rno</span><span class="p">]</span>
+                                           <span class="k">for</span> <span class="n">rno</span> <span class="ow">in</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;rno&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">]</span>
+<span class="n">df</span><span class="p">[</span><span class="s1">&#39;Smoothed sampled elevations&#39;</span><span class="p">]</span> <span class="o">/=</span> <span class="mf">.3048</span> <span class="c1"># convert from meters to feet</span>
+<span class="n">df</span><span class="p">[</span><span class="s1">&#39;Raw sampled elevations&#39;</span><span class="p">]</span> <span class="o">/=</span> <span class="mf">.3048</span>
+<span class="n">df</span><span class="p">[</span><span class="s1">&#39;Smoothed sampled with field meas.&#39;</span><span class="p">]</span> <span class="o">/=</span> <span class="mf">.3048</span>
 </pre></div>
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">segments</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;iseg&#39;</span><span class="p">)</span>
 <span class="k">for</span> <span class="n">iseg</span><span class="p">,</span> <span class="n">srd</span> <span class="ow">in</span> <span class="n">segments</span><span class="p">:</span>
     <span class="n">srd</span> <span class="o">=</span> <span class="n">srd</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
     <span class="n">srd</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">srd</span><span class="o">.</span><span class="n">dist</span>
-    <span class="n">ax</span> <span class="o">=</span> <span class="n">srd</span><span class="p">[[</span><span class="s1">&#39;model top&#39;</span><span class="p">,</span> <span class="s1">&#39;NHDPlus elevations&#39;</span><span class="p">,</span> <span class="s1">&#39;raw sampled elevations&#39;</span><span class="p">,</span> <span class="s1">&#39;smoothed sampled elevations&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+    <span class="n">cols</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Model top&#39;</span><span class="p">,</span> <span class="s1">&#39;NHDPlus elevations&#39;</span><span class="p">,</span> <span class="s1">&#39;Raw sampled elevations&#39;</span><span class="p">,</span> <span class="s1">&#39;Smoothed sampled elevations&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">iseg</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="n">cols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;Smoothed sampled with field meas.&#39;</span><span class="p">)</span>
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">srd</span><span class="p">[</span><span class="n">cols</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Distance along stream profile, in feet&#39;</span><span class="p">)</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Streambed Elevation, in feet&#39;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Segment </span><span class="si">{</span><span class="n">iseg</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="c1"># save the profile that begins with segment 1</span>
     <span class="k">if</span> <span class="n">iseg</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
@@ -363,294 +476,294 @@ finished in 0.10s
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/notebooks_Streambed_elevation_demo_8_0.png" src="../_images/notebooks_Streambed_elevation_demo_8_0.png" />
+<img alt="../_images/notebooks_Streambed_elevation_demo_13_0.png" src="../_images/notebooks_Streambed_elevation_demo_13_0.png" />
 </div>
 </div>
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/notebooks_Streambed_elevation_demo_8_1.png" src="../_images/notebooks_Streambed_elevation_demo_8_1.png" />
+<img alt="../_images/notebooks_Streambed_elevation_demo_13_1.png" src="../_images/notebooks_Streambed_elevation_demo_13_1.png" />
 </div>
 </div>
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/notebooks_Streambed_elevation_demo_8_2.png" src="../_images/notebooks_Streambed_elevation_demo_8_2.png" />
+<img alt="../_images/notebooks_Streambed_elevation_demo_13_2.png" src="../_images/notebooks_Streambed_elevation_demo_13_2.png" />
 </div>
 </div>
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/notebooks_Streambed_elevation_demo_8_3.png" src="../_images/notebooks_Streambed_elevation_demo_8_3.png" />
+<img alt="../_images/notebooks_Streambed_elevation_demo_13_3.png" src="../_images/notebooks_Streambed_elevation_demo_13_3.png" />
 </div>
 </div>
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/notebooks_Streambed_elevation_demo_8_4.png" src="../_images/notebooks_Streambed_elevation_demo_8_4.png" />
+<img alt="../_images/notebooks_Streambed_elevation_demo_13_4.png" src="../_images/notebooks_Streambed_elevation_demo_13_4.png" />
 </div>
 </div>
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/notebooks_Streambed_elevation_demo_8_5.png" src="../_images/notebooks_Streambed_elevation_demo_8_5.png" />
+<img alt="../_images/notebooks_Streambed_elevation_demo_13_5.png" src="../_images/notebooks_Streambed_elevation_demo_13_5.png" />
 </div>
 </div>
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/notebooks_Streambed_elevation_demo_8_6.png" src="../_images/notebooks_Streambed_elevation_demo_8_6.png" />
+<img alt="../_images/notebooks_Streambed_elevation_demo_13_6.png" src="../_images/notebooks_Streambed_elevation_demo_13_6.png" />
 </div>
 </div>
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/notebooks_Streambed_elevation_demo_8_7.png" src="../_images/notebooks_Streambed_elevation_demo_8_7.png" />
+<img alt="../_images/notebooks_Streambed_elevation_demo_13_7.png" src="../_images/notebooks_Streambed_elevation_demo_13_7.png" />
 </div>
 </div>
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/notebooks_Streambed_elevation_demo_8_8.png" src="../_images/notebooks_Streambed_elevation_demo_8_8.png" />
+<img alt="../_images/notebooks_Streambed_elevation_demo_13_8.png" src="../_images/notebooks_Streambed_elevation_demo_13_8.png" />
 </div>
 </div>
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/notebooks_Streambed_elevation_demo_8_9.png" src="../_images/notebooks_Streambed_elevation_demo_8_9.png" />
+<img alt="../_images/notebooks_Streambed_elevation_demo_13_9.png" src="../_images/notebooks_Streambed_elevation_demo_13_9.png" />
 </div>
 </div>
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/notebooks_Streambed_elevation_demo_8_10.png" src="../_images/notebooks_Streambed_elevation_demo_8_10.png" />
+<img alt="../_images/notebooks_Streambed_elevation_demo_13_10.png" src="../_images/notebooks_Streambed_elevation_demo_13_10.png" />
 </div>
 </div>
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/notebooks_Streambed_elevation_demo_8_11.png" src="../_images/notebooks_Streambed_elevation_demo_8_11.png" />
+<img alt="../_images/notebooks_Streambed_elevation_demo_13_11.png" src="../_images/notebooks_Streambed_elevation_demo_13_11.png" />
 </div>
 </div>
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/notebooks_Streambed_elevation_demo_8_12.png" src="../_images/notebooks_Streambed_elevation_demo_8_12.png" />
+<img alt="../_images/notebooks_Streambed_elevation_demo_13_12.png" src="../_images/notebooks_Streambed_elevation_demo_13_12.png" />
 </div>
 </div>
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/notebooks_Streambed_elevation_demo_8_13.png" src="../_images/notebooks_Streambed_elevation_demo_8_13.png" />
+<img alt="../_images/notebooks_Streambed_elevation_demo_13_13.png" src="../_images/notebooks_Streambed_elevation_demo_13_13.png" />
 </div>
 </div>
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/notebooks_Streambed_elevation_demo_8_14.png" src="../_images/notebooks_Streambed_elevation_demo_8_14.png" />
+<img alt="../_images/notebooks_Streambed_elevation_demo_13_14.png" src="../_images/notebooks_Streambed_elevation_demo_13_14.png" />
 </div>
 </div>
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/notebooks_Streambed_elevation_demo_8_15.png" src="../_images/notebooks_Streambed_elevation_demo_8_15.png" />
+<img alt="../_images/notebooks_Streambed_elevation_demo_13_15.png" src="../_images/notebooks_Streambed_elevation_demo_13_15.png" />
 </div>
 </div>
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/notebooks_Streambed_elevation_demo_8_16.png" src="../_images/notebooks_Streambed_elevation_demo_8_16.png" />
+<img alt="../_images/notebooks_Streambed_elevation_demo_13_16.png" src="../_images/notebooks_Streambed_elevation_demo_13_16.png" />
 </div>
 </div>
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/notebooks_Streambed_elevation_demo_8_17.png" src="../_images/notebooks_Streambed_elevation_demo_8_17.png" />
+<img alt="../_images/notebooks_Streambed_elevation_demo_13_17.png" src="../_images/notebooks_Streambed_elevation_demo_13_17.png" />
 </div>
 </div>
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/notebooks_Streambed_elevation_demo_8_18.png" src="../_images/notebooks_Streambed_elevation_demo_8_18.png" />
+<img alt="../_images/notebooks_Streambed_elevation_demo_13_18.png" src="../_images/notebooks_Streambed_elevation_demo_13_18.png" />
 </div>
 </div>
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/notebooks_Streambed_elevation_demo_8_19.png" src="../_images/notebooks_Streambed_elevation_demo_8_19.png" />
+<img alt="../_images/notebooks_Streambed_elevation_demo_13_19.png" src="../_images/notebooks_Streambed_elevation_demo_13_19.png" />
 </div>
 </div>
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/notebooks_Streambed_elevation_demo_8_20.png" src="../_images/notebooks_Streambed_elevation_demo_8_20.png" />
+<img alt="../_images/notebooks_Streambed_elevation_demo_13_20.png" src="../_images/notebooks_Streambed_elevation_demo_13_20.png" />
 </div>
 </div>
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/notebooks_Streambed_elevation_demo_8_21.png" src="../_images/notebooks_Streambed_elevation_demo_8_21.png" />
+<img alt="../_images/notebooks_Streambed_elevation_demo_13_21.png" src="../_images/notebooks_Streambed_elevation_demo_13_21.png" />
 </div>
 </div>
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/notebooks_Streambed_elevation_demo_8_22.png" src="../_images/notebooks_Streambed_elevation_demo_8_22.png" />
+<img alt="../_images/notebooks_Streambed_elevation_demo_13_22.png" src="../_images/notebooks_Streambed_elevation_demo_13_22.png" />
 </div>
 </div>
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/notebooks_Streambed_elevation_demo_8_23.png" src="../_images/notebooks_Streambed_elevation_demo_8_23.png" />
+<img alt="../_images/notebooks_Streambed_elevation_demo_13_23.png" src="../_images/notebooks_Streambed_elevation_demo_13_23.png" />
 </div>
 </div>
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/notebooks_Streambed_elevation_demo_8_24.png" src="../_images/notebooks_Streambed_elevation_demo_8_24.png" />
+<img alt="../_images/notebooks_Streambed_elevation_demo_13_24.png" src="../_images/notebooks_Streambed_elevation_demo_13_24.png" />
 </div>
 </div>
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/notebooks_Streambed_elevation_demo_8_25.png" src="../_images/notebooks_Streambed_elevation_demo_8_25.png" />
+<img alt="../_images/notebooks_Streambed_elevation_demo_13_25.png" src="../_images/notebooks_Streambed_elevation_demo_13_25.png" />
 </div>
 </div>
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/notebooks_Streambed_elevation_demo_8_26.png" src="../_images/notebooks_Streambed_elevation_demo_8_26.png" />
+<img alt="../_images/notebooks_Streambed_elevation_demo_13_26.png" src="../_images/notebooks_Streambed_elevation_demo_13_26.png" />
 </div>
 </div>
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/notebooks_Streambed_elevation_demo_8_27.png" src="../_images/notebooks_Streambed_elevation_demo_8_27.png" />
+<img alt="../_images/notebooks_Streambed_elevation_demo_13_27.png" src="../_images/notebooks_Streambed_elevation_demo_13_27.png" />
 </div>
 </div>
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/notebooks_Streambed_elevation_demo_8_28.png" src="../_images/notebooks_Streambed_elevation_demo_8_28.png" />
+<img alt="../_images/notebooks_Streambed_elevation_demo_13_28.png" src="../_images/notebooks_Streambed_elevation_demo_13_28.png" />
 </div>
 </div>
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/notebooks_Streambed_elevation_demo_8_29.png" src="../_images/notebooks_Streambed_elevation_demo_8_29.png" />
+<img alt="../_images/notebooks_Streambed_elevation_demo_13_29.png" src="../_images/notebooks_Streambed_elevation_demo_13_29.png" />
 </div>
 </div>
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/notebooks_Streambed_elevation_demo_8_30.png" src="../_images/notebooks_Streambed_elevation_demo_8_30.png" />
+<img alt="../_images/notebooks_Streambed_elevation_demo_13_30.png" src="../_images/notebooks_Streambed_elevation_demo_13_30.png" />
 </div>
 </div>
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/notebooks_Streambed_elevation_demo_8_31.png" src="../_images/notebooks_Streambed_elevation_demo_8_31.png" />
+<img alt="../_images/notebooks_Streambed_elevation_demo_13_31.png" src="../_images/notebooks_Streambed_elevation_demo_13_31.png" />
 </div>
 </div>
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/notebooks_Streambed_elevation_demo_8_32.png" src="../_images/notebooks_Streambed_elevation_demo_8_32.png" />
+<img alt="../_images/notebooks_Streambed_elevation_demo_13_32.png" src="../_images/notebooks_Streambed_elevation_demo_13_32.png" />
 </div>
 </div>
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/notebooks_Streambed_elevation_demo_8_33.png" src="../_images/notebooks_Streambed_elevation_demo_8_33.png" />
+<img alt="../_images/notebooks_Streambed_elevation_demo_13_33.png" src="../_images/notebooks_Streambed_elevation_demo_13_33.png" />
 </div>
 </div>
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/notebooks_Streambed_elevation_demo_8_34.png" src="../_images/notebooks_Streambed_elevation_demo_8_34.png" />
+<img alt="../_images/notebooks_Streambed_elevation_demo_13_34.png" src="../_images/notebooks_Streambed_elevation_demo_13_34.png" />
 </div>
 </div>
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/notebooks_Streambed_elevation_demo_8_35.png" src="../_images/notebooks_Streambed_elevation_demo_8_35.png" />
+<img alt="../_images/notebooks_Streambed_elevation_demo_13_35.png" src="../_images/notebooks_Streambed_elevation_demo_13_35.png" />
 </div>
 </div>
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/notebooks_Streambed_elevation_demo_8_36.png" src="../_images/notebooks_Streambed_elevation_demo_8_36.png" />
+<img alt="../_images/notebooks_Streambed_elevation_demo_13_36.png" src="../_images/notebooks_Streambed_elevation_demo_13_36.png" />
 </div>
 </div>
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/notebooks_Streambed_elevation_demo_8_37.png" src="../_images/notebooks_Streambed_elevation_demo_8_37.png" />
+<img alt="../_images/notebooks_Streambed_elevation_demo_13_37.png" src="../_images/notebooks_Streambed_elevation_demo_13_37.png" />
 </div>
 </div>
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/notebooks_Streambed_elevation_demo_8_38.png" src="../_images/notebooks_Streambed_elevation_demo_8_38.png" />
+<img alt="../_images/notebooks_Streambed_elevation_demo_13_38.png" src="../_images/notebooks_Streambed_elevation_demo_13_38.png" />
 </div>
 </div>
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/notebooks_Streambed_elevation_demo_8_39.png" src="../_images/notebooks_Streambed_elevation_demo_8_39.png" />
+<img alt="../_images/notebooks_Streambed_elevation_demo_13_39.png" src="../_images/notebooks_Streambed_elevation_demo_13_39.png" />
 </div>
 </div>
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/notebooks_Streambed_elevation_demo_8_40.png" src="../_images/notebooks_Streambed_elevation_demo_8_40.png" />
+<img alt="../_images/notebooks_Streambed_elevation_demo_13_40.png" src="../_images/notebooks_Streambed_elevation_demo_13_40.png" />
 </div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/notebooks_Streambed_elevation_demo_8_41.png" src="../_images/notebooks_Streambed_elevation_demo_8_41.png" />
+<img alt="../_images/notebooks_Streambed_elevation_demo_13_41.png" src="../_images/notebooks_Streambed_elevation_demo_13_41.png" />
 </div>
 </div>
 <div class="nbinput nblast docutils container">
@@ -677,7 +790,7 @@ finished in 0.10s
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on May 09, 2025.
+      <span class="lastupdated">Last updated on May 18, 2025.
       </span></p>
   </div>
 

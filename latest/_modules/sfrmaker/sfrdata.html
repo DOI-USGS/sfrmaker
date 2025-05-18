@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>sfrmaker.sfrdata &mdash; SFRmaker 0.12.1.post49.dev0+ge6d125d documentation</title>
+  <title>sfrmaker.sfrdata &mdash; SFRmaker 0.12.1.post51.dev0+g30bc74e documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=5c3c1868"></script>
+      <script src="../../_static/documentation_options.js?v=7197016a"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -103,13 +103,14 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">yaml</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gpd</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">rasterio</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">rasterstats</span><span class="w"> </span><span class="kn">import</span> <span class="n">zonal_stats</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">LineString</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">LineString</span><span class="p">,</span> <span class="n">Point</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">gisutils</span><span class="w"> </span><span class="kn">import</span> <span class="n">df2shp</span><span class="p">,</span> <span class="n">get_authority_crs</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sfrmaker.routing</span><span class="w"> </span><span class="kn">import</span> <span class="n">find_path</span><span class="p">,</span> <span class="n">renumber_segments</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sfrmaker.checks</span><span class="w"> </span><span class="kn">import</span> <span class="n">valid_rnos</span><span class="p">,</span> <span class="n">valid_nsegs</span><span class="p">,</span> <span class="n">rno_nseg_routing_consistent</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">sfrmaker.elevations</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_slopes</span><span class="p">,</span> <span class="n">smooth_elevations</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sfrmaker.elevations</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_slopes</span><span class="p">,</span> <span class="n">smooth_elevations</span><span class="p">,</span> <span class="n">sample_reach_elevations</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sfrmaker.flows</span><span class="w"> </span><span class="kn">import</span> <span class="n">add_to_perioddata</span><span class="p">,</span> <span class="n">add_to_segment_data</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sfrmaker.gis</span><span class="w"> </span><span class="kn">import</span> <span class="n">export_reach_data</span><span class="p">,</span> <span class="n">project</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sfrmaker.observations</span><span class="w"> </span><span class="kn">import</span> <span class="n">write_gage_package</span><span class="p">,</span> <span class="n">write_mf6_sfr_obsfile</span><span class="p">,</span> <span class="n">add_observations</span>
@@ -118,6 +119,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">sfrmaker</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sfrmaker.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataPackage</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sfrmaker.mf5to6</span><span class="w"> </span><span class="kn">import</span> <span class="n">segment_data_to_period_data</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sfrmaker.observations</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_closest_reach</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sfrmaker.reaches</span><span class="w"> </span><span class="kn">import</span> <span class="n">consolidate_reach_conductances</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sfrmaker.rivdata</span><span class="w"> </span><span class="kn">import</span> <span class="n">RivData</span>
 
@@ -1051,7 +1053,11 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">sample_reach_elevations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dem</span><span class="p">,</span>
                                 <span class="n">method</span><span class="o">=</span><span class="s1">&#39;buffers&#39;</span><span class="p">,</span>
                                 <span class="n">buffer_distance</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
-                                <span class="n">smooth</span><span class="o">=</span><span class="kc">True</span>
+                                <span class="n">smooth</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                <span class="n">elevation_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                <span class="n">elevation_data_crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                <span class="n">elevation_data_layer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                <span class="n">elevation_data_errors</span><span class="o">=</span><span class="s1">&#39;raise&#39;</span><span class="p">,</span>
                                 <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Computes zonal statistics on a raster for SFR reaches, using</span>
 <span class="sd">        either buffer polygons around the reach LineStrings, or the model</span>
@@ -1070,63 +1076,60 @@
 <span class="sd">            Run sfrmaker.elevations.smooth_elevations on sampled elevations</span>
 <span class="sd">            to ensure that they decrease monotonically in the downstream direction</span>
 <span class="sd">            (default=True).</span>
+<span class="sd">        elevation_data : str/pathlike or DataFrame</span>
+<span class="sd">            Optional table of streambed top elevations at x, y locations. These will be mapped to</span>
+<span class="sd">            individual reaches using the selected method, replacing the DEM-derived elevations.</span>
+<span class="sd">            The points must fall within the selected buffer distance or cell polygon, otherwise</span>
+<span class="sd">            an error will be raised. Points can be specified in a shapefile, geopackage, CSV file or</span>
+<span class="sd">            (Geo)DataFrame, which must contain the following fields:</span>
+<span class="sd">            </span>
+<span class="sd">            ========= ===============================================================================</span>
+<span class="sd">            x         x-coordinate. If a CSV or regular DataFrame is provided, </span>
+<span class="sd">                      this must be in the CRS of the model or an elevation_data_crs must be provided.</span>
+<span class="sd">            y         y-coordinate.</span>
+<span class="sd">            elevation Elevation in the model units.</span>
+<span class="sd">            ========= ================================================================================</span>
+<span class="sd">            </span>
+<span class="sd">            By default, None.</span>
+<span class="sd">        elevation_data_layer : None</span>
+<span class="sd">            Layer name for the elevation data, if the data are being supplied in a multi-layer GeoPackage.</span>
+<span class="sd">            by default, None.</span>
+<span class="sd">        elevation_data_crs : obj</span>
+<span class="sd">            Coordinate reference system of the x,y points in elevation-data. </span>
+<span class="sd">            Only needed if the data do not have a valid ESRI projection (.prj) file.</span>
+<span class="sd">            A Python int, dict, str, or :class:`pyproj.crs.CRS` instance</span>
+<span class="sd">            passed to :meth:`pyproj.crs.CRS.from_user_input`</span>
 
+<span class="sd">            Can be any of:</span>
+<span class="sd">            - PROJ string</span>
+<span class="sd">            - Dictionary of PROJ parameters</span>
+<span class="sd">            - PROJ keyword arguments for parameters</span>
+<span class="sd">            - JSON string with PROJ parameters</span>
+<span class="sd">            - CRS WKT string</span>
+<span class="sd">            - An authority string [i.e. &#39;epsg:4326&#39;]</span>
+<span class="sd">            - An EPSG integer code [i.e. 4326]</span>
+<span class="sd">            - A tuple of (&quot;auth_name&quot;: &quot;auth_code&quot;) [i.e (&#39;epsg&#39;, &#39;4326&#39;)]</span>
+<span class="sd">            - An object with a `to_wkt` method.</span>
+<span class="sd">            - A :class:`pyproj.crs.CRS` class</span>
+<span class="sd">        elevation_data_errors : {‘ignore’, ‘raise’}</span>
+<span class="sd">            If ‘ignore’, suppress error when one or more points in elevation data is</span>
+<span class="sd">            not associated with a stream reach (is out of geographic proximity).</span>
+<span class="sd">            By default, ‘raise’.</span>
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        elevs : dict of sampled elevations keyed by reach number</span>
+<span class="sd">        streambed_tops : dict of sampled elevations keyed by reach number</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">sample_reach_elevations</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reach_data</span><span class="p">,</span> <span class="n">dem</span><span class="p">,</span>
+                            <span class="n">sfrmaker_modelgrid</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">,</span>
+                            <span class="n">model_crs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span>
+                            <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span>
+                            <span class="n">buffer_distance</span><span class="o">=</span><span class="n">buffer_distance</span><span class="p">,</span>
+                            <span class="n">smooth</span><span class="o">=</span><span class="n">smooth</span><span class="p">,</span>
+                            <span class="n">elevation_data</span><span class="o">=</span><span class="n">elevation_data</span><span class="p">,</span>
+                            <span class="n">elevation_data_crs</span><span class="o">=</span><span class="n">elevation_data_crs</span><span class="p">,</span>
+                            <span class="n">elevation_data_layer</span><span class="o">=</span><span class="n">elevation_data_layer</span><span class="p">,</span>
+                            <span class="n">elevation_data_errors</span><span class="o">=</span><span class="n">elevation_data_errors</span><span class="p">)</span></div>
 
-        <span class="c1"># get the CRS and pixel size for the DEM</span>
-        <span class="k">with</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">dem</span><span class="p">)</span> <span class="k">as</span> <span class="n">src</span><span class="p">:</span>
-            <span class="n">raster_crs</span> <span class="o">=</span> <span class="n">get_authority_crs</span><span class="p">(</span><span class="n">src</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
-
-            <span class="c1"># make sure buffer is large enough for DEM pixel size</span>
-            <span class="n">buffer_distance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">src</span><span class="o">.</span><span class="n">res</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span>
-                                              <span class="n">src</span><span class="o">.</span><span class="n">res</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="mf">1.01</span><span class="p">,</span>
-                                      <span class="n">buffer_distance</span><span class="p">])</span>
-
-        <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;buffers&#39;</span><span class="p">:</span>
-            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reach_data</span><span class="o">.</span><span class="n">geometry</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">LineString</span><span class="p">),</span> \
-                <span class="s2">&quot;Need LineString geometries in reach_data.geometry column to use buffer option.&quot;</span>
-            <span class="n">features</span> <span class="o">=</span> <span class="p">[</span><span class="n">g</span><span class="o">.</span><span class="n">buffer</span><span class="p">(</span><span class="n">buffer_distance</span><span class="p">)</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">reach_data</span><span class="o">.</span><span class="n">geometry</span><span class="p">]</span>
-            <span class="n">txt</span> <span class="o">=</span> <span class="s1">&#39;buffered LineStrings&#39;</span>
-        <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;cell polygons&#39;</span><span class="p">:</span>
-            <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> \
-                <span class="s2">&quot;Need an attached sfrmaker.Grid instance to use cell polygons option.&quot;</span>
-            <span class="n">features</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">reach_data</span><span class="o">.</span><span class="n">node</span><span class="p">,</span> <span class="s1">&#39;geometry&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-            <span class="n">txt</span> <span class="o">=</span> <span class="n">method</span>
-
-        <span class="c1"># to_crs features if they&#39;re not in the same crs</span>
-        <span class="k">if</span> <span class="n">raster_crs</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">:</span>
-            <span class="n">features</span> <span class="o">=</span> <span class="n">project</span><span class="p">(</span><span class="n">features</span><span class="p">,</span>
-                               <span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span>
-                               <span class="n">raster_crs</span><span class="p">)</span>
-
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;running rasterstats.zonal_stats on </span><span class="si">{}</span><span class="s1">...&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">txt</span><span class="p">))</span>
-        <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-        <span class="k">def</span><span class="w"> </span><span class="nf">get_min</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">x</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mf">1e38</span><span class="p">])</span>
-        <span class="n">results</span> <span class="o">=</span> <span class="n">zonal_stats</span><span class="p">(</span><span class="n">features</span><span class="p">,</span>
-                              <span class="n">dem</span><span class="p">,</span>
-                              <span class="n">add_stats</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;nanmin&#39;</span><span class="p">:</span> <span class="n">get_min</span><span class="p">}</span>
-                              <span class="p">)</span>
-        <span class="n">elevs</span> <span class="o">=</span> <span class="p">[</span><span class="n">r</span><span class="p">[</span><span class="s1">&#39;nanmin&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">results</span><span class="p">]</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;finished in </span><span class="si">{:.2f}</span><span class="s2">s</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span><span class="p">))</span>
-
-        <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">v</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">elevs</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;No </span><span class="si">{}</span><span class="s1"> intersected with </span><span class="si">{}</span><span class="s1">. Check projections.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">txt</span><span class="p">,</span> <span class="n">dem</span><span class="p">))</span>
-        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">v</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">elevs</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Some </span><span class="si">{}</span><span class="s1"> not intersected with </span><span class="si">{}</span><span class="s1">. &#39;</span>
-                            <span class="s1">&#39;Check that DEM covers the area of the stream network.&#39;</span>
-                            <span class="s1">&#39;.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">txt</span><span class="p">,</span> <span class="n">dem</span><span class="p">))</span>
-
-        <span class="k">if</span> <span class="n">smooth</span><span class="p">:</span>
-            <span class="n">elevs</span> <span class="o">=</span> <span class="n">smooth_elevations</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reach_data</span><span class="o">.</span><span class="n">rno</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
-                                      <span class="bp">self</span><span class="o">.</span><span class="n">reach_data</span><span class="o">.</span><span class="n">outreach</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
-                                      <span class="n">elevs</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">elevs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reach_data</span><span class="o">.</span><span class="n">rno</span><span class="p">,</span> <span class="n">elevs</span><span class="p">))</span>
-        <span class="k">return</span> <span class="n">elevs</span></div>
 
 
 <div class="viewcode-block" id="SFRData.set_streambed_top_elevations_from_dem">
@@ -2023,7 +2026,7 @@
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on May 09, 2025.
+      <span class="lastupdated">Last updated on May 18, 2025.
       </span></p>
   </div>
 
