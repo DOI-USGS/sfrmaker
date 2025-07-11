@@ -478,7 +478,7 @@ def load_nhdplus_hr(NHDPlusHR_paths, bbox_filter=None,
     if drop_ftypes is not None:
         df = df.loc[~df.FType.isin(drop_ftypes)]
     if drop_NHDPlusIDs is not None:
-        df = df.loc[~df.NHDPlusID.isin(drop_NHDPlusIDs)]
+        df = df.loc[~df.NHDPlusID.isin(map(str, drop_NHDPlusIDs))]
         
     keep_cols = ['NHDPlusID', 'ToNHDPID', 'ArbolateSu',
                'geometry', 'StreamOrde',
