@@ -122,6 +122,8 @@ def find_path(graph, start, end='0', limit=None):
     if limit is None:
         limit = len(graph)
     path = [start]
+    if str(start) == str(end):
+        return path
     next_id = start
     for i in range(limit):
         next_id = graph[next_id]
