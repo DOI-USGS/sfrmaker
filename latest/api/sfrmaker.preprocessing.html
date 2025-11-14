@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>The Preprocessing Module &mdash; SFRmaker 0.12.1.post52.dev0+g4339462 documentation</title>
+  <title>The Preprocessing Module &mdash; SFRmaker 0.12.1.post54.dev0+g1f885a0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
@@ -15,7 +15,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=00d769da"></script>
+      <script src="../_static/documentation_options.js?v=7111a76c"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -138,8 +138,8 @@ features in polygon.</p>
 </dd>
 <dt><strong>crs</strong><span class="classifier">obj</span></dt><dd><p>Coordinate reference system of flowlines. Only needed if
 the data do not have a valid ESRI projection (.prj) file.
-A Python int, dict, str, or <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.7.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> instance
-passed to <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input" title="(in pyproj v3.7.1)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.crs.CRS.from_user_input()</span></code></a></p>
+A Python int, dict, str, or <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.7.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> instance
+passed to <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input" title="(in pyproj v3.7.2)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.crs.CRS.from_user_input()</span></code></a></p>
 <dl class="simple">
 <dt>Can be any of:</dt><dd><ul class="simple">
 <li><p>PROJ string</p></li>
@@ -151,7 +151,7 @@ passed to <a class="reference external" href="https://pyproj4.github.io/pyproj/s
 <li><p>An EPSG integer code [i.e. 4326]</p></li>
 <li><p>A tuple of (“auth_name”: “auth_code”) [i.e (‘epsg’, ‘4326’)]</p></li>
 <li><p>An object with a <cite>to_wkt</cite> method.</p></li>
-<li><p>A <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.7.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> class</p></li>
+<li><p>A <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.7.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> class</p></li>
 </ul>
 </dd>
 </dl>
@@ -433,8 +433,8 @@ by default None</p>
 </dd>
 <dt><strong>flowline_crs</strong><span class="classifier">obj</span></dt><dd><p>Coordinate reference system of the NHDPlus data. Only needed if
 the data do not have a valid ESRI projection (.prj) file.
-A Python int, dict, str, or <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.7.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> instance
-passed to <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input" title="(in pyproj v3.7.1)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.crs.CRS.from_user_input()</span></code></a></p>
+A Python int, dict, str, or <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.7.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> instance
+passed to <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input" title="(in pyproj v3.7.2)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.crs.CRS.from_user_input()</span></code></a></p>
 <dl class="simple">
 <dt>Can be any of:</dt><dd><ul class="simple">
 <li><p>PROJ string</p></li>
@@ -446,7 +446,7 @@ passed to <a class="reference external" href="https://pyproj4.github.io/pyproj/s
 <li><p>An EPSG integer code [i.e. 4326]</p></li>
 <li><p>A tuple of (“auth_name”: “auth_code”) [i.e (‘epsg’, ‘4326’)]</p></li>
 <li><p>An object with a <cite>to_wkt</cite> method.</p></li>
-<li><p>A <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.7.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> class</p></li>
+<li><p>A <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.7.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> class</p></li>
 </ul>
 </dd>
 </dl>
@@ -631,7 +631,7 @@ by default, False</p>
 <dt><strong>dest_crs</strong><span class="classifier">CRS-like, optional</span></dt><dd><p>Reproject preprocessed flowlines to this 
 coorindate reference system (CRS), for example as 
 specified by an EPSG code. See the documentation for 
-<a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input" title="(in pyproj v3.7.1)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.crs.CRS.from_user_input()</span></code></a> for other examples, 
+<a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input" title="(in pyproj v3.7.2)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.crs.CRS.from_user_input()</span></code></a> for other examples, 
 by default None</p>
 </dd>
 <dt><strong>outfile</strong><span class="classifier">str or pathlike, optional</span></dt><dd><p>Output shapefile path, 
@@ -666,7 +666,7 @@ by default 0.</p>
 <dt><strong>dest_crs</strong><span class="classifier">CRS-like, optional</span></dt><dd><p>Reproject preprocessed flowlines to this 
 coorindate reference system (CRS), for example as 
 specified by an EPSG code. See the documentation for 
-<a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input" title="(in pyproj v3.7.1)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.crs.CRS.from_user_input()</span></code></a> for other examples, 
+<a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input" title="(in pyproj v3.7.2)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.crs.CRS.from_user_input()</span></code></a> for other examples, 
 by default None</p>
 </dd>
 <dt><strong>outfile</strong><span class="classifier">str or pathlike, optional</span></dt><dd><p>Output shapefile path, 
@@ -869,7 +869,7 @@ In this case, one would most likely supply both <code class="docutils literal no
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Jul 11, 2025.
+      <span class="lastupdated">Last updated on Nov 14, 2025.
       </span></p>
   </div>
 
