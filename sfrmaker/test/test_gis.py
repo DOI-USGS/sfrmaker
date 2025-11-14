@@ -12,11 +12,10 @@ def test_get_bbox(project_root_path):
     assert np.allclose(bbox, (-90.62442575352304, 46.37890212020774, -90.46249896050521, 46.458360301848685))
 
 
-@pytest.mark.skip(reason='still working on faster intersection method')
-@pytest.fixture(scope='module')
-def intersected(tylerforks_sfrmaker_grid_from_flopy, tylerforks_lines_from_NHDPlus):
-    #results = intersect()
-    pass
+#@pytest.fixture(scope='module')
+#def intersected(tylerforks_sfrmaker_grid_from_flopy, tylerforks_lines_from_NHDPlus):
+#    #results = intersect()
+#    pass
 
 
 @pytest.mark.skip(reason='still working on faster intersection method')
