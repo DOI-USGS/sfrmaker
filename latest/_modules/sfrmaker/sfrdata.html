@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>sfrmaker.sfrdata &mdash; SFRmaker 0.12.1.post54.dev0+g1f885a0 documentation</title>
+  <title>sfrmaker.sfrdata &mdash; SFRmaker 0.12.1.post58.dev0+g6d8563b documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=7111a76c"></script>
+      <script src="../../_static/documentation_options.js?v=b659b46e"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -602,7 +602,7 @@
 <a class="viewcode-back" href="../../api/sfrmaker.sfrdata.html#sfrmaker.sfrdata.SFRData.repair_outsegs">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">repair_outsegs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set any outsegs that are not nsegs or lakes to 0 (outlet status)&quot;&quot;&quot;</span>
-        <span class="n">isasegment</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">in1d</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">segment_data</span><span class="o">.</span><span class="n">outseg</span><span class="p">,</span>
+        <span class="n">isasegment</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">segment_data</span><span class="o">.</span><span class="n">outseg</span><span class="p">,</span>
                              <span class="bp">self</span><span class="o">.</span><span class="n">segment_data</span><span class="o">.</span><span class="n">nseg</span><span class="p">)</span>
         <span class="n">isasegment</span> <span class="o">=</span> <span class="n">isasegment</span> <span class="o">|</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">segment_data</span><span class="o">.</span><span class="n">outseg</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">segment_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">~</span><span class="n">isasegment</span><span class="p">,</span> <span class="s1">&#39;outseg&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span></div>
@@ -2026,7 +2026,7 @@
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Nov 14, 2025.
+      <span class="lastupdated">Last updated on Dec 29, 2025.
       </span></p>
   </div>
 
