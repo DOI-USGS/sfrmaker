@@ -208,7 +208,7 @@ class Mf6SFR:
             df['per'] = k
             dfs.append(df)
         sd = pd.concat(dfs, axis=0)
-        keepcols = (sd.sum(axis=0) > 0) | np.in1d(sd.columns.values, ['per'])
+        keepcols = (sd.sum(axis=0) > 0) | np.isin(sd.columns.values, ['per'])
         return sd.loc[:, keepcols]
 
     def _get_packagedata(self):
