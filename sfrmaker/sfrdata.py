@@ -489,7 +489,7 @@ class SFRData(DataPackage):
 
     def repair_outsegs(self):
         """Set any outsegs that are not nsegs or lakes to 0 (outlet status)"""
-        isasegment = np.in1d(self.segment_data.outseg,
+        isasegment = np.isin(self.segment_data.outseg,
                              self.segment_data.nseg)
         isasegment = isasegment | (self.segment_data.outseg < 0)
         self.segment_data.loc[~isasegment, 'outseg'] = 0
