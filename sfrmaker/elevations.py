@@ -314,7 +314,8 @@ def sample_reach_elevations(sfr_reach_data, dem,
         else:
             raise ValueError(f'Unrecognized input for elevation_data:\n{elevation_data}')
         
-        if isinstance(measured_elevations, gpd.GeoDataFrame):
+        if isinstance(measured_elevations, gpd.GeoDataFrame) and\
+            getattr(measured_elevations, 'geometry').is_valid.all():
             #x = [g.x for g in measured_elevations.geometry]
             #y = [g.y for g in measured_elevations.geometry]
             pass
