@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>sfrmaker.mf5to6 &mdash; SFRmaker 0.12.1.post0.dev0+g47043eb documentation</title>
+  <title>sfrmaker.mf5to6 &mdash; SFRmaker 0.13.0.post0.dev0+g70baf68 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=5c6a15c5"></script>
+      <script src="../../_static/documentation_options.js?v=93f73836"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -308,7 +308,7 @@
             <span class="n">df</span><span class="p">[</span><span class="s1">&#39;per&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">k</span>
             <span class="n">dfs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
         <span class="n">sd</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">dfs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-        <span class="n">keepcols</span> <span class="o">=</span> <span class="p">(</span><span class="n">sd</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">in1d</span><span class="p">(</span><span class="n">sd</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;per&#39;</span><span class="p">])</span>
+        <span class="n">keepcols</span> <span class="o">=</span> <span class="p">(</span><span class="n">sd</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">sd</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;per&#39;</span><span class="p">])</span>
         <span class="k">return</span> <span class="n">sd</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">keepcols</span><span class="p">]</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_get_packagedata</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -652,7 +652,7 @@
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on May 09, 2025.
+      <span class="lastupdated">Last updated on Dec 30, 2025.
       </span></p>
   </div>
 
