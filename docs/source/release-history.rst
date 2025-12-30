@@ -2,7 +2,6 @@
 Release History
 ===============
 
-<<<<<<< HEAD
 Version 0.13.2 (2026-03-12)
 ---------------------------
 **Bug Fixes:**
@@ -16,12 +15,6 @@ Version 0.13.1 (2025-12-30)
 ---------------------------
 **Bug Fixes:**
 * fix geopandas-related issue with elevations.sample_reach_elevations when measured elevations are supplied by a csv
-=======
-Version 0.13.1 (in development)
--------------------------------
-**Bug Fixes:**
-* fix UnboundLocalError in SFRData.write_package() when a caller-supplied options list (with no existing OBS6 FILEIN entry) is passed and observations are present (issue #102)
->>>>>>> 0d1c9eb3 (Fix UnboundLocalError in write_package when options are supplied with observations)
 
 Version 0.13.0 (2025-12-30)
 ---------------------------
