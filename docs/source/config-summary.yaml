@@ -80,6 +80,7 @@ model:
   load_only: None
   forgive: False
   check: True
+  extra_pkgs: None
   # MODFLOW-6 information
   # (arguments to flopy.mf6.MFSimulation.get_model):
   model_name: None
@@ -93,6 +94,10 @@ dem:
   # keyword arguments to sfrmaker.SFRData.sample_reach_elevations:
   buffer_distance: 100
   smooth: True
+  elevation_data: None
+  elevation_data_crs: None
+  elevation_data_layer: None
+  elevation_data_errors: raise
 
 inflows:
   # Option to add specified inflows
