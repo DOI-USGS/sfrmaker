@@ -327,7 +327,8 @@ def sample_reach_elevations(sfr_reach_data, dem,
             x_coords = measured_elevations['x'].astype(float)
             y_coords = measured_elevations['y'].astype(float)
             measured_elevations['geometry'] = [Point(x, y) for x, y in zip(x_coords, y_coords)]
-            measured_elevations = gpd.GeoDataFrame(measured_elevations, crs=elevation_data_crs)
+            measured_elevations = gpd.GeoDataFrame(measured_elevations)
+            measured_elevations.set_crs(elevation_data_crs, allow_override=True)
         measured_elevations['elevation'] = measured_elevations['elevation'].astype(float)
         
         if measured_elevations.crs is None:
