@@ -2,6 +2,20 @@
 Release History
 ===============
 
+Version 0.13.0 (2025-12-30)
+---------------------------
+New Features:
+**************
+* Add support for incorporating field measurements of streambed top elevation.
+
+Bug Fixes:
+*************
+* fix issue with elevations.sample_reach_elevations where csvs read by geopandas were being mistaken for vector data
+* refactor code to support numpy API change from in1d to isin
+* fix issue with the routing.find_path function: if the starting ID == the end ID, return the end ID (which is the last ID in any other returned path), instead of raising an error.
+* drop_NHDPlusIDs compared as strings in load_nhdplus_hr()
+* fix issue with load_nhdplus_hr() where user-supplied list of NHDPlusIDs were not being cast to strings for comparison with other NHDPlusIDs
+
 Version 0.12.1 (2025-05-09)
 ---------------------------
 * Fix Flopy packagedata error when there are auxiliary columns in the packagedata.
