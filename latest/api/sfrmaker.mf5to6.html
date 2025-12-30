@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>The MODFLOW-2005 to 6 Module &mdash; SFRmaker 0.12.1.post58.dev0+g6d8563b documentation</title>
+  <title>The MODFLOW-2005 to 6 Module &mdash; SFRmaker 0.13.0.post0.dev0+g70baf68 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
@@ -15,7 +15,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=b659b46e"></script>
+      <script src="../_static/documentation_options.js?v=93f73836"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -56,6 +56,7 @@
 <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../inputs.html"> Input Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebooks/preprocessing_demo.html"> Preprocessing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples/index.html"> Using SFRmaker</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../concepts.html"> Concepts and methods</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../notebooks/sfrmaker_tools.html"> Other stand-alone tools</a></li>
@@ -130,7 +131,7 @@
 <p>Code for converting MODFLOW-2005 style SFR Package input to MODFLOW-6 style SFR package input.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="sfrmaker.mf5to6.Mf6SFR">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sfrmaker.mf5to6.</span></span><span class="sig-name descname"><span class="pre">Mf6SFR</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ModflowSfr2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">SFRData</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">period_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">idomain</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auxiliary_line_numbers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/mf5to6.html#Mf6SFR"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.mf5to6.Mf6SFR" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sfrmaker.mf5to6.</span></span><span class="sig-name descname"><span class="pre">Mf6SFR</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ModflowSfr2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">SFRData</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">period_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">idomain</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auxiliary_line_numbers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/mf5to6.html#Mf6SFR"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.mf5to6.Mf6SFR" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Class for writing MODFLOW-6 SFR package input
 from a (MODFLOW-2005 style) flopy.modflow.ModflowSfr2 instance or
@@ -174,12 +175,12 @@ and write hydrography line IDs to the packagedata block in the auxiliary
 
 <dl class="py property">
 <dt class="sig sig-object py" id="sfrmaker.mf5to6.Mf6SFR.connections">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">connections</span></span><a class="headerlink" href="#sfrmaker.mf5to6.Mf6SFR.connections" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">connections</span></span><a class="headerlink" href="#sfrmaker.mf5to6.Mf6SFR.connections" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="sfrmaker.mf5to6.Mf6SFR.graph_r">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">graph_r</span></span><a class="headerlink" href="#sfrmaker.mf5to6.Mf6SFR.graph_r" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">graph_r</span></span><a class="headerlink" href="#sfrmaker.mf5to6.Mf6SFR.graph_r" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -194,17 +195,17 @@ and write hydrography line IDs to the packagedata block in the auxiliary
 
 <dl class="py property">
 <dt class="sig sig-object py" id="sfrmaker.mf5to6.Mf6SFR.options_block">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">options_block</span></span><a class="headerlink" href="#sfrmaker.mf5to6.Mf6SFR.options_block" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">options_block</span></span><a class="headerlink" href="#sfrmaker.mf5to6.Mf6SFR.options_block" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="sfrmaker.mf5to6.Mf6SFR.packagedata">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">packagedata</span></span><a class="headerlink" href="#sfrmaker.mf5to6.Mf6SFR.packagedata" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">packagedata</span></span><a class="headerlink" href="#sfrmaker.mf5to6.Mf6SFR.packagedata" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="sfrmaker.mf5to6.Mf6SFR.period_data">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">period_data</span></span><a class="headerlink" href="#sfrmaker.mf5to6.Mf6SFR.period_data" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">period_data</span></span><a class="headerlink" href="#sfrmaker.mf5to6.Mf6SFR.period_data" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -274,7 +275,7 @@ distribute these to k, i, j.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="sfrmaker.mf5to6.mf6sfr">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sfrmaker.mf5to6.</span></span><span class="sig-name descname"><span class="pre">mf6sfr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/mf5to6.html#mf6sfr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.mf5to6.mf6sfr" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sfrmaker.mf5to6.</span></span><span class="sig-name descname"><span class="pre">mf6sfr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/mf5to6.html#mf6sfr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.mf5to6.mf6sfr" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#sfrmaker.mf5to6.Mf6SFR" title="sfrmaker.mf5to6.Mf6SFR"><code class="xref py py-class docutils literal notranslate"><span class="pre">Mf6SFR</span></code></a></p>
 </dd></dl>
 
@@ -298,7 +299,7 @@ distribute these to k, i, j.</p>
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Dec 29, 2025.
+      <span class="lastupdated">Last updated on Dec 30, 2025.
       </span></p>
   </div>
 

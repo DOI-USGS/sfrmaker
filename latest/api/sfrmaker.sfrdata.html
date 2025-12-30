@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>The SFRData Module &mdash; SFRmaker 0.12.1.post58.dev0+g6d8563b documentation</title>
+  <title>The SFRData Module &mdash; SFRmaker 0.13.0.post0.dev0+g70baf68 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
@@ -15,7 +15,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=b659b46e"></script>
+      <script src="../_static/documentation_options.js?v=93f73836"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -56,6 +56,7 @@
 <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../inputs.html"> Input Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebooks/preprocessing_demo.html"> Preprocessing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples/index.html"> Using SFRmaker</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../concepts.html"> Concepts and methods</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../notebooks/sfrmaker_tools.html"> Other stand-alone tools</a></li>
@@ -170,7 +171,7 @@
 <span id="the-sfrdata-module"></span><h1>The SFRData Module<a class="headerlink" href="#module-sfrmaker.sfrdata" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="sfrmaker.sfrdata.SFRData">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sfrmaker.sfrdata.</span></span><span class="sig-name descname"><span class="pre">SFRData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reach_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">segment_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">isfr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_length_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'undefined'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_time_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'days'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enforce_increasing_nsegs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_slope</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimum_slope</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maximum_slope</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">package_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'model'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/sfrdata.html#SFRData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.sfrdata.SFRData" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sfrmaker.sfrdata.</span></span><span class="sig-name descname"><span class="pre">SFRData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reach_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">segment_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">isfr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_length_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'undefined'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_time_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'days'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enforce_increasing_nsegs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_slope</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimum_slope</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maximum_slope</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">package_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'model'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/sfrdata.html#SFRData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.sfrdata.SFRData" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">DataPackage</span></code></p>
 <p>Class for working with a streamflow routing (SFR) dataset,
 where the stream network is discretized into reaches contained
@@ -246,7 +247,7 @@ elevations, by default, ‘.’</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="sfrmaker.sfrdata.SFRData.const">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">const</span></span><a class="headerlink" href="#sfrmaker.sfrdata.SFRData.const" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">const</span></span><a class="headerlink" href="#sfrmaker.sfrdata.SFRData.const" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -261,12 +262,12 @@ elevations, by default, ‘.’</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="sfrmaker.sfrdata.SFRData.crs">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">crs</span></span><a class="headerlink" href="#sfrmaker.sfrdata.SFRData.crs" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">crs</span></span><a class="headerlink" href="#sfrmaker.sfrdata.SFRData.crs" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="sfrmaker.sfrdata.SFRData.crs_units">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">crs_units</span></span><a class="headerlink" href="#sfrmaker.sfrdata.SFRData.crs_units" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">crs_units</span></span><a class="headerlink" href="#sfrmaker.sfrdata.SFRData.crs_units" title="Link to this definition"></a></dt>
 <dd><p>Length units of the coordinate reference system</p>
 </dd></dl>
 
@@ -322,7 +323,7 @@ in stress periods 0, 1, 2…</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="sfrmaker.sfrdata.SFRData.from_package">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_package</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sfrpackagefile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">namefile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sim_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_ws</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'model'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">package_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">linework</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/sfrdata.html#SFRData.from_package"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.sfrdata.SFRData.from_package" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_package</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sfrpackagefile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">namefile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sim_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_ws</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'model'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">package_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">linework</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/sfrdata.html#SFRData.from_package"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.sfrdata.SFRData.from_package" title="Link to this definition"></a></dt>
 <dd><p>Read SFR package file</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -346,12 +347,12 @@ information.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="sfrmaker.sfrdata.SFRData.from_tables">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_tables</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reach_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">segment_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">isfr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/sfrdata.html#SFRData.from_tables"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.sfrdata.SFRData.from_tables" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_tables</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reach_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">segment_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">isfr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/sfrdata.html#SFRData.from_tables"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.sfrdata.SFRData.from_tables" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="sfrmaker.sfrdata.SFRData.from_yaml">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_yaml</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">package_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">write_output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/sfrdata.html#SFRData.from_yaml"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.sfrdata.SFRData.from_yaml" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_yaml</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">package_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">write_output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/sfrdata.html#SFRData.from_yaml"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.sfrdata.SFRData.from_yaml" title="Link to this definition"></a></dt>
 <dd><p>Create an SFRData instance from a yaml-format configuration file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -380,12 +381,12 @@ reach and segment data tables and shapefiles.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="sfrmaker.sfrdata.SFRData.get_empty_reach_data">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_empty_reach_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nreaches</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/sfrdata.html#SFRData.get_empty_reach_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.sfrdata.SFRData.get_empty_reach_data" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_empty_reach_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nreaches</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/sfrdata.html#SFRData.get_empty_reach_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.sfrdata.SFRData.get_empty_reach_data" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="sfrmaker.sfrdata.SFRData.get_empty_segment_data">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_empty_segment_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nsegments</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/sfrdata.html#SFRData.get_empty_segment_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.sfrdata.SFRData.get_empty_segment_data" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_empty_segment_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nsegments</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/sfrdata.html#SFRData.get_empty_segment_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.sfrdata.SFRData.get_empty_segment_data" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -444,28 +445,28 @@ using linear interpolation.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="sfrmaker.sfrdata.SFRData.model">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">model</span></span><a class="headerlink" href="#sfrmaker.sfrdata.SFRData.model" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">model</span></span><a class="headerlink" href="#sfrmaker.sfrdata.SFRData.model" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="sfrmaker.sfrdata.SFRData.modflow_sfr2">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">modflow_sfr2</span></span><a class="headerlink" href="#sfrmaker.sfrdata.SFRData.modflow_sfr2" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">modflow_sfr2</span></span><a class="headerlink" href="#sfrmaker.sfrdata.SFRData.modflow_sfr2" title="Link to this definition"></a></dt>
 <dd><p>A <cite>flopy.modflow.mfsfr2.ModflowSfr2</cite> represenation of the sfr dataset.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="sfrmaker.sfrdata.SFRData.observations">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">observations</span></span><a class="headerlink" href="#sfrmaker.sfrdata.SFRData.observations" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">observations</span></span><a class="headerlink" href="#sfrmaker.sfrdata.SFRData.observations" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="sfrmaker.sfrdata.SFRData.observations_file">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">observations_file</span></span><a class="headerlink" href="#sfrmaker.sfrdata.SFRData.observations_file" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">observations_file</span></span><a class="headerlink" href="#sfrmaker.sfrdata.SFRData.observations_file" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="sfrmaker.sfrdata.SFRData.package_name">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">package_name</span></span><a class="headerlink" href="#sfrmaker.sfrdata.SFRData.package_name" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">package_name</span></span><a class="headerlink" href="#sfrmaker.sfrdata.SFRData.package_name" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -475,14 +476,14 @@ using linear interpolation.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="sfrmaker.sfrdata.SFRData.paths">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">paths</span></span><a class="headerlink" href="#sfrmaker.sfrdata.SFRData.paths" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">paths</span></span><a class="headerlink" href="#sfrmaker.sfrdata.SFRData.paths" title="Link to this definition"></a></dt>
 <dd><p>Dict listing routing sequence for each segment
 in SFR network.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="sfrmaker.sfrdata.SFRData.period_data">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">period_data</span></span><a class="headerlink" href="#sfrmaker.sfrdata.SFRData.period_data" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">period_data</span></span><a class="headerlink" href="#sfrmaker.sfrdata.SFRData.period_data" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -492,7 +493,7 @@ in SFR network.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="sfrmaker.sfrdata.SFRData.reach_paths">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">reach_paths</span></span><a class="headerlink" href="#sfrmaker.sfrdata.SFRData.reach_paths" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">reach_paths</span></span><a class="headerlink" href="#sfrmaker.sfrdata.SFRData.reach_paths" title="Link to this definition"></a></dt>
 <dd><p>Dict listing routing sequence for each segment
 in SFR network.</p>
 </dd></dl>
@@ -519,7 +520,7 @@ starts at 1 and only increases downstream.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="sfrmaker.sfrdata.SFRData.rno_routing">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">rno_routing</span></span><a class="headerlink" href="#sfrmaker.sfrdata.SFRData.rno_routing" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">rno_routing</span></span><a class="headerlink" href="#sfrmaker.sfrdata.SFRData.rno_routing" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -604,7 +605,7 @@ By default, ‘raise’.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="sfrmaker.sfrdata.SFRData.segment_routing">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">segment_routing</span></span><a class="headerlink" href="#sfrmaker.sfrdata.SFRData.segment_routing" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">segment_routing</span></span><a class="headerlink" href="#sfrmaker.sfrdata.SFRData.segment_routing" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -643,7 +644,7 @@ will be created around the reach LineStrings (geometry column in reach_data).</p
 
 <dl class="py property">
 <dt class="sig sig-object py" id="sfrmaker.sfrdata.SFRData.structured">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">structured</span></span><a class="headerlink" href="#sfrmaker.sfrdata.SFRData.structured" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">structured</span></span><a class="headerlink" href="#sfrmaker.sfrdata.SFRData.structured" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -834,7 +835,7 @@ and <a class="reference internal" href="#sfrmaker.sfrdata.SFRData.period_data" t
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Dec 29, 2025.
+      <span class="lastupdated">Last updated on Dec 30, 2025.
       </span></p>
   </div>
 
