@@ -2,10 +2,6 @@
 Release History
 ===============
 
-Version 0.13.1 (2025-12-30)
----------------------------
-* fix geopandas-related issue with elevations.sample_reach_elevations when measured elevations are supplied by a csv
-
 Version 0.13.0 (2025-12-30)
 ---------------------------
 New Features:
