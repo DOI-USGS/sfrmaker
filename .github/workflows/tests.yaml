@@ -87,9 +87,17 @@ jobs:
         python -m ipykernel install --user --name sfrmaker_ci --display-name "sfrmaker_ci"
     - name: Test with latest PyPI flopy
       shell: bash -l {0}
-      if: ${{ matrix.python-version == 3.11}}
-      run: pip install flopy --force-reinstall
-    - name: Conda list
+      if: ${{ matrix.python-version == 3.12}}
+      run: pip install flopy
+    - name: Test with latest conda flopy
+      shell: bash -l {0}
+      if: ${{ matrix.python-version == 3.13}}
+      run: micromamba install flopy
+    - name: Test with latest develop flopy and pandas 3
+      shell: bash -l {0}
+      if: ${{ matrix.python-version == 3.14}}
+      run: pip install git+https://github.com/modflowpy/flopy@develop --no-deps
+    - name: Conda list  
       shell: bash -l {0}
       run: |
         micromamba list

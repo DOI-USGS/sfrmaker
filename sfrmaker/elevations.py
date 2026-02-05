@@ -372,7 +372,8 @@ def sample_reach_elevations(sfr_reach_data, dem,
         joined_consolidated['elevation'] = joined.groupby('rno')['elevation'].min()
         
         sampled_elevations = pd.Series(sampled_elevations, index=reach_data['rno'])
-        sampled_elevations.update(joined_consolidated['elevation'])
+        dtype = sampled_elevations.dtype
+        sampled_elevations.update(joined_consolidated['elevation'].astype(dtype))
         sampled_elevations = sampled_elevations.tolist()
             
     if smooth:
