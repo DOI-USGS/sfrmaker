@@ -333,7 +333,7 @@ def test_swb_runoff_to_csv(test_data_path, limit_runoff_to_area,
     # (this will break if the test data change)
     if limit_runoff_to_area is None:
         loc = aggregated.index.get_level_values(1) == 17955907
-        expected = aggregated.loc[loc, 'area_m2']
+        expected = aggregated.loc[loc, 'area_m2'].values
         # expected amount is the average inches per day
         # converted to meters, then multiplied by
         # SWB cell area of 1 km x 1 km

@@ -374,7 +374,7 @@ class Mf6SFR:
                     datacols = {'inflow', 'manning', 'rainfall', 'evaporation', 'runoff', 'stage'}
                     datacols = [c for c in group.columns if c in datacols]
                     group = group.loc[:, datacols]
-                    group.stack().to_csv(output, sep=' ', index=True, header=False)
+                    group.stack().dropna().to_csv(output, sep=' ', index=True, header=False)
                     output.write('END Period {}\n'.format(per + 1))
         print('wrote {}'.format(outfile))
 
