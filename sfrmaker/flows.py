@@ -576,7 +576,8 @@ def add_to_segment_data(sfrdata, data, flowline_routing=None,
     per_seg_sums[variable] = data.groupby(['per', 'nseg']).sum()[variable]
     replace = sorted(list(set(per_seg_sums.index).intersection(sfrd.segment_data.index)))
     add = sorted(list(set(per_seg_sums.index).difference(sfrd.segment_data.index)))
-    sfrd.segment_data.loc[replace, variable] = per_seg_sums.loc[replace, variable]
+    dtype = sfrd.segment_data.loc[replace, variable].dtype
+    sfrd.segment_data.loc[replace, variable] = per_seg_sums.loc[replace, variable].astype(dtype)
 
     # concat on the added data (create additional rows in segment_data table)
     to_concat = [sfrd.segment_data]
