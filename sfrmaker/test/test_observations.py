@@ -29,7 +29,7 @@ def mf6_observations_file(outdir):
 def check_gage_package(fname, name_file, expected_data, expected_sites):
     assert os.path.exists(fname)
     assert os.path.exists(name_file)
-    data = pd.read_csv(fname, header=None, skiprows=1, delim_whitespace=True)
+    data = pd.read_csv(fname, header=None, skiprows=1, sep=r'\s+')
     pd.testing.assert_frame_equal(data, expected_data, check_dtype=False)
     sites = set()
     with open(name_file) as src:
