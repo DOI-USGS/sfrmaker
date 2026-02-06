@@ -10,7 +10,8 @@ def add_line_sequence(routing, nlines=4, string_ids=False):
     headwater_line_ids = set(routing.keys()).difference(routing.values())
     # add in some lines upstream of a headwater
     n = nlines
-    new_lines = set(range(n + 2)).difference(routing)
+    new_lines = sorted(set(map(str, range(n + 2))).difference(routing), reverse=True)
+    #new_lines = set(range(n + 2)).difference(routing)
     new_routing = {}
     lid = new_lines.pop()
     sequence = [lid]
