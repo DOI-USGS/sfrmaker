@@ -74,7 +74,7 @@ def data(shellmound_sfrdata):
     line_id = dict(zip(data['rd'].iseg, data['rd'].line_id))
 
         # routing for source hydrography
-    data['flowline_routing'] = {line_id.get(k, 0): line_id.get(v, 0)
+    data['flowline_routing'] = {line_id.get(k, '0'): line_id.get(v, '0')
                             for k, v in sfr_routing.items()}
     nlines = 4
     data['seq'] = add_line_sequence(data['flowline_routing'], nlines=nlines)
@@ -88,7 +88,7 @@ def test_add_to_perioddata1(data):
     rd = data['rd']
     flows = pd.DataFrame({'Q_avg': [100., 10., 200., 20.],
                         'per': [0, 1, 0, 1],
-                        'line_id': [2, 2, 4, 4]})
+                        'line_id': ['2', '2', '4', '4']})
     add_to_perioddata(sfrd, flows,
                     flowline_routing=flowline_routing,
                     variable='inflow',
@@ -115,7 +115,7 @@ def test_add_to_perioddata2(data):
     flowline_routing['6'] = '18046688'
     flows = pd.DataFrame({'Q_avg': [100., 10., 200., 20.],
                         'per': [0, 1, 0, 1],
-                        'line_id': [6, 6, 4, 4]})
+                        'line_id': ['6', '6', '4', '4']})
     add_to_perioddata(sfrd, flows,
                     flowline_routing=flowline_routing,
                     variable='inflow',
@@ -143,7 +143,7 @@ def test_add_to_perioddata3(data):
     flowline_routing = data['flowline_routing']
     flows = pd.DataFrame({'Q_avg': [100., 10., 200., 20.],
                         'per': [0, 1, 0, 1],
-                        'line_id': [2, 2, 4, 4]})
+                        'line_id': ['2', '2', '4', '4']})
     add_to_perioddata(sfrd, flows,
                     flowline_routing=flowline_routing,
                     variable='inflow',
@@ -199,7 +199,7 @@ def test_add_to_segment_data(shellmound_sfrdata):
     line = sfrd.reach_data.line_id.values[0]
     flows = pd.DataFrame({'Q_avg': [100., 10., 200., 20., 51, 52, 53, 54],
                           'per': [0, 1, 0, 1, 2, 3, 4, 5],
-                          'line_id': [2, 2, 4, 4, line, line, line, line]})
+                          'line_id': ['2', '2', '4', '4', line, line, line, line]})
     sd1 = sfrd.segment_data.copy()
     sd1.index = pd.MultiIndex.from_tuples(zip(sd1.per, sd1.nseg), names=['per', 'nseg'])
     add_to_segment_data(sfrd, flows,
