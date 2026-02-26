@@ -43,6 +43,7 @@ flowlines:
   up_elevation_column: elevup
   dn_elevation_column: elevdn
   elevation_units: meters
+  length_units: None
   name_column: name
   bbox_filter: None
   crs: None
