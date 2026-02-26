@@ -187,6 +187,18 @@ def get_model_length_units(model):
         return lenuni_text[model.dis.lenuni]
 
 
+def get_crs_units(unit_string):
+    """Parse units string returned by PYPROJ into 'feet' or 'meters'"""
+    meters_identifiers = ['meter', 'metre', 'm']
+    for string in meters_identifiers:
+        if string in unit_string:
+            return 'meters'
+    feet_identifiers = ['feet', 'foot', 'ft']
+    for string in feet_identifiers:
+        if string in unit_string:
+            return 'feet'
+    
+    
 def get_length_units(argument, grid, model):
     """How SFRmaker sets the length units
     from multiple sources of information.
