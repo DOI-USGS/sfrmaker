@@ -15,7 +15,7 @@ from sfrmaker.gis import read_polygon_feature, get_bbox, get_crs
 from sfrmaker.grid import StructuredGrid
 from sfrmaker.nhdplus_utils import load_nhdplus_v2, get_prj_file, load_nhdplus_hr
 from sfrmaker.sfrdata import SFRData
-from sfrmaker.units import convert_length_units, get_length_units
+from sfrmaker.units import convert_length_units, get_crs_units, get_length_units
 from sfrmaker.utils import (width_from_arbolate_sum, arbolate_sum)
 from sfrmaker.reaches import consolidate_reach_conductances, interpolate_to_reaches, setup_reach_data
 from sfrmaker.routing import get_previous_ids_in_subset
@@ -50,6 +50,9 @@ class Lines:
     elevation_units : str, optional
         Length units for values in ``up_elevation_column`` and ``dn_elevation_column``; 
         by default 'meters'.
+    length_units : str, optional
+        Length units for linestrings in df, if CRS is not specified.
+        by default, None
     crs : obj, optional
         Coordinate reference object for ``df``. This argument is only needed
         if ``df`` is not a GeoDataFrame with a valid attached coordinate reference.
@@ -88,6 +91,7 @@ class Lines:
                 asum_units='km',
                 width_units='meters',
                 elevation_units='meters',
+                length_units=None,
                 crs=None, prjfile=None, **kwargs):
         if 'attr_length_units' in kwargs:
             warnings.warn(
@@ -119,7 +123,7 @@ class Lines:
                              'input DataFrame is different than CRS supplied '
                              'as argument to sfrmaker.Lines!')
             
-        self._geometry_length_units = None
+        self._geometry_length_units = length_units
 
         self._routing = None  # dictionary of routing connections
         self._last_routing_dict_update = None
@@ -137,10 +141,6 @@ class Lines:
     def geometry_length_units(self):
         """Length units of reach LineString geometries.
         """
-        valid_units = {'feet': 'feet',
-                       'foot': 'feet',
-                       'meters': 'meters',
-                       'metre': 'meters'}
         if self.crs is not None:
             if self.crs.is_geographic:
                 raise ValueError('Flowline geometries need to be in a '
@@ -148,12 +148,11 @@ class Lines:
                                 'with a projected CRS to the Lines.to_sfr() method or '
                                 'run Lines.to_crs() to reproject the flowlines.'
                                 )
-            self._geometry_length_units = valid_units.get(self.crs.axis_info[0].unit_name)
+            self._geometry_length_units = get_crs_units(self.crs.axis_info[0].unit_name)
         if self._geometry_length_units is None:
-            print("Warning: No length units specified in CRS for input LineStrings "
-                  "or length units not recognized"
-                  "defaulting to meters.")
-            self._geometry_length_units = 'meters'
+            raise ValueError("Warning: No length units specified in CRS for input LineStrings "
+                  "or length units not recognized. "
+                  "Check coordinate reference (e.g. .prj file) or enter length_units.")
         return self._geometry_length_units
 
     @property
@@ -468,6 +467,7 @@ class Lines:
                        up_elevation_column='elevup',
                        dn_elevation_column='elevdn',
                        elevation_units='meters',
+                       length_units=None,
                        name_column='name',
                        bbox_filter=None,
                        crs=None, prjfile=None, **kwargs):
@@ -531,6 +531,12 @@ class Lines:
             ESRI-style projection file with coordinate reference information for ``df``. 
             This argument is only needed
             if ``shapefile`` does not include a valid projection file.
+        length_units : str, optional
+            Length units of shapefile coordinate reference system.
+            This argument is only needed
+            if ``shapefile`` does not include a valid projection file and 
+            no other coordinate reference information is given.
+            by default, None
         **kwargs : dict, optional
             Support for deprecated keyword options.
 
@@ -581,6 +587,7 @@ class Lines:
                                   up_elevation_column=up_elevation_column,
                                   dn_elevation_column=dn_elevation_column,
                                   elevation_units=elevation_units,
+                                  length_units=length_units,
                                   name_column=name_column,
                                   crs=crs, prjfile=prjfile, **kwargs)
 
@@ -596,6 +603,7 @@ class Lines:
                        up_elevation_column='elevup',
                        dn_elevation_column='elevdn',
                        elevation_units='meters',
+                       length_units=None,
                        geometry_column='geometry',
                        name_column='name',
                        crs=None, prjfile=None,
@@ -659,6 +667,10 @@ class Lines:
             ESRI-style projection file with coordinate reference information for ``df``. 
             This argument is only needed if ``df`` is not a GeoDataFrame 
             with a valid attached coordinate reference.
+        length_units : str, optional
+            Length units of shapefile coordinate reference system.
+            This argument is only needed if no other coordinate reference information is given.
+            by default, None
         **kwargs : dict, optional
             Support for deprecated keyword options.
 
@@ -723,6 +735,7 @@ class Lines:
                    asum_units=asum_units,
                    width_units=width_units, 
                    elevation_units=elevation_units,
+                   length_units=length_units,
                    crs=crs, prjfile=prjfile, **kwargs)
 
     @classmethod

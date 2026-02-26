@@ -3,8 +3,13 @@ Tests for units.py module
 """
 import numpy as np
 import flopy
-from ..units import (convert_flux_units, convert_length_units,
-                     convert_time_units, get_model_length_units)
+import pytest
+from ..units import (
+    convert_flux_units, 
+    convert_length_units,
+    convert_time_units, 
+    get_crs_units,
+    get_model_length_units)
 
 
 def test_convert_flux():
@@ -60,3 +65,14 @@ def test_get_model_length_units():
     dis.length_units = 'feet'
     units = get_model_length_units(gwf)
     assert units == 'feet'
+
+
+@pytest.mark.parametrize('crs_unit_str,expected', (
+    ('US survey foot','feet'),
+    ('feet #','feet'),
+    ('foot','feet'),
+    ('meters #','meters'),
+    ('metres ','meters')
+    ))
+def test_get_crs_length_units(crs_unit_str, expected):
+    assert get_crs_units(crs_unit_str) == expected
