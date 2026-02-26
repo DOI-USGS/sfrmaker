@@ -28,10 +28,10 @@
    "id": "619f9195",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-02-06T16:40:09.850993Z",
-     "iopub.status.busy": "2026-02-06T16:40:09.850509Z",
-     "iopub.status.idle": "2026-02-06T16:40:11.973172Z",
-     "shell.execute_reply": "2026-02-06T16:40:11.971814Z"
+     "iopub.execute_input": "2026-02-26T20:51:25.521553Z",
+     "iopub.status.busy": "2026-02-26T20:51:25.521400Z",
+     "iopub.status.idle": "2026-02-26T20:51:27.660066Z",
+     "shell.execute_reply": "2026-02-26T20:51:27.658352Z"
     }
    },
    "outputs": [],
@@ -58,10 +58,10 @@
    "id": "bb1d52ad",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-02-06T16:40:11.977886Z",
-     "iopub.status.busy": "2026-02-06T16:40:11.976799Z",
-     "iopub.status.idle": "2026-02-06T16:40:11.982060Z",
-     "shell.execute_reply": "2026-02-06T16:40:11.981377Z"
+     "iopub.execute_input": "2026-02-26T20:51:27.664003Z",
+     "iopub.status.busy": "2026-02-26T20:51:27.663454Z",
+     "iopub.status.idle": "2026-02-26T20:51:27.668408Z",
+     "shell.execute_reply": "2026-02-26T20:51:27.667204Z"
     }
    },
    "outputs": [],
@@ -95,10 +95,10 @@
    "id": "3235b2fb",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-02-06T16:40:11.984360Z",
-     "iopub.status.busy": "2026-02-06T16:40:11.984201Z",
-     "iopub.status.idle": "2026-02-06T16:40:12.255319Z",
-     "shell.execute_reply": "2026-02-06T16:40:12.254286Z"
+     "iopub.execute_input": "2026-02-26T20:51:27.670739Z",
+     "iopub.status.busy": "2026-02-26T20:51:27.670510Z",
+     "iopub.status.idle": "2026-02-26T20:51:27.978342Z",
+     "shell.execute_reply": "2026-02-26T20:51:27.977125Z"
     }
    },
    "outputs": [
@@ -112,22 +112,22 @@
       "Getting routing information from NHDPlus HR Plusflow table...\n",
       "finished in 0.00s\n",
       "\n",
-      "finished in 0.17s\n",
+      "finished in 0.20s\n",
       "\n",
-      "reading ../neversink_rondout/NHDPLUS_HR_2.gdb...\n",
-      "filtering flowlines...\n",
-      "\n",
-      "Getting routing information from NHDPlus HR Plusflow table...\n",
-      "finished in 0.00s\n",
-      "\n",
-      "finished in 0.21s\n",
-      "\n"
+      "reading ../neversink_rondout/NHDPLUS_HR_2.gdb...\n"
      ]
     },
     {
      "name": "stdout",
      "output_type": "stream",
      "text": [
+      "filtering flowlines...\n",
+      "\n",
+      "Getting routing information from NHDPlus HR Plusflow table...\n",
+      "finished in 0.00s\n",
+      "\n",
+      "finished in 0.27s\n",
+      "\n",
       "wrote output/preprocessed_flowlines.shp\n"
      ]
     }
@@ -167,10 +167,10 @@
    "id": "47229b35",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-02-06T16:40:12.257792Z",
-     "iopub.status.busy": "2026-02-06T16:40:12.257522Z",
-     "iopub.status.idle": "2026-02-06T16:40:12.299582Z",
-     "shell.execute_reply": "2026-02-06T16:40:12.297391Z"
+     "iopub.execute_input": "2026-02-26T20:51:27.980865Z",
+     "iopub.status.busy": "2026-02-26T20:51:27.980629Z",
+     "iopub.status.idle": "2026-02-26T20:51:28.005403Z",
+     "shell.execute_reply": "2026-02-26T20:51:28.004040Z"
     }
    },
    "outputs": [
@@ -210,10 +210,10 @@
    "id": "08783e35",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-02-06T16:40:12.302581Z",
-     "iopub.status.busy": "2026-02-06T16:40:12.302430Z",
-     "iopub.status.idle": "2026-02-06T16:40:12.306460Z",
-     "shell.execute_reply": "2026-02-06T16:40:12.305389Z"
+     "iopub.execute_input": "2026-02-26T20:51:28.008277Z",
+     "iopub.status.busy": "2026-02-26T20:51:28.008127Z",
+     "iopub.status.idle": "2026-02-26T20:51:28.015499Z",
+     "shell.execute_reply": "2026-02-26T20:51:28.014542Z"
     }
    },
    "outputs": [],
@@ -242,10 +242,10 @@
    "id": "f61d69a1",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-02-06T16:40:12.308645Z",
-     "iopub.status.busy": "2026-02-06T16:40:12.308516Z",
-     "iopub.status.idle": "2026-02-06T16:40:12.311836Z",
-     "shell.execute_reply": "2026-02-06T16:40:12.311187Z"
+     "iopub.execute_input": "2026-02-26T20:51:28.018851Z",
+     "iopub.status.busy": "2026-02-26T20:51:28.018693Z",
+     "iopub.status.idle": "2026-02-26T20:51:28.027821Z",
+     "shell.execute_reply": "2026-02-26T20:51:28.026466Z"
     }
    },
    "outputs": [],
@@ -284,10 +284,10 @@
    "id": "84909bed",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-02-06T16:40:12.313764Z",
-     "iopub.status.busy": "2026-02-06T16:40:12.313648Z",
-     "iopub.status.idle": "2026-02-06T16:40:12.484993Z",
-     "shell.execute_reply": "2026-02-06T16:40:12.484110Z"
+     "iopub.execute_input": "2026-02-26T20:51:28.030973Z",
+     "iopub.status.busy": "2026-02-26T20:51:28.030647Z",
+     "iopub.status.idle": "2026-02-26T20:51:28.187131Z",
+     "shell.execute_reply": "2026-02-26T20:51:28.185226Z"
     }
    },
    "outputs": [
@@ -306,20 +306,20 @@
       "--> building dataframe... (may take a while for large shapefiles)\n",
       "\n",
       "reading ../tylerforks/NHDPlus/NHDPlusAttributes/PlusFlowlineVAA.dbf...\n",
-      "--> building dataframe... (may take a while for large shapefiles)\n",
-      "\n",
-      "reading ../tylerforks/NHDPlus/NHDPlusAttributes/PlusFlow.dbf...\n",
-      "--> building dataframe... (may take a while for large shapefiles)\n",
-      "\n",
-      "reading ../tylerforks/NHDPlus/NHDPlusAttributes/elevslope.dbf...\n",
-      "--> building dataframe... (may take a while for large shapefiles)\n",
-      "writing output/PlusFlowlineVAA_gt3km.dbf... Done\n"
+      "--> building dataframe... (may take a while for large shapefiles)\n"
      ]
     },
     {
      "name": "stdout",
      "output_type": "stream",
      "text": [
+      "\n",
+      "reading ../tylerforks/NHDPlus/NHDPlusAttributes/PlusFlow.dbf...\n",
+      "--> building dataframe... (may take a while for large shapefiles)\n",
+      "\n",
+      "reading ../tylerforks/NHDPlus/NHDPlusAttributes/elevslope.dbf...\n",
+      "--> building dataframe... (may take a while for large shapefiles)\n",
+      "writing output/PlusFlowlineVAA_gt3km.dbf... Done\n",
       "writing output/PlusFlow_gt3km.dbf... Done\n",
       "writing output/elevslope_gt3km.dbf... Done\n"
      ]
@@ -412,10 +412,10 @@
    "id": "ec5ad987",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-02-06T16:40:12.491688Z",
-     "iopub.status.busy": "2026-02-06T16:40:12.491200Z",
-     "iopub.status.idle": "2026-02-06T16:40:12.505988Z",
-     "shell.execute_reply": "2026-02-06T16:40:12.504273Z"
+     "iopub.execute_input": "2026-02-26T20:51:28.190389Z",
+     "iopub.status.busy": "2026-02-26T20:51:28.190139Z",
+     "iopub.status.idle": "2026-02-26T20:51:28.197040Z",
+     "shell.execute_reply": "2026-02-26T20:51:28.195662Z"
     }
    },
    "outputs": [
@@ -452,10 +452,10 @@
    "id": "20e6d318",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-02-06T16:40:12.512363Z",
-     "iopub.status.busy": "2026-02-06T16:40:12.512168Z",
-     "iopub.status.idle": "2026-02-06T16:40:12.723978Z",
-     "shell.execute_reply": "2026-02-06T16:40:12.721231Z"
+     "iopub.execute_input": "2026-02-26T20:51:28.199858Z",
+     "iopub.status.busy": "2026-02-26T20:51:28.199736Z",
+     "iopub.status.idle": "2026-02-26T20:51:28.379816Z",
+     "shell.execute_reply": "2026-02-26T20:51:28.378953Z"
     }
    },
    "outputs": [
@@ -521,10 +521,10 @@
    "id": "7ce511f7",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-02-06T16:40:12.728087Z",
-     "iopub.status.busy": "2026-02-06T16:40:12.727695Z",
-     "iopub.status.idle": "2026-02-06T16:40:13.133804Z",
-     "shell.execute_reply": "2026-02-06T16:40:13.131317Z"
+     "iopub.execute_input": "2026-02-26T20:51:28.384977Z",
+     "iopub.status.busy": "2026-02-26T20:51:28.384497Z",
+     "iopub.status.idle": "2026-02-26T20:51:28.791873Z",
+     "shell.execute_reply": "2026-02-26T20:51:28.789167Z"
     }
    },
    "outputs": [
@@ -587,10 +587,10 @@
    "id": "d659de74",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-02-06T16:40:13.140095Z",
-     "iopub.status.busy": "2026-02-06T16:40:13.138855Z",
-     "iopub.status.idle": "2026-02-06T16:40:13.163377Z",
-     "shell.execute_reply": "2026-02-06T16:40:13.162328Z"
+     "iopub.execute_input": "2026-02-26T20:51:28.797027Z",
+     "iopub.status.busy": "2026-02-26T20:51:28.796682Z",
+     "iopub.status.idle": "2026-02-26T20:51:28.823120Z",
+     "shell.execute_reply": "2026-02-26T20:51:28.821523Z"
     }
    },
    "outputs": [
@@ -839,10 +839,10 @@
    "id": "50dba987",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-02-06T16:40:13.166067Z",
-     "iopub.status.busy": "2026-02-06T16:40:13.165899Z",
-     "iopub.status.idle": "2026-02-06T16:40:13.263674Z",
-     "shell.execute_reply": "2026-02-06T16:40:13.260927Z"
+     "iopub.execute_input": "2026-02-26T20:51:28.827159Z",
+     "iopub.status.busy": "2026-02-26T20:51:28.826973Z",
+     "iopub.status.idle": "2026-02-26T20:51:28.961379Z",
+     "shell.execute_reply": "2026-02-26T20:51:28.959759Z"
     }
    },
    "outputs": [
@@ -887,10 +887,10 @@
    "id": "39a289bb",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-02-06T16:40:13.266251Z",
-     "iopub.status.busy": "2026-02-06T16:40:13.266072Z",
-     "iopub.status.idle": "2026-02-06T16:40:13.330438Z",
-     "shell.execute_reply": "2026-02-06T16:40:13.329804Z"
+     "iopub.execute_input": "2026-02-26T20:51:28.963943Z",
+     "iopub.status.busy": "2026-02-26T20:51:28.963761Z",
+     "iopub.status.idle": "2026-02-26T20:51:29.010929Z",
+     "shell.execute_reply": "2026-02-26T20:51:29.009925Z"
     }
    },
    "outputs": [
@@ -900,13 +900,7 @@
      "text": [
       "\n",
       "reading ../tylerforks/active_area.shp...\n",
-      "--> building dataframe... (may take a while for large shapefiles)\n"
-     ]
-    },
-    {
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
+      "--> building dataframe... (may take a while for large shapefiles)\n",
       "starting lines: 19\n",
       "remaining lines: 11\n"
      ]
@@ -932,10 +926,10 @@
    "id": "a60e8b64",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-02-06T16:40:13.332490Z",
-     "iopub.status.busy": "2026-02-06T16:40:13.332364Z",
-     "iopub.status.idle": "2026-02-06T16:40:13.402000Z",
-     "shell.execute_reply": "2026-02-06T16:40:13.399346Z"
+     "iopub.execute_input": "2026-02-26T20:51:29.013549Z",
+     "iopub.status.busy": "2026-02-26T20:51:29.013388Z",
+     "iopub.status.idle": "2026-02-26T20:51:29.072053Z",
+     "shell.execute_reply": "2026-02-26T20:51:29.071008Z"
     }
    },
    "outputs": [

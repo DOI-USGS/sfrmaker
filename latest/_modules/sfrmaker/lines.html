@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>sfrmaker.lines &mdash; SFRmaker 0.13.0.post4.dev0+g186c949 documentation</title>
+  <title>sfrmaker.lines &mdash; SFRmaker 0.13.0.post5.dev0+g9ab4f77 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=a0e558c3"></script>
+      <script src="../../_static/documentation_options.js?v=65520a6d"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -113,7 +113,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">sfrmaker.grid</span><span class="w"> </span><span class="kn">import</span> <span class="n">StructuredGrid</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sfrmaker.nhdplus_utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_nhdplus_v2</span><span class="p">,</span> <span class="n">get_prj_file</span><span class="p">,</span> <span class="n">load_nhdplus_hr</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sfrmaker.sfrdata</span><span class="w"> </span><span class="kn">import</span> <span class="n">SFRData</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">sfrmaker.units</span><span class="w"> </span><span class="kn">import</span> <span class="n">convert_length_units</span><span class="p">,</span> <span class="n">get_length_units</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sfrmaker.units</span><span class="w"> </span><span class="kn">import</span> <span class="n">convert_length_units</span><span class="p">,</span> <span class="n">get_crs_units</span><span class="p">,</span> <span class="n">get_length_units</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sfrmaker.utils</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">width_from_arbolate_sum</span><span class="p">,</span> <span class="n">arbolate_sum</span><span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sfrmaker.reaches</span><span class="w"> </span><span class="kn">import</span> <span class="n">consolidate_reach_conductances</span><span class="p">,</span> <span class="n">interpolate_to_reaches</span><span class="p">,</span> <span class="n">setup_reach_data</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sfrmaker.routing</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_previous_ids_in_subset</span>
@@ -150,6 +150,9 @@
 <span class="sd">    elevation_units : str, optional</span>
 <span class="sd">        Length units for values in ``up_elevation_column`` and ``dn_elevation_column``; </span>
 <span class="sd">        by default &#39;meters&#39;.</span>
+<span class="sd">    length_units : str, optional</span>
+<span class="sd">        Length units for linestrings in df, if CRS is not specified.</span>
+<span class="sd">        by default, None</span>
 <span class="sd">    crs : obj, optional</span>
 <span class="sd">        Coordinate reference object for ``df``. This argument is only needed</span>
 <span class="sd">        if ``df`` is not a GeoDataFrame with a valid attached coordinate reference.</span>
@@ -188,6 +191,7 @@
                 <span class="n">asum_units</span><span class="o">=</span><span class="s1">&#39;km&#39;</span><span class="p">,</span>
                 <span class="n">width_units</span><span class="o">=</span><span class="s1">&#39;meters&#39;</span><span class="p">,</span>
                 <span class="n">elevation_units</span><span class="o">=</span><span class="s1">&#39;meters&#39;</span><span class="p">,</span>
+                <span class="n">length_units</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                 <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">prjfile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">if</span> <span class="s1">&#39;attr_length_units&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
             <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
@@ -219,7 +223,7 @@
                              <span class="s1">&#39;input DataFrame is different than CRS supplied &#39;</span>
                              <span class="s1">&#39;as argument to sfrmaker.Lines!&#39;</span><span class="p">)</span>
             
-        <span class="bp">self</span><span class="o">.</span><span class="n">_geometry_length_units</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_geometry_length_units</span> <span class="o">=</span> <span class="n">length_units</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_routing</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># dictionary of routing connections</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_last_routing_dict_update</span> <span class="o">=</span> <span class="kc">None</span>
@@ -237,10 +241,6 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">geometry_length_units</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Length units of reach LineString geometries.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">valid_units</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;feet&#39;</span><span class="p">:</span> <span class="s1">&#39;feet&#39;</span><span class="p">,</span>
-                       <span class="s1">&#39;foot&#39;</span><span class="p">:</span> <span class="s1">&#39;feet&#39;</span><span class="p">,</span>
-                       <span class="s1">&#39;meters&#39;</span><span class="p">:</span> <span class="s1">&#39;meters&#39;</span><span class="p">,</span>
-                       <span class="s1">&#39;metre&#39;</span><span class="p">:</span> <span class="s1">&#39;meters&#39;</span><span class="p">}</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">is_geographic</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Flowline geometries need to be in a &#39;</span>
@@ -248,12 +248,11 @@
                                 <span class="s1">&#39;with a projected CRS to the Lines.to_sfr() method or &#39;</span>
                                 <span class="s1">&#39;run Lines.to_crs() to reproject the flowlines.&#39;</span>
                                 <span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_geometry_length_units</span> <span class="o">=</span> <span class="n">valid_units</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">axis_info</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">unit_name</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_geometry_length_units</span> <span class="o">=</span> <span class="n">get_crs_units</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">axis_info</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">unit_name</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_geometry_length_units</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Warning: No length units specified in CRS for input LineStrings &quot;</span>
-                  <span class="s2">&quot;or length units not recognized&quot;</span>
-                  <span class="s2">&quot;defaulting to meters.&quot;</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_geometry_length_units</span> <span class="o">=</span> <span class="s1">&#39;meters&#39;</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Warning: No length units specified in CRS for input LineStrings &quot;</span>
+                  <span class="s2">&quot;or length units not recognized. &quot;</span>
+                  <span class="s2">&quot;Check coordinate reference (e.g. .prj file) or enter length_units.&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_geometry_length_units</span>
 
     <span class="nd">@property</span>
@@ -585,6 +584,7 @@
                        <span class="n">up_elevation_column</span><span class="o">=</span><span class="s1">&#39;elevup&#39;</span><span class="p">,</span>
                        <span class="n">dn_elevation_column</span><span class="o">=</span><span class="s1">&#39;elevdn&#39;</span><span class="p">,</span>
                        <span class="n">elevation_units</span><span class="o">=</span><span class="s1">&#39;meters&#39;</span><span class="p">,</span>
+                       <span class="n">length_units</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                        <span class="n">name_column</span><span class="o">=</span><span class="s1">&#39;name&#39;</span><span class="p">,</span>
                        <span class="n">bbox_filter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                        <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">prjfile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -648,6 +648,12 @@
 <span class="sd">            ESRI-style projection file with coordinate reference information for ``df``. </span>
 <span class="sd">            This argument is only needed</span>
 <span class="sd">            if ``shapefile`` does not include a valid projection file.</span>
+<span class="sd">        length_units : str, optional</span>
+<span class="sd">            Length units of shapefile coordinate reference system.</span>
+<span class="sd">            This argument is only needed</span>
+<span class="sd">            if ``shapefile`` does not include a valid projection file and </span>
+<span class="sd">            no other coordinate reference information is given.</span>
+<span class="sd">            by default, None</span>
 <span class="sd">        **kwargs : dict, optional</span>
 <span class="sd">            Support for deprecated keyword options.</span>
 
@@ -698,6 +704,7 @@
                                   <span class="n">up_elevation_column</span><span class="o">=</span><span class="n">up_elevation_column</span><span class="p">,</span>
                                   <span class="n">dn_elevation_column</span><span class="o">=</span><span class="n">dn_elevation_column</span><span class="p">,</span>
                                   <span class="n">elevation_units</span><span class="o">=</span><span class="n">elevation_units</span><span class="p">,</span>
+                                  <span class="n">length_units</span><span class="o">=</span><span class="n">length_units</span><span class="p">,</span>
                                   <span class="n">name_column</span><span class="o">=</span><span class="n">name_column</span><span class="p">,</span>
                                   <span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">,</span> <span class="n">prjfile</span><span class="o">=</span><span class="n">prjfile</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
@@ -716,6 +723,7 @@
                        <span class="n">up_elevation_column</span><span class="o">=</span><span class="s1">&#39;elevup&#39;</span><span class="p">,</span>
                        <span class="n">dn_elevation_column</span><span class="o">=</span><span class="s1">&#39;elevdn&#39;</span><span class="p">,</span>
                        <span class="n">elevation_units</span><span class="o">=</span><span class="s1">&#39;meters&#39;</span><span class="p">,</span>
+                       <span class="n">length_units</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                        <span class="n">geometry_column</span><span class="o">=</span><span class="s1">&#39;geometry&#39;</span><span class="p">,</span>
                        <span class="n">name_column</span><span class="o">=</span><span class="s1">&#39;name&#39;</span><span class="p">,</span>
                        <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">prjfile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -779,6 +787,10 @@
 <span class="sd">            ESRI-style projection file with coordinate reference information for ``df``. </span>
 <span class="sd">            This argument is only needed if ``df`` is not a GeoDataFrame </span>
 <span class="sd">            with a valid attached coordinate reference.</span>
+<span class="sd">        length_units : str, optional</span>
+<span class="sd">            Length units of shapefile coordinate reference system.</span>
+<span class="sd">            This argument is only needed if no other coordinate reference information is given.</span>
+<span class="sd">            by default, None</span>
 <span class="sd">        **kwargs : dict, optional</span>
 <span class="sd">            Support for deprecated keyword options.</span>
 
@@ -843,6 +855,7 @@
                    <span class="n">asum_units</span><span class="o">=</span><span class="n">asum_units</span><span class="p">,</span>
                    <span class="n">width_units</span><span class="o">=</span><span class="n">width_units</span><span class="p">,</span> 
                    <span class="n">elevation_units</span><span class="o">=</span><span class="n">elevation_units</span><span class="p">,</span>
+                   <span class="n">length_units</span><span class="o">=</span><span class="n">length_units</span><span class="p">,</span>
                    <span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">,</span> <span class="n">prjfile</span><span class="o">=</span><span class="n">prjfile</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 
@@ -1406,7 +1419,7 @@
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Feb 06, 2026.
+      <span class="lastupdated">Last updated on Feb 26, 2026.
       </span></p>
   </div>
 
