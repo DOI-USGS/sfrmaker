@@ -28,13 +28,13 @@ def test_read_nhdplus_hr(nhdplus_files, bbox_filter, expected_nrows, drop_fcodes
         NHDPlusHR_paths = datapath / nhdplus_files
     results = read_nhdplus_hr(NHDPlusHR_paths, bbox_filter=bbox_filter, 
                               drop_fcodes=drop_fcodes)
-    expected_cols = ['NHDPlusID', 'ArbolateSu','StreamOrde', 'MaxElevSmo', 
-                     'MinElevSmo', 'Divergence', 'ToNHDPID']
+    expected_cols = ['nhdplusid', 'arbolate_s','stream_ord', 'maxelevsmo', 
+                     'minelevsmo', 'divergence', 'to_nhdpid']
     assert not set(expected_cols).difference(results.columns)
     assert len(results) == expected_nrows
     # NHDPlusIDs should be treated as strings
-    assert all([type(s) == str for s in results['NHDPlusID'].astype(int).astype(str)])
-    assert all([type(s) == str for s in results['ToNHDPID'].astype(int).astype(str)])
+    assert all([type(s) == str for s in results['nhdplusid'].astype(int).astype(str)])
+    assert all([type(s) == str for s in results['to_nhdpid'].astype(int).astype(str)])
 
 
 @pytest.mark.parametrize('nhdplus_files,bbox_filter,expected_nrows', (
@@ -79,6 +79,6 @@ def test_load_nhdplus_v2(kwargs, bbox_filter, datapath):
         bbox_filter = datapath / bbox_filter
     results = load_nhdplus_v2(**kwargs, bbox_filter=bbox_filter)
     # all comids and tocomids should be strings
-    assert all([type(s) == str for s in results['COMID'].astype(int).astype(str)])
-    assert all([type(s) == str for comids in results['COMID'].astype(int).astype(str) 
+    assert all([type(s) == str for s in results['comid'].astype(int).astype(str)])
+    assert all([type(s) == str for comids in results['comid'].astype(int).astype(str) 
          for s in comids ])

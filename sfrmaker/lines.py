@@ -574,7 +574,10 @@ class Lines:
             bbox_filter = get_bbox(bbox_filter, shpfile_crs)
 
         df = gpd.read_file(shapefile, bbox=bbox_filter)
-        assert 'geometry' in df.columns, "No feature geometries found in {}.".format(shapefile)
+        if id_column not in df.columns:
+            raise ValueError(f"id_column: {id_column} not in {shapefile} attribute fields")
+        if 'geometry' not in df.columns:
+            raise ValueError(f"No feature geometries found in {shapefile}.")
 
         return cls.from_dataframe(df,   
                                   id_column=id_column,
@@ -817,18 +820,18 @@ class Lines:
             prjfile = get_prj_file(NHDPlus_paths, NHDFlowlines)
 
         # convert arbolate sums from km to m
-        df['asum1'] = (df.ArbolateSu - df.LENGTHKM) * 1000
-        df['asum2'] = df.ArbolateSu * 1000
+        df['asum1'] = (df['arbolate_s'] - df['length_km']) * 1000
+        df['asum2'] = df['arbolate_s'] * 1000
 
         # convert comid end elevations from cm to m
-        if 'MAXELEVSMO' in df.columns:
-            df['elevup'] = df.MAXELEVSMO / 100.
-        if 'MINELEVSMO' in df.columns:
-            df['elevdn'] = df.MINELEVSMO / 100.
+        if 'maxelevsmo' in df.columns:
+            df['elevup'] = df['maxelevsmo'] / 100.
+        if 'minelevsmo' in df.columns:
+            df['elevdn'] = df['minelevsmo'] / 100.
 
-        return cls.from_dataframe(df, id_column='COMID',
+        return cls.from_dataframe(df, id_column='comid',
                                   routing_column='tocomid',
-                                  name_column='GNIS_NAME',
+                                  name_column='gnis_name',
                                   asum_units='meters',
                                   elevation_units='meters',
                                   crs=crs, prjfile=prjfile, **kwargs)
@@ -907,17 +910,17 @@ class Lines:
         #    proj_str = crs.to_proj4()
 
         # convert arbolate sums from km to m
-        df['asum2'] = df.ArbolateSu * 1000
+        df['asum2'] = df['arbolate_s'] * 1000
 
         # convert NHDPlusID end elevations from cm to m
-        if 'MaxElevSmo' in df.columns:
-            df['elevup'] = df.MaxElevSmo / 100.
-        if 'MinElevSmo' in df.columns:
-            df['elevdn'] = df.MinElevSmo / 100.
+        if 'maxelevsmo' in df.columns:
+            df['elevup'] = df['maxelevsmo'] / 100.
+        if 'minelevsmo' in df.columns:
+            df['elevdn'] = df['minelevsmo'] / 100.
 
-        return cls.from_dataframe(df, id_column='NHDPlusID',
-                                  routing_column='ToNHDPID',
-                                  name_column='GNIS_Name',
+        return cls.from_dataframe(df, id_column='nhdplusid',
+                                  routing_column='to_nhdpid',
+                                  name_column='gnis_name',
                                   arbolate_sum_column2='asum2',
                                   asum_units='meters',
                                   up_elevation_column='elevup',

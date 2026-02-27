@@ -154,3 +154,11 @@ options:
   default_slope: 0.001
   minimum_slope: 0.0001
   maximum_slope: 1.0
+  # keyword arguments to sfrmaker.SFRData.write_package:
+  filename: None
+  options: None
+  run_diagnostics: True
+  write_observations_input: True
+  external_files_path: None
+  gage_starting_unit_number: None
+  write_mf6_inactive_cellids_as_None: False
