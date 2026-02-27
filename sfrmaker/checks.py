@@ -208,16 +208,10 @@ def same_sfr_numbering(reach_data1, reach_data2):
 def reach_elevations_decrease_downstream(reach_data):
     """Verify that reach values decrease monotonically in the downstream direction."""
     rd = reach_data.reset_index()
-    return check_monotonicity(rd.rno, rd.outreach, rd.strtop)
-    #elev = dict(zip(rd.rno, rd.strtop))
-    #dnelev = {rid: elev[rd.outreach[i]] if rd.outreach[i] != 0
-    #else -9999 for i, rid in enumerate(rd.rno)}
-    #diffs = np.array([(dnelev[i] - elev[i]) if dnelev[i] != -9999
-    #                  else -.001 for i in rd.rno])
-    #return np.max(diffs) <= 0
+    return check_monotonicity(rd.rno, rd.outreach, rd.strtop, outlet_id=0)
 
 
-def check_monotonicity(ids, toids, values, decrease=True):
+def check_monotonicity(ids, toids, values, decrease=True, outlet_id=0):
     """Verify that values decrease or increase monotonically
     in the downstream direction.
 
@@ -232,7 +226,11 @@ def check_monotonicity(ids, toids, values, decrease=True):
     decrease : bool
         If True, verify that values strictly decrease in the downstream direction,
         if False, verify that values strictly increase in the downstream direction.
-
+    outlet_id : str or int
+        Identifier in `toids` that indicates an outlet condition.
+        By default, 0 (integer, which is used in a MODFLOW SFR Package context; 
+        when working with flowline identifiers, a '0' (str) should be used).
+        
     Returns
     -------
     is_monotonic : bool
@@ -249,7 +247,7 @@ def check_monotonicity(ids, toids, values, decrease=True):
     if not decrease:
         values *= -1
     values_dict = dict(zip(ids, values))
-    downstream_values = {rid: values_dict[toids[i]] if toids[i] != 0
+    downstream_values = {rid: values_dict[toids[i]] if toids[i] != outlet_id
               else default for i, rid in enumerate(ids)}
     diffs = np.array([(downstream_values[i] - values_dict[i]) if downstream_values[i] != default
                       else -.001 for i in ids])

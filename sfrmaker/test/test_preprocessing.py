@@ -93,10 +93,10 @@ def preprocessed_flowlines_module(test_data_path, culled_flowlines, outfolder, p
     kwargs['asum_thresh'] = 20.
     kwargs['width_from_asum_a_param'] = 0.0592
     kwargs['width_from_asum_b_param'] = 0.5127
-    kwargs['known_connections'] = {17955195: 17955197,
-                                   17955197: 17955185,
-                                   17954979: 17954993,
-                                   17954993: 17955075
+    kwargs['known_connections'] = {'17955195': '17955197',
+                                   '17955197': '17955185',
+                                   '17954979': '17954993',
+                                   '17954993': '17955075'
                                    }
     kwargs['logger'] = None
     kwargs['output_length_units'] = 'meters'
@@ -121,19 +121,24 @@ def preprocessed_flowlines(preprocessed_flowlines_module):
 def test_cull_flowlines(clipped_flowlines, culled_flowlines, test_data_path,
                                     outfolder, active_area):
     nhdpaths = [os.path.join(test_data_path, 'NHDPlus08')]
-    source_nhdfiles = [os.path.join(nhdpaths[0], 'NHDSnapshot/Hydrography/NHDFlowline.shp'),
-                       os.path.join(nhdpaths[0], 'NHDPlusAttributes/PlusFlowlineVAA.dbf'),
-                       os.path.join(nhdpaths[0], 'NHDPlusAttributes/PlusFlow.dbf'),
-                       os.path.join(nhdpaths[0], 'NHDPlusAttributes/elevslope.dbf')
-                       ]
-    original_sizes = np.array([os.path.getsize(f) for f in source_nhdfiles])
+    source_nhdfiles = {
+        'flowlines_file': os.path.join(nhdpaths[0], 'NHDSnapshot/Hydrography/NHDFlowline.shp'),
+        'pfvaa_file': os.path.join(nhdpaths[0], 'NHDPlusAttributes/PlusFlowlineVAA.dbf'),
+        'pf_file': os.path.join(nhdpaths[0], 'NHDPlusAttributes/PlusFlow.dbf'),
+        'elevslope_file': os.path.join(nhdpaths[0], 'NHDPlusAttributes/elevslope.dbf')
+    }
+    from osgeo import ogr
+    for k, orig_file in source_nhdfiles.items():
+        with ogr.Open(orig_file) as src1:
+            layer1 = src1.GetLayer(0)
+            orig_nrows = layer1.GetFeatureCount()
+        with ogr.Open(clipped_flowlines[k]) as src2:
+            clipped_nrows = src2.GetLayer(0).GetFeatureCount()
+        
+        with ogr.Open(culled_flowlines[k]) as src3:
+            culled_nrows = src3.GetLayer(0).GetFeatureCount()
+        assert culled_nrows < clipped_nrows < orig_nrows
     results = clipped_flowlines
-    clipped_sizes = np.array([os.path.getsize(f) for f in clipped_flowlines.values()])
-    culled_sizes = np.array([os.path.getsize(f) for f in culled_flowlines.values()])
-    assert np.all(culled_sizes > 0)
-    assert np.all(original_sizes > 0)
-    assert np.all(culled_sizes <= clipped_sizes)
-    assert np.all(clipped_sizes <= original_sizes)
 
     results2 = cull_flowlines(nhdpaths,
                               asum_thresh=None, intermittent_streams_asum_thresh=None,
@@ -141,36 +146,38 @@ def test_cull_flowlines(clipped_flowlines, culled_flowlines, test_data_path,
                               active_area=active_area,
                               outfolder=outfolder)
     assert results == results2
-    sizes2 = np.array([os.path.getsize(f) for f in results.values()])
-    assert np.all(sizes2 <= original_sizes)
+    for k, orig_file in source_nhdfiles.items():
+        with ogr.Open(results2[k]) as src4:
+            results2_nrows = src4.GetLayer(0).GetFeatureCount()
+    assert results2_nrows < orig_nrows
     assert results != culled_flowlines
 
 
 def test_preprocess_nhdplus(preprocessed_flowlines):
-    fl = preprocessed_flowlines
+    fl = preprocessed_flowlines.copy()
 
     # check some more connections
-    connections = {17955689: 17955711,
-                   17956683: 17956745
+    connections = {'17955689': '17955711',
+                   '17956683': '17956745'
                    }
     for comid, tocomid in connections.items():
         assert fl.loc[comid, 'tocomid'] == tocomid
 
     # these lines should have been dropped
-    should_have_been_dropped = {17956691, 17955223}
+    should_have_been_dropped = {'17956691', '17955223'}
     for comid in should_have_been_dropped:
         assert comid not in fl.index
 
     # these lines should be included
-    should_be_included = {17955197, 17956745}
+    should_be_included = {'17955197', '17956745'}
     for comid in should_be_included:
         assert comid in fl.index
 
     # check that arbolate sums at known connections are correct
-    assert np.allclose(fl.loc[17955197, 'asum_calc'], 650., rtol=0.1)
+    assert np.allclose(fl.loc['17955197', 'asum_calc'], 650., rtol=0.1)
 
     # check that arbolate sums increase monotonically downstream
-    assert check_monotonicity(fl.index, fl.tocomid, fl.asum_calc, decrease=False)
+    assert check_monotonicity(fl.index, fl.tocomid, fl.asum_calc, decrease=False, outlet_id='0')
 
     # verify that for the lines that have narwidth estimates,
     # the mean narwidth width and asum widths are within 20%
@@ -182,7 +189,7 @@ def test_preprocess_nhdplus(preprocessed_flowlines):
 
 #@pytest.mark.skipif(sys.version_info[:2] == (3, 11), reason="inexplicable negative asum values")
 def test_preprocess_nhdplus_no_zonal_stats(culled_flowlines, preprocessed_flowlines,
-                                           test_data_path, outfolder):
+                                           test_data_path, outfolder, active_area):
 
     kwargs = culled_flowlines.copy()
     preprocessed_flowlines = preprocessed_flowlines.copy()
@@ -195,10 +202,10 @@ def test_preprocess_nhdplus_no_zonal_stats(culled_flowlines, preprocessed_flowli
     kwargs['asum_thresh'] = 20.
     kwargs['width_from_asum_a_param'] = 0.0592
     kwargs['width_from_asum_b_param'] = 0.5127
-    kwargs['known_connections'] = {17955195: 17955197,
-                                   17955197: 17955185,
-                                   17954979: 17954993,
-                                   17954993: 17955075
+    kwargs['known_connections'] = {'17955195': '17955197',
+                                   '17955197': '17955185',
+                                   '17954979': '17954993',
+                                   '17954993': '17955075'
                                    }
     kwargs['logger'] = None
     kwargs['output_length_units'] = 'meters'
@@ -209,23 +216,41 @@ def test_preprocess_nhdplus_no_zonal_stats(culled_flowlines, preprocessed_flowli
     # verify that the same result is produced
     # when reusing the shapefile output from zonal statistics
     pd.testing.assert_frame_equal(preprocessed_flowlines, preprocessed_flowlines2)
-    
+
+
+def test_update_flowline_up_dn_elevations(test_data_path, outfolder, active_area):
+    nhdpaths = [os.path.join(test_data_path, 'NHDPlus08')]
+    # run cull_flowlines again; elevation asserts require fresh copy
+    # (kwargs points to the same output shapefiles produced by cull_flowlines)
+    kwargs = cull_flowlines(nhdpaths,
+                             asum_thresh=20, intermittent_streams_asum_thresh=50,
+                             cull_invalid=True, cull_isolated=True,
+                             active_area=active_area,
+                             outfolder=outfolder)
+    #kwargs['run_zonal_statistics'] = False
+    #kwargs['flowline_elevations_file'] = Path(outfolder, 'flowlines_gt20km_buffers.shp')
+    kwargs['demfile'] = os.path.join(test_data_path, 'meras_100m_dem.tif')
+    kwargs['logger'] = None
+    kwargs['output_length_units'] = 'meters'
+    kwargs['outfolder'] = outfolder
+    kwargs['dest_crs'] = 5070
     # test manual updating of COMID end elevations
     # (e.g. from measured stage data)
     # assume mean stage at the Money, MS gage
     # (near the upstream end of COMID 17991438)
     # has been measured at 37.1 m (~1.2 meters above the min DEM elevation)
-    kwargs['update_up_elevations'] = {17991438: 37.1,
+    kwargs['update_up_elevations'] = {'17991438': 37.1,
                                 }
     # and that mean stage near Greenwood
     # (near the downstream end of COMID 18047242)
     # has been measured at 37.0 m (~1.1 meters above the min DEM elevation)
-    kwargs['update_dn_elevations'] = {18047242: 37.0,
+    kwargs['update_dn_elevations'] = {'18047242': 37.0,
                                 }
+
     preprocessed_flowlines3 = preprocess_nhdplus(**kwargs)
     
-    assert preprocessed_flowlines3.loc[17991438, 'elevupsmo'] == 37.1
-    assert preprocessed_flowlines3.loc[18047242, 'elevdnsmo'] == 37.0
+    assert preprocessed_flowlines3.loc['17991438', 'elevupsmo'] == 37.1
+    assert preprocessed_flowlines3.loc['18047242', 'elevdnsmo'] == 37.0
 
 
 @pytest.mark.timeout(30)  # projection issues will cause zonal stats to hang
@@ -243,6 +268,7 @@ def test_preprocess_nhdplus_no_narwidth(test_data_path, culled_flowlines, outfol
 
 
 def test_clip_flowlines(preprocessed_flowlines, test_data_path):
+    preprocessed_flowlines = preprocessed_flowlines.copy()
     clipped = clip_flowlines_to_polygon(preprocessed_flowlines,
                                         os.path.join(test_data_path, 'active_area.shp'),
                                         simplify_tol=100, logger=None)
@@ -253,18 +279,23 @@ def test_clip_flowlines(preprocessed_flowlines, test_data_path):
                                        None))
 def test_edit_flowlines(flowlines, preprocessed_flowlines, test_data_path):
     if flowlines is None:
-        flowlines = preprocessed_flowlines
+        flowlines = preprocessed_flowlines.copy()
     flowline_edits_file = os.path.join(test_data_path, 'flowline_edits.yml')
     edited_flowlines = edit_flowlines(flowlines,
                                       flowline_edits_file, logger=None)
     with open(flowline_edits_file) as src:
         cfg = yaml.load(src, Loader=yaml.Loader)
     # verify that flowlines were dropped
-    assert not any(set(cfg['drop_flowlines']).intersection(edited_flowlines.COMID))
+    assert not any(set(cfg['drop_flowlines']).intersection(edited_flowlines['comid']))
     # verify routing changes
-    for comid, tocomid in cfg['reroute_flowlines'].items():
+    reroute_flowlines = cfg['reroute_flowlines']
+    if not pd.api.types.is_numeric_dtype(edited_flowlines.index):
+        reroute_flowlines = {str(k): str(v) for k, v in reroute_flowlines.items()}
+    for comid, tocomid in reroute_flowlines.items():
         assert edited_flowlines.loc[comid, 'tocomid'] == tocomid
     add_flowlines = shp2df(os.path.join(test_data_path, 'yazoo.shp'))
+    if not pd.api.types.is_numeric_dtype(edited_flowlines.index):
+        add_flowlines = add_flowlines.astype(str)
     assert not any(set(add_flowlines.comid).difference(edited_flowlines.index))
     if isinstance(flowlines, str) or isinstance(flowlines, Path):
         assert os.path.exists(flowlines[:-4] + '.prj')
@@ -282,9 +313,9 @@ def test_get_flowline_routing(datapath, project_root_path):
     mask = f'{datapath}/tylerforks/grid.shp'
     df = get_flowline_routing(NHDPlus_paths=NHDPlus_paths,
                               mask=mask)
-    assert np.array_equal(df.columns, ['FROMCOMID', 'TOCOMID'])
+    assert np.array_equal(df.columns, ['from_comid', 'to_comid'])
     df2 = get_flowline_routing(PlusFlow=plusflow_files)
-    pd.testing.assert_frame_equal(df2.loc[df2['FROMCOMID'].isin(df['FROMCOMID'])].head(),
+    pd.testing.assert_frame_equal(df2.loc[df2['from_comid'].isin(df['from_comid'])].head(),
                                   df.head())
     os.chdir(wd)
     
@@ -409,10 +440,10 @@ def test_preprocess_nhdplus_hr_flowlines(project_root_path, outdir):
     
     df = gpd.read_file(outfile)
     assert df.crs == 26918
-    assert not set(df['FCode']).difference(keep_fcodes)
-    assert '10000700059483' not in df['NHDPlusID'].values
+    assert not set(df['fcode']).difference(keep_fcodes)
+    assert '10000700059483' not in df['nhdplusid'].values
     # the next line up shouldn't be there either
-    assert '10000700020952' not in df['NHDPlusID'].values
+    assert '10000700020952' not in df['nhdplusid'].values
 
 
 def test_preprocess_nhdplus_hr_waterbodies(project_root_path, outdir):
@@ -433,9 +464,9 @@ def test_preprocess_nhdplus_hr_waterbodies(project_root_path, outdir):
                                       dest_crs=26905, outfile=outfile)
     df = gpd.read_file(outfile)
     df.crs == 26905
-    df['NHDPlusID'] = df['NHDPlusID'].astype(int).astype(str)
-    assert set(df['NHDPlusID']) == expected_lakes
+    df['nhdplusid'] = df['nhdplusid'].astype(int).astype(str)
+    assert set(df['nhdplusid']) == expected_lakes
     # this lake is < 0.05 km2; should have been culled
-    assert '75004400012864' not in df['NHDPlusID'].values
+    assert '75004400012864' not in df['nhdplusid'].values
     for nhdplusid in drop_waterbodies:
-        assert int(nhdplusid) not in df['NHDPlusID'].values
+        assert int(nhdplusid) not in df['nhdplusid'].values

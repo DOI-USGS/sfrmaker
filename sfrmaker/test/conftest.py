@@ -266,7 +266,7 @@ def get_lines_from_shapefile(test_data_path):
                                         up_elevation_column='elevupsmo',
                                         dn_elevation_column='elevdnsmo',
                                         elevation_units='feet',
-                                        name_column='GNIS_NAME',
+                                        name_column='gnis_name',
                                         )
     return lns
 
