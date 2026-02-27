@@ -263,7 +263,8 @@ class Mf6SFR:
         return segment_data_to_period_data(self.sd, self.rd)
 
     def write_file(self, filename=None, outpath='', options=None,
-                   external_files_path=None):
+                   external_files_path=None,
+                   write_mf6_inactive_cellids_as_None=False):
         """Write a MODFLOW-6 format SFR package file.
 
         Parameters
@@ -290,6 +291,11 @@ class Mf6SFR:
             Path for writing an external file for packagedata, relative to the location of the SFR package file.
             If specified, an open/close statement referencing the file is written to the packagedata block.
             By default, None (packagedata table is written to the SFR package file)
+        write_mf6_inactive_cellids_as_None : bool
+            Prior to MODFLOW 6.4.3, groundwater flow connections for SFR reaches in inactive cells
+            were written as 'NONE'. Since then, unconnected reaches are specified with a zero for
+            each grid dimension (e.g. '0 0 0' for DIS grid). This option allows 'NONE' to be written
+            for compatibility with older versions of MODFLOW 6. By default, False (use 0s).
 
         Raises
         ------
@@ -324,13 +330,17 @@ class Mf6SFR:
                     writepakdata[c] += 1  # convert indices to 1-based
                     writepakdata[c] = writepakdata[c].astype(str)
             # fill in NONEs for reaches in inactive cells
-            inactive = writepakdata.idomain != 1
-            if not 'cellid' in writepakdata.columns:
-                writepakdata.loc[inactive, 'k'] = ''
-                writepakdata.loc[inactive, 'i'] = 'NONE'
-                writepakdata.loc[inactive, 'j'] = ''
+            inactive = writepakdata['idomain'] < 1
+            if write_mf6_inactive_cellids_as_None:
+                if not 'cellid' in writepakdata.columns:
+                    writepakdata.loc[inactive, 'k'] = ''
+                    writepakdata.loc[inactive, 'i'] = 'NONE'
+                    writepakdata.loc[inactive, 'j'] = ''
+                else:
+                    writepakdata.loc[inactive, 'cellid'] = 'NONE'
             else:
-                writepakdata.loc[inactive, 'cellid'] = 'NONE'
+                for col in ['cellid', 'k', 'i', 'j']:
+                    writepakdata.loc[inactive, col] = '0'
 
             columns = list(writepakdata.columns)
             columns[0] = '#{}'.format(columns[0])

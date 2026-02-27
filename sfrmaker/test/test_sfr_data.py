@@ -205,9 +205,12 @@ def test_ibound_representation_of_idomain(shellmound_sfrdata, shellmound_model):
 
 @pytest.mark.xfail(version.parse(flopy.__version__) <= version.parse('3.3.0'),
                    reason="")
-def test_write_mf6_package(shellmound_sfrdata, mf6sfr, outdir):
+@pytest.mark.parametrize('write_mf6_inactive_cellids_as_None', (True,False))
+def test_write_mf6_package(shellmound_sfrdata, mf6sfr, outdir,
+                           write_mf6_inactive_cellids_as_None):
     sfr_package_file = os.path.join(outdir, 'test.package_file.sfr')
-    shellmound_sfrdata.write_package(filename=sfr_package_file, version='mf6')
+    shellmound_sfrdata.write_package(filename=sfr_package_file, version='mf6',
+                                     write_mf6_inactive_cellids_as_None=write_mf6_inactive_cellids_as_None)
     with open(sfr_package_file) as src:
         for line in src:
             if 'budget' in line.lower() or 'stage' in line.lower():
@@ -252,7 +255,7 @@ def test_write_mf6_package(shellmound_sfrdata, mf6sfr, outdir):
                 for line in src:
                     if 'end packagedata' in line.lower():
                         break
-                    if 'none' not in line.lower() and '#' not in line:
+                    if 'none' not in line.lower() and ' 0 0 0 ' not in line and '#' not in line:
                         rows.append(line)
                 break
     text = ''.join(rows)
@@ -263,10 +266,11 @@ def test_write_mf6_package(shellmound_sfrdata, mf6sfr, outdir):
                          index_col=False
                          )
     isna = df.isna().any(axis=1).values.astype(bool)
-    df.dropna(axis=0, inplace=True)
+    #isna = isna | ((df[['k', 'i', 'j']] == (0, 0, 0)).any(axis=1))
+    df = df.loc[~isna].copy()
     for c in ['k', 'i', 'j', cols[0]]:
         df[c] = df[c].astype(int) - 1
-    pd.testing.assert_frame_equal(df,
+    pd.testing.assert_frame_equal(df.reset_index(drop=True),
                                   pdata.loc[~isna].reset_index(drop=True),
                                   check_dtype=False)
 
