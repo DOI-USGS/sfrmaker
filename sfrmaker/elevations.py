@@ -14,7 +14,7 @@ from sfrmaker.routing import get_nextupsegs, get_upsegs, make_graph
 
 def get_slopes(streambed_tops, reach_lengths, reach_numbers, outreach_numbers, 
                default_slope=0.001, minimum_slope=0.0001,
-                maximum_slope=1.):
+                maximum_slope=1., outlet_id=0):
     """Compute slopes by reach using values in strtop (streambed top) and rchlen (reach length)
     columns of reach_data. The slope for a reach n is computed as strtop(n) - strtop(n+1) / rchlen(n).
     Slopes for outlet reaches are set equal to a default value (default_slope).
@@ -42,6 +42,10 @@ def get_slopes(streambed_tops, reach_lengths, reach_numbers, outreach_numbers,
     maximum_slope : float
         Assigned to reaches with computed slopes more than this value.
         Default value is 1.
+    outlet_id : str or int
+        Identifier in `toids` that indicates an outlet condition.
+        By default, 0 (integer, which is used in a MODFLOW SFR Package context; 
+        when working with flowline identifiers, a '0' (str) should be used).
     """
     # cast everything to lists to avoid confusion with numpy vs. pandas indexers
     streambed_tops = list(streambed_tops)
@@ -63,7 +67,8 @@ def get_slopes(streambed_tops, reach_lengths, reach_numbers, outreach_numbers,
     return slopes
         
         
-def smooth_elevations(fromids, toids, elevations, start_elevations=None):  # elevup, elevdn):
+def smooth_elevations(fromids, toids, elevations, start_elevations=None,
+                      outlet_id=0):  # elevup, elevdn):
     """
 
     Parameters
@@ -77,6 +82,10 @@ def smooth_elevations(fromids, toids, elevations, start_elevations=None):  # ele
     start_elevations : sequence of floats, optional
         Start elevation for edge (line) in a stream network.
         By default, None.
+    outlet_id : str or int
+        Identifier in `toids` that indicates an outlet condition.
+        By default, 0 (integer, which is used in a MODFLOW SFR Package context; 
+        when working with flowline identifiers, a '0' (str) should be used).
 
     Returns
     -------
@@ -86,7 +95,10 @@ def smooth_elevations(fromids, toids, elevations, start_elevations=None):  # ele
     """
     # make forward and reverse dictionaries with routing info
     graph = dict(zip(fromids, toids))
-    assert 0 in set(graph.values()), 'No outlets in routing network!'
+    if not outlet_id in graph.values():
+        raise ValueError("'toids' sequence must contain at least one '0' "
+                         "indicating an outlet for the routing network!")
+    
     graph_r = make_graph(toids, fromids)
 
     # make dictionaries of segment end elevations
@@ -127,14 +139,14 @@ def smooth_elevations(fromids, toids, elevations, start_elevations=None):  # ele
         elevmin_s = np.min([elevations[s] for s in all_upsegs])  # minimum current elevation upstream of node
         oldmin_s = elevations[seg]
         elevs = [elevmin_s, oldmin_s]
-        if oseg > 0:  # if segment is not an outlet,
+        if oseg != outlet_id:  # if segment is not an outlet,
             if start_elevations is not None:
                 elevs.append(elevmax[oseg]) # outseg start elevation (already updated)
         # set segment end elevation as min of
         # upstream elevations, current elevation, outseg start elevation
         elevations[seg] = np.min(elevs)
         # if the node is not an outlet, reset the outseg max if the current min is lower
-        if oseg > 0:
+        if oseg != outlet_id:
             if start_elevations is not None:
                 next_reach_elev = elevmax[oseg]
                 elevmax[graph[seg]] = np.min([elevmin_s, next_reach_elev])
@@ -145,11 +157,12 @@ def smooth_elevations(fromids, toids, elevations, start_elevations=None):  # ele
     print('\nSmoothing elevations...')
     ta = time.time()
     # get list of segments at each level, starting with 0 (outlet)
-    segment_levels = get_upseg_levels(0)
+    segment_levels = get_upseg_levels(outlet_id)
+
     # at each level, reset all of the segment elevations as necessary
     for level in segment_levels:
         for s in level:
-            if 0 in level:
+            if outlet_id in level:
                 j=2
             reset_elevations(s)
     print("finished in {:.2f}s".format(time.time() - ta))
@@ -379,7 +392,7 @@ def sample_reach_elevations(sfr_reach_data, dem,
     if smooth:
         streambed_tops = smooth_elevations(reach_data.rno.tolist(),
                                     reach_data.outreach.tolist(),
-                                    sampled_elevations)
+                                    sampled_elevations, outlet_id=0)
     else:
         streambed_tops = dict(zip(reach_data.rno, sampled_elevations))
     return streambed_tops

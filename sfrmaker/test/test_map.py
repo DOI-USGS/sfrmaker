@@ -24,7 +24,7 @@ def get_lines(test_data_path, name_path):
         width2_column='width2',
         up_elevation_column='elevupsmo',
         dn_elevation_column='elevdnsmo',
-        name_column='GNIS_NAME',
+        name_column='gnis_name',
         width_units='feet',
         elevation_units='feet',
         crs=5070)
