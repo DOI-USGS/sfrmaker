@@ -31,7 +31,7 @@ from sfrmaker.gis import (intersect_rtree, get_crs,
 from sfrmaker.elevations import smooth_elevations
 from sfrmaker.logger import Logger
 from sfrmaker.nhdplus_utils import (
-    get_nhdplus_v2_filepaths, get_prj_file, read_nhdplus_hr)
+    get_nhdplus_v2_filepaths, get_prj_file, read_nhdplus, read_nhdplus_hr)
 from sfrmaker.routing import find_path, make_graph, make_reverse_graph, get_upsegs
 from sfrmaker.units import convert_length_units, unit_abbreviations
 from sfrmaker.utils import width_from_arbolate_sum, arbolate_sum
@@ -73,7 +73,7 @@ def get_flowline_routing(NHDPlus_paths=None, PlusFlow=None, mask=None,
     if NHDPlus_paths is not None:
         flowlines_files, pfvaa_files, pf_files, elevslope_files = \
         get_nhdplus_v2_filepaths(NHDPlus_paths, raise_not_exist_error=False)
-        pf = shp2df(pf_files)
+        pf = read_nhdplus(pf_files)
         
         if mask is not None:
             if isinstance(mask, tuple):
@@ -88,17 +88,17 @@ def get_flowline_routing(NHDPlus_paths=None, PlusFlow=None, mask=None,
                 bbox_filter = get_bbox(extent_poly_nhd_crs, dest_crs=nhdplus_crs)
             else:
                 bbox_filter = None
-            flowlines = shp2df(flowlines_files, filter=bbox_filter)
-            keep_comids = pf['FROMCOMID'].isin(flowlines['COMID']) | \
-                          pf['TOCOMID'].isin(flowlines['COMID'])
+            flowlines = read_nhdplus(flowlines_files, bbox_filter=bbox_filter)
+            keep_comids = pf['from_comid'].isin(flowlines['comid']) | \
+                          pf['to_comid'].isin(flowlines['comid'])
             pf = pf.loc[keep_comids]
     elif PlusFlow is not None:
-        pf = shp2df(PlusFlow)
+        pf = read_nhdplus(PlusFlow)
     else:
         raise ValueError(("get_flowline_routing: Must provide one of more" 
                           " NHDPlus_path or PlusFlow table."))
-    pf = pf.loc[pf['FROMCOMID'] != 0]
-    return pf[['FROMCOMID', 'TOCOMID']]
+    pf = pf.loc[pf['from_comid'] != 0]
+    return pf[['from_comid', 'to_comid']]
         
     
 def cull_flowlines(NHDPlus_paths,
@@ -193,30 +193,34 @@ def cull_flowlines(NHDPlus_paths,
         filter = None
 
     # read NHDPlus files into pandas dataframes
-    fl = shp2df(flowlines_files, filter=filter)
+    fl = read_nhdplus(flowlines_files, bbox_filter=filter)
     fl_all = fl.copy()
 
-    pfvaa = shp2df(pfvaa_files)
-    pf = shp2df(pf_files)
-    elevslope = shp2df(elevslope_files)
+    pfvaa = read_nhdplus(pfvaa_files)
+    pf = read_nhdplus(pf_files)
+    elevslope = read_nhdplus(elevslope_files)
 
     logger.log('Reading raw NHDPlus files')
 
     # index dataframes by common-identifier numbers
     # drop any entries without ID numbers
-    # enforce integer dtype in ID numbers
-    fl.dropna(subset=['COMID'], axis=0, inplace=True)
-    fl['COMID'] = fl.COMID.astype('int64')
-    fl.index = fl['COMID']
-    pfvaa.dropna(subset=['ComID'], axis=0, inplace=True)
-    pfvaa['ComID'] = pfvaa.ComID.astype('int64')
-    pfvaa.index = pfvaa['ComID']
-    pf.dropna(subset=['FROMCOMID'], axis=0, inplace=True)
-    pf['FROMCOMID'] = pf.FROMCOMID.astype('int64')
-    pf.index = pf['FROMCOMID']
-    elevslope.dropna(subset=['COMID'], axis=0, inplace=True)
-    elevslope['COMID'] = elevslope.COMID.astype('int64')
-    elevslope.index = elevslope['COMID']
+    invalid_ids = {None, '', 'none'}
+    fl = fl.loc[~fl['comid'].str.lower().isin(invalid_ids)].copy()
+    #fl.dropna(subset=['comid'], axis=0, inplace=True)
+    #fl['comid'] = fl['comid'].astype('int64')
+    fl.index = fl['comid']
+    pfvaa = pfvaa.loc[~pfvaa['comid'].str.lower().isin(invalid_ids)].copy()
+    #pfvaa.dropna(subset=['comid'], axis=0, inplace=True)
+    #pfvaa['comid'] = pfvaa['comid'].astype('int64')
+    pfvaa.index = pfvaa['comid']
+    pf = pf.loc[~pf['from_comid'].str.lower().isin(invalid_ids)].copy()
+    #pf.dropna(subset=['from_comid'], axis=0, inplace=True)
+    #pf['from_comid'] = pf['from_comid'].astype('int64')
+    pf.index = pf['from_comid']
+    elevslope = elevslope.loc[~elevslope['comid'].str.lower().isin(invalid_ids)].copy()
+    #elevslope.dropna(subset=['comid'], axis=0, inplace=True)
+    #elevslope['comid'] = elevslope['comid'].astype('int64')
+    elevslope.index = elevslope['comid']
 
     original_comids = set(fl.index)
     if cull_invalid:
@@ -250,52 +254,48 @@ def cull_flowlines(NHDPlus_paths,
         # assign an arbitrary asum of 1
         # (user will have to manually edit these invalid COMIDs later,
         # or in this case, the minimum stream width would be assigned)
-        pfvaa_difference = list(set(fl.COMID).difference(pfvaa.ComID))
+        pfvaa_difference = list(set(fl['comid']).difference(pfvaa['comid']))
         if any(pfvaa_difference):
             to_append = pd.DataFrame({
-                'ComID': pfvaa_difference,
-                'ArbolateSu': [1] * len(pfvaa_difference)}, 
+                'comid': pfvaa_difference,
+                'arbolate_s': [1] * len(pfvaa_difference)}, 
             index=pfvaa_difference)
             pfvaa = pd.concat([pfvaa, to_append], axis=0)
         # add any missing COMIDs to routing table
         # fill to comids with 0s (outlet condition)
-        pf_difference = list(set(fl.COMID).difference(pf.FROMCOMID))
+        pf_difference = list(set(fl['comid']).difference(pf['from_comid']))
         if any(pf_difference):
             to_append = pd.DataFrame({
-                'FROMCOMID': pf_difference,
-                'TOCOMID': [0] * len(pf_difference)}, 
+                'from_comid': pf_difference,
+                'to_comid': [0] * len(pf_difference)}, 
             index=pf_difference)
             pf = pd.concat([pf, to_append], axis=0)
         # add any missing COMIDs to elevations table
         # fill missing elevations with zeros
-        elevslope_difference = list(set(fl.COMID).difference(elevslope.COMID))
+        elevslope_difference = list(set(fl['comid']).difference(elevslope['comid']))
         if any(elevslope_difference):
             to_append = pd.DataFrame({
-                'COMID': elevslope_difference,
-                'MAXELEVSMO': [0] * len(elevslope_difference), 
+                'comid': elevslope_difference,
+                'maxelevsmo': [0] * len(elevslope_difference), 
                 'MELEVSMO': [0] * len(elevslope_difference)}, 
                 index=elevslope_difference)
             elevslope = pd.concat([elevslope, to_append], axis=0)
-    
-    assert pd.api.types.is_integer_dtype(pfvaa['ComID'])
-    assert pd.api.types.is_integer_dtype(pf['FROMCOMID'])
-    assert pd.api.types.is_integer_dtype(elevslope['COMID'])
 
-    fl['nhd_asum'] = pfvaa.ArbolateSu
+    fl['nhd_asum'] = pfvaa['arbolate_s']
 
     # cull by arbolate sum first
     if asum_thresh is not None:
         logger.statement('Dropping Flowlines with arbolate sum less than {}km'.format(asum_thresh))
         # exclude streams classified as perennial from threshold
-        criteria = (fl.FCODE == 46006) | (fl.nhd_asum >= asum_thresh)
-        criteria = criteria | fl['COMID'].isin(keep_comids)
+        criteria = (fl['fcode'] == 46006) | (fl.nhd_asum >= asum_thresh)
+        criteria = criteria | fl['comid'].isin(keep_comids)
         fl = fl.loc[criteria]
 
     # then cull intermittent streams
     if intermittent_streams_asum_thresh is not None:
         logger.statement('Dropping intermittent streams with arbolate sum less than {}km'.format(intermittent_streams_asum_thresh))
-        drop_intermittent = (fl.nhd_asum < intermittent_streams_asum_thresh) & (fl.FCODE == 46003)
-        criteria = ~drop_intermittent | fl['COMID'].isin(keep_comids)
+        drop_intermittent = (fl.nhd_asum < intermittent_streams_asum_thresh) & (fl['fcode'] == 46003)
+        criteria = ~drop_intermittent | fl['comid'].isin(keep_comids)
         fl = fl.loc[criteria]
 
     if cull_isolated:
@@ -308,13 +308,13 @@ def cull_flowlines(NHDPlus_paths,
         # technically not correct, because some flowlines have more than one distrib.
         # the tocomid chosen will be the last one element-wise in the plusflow table
         # this should be fine because there weren't many isolated COMIDs in the MAP area
-        comids = set(fl.COMID)
-        tocomid = [c if c in pf.FROMCOMID else 0 for c in pf.TOCOMID]
-        graph = dict(zip(pf.FROMCOMID, tocomid))
+        comids = set(fl['comid'])
+        tocomid = [c if c in pf['from_comid'] else 0 for c in pf['to_comid']]
+        graph = dict(zip(pf['from_comid'], tocomid))
         fl['tocomid'] = [graph[c] for c in fl.index]
-        geoms = dict(zip(fl_all.COMID, fl_all.geometry))
+        geoms = dict(zip(fl_all['comid'], fl_all.geometry))
         drop_comids = {0}
-        for i, c in enumerate(fl.COMID):
+        for i, c in enumerate(fl['comid']):
             # skip comids already in drop list
             if c in drop_comids:
                 continue
@@ -326,13 +326,13 @@ def cull_flowlines(NHDPlus_paths,
                     # but is within the model domain and a stream
                     # it was dropped
                     g = geoms.get(dnid, None)
-                    dnid_fcode = pfvaa.loc[dnid, 'Fcode']
+                    dnid_fcode = pfvaa.loc[dnid, 'fcode']
                     if g is not None and g.within(extent_poly_nhd_crs) and dnid_fcode not in [56600 # coastline
                                                                                            ]:
                         # drop current comid and all upstream comids
                         drop_comids.update(set(path[:j+1]))
                         break
-        criteria = ~fl.COMID.isin(drop_comids) | fl['COMID'].isin(keep_comids)
+        criteria = ~fl['comid'].isin(drop_comids) | fl['comid'].isin(keep_comids)
         fl = fl.loc[criteria]
 
         logger.log('Removing isolated flowlines that are no longer in the network')
@@ -602,16 +602,16 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
     with fiona.open(flowlines_file) as src:
         flowline_bbox = box(*src.bounds)
 
-    fl = gpd.read_file(flowlines_file) # flowlines clipped to model area
-    pfvaa = shp2df(pfvaa_file)
-    pf = shp2df(pf_file)
-    elevslope = shp2df(elevslope_file)
+    fl = read_nhdplus(flowlines_file) # flowlines clipped to model area
+    pfvaa = read_nhdplus(pfvaa_file)
+    pf = read_nhdplus(pf_file)
+    elevslope = read_nhdplus(elevslope_file)
 
     # index dataframes by common-identifier numbers
-    pfvaa.index = pfvaa.ComID
-    pf.index = pf.FROMCOMID
-    elevslope.index = elevslope.COMID
-    fl.index = fl.COMID
+    pfvaa.index = pfvaa['comid']
+    pf.index = pf['from_comid']
+    elevslope.index = elevslope['comid']
+    fl.index = fl['comid']
 
     # subset attribute tables to clipped flowlines
     pfvaa = pfvaa.loc[fl.index]
@@ -705,7 +705,7 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
                 "a previous run of the sfrmaker.preprocessing.preprocess_nhdplus() "
                 "function is needed.")
         flccb = gpd.read_file(flowline_elevations_file)
-        flccb.index = flccb['COMID']
+        flccb.index = flccb['comid']
         flccb['buffpoly'] = flccb['geometry']
         merge_cols = [c for c in flccb.columns if c not in fl.columns]
         fl = fl.join(flccb[merge_cols])
@@ -713,19 +713,19 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
     # cull COMIDS with invalid values
     minelev = -10
     logger.statement('Culling COMIDs with smoothed values < {} cm'.format(minelev))
-    badstrtop = (elevslope.MAXELEVSMO < minelev) | (elevslope.MINELEVSMO < minelev)
-    badstrtop_comids = elevslope.loc[badstrtop].COMID.values
-    badstrtop = [True if c in badstrtop_comids else False for c in fl.COMID]
+    badstrtop = (elevslope['maxelevsmo'] < minelev) | (elevslope['minelevsmo'] < minelev)
+    badstrtop_comids = elevslope.loc[badstrtop]['comid'].values
+    badstrtop = [True if c in badstrtop_comids else False for c in fl['comid']]
     flcc = fl.loc[~np.array(badstrtop)].copy()
 
     # add some attributes from pfvaa file
-    flcc['Divergence'] = pfvaa.loc[flcc.index, 'Divergence']
-    flcc['LevelPathI'] = pfvaa.loc[flcc.index, 'LevelPathI']
-    flcc['nhd_asum'] = pfvaa.loc[flcc.index, 'ArbolateSu']
+    flcc['divergence'] = pfvaa.loc[flcc.index, 'divergence']
+    flcc['levelpathi'] = pfvaa.loc[flcc.index, 'levelpathi']
+    flcc['nhd_asum'] = pfvaa.loc[flcc.index, 'arbolate_s']
 
     # dictionary with routing info by COMID
-    graph = make_graph(pf.FROMCOMID.values, pf.TOCOMID.values)
-    in_model = set(fl.COMID)
+    graph = make_graph(pf['from_comid'].values, pf['to_comid'].values)
+    in_model = set(fl['comid'])
     graph = {k: v for k, v in graph.items() if k in in_model}
 
     # use the 10th percentile from zonal_statistics for setting end elevation of each flowline
@@ -755,7 +755,7 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
 
     # dictionary of values for selecting main channel at diversions
     valid_comids = set(flcc.index)
-    div_elevs = dict(zip(flcc.COMID, flcc[elevcol]))
+    div_elevs = dict(zip(flcc['comid'], flcc[elevcol]))
     tocomids = {}
     diversionminorcomids = set()
     for k, v in graph.items():
@@ -789,7 +789,7 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
             if any(np.isnan(dnelevs)) or len(unique_dnelevs) == 1:
                 # Divergence == 1 is the main stemp, Divergence == 2 is minor
                 # (see NHDPlus v2 User's Guide)
-                info = flcc.loc[tocomids_c, 'Divergence'].sort_values()
+                info = flcc.loc[tocomids_c, 'divergence'].sort_values()
                 selected_tocomid = info.index[0]
                 if info.values[0] != 1:
                     logger.statement(no_main_stem_warning.format(k, selected_tocomid))
@@ -801,9 +801,9 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
 
     # update the routing graphs
     # set tocomids to zero if there's no flowline
-    graph = {k: v if v in flcc.index else 0 for k, v in tocomids.items()}
+    graph = {k: v if v in flcc.index else '0' for k, v in tocomids.items()}
     graph_r = make_graph(list(graph.values()), list(graph.keys()))
-    flcc['tocomid'] = [graph.get(c, 0) for c in flcc.index]
+    flcc['tocomid'] = [graph.get(c, '0') for c in flcc.index]
 
     # drop comids not in the model
     diversionminorcomids = diversionminorcomids.intersection(flcc.index)
@@ -824,7 +824,7 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
     # use the 1st percentile elevation values to avoid outliers
     # (spurious values in the DEM)
     logger.log('Updating elevation values with 1st percentile sampled from the dem')
-    elevs = dict(zip(flcc.COMID, flcc['pct01']))
+    elevs = dict(zip(flcc['comid'], flcc['pct01']))
     
     # update the elevations with any specified elevations
     # for up elevations, update the elevations of the next lines upstream
@@ -858,7 +858,7 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
     elevup = {}
     cm_to_output_units = convert_length_units('cm', output_length_units)
     # dictionary of NHDPlus minimum values converted to output units
-    elevslope_dict = dict(zip(elevslope.COMID, elevslope.MINELEVSMO * cm_to_output_units))
+    elevslope_dict = dict(zip(elevslope['comid'], elevslope['minelevsmo'] * cm_to_output_units))
     # screen for comids outside model
     valid_comids = {k for k, v in elevs.items() if minelev < v < 1e5}
     for tocomid, fromcomids in graph_r.items():
@@ -880,12 +880,13 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
     # smooth segment end values so that they never rise downstream
     logger.log('Smoothing updated elevations')
     elevminsmo, elevmaxsmo = smooth_elevations(flcc.index.values, flcc.tocomid.values,
-                                               flcc.elevdn.values, flcc.elevup.values)
+                                               flcc.elevdn.values, flcc.elevup.values,
+                                               outlet_id='0')
     flcc['elevupsmo'] = [elevmaxsmo[c] for c in flcc.index]
     flcc['elevdnsmo'] = [elevminsmo[c] for c in flcc.index]
 
     # verify that end values less than start values
-    assert np.all(flcc.elevdnsmo <= flcc.elevupsmo)
+    assert np.all(flcc['elevdnsmo'] <= flcc['elevupsmo'])
     # verify that values don't rise at segment connections
     elevupsmo = dict(zip(flcc.index, flcc.elevupsmo))
     nextup = np.array([elevupsmo.get(graph.get(c, -10), -10) for c in flcc.index])
@@ -893,8 +894,8 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
     logger.log('Smoothing updated elevations')
 
     # subtract secondary distributaries
-    nhdplus_asums = dict(zip(pfvaa.index, pfvaa.ArbolateSu))
-    fl_lengths = fl.LENGTHKM.to_dict()
+    nhdplus_asums = dict(zip(pfvaa.index, pfvaa['arbolate_s']))
+    fl_lengths = fl['length_km'].to_dict()
 
     logger.log('Recomputing arbolate sums')
     # NHDPlus asums are the default
@@ -925,7 +926,7 @@ def preprocess_nhdplus(flowlines_file, pfvaa_file,
     logger.statement('Populating channel widths...')
     logger.statement('width = {} * arbolate sum (meters) ^ {}'.format(width_from_asum_a_param,
                                                                       width_from_asum_b_param))
-    flcc['width1asum'] = width_from_arbolate_sum(flcc['asum_calc'].values - flcc['LENGTHKM'].values,
+    flcc['width1asum'] = width_from_arbolate_sum(flcc['asum_calc'].values - flcc['length_km'].values,
                                                  a=width_from_asum_a_param,
                                                  b=width_from_asum_b_param,
                                                  minimum_width=minimum_width,
@@ -1084,7 +1085,8 @@ def sample_NARWidth(flowlines, narwidth_shapefile, waterbody_shapefiles,
     """
 
     wb = shp2df(waterbody_shapefiles)
-
+    wb.columns = wb.columns.str.lower()
+    
     if not os.path.isdir(outpath):
         os.makedirs(outpath)
 
@@ -1159,8 +1161,8 @@ def sample_NARWidth(flowlines, narwidth_shapefile, waterbody_shapefiles,
     flowlines['narwd_std'] = np.array(widths_std) * unit_conversion
     flowlines['narwd_min'] = np.array(widths_min) * unit_conversion
     flowlines['narwd_max'] = np.array(widths_max) * unit_conversion
-    waterbodies = set(wb.COMID)
-    flowlines['is_wb'] = [True if c in waterbodies else False for c in flowlines.WBAREACOMI]
+    waterbodies = set(wb['comid'])
+    flowlines['is_wb'] = [True if c in waterbodies else False for c in flowlines['wbareacomi']]
 
     flowlines.drop('geometry', axis=1).to_csv('{}/flowlines_w_sampled_narwidth_elevations.csv'.format(outpath))
 
@@ -1175,7 +1177,7 @@ def sample_NARWidth(flowlines, narwidth_shapefile, waterbody_shapefiles,
 
 
 def edit_flowlines(flowlines, config_file,
-                   id_column='COMID', toid_column='tocomid',
+                   id_column='comid', toid_column='tocomid',
                    logger=None):
     """Make edits to the flowlines in flowlines_file,
     as described in config_file.
@@ -1215,6 +1217,7 @@ def edit_flowlines(flowlines, config_file,
     if isinstance(flowlines, str) or isinstance(flowlines, Path):
         logger.log_file_and_date_modified(flowlines)
         df = gpd.read_file(flowlines)
+        df.columns = df.columns.str.lower()
         # make a backup
         for ext in '.shp', '.dbf', '.shx', '.prj':
             source = flowlines[:-4] + ext
@@ -1242,6 +1245,8 @@ def edit_flowlines(flowlines, config_file,
         df2.rename(columns=column_mappings, inplace=True)
 
         # drop the IDs being added if they already exist
+        if not pd.api.types.is_numeric_dtype(df[id_column]):
+            df2[id_column] = df2[id_column].astype(str)
         df = df.loc[~df[id_column].isin(df2[id_column])]
 
         df = pd.concat([df, df2], axis=0)
@@ -1252,13 +1257,18 @@ def edit_flowlines(flowlines, config_file,
     if 'drop_flowlines' in cfg:
 
         drop_ids = cfg['drop_flowlines']
+        if not pd.api.types.is_numeric_dtype(df.index):
+            drop_ids = [str(drop_id) for drop_id in drop_ids]
         drop_rows = df.index.isin(drop_ids)
         drop_upids = set(df.loc[drop_rows, toid_column])
         df = df.loc[~drop_rows]
         logger.statement('dropped flowlines: {}'.format(textwrap.fill(str(drop_upids), 100)))
 
     if 'reroute_flowlines' in cfg:
-        for k, v in cfg['reroute_flowlines'].items():
+        reroute_flowlines = cfg['reroute_flowlines']
+        if not pd.api.types.is_numeric_dtype(df.index):
+            reroute_flowlines = {str(k): str(v) for k, v in reroute_flowlines.items()}
+        for k, v in reroute_flowlines.items():
             if k in df.index:
                 df.loc[k, toid_column] = v
             else:
@@ -1316,7 +1326,7 @@ def recompute_asums_for_minor_distribs(minor_distrib_comids, fl_lengths, graph, 
     return new_asums
 
 
-def fix_invalid_asums(asums, fl_lengths, graph, graph_r):
+def fix_invalid_asums(asums, fl_lengths, graph, graph_r, outlet_id='0'):
     """Recompute arbolate sum at any places in the network
     where it decreases going downstream, and then for all lines
     downstream of those locations. Decreases may be caused by
@@ -1334,7 +1344,10 @@ def fix_invalid_asums(asums, fl_lengths, graph, graph_r):
         Dictionary of downstream routing connections {fromcomid: tocomid}
     graph_r : dict
         Dictionary of upstream routing connections {tocomid: {fromcomid1, fromcomid2,...}}
-
+    outlet_id : str or int
+        Identifier in `toids` that indicates an outlet condition.
+        By default, '0' (string IDs are assumed when working with flowline identifiers).
+        
     Returns
     -------
     new_asums : dict
@@ -1380,7 +1393,7 @@ def fix_invalid_asums(asums, fl_lengths, graph, graph_r):
             # for each comid going downstream
             for cp in path[1:]:
                 # end condition is an outlet
-                if cp == 0:
+                if cp == outlet_id:
                     break
                 old_asum = new_asums[cp]
                 asum_c = old_asum + increment
@@ -1835,26 +1848,26 @@ def preprocess_nhdplus_hr_flowlines(nhdplus_path, active_area=None,
     
     # drop undesired line types (storm sewers and aquaducts, etc.)
     if keep_fcodes is not None:
-        df = df.loc[df['FCode'].isin(keep_fcodes)].copy()
+        df = df.loc[df['fcode'].isin(keep_fcodes)].copy()
     
     # drop drop_ids_upstream and all IDs above them
-    routing = make_graph(df['NHDPlusID'], df['ToNHDPID'], one_to_many=False)
+    routing = make_graph(df['nhdplusid'], df['to_nhdpid'], one_to_many=False)
     routing_r = make_reverse_graph(routing)
     if drop_ids_upstream is not None:
         all_drop_ids = drop_ids_upstream.copy()
         for nhdplusid in drop_ids_upstream:
             upstream_ids = get_upsegs(routing_r, nhdplusid)
             all_drop_ids.update(upstream_ids)
-        df = df.loc[~df['NHDPlusID'].isin(all_drop_ids)].copy()
+        df = df.loc[~df['nhdplusid'].isin(all_drop_ids)].copy()
     # drop just specified IDs    
     if drop_ids is not None:
-        df = df.loc[~df['NHDPlusID'].isin(drop_ids)].copy()
+        df = df.loc[~df['nhdplusid'].isin(drop_ids)].copy()
         
     # update the routing dicts
-    df.loc[~df['ToNHDPID'].isin(df['NHDPlusID']), 'ToNHDPID'] = 0
-    routing = make_graph(df['NHDPlusID'], df['ToNHDPID'], one_to_many=False)
+    df.loc[~df['to_nhdpid'].isin(df['nhdplusid']), 'to_nhdpid'] = 0
+    routing = make_graph(df['nhdplusid'], df['to_nhdpid'], one_to_many=False)
     routing_r = make_reverse_graph(routing)
-    df['ToNHDPID'] = [routing[nhdplusid] for nhdplusid in df['NHDPlusID']]
+    df['to_nhdpid'] = [routing[nhdplusid] for nhdplusid in df['nhdplusid']]
     
     # option to cull isolated groups of flowlines
     if drop_isolated:
@@ -1869,9 +1882,9 @@ def preprocess_nhdplus_hr_flowlines(nhdplus_path, active_area=None,
         # outlets are nhdplus IDs that don't route to anywhere
         outlets = {k for k, v in routing.items() if v == 0}
         # evaluate only outlets still in the dataset
-        outlets = outlets.intersection(df['NHDPlusID'])
+        outlets = outlets.intersection(df['nhdplusid'])
         for nhdplusid in outlets:
-            geom = df.loc[df['NHDPlusID'] == nhdplusid, 'geometry'].values[0]
+            geom = df.loc[df['nhdplusid'] == nhdplusid, 'geometry'].values[0]
             # remove outlet streams that are inside the model area
             if geom.within(extent_poly_nhd_crs):
                 # include the outlet
@@ -1882,13 +1895,13 @@ def preprocess_nhdplus_hr_flowlines(nhdplus_path, active_area=None,
                         routing_r, 
                         nhdplusid))
                 drop_isolated_ids.update(upstream_ids)
-        df = df.loc[~df['NHDPlusID'].isin(all_drop_ids)]
+        df = df.loc[~df['nhdplusid'].isin(all_drop_ids)]
     
     # repoject to dest_crs
     df = df.to_crs(dest_crs)
     
     # write out to shapefile
-    df['FDate'] = pd.to_datetime(df['FDate']).dt.strftime('%Y-%m-%d')
+    df['fdate'] = pd.to_datetime(df['fdate']).dt.strftime('%Y-%m-%d')
     df.to_file(outfile)
     print(f'wrote {outfile}')
     
@@ -1939,7 +1952,8 @@ def preprocess_nhdplus_hr_waterbodies(nhdplus_path, active_area,
         df = gpd.read_file(f, **kwargs)
         dfs.append(df)
     df = pd.concat(dfs)
-    df['NHDPlusID'] = df['NHDPlusID'].astype(int).astype(str)
+    df.columns = df.columns.str.lower()
+    df['nhdplusid'] = df['nhdplusid'].astype(int).astype(str)
     if dest_crs is None:
         dest_crs = df.crs
     else:
@@ -1951,9 +1965,9 @@ def preprocess_nhdplus_hr_waterbodies(nhdplus_path, active_area,
         extent_poly = read_polygon_feature(
             active_area, dest_crs=dest_crs)
         intersects = np.array([g.intersects(extent_poly) for g in df.geometry])
-    loc = intersects & ~df['NHDPlusID'].isin(drop_waterbodies) & (df['AreaSqKm'] >= min_areasqkm)
+    loc = intersects & ~df['nhdplusid'].isin(drop_waterbodies) & (df['areasqkm'] >= min_areasqkm)
     df = df.loc[loc].copy()
     
-    df['FDate'] = pd.to_datetime(df['FDate']).dt.strftime('%Y-%m-%d')
+    df['fdate'] = pd.to_datetime(df['fdate']).dt.strftime('%Y-%m-%d')
     df.to_file(outfile)
     print(f'wrote {outfile}')

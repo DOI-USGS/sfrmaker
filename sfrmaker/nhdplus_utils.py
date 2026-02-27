@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 import time
 import warnings
+import fiona
 import numpy as np
 import pandas as pd
 import geopandas as gpd
@@ -9,6 +10,19 @@ from gisutils import shp2df, get_shapefile_crs
 from .gis import get_bbox, get_crs
 
 
+def get_layername_anycase(layername, geodatabase_filepath):
+    """Get a layername in a geodatabase or geopackage without matching case.
+    If there are multiple matches, return the layer name (if any) that matches
+    the case of the input layername.
+    """
+    layers = fiona.listlayers(geodatabase_filepath)
+    layername_anycase = [n for n in layers if layername.lower() == n.lower()]
+    if len(layername_anycase) > 1 and layername in layers:
+        return layername
+    elif len(layername_anycase) == 1:
+        return layername_anycase[0]
+    
+    
 def get_prj_file(NHDPlus_paths=None, NHDFlowlines=None):
     if NHDPlus_paths is not None:
         if isinstance(NHDPlus_paths, str) or isinstance(NHDPlus_paths, Path):
@@ -43,7 +57,7 @@ def get_nhdplus_v2_filepaths(NHDPlus_paths,
 
 
 def get_nhdplus_v2_routing(PlusFlow_file,
-                           from_col='FROMCOMID', to_col='TOCOMID'):
+                           from_col='from_comid', to_col='to_comid'):
     """Read PlusFlow file and return the routing
     information as a dictionary of to:from COMID numbers.
     """
@@ -122,7 +136,7 @@ def load_nhdplus_v2(NHDPlus_paths=None,
         Table of NHDPlus version 2 information with columns:
         
         ===== ========= ======== ========== ========== ========== ==========
-        COMID GNIS_NAME LENGTHKM ArbolateSu StreamOrde MAXELEVSMO MINELEVSMO
+        comid gnis_name lengthkm arbolatesu streamorde maxelevsmo minelevsmo
         ===== ========= ======== ========== ========== ========== ==========
         
         See NHDPlus version 2 documentation for descriptions.
@@ -154,15 +168,15 @@ def load_nhdplus_v2(NHDPlus_paths=None,
     if bbox_filter is not None and not isinstance(bbox_filter, tuple):
         bbox_filter = get_bbox(bbox_filter, dest_crs=crs)
 
-    fl_cols = ['COMID',  # 'FCODE', 'FDATE', 'FLOWDIR',
+    fl_cols = ['comid',  # 'FCODE', 'FDATE', 'FLOWDIR',
                # 'FTYPE', 'GNIS_ID',
-               'GNIS_NAME', 'LENGTHKM',
+               'gnis_name', 'length_km',
                # 'REACHCODE', 'RESOLUTION', 'WBAREACOMI',
                'geometry']
-    pfvaa_cols = ['ArbolateSu',  # 'Hydroseq', 'DnHydroseq',
-                  'StreamOrde',  # 'LevelPathI',
+    pfvaa_cols = ['arbolate_s',  # 'Hydroseq', 'DnHydroseq',
+                  'stream_ord',  # 'LevelPathI',
                   ]
-    elevs_cols = ['MAXELEVSMO', 'MINELEVSMO']
+    elevs_cols = ['maxelevsmo', 'minelevsmo']
 
     # read flowlines and attribute tables into dataframes
     fl = read_nhdplus(NHDFlowlines, bbox_filter=bbox_filter)
@@ -171,8 +185,8 @@ def load_nhdplus_v2(NHDPlus_paths=None,
     elevs = read_nhdplus(elevslope)
 
     # join flowline and attribute dataframes
-    fl.columns = [c.upper() for c in list(fl)]  # added this, switch all to upper case
-    fl = fl.rename(columns={"GEOMETRY": "geometry"})  # added this (switch GEOMETRY back to lower case)
+    #fl.columns = [c.upper() for c in list(fl)]  # added this, switch all to upper case
+    #fl = fl.rename(columns={"GEOMETRY": "geometry"})  # added this (switch GEOMETRY back to lower case)
     df = fl[fl_cols].copy()
     df = df.join(pfvaa[pfvaa_cols], how='left')
     df = df.join(elevs[elevs_cols], how='left')
@@ -189,25 +203,25 @@ def get_tocomids(pf, fromcomid_list):
 
     # setup local variables and cull plusflow table to comids in model
     comids = fromcomid_list
-    pf = pf.loc[(pf.FROMCOMID.isin(comids)) |
-                (pf.TOCOMID.isin(comids))].copy()
+    pf = pf.loc[(pf['from_comid'].isin(comids)) |
+                (pf['to_comid'].isin(comids))].copy()
 
     # subset PlusFlow entries for comids that are not in fromcomid_list
     # comids may be missing because they are outside of the model
     # or if the fromcomid_list dataset was edited (resulting in breaks in the routing)
-    missing_tocomids = ~pf.TOCOMID.isin(comids) & (pf.TOCOMID != '0')
-    missing = pf.loc[missing_tocomids, ['FROMCOMID', 'TOCOMID']].copy()
+    missing_tocomids = ~pf['to_comid'].isin(comids) & (pf['to_comid'] != '0')
+    missing = pf.loc[missing_tocomids, ['from_comid', 'to_comid']].copy()
     # recursively crawl the PlusFlow table
     # to try to find a downstream comid that is in fromcomid_list
     missing['nextCOMID'] = [find_next_comid(tc, pf, comids)
-                            for tc in missing.TOCOMID]
-    pf.loc[missing_tocomids, 'TOCOMID'] = missing.nextCOMID
+                            for tc in missing['to_comid']]
+    pf.loc[missing_tocomids, 'to_comid'] = missing.nextCOMID
 
     # set any remaining comids not in fromcomid_list to zero
     # (outlets or inlets from outside model)
-    pf.loc[~pf.FROMCOMID.isin(comids), 'FROMCOMID'] = '0'
-    tocomid = pf.TOCOMID.values
-    fromcomid = pf.FROMCOMID.values
+    pf.loc[~pf['from_comid'].isin(comids), 'from_comid'] = '0'
+    tocomid = pf['to_comid'].values
+    fromcomid = pf['from_comid'].values
     tocomids = [tocomid[fromcomid == c].tolist() for c in comids]
     print("finished in {:.2f}s\n".format(time.time() - ta))
     return tocomids
@@ -222,7 +236,7 @@ def find_next_comid(comid, pftable, comids, max_levels=10):
     nextocomid = [comid]
     comids = set(comids)
     for i in range(max_levels):
-        nextocomid = pftable.loc[pftable.FROMCOMID.isin(nextocomid), 'TOCOMID'].tolist()
+        nextocomid = pftable.loc[pftable['from_comid'].isin(nextocomid), 'to_comid'].tolist()
         if len(set(nextocomid).intersection(comids)) > 0:
             # if more than one comid is found, simply take the first
             # (often these will be in different levelpaths,
@@ -268,6 +282,7 @@ def read_nhdplus(shapefiles, bbox_filter=None,
     dfs = []
     for i, f in enumerate(shapefiles):
         df = gpd.read_file(f, bbox=bbox_filter)
+        df.columns = df.columns.str.lower()
         if len(dfs) > 0:
             if df.crs != dfs[-1].crs:
                 # we could simply reproject, 
@@ -278,19 +293,31 @@ def read_nhdplus(shapefiles, bbox_filter=None,
     df = pd.concat(dfs)
     
     for col in cast_columns_to_strings:
-        column_name = [c for c in df.columns if c.lower() == col]
+        column_name = [c for c in df.columns if c.lower() == col.lower()]
         df[column_name] = df[column_name].astype(int).astype(str)
-            
+
+    column_renames = {
+        "lengthkm": "length_km",
+        "fromcomid": "from_comid",
+        "tocomid": "to_comid",
+        "streamorde": "stream_ord",
+        "arbolatesu":  "arbolate_s"
+        }
+    df.rename(columns=column_renames, inplace=True)
+    
+    if 'geometry' in df.columns:
+        df = gpd.GeoDataFrame(df, crs=fl_crs)
+    
     if len(df) > 0:
-        index_col = [c for c in df.columns if c.lower() == index_col or c.lower() == 'fromcomid']
-        if len(index_col) == 0:
+        index_col_matches = [c for c in df.columns if c.lower() == index_col.lower() or c.lower() == 'from_comid']
+        if len(index_col_matches) == 0:
             if isinstance(shapefiles, list):
                 shapefiles = '\n'.join(shapefiles)
             raise IndexError('No {} column found in: \n{}'.format(index_col,
                                                                   shapefiles))
         else:
             # cast COMIDs to strings
-            df.index = df[index_col[0]]
+            df.index = df[index_col_matches[0]].astype(str)
         return df
 
 
@@ -336,9 +363,11 @@ def read_nhdplus_hr(NHDPlusHR_paths, bbox_filter=None, drop_fcodes=None):
     fls = []
     for f in NHDPlusHR_paths:
         print(f'reading {f}...')
-        fl = gpd.read_file(f, driver='OpenFileGDB', layer='NHDFlowline', dtype={'NHDPlusID': str})
-        # cast NHDPlusIDs to strings (pandas dtype arg doesn't guarentee this)
-        fl['NHDPlusID'] = fl['NHDPlusID'].astype(int).astype(str)
+        layer = get_layername_anycase('NHDFlowline', f)
+        fl = gpd.read_file(f, driver='OpenFileGDB', layer=layer, dtype={'nhdplusid': str})
+        fl.columns = fl.columns.str.lower()
+        # cast nhdplusids to strings (pandas dtype arg doesn't guarentee this)
+        fl['nhdplusid'] = fl['nhdplusid'].astype(int).astype(str)
         
         #  get crs information from flowlines
         fl_crs = fl.crs
@@ -356,16 +385,22 @@ def read_nhdplus_hr(NHDPlusHR_paths, bbox_filter=None, drop_fcodes=None):
             fl = fl.cx[bbox_filter[0]:bbox_filter[2], bbox_filter[1]:bbox_filter[3]]
             
         #  read NHDPlusFlowlineVAA file from NHDPlusHR_path (NHDPlus HR OpenFileGDB) and merge with flowlines
-        flvaa = gpd.read_file(f, driver='OpenFileGDB', layer='NHDPlusFlowlineVAA')
-        flvaa['NHDPlusID'] = flvaa['NHDPlusID'].astype(int).astype(str)
-        fl = fl.merge(flvaa[['NHDPlusID', 'ArbolateSu','StreamOrde', 'MaxElevSmo', 'MinElevSmo', 'Divergence']],
-                    on='NHDPlusID', how='left'
+        layer = get_layername_anycase('NHDPlusFlowlineVAA', f)
+        flvaa = gpd.read_file(f, driver='OpenFileGDB', layer=layer)
+        flvaa.columns = flvaa.columns.str.lower()
+        flvaa.rename(columns={'arbolatesu':'arbolate_s', 'streamorde': 'stream_ord'}, inplace=True)
+        flvaa['nhdplusid'] = flvaa['nhdplusid'].astype(int).astype(str)
+        fl = fl.merge(flvaa[['nhdplusid', 'arbolate_s','stream_ord', 'maxelevsmo', 'minelevsmo', 'divergence']],
+                    on='nhdplusid', how='left'
                 )
         
         # read NHDPlusFlow file from NHDPlusHR_path (NHDPlus HR OpenFileGDB) 
-        pf = gpd.read_file(f, driver='OpenFileGDB', layer='NHDPlusFlow')
-        pf['FromNHDPID'] = pf['FromNHDPID'].astype(int).astype(str)
-        pf['ToNHDPID'] = pf['ToNHDPID'].astype(int).astype(str)
+        layer = get_layername_anycase('NHDPlusFlow', f)
+        pf = gpd.read_file(f, driver='OpenFileGDB', layer=layer)
+        pf.columns = pf.columns.str.lower()
+        pf.rename(columns={'tonhdpid': 'to_nhdpid', 'fromnhdpid': 'from_nhdpid'}, inplace=True)
+        pf['from_nhdpid'] = pf['from_nhdpid'].astype(int).astype(str)
+        pf['to_nhdpid'] = pf['to_nhdpid'].astype(int).astype(str)
         
         #  Remove features classified as minor divergence pathways (Divergence == 2)
         #  from PlusFlow table
@@ -374,15 +409,15 @@ def read_nhdplus_hr(NHDPlusHR_paths, bbox_filter=None, drop_fcodes=None):
         #  Add routing information from PlusFlow table.
         #  Set any remaining comids not in fromcomid_list to zero
         #  (outlets or inlets from outside model)
-        fl['ToNHDPID'] = [pf_routing_dict[i] if i in pf_routing_dict else 0.0 for i in fl['NHDPlusID']]
+        fl['to_nhdpid'] = [pf_routing_dict[i] if i in pf_routing_dict else 0.0 for i in fl['nhdplusid']]
         print("finished in {:.2f}s\n".format(time.time() - ta))
         fls.append(fl)
     fl = pd.concat(fls, axis=0)
     if drop_fcodes is not None:
         if np.isscalar(drop_fcodes):
-            keep = fl['FCode'] != drop_fcodes
+            keep = fl['fcode'] != drop_fcodes
         else:
-            keep = ~fl['FCode'].isin(drop_fcodes)
+            keep = ~fl['fcode'].isin(drop_fcodes)
         fl = fl.loc[keep].copy()
     return fl
 
@@ -396,13 +431,13 @@ def get_hr_routing(pf, fl):
     ta = time.time()
     
     # merge divergence data info to Plusflow dataframe
-    pf = pf.merge(fl[['Divergence', 'NHDPlusID']], left_on='ToNHDPID', 
-                      right_on = 'NHDPlusID', how='outer')
-    pf.rename(columns={'Divergence':'Divergence_ToNHDPID'}, inplace=True)
+    pf = pf.merge(fl[['divergence', 'nhdplusid']], left_on='to_nhdpid', 
+                      right_on = 'nhdplusid', how='outer')
+    pf.rename(columns={'divergence':'divergence_tonhdpid'}, inplace=True)
 
     # build routing dict excluding Divergece to == 2 (minor divergence path)
-    pf_routing_dict = dict(zip(pf.loc[pf.Divergence_ToNHDPID != 2, 'FromNHDPID'], 
-                               pf.loc[pf.Divergence_ToNHDPID != 2, 'ToNHDPID']))
+    pf_routing_dict = dict(zip(pf.loc[pf.divergence_tonhdpid != 2, 'from_nhdpid'], 
+                               pf.loc[pf.divergence_tonhdpid != 2, 'to_nhdpid']))
     
     print("finished in {:.2f}s\n".format(time.time() - ta))
     return pf_routing_dict
@@ -474,15 +509,15 @@ def load_nhdplus_hr(NHDPlusHR_paths, bbox_filter=None,
    
     #  Option to drop specified FCodes
     if drop_fcodes is not None:    
-        df = df.loc[~df.FCode.isin(drop_fcodes)]
+        df = df.loc[~df['fcode'].isin(drop_fcodes)]
     if drop_ftypes is not None:
-        df = df.loc[~df.FType.isin(drop_ftypes)]
+        df = df.loc[~df['ftype'].isin(drop_ftypes)]
     if drop_NHDPlusIDs is not None:
-        df = df.loc[~df.NHDPlusID.isin(map(str, drop_NHDPlusIDs))]
+        df = df.loc[~df['nhdplusid'].isin(map(str, drop_NHDPlusIDs))]
         
-    keep_cols = ['NHDPlusID', 'ToNHDPID', 'ArbolateSu',
-               'geometry', 'StreamOrde',
-               'MaxElevSmo', 'MinElevSmo', 'GNIS_Name']
+    keep_cols = ['nhdplusid', 'to_nhdpid', 'arbolate_s',
+               'geometry', 'stream_ord',
+               'maxelevsmo', 'minelevsmo', 'gnis_name']
     
     #  Make final dataframe with only the info needed for lines
     df = df[keep_cols].copy()

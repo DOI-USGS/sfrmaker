@@ -13,7 +13,7 @@ from shapely.geometry import LineString, Point
 from gisutils import df2shp, get_authority_crs
 from sfrmaker.routing import find_path, renumber_segments
 from sfrmaker.checks import valid_rnos, valid_nsegs, rno_nseg_routing_consistent
-from sfrmaker.elevations import get_slopes, smooth_elevations, sample_reach_elevations
+from sfrmaker.elevations import get_slopes, sample_reach_elevations
 from sfrmaker.flows import add_to_perioddata, add_to_segment_data
 from sfrmaker.gis import export_reach_data, project
 from sfrmaker.observations import write_gage_package, write_mf6_sfr_obsfile, add_observations

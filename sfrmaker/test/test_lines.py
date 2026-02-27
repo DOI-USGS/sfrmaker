@@ -30,7 +30,7 @@ def test_from_dataframe(nhdplus_dataframe, one_to_many,
     df = nhdplus_dataframe
     if one_to_many:
         # add some fake distributaries to a few flowlines
-        id = df.COMID.values[0]
+        id = df['comid'].values[0]
         inds = df.index.values[:3]
         modified_toids = [[toids[0], id] for toids in df.loc[inds, 'tocomid']] + df.loc[df.index.values[3]:, 'tocomid'].tolist()
         df['tocomid'] = modified_toids
@@ -40,16 +40,16 @@ def test_from_dataframe(nhdplus_dataframe, one_to_many,
         prjfile = get_prj_file(NHDFlowlines=flowlines)
 
     # convert arbolate sums from km to m
-    df['asum2'] = df.ArbolateSu * 1000
+    df['asum2'] = df['arbolate_s'] * 1000
 
     # convert comid end elevations from cm to m
-    if 'MAXELEVSMO' in df.columns:
-        df['elevup'] = df.MAXELEVSMO / 100.
-    if 'MINELEVSMO' in df.columns:
-        df['elevdn'] = df.MINELEVSMO / 100.
-    lines = sfrmaker.Lines.from_dataframe(df, id_column='COMID',
+    if 'maxelevsmo' in df.columns:
+        df['elevup'] = df['maxelevsmo'] / 100.
+    if 'minelevsmo' in df.columns:
+        df['elevdn'] = df['minelevsmo'] / 100.
+    lines = sfrmaker.Lines.from_dataframe(df, id_column='comid',
                                           routing_column='tocomid',
-                                          name_column='GNIS_NAME',
+                                          name_column='gnis_name',
                                           asum_units='meters',
                                           elevation_units='meters',
                                           prjfile=prjfile, crs=crs)
@@ -133,7 +133,7 @@ def test_from_shapefile(crs, prjfile):
         width2_column='width2',
         up_elevation_column='elevupsmo',
         dn_elevation_column='elevdnsmo',
-        name_column='GNIS_NAME',
+        name_column='gnis_name',
         width_units='feet',  # units of source data
         elevation_units='feet',  # units of source data
         prjfile=prjfile, crs=crs

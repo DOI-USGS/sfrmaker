@@ -461,7 +461,7 @@ def make_config_summary():
         'dem': {'dem', 'dem_z_units'},
         'options': {'model', 'grid',
                     'reach_data', 'segment_data',
-                    'package_name'},
+                    'package_name', 'version', 'idomain'},
         'to_riv': {'segments', 'rno'}
     }
 
