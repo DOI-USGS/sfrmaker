@@ -8,12 +8,10 @@ Version 0.13.1 (2025-12-30)
 
 Version 0.13.0 (2025-12-30)
 ---------------------------
-New Features:
-**************
+**New Features:**
 * Add support for incorporating field measurements of streambed top elevation.
 
-Bug Fixes:
-*************
+**Bug Fixes:**
 * fix issue with elevations.sample_reach_elevations where csvs read by geopandas were being mistaken for vector data
 * refactor code to support numpy API change from in1d to isin
 * fix issue with the routing.find_path function: if the starting ID == the end ID, return the end ID (which is the last ID in any other returned path), instead of raising an error.
@@ -26,18 +24,15 @@ Version 0.12.1 (2025-05-09)
 
 Version 0.12.0 (2025-05-09)
 ---------------------------
-New Features:
-**************
+**New Features:**
 * Add support for preprocessing NHDPlus HR flowlines and waterbodies to shapefiles (`preprocessing.preprocess_nhdplus_hr_flowlines()` and `preprocessing.preprocess_nhdplus_hr_waterbodies()` functions)
 * Add support for readling multiple NHDPlus HR geodatabases (which can then be consolidated)
 * Add demo for converty MODFLOW SFR2 to MODFLOW 6
 
-Internal Refactor:
-*******************
+**Internal Refactor:**
 * Use strings universally for line and other feature identifiers, to avoid confusion with floats vs ints, and issues with long identifiers such as those in NHDPlus HR that can't be represented as integers in 32-bit contexts
 
-Bug Fixes:
-*************
+**Bug Fixes:**
 * fix issue with intersections when there are invalid geometries, by employging shapely’s `make_valid()` method.
 * fix issue with reading and writing shapefiles when there are multiple geometry types (e.g. Multipolygon and Polygon)
 * fix issue with convering MODFLOW 2005 SFR2 packages to MODFLOW 6, where line_id auxiliary variable wasn't included in the MODFLOW 6 packagedata.

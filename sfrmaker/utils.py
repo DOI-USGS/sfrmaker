@@ -450,6 +450,8 @@ def make_config_summary():
                 sfrmaker.Lines.to_sfr,
             ('keyword arguments to sfrmaker.SFRData'):
                 sfrmaker.SFRData,
+            ('keyword arguments to sfrmaker.SFRData.write_package'):
+            sfrmaker.SFRData.write_package,
         }
     }
 

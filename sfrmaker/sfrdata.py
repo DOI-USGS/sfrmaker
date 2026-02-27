@@ -940,7 +940,7 @@ class SFRData(DataPackage):
             an error will be raised. Points can be specified in a shapefile, geopackage, CSV file or
             (Geo)DataFrame, which must contain the following fields:
             
-            ========= ===============================================================================
+            ========= ================================================================================
             x         x-coordinate. If a CSV or regular DataFrame is provided, 
                       this must be in the CRS of the model or an elevation_data_crs must be provided.
             y         y-coordinate.
@@ -1379,8 +1379,12 @@ class SFRData(DataPackage):
                 package_file_path = os.path.join(output_path, package_name + '.sfr')
             else:
                 package_file_path = os.path.join(model.model_ws, package_name + '.sfr')
-            sfrdata.write_package(package_file_path,
-                                  version=model_version)
+            kwargs = {'filename': package_file_path,
+                      'version': model_version}
+            kwargs.update({k:v for k, v in cfg.get('options', {}).items() 
+                           if k not in {'version'}})
+            kwargs = get_input_arguments(kwargs, sfrdata.write_package)
+            sfrdata.write_package(**kwargs)
             sfrdata.write_tables()
             sfrdata.write_shapefiles()
 
@@ -1533,6 +1537,7 @@ class SFRData(DataPackage):
                       options=None, run_diagnostics=True,
                       write_observations_input=True,
                       external_files_path=None, gage_starting_unit_number=None,
+                      write_mf6_inactive_cellids_as_None=False,
                       **kwargs):
         """Write an SFR package input file.
 
@@ -1579,6 +1584,11 @@ class SFRData(DataPackage):
         gage_starting_unit_number : int, optional
             Starting unit number for gage output files, 
             by default None
+        write_mf6_inactive_cellids_as_None : bool
+            Prior to MODFLOW 6.4.3, groundwater flow connections for SFR reaches in inactive cells
+            were written as 'NONE'. Since then, unconnected reaches are specified with a zero for
+            each grid dimension (e.g. '0 0 0' for DIS grid). This option allows 'NONE' to be written
+            for compatibility with older versions of MODFLOW 6. By default, False (use 0s).
         """        
         print('SFRmaker v. {}'.format(sfrmaker.__version__))
         # run the flopy SFR diagnostics
@@ -1639,7 +1649,8 @@ class SFRData(DataPackage):
                           options=options)
 
             # write a MODFLOW 6 file
-            sfr6.write_file(filename=filename, external_files_path=external_files_path)
+            sfr6.write_file(filename=filename, external_files_path=external_files_path,
+                            write_mf6_inactive_cellids_as_None=write_mf6_inactive_cellids_as_None)
 
     def write_tables(self, basename=None):
         """Write :py:attr:`~SFRData.reach_data`, :py:attr:`~SFRData.segment_data`,
