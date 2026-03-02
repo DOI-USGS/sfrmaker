@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>sfrmaker.mf5to6 &mdash; SFRmaker 0.13.0.post5.dev0+g9ab4f77 documentation</title>
+  <title>sfrmaker.mf5to6 &mdash; SFRmaker 0.13.0.post7.dev0+g0e9a3a5 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=65520a6d"></script>
+      <script src="../../_static/documentation_options.js?v=b8c60106"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -365,7 +365,8 @@
 <div class="viewcode-block" id="Mf6SFR.write_file">
 <a class="viewcode-back" href="../../api/sfrmaker.mf5to6.html#sfrmaker.mf5to6.Mf6SFR.write_file">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">write_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">outpath</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                   <span class="n">external_files_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+                   <span class="n">external_files_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                   <span class="n">write_mf6_inactive_cellids_as_None</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Write a MODFLOW-6 format SFR package file.</span>
 
 <span class="sd">        Parameters</span>
@@ -392,6 +393,11 @@
 <span class="sd">            Path for writing an external file for packagedata, relative to the location of the SFR package file.</span>
 <span class="sd">            If specified, an open/close statement referencing the file is written to the packagedata block.</span>
 <span class="sd">            By default, None (packagedata table is written to the SFR package file)</span>
+<span class="sd">        write_mf6_inactive_cellids_as_None : bool</span>
+<span class="sd">            Prior to MODFLOW 6.4.3, groundwater flow connections for SFR reaches in inactive cells</span>
+<span class="sd">            were written as &#39;NONE&#39;. Since then, unconnected reaches are specified with a zero for</span>
+<span class="sd">            each grid dimension (e.g. &#39;0 0 0&#39; for DIS grid). This option allows &#39;NONE&#39; to be written</span>
+<span class="sd">            for compatibility with older versions of MODFLOW 6. By default, False (use 0s).</span>
 
 <span class="sd">        Raises</span>
 <span class="sd">        ------</span>
@@ -426,13 +432,17 @@
                     <span class="n">writepakdata</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>  <span class="c1"># convert indices to 1-based</span>
                     <span class="n">writepakdata</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">writepakdata</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
             <span class="c1"># fill in NONEs for reaches in inactive cells</span>
-            <span class="n">inactive</span> <span class="o">=</span> <span class="n">writepakdata</span><span class="o">.</span><span class="n">idomain</span> <span class="o">!=</span> <span class="mi">1</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="s1">&#39;cellid&#39;</span> <span class="ow">in</span> <span class="n">writepakdata</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
-                <span class="n">writepakdata</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">inactive</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
-                <span class="n">writepakdata</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">inactive</span><span class="p">,</span> <span class="s1">&#39;i&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;NONE&#39;</span>
-                <span class="n">writepakdata</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">inactive</span><span class="p">,</span> <span class="s1">&#39;j&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+            <span class="n">inactive</span> <span class="o">=</span> <span class="n">writepakdata</span><span class="p">[</span><span class="s1">&#39;idomain&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">write_mf6_inactive_cellids_as_None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="s1">&#39;cellid&#39;</span> <span class="ow">in</span> <span class="n">writepakdata</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                    <span class="n">writepakdata</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">inactive</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+                    <span class="n">writepakdata</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">inactive</span><span class="p">,</span> <span class="s1">&#39;i&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;NONE&#39;</span>
+                    <span class="n">writepakdata</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">inactive</span><span class="p">,</span> <span class="s1">&#39;j&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">writepakdata</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">inactive</span><span class="p">,</span> <span class="s1">&#39;cellid&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;NONE&#39;</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">writepakdata</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">inactive</span><span class="p">,</span> <span class="s1">&#39;cellid&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;NONE&#39;</span>
+                <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;cellid&#39;</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="s1">&#39;j&#39;</span><span class="p">]:</span>
+                    <span class="n">writepakdata</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">inactive</span><span class="p">,</span> <span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;0&#39;</span>
 
             <span class="n">columns</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">writepakdata</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
             <span class="n">columns</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;#</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">columns</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
@@ -652,7 +662,7 @@
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Feb 26, 2026.
+      <span class="lastupdated">Last updated on Mar 02, 2026.
       </span></p>
   </div>
 

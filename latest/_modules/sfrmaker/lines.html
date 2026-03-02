@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>sfrmaker.lines &mdash; SFRmaker 0.13.0.post5.dev0+g9ab4f77 documentation</title>
+  <title>sfrmaker.lines &mdash; SFRmaker 0.13.0.post7.dev0+g0e9a3a5 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=65520a6d"></script>
+      <script src="../../_static/documentation_options.js?v=b8c60106"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -691,7 +691,10 @@
             <span class="n">bbox_filter</span> <span class="o">=</span> <span class="n">get_bbox</span><span class="p">(</span><span class="n">bbox_filter</span><span class="p">,</span> <span class="n">shpfile_crs</span><span class="p">)</span>
 
         <span class="n">df</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">shapefile</span><span class="p">,</span> <span class="n">bbox</span><span class="o">=</span><span class="n">bbox_filter</span><span class="p">)</span>
-        <span class="k">assert</span> <span class="s1">&#39;geometry&#39;</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> <span class="s2">&quot;No feature geometries found in </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">shapefile</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">id_column</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;id_column: </span><span class="si">{</span><span class="n">id_column</span><span class="si">}</span><span class="s2"> not in </span><span class="si">{</span><span class="n">shapefile</span><span class="si">}</span><span class="s2"> attribute fields&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s1">&#39;geometry&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No feature geometries found in </span><span class="si">{</span><span class="n">shapefile</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_dataframe</span><span class="p">(</span><span class="n">df</span><span class="p">,</span>   
                                   <span class="n">id_column</span><span class="o">=</span><span class="n">id_column</span><span class="p">,</span>
@@ -940,18 +943,18 @@
             <span class="n">prjfile</span> <span class="o">=</span> <span class="n">get_prj_file</span><span class="p">(</span><span class="n">NHDPlus_paths</span><span class="p">,</span> <span class="n">NHDFlowlines</span><span class="p">)</span>
 
         <span class="c1"># convert arbolate sums from km to m</span>
-        <span class="n">df</span><span class="p">[</span><span class="s1">&#39;asum1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">ArbolateSu</span> <span class="o">-</span> <span class="n">df</span><span class="o">.</span><span class="n">LENGTHKM</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1000</span>
-        <span class="n">df</span><span class="p">[</span><span class="s1">&#39;asum2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">ArbolateSu</span> <span class="o">*</span> <span class="mi">1000</span>
+        <span class="n">df</span><span class="p">[</span><span class="s1">&#39;asum1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;arbolate_s&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;length_km&#39;</span><span class="p">])</span> <span class="o">*</span> <span class="mi">1000</span>
+        <span class="n">df</span><span class="p">[</span><span class="s1">&#39;asum2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;arbolate_s&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">1000</span>
 
         <span class="c1"># convert comid end elevations from cm to m</span>
-        <span class="k">if</span> <span class="s1">&#39;MAXELEVSMO&#39;</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
-            <span class="n">df</span><span class="p">[</span><span class="s1">&#39;elevup&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">MAXELEVSMO</span> <span class="o">/</span> <span class="mf">100.</span>
-        <span class="k">if</span> <span class="s1">&#39;MINELEVSMO&#39;</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
-            <span class="n">df</span><span class="p">[</span><span class="s1">&#39;elevdn&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">MINELEVSMO</span> <span class="o">/</span> <span class="mf">100.</span>
+        <span class="k">if</span> <span class="s1">&#39;maxelevsmo&#39;</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="n">df</span><span class="p">[</span><span class="s1">&#39;elevup&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;maxelevsmo&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="mf">100.</span>
+        <span class="k">if</span> <span class="s1">&#39;minelevsmo&#39;</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="n">df</span><span class="p">[</span><span class="s1">&#39;elevdn&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;minelevsmo&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="mf">100.</span>
 
-        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_dataframe</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">id_column</span><span class="o">=</span><span class="s1">&#39;COMID&#39;</span><span class="p">,</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_dataframe</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">id_column</span><span class="o">=</span><span class="s1">&#39;comid&#39;</span><span class="p">,</span>
                                   <span class="n">routing_column</span><span class="o">=</span><span class="s1">&#39;tocomid&#39;</span><span class="p">,</span>
-                                  <span class="n">name_column</span><span class="o">=</span><span class="s1">&#39;GNIS_NAME&#39;</span><span class="p">,</span>
+                                  <span class="n">name_column</span><span class="o">=</span><span class="s1">&#39;gnis_name&#39;</span><span class="p">,</span>
                                   <span class="n">asum_units</span><span class="o">=</span><span class="s1">&#39;meters&#39;</span><span class="p">,</span>
                                   <span class="n">elevation_units</span><span class="o">=</span><span class="s1">&#39;meters&#39;</span><span class="p">,</span>
                                   <span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">,</span> <span class="n">prjfile</span><span class="o">=</span><span class="n">prjfile</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
@@ -1033,17 +1036,17 @@
         <span class="c1">#    proj_str = crs.to_proj4()</span>
 
         <span class="c1"># convert arbolate sums from km to m</span>
-        <span class="n">df</span><span class="p">[</span><span class="s1">&#39;asum2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">ArbolateSu</span> <span class="o">*</span> <span class="mi">1000</span>
+        <span class="n">df</span><span class="p">[</span><span class="s1">&#39;asum2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;arbolate_s&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">1000</span>
 
         <span class="c1"># convert NHDPlusID end elevations from cm to m</span>
-        <span class="k">if</span> <span class="s1">&#39;MaxElevSmo&#39;</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
-            <span class="n">df</span><span class="p">[</span><span class="s1">&#39;elevup&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">MaxElevSmo</span> <span class="o">/</span> <span class="mf">100.</span>
-        <span class="k">if</span> <span class="s1">&#39;MinElevSmo&#39;</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
-            <span class="n">df</span><span class="p">[</span><span class="s1">&#39;elevdn&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">MinElevSmo</span> <span class="o">/</span> <span class="mf">100.</span>
+        <span class="k">if</span> <span class="s1">&#39;maxelevsmo&#39;</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="n">df</span><span class="p">[</span><span class="s1">&#39;elevup&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;maxelevsmo&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="mf">100.</span>
+        <span class="k">if</span> <span class="s1">&#39;minelevsmo&#39;</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="n">df</span><span class="p">[</span><span class="s1">&#39;elevdn&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;minelevsmo&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="mf">100.</span>
 
-        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_dataframe</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">id_column</span><span class="o">=</span><span class="s1">&#39;NHDPlusID&#39;</span><span class="p">,</span>
-                                  <span class="n">routing_column</span><span class="o">=</span><span class="s1">&#39;ToNHDPID&#39;</span><span class="p">,</span>
-                                  <span class="n">name_column</span><span class="o">=</span><span class="s1">&#39;GNIS_Name&#39;</span><span class="p">,</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_dataframe</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">id_column</span><span class="o">=</span><span class="s1">&#39;nhdplusid&#39;</span><span class="p">,</span>
+                                  <span class="n">routing_column</span><span class="o">=</span><span class="s1">&#39;to_nhdpid&#39;</span><span class="p">,</span>
+                                  <span class="n">name_column</span><span class="o">=</span><span class="s1">&#39;gnis_name&#39;</span><span class="p">,</span>
                                   <span class="n">arbolate_sum_column2</span><span class="o">=</span><span class="s1">&#39;asum2&#39;</span><span class="p">,</span>
                                   <span class="n">asum_units</span><span class="o">=</span><span class="s1">&#39;meters&#39;</span><span class="p">,</span>
                                   <span class="n">up_elevation_column</span><span class="o">=</span><span class="s1">&#39;elevup&#39;</span><span class="p">,</span>
@@ -1419,7 +1422,7 @@
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Feb 26, 2026.
+      <span class="lastupdated">Last updated on Mar 02, 2026.
       </span></p>
   </div>
 

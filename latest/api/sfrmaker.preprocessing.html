@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>The Preprocessing Module &mdash; SFRmaker 0.13.0.post5.dev0+g9ab4f77 documentation</title>
+  <title>The Preprocessing Module &mdash; SFRmaker 0.13.0.post7.dev0+g0e9a3a5 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
@@ -15,7 +15,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=65520a6d"></script>
+      <script src="../_static/documentation_options.js?v=b8c60106"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -227,7 +227,7 @@ by default None</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="sfrmaker.preprocessing.edit_flowlines">
-<span class="sig-prename descclassname"><span class="pre">sfrmaker.preprocessing.</span></span><span class="sig-name descname"><span class="pre">edit_flowlines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">flowlines</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'COMID'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">toid_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'tocomid'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/preprocessing.html#edit_flowlines"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.preprocessing.edit_flowlines" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">sfrmaker.preprocessing.</span></span><span class="sig-name descname"><span class="pre">edit_flowlines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">flowlines</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'comid'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">toid_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'tocomid'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/preprocessing.html#edit_flowlines"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.preprocessing.edit_flowlines" title="Link to this definition"></a></dt>
 <dd><p>Make edits to the flowlines in flowlines_file,
 as described in config_file.</p>
 <dl class="field-list simple">
@@ -259,7 +259,7 @@ input shapefile is overwritten by the results.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="sfrmaker.preprocessing.fix_invalid_asums">
-<span class="sig-prename descclassname"><span class="pre">sfrmaker.preprocessing.</span></span><span class="sig-name descname"><span class="pre">fix_invalid_asums</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">asums</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fl_lengths</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">graph</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">graph_r</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/preprocessing.html#fix_invalid_asums"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.preprocessing.fix_invalid_asums" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">sfrmaker.preprocessing.</span></span><span class="sig-name descname"><span class="pre">fix_invalid_asums</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">asums</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fl_lengths</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">graph</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">graph_r</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outlet_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'0'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/preprocessing.html#fix_invalid_asums"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.preprocessing.fix_invalid_asums" title="Link to this definition"></a></dt>
 <dd><p>Recompute arbolate sum at any places in the network
 where it decreases going downstream, and then for all lines
 downstream of those locations. Decreases may be caused by
@@ -276,6 +276,9 @@ in same units as asums.</p>
 <dt><strong>graph</strong><span class="classifier">dict</span></dt><dd><p>Dictionary of downstream routing connections {fromcomid: tocomid}</p>
 </dd>
 <dt><strong>graph_r</strong><span class="classifier">dict</span></dt><dd><p>Dictionary of upstream routing connections {tocomid: {fromcomid1, fromcomid2,…}}</p>
+</dd>
+<dt><strong>outlet_id</strong><span class="classifier">str or int</span></dt><dd><p>Identifier in <cite>toids</cite> that indicates an outlet condition.
+By default, ‘0’ (string IDs are assumed when working with flowline identifiers).</p>
 </dd>
 </dl>
 </dd>
@@ -870,7 +873,7 @@ In this case, one would most likely supply both <code class="docutils literal no
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Feb 26, 2026.
+      <span class="lastupdated">Last updated on Mar 02, 2026.
       </span></p>
   </div>
 

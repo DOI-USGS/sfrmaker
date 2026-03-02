@@ -28,10 +28,10 @@
    "id": "619f9195",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-02-26T20:51:25.521553Z",
-     "iopub.status.busy": "2026-02-26T20:51:25.521400Z",
-     "iopub.status.idle": "2026-02-26T20:51:27.660066Z",
-     "shell.execute_reply": "2026-02-26T20:51:27.658352Z"
+     "iopub.execute_input": "2026-03-02T21:35:33.232008Z",
+     "iopub.status.busy": "2026-03-02T21:35:33.231443Z",
+     "iopub.status.idle": "2026-03-02T21:35:35.947327Z",
+     "shell.execute_reply": "2026-03-02T21:35:35.946370Z"
     }
    },
    "outputs": [],
@@ -58,10 +58,10 @@
    "id": "bb1d52ad",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-02-26T20:51:27.664003Z",
-     "iopub.status.busy": "2026-02-26T20:51:27.663454Z",
-     "iopub.status.idle": "2026-02-26T20:51:27.668408Z",
-     "shell.execute_reply": "2026-02-26T20:51:27.667204Z"
+     "iopub.execute_input": "2026-03-02T21:35:35.949690Z",
+     "iopub.status.busy": "2026-03-02T21:35:35.949253Z",
+     "iopub.status.idle": "2026-03-02T21:35:35.956602Z",
+     "shell.execute_reply": "2026-03-02T21:35:35.955841Z"
     }
    },
    "outputs": [],
@@ -95,10 +95,10 @@
    "id": "3235b2fb",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-02-26T20:51:27.670739Z",
-     "iopub.status.busy": "2026-02-26T20:51:27.670510Z",
-     "iopub.status.idle": "2026-02-26T20:51:27.978342Z",
-     "shell.execute_reply": "2026-02-26T20:51:27.977125Z"
+     "iopub.execute_input": "2026-03-02T21:35:35.958502Z",
+     "iopub.status.busy": "2026-03-02T21:35:35.958383Z",
+     "iopub.status.idle": "2026-03-02T21:35:36.214241Z",
+     "shell.execute_reply": "2026-03-02T21:35:36.212430Z"
     }
    },
    "outputs": [
@@ -112,22 +112,22 @@
       "Getting routing information from NHDPlus HR Plusflow table...\n",
       "finished in 0.00s\n",
       "\n",
-      "finished in 0.20s\n",
+      "finished in 0.16s\n",
       "\n",
-      "reading ../neversink_rondout/NHDPLUS_HR_2.gdb...\n"
+      "reading ../neversink_rondout/NHDPLUS_HR_2.gdb...\n",
+      "filtering flowlines...\n",
+      "\n",
+      "Getting routing information from NHDPlus HR Plusflow table...\n",
+      "finished in 0.00s\n",
+      "\n",
+      "finished in 0.20s\n",
+      "\n"
      ]
     },
     {
      "name": "stdout",
      "output_type": "stream",
      "text": [
-      "filtering flowlines...\n",
-      "\n",
-      "Getting routing information from NHDPlus HR Plusflow table...\n",
-      "finished in 0.00s\n",
-      "\n",
-      "finished in 0.27s\n",
-      "\n",
       "wrote output/preprocessed_flowlines.shp\n"
      ]
     }
@@ -167,10 +167,10 @@
    "id": "47229b35",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-02-26T20:51:27.980865Z",
-     "iopub.status.busy": "2026-02-26T20:51:27.980629Z",
-     "iopub.status.idle": "2026-02-26T20:51:28.005403Z",
-     "shell.execute_reply": "2026-02-26T20:51:28.004040Z"
+     "iopub.execute_input": "2026-03-02T21:35:36.217396Z",
+     "iopub.status.busy": "2026-03-02T21:35:36.216683Z",
+     "iopub.status.idle": "2026-03-02T21:35:36.249113Z",
+     "shell.execute_reply": "2026-03-02T21:35:36.248184Z"
     }
    },
    "outputs": [
@@ -210,10 +210,10 @@
    "id": "08783e35",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-02-26T20:51:28.008277Z",
-     "iopub.status.busy": "2026-02-26T20:51:28.008127Z",
-     "iopub.status.idle": "2026-02-26T20:51:28.015499Z",
-     "shell.execute_reply": "2026-02-26T20:51:28.014542Z"
+     "iopub.execute_input": "2026-03-02T21:35:36.251122Z",
+     "iopub.status.busy": "2026-03-02T21:35:36.250938Z",
+     "iopub.status.idle": "2026-03-02T21:35:36.258067Z",
+     "shell.execute_reply": "2026-03-02T21:35:36.255105Z"
     }
    },
    "outputs": [],
@@ -242,10 +242,10 @@
    "id": "f61d69a1",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-02-26T20:51:28.018851Z",
-     "iopub.status.busy": "2026-02-26T20:51:28.018693Z",
-     "iopub.status.idle": "2026-02-26T20:51:28.027821Z",
-     "shell.execute_reply": "2026-02-26T20:51:28.026466Z"
+     "iopub.execute_input": "2026-03-02T21:35:36.261768Z",
+     "iopub.status.busy": "2026-03-02T21:35:36.261533Z",
+     "iopub.status.idle": "2026-03-02T21:35:36.267920Z",
+     "shell.execute_reply": "2026-03-02T21:35:36.266619Z"
     }
    },
    "outputs": [],
@@ -284,10 +284,10 @@
    "id": "84909bed",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-02-26T20:51:28.030973Z",
-     "iopub.status.busy": "2026-02-26T20:51:28.030647Z",
-     "iopub.status.idle": "2026-02-26T20:51:28.187131Z",
-     "shell.execute_reply": "2026-02-26T20:51:28.185226Z"
+     "iopub.execute_input": "2026-03-02T21:35:36.271278Z",
+     "iopub.status.busy": "2026-03-02T21:35:36.271109Z",
+     "iopub.status.idle": "2026-03-02T21:35:36.469801Z",
+     "shell.execute_reply": "2026-03-02T21:35:36.469335Z"
     }
    },
    "outputs": [
@@ -299,13 +299,6 @@
       "../tylerforks/NHDPlus/\n",
       "\n",
       "reading ../tylerforks/active_area.shp...\n",
-      "--> building dataframe... (may take a while for large shapefiles)\n",
-      "\n",
-      "reading ../tylerforks/NHDPlus/NHDSnapshot/Hydrography/NHDFlowline.shp...\n",
-      "filtering on bounding box -90.59552642527598, 46.37324928457199, -90.45520721646749, 46.43603727904705...\n",
-      "--> building dataframe... (may take a while for large shapefiles)\n",
-      "\n",
-      "reading ../tylerforks/NHDPlus/NHDPlusAttributes/PlusFlowlineVAA.dbf...\n",
       "--> building dataframe... (may take a while for large shapefiles)\n"
      ]
     },
@@ -313,13 +306,13 @@
      "name": "stdout",
      "output_type": "stream",
      "text": [
-      "\n",
-      "reading ../tylerforks/NHDPlus/NHDPlusAttributes/PlusFlow.dbf...\n",
-      "--> building dataframe... (may take a while for large shapefiles)\n",
-      "\n",
-      "reading ../tylerforks/NHDPlus/NHDPlusAttributes/elevslope.dbf...\n",
-      "--> building dataframe... (may take a while for large shapefiles)\n",
-      "writing output/PlusFlowlineVAA_gt3km.dbf... Done\n",
+      "writing output/PlusFlowlineVAA_gt3km.dbf... Done\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
       "writing output/PlusFlow_gt3km.dbf... Done\n",
       "writing output/elevslope_gt3km.dbf... Done\n"
      ]
@@ -328,60 +321,6 @@
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.14/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0\n",
-      "  props['geometry'] = line.get('geometry', None)\n",
-      "/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.14/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0\n",
-      "  props['geometry'] = line.get('geometry', None)\n",
-      "/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.14/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0\n",
-      "  props['geometry'] = line.get('geometry', None)\n",
-      "/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.14/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0\n",
-      "  props['geometry'] = line.get('geometry', None)\n",
-      "/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.14/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0\n",
-      "  props['geometry'] = line.get('geometry', None)\n",
-      "/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.14/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0\n",
-      "  props['geometry'] = line.get('geometry', None)\n",
-      "/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.14/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0\n",
-      "  props['geometry'] = line.get('geometry', None)\n",
-      "/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.14/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0\n",
-      "  props['geometry'] = line.get('geometry', None)\n",
-      "/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.14/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0\n",
-      "  props['geometry'] = line.get('geometry', None)\n",
-      "/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.14/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0\n",
-      "  props['geometry'] = line.get('geometry', None)\n",
-      "/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.14/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0\n",
-      "  props['geometry'] = line.get('geometry', None)\n",
-      "/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.14/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0\n",
-      "  props['geometry'] = line.get('geometry', None)\n",
-      "/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.14/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0\n",
-      "  props['geometry'] = line.get('geometry', None)\n",
-      "/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.14/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0\n",
-      "  props['geometry'] = line.get('geometry', None)\n",
-      "/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.14/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0\n",
-      "  props['geometry'] = line.get('geometry', None)\n",
-      "/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.14/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0\n",
-      "  props['geometry'] = line.get('geometry', None)\n",
-      "/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.14/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0\n",
-      "  props['geometry'] = line.get('geometry', None)\n",
-      "/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.14/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0\n",
-      "  props['geometry'] = line.get('geometry', None)\n",
-      "/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.14/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0\n",
-      "  props['geometry'] = line.get('geometry', None)\n",
-      "/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.14/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0\n",
-      "  props['geometry'] = line.get('geometry', None)\n",
-      "/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.14/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0\n",
-      "  props['geometry'] = line.get('geometry', None)\n",
-      "/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.14/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0\n",
-      "  props['geometry'] = line.get('geometry', None)\n",
-      "/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.14/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0\n",
-      "  props['geometry'] = line.get('geometry', None)\n",
-      "/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.14/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0\n",
-      "  props['geometry'] = line.get('geometry', None)\n",
-      "/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.14/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0\n",
-      "  props['geometry'] = line.get('geometry', None)\n",
-      "/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.14/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0\n",
-      "  props['geometry'] = line.get('geometry', None)\n",
-      "/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.14/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0\n",
-      "  props['geometry'] = line.get('geometry', None)\n",
       "/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.14/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0\n",
       "  props['geometry'] = line.get('geometry', None)\n"
      ]
@@ -412,10 +351,10 @@
    "id": "ec5ad987",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-02-26T20:51:28.190389Z",
-     "iopub.status.busy": "2026-02-26T20:51:28.190139Z",
-     "iopub.status.idle": "2026-02-26T20:51:28.197040Z",
-     "shell.execute_reply": "2026-02-26T20:51:28.195662Z"
+     "iopub.execute_input": "2026-03-02T21:35:36.472225Z",
+     "iopub.status.busy": "2026-03-02T21:35:36.471688Z",
+     "iopub.status.idle": "2026-03-02T21:35:36.480943Z",
+     "shell.execute_reply": "2026-03-02T21:35:36.479802Z"
     }
    },
    "outputs": [
@@ -452,10 +391,10 @@
    "id": "20e6d318",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-02-26T20:51:28.199858Z",
-     "iopub.status.busy": "2026-02-26T20:51:28.199736Z",
-     "iopub.status.idle": "2026-02-26T20:51:28.379816Z",
-     "shell.execute_reply": "2026-02-26T20:51:28.378953Z"
+     "iopub.execute_input": "2026-03-02T21:35:36.498580Z",
+     "iopub.status.busy": "2026-03-02T21:35:36.498389Z",
+     "iopub.status.idle": "2026-03-02T21:35:36.749610Z",
+     "shell.execute_reply": "2026-03-02T21:35:36.747832Z"
     }
    },
    "outputs": [
@@ -521,28 +460,13 @@
    "id": "7ce511f7",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-02-26T20:51:28.384977Z",
-     "iopub.status.busy": "2026-02-26T20:51:28.384497Z",
-     "iopub.status.idle": "2026-02-26T20:51:28.791873Z",
-     "shell.execute_reply": "2026-02-26T20:51:28.789167Z"
+     "iopub.execute_input": "2026-03-02T21:35:36.752375Z",
+     "iopub.status.busy": "2026-03-02T21:35:36.752208Z",
+     "iopub.status.idle": "2026-03-02T21:35:37.170597Z",
+     "shell.execute_reply": "2026-03-02T21:35:37.169438Z"
     }
    },
    "outputs": [
-    {
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "\n",
-      "reading output/PlusFlowlineVAA_gt3km.dbf...\n",
-      "--> building dataframe... (may take a while for large shapefiles)\n",
-      "\n",
-      "reading output/PlusFlow_gt3km.dbf...\n",
-      "--> building dataframe... (may take a while for large shapefiles)\n",
-      "\n",
-      "reading output/elevslope_gt3km.dbf...\n",
-      "--> building dataframe... (may take a while for large shapefiles)\n"
-     ]
-    },
     {
      "name": "stdout",
      "output_type": "stream",
@@ -587,10 +511,10 @@
    "id": "d659de74",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-02-26T20:51:28.797027Z",
-     "iopub.status.busy": "2026-02-26T20:51:28.796682Z",
-     "iopub.status.idle": "2026-02-26T20:51:28.823120Z",
-     "shell.execute_reply": "2026-02-26T20:51:28.821523Z"
+     "iopub.execute_input": "2026-03-02T21:35:37.172748Z",
+     "iopub.status.busy": "2026-03-02T21:35:37.172610Z",
+     "iopub.status.idle": "2026-03-02T21:35:37.188370Z",
+     "shell.execute_reply": "2026-03-02T21:35:37.186790Z"
     }
    },
    "outputs": [
@@ -615,16 +539,16 @@
        "  <thead>\n",
        "    <tr style=\"text-align: right;\">\n",
        "      <th></th>\n",
-       "      <th>COMID</th>\n",
-       "      <th>FDATE</th>\n",
-       "      <th>RESOLUTION</th>\n",
-       "      <th>GNIS_ID</th>\n",
-       "      <th>GNIS_NAME</th>\n",
-       "      <th>LENGTHKM</th>\n",
-       "      <th>REACHCODE</th>\n",
-       "      <th>FLOWDIR</th>\n",
-       "      <th>WBAREACOMI</th>\n",
-       "      <th>FTYPE</th>\n",
+       "      <th>comid</th>\n",
+       "      <th>fdate</th>\n",
+       "      <th>resolution</th>\n",
+       "      <th>gnis_id</th>\n",
+       "      <th>gnis_name</th>\n",
+       "      <th>length_km</th>\n",
+       "      <th>reachcode</th>\n",
+       "      <th>flowdir</th>\n",
+       "      <th>wbareacomi</th>\n",
+       "      <th>ftype</th>\n",
        "      <th>...</th>\n",
        "      <th>elevup</th>\n",
        "      <th>elevdn</th>\n",
@@ -638,7 +562,7 @@
        "      <th>width2</th>\n",
        "    </tr>\n",
        "    <tr>\n",
-       "      <th>COMID</th>\n",
+       "      <th>comid</th>\n",
        "      <th></th>\n",
        "      <th></th>\n",
        "      <th></th>\n",
@@ -789,16 +713,16 @@
        "</div>"
       ],
       "text/plain": [
-       "           COMID       FDATE RESOLUTION  GNIS_ID    GNIS_NAME  LENGTHKM  \\\n",
-       "COMID                                                                     \n",
-       "1814983  1814983  1999-07-05     Medium  1580686  Tyler Forks     2.947   \n",
-       "1814907  1814907  1999-07-05     Medium  1580686  Tyler Forks     1.483   \n",
-       "1814869  1814869  1999-07-05     Medium  1580686  Tyler Forks     7.555   \n",
-       "1814859  1814859  1999-07-05     Medium  1580686  Tyler Forks     2.558   \n",
-       "1814897  1814897  1999-07-05     Medium  1580686  Tyler Forks     1.624   \n",
+       "           comid       fdate resolution  gnis_id    gnis_name  length_km  \\\n",
+       "comid                                                                      \n",
+       "1814983  1814983  1999-07-05     Medium  1580686  Tyler Forks      2.947   \n",
+       "1814907  1814907  1999-07-05     Medium  1580686  Tyler Forks      1.483   \n",
+       "1814869  1814869  1999-07-05     Medium  1580686  Tyler Forks      7.555   \n",
+       "1814859  1814859  1999-07-05     Medium  1580686  Tyler Forks      2.558   \n",
+       "1814897  1814897  1999-07-05     Medium  1580686  Tyler Forks      1.624   \n",
        "\n",
-       "              REACHCODE         FLOWDIR  WBAREACOMI        FTYPE  ...  \\\n",
-       "COMID                                                             ...   \n",
+       "              reachcode         flowdir  wbareacomi        ftype  ...  \\\n",
+       "comid                                                             ...   \n",
        "1814983  04010302000160  With Digitized           0  StreamRiver  ...   \n",
        "1814907  04010302000161  With Digitized           0  StreamRiver  ...   \n",
        "1814869  04010302000162  With Digitized           0  StreamRiver  ...   \n",
@@ -806,7 +730,7 @@
        "1814897  04010302000164  With Digitized           0  StreamRiver  ...   \n",
        "\n",
        "             elevup      elevdn   elevupsmo   elevdnsmo  asum_calc asum_diff  \\\n",
-       "COMID                                                                          \n",
+       "comid                                                                          \n",
        "1814983  343.306824  340.423096  343.306824  340.423096    133.052       0.0   \n",
        "1814907  344.879608  343.306824  344.879608  343.306824    125.007       0.0   \n",
        "1814869  353.597046  344.879608  353.597046  344.879608    119.314       0.0   \n",
@@ -814,7 +738,7 @@
        "1814897  389.698822  367.337708  389.698822  367.337708    102.417       0.0   \n",
        "\n",
        "         width1asum  width2asum    width1    width2  \n",
-       "COMID                                                \n",
+       "comid                                                \n",
        "1814983    7.558493    7.645791  7.558493  7.645791  \n",
        "1814907    7.359996    7.405168  7.359996  7.405168  \n",
        "1814869    6.991834    7.230301  6.991834  7.230301  \n",
@@ -839,10 +763,10 @@
    "id": "50dba987",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-02-26T20:51:28.827159Z",
-     "iopub.status.busy": "2026-02-26T20:51:28.826973Z",
-     "iopub.status.idle": "2026-02-26T20:51:28.961379Z",
-     "shell.execute_reply": "2026-02-26T20:51:28.959759Z"
+     "iopub.execute_input": "2026-03-02T21:35:37.191460Z",
+     "iopub.status.busy": "2026-03-02T21:35:37.191280Z",
+     "iopub.status.idle": "2026-03-02T21:35:37.316349Z",
+     "shell.execute_reply": "2026-03-02T21:35:37.314800Z"
     }
    },
    "outputs": [
@@ -887,10 +811,10 @@
    "id": "39a289bb",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-02-26T20:51:28.963943Z",
-     "iopub.status.busy": "2026-02-26T20:51:28.963761Z",
-     "iopub.status.idle": "2026-02-26T20:51:29.010929Z",
-     "shell.execute_reply": "2026-02-26T20:51:29.009925Z"
+     "iopub.execute_input": "2026-03-02T21:35:37.321263Z",
+     "iopub.status.busy": "2026-03-02T21:35:37.320808Z",
+     "iopub.status.idle": "2026-03-02T21:35:37.377984Z",
+     "shell.execute_reply": "2026-03-02T21:35:37.376189Z"
     }
    },
    "outputs": [
@@ -900,7 +824,13 @@
      "text": [
       "\n",
       "reading ../tylerforks/active_area.shp...\n",
-      "--> building dataframe... (may take a while for large shapefiles)\n",
+      "--> building dataframe... (may take a while for large shapefiles)\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
       "starting lines: 19\n",
       "remaining lines: 11\n"
      ]
@@ -926,10 +856,10 @@
    "id": "a60e8b64",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-02-26T20:51:29.013549Z",
-     "iopub.status.busy": "2026-02-26T20:51:29.013388Z",
-     "iopub.status.idle": "2026-02-26T20:51:29.072053Z",
-     "shell.execute_reply": "2026-02-26T20:51:29.071008Z"
+     "iopub.execute_input": "2026-03-02T21:35:37.384482Z",
+     "iopub.status.busy": "2026-03-02T21:35:37.383920Z",
+     "iopub.status.idle": "2026-03-02T21:35:37.501848Z",
+     "shell.execute_reply": "2026-03-02T21:35:37.501072Z"
     }
    },
    "outputs": [

@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>The SFRData Module &mdash; SFRmaker 0.13.0.post5.dev0+g9ab4f77 documentation</title>
+  <title>The SFRData Module &mdash; SFRmaker 0.13.0.post7.dev0+g0e9a3a5 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
@@ -15,7 +15,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=65520a6d"></script>
+      <script src="../_static/documentation_options.js?v=b8c60106"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -565,6 +565,20 @@ individual reaches using the selected method, replacing the DEM-derived elevatio
 The points must fall within the selected buffer distance or cell polygon, otherwise
 an error will be raised. Points can be specified in a shapefile, geopackage, CSV file or
 (Geo)DataFrame, which must contain the following fields:</p>
+<table class="docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p>x</p></td>
+<td><p>x-coordinate. If a CSV or regular DataFrame is provided,
+this must be in the CRS of the model or an elevation_data_crs must be provided.</p></td>
+</tr>
+<tr class="row-even"><td><p>y</p></td>
+<td><p>y-coordinate.</p></td>
+</tr>
+<tr class="row-odd"><td><p>elevation</p></td>
+<td><p>Elevation in the model units.</p></td>
+</tr>
+</tbody>
+</table>
 <p>By default, None.</p>
 </dd>
 <dt><strong>elevation_data_layer</strong><span class="classifier">None</span></dt><dd><p>Layer name for the elevation data, if the data are being supplied in a multi-layer GeoPackage.
@@ -751,7 +765,7 @@ by default None</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="sfrmaker.sfrdata.SFRData.write_package">
-<span class="sig-name descname"><span class="pre">write_package</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mf2005'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">idomain</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_diagnostics</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">write_observations_input</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">external_files_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gage_starting_unit_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/sfrdata.html#SFRData.write_package"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.sfrdata.SFRData.write_package" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">write_package</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mf2005'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">idomain</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_diagnostics</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">write_observations_input</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">external_files_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gage_starting_unit_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">write_mf6_inactive_cellids_as_None</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/sfrdata.html#SFRData.write_package"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.sfrdata.SFRData.write_package" title="Link to this definition"></a></dt>
 <dd><p>Write an SFR package input file.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -798,6 +812,11 @@ By default, None (packagedata table is written to the SFR package file)</p>
 <dt><strong>gage_starting_unit_number</strong><span class="classifier">int, optional</span></dt><dd><p>Starting unit number for gage output files, 
 by default None</p>
 </dd>
+<dt><strong>write_mf6_inactive_cellids_as_None</strong><span class="classifier">bool</span></dt><dd><p>Prior to MODFLOW 6.4.3, groundwater flow connections for SFR reaches in inactive cells
+were written as ‘NONE’. Since then, unconnected reaches are specified with a zero for
+each grid dimension (e.g. ‘0 0 0’ for DIS grid). This option allows ‘NONE’ to be written
+for compatibility with older versions of MODFLOW 6. By default, False (use 0s).</p>
+</dd>
 </dl>
 </dd>
 </dl>
@@ -835,7 +854,7 @@ and <a class="reference internal" href="#sfrmaker.sfrdata.SFRData.period_data" t
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Feb 26, 2026.
+      <span class="lastupdated">Last updated on Mar 02, 2026.
       </span></p>
   </div>
 
