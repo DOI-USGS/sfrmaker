@@ -157,7 +157,7 @@ def test_create_mf6sfr(mf6sfr, shellmound_sfrdata, shellmound_model):
     packagedata['j'] = j
     packagedata.drop('cellid', axis=1, inplace=True)
     for col in packagedata.columns:
-        if packagedata[col].dtype == object:
+        if pd.api.types.is_string_dtype(packagedata[col].dtype):
             packagedata[col] = pd.to_numeric(packagedata[col])
     reach_data = shellmound_sfrdata.reach_data
     rno_col = {'rno', 'ifno'}.intersection(packagedata.columns).pop()
@@ -188,7 +188,7 @@ def test_flopy_mf6sfr_outfile(mf6sfr, mf6sfr_outfile):
     for col in pkdata1.dtype.names:
         if col == 'cellid':
             continue
-        elif pkdata1[col].dtype == object:
+        elif pd.api.types.is_string_dtype(pkdata1[col].dtype):
             c1 = pd.to_numeric(pkdata1[col])
             c2 = pd.to_numeric(mf6sfr.packagedata.array[col])
         else:
