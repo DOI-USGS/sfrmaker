@@ -97,7 +97,7 @@ def add_observations(sfrdata, data, flowline_routing=None,
         data[obsname_column] = data[line_id_column].astype(object)
     else:
         data[obsname_column] = data[obsname_column].astype(object)
-    assert data[obsname_column].dtype == object
+    assert pd.api.types.is_string_dtype(data[obsname_column].dtype)
 
     # read reach geometries from a shapefile
     if sfrlines_shapefile is not None:
