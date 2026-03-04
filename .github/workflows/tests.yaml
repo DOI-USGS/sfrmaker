@@ -76,27 +76,33 @@ jobs:
     - name: Test install from git
       shell: bash -l {0}
       run: |
-        pip install git+https://github.com/doi-usgs/sfrmaker@develop
+        pip install git+https://github.com/doi-usgs/sfrmaker@develop --no-deps
         cd ..
         python -c "import sfrmaker"
         cd sfrmaker
+    - name: Test with latest PyPI flopy
+      shell: bash -l {0}
+      if: ${{ matrix.python-version == 3.12}}
+      run: |
+        pip install flopy
+        pip install git+https://github.com/aleaf/modflow-export@develop
+    - name: Test with latest conda flopy
+      shell: bash -l {0}
+      if: ${{ matrix.python-version == 3.13}}
+      run: |
+        micromamba install flopy
+        pip install git+https://github.com/aleaf/modflow-export@develop
+    - name: Test with latest develop flopy and pandas 3
+      shell: bash -l {0}
+      if: ${{ matrix.python-version == 3.14}}
+      run: |
+        pip install git+https://github.com/modflowpy/flopy@develop --no-deps
+        pip install git+https://github.com/aleaf/modflow-export@develop
     - name: Install SFRmaker and ipykernel
       shell: bash -l {0}
       run: |
         pip install -e .
         python -m ipykernel install --user --name sfrmaker_ci --display-name "sfrmaker_ci"
-    - name: Test with latest PyPI flopy
-      shell: bash -l {0}
-      if: ${{ matrix.python-version == 3.12}}
-      run: pip install flopy
-    - name: Test with latest conda flopy
-      shell: bash -l {0}
-      if: ${{ matrix.python-version == 3.13}}
-      run: micromamba install flopy
-    - name: Test with latest develop flopy and pandas 3
-      shell: bash -l {0}
-      if: ${{ matrix.python-version == 3.14}}
-      run: pip install git+https://github.com/modflowpy/flopy@develop --no-deps
     - name: Conda list  
       shell: bash -l {0}
       run: |
