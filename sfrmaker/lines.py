@@ -1210,7 +1210,7 @@ class Lines:
             if isinstance(add_outlets, str) or isinstance(add_outlets, int):
                 add_outlets = [add_outlets]
             for outlet_id in add_outlets:
-                if rd.line_id.dtype == object:
+                if pd.api.types.is_string_dtype(rd.line_id.dtype):
                     outlet_id = str(outlet_id)
                     outlet_toid = '0'
                 else:
