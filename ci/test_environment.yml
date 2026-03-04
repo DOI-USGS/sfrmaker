@@ -35,4 +35,3 @@ dependencies:
   - pip:
     - gis-utils
     - pytest-timeout
-    - git+https://github.com/aleaf/modflow-export@develop
