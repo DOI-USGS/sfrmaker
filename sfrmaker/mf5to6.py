@@ -5,6 +5,7 @@ from copy import copy
 import warnings
 import numpy as np
 import pandas as pd
+import flopy
 import sfrmaker
 from sfrmaker.reaches import interpolate_to_reaches
 
@@ -65,7 +66,8 @@ class Mf6SFR:
             'rtp', 'rbth', 'rhk', 'man', 'ncon', 'ustrf', 'ndv', 'idomain', 'line_id']
     def __init__(self, ModflowSfr2=None, SFRData=None,
                  period_data=None, idomain=None,
-                 options=None, auxiliary_line_numbers=True):
+                 options=None, auxiliary_line_numbers=True,
+                 modelgrid_type='structured'):
 
         # instantiate with SFRData instance instead of ModflowSfr2 instance
         # allows auxiliary variables from SFRData.reach_data
@@ -107,13 +109,17 @@ class Mf6SFR:
             self.rd = SFRData.reach_data
             self.sd = SFRData.segment_data
             self._period_data = SFRData.period_data
+            self.model = SFRData.model
         else:
             self.rd = pd.DataFrame(ModflowSfr2.reach_data)
             self.rd.rename(columns={'reachID': 'rno'}, inplace=True)
             self.sd = self._get_segment_dataframe()
             # period data
             self._period_data = period_data
+            self.model = ModflowSfr2.parent
 
+        self._modelgrid_type = modelgrid_type
+        
         # package data
         self._package_data = None
 
@@ -183,11 +189,36 @@ class Mf6SFR:
         return self._connections
 
     @property
+    def modelgrid_type(self):
+        modelgrid_type = self._modelgrid_type
+        if self.model is not None:
+            if self.model.modelgrid is not None:
+                modelgrid_type = self.model.modelgrid.grid_type
+            else:
+                if self.model.version in {'mf2005', 'mfnwt'}:
+                    modelgrid_type =  'structured'
+                elif self.model.version == 'mfusg':
+                    modelgrid_type =  'unstructured'
+        if modelgrid_type == 'structured' and\
+            ({'k', 'i', 'j'}.intersection(self.rd.columns) != {'k', 'i', 'j'}):
+                raise ValueError(
+                    'Structured grids must have k, i, j columns in reach data!')
+        elif modelgrid_type == 'vertex' and\
+            ({'k', 'cell2d'}.intersection(self.rd.columns) != {'k', 'cell2d'}):
+                raise ValueError(
+                    'Vertex grids must have k, cell2d columns in reach data!') 
+        elif modelgrid_type == 'unstructured' and 'cellid' not in self.rd.columns:
+            raise ValueError(
+                    'Unstructured grids must have a cellid column in reach data!') 
+        self._modelgrid_type = modelgrid_type
+        return self._modelgrid_type
+        
+    @property
     def period_data(self):
         if self._period_data is None:
             self._period_data = self._get_period_data()
         return self._period_data
-
+        
     def _segment_data2reach_data(self, var):
         reach_values = []
         sd0 = self.ModflowSfr2.segment_data[0]
@@ -325,21 +356,30 @@ class Mf6SFR:
 
             output.write('\nBEGIN Packagedata\n')
             writepakdata = self.packagedata.copy()
-            for c in ['cellid', 'k', 'i', 'j']:
+            for c in ['cellid', 'cell2d', 'k', 'i', 'j']:
                 if c in writepakdata.columns:
                     writepakdata[c] += 1  # convert indices to 1-based
                     writepakdata[c] = writepakdata[c].astype(str)
             # fill in NONEs for reaches in inactive cells
             inactive = writepakdata['idomain'] < 1
             if write_mf6_inactive_cellids_as_None:
-                if not 'cellid' in writepakdata.columns:
+                if self.modelgrid_type == 'structured':
                     writepakdata.loc[inactive, 'k'] = ''
                     writepakdata.loc[inactive, 'i'] = 'NONE'
                     writepakdata.loc[inactive, 'j'] = ''
+                elif self.modelgrid_type == 'vertex':
+                    writepakdata.loc[inactive, 'k'] = ''
+                    writepakdata.loc[inactive, 'cell2d'] = 'NONE'
                 else:
                     writepakdata.loc[inactive, 'cellid'] = 'NONE'
             else:
-                for col in ['cellid', 'k', 'i', 'j']:
+                if self.modelgrid_type == 'structured':
+                    index_cols = ['k', 'i', 'j']
+                elif self.modelgrid_type == 'vertex':
+                    index_cols = ['k', 'cell2d']
+                else:
+                    index_cols = ['cellid']
+                for col in index_cols:
                     writepakdata.loc[inactive, col] = '0'
 
             columns = list(writepakdata.columns)
