@@ -265,13 +265,16 @@ def test_write_mf6_package(shellmound_sfrdata, mf6sfr, outdir,
                          names=cols,
                          index_col=False
                          )
-    isna = df.isna().any(axis=1).values.astype(bool)
+    assert not 'nan' in text
+    assert not df.isna().any().any()
+    #isna = df.isna().any(axis=1).values.astype(bool)
     #isna = isna | ((df[['k', 'i', 'j']] == (0, 0, 0)).any(axis=1))
-    df = df.loc[~isna].copy()
+    #df = df.loc[~isna].copy()
     for c in ['k', 'i', 'j', cols[0]]:
         df[c] = df[c].astype(int) - 1
     pd.testing.assert_frame_equal(df.reset_index(drop=True),
-                                  pdata.loc[~isna].reset_index(drop=True),
+                                  pdata.reset_index(drop=True),
+                                  #pdata.loc[~isna].reset_index(drop=True),
                                   check_dtype=False)
 
 
