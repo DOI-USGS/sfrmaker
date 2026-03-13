@@ -5,16 +5,16 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>sfrmaker.observations &mdash; SFRmaker 0.13.1.post0.dev0+g8e10d10 documentation</title>
+  <title>sfrmaker.observations &mdash; SFRmaker 0.13.2.post0.dev0+gf99ac67 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
-      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
 
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=650af2e3"></script>
+      <script src="../../_static/documentation_options.js?v=6d0ec869"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -197,7 +197,7 @@
         <span class="n">data</span><span class="p">[</span><span class="n">obsname_column</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">line_id_column</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">data</span><span class="p">[</span><span class="n">obsname_column</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">obsname_column</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
-    <span class="k">assert</span> <span class="n">data</span><span class="p">[</span><span class="n">obsname_column</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="nb">object</span>
+    <span class="k">assert</span> <span class="n">pd</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">is_string_dtype</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">obsname_column</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
 
     <span class="c1"># read reach geometries from a shapefile</span>
     <span class="k">if</span> <span class="n">sfrlines_shapefile</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -652,7 +652,7 @@
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Dec 30, 2025.
+      <span class="lastupdated">Last updated on Mar 13, 2026.
       </span></p>
   </div>
 

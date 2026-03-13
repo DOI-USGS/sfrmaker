@@ -6,9 +6,9 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Preprocessing hydrography &mdash; SFRmaker 0.13.1.post0.dev0+g8e10d10 documentation</title>
+  <title>Preprocessing hydrography &mdash; SFRmaker 0.13.2.post0.dev0+gf99ac67 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
       <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
       <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
@@ -16,7 +16,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=650af2e3"></script>
+      <script src="../_static/documentation_options.js?v=6d0ec869"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -195,7 +195,7 @@ filtering flowlines...
 Getting routing information from NHDPlus HR Plusflow table...
 finished in 0.00s
 
-finished in 0.11s
+finished in 0.10s
 
 reading ../neversink_rondout/NHDPLUS_HR_2.gdb...
 filtering flowlines...
@@ -203,7 +203,7 @@ filtering flowlines...
 Getting routing information from NHDPlus HR Plusflow table...
 finished in 0.00s
 
-finished in 0.14s
+finished in 0.17s
 
 wrote output/preprocessed_flowlines.shp
 </pre></div></div>
@@ -305,19 +305,6 @@ for basins:
 
 reading ../tylerforks/active_area.shp...
 --&gt; building dataframe... (may take a while for large shapefiles)
-
-reading ../tylerforks/NHDPlus/NHDSnapshot/Hydrography/NHDFlowline.shp...
-filtering on bounding box -90.59552642527598, 46.37324928457199, -90.45520721646749, 46.43603727904705...
---&gt; building dataframe... (may take a while for large shapefiles)
-
-reading ../tylerforks/NHDPlus/NHDPlusAttributes/PlusFlowlineVAA.dbf...
---&gt; building dataframe... (may take a while for large shapefiles)
-
-reading ../tylerforks/NHDPlus/NHDPlusAttributes/PlusFlow.dbf...
---&gt; building dataframe... (may take a while for large shapefiles)
-
-reading ../tylerforks/NHDPlus/NHDPlusAttributes/elevslope.dbf...
---&gt; building dataframe... (may take a while for large shapefiles)
 writing output/PlusFlowlineVAA_gt3km.dbf... Done
 writing output/PlusFlow_gt3km.dbf... Done
 writing output/elevslope_gt3km.dbf... Done
@@ -328,60 +315,6 @@ writing output/elevslope_gt3km.dbf... Done
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.14/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
-  props[&#39;geometry&#39;] = line.get(&#39;geometry&#39;, None)
-/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.14/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
-  props[&#39;geometry&#39;] = line.get(&#39;geometry&#39;, None)
-/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.14/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
-  props[&#39;geometry&#39;] = line.get(&#39;geometry&#39;, None)
-/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.14/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
-  props[&#39;geometry&#39;] = line.get(&#39;geometry&#39;, None)
-/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.14/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
-  props[&#39;geometry&#39;] = line.get(&#39;geometry&#39;, None)
-/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.14/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
-  props[&#39;geometry&#39;] = line.get(&#39;geometry&#39;, None)
-/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.14/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
-  props[&#39;geometry&#39;] = line.get(&#39;geometry&#39;, None)
-/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.14/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
-  props[&#39;geometry&#39;] = line.get(&#39;geometry&#39;, None)
-/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.14/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
-  props[&#39;geometry&#39;] = line.get(&#39;geometry&#39;, None)
-/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.14/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
-  props[&#39;geometry&#39;] = line.get(&#39;geometry&#39;, None)
-/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.14/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
-  props[&#39;geometry&#39;] = line.get(&#39;geometry&#39;, None)
-/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.14/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
-  props[&#39;geometry&#39;] = line.get(&#39;geometry&#39;, None)
-/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.14/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
-  props[&#39;geometry&#39;] = line.get(&#39;geometry&#39;, None)
-/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.14/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
-  props[&#39;geometry&#39;] = line.get(&#39;geometry&#39;, None)
-/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.14/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
-  props[&#39;geometry&#39;] = line.get(&#39;geometry&#39;, None)
-/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.14/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
-  props[&#39;geometry&#39;] = line.get(&#39;geometry&#39;, None)
-/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.14/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
-  props[&#39;geometry&#39;] = line.get(&#39;geometry&#39;, None)
-/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.14/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
-  props[&#39;geometry&#39;] = line.get(&#39;geometry&#39;, None)
-/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.14/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
-  props[&#39;geometry&#39;] = line.get(&#39;geometry&#39;, None)
-/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.14/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
-  props[&#39;geometry&#39;] = line.get(&#39;geometry&#39;, None)
-/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.14/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
-  props[&#39;geometry&#39;] = line.get(&#39;geometry&#39;, None)
-/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.14/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
-  props[&#39;geometry&#39;] = line.get(&#39;geometry&#39;, None)
-/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.14/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
-  props[&#39;geometry&#39;] = line.get(&#39;geometry&#39;, None)
-/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.14/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
-  props[&#39;geometry&#39;] = line.get(&#39;geometry&#39;, None)
-/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.14/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
-  props[&#39;geometry&#39;] = line.get(&#39;geometry&#39;, None)
-/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.14/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
-  props[&#39;geometry&#39;] = line.get(&#39;geometry&#39;, None)
-/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.14/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
-  props[&#39;geometry&#39;] = line.get(&#39;geometry&#39;, None)
 /Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.14/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0
   props[&#39;geometry&#39;] = line.get(&#39;geometry&#39;, None)
 </pre></div></div>
@@ -497,15 +430,6 @@ regenerated if other apsects of the model (such as the grid) change.</p>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 
-reading output/PlusFlowlineVAA_gt3km.dbf...
---&gt; building dataframe... (may take a while for large shapefiles)
-
-reading output/PlusFlow_gt3km.dbf...
---&gt; building dataframe... (may take a while for large shapefiles)
-
-reading output/elevslope_gt3km.dbf...
---&gt; building dataframe... (may take a while for large shapefiles)
-
 Smoothing elevations...
 finished in 0.00s
 </pre></div></div>
@@ -542,16 +466,16 @@ finished in 0.00s
   <thead>
     <tr style="text-align: right;">
       <th></th>
-      <th>COMID</th>
-      <th>FDATE</th>
-      <th>RESOLUTION</th>
-      <th>GNIS_ID</th>
-      <th>GNIS_NAME</th>
-      <th>LENGTHKM</th>
-      <th>REACHCODE</th>
-      <th>FLOWDIR</th>
-      <th>WBAREACOMI</th>
-      <th>FTYPE</th>
+      <th>comid</th>
+      <th>fdate</th>
+      <th>resolution</th>
+      <th>gnis_id</th>
+      <th>gnis_name</th>
+      <th>length_km</th>
+      <th>reachcode</th>
+      <th>flowdir</th>
+      <th>wbareacomi</th>
+      <th>ftype</th>
       <th>...</th>
       <th>elevup</th>
       <th>elevdn</th>
@@ -565,7 +489,7 @@ finished in 0.00s
       <th>width2</th>
     </tr>
     <tr>
-      <th>COMID</th>
+      <th>comid</th>
       <th></th>
       <th></th>
       <th></th>
@@ -817,7 +741,7 @@ remaining lines: 11
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Dec 30, 2025.
+      <span class="lastupdated">Last updated on Mar 13, 2026.
       </span></p>
   </div>
 

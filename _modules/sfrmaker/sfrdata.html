@@ -5,16 +5,16 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>sfrmaker.sfrdata &mdash; SFRmaker 0.13.1.post0.dev0+g8e10d10 documentation</title>
+  <title>sfrmaker.sfrdata &mdash; SFRmaker 0.13.2.post0.dev0+gf99ac67 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
-      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
 
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=650af2e3"></script>
+      <script src="../../_static/documentation_options.js?v=6d0ec869"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -111,7 +111,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">gisutils</span><span class="w"> </span><span class="kn">import</span> <span class="n">df2shp</span><span class="p">,</span> <span class="n">get_authority_crs</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sfrmaker.routing</span><span class="w"> </span><span class="kn">import</span> <span class="n">find_path</span><span class="p">,</span> <span class="n">renumber_segments</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sfrmaker.checks</span><span class="w"> </span><span class="kn">import</span> <span class="n">valid_rnos</span><span class="p">,</span> <span class="n">valid_nsegs</span><span class="p">,</span> <span class="n">rno_nseg_routing_consistent</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">sfrmaker.elevations</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_slopes</span><span class="p">,</span> <span class="n">smooth_elevations</span><span class="p">,</span> <span class="n">sample_reach_elevations</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sfrmaker.elevations</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_slopes</span><span class="p">,</span> <span class="n">sample_reach_elevations</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sfrmaker.flows</span><span class="w"> </span><span class="kn">import</span> <span class="n">add_to_perioddata</span><span class="p">,</span> <span class="n">add_to_segment_data</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sfrmaker.gis</span><span class="w"> </span><span class="kn">import</span> <span class="n">export_reach_data</span><span class="p">,</span> <span class="n">project</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sfrmaker.observations</span><span class="w"> </span><span class="kn">import</span> <span class="n">write_gage_package</span><span class="p">,</span> <span class="n">write_mf6_sfr_obsfile</span><span class="p">,</span> <span class="n">add_observations</span>
@@ -1084,7 +1084,7 @@
 <span class="sd">            an error will be raised. Points can be specified in a shapefile, geopackage, CSV file or</span>
 <span class="sd">            (Geo)DataFrame, which must contain the following fields:</span>
 <span class="sd">            </span>
-<span class="sd">            ========= ===============================================================================</span>
+<span class="sd">            ========= ================================================================================</span>
 <span class="sd">            x         x-coordinate. If a CSV or regular DataFrame is provided, </span>
 <span class="sd">                      this must be in the CRS of the model or an elevation_data_crs must be provided.</span>
 <span class="sd">            y         y-coordinate.</span>
@@ -1538,8 +1538,12 @@
                 <span class="n">package_file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_path</span><span class="p">,</span> <span class="n">package_name</span> <span class="o">+</span> <span class="s1">&#39;.sfr&#39;</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">package_file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">model_ws</span><span class="p">,</span> <span class="n">package_name</span> <span class="o">+</span> <span class="s1">&#39;.sfr&#39;</span><span class="p">)</span>
-            <span class="n">sfrdata</span><span class="o">.</span><span class="n">write_package</span><span class="p">(</span><span class="n">package_file_path</span><span class="p">,</span>
-                                  <span class="n">version</span><span class="o">=</span><span class="n">model_version</span><span class="p">)</span>
+            <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;filename&#39;</span><span class="p">:</span> <span class="n">package_file_path</span><span class="p">,</span>
+                      <span class="s1">&#39;version&#39;</span><span class="p">:</span> <span class="n">model_version</span><span class="p">}</span>
+            <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">k</span><span class="p">:</span><span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">cfg</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;options&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> 
+                           <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">{</span><span class="s1">&#39;version&#39;</span><span class="p">}})</span>
+            <span class="n">kwargs</span> <span class="o">=</span> <span class="n">get_input_arguments</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">sfrdata</span><span class="o">.</span><span class="n">write_package</span><span class="p">)</span>
+            <span class="n">sfrdata</span><span class="o">.</span><span class="n">write_package</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
             <span class="n">sfrdata</span><span class="o">.</span><span class="n">write_tables</span><span class="p">()</span>
             <span class="n">sfrdata</span><span class="o">.</span><span class="n">write_shapefiles</span><span class="p">()</span>
 
@@ -1701,6 +1705,7 @@
                       <span class="n">options</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">run_diagnostics</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                       <span class="n">write_observations_input</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                       <span class="n">external_files_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">gage_starting_unit_number</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                      <span class="n">write_mf6_inactive_cellids_as_None</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                       <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Write an SFR package input file.</span>
 
@@ -1747,6 +1752,11 @@
 <span class="sd">        gage_starting_unit_number : int, optional</span>
 <span class="sd">            Starting unit number for gage output files, </span>
 <span class="sd">            by default None</span>
+<span class="sd">        write_mf6_inactive_cellids_as_None : bool</span>
+<span class="sd">            Prior to MODFLOW 6.4.3, groundwater flow connections for SFR reaches in inactive cells</span>
+<span class="sd">            were written as &#39;NONE&#39;. Since then, unconnected reaches are specified with a zero for</span>
+<span class="sd">            each grid dimension (e.g. &#39;0 0 0&#39; for DIS grid). This option allows &#39;NONE&#39; to be written</span>
+<span class="sd">            for compatibility with older versions of MODFLOW 6. By default, False (use 0s).</span>
 <span class="sd">        &quot;&quot;&quot;</span>        
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;SFRmaker v. </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">sfrmaker</span><span class="o">.</span><span class="n">__version__</span><span class="p">))</span>
         <span class="c1"># run the flopy SFR diagnostics</span>
@@ -1807,7 +1817,8 @@
                           <span class="n">options</span><span class="o">=</span><span class="n">options</span><span class="p">)</span>
 
             <span class="c1"># write a MODFLOW 6 file</span>
-            <span class="n">sfr6</span><span class="o">.</span><span class="n">write_file</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="p">,</span> <span class="n">external_files_path</span><span class="o">=</span><span class="n">external_files_path</span><span class="p">)</span></div>
+            <span class="n">sfr6</span><span class="o">.</span><span class="n">write_file</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="p">,</span> <span class="n">external_files_path</span><span class="o">=</span><span class="n">external_files_path</span><span class="p">,</span>
+                            <span class="n">write_mf6_inactive_cellids_as_None</span><span class="o">=</span><span class="n">write_mf6_inactive_cellids_as_None</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="SFRData.write_tables">
@@ -2027,7 +2038,7 @@
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Dec 30, 2025.
+      <span class="lastupdated">Last updated on Mar 13, 2026.
       </span></p>
   </div>
 

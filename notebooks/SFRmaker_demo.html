@@ -6,9 +6,9 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Basic usage of SFRmaker in a scripting context &mdash; SFRmaker 0.13.1.post0.dev0+g8e10d10 documentation</title>
+  <title>Basic usage of SFRmaker in a scripting context &mdash; SFRmaker 0.13.2.post0.dev0+gf99ac67 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
       <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
       <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
@@ -16,7 +16,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=650af2e3"></script>
+      <script src="../_static/documentation_options.js?v=6d0ec869"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -221,7 +221,7 @@ loading NHDPlus v2 hydrography data...
 for basins:
 ../tylerforks/NHDPlus/
 
-load finished in 0.59s
+load finished in 0.52s
 
 Getting routing information from NHDPlus Plusflow table...
 finished in 0.02s
@@ -345,7 +345,7 @@ reading ../tylerforks/active_area.shp...
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.image.AxesImage at 0x13b15f8c0&gt;
+&lt;matplotlib.image.AxesImage at 0x13ca05be0&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -400,12 +400,12 @@ MODFLOW 5 layer(s) 111 row(s) 160 column(s) 1 stress period(s)
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 
-SFRmaker version 0.13.1
+SFRmaker version 0.13.2
 
 Creating sfr dataset...
 
 Creating grid class instance from flopy Grid instance...
-grid class created in 0.27s
+grid class created in 0.19s
 
 Model grid information
 structured grid
@@ -435,14 +435,14 @@ finished in 0.00s
 Intersecting 42 flowlines with 17,760 grid cells...
 
 Building spatial index...
-finished in 0.69s
+finished in 0.54s
 
 Intersecting 42 features...
 42
-finished in 0.06s
+finished in 0.07s
 
 Setting up reach data... (may take a few minutes for large grids)
-finished in 0.19s
+finished in 0.17s
 
 Computing widths...
 
@@ -464,7 +464,7 @@ bounds: 682688.00, 5139052.00, 694880.00, 5147510.20
 active area defined by: all cells
 
 
-Time to create sfr dataset: 1.45s
+Time to create sfr dataset: 1.18s
 
 </pre></div></div>
 </div>
@@ -860,7 +860,7 @@ Time to create sfr dataset: 1.45s
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 running rasterstats.zonal_stats on buffered LineStrings...
-finished in 3.96s
+finished in 3.03s
 
 
 Smoothing elevations...
@@ -1091,7 +1091,7 @@ that all streambed top elevations are at or below the model top. Oftentimes, the
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 
-Running Flopy v. 3.10.0.dev5 diagnostics...
+Running Flopy v. 3.10.0 diagnostics...
 wrote tf_SFR.chk
 </pre></div></div>
 </div>
@@ -1112,9 +1112,9 @@ wrote tf_SFR.chk
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-SFRmaker v. 0.13.1
+SFRmaker v. 0.13.2
 
-Running Flopy v. 3.10.0.dev5 diagnostics...
+Running Flopy v. 3.10.0 diagnostics...
 passed.
 
 Checking for continuity in segment and reach numbering...
@@ -1433,9 +1433,9 @@ wrote /Users/runner/work/sfrmaker/sfrmaker/examples/Notebooks/../tylerforks/tyle
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-SFRmaker v. 0.13.1
+SFRmaker v. 0.13.2
 
-Running Flopy v. 3.10.0.dev5 diagnostics...
+Running Flopy v. 3.10.0 diagnostics...
 passed.
 
 Checking for continuity in segment and reach numbering...
@@ -1845,7 +1845,7 @@ No non-zero values of flow to export!
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Dec 30, 2025.
+      <span class="lastupdated">Last updated on Mar 13, 2026.
       </span></p>
   </div>
 
