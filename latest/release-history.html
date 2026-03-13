@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Release History &mdash; SFRmaker 0.13.0.post11.dev0+g1eeb719 documentation</title>
+  <title>Release History &mdash; SFRmaker 0.13.1.post12.dev0+gf99ac67 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
@@ -15,7 +15,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=99ddcc9e"></script>
+      <script src="_static/documentation_options.js?v=9676f619"></script>
       <script src="_static/doctools.js?v=9bcbadda"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="_static/clipboard.min.js?v=a7894cd8"></script>
@@ -67,6 +67,8 @@
 <li class="toctree-l1"><a class="reference internal" href="api/index.html"> Code reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="config-summary.html"> Summary of configuration file options</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#"> Release History</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#version-0-13-2-2026-03-12">Version 0.13.2 (2026-03-12)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#version-0-13-1-2025-12-30">Version 0.13.1 (2025-12-30)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#version-0-13-0-2025-12-30">Version 0.13.0 (2025-12-30)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#version-0-12-1-2025-05-09">Version 0.12.1 (2025-05-09)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#version-0-12-0-2025-05-09">Version 0.12.0 (2025-05-09)</a></li>
@@ -128,6 +130,20 @@
              
   <section id="release-history">
 <h1>Release History<a class="headerlink" href="#release-history" title="Link to this heading"></a></h1>
+<section id="version-0-13-2-2026-03-12">
+<h2>Version 0.13.2 (2026-03-12)<a class="headerlink" href="#version-0-13-2-2026-03-12" title="Link to this heading"></a></h2>
+<p><strong>Bug Fixes:</strong>
+* Add support for pandas 3
+* Force all NHDPlus (v2 and HiRes) columns to lower-case, to resolve issues with inconsistent column name capitalization downloaded datasets;
+* Fix some remaining instances in the code where integer line IDs were expected (recast to string or allow type to be specified), in the preprocessing and routing modules.
+* Support any CRS unit strings that contain meter/metre/m, feet/foot/ft. Previously, for example strings like ‘US survey foot’ were not being recognized.
+* By default, write 0s for each dimension of unconnected cells in SFR Package; retain option to write NONE for backwards compatibility with previous versions of MODFLOW 6.</p>
+</section>
+<section id="version-0-13-1-2025-12-30">
+<h2>Version 0.13.1 (2025-12-30)<a class="headerlink" href="#version-0-13-1-2025-12-30" title="Link to this heading"></a></h2>
+<p><strong>Bug Fixes:</strong>
+* fix geopandas-related issue with elevations.sample_reach_elevations when measured elevations are supplied by a csv</p>
+</section>
 <section id="version-0-13-0-2025-12-30">
 <h2>Version 0.13.0 (2025-12-30)<a class="headerlink" href="#version-0-13-0-2025-12-30" title="Link to this heading"></a></h2>
 <p><strong>New Features:</strong>
@@ -445,7 +461,7 @@
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Mar 05, 2026.
+      <span class="lastupdated">Last updated on Mar 13, 2026.
       </span></p>
   </div>
 
