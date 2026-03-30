@@ -1,3 +1,4 @@
+from collections import deque
 import time
 
 import numpy as np
@@ -229,9 +230,11 @@ def make_reverse_graph(graph):
 
 
 def renumber_segments(nseg, outseg):
-    """Renumber segments so that segment numbering is continuous, starts at 1, and always increases
-        in the downstream direction. Experience suggests that this can substantially speed
-        convergence for some models using the NWT solver.
+    """Renumber a segment or reach numbers in a stream network
+    that may include divergences, to be strictly increasing downstream.
+    * first enforces consecutive numbers (max number == n segments)
+    * then apply's Kahn's algorithm to re-number the segments 
+      so that numbers strictly increase in the downstream direction
 
     Parameters
     ----------
@@ -242,43 +245,47 @@ def renumber_segments(nseg, outseg):
 
     Returns
     -------
-    r : dict
-        Dictionary mapping old segment numbers (keys) to new segment numbers (values). r only
-        contains entries for number that were remapped.
+    renumbering : dict
+        Dictionary mapping old segment numbers (keys) to new segment numbers (values).
+        Includes the outlet segment (0), which always maps to 0.
     """
-    if not isinstance(nseg, np.ndarray):
-        nseg = np.array(nseg)
-    if not isinstance(outseg, np.ndarray):
-        outseg = np.array(outseg)
+    renumbered_consecutive = None
+    if max(nseg) > len(nseg):
+        consecutive_nseg = np.arange(1, len(set(nseg))+1)
+        renumbered_consecutive = dict(zip(sorted(list(set(nseg))), consecutive_nseg))
+        nseg = [renumbered_consecutive[n] for n in nseg]
+        outseg = [renumbered_consecutive.get(n, 0) for n in outseg]
+    
+    graph = make_graph(nseg, outseg)
+    graph = {k-1: {vv-1 for vv in v if vv > 0} for k, v in graph.items()}
+    n = len(graph)
+    in_degree = [0] * n
+    result = []
+    
+    for node in graph:
+        for neighbor in graph[node]:
+            in_degree[neighbor] += 1
 
-    def reassign_upsegs(r, nexts, upsegs):
-        nextupsegs = []
-        for u in upsegs:
-            r[u] = nexts if u > 0 else u  # handle lakes
-            nexts -= 1
-            nextupsegs += list(nseg[outseg == u])
-        return r, nexts, nextupsegs
-
-    print('enforcing best segment numbering...')
-    # enforce that all outsegs not listed in nseg are converted to 0
-    # but leave lakes alone
-    r = {0: 0}
-    r.update({o: 0 for o in outseg if o > 0 and o not in nseg})
-    outseg = np.array([o if o in nseg or o < 0 else 0 for o in outseg])
-
-    # if reach data are supplied, segment/outseg pairs may be listed more than once
-    if len(nseg) != len(np.unique(nseg)):
-        d = dict(zip(nseg, outseg))
-        nseg, outseg = np.array(list(d.keys())), np.array(list(d.values()))
-    ns = len(nseg)
-
-    nexts = ns
-    nextupsegs = nseg[outseg == 0]
-    for i in range(ns):
-        r, nexts, nextupsegs = reassign_upsegs(r, nexts, nextupsegs)
-        if len(nextupsegs) == 0:
-            break
-    return r
+    queue = deque([i for i in range(n) if in_degree[i] == 0])
+    
+    while queue:
+        node = queue.popleft()
+        result.append(node)
+        
+        for neighbor in graph[node]:
+            in_degree[neighbor] -= 1
+            if in_degree[neighbor] == 0:
+                queue.append(neighbor)
+    
+    if len(result) != n:
+        raise ValueError("Graph has a cycle, cannot be topologically sorted.")
+    renumbering = dict(zip([r+1 for r in result], range(1, n+1)))
+    if renumbered_consecutive is not None:
+        original_nseg_lookup = {v:k for k, v in renumbered_consecutive.items()}
+        renumbering = {original_nseg_lookup[k]: v 
+                       for k, v in renumbering.items()}
+    renumbering[0] = 0
+    return renumbering
 
 
 def get_next_id_in_subset(subset, routing, ids):

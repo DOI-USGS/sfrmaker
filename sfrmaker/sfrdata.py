@@ -1490,7 +1490,7 @@ class SFRData(DataPackage):
         # (after the RIV reaches are removed from the SFR dataset)
         new_rnos = renumber_segments(riv_data['rno'], riv_data['outreach'])
         riv_data['rno'] = [new_rnos[outreach] for outreach in riv_data['rno']]
-        riv_data['outreach'] = [new_rnos[outreach] for outreach in riv_data['outreach']]
+        riv_data['outreach'] = [new_rnos.get(outreach, 0) for outreach in riv_data['outreach']]
 
         riv = RivData(stress_period_data=riv_data, grid=self.grid,
                       model=self.model, model_length_units=self.model_length_units,
