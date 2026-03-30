@@ -12,10 +12,10 @@ from sfrmaker.observations import locate_sites, get_closest_reach
 @pytest.fixture
 def flux_observation_data():
     data = ('datetime,per,line_id,flow_m3d,site_no,junk,x,y,comment\n'
-            '1998-04-01,0,17991438,100.,7281600,262,533280,1192740,RF model estimate\n'
-            '1998-05-01,0,17956091,10.,7288570,204,515375.2,1189942.5,RF model estimate\n'
-            '1998-04-01,1,17991438,200.,7281600,262,533280,1192740,base flow separation\n'
-            '1998-05-01,1,17956091,20.,7288570,204,515375.2,1189942.5,base flow separation\n'
+            '1998-04-01,0,17991438,100.,7281600,288,533280,1192740,RF model estimate\n'
+            '1998-05-01,0,17956091,10.,7288570,419,515375.2,1189942.5,RF model estimate\n'
+            '1998-04-01,1,17991438,200.,7281600,288,533280,1192740,base flow separation\n'
+            '1998-05-01,1,17956091,20.,7288570,419,515375.2,1189942.5,base flow separation\n'
             )
     data = pd.read_csv(io.StringIO(data))
     return data
@@ -208,8 +208,8 @@ def test_add_observations_from_points(shellmound_sfrdata, flux_observation_data,
             assert (r.iseg, r.ireach) == iseg_ireach[r.rno]
 
 
-@pytest.mark.parametrize("x, y, expected", ((515459.9, 1189906.1, 202),
-                                            (515375.2, 1189942.5, 204)
+@pytest.mark.parametrize("x, y, expected", ((515459.9, 1189906.1, 257),
+                                            (515375.2, 1189942.5, 419)
                                   )
                          )
 def test_get_closest_reach(shellmound_sfrdata, x, y, expected, outdir):
@@ -223,8 +223,8 @@ def test_get_closest_reach(shellmound_sfrdata, x, y, expected, outdir):
 @pytest.mark.parametrize('reach_id_col', (None, 'rno'))
 def test_locate_sites(shellmound_sfrdata, reach_id_col, outdir):
 
-    X, Y, rno = zip(*((515459.9, 1189906.1, 202),
-                      (515375.2, 1189942.5, 204)))
+    X, Y, rno = zip(*((515459.9, 1189906.1, 257),
+                      (515375.2, 1189942.5, 419)))
     df = pd.DataFrame({'geometry': [Point(x, y) for x, y in zip(X, Y)],
                        'site_no': rno
                        }

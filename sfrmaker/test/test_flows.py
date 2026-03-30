@@ -181,7 +181,7 @@ def test_add_to_perioddata3(data):
                     one_inflow_per_path=False)
     assert np.allclose(sfrd.period_data['inflow'].sort_index(level='rno').values, 
                     [100., 10., 200., 20.])
-    assert np.allclose(sfrd.period_data.index.levels[1], [354, 401])
+    assert np.allclose(sfrd.period_data.index.levels[1], [31, 117])
     
     
 def test_add_to_segment_data(shellmound_sfrdata):

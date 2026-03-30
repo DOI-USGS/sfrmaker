@@ -119,6 +119,69 @@ def test_find_path():
     assert path[0] == 1
     assert path[-1] == 0
 
+
+def apply_renumbering(new_numbering, routing_dict):
+    new_routing = dict()
+    for k, v in routing_dict.items():
+        if np.isscalar(v):
+            new_routing[new_numbering[k]] = new_numbering.get(v, 0)
+        else:
+            new_routing[new_numbering[k]] = {new_numbering.get(vv, 0) for vv in v}
+    return new_routing
+
+
+def shuffle_numbering(routing_dict):
+    # first enforce consecutive numbering
+    nseg = np.arange(1, len(routing_dict)+1)
+    new_numbering = dict(zip(routing_dict.keys(), nseg))
+    new_routing = apply_renumbering(new_numbering, routing_dict)
+    shuffled_nseg = nseg.copy()
+    np.random.shuffle(shuffled_nseg)
+    shuffled_numbering = dict(zip(nseg, shuffled_nseg))
+    shuffled_routing = apply_renumbering(shuffled_numbering, new_routing)
+    return shuffled_routing
+
+
+def test_renumbering_diversions():
+    routing = {1: 2, 2: 3, 3: 4, 4: 5, 5: 6, 6:22,
+               7: 8, 8: 9, 9: {10, 16}, 
+               10: 11, 11: 12, 12: 13, 13: 14, 14: 15, 15:4,
+               16: 17, 17: 18, 18: 19, 19: 20, 20: 21, 21: 22, 22: 0}
+    #routing = {1: 2, 2: 3, 3: 13,  # segment 1
+    #           4:5, 5:6, 6:7, 7:8, 8:9, 9:13,  # segment 2
+    #           10:11, 11:12, 12: {16, 4},  # segment 3
+    #           13:14, 14:15, 15:22,  # segment 4
+    #           16: 17, 17: 18, 18: 19, 19: 20, 20: 21, 21: 22,  # segment 5
+    #           22: 0.  # segment 6
+    #           }
+    routing = shuffle_numbering(routing)
+    
+    nseg = []
+    outseg = []
+    for seg, nextsegs in routing.items():
+        if np.isscalar(nextsegs):
+            nseg.append(seg)
+            outseg.append(nextsegs)
+        else:
+            for distributary in nextsegs:
+                nseg.append(seg)
+                outseg.append(distributary)
+    new_numbering = renumber_segments(nseg, outseg)
+    for seg, nextsegs in routing.items():
+        if np.isscalar(nextsegs):
+            if (nextsegs > 0):
+                assert new_numbering[seg] < new_numbering[nextsegs]
+        else:
+            for distributary in nextsegs:
+                if distributary > 0:
+                    assert new_numbering[seg] < new_numbering[distributary]
+    new_routing = dict()
+    for k, v in routing.items():
+        if np.isscalar(v):
+            new_routing[new_numbering[k]] = new_numbering.get(v, 0)
+        else:
+            new_routing[new_numbering[k]] = {new_numbering.get(vv, 0) for vv in v}
+
 #@pytest.mark.parametrize('fmt,crs,field_data,errors',(
 #    ('df', 26715, [692396.7, 5140825.5, 392.], 'raise'),
 @pytest.mark.parametrize('lines_file,id_col,distance_tol,expected_routing_col,expected_routing',
