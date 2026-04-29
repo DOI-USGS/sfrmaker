@@ -453,7 +453,7 @@ def load_nhdplus_hr(NHDPlusHR_paths, bbox_filter=None,
         Subregion  file geodatabase (.gdb) to include, assuming the file structure 
         is the same as when downloaded from the USGS National Map Downloader tool 
         (v2.0) website (https://apps.nationalmap.gov/downloader/#/).
-    filter : tuple, str (filepath), shapely Polygon or GeoJSON polygon
+    bbox_filter : tuple, str (filepath), shapely Polygon or GeoJSON polygon
         Bounding box (tuple) or polygon feature of model stream network area.
         Shapefiles will be reprojected to the CRS of the flowlines; all other
         feature types must be supplied in same CRS as flowlines.
@@ -472,7 +472,7 @@ def load_nhdplus_hr(NHDPlusHR_paths, bbox_filter=None,
             - ``crs``: NHDPlus HR data are assumed to include valid projection information.
             - ``epsg`` (int): NHDPlus HR data are assumed to include valid projection information.
             - ``proj_str`` (str): NHDPlus HR data are assumed to include valid projection information.
-            - ``filter`` (tuble): use ``bbox_filter`` instead.
+            - ``filter`` (tuple): use ``bbox_filter`` instead.
 
     Returns
     ==========
