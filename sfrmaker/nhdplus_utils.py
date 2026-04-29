@@ -472,7 +472,7 @@ def load_nhdplus_hr(NHDPlusHR_paths, bbox_filter=None,
             - ``crs``: NHDPlus HR data are assumed to include valid projection information.
             - ``epsg`` (int): NHDPlus HR data are assumed to include valid projection information.
             - ``proj_str`` (str): NHDPlus HR data are assumed to include valid projection information.
-                - ``filter`` (tuble): use ``bbox_filter`` instead.
+            - ``filter`` (tuble): use ``bbox_filter`` instead.
 
     Returns
     ==========
@@ -505,7 +505,7 @@ def load_nhdplus_hr(NHDPlusHR_paths, bbox_filter=None,
     
     #  Read if using one HUC-4 FileGDP passed as str
     if isinstance(NHDPlusHR_paths, str) or isinstance(NHDPlusHR_paths, Path):
-        df = read_nhdplus_hr(NHDPlusHR_paths, filter = filter)
+        df = read_nhdplus_hr(NHDPlusHR_paths, bbox_filter=bbox_filter)
    
     #  Option to drop specified FCodes
     if drop_fcodes is not None:    
