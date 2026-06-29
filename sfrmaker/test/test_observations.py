@@ -104,7 +104,35 @@ def test_write_mf6_sfr_obsfile(shellmound_sfrdata, flux_observation_data, outdir
             if 'obs6' in line.lower():
                 _, _, fname = line.strip().split()
                 assert os.path.exists(os.path.join(outdir, fname))
-                break                                              
+                break
+
+
+def test_write_mf6_sfr_obsfile_with_options(shellmound_sfrdata, flux_observation_data, outdir):
+    # regression test for issue #102: passing an explicit options list
+    # (so options is not None) with observations present used to raise
+    # UnboundLocalError on just_the_filename
+    sfr_package_file = os.path.join(outdir, 'test.package_file_options.sfr')
+
+    shellmound_sfrdata.observations_file = os.path.join(outdir, 'test.options_file.obs')
+    obs = shellmound_sfrdata.add_observations(flux_observation_data,
+                                              obstype='downstream-flow',
+                                              line_id_column='line_id',
+                                              obsname_column='site_no'
+                                              )
+    expected = shellmound_sfrdata.observations[['obsname', 'obstype', 'rno']]
+    shellmound_sfrdata.write_package(filename=sfr_package_file, version='mf6',
+                                     options=['save_flows'])
+    check_mf6_obs_file(shellmound_sfrdata.observations_file,
+                       expected=expected)
+    with open(sfr_package_file) as src:
+        for line in src:
+            if 'obs6' in line.lower():
+                _, _, fname = line.strip().split()
+                # the FILEIN entry should be a basename, not a full path
+                assert fname == os.path.split(fname)[1]
+                assert os.path.exists(os.path.join(outdir, fname))
+                break
+
 
 def test_add_observations_from_line_ids(shellmound_sfrdata, flux_observation_data, outdir):
     obs = shellmound_sfrdata.add_observations(flux_observation_data,

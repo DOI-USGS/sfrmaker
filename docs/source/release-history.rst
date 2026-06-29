@@ -2,6 +2,11 @@
 Release History
 ===============
 
+Version 0.13.1 (in development)
+-------------------------------
+**Bug Fixes:**
+* fix UnboundLocalError in SFRData.write_package() when a caller-supplied options list (with no existing OBS6 FILEIN entry) is passed and observations are present (issue #102)
+
 Version 0.13.0 (2025-12-30)
 ---------------------------
 **New Features:**
