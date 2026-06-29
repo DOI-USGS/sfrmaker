@@ -1635,7 +1635,7 @@ class SFRData(DataPackage):
             if write_observations_input and len(self.observations) > 0:
                 if 'obs6 filein' not in ''.join(options).lower():
                     obs_input_filename = filename + '.obs'
-                    options.append('OBS6 FILEIN {}'.format(just_the_filename + '.obs'))
+                    options.append('OBS6 FILEIN {}'.format(os.path.split(obs_input_filename)[1]))
                 else:
                     for entry in options:
                         if 'obs6 filein' in entry.lower():
