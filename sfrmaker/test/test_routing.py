@@ -1,9 +1,11 @@
 import numpy as np
+import geopandas as gpd
+import pytest
 from sfrmaker.routing import make_graph, get_upsegs
 
 from ..checks import routing_is_circular, valid_nsegs
 from ..routing import (get_next_id_in_subset, renumber_segments, find_path,
-                       get_previous_ids_in_subset)
+                       get_previous_ids_in_subset, route_lines_by_proximity)
 
 
 def add_line_sequence(routing, nlines=4, string_ids=False):
@@ -116,3 +118,33 @@ def test_find_path():
     path = find_path(routing, start=1)
     assert path[0] == 1
     assert path[-1] == 0
+
+#@pytest.mark.parametrize('fmt,crs,field_data,errors',(
+#    ('df', 26715, [692396.7, 5140825.5, 392.], 'raise'),
+@pytest.mark.parametrize('lines_file,id_col,distance_tol,expected_routing_col,expected_routing',
+                         (('hughes_2023/lines.shp', 'id', 2000, 'routing', None),
+                          ('hughes_2023/lines.shp', 'id', 100, 'routing', [3, 0, 5, 0, 0, 0]),
+                          ('hughes_2023/lines.shp', None, 100, 'routing', [3, 0, 5, 0, 0, 0]),
+                          ('hughes_2023/lines.shp', ['1', '2', '3', '4', '5', '6'], 100, 'routing', ['3', '0', '5', '0', '0', '0']),
+                          pytest.param('hughes_2023/lines.shp', list(range(0, 6)), 100, 'routing', [3, 0, 5, 0, 0, 0], marks=pytest.mark.xfail), 
+                          ('shellmound/flowlines.shp', 'COMID', 100, 'tocomid', None),
+                         ))
+def test_route_lines_by_proximity(lines_file, id_col, distance_tol, expected_routing_col, 
+                                  expected_routing, test_data_path):
+    gdf = gpd.read_file(test_data_path / lines_file)
+    if expected_routing is None:
+        line_id_dtype = int
+        if gdf[id_col].dtype in {str, object}:
+            line_id_dtype = str
+        expected_routing = [line_id if line_id in gdf[id_col].values else line_id_dtype(0) 
+                            for line_id in gdf[expected_routing_col]]
+    if id_col is None:
+        line_ids = None
+    elif isinstance(id_col, str) and id_col in gdf.columns:
+        line_ids = gdf[id_col]
+    else:
+        line_ids = id_col
+    proximity_routing = route_lines_by_proximity(gdf['geometry'], 
+                                                 line_ids=line_ids, 
+                                                 distance_tol=distance_tol)
+    assert all(np.array(expected_routing) == np.array(proximity_routing))
