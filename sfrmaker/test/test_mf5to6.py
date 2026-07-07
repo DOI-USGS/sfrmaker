@@ -25,32 +25,25 @@ def mf6sfr_instance_SFRdata(shellmound_sfrdata):
     return sfrmaker.Mf6SFR(SFRData=shellmound_sfrdata)
 
 
-@pytest.mark.parametrize('options', (None, 
-                                     ['save_flows',
-                                      'BUDGET FILEOUT sfr.cbc',
-                                      'STAGE FILEOUT sr.stage.bin',
-                                     ],
-                                     ['auxiliary line_id',
-                                      'unit_conversion 1.0']
-                                     ),
-                         )
-def test_init(options, shellmound_ModflowSfr2):
+@pytest.mark.parametrize('options,expected_keys', (
+    (None, ['BEGIN','length_conversion', 'time_conversion', 'boundnames', 'END']),
+    (['save_flows', 'BUDGET FILEOUT sfr.cbc', 'STAGE FILEOUT sr.stage.bin'],
+     ['BEGIN', 'save_flows', 'BUDGET FILEOUT', 'STAGE FILEOUT', 'length_conversion', 'time_conversion', 'boundnames', 'END']),
+    (['boundnames', 'length_conversion 1.0', 'time_conversion 86400'],
+     ['BEGIN', 'length_conversion', 'time_conversion', 'boundnames', 'END']),
+    (['boundnames','unit_conversion 86400'],
+     ['BEGIN', 'unit_conversion', 'boundnames', 'END'])
+                         ))
+def test_init(options, expected_keys, shellmound_ModflowSfr2):
     mf6sfr = sfrmaker.Mf6SFR(shellmound_ModflowSfr2, options=options)
     options_block = mf6sfr.options_block.strip('\n').split('\n')
-    expected_keys = ['BEGIN']
-    if options is not None:
-        expected_keys = expected_keys[:1] + [' '.join(item.split()[:-1]) if len(item.split()) > 1 else item 
-                        for item in options]
-    if 'unit_conversion' not in expected_keys:
-        expected_keys.append('unit_conversion')
-    if 'auxiliary' not in expected_keys:
-        expected_keys.append('auxiliary')
-    expected_keys.append('END')
     keys = [' '.join(item.split()[:-1]) if len(item.split()) > 1 else item.strip() 
                     for item in options_block]
     # verify that there aren't any duplicate entries
-    assert len(set(keys)) == len(keys)
-    assert keys == expected_keys
+    assert keys[0].lower() == 'begin'
+    assert keys[-1].lower() == 'end'
+    assert len(keys) == len(set(keys))
+    assert set(keys) == set(expected_keys)
 
 
 def test_connectiondata(mf6sfr_instance_SFRdata, outdir):
@@ -72,7 +65,7 @@ def test_connectiondata(mf6sfr_instance_SFRdata, outdir):
 def test_packagedata_aux(mf6sfr_instance_SFRdata):
     mf6sfr = mf6sfr_instance_SFRdata
     packagedata = mf6sfr._get_packagedata()
-    assert 'line_id' in packagedata.columns
+    assert 'boundname' in packagedata.columns
     
 
 def test_segment_data_to_perioddata(shellmound_sfrdata):

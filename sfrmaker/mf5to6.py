@@ -8,7 +8,7 @@ import pandas as pd
 import flopy
 import sfrmaker
 from sfrmaker.reaches import interpolate_to_reaches
-
+from sfrmaker.units import get_model_length_units, get_model_time_units
 
 class Mf6SFR:
     """Class for writing MODFLOW-6 SFR package input
@@ -32,18 +32,19 @@ class Mf6SFR:
     options : list, optional
         List of strings to write to the MODFLOW-6 SFR options block. For example::
 
-                options=['save_flows',
-                         'BUDGET FILEOUT model.sfr.cbc',
-                         'STAGE FILEOUT model.sfr.stage.bin']
+            options=['save_flows',
+                        'BUDGET FILEOUT model.sfr.cbc',
+                        'STAGE FILEOUT model.sfr.stage.bin']
 
-        An appropriate unit_conversion is written by default.
+        Unless specified, appropriate length_conversion and time_conversion values written by default.
+        Alternatively, include 'unit_conversion' with the appropriate value here for compatibility with 
+        older versions of MODFLOW 6. 
         See MODFLOW-6 documentation for other options.
         By default None.
-
-    auxiliary_line_numbers : bool, optional
-        If true, add 'line_id' as an auxiliary variable to the options block
-        and write hydrography line IDs to the packagedata block in the auxiliary
-        'line_id' column, by default True.
+    boundnames : bool, optional
+        If true, add 'boundnames' to the options block
+        and write hydrography line IDs to the packagedata block in the
+        'boundname' column, by default True.
     """
     # convert from ModflowSfr to mf6
     mf6names = {'rno': 'rno',
@@ -63,10 +64,10 @@ class Mf6SFR:
     mf5names = {v: k for k, v in mf6names.items()}
 
     cols = ['rno', 'cellid', 'k', 'i', 'j', 'rlen', 'rwid', 'rgrd',
-            'rtp', 'rbth', 'rhk', 'man', 'ncon', 'ustrf', 'ndv', 'idomain', 'line_id']
+            'rtp', 'rbth', 'rhk', 'man', 'ncon', 'ustrf', 'ndv', 'idomain', 'boundname']
     def __init__(self, ModflowSfr2=None, SFRData=None,
                  period_data=None, idomain=None,
-                 options=None, auxiliary_line_numbers=True,
+                 options=None, boundnames=True,
                  modelgrid_type='structured'):
 
         # instantiate with SFRData instance instead of ModflowSfr2 instance
@@ -96,19 +97,18 @@ class Mf6SFR:
         self.ModflowSfr2.reach_data.sort(order=['iseg', 'ireach'])
 
         self.structured = self.ModflowSfr2.parent.structured
-        self.unit_conversion = ModflowSfr2.const
+        #self.unit_conversion = ModflowSfr2.const
+        self._time_conversion = None
+        self._length_conversion = None
         self.nreaches = len(ModflowSfr2.reach_data)
         self.nper = ModflowSfr2.nper
-
-        # mf6 options block
-        self.auxiliary_line_numbers = auxiliary_line_numbers
-        self.options_block = options
 
         # dataframes of reach and segment data from modflow_sfr2
         if SFRData is not None:
             self.rd = SFRData.reach_data
             self.sd = SFRData.segment_data
             self._period_data = SFRData.period_data
+            self.sfrdata = SFRData
             self.model = SFRData.model
         else:
             self.rd = pd.DataFrame(ModflowSfr2.reach_data)
@@ -116,8 +116,13 @@ class Mf6SFR:
             self.sd = self._get_segment_dataframe()
             # period data
             self._period_data = period_data
+            self.sfrdata = None
             self.model = ModflowSfr2.parent
-
+            
+        # mf6 options block
+        self.boundnames = boundnames
+        self.options_block = options
+        
         self._modelgrid_type = modelgrid_type
         
         # package data
@@ -157,10 +162,15 @@ class Mf6SFR:
         if options is not None:
             for opt in options:
                 options_block += '  {}\n'.format(opt)
+        #if 'unit_conversion' not in options_block:
+        #    options_block += '  unit_conversion  {}\n'.format(self.unit_conversion)
         if 'unit_conversion' not in options_block:
-            options_block += '  unit_conversion  {}\n'.format(self.unit_conversion)
-        if 'auxiliary' not in options_block and self.auxiliary_line_numbers:
-            options_block += '  auxiliary line_id\n'
+            if 'length_conversion' not in options_block:
+                options_block += f'  length_conversion  {self.length_conversion}\n'
+            if 'time_conversion' not in options_block:
+                options_block += f'  time_conversion  {self.time_conversion}\n'
+        if self.boundnames and 'boundnames' not in options_block:
+            options_block += '  boundnames\n'
         options_block += 'END Options\n'
         self._options_block = options_block
 
@@ -218,7 +228,39 @@ class Mf6SFR:
         if self._period_data is None:
             self._period_data = self._get_period_data()
         return self._period_data
-        
+    
+    @property
+    def time_conversion(self):
+        time_conversions = {
+            'seconds': 1., 'minutes': 60., 'hours': 3600., 'days': 86400., 'years': 31557600.
+        }
+        time_conversion = self._time_conversion
+        if time_conversion is None:
+            if self.sfrdata is not None:
+                time_units = self.sfrdata.model_time_units
+            else:
+                time_units = get_model_time_units(self.model)
+            # default to days
+            time_conversion = time_conversions.get(time_units, 86400)
+            self._time_conversion = time_conversion
+        return time_conversion
+
+    @property
+    def length_conversion(self):
+        length_conversions = {
+            'feet': 1.486, 'meters': 1.0, 'centimeters': 100.
+        }
+        length_conversion = self._length_conversion
+        if length_conversion is None:
+            if self.sfrdata is not None:
+                length_units = self.sfrdata.model_length_units
+            else:
+                length_units = get_model_length_units(self.model)
+            # default to meters
+            length_conversion = length_conversions.get(length_units, 1)
+            self._length_conversion = length_conversion
+        return length_conversion
+                
     def _segment_data2reach_data(self, var):
         reach_values = []
         sd0 = self.ModflowSfr2.segment_data[0]
@@ -280,11 +322,14 @@ class Mf6SFR:
             for var in aux_variables:
                 if var in self.rd.columns:
                     packagedata[var] = self.rd[var]
-                elif var == 'line_id':  # included by default
-                    # if no line_id column; use SFR2 segment
-                    packagedata[var] = self.rd['iseg']
                 else:
                     raise ValueError(f"Auxiliary variable {var} not in packagedata!")
+        if self.boundnames:
+            if 'line_id' in self.rd.columns:
+                packagedata['boundname'] = self.rd['line_id']
+            else:
+                # if no line_id column; use SFR2 segment
+                packagedata['boundname'] = self.rd['iseg']
                     
         cols = [c for c in self.cols if c in packagedata.columns]
         return packagedata[cols].sort_values(by='rno')
@@ -315,7 +360,9 @@ class Mf6SFR:
                          'BUDGET FILEOUT model.sfr.cbc',
                          'STAGE FILEOUT model.sfr.stage.bin']
 
-            An appropriate unit_conversion is written by default.
+            Unless specified, appropriate length_conversion and time_conversion values written by default.
+            Alternatively, include 'unit_conversion' with the appropriate value here for compatibility with 
+            older versions of MODFLOW 6. 
             See MODFLOW-6 documentation for other options.
             By default None.
         external_files_path : str, optional

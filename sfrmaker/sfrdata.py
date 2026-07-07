@@ -18,7 +18,12 @@ from sfrmaker.flows import add_to_perioddata, add_to_segment_data
 from sfrmaker.gis import export_reach_data, project
 from sfrmaker.observations import write_gage_package, write_mf6_sfr_obsfile, add_observations
 from sfrmaker.units import convert_length_units, itmuni_values, lenuni_values
-from sfrmaker.utils import get_sfr_package_format, get_input_arguments, assign_layers, update
+from sfrmaker.utils import (
+    convert_id_column_to_strings, 
+    get_sfr_package_format, 
+    get_input_arguments, 
+    assign_layers, 
+    update)
 import sfrmaker
 from sfrmaker.base import DataPackage
 from sfrmaker.mf5to6 import segment_data_to_period_data
@@ -746,7 +751,7 @@ class SFRData(DataPackage):
 
         # update the ModflowSfr2 instance in case the SFR dataset has changed
         self.create_modflow_sfr2()
-        sfr6 = Mf6SFR(self.modflow_sfr2)
+        sfr6 = Mf6SFR(SFRData=self)
 
         # package data
         # An error occurred when storing data "packagedata" in a recarray.
@@ -754,6 +759,9 @@ class SFRData(DataPackage):
         # "<rno> <cellid> <rlen> <rwid> <rgrd> <rtp> <rbth> <rhk> <man> <ncon> <ustrf> <ndv>"
         # (some variables may be optional, see MF6 documentation)
         packagedata = sfr6.packagedata.copy()
+        boundnames = False
+        if 'boundname' in packagedata.columns:
+            boundnames = True
         if self.structured:
             columns = packagedata.drop(['k', 'i', 'j', 'idomain'], axis=1).columns.tolist()
             packagedata['cellid'] = list(zip(packagedata.k,
@@ -809,6 +817,7 @@ class SFRData(DataPackage):
                                    nreaches=len(self.reach_data),
                                    packagedata=packagedata,
                                    connectiondata=connectiondata,
+                                   boundnames=boundnames,
                                    auxiliary=auxiliary,
                                    diversions=None,  # TODO: add support for diversions
                                    perioddata=period_data,  # TODO: add support for creating mf6 perioddata input
@@ -1333,7 +1342,7 @@ class SFRData(DataPackage):
             inflows_input['id_column'] = inflows_input['line_id_column']
             inflows_by_stress_period = pd.read_csv(inflows_input['filename'])
             inflows_by_stress_period[inflows_input['id_column']] =\
-                inflows_by_stress_period[inflows_input['id_column']].astype(int).astype(str)
+                convert_id_column_to_strings(inflows_by_stress_period[inflows_input['id_column']])
 
             # check if all inflow sites are included in sfr network
             missing_sites = set(inflows_by_stress_period[inflows_input['id_column']]). \

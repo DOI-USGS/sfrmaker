@@ -2,7 +2,9 @@
 import numpy as np
 import pandas as pd
 import pytest
-from sfrmaker.utils import (assign_layers, width_from_arbolate_sum,
+from sfrmaker.utils import (assign_layers, 
+                            convert_id_column_to_strings, 
+                            width_from_arbolate_sum,
                             arbolate_sum, make_config_summary)
 
 
@@ -89,3 +91,17 @@ def test_asum(sfr_test_numbering):
 
 def test_make_config_summary():
     results = make_config_summary()
+
+
+@pytest.mark.parametrize('id_series,expected', (
+    (pd.Series(['1a', '2b']), ['1a', '2b']),
+    (pd.Series(['1', '2']), ['1', '2']),
+    (pd.Series([1, 2]), ['1', '2']),
+    (pd.Series([1., 2.]), ['1', '2']),
+    (pd.Series([1.1, 2.9]), ['1.1', '2.9']),
+    (pd.Series([1.234]), ['1.234']),
+    (pd.Series([1.23423409285e-11]), ['1.23423409285e-11']),
+))
+def test_convert_id_column_to_strings(id_series, expected):
+    result = convert_id_column_to_strings(id_series)
+    assert all(np.array(result) == np.array(expected))
