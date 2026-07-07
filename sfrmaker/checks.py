@@ -166,6 +166,8 @@ def routing_is_circular(fromid, toid):
     # a fromid should not appear more than once in its sequence
     for k, v in paths.items():
         if v.count(k) > 1:
+            print(f"Line ID {k} routes to itself")
+            print([str(s) for s in v[:v[1:].index(k)+2]])
             return True
     return False
 
