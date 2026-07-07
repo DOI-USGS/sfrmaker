@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>The Utilities Module &mdash; SFRmaker 0.13.0.post12.dev0+gf4e1a05 documentation</title>
+  <title>The Utilities Module &mdash; SFRmaker 0.13.0.post15.dev0+g43040a2 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
@@ -15,7 +15,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=f271fa55"></script>
+      <script src="../_static/documentation_options.js?v=78e0268d"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -77,6 +77,7 @@
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Utilities Module</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#sfrmaker.utils.arbolate_sum"><code class="docutils literal notranslate"><span class="pre">arbolate_sum()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#sfrmaker.utils.assign_layers"><code class="docutils literal notranslate"><span class="pre">assign_layers()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sfrmaker.utils.convert_id_column_to_strings"><code class="docutils literal notranslate"><span class="pre">convert_id_column_to_strings()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#sfrmaker.utils.exe_exists"><code class="docutils literal notranslate"><span class="pre">exe_exists()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#sfrmaker.utils.get_input_arguments"><code class="docutils literal notranslate"><span class="pre">get_input_arguments()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#sfrmaker.utils.get_layer"><code class="docutils literal notranslate"><span class="pre">get_layer()</span></code></a></li>
@@ -152,7 +153,7 @@ the segments. By default, None.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt><strong>asum</strong><span class="classifier">float or dict</span></dt><dd><p>Arbolate sums for each segment.</p>
+<dt><strong>asum</strong><span class="classifier">dict</span></dt><dd><p>Arbolate sums for each segment.</p>
 </dd>
 </dl>
 </dd>
@@ -213,6 +214,11 @@ a 3D array will always be returned.</p>
 When multiple reaches occur in a cell, the lowest streambed bottom is used
 in determining the layer and any corrections to the model bottom.</p>
 </dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="sfrmaker.utils.convert_id_column_to_strings">
+<span class="sig-prename descclassname"><span class="pre">sfrmaker.utils.</span></span><span class="sig-name descname"><span class="pre">convert_id_column_to_strings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id_series</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/utils.html#convert_id_column_to_strings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.utils.convert_id_column_to_strings" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="sfrmaker.utils.exe_exists">
@@ -377,7 +383,7 @@ from feet to the specified output units.</p>
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Mar 30, 2026.
+      <span class="lastupdated">Last updated on Jul 07, 2026.
       </span></p>
   </div>
 

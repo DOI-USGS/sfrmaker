@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>sfrmaker.utils &mdash; SFRmaker 0.13.0.post12.dev0+gf4e1a05 documentation</title>
+  <title>sfrmaker.utils &mdash; SFRmaker 0.13.0.post15.dev0+g43040a2 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=f271fa55"></script>
+      <script src="../../_static/documentation_options.js?v=78e0268d"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -305,7 +305,7 @@
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    asum : float or dict</span>
+<span class="sd">    asum : dict</span>
 <span class="sd">        Arbolate sums for each segment.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">segment</span><span class="p">):</span>
@@ -638,8 +638,37 @@
                 <span class="n">comment_text</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">  # &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">comment</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">))</span>
                 <span class="n">dest</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  # </span><span class="si">{</span><span class="n">comment_text</span><span class="si">}</span><span class="s2">:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
                 <span class="k">for</span> <span class="n">argname</span><span class="p">,</span> <span class="n">default_value</span> <span class="ow">in</span> <span class="n">args</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                    <span class="n">dest</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;  </span><span class="si">{</span><span class="n">argname</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">default_value</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
-    <span class="n">j</span><span class="o">=</span><span class="mi">2</span></div>
+                    <span class="n">dest</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;  </span><span class="si">{</span><span class="n">argname</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">default_value</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="convert_id_column_to_strings">
+<a class="viewcode-back" href="../../api/sfrmaker.utils.html#sfrmaker.utils.convert_id_column_to_strings">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">convert_id_column_to_strings</span><span class="p">(</span><span class="n">id_series</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">id_series</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span> <span class="o">==</span> <span class="n">id_series</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)):</span>
+            <span class="n">new_values</span> <span class="o">=</span> <span class="n">id_series</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">new_values</span> <span class="o">=</span> <span class="n">id_series</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">new_values</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">new_values</span> <span class="o">=</span> <span class="n">id_series</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">new_values</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="c1"># case of mixed types</span>
+    <span class="n">new_values</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">identifier</span> <span class="ow">in</span> <span class="n">id_series</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">identifier</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">new_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">identifier</span><span class="p">)))</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">new_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">identifier</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">new_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">identifier</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">new_values</span></div>
 
 </pre></div>
 
@@ -651,7 +680,7 @@
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Mar 30, 2026.
+      <span class="lastupdated">Last updated on Jul 07, 2026.
       </span></p>
   </div>
 

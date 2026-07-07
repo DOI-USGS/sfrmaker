@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>sfrmaker.lines &mdash; SFRmaker 0.13.0.post12.dev0+gf4e1a05 documentation</title>
+  <title>sfrmaker.lines &mdash; SFRmaker 0.13.0.post15.dev0+g43040a2 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=f271fa55"></script>
+      <script src="../../_static/documentation_options.js?v=78e0268d"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -114,7 +114,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">sfrmaker.nhdplus_utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_nhdplus_v2</span><span class="p">,</span> <span class="n">get_prj_file</span><span class="p">,</span> <span class="n">load_nhdplus_hr</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sfrmaker.sfrdata</span><span class="w"> </span><span class="kn">import</span> <span class="n">SFRData</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sfrmaker.units</span><span class="w"> </span><span class="kn">import</span> <span class="n">convert_length_units</span><span class="p">,</span> <span class="n">get_crs_units</span><span class="p">,</span> <span class="n">get_length_units</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">sfrmaker.utils</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">width_from_arbolate_sum</span><span class="p">,</span> <span class="n">arbolate_sum</span><span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sfrmaker.utils</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">convert_id_column_to_strings</span><span class="p">,</span> <span class="n">width_from_arbolate_sum</span><span class="p">,</span> <span class="n">arbolate_sum</span><span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sfrmaker.reaches</span><span class="w"> </span><span class="kn">import</span> <span class="n">consolidate_reach_conductances</span><span class="p">,</span> <span class="n">interpolate_to_reaches</span><span class="p">,</span> <span class="n">setup_reach_data</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sfrmaker.routing</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_previous_ids_in_subset</span>
 
@@ -835,10 +835,10 @@
         <span class="n">df</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">rename_cols</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         
         <span class="c1"># convert IDs to strings</span>
-        <span class="n">df</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+        <span class="n">df</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">convert_id_column_to_strings</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span>
         <span class="c1"># if reading from NHDPlus, to-ids may already be in lists</span>
         <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;toid&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
-            <span class="n">df</span><span class="p">[</span><span class="s1">&#39;toid&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;toid&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+            <span class="n">df</span><span class="p">[</span><span class="s1">&#39;toid&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">convert_id_column_to_strings</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;toid&#39;</span><span class="p">])</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">df</span><span class="p">[</span><span class="s1">&#39;toid&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[[</span><span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">toid</span><span class="p">))</span> <span class="k">for</span> <span class="n">toid</span> <span class="ow">in</span> <span class="n">toids</span><span class="p">]</span> <span class="k">for</span> <span class="n">toids</span> <span class="ow">in</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;toid&#39;</span><span class="p">]]</span>
 
@@ -1209,14 +1209,14 @@
 
         <span class="c1"># compute arbolate sums for original LineStrings if they weren&#39;t provided</span>
         <span class="c1"># output all asums in meters</span>
-        <span class="k">if</span> <span class="s1">&#39;asum2&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s1">&#39;asum2&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;asum2&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">line_lengths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">g</span><span class="o">.</span><span class="n">length</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">geometry</span><span class="p">])</span> <span class="o">*</span> \
                 <span class="n">convert_length_units</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">geometry_length_units</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">asum_units</span><span class="p">)</span>
-            <span class="n">line_lengths_lookup</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">line_lengths</span><span class="p">)),</span>
+            <span class="n">line_lengths_lookup</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">line_lengths</span><span class="p">))</span>
             <span class="n">asums</span> <span class="o">=</span> <span class="n">arbolate_sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
                                  <span class="n">lengths</span><span class="o">=</span><span class="n">line_lengths_lookup</span><span class="p">,</span>
                                  <span class="n">routing</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">routing</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;asum2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">asums</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;asum2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">asums</span><span class="p">[</span><span class="n">line_id</span><span class="p">]</span> <span class="k">for</span> <span class="n">line_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]]</span>
 
         <span class="c1"># populate starting asums (asum1)</span>
         <span class="k">if</span> <span class="s1">&#39;asum1&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;asum1&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -1422,7 +1422,7 @@
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Mar 30, 2026.
+      <span class="lastupdated">Last updated on Jul 07, 2026.
       </span></p>
   </div>
 

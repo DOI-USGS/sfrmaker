@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>sfrmaker.mf5to6 &mdash; SFRmaker 0.13.0.post12.dev0+gf4e1a05 documentation</title>
+  <title>sfrmaker.mf5to6 &mdash; SFRmaker 0.13.0.post15.dev0+g43040a2 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=f271fa55"></script>
+      <script src="../../_static/documentation_options.js?v=78e0268d"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -106,7 +106,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">flopy</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sfrmaker</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sfrmaker.reaches</span><span class="w"> </span><span class="kn">import</span> <span class="n">interpolate_to_reaches</span>
-
+<span class="kn">from</span><span class="w"> </span><span class="nn">sfrmaker.units</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_model_length_units</span><span class="p">,</span> <span class="n">get_model_time_units</span>
 
 <div class="viewcode-block" id="Mf6SFR">
 <a class="viewcode-back" href="../../api/sfrmaker.mf5to6.html#sfrmaker.mf5to6.Mf6SFR">[docs]</a>
@@ -132,18 +132,19 @@
 <span class="sd">    options : list, optional</span>
 <span class="sd">        List of strings to write to the MODFLOW-6 SFR options block. For example::</span>
 
-<span class="sd">                options=[&#39;save_flows&#39;,</span>
-<span class="sd">                         &#39;BUDGET FILEOUT model.sfr.cbc&#39;,</span>
-<span class="sd">                         &#39;STAGE FILEOUT model.sfr.stage.bin&#39;]</span>
+<span class="sd">            options=[&#39;save_flows&#39;,</span>
+<span class="sd">                        &#39;BUDGET FILEOUT model.sfr.cbc&#39;,</span>
+<span class="sd">                        &#39;STAGE FILEOUT model.sfr.stage.bin&#39;]</span>
 
-<span class="sd">        An appropriate unit_conversion is written by default.</span>
+<span class="sd">        Unless specified, appropriate length_conversion and time_conversion values written by default.</span>
+<span class="sd">        Alternatively, include &#39;unit_conversion&#39; with the appropriate value here for compatibility with </span>
+<span class="sd">        older versions of MODFLOW 6. </span>
 <span class="sd">        See MODFLOW-6 documentation for other options.</span>
 <span class="sd">        By default None.</span>
-
-<span class="sd">    auxiliary_line_numbers : bool, optional</span>
-<span class="sd">        If true, add &#39;line_id&#39; as an auxiliary variable to the options block</span>
-<span class="sd">        and write hydrography line IDs to the packagedata block in the auxiliary</span>
-<span class="sd">        &#39;line_id&#39; column, by default True.</span>
+<span class="sd">    boundnames : bool, optional</span>
+<span class="sd">        If true, add &#39;boundnames&#39; to the options block</span>
+<span class="sd">        and write hydrography line IDs to the packagedata block in the</span>
+<span class="sd">        &#39;boundname&#39; column, by default True.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># convert from ModflowSfr to mf6</span>
     <span class="n">mf6names</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;rno&#39;</span><span class="p">:</span> <span class="s1">&#39;rno&#39;</span><span class="p">,</span>
@@ -163,10 +164,10 @@
     <span class="n">mf5names</span> <span class="o">=</span> <span class="p">{</span><span class="n">v</span><span class="p">:</span> <span class="n">k</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">mf6names</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
 
     <span class="n">cols</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;rno&#39;</span><span class="p">,</span> <span class="s1">&#39;cellid&#39;</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="s1">&#39;j&#39;</span><span class="p">,</span> <span class="s1">&#39;rlen&#39;</span><span class="p">,</span> <span class="s1">&#39;rwid&#39;</span><span class="p">,</span> <span class="s1">&#39;rgrd&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;rtp&#39;</span><span class="p">,</span> <span class="s1">&#39;rbth&#39;</span><span class="p">,</span> <span class="s1">&#39;rhk&#39;</span><span class="p">,</span> <span class="s1">&#39;man&#39;</span><span class="p">,</span> <span class="s1">&#39;ncon&#39;</span><span class="p">,</span> <span class="s1">&#39;ustrf&#39;</span><span class="p">,</span> <span class="s1">&#39;ndv&#39;</span><span class="p">,</span> <span class="s1">&#39;idomain&#39;</span><span class="p">,</span> <span class="s1">&#39;line_id&#39;</span><span class="p">]</span>
+            <span class="s1">&#39;rtp&#39;</span><span class="p">,</span> <span class="s1">&#39;rbth&#39;</span><span class="p">,</span> <span class="s1">&#39;rhk&#39;</span><span class="p">,</span> <span class="s1">&#39;man&#39;</span><span class="p">,</span> <span class="s1">&#39;ncon&#39;</span><span class="p">,</span> <span class="s1">&#39;ustrf&#39;</span><span class="p">,</span> <span class="s1">&#39;ndv&#39;</span><span class="p">,</span> <span class="s1">&#39;idomain&#39;</span><span class="p">,</span> <span class="s1">&#39;boundname&#39;</span><span class="p">]</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ModflowSfr2</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">SFRData</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">period_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">idomain</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                 <span class="n">options</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">auxiliary_line_numbers</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                 <span class="n">options</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">boundnames</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                  <span class="n">modelgrid_type</span><span class="o">=</span><span class="s1">&#39;structured&#39;</span><span class="p">):</span>
 
         <span class="c1"># instantiate with SFRData instance instead of ModflowSfr2 instance</span>
@@ -196,19 +197,18 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">ModflowSfr2</span><span class="o">.</span><span class="n">reach_data</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;iseg&#39;</span><span class="p">,</span> <span class="s1">&#39;ireach&#39;</span><span class="p">])</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">structured</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ModflowSfr2</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">structured</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">unit_conversion</span> <span class="o">=</span> <span class="n">ModflowSfr2</span><span class="o">.</span><span class="n">const</span>
+        <span class="c1">#self.unit_conversion = ModflowSfr2.const</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_time_conversion</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_length_conversion</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">nreaches</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ModflowSfr2</span><span class="o">.</span><span class="n">reach_data</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">nper</span> <span class="o">=</span> <span class="n">ModflowSfr2</span><span class="o">.</span><span class="n">nper</span>
-
-        <span class="c1"># mf6 options block</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">auxiliary_line_numbers</span> <span class="o">=</span> <span class="n">auxiliary_line_numbers</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">options_block</span> <span class="o">=</span> <span class="n">options</span>
 
         <span class="c1"># dataframes of reach and segment data from modflow_sfr2</span>
         <span class="k">if</span> <span class="n">SFRData</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">rd</span> <span class="o">=</span> <span class="n">SFRData</span><span class="o">.</span><span class="n">reach_data</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">sd</span> <span class="o">=</span> <span class="n">SFRData</span><span class="o">.</span><span class="n">segment_data</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_period_data</span> <span class="o">=</span> <span class="n">SFRData</span><span class="o">.</span><span class="n">period_data</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sfrdata</span> <span class="o">=</span> <span class="n">SFRData</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">SFRData</span><span class="o">.</span><span class="n">model</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">rd</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">ModflowSfr2</span><span class="o">.</span><span class="n">reach_data</span><span class="p">)</span>
@@ -216,8 +216,13 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">sd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_segment_dataframe</span><span class="p">()</span>
             <span class="c1"># period data</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_period_data</span> <span class="o">=</span> <span class="n">period_data</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sfrdata</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">ModflowSfr2</span><span class="o">.</span><span class="n">parent</span>
-
+            
+        <span class="c1"># mf6 options block</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">boundnames</span> <span class="o">=</span> <span class="n">boundnames</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">options_block</span> <span class="o">=</span> <span class="n">options</span>
+        
         <span class="bp">self</span><span class="o">.</span><span class="n">_modelgrid_type</span> <span class="o">=</span> <span class="n">modelgrid_type</span>
         
         <span class="c1"># package data</span>
@@ -257,10 +262,15 @@
         <span class="k">if</span> <span class="n">options</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">opt</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
                 <span class="n">options_block</span> <span class="o">+=</span> <span class="s1">&#39;  </span><span class="si">{}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">opt</span><span class="p">)</span>
+        <span class="c1">#if &#39;unit_conversion&#39; not in options_block:</span>
+        <span class="c1">#    options_block += &#39;  unit_conversion  {}\n&#39;.format(self.unit_conversion)</span>
         <span class="k">if</span> <span class="s1">&#39;unit_conversion&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">options_block</span><span class="p">:</span>
-            <span class="n">options_block</span> <span class="o">+=</span> <span class="s1">&#39;  unit_conversion  </span><span class="si">{}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unit_conversion</span><span class="p">)</span>
-        <span class="k">if</span> <span class="s1">&#39;auxiliary&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">options_block</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">auxiliary_line_numbers</span><span class="p">:</span>
-            <span class="n">options_block</span> <span class="o">+=</span> <span class="s1">&#39;  auxiliary line_id</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="k">if</span> <span class="s1">&#39;length_conversion&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">options_block</span><span class="p">:</span>
+                <span class="n">options_block</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;  length_conversion  </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">length_conversion</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="k">if</span> <span class="s1">&#39;time_conversion&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">options_block</span><span class="p">:</span>
+                <span class="n">options_block</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;  time_conversion  </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">time_conversion</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">boundnames</span> <span class="ow">and</span> <span class="s1">&#39;boundnames&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">options_block</span><span class="p">:</span>
+            <span class="n">options_block</span> <span class="o">+=</span> <span class="s1">&#39;  boundnames</span><span class="se">\n</span><span class="s1">&#39;</span>
         <span class="n">options_block</span> <span class="o">+=</span> <span class="s1">&#39;END Options</span><span class="se">\n</span><span class="s1">&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_options_block</span> <span class="o">=</span> <span class="n">options_block</span>
 
@@ -318,7 +328,39 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_period_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_period_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_period_data</span><span class="p">()</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_period_data</span>
-        
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">time_conversion</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">time_conversions</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;seconds&#39;</span><span class="p">:</span> <span class="mf">1.</span><span class="p">,</span> <span class="s1">&#39;minutes&#39;</span><span class="p">:</span> <span class="mf">60.</span><span class="p">,</span> <span class="s1">&#39;hours&#39;</span><span class="p">:</span> <span class="mf">3600.</span><span class="p">,</span> <span class="s1">&#39;days&#39;</span><span class="p">:</span> <span class="mf">86400.</span><span class="p">,</span> <span class="s1">&#39;years&#39;</span><span class="p">:</span> <span class="mf">31557600.</span>
+        <span class="p">}</span>
+        <span class="n">time_conversion</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_time_conversion</span>
+        <span class="k">if</span> <span class="n">time_conversion</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sfrdata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">time_units</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sfrdata</span><span class="o">.</span><span class="n">model_time_units</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">time_units</span> <span class="o">=</span> <span class="n">get_model_time_units</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">)</span>
+            <span class="c1"># default to days</span>
+            <span class="n">time_conversion</span> <span class="o">=</span> <span class="n">time_conversions</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">time_units</span><span class="p">,</span> <span class="mi">86400</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_time_conversion</span> <span class="o">=</span> <span class="n">time_conversion</span>
+        <span class="k">return</span> <span class="n">time_conversion</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">length_conversion</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">length_conversions</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;feet&#39;</span><span class="p">:</span> <span class="mf">1.486</span><span class="p">,</span> <span class="s1">&#39;meters&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s1">&#39;centimeters&#39;</span><span class="p">:</span> <span class="mf">100.</span>
+        <span class="p">}</span>
+        <span class="n">length_conversion</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_length_conversion</span>
+        <span class="k">if</span> <span class="n">length_conversion</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sfrdata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">length_units</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sfrdata</span><span class="o">.</span><span class="n">model_length_units</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">length_units</span> <span class="o">=</span> <span class="n">get_model_length_units</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">)</span>
+            <span class="c1"># default to meters</span>
+            <span class="n">length_conversion</span> <span class="o">=</span> <span class="n">length_conversions</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">length_units</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_length_conversion</span> <span class="o">=</span> <span class="n">length_conversion</span>
+        <span class="k">return</span> <span class="n">length_conversion</span>
+                
     <span class="k">def</span><span class="w"> </span><span class="nf">_segment_data2reach_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var</span><span class="p">):</span>
         <span class="n">reach_values</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">sd0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ModflowSfr2</span><span class="o">.</span><span class="n">segment_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -380,11 +422,14 @@
             <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">aux_variables</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">var</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">rd</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
                     <span class="n">packagedata</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rd</span><span class="p">[</span><span class="n">var</span><span class="p">]</span>
-                <span class="k">elif</span> <span class="n">var</span> <span class="o">==</span> <span class="s1">&#39;line_id&#39;</span><span class="p">:</span>  <span class="c1"># included by default</span>
-                    <span class="c1"># if no line_id column; use SFR2 segment</span>
-                    <span class="n">packagedata</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rd</span><span class="p">[</span><span class="s1">&#39;iseg&#39;</span><span class="p">]</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Auxiliary variable </span><span class="si">{</span><span class="n">var</span><span class="si">}</span><span class="s2"> not in packagedata!&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">boundnames</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s1">&#39;line_id&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">rd</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                <span class="n">packagedata</span><span class="p">[</span><span class="s1">&#39;boundname&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rd</span><span class="p">[</span><span class="s1">&#39;line_id&#39;</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># if no line_id column; use SFR2 segment</span>
+                <span class="n">packagedata</span><span class="p">[</span><span class="s1">&#39;boundname&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rd</span><span class="p">[</span><span class="s1">&#39;iseg&#39;</span><span class="p">]</span>
                     
         <span class="n">cols</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cols</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">packagedata</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">packagedata</span><span class="p">[</span><span class="n">cols</span><span class="p">]</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s1">&#39;rno&#39;</span><span class="p">)</span>
@@ -417,7 +462,9 @@
 <span class="sd">                         &#39;BUDGET FILEOUT model.sfr.cbc&#39;,</span>
 <span class="sd">                         &#39;STAGE FILEOUT model.sfr.stage.bin&#39;]</span>
 
-<span class="sd">            An appropriate unit_conversion is written by default.</span>
+<span class="sd">            Unless specified, appropriate length_conversion and time_conversion values written by default.</span>
+<span class="sd">            Alternatively, include &#39;unit_conversion&#39; with the appropriate value here for compatibility with </span>
+<span class="sd">            older versions of MODFLOW 6. </span>
 <span class="sd">            See MODFLOW-6 documentation for other options.</span>
 <span class="sd">            By default None.</span>
 <span class="sd">        external_files_path : str, optional</span>
@@ -702,7 +749,7 @@
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Mar 30, 2026.
+      <span class="lastupdated">Last updated on Jul 07, 2026.
       </span></p>
   </div>
 
