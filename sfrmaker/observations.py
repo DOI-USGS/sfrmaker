@@ -16,6 +16,7 @@ except:
 from .gis import get_shapefile_crs, project
 from .fileio import read_tables
 from .routing import get_next_id_in_subset
+from .utils import convert_id_column_to_strings
 
 
 def add_observations(sfrdata, data, flowline_routing=None,
@@ -123,7 +124,7 @@ def add_observations(sfrdata, data, flowline_routing=None,
 
         # get reach number from site locations in source hydrography (line_ids)
         elif line_id_column in data.columns:
-            data[line_id_column] = data[line_id_column].astype(int).astype(str)
+            data[line_id_column] = convert_id_column_to_strings(data[line_id_column])
             # map NHDPlus COMIDs to reach numbers
             if flowline_routing is None:
                 line_id = dict(zip(reach_data.iseg, reach_data.line_id))

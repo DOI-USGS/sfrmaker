@@ -196,7 +196,7 @@ def arbolate_sum(segment, lengths, routing, starting_asums=None):
 
     Returns
     -------
-    asum : float or dict
+    asum : dict
         Arbolate sums for each segment.
     """
     if np.isscalar(segment):
@@ -506,4 +506,30 @@ def make_config_summary():
                 dest.write(f"  # {comment_text}:\n")
                 for argname, default_value in args.items():
                     dest.write(f'  {argname}: {default_value}\n')
-    j=2
+
+
+def convert_id_column_to_strings(id_series):
+    try:
+        if all(id_series.astype(int) == id_series.astype(float)):
+            new_values = id_series.astype(int).astype(str)
+        else:
+            new_values = id_series.astype(str)
+        return new_values
+    except:
+        pass
+    try:
+        new_values = id_series.astype(str)
+        return new_values
+    except:
+        pass
+    # case of mixed types
+    new_values = list()
+    for identifier in id_series:
+        if not isinstance(identifier, str):
+            try:
+                new_values.append(int(str(identifier)))
+            except:
+                new_values.append(str(identifier))
+        else:
+            new_values.append(identifier)
+    return new_values

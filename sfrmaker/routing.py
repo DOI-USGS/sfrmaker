@@ -356,3 +356,81 @@ def get_previous_ids_in_subset(subset, routing, ids):
         if len(nextupsegs) > 0:
             nextupsegs = get_nextupsegs(graph_r, nextupsegs)
     return new_ids
+
+
+def route_lines_by_proximity(flowline_geometries, line_ids=None, distance_tol=100):
+    """Route flowlines based on the proximity of their start and end-points.
+    
+    Parameters
+    ----------
+    flowline_geometries : sequence of shapely linestring geometries
+    line_ids : (optional) sequence of line ID numbers
+        If None, the one-based index position of the lines is used, 
+        with zero values indicating an outlet.
+    distance_tol : float
+        Maximum distance from a line end to the start of the next line. Lines
+        outside of this distance will not be routed to. 
+        
+    Returns
+    -------
+    flowline_routing : sequence of downstream line ID numbers
+        The next downstream line for each line in line_ids.
+    """
+    line_id_dtype = str
+    if line_ids is None:
+        line_ids = np.arange(1, len(flowline_geometries) + 1, dtype=int)
+        line_id_dtype = int
+    else:
+        line_ids = np.array(list(line_ids))
+        if len(line_ids) != len(flowline_geometries):
+            raise ValueError(f"{len(line_ids)} line_ids for {len(flowline_geometries)} flowlines!")
+        if len(set(line_ids)) != len(line_ids):
+            raise ValueError(f"{len(line_ids) - len(set(line_ids))} duplicate line_ids!")
+        line_id_dtype = type(line_ids[0])
+        outlet_id = line_id_dtype(0)
+        if outlet_id in line_ids:
+            raise ValueError(f"'0' is reserved for an outlet condition, not allowed as a line_id.")
+    start_xy = np.array([line.coords[0] for line in flowline_geometries])
+    end_xy = np.array([line.coords[-1] for line in flowline_geometries])
+    
+    flowline_routing = []
+    for line_id, (end_x, end_y) in zip(line_ids, end_xy):
+        other_line_start_xy = start_xy[line_ids != line_id]
+        other_line_ids = line_ids[line_ids != line_id]
+        dist_to_start_xys = np.sqrt((end_x - other_line_start_xy[:, 0])**2 +\
+            (end_y - other_line_start_xy[:, 1])**2)
+        if np.min(dist_to_start_xys) <= distance_tol:
+            next_start_id = other_line_ids[np.argmin(dist_to_start_xys)]
+        else:
+            next_start_id = line_id_dtype(0)
+        flowline_routing.append(next_start_id)
+        
+    # go thru the paths and fix any instances of circular routing
+    graph = make_graph(line_ids, flowline_routing, one_to_many=False)
+    paths = {fid: find_path(graph, fid) for fid in graph.keys()}
+    for line_id, routing_path in paths.items():
+        if routing_path.count(line_id) > 1:
+            upstream_ids = routing_path[:routing_path[1:].index(line_id)+1]
+            fix_from_id = upstream_ids[-1]
+            lines_not_upstream = np.array([True if lid in upstream_ids else False for lid in line_ids])#~np.isin(line_ids, upstream_ids)
+            other_line_start_xy = start_xy[lines_not_upstream]
+            other_line_ids = line_ids[lines_not_upstream]
+            dist_to_start_xys = np.sqrt((end_x - other_line_start_xy[:, 0])**2 +\
+                (end_y - other_line_start_xy[:, 1])**2)
+            if np.min(dist_to_start_xys) <= distance_tol:
+                next_start_id = other_line_ids[np.argmin(dist_to_start_xys)]
+            else:
+                next_start_id = outlet_id
+            graph[fix_from_id] = next_start_id
+        new_path = find_path(graph, line_id)
+        if new_path.count(line_id) > 1:
+            raise ValueError("Circular routing")
+    for from_line, to_line in graph.items():
+        if to_line in graph.keys() and to_line not in {0, '0'}:
+            start_x, start_y = start_xy[line_ids == to_line][0]
+            end_x, end_y = end_xy[line_ids == from_line][0]
+            routing_dist = np.sqrt((start_x - end_x)**2 + (start_y - end_y)**2)
+            assert routing_dist <= distance_tol
+    
+    flowline_routing = [graph[line_id] for line_id in line_ids]
+    return flowline_routing

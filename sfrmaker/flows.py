@@ -14,6 +14,7 @@ from mfexport.budget_output import read_sfr_output
 from .fileio import read_tables
 from .routing import get_next_id_in_subset
 from sfrmaker.fileio import load_modelgrid
+from sfrmaker.utils import convert_id_column_to_strings
 
 
 def get_inflow_locations_from_parent_model(parent_reach_data, inset_reach_data,
@@ -79,7 +80,7 @@ def get_inflow_locations_from_parent_model(parent_reach_data, inset_reach_data,
         prd['ireach'] = 1
     mustinclude_cols = {'line_id', 'rno', 'iseg', 'ireach', 'geometry'}
     assert len(mustinclude_cols.intersection(prd.columns)) == len(mustinclude_cols)
-    prd['line_id'] = prd['line_id'].astype(int).astype(str)
+    prd['line_id'] = convert_id_column_to_strings(prd['line_id'])
     
     if isinstance(inset_reach_data, str) or isinstance(inset_reach_data, Path):
         if inset_reach_data.endswith('.shp'):
@@ -95,7 +96,7 @@ def get_inflow_locations_from_parent_model(parent_reach_data, inset_reach_data,
         ird['ireach'] = 1
     mustinclude_cols = {'line_id', 'rno', 'iseg', 'ireach'}
     assert len(mustinclude_cols.intersection(ird.columns)) == len(mustinclude_cols)
-    ird['line_id'] = ird['line_id'].astype(int).astype(str)
+    ird['line_id'] = convert_id_column_to_strings(ird['line_id'])
     
     graph = make_graph(ird.rno.values, ird.outreach.values, one_to_many=False)
 
@@ -273,7 +274,7 @@ def add_to_perioddata(sfrdata, data, flowline_routing=None,
     
     # convert line IDs to strings
     if line_id_column in data.columns:
-        data[line_id_column] = data[line_id_column].astype(int).astype(str)
+        data[line_id_column] = convert_id_column_to_strings(data[line_id_column])
 
     # map NHDPlus COMIDs to reach numbers
     if flowline_routing is not None:
