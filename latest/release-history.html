@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Release History &mdash; SFRmaker 0.13.0.post16.dev0+g56a0741 documentation</title>
+  <title>Release History &mdash; SFRmaker 0.13.0.post19.dev0+gb94a308 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
@@ -15,7 +15,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=d8429687"></script>
+      <script src="_static/documentation_options.js?v=dd306ef9"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="_static/clipboard.min.js?v=a7894cd8"></script>
@@ -67,6 +67,7 @@
 <li class="toctree-l1"><a class="reference internal" href="api/index.html"> Code reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="config-summary.html"> Summary of configuration file options</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#"> Release History</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#version-0-13-3-in-development">Version 0.13.3 (in development)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#version-0-13-2-2026-03-12">Version 0.13.2 (2026-03-12)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#version-0-13-1-2025-12-30">Version 0.13.1 (2025-12-30)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#version-0-13-0-2025-12-30">Version 0.13.0 (2025-12-30)</a></li>
@@ -130,6 +131,11 @@
              
   <section id="release-history">
 <h1>Release History<a class="headerlink" href="#release-history" title="Link to this heading"></a></h1>
+<section id="version-0-13-3-in-development">
+<h2>Version 0.13.3 (in development)<a class="headerlink" href="#version-0-13-3-in-development" title="Link to this heading"></a></h2>
+<p><strong>Bug Fixes:</strong>
+* fix UnboundLocalError in SFRData.write_package() when a caller-supplied options list (with no existing OBS6 FILEIN entry) is passed and observations are present (issue #102)</p>
+</section>
 <section id="version-0-13-2-2026-03-12">
 <h2>Version 0.13.2 (2026-03-12)<a class="headerlink" href="#version-0-13-2-2026-03-12" title="Link to this heading"></a></h2>
 <p><strong>Bug Fixes:</strong>
