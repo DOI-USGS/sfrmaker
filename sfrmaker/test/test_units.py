@@ -9,7 +9,8 @@ from ..units import (
     convert_length_units,
     convert_time_units, 
     get_crs_units,
-    get_model_length_units)
+    get_model_length_units,
+    get_model_time_units)
 
 
 def test_convert_flux():
@@ -66,6 +67,25 @@ def test_get_model_length_units():
     units = get_model_length_units(gwf)
     assert units == 'feet'
 
+
+def test_get_model_time_units():
+    mf = flopy.modflow.Modflow()
+    dis = flopy.modflow.ModflowDis(mf)
+    units = get_model_time_units(mf)
+    assert units == 'days'  # flopy default
+    dis.itmuni = 0
+    units = get_model_time_units(mf)
+    assert units == 'undefined'  # flopy default
+
+    sim = flopy.mf6.MFSimulation()
+    tdis = flopy.mf6.modflow.mftdis.ModflowTdis(sim)
+    gwf = flopy.mf6.ModflowGwf(sim)
+    units = get_model_time_units(gwf)
+    assert units == 'undefined'  # flopy default
+    tdis = flopy.mf6.modflow.mftdis.ModflowTdis(sim, time_units='feet')
+    units = get_model_time_units(gwf)
+    assert units == 'feet'
+    
 
 @pytest.mark.parametrize('crs_unit_str,expected', (
     ('US survey foot','feet'),

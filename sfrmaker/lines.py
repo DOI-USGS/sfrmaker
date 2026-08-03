@@ -16,7 +16,7 @@ from sfrmaker.grid import StructuredGrid
 from sfrmaker.nhdplus_utils import load_nhdplus_v2, get_prj_file, load_nhdplus_hr
 from sfrmaker.sfrdata import SFRData
 from sfrmaker.units import convert_length_units, get_crs_units, get_length_units
-from sfrmaker.utils import (width_from_arbolate_sum, arbolate_sum)
+from sfrmaker.utils import (convert_id_column_to_strings, width_from_arbolate_sum, arbolate_sum)
 from sfrmaker.reaches import consolidate_reach_conductances, interpolate_to_reaches, setup_reach_data
 from sfrmaker.routing import get_previous_ids_in_subset
 
@@ -715,10 +715,10 @@ class Lines:
         df.rename(columns=rename_cols, inplace=True)
         
         # convert IDs to strings
-        df['id'] = df['id'].astype(int).astype(str)
+        df['id'] = convert_id_column_to_strings(df['id'])
         # if reading from NHDPlus, to-ids may already be in lists
         if np.isscalar(df['toid'].values[0]):
-            df['toid'] = df['toid'].astype(int).astype(str)
+            df['toid'] = convert_id_column_to_strings(df['toid'])
         else:
             df['toid'] = [[str(int(toid)) for toid in toids] for toids in df['toid']]
 
@@ -1080,14 +1080,14 @@ class Lines:
 
         # compute arbolate sums for original LineStrings if they weren't provided
         # output all asums in meters
-        if 'asum2' not in self.df.columns:
+        if 'asum2' not in self.df.columns or self.df['asum2'].sum() == 0:
             line_lengths = np.array([g.length for g in self.df.geometry]) * \
                 convert_length_units(self.geometry_length_units, self.asum_units)
-            line_lengths_lookup = dict(zip(self.df.id, line_lengths)),
+            line_lengths_lookup = dict(zip(self.df.id, line_lengths))
             asums = arbolate_sum(self.df.id,
                                  lengths=line_lengths_lookup,
                                  routing=self.routing)
-            self.df['asum2'] = asums
+            self.df['asum2'] = [asums[line_id] for line_id in self.df['id']]
 
         # populate starting asums (asum1)
         if 'asum1' not in self.df.columns or self.df['asum1'].sum() == 0:

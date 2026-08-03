@@ -3,7 +3,7 @@ Stuff for handling units
 """
 import numpy as np
 
-lenuni_values = {'unknown': 0,
+lenuni_values = {
                  'undefined': 0,
                  'feet': 1,
                  'meters': 2,
@@ -53,7 +53,7 @@ volumetric_units = {'liters': 13,
                     'acre-foot': 16
                     }
 
-itmuni_values = {"unknown": 0,
+itmuni_values = {"undefined": 0,
                  "seconds": 1,
                  "minutes": 2,
                  "hours": 3,
@@ -185,6 +185,15 @@ def get_model_length_units(model):
         return model.dis.length_units.array
     else:
         return lenuni_text[model.dis.lenuni]
+
+
+def get_model_time_units(model):
+    if model.version == 'mf6':
+        if model.simulation.tdis.time_units.array is None:
+            return 'undefined'
+        return model.simulation.tdis.time_units.array
+    else:
+        return itmuni_text[model.dis.itmuni]
 
 
 def get_crs_units(unit_string):

@@ -2,10 +2,24 @@
 Release History
 ===============
 
-Version 0.13.1 (in development)
+Version 0.13.3 (in development)
 -------------------------------
 **Bug Fixes:**
 * fix UnboundLocalError in SFRData.write_package() when a caller-supplied options list (with no existing OBS6 FILEIN entry) is passed and observations are present (issue #102)
+
+Version 0.13.2 (2026-03-12)
+---------------------------
+**Bug Fixes:**
+* Add support for pandas 3
+* Force all NHDPlus (v2 and HiRes) columns to lower-case, to resolve issues with inconsistent column name capitalization downloaded datasets;
+* Fix some remaining instances in the code where integer line IDs were expected (recast to string or allow type to be specified), in the preprocessing and routing modules.
+* Support any CRS unit strings that contain meter/metre/m, feet/foot/ft. Previously, for example strings like 'US survey foot' were not being recognized.
+* By default, write 0s for each dimension of unconnected cells in SFR Package; retain option to write NONE for backwards compatibility with previous versions of MODFLOW 6.
+
+Version 0.13.1 (2025-12-30)
+---------------------------
+**Bug Fixes:**
+* fix geopandas-related issue with elevations.sample_reach_elevations when measured elevations are supplied by a csv
 
 Version 0.13.0 (2025-12-30)
 ---------------------------
