@@ -1212,7 +1212,7 @@ def edit_flowlines(flowlines, config_file,
     config_path = os.path.abspath(os.path.split(config_file)[0])
     logger.log_file_and_date_modified(config_file)
     with open(config_file) as src:
-        cfg = yaml.load(src, Loader=yaml.Loader)
+        cfg = yaml.safe_load(src)
 
     if isinstance(flowlines, str) or isinstance(flowlines, Path):
         logger.log_file_and_date_modified(flowlines)
