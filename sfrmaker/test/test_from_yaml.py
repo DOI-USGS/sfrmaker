@@ -31,7 +31,7 @@ def shellmound_config(shellmound_active_area, outdir):
     shellmound active area."""
     config_file = 'sfrmaker/test/data/shellmound/shellmound_config.yml'
     with open(config_file) as src:
-        cfg = yaml.load(src, Loader=yaml.Loader)
+        cfg = yaml.safe_load(src)
     return config_file, cfg
 
 
@@ -156,7 +156,7 @@ def test_tylerforks_from_config(config_file, dem):
         - with and without DEM
     """
     with open(config_file) as src:
-        cfg = yaml.load(src, Loader=yaml.Loader)
+        cfg = yaml.safe_load(src)
 
     # dict still has same pathing as config file
     os.chdir(os.path.split(config_file)[0])

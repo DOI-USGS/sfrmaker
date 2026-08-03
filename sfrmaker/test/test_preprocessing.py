@@ -284,7 +284,7 @@ def test_edit_flowlines(flowlines, preprocessed_flowlines, test_data_path):
     edited_flowlines = edit_flowlines(flowlines,
                                       flowline_edits_file, logger=None)
     with open(flowline_edits_file) as src:
-        cfg = yaml.load(src, Loader=yaml.Loader)
+        cfg = yaml.safe_load(src)
     # verify that flowlines were dropped
     assert not any(set(cfg['drop_flowlines']).intersection(edited_flowlines['comid']))
     # verify routing changes

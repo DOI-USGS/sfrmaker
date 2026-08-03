@@ -1179,7 +1179,7 @@ class SFRData(DataPackage):
             path = path if len(path) > 0 else '.'
             os.chdir(path)
             with open(config_file) as src:
-                cfg = yaml.load(src, Loader=yaml.Loader)
+                cfg = yaml.safe_load(src)
         # or accept a mapping as input
         else:
             cfg = config_file
@@ -1188,7 +1188,7 @@ class SFRData(DataPackage):
         defaults_file = os.path.join(os.path.split(__file__)[0],
                                      'default_config.yml')
         with open(defaults_file) as src:
-            defaults = yaml.load(src, Loader=yaml.Loader)
+            defaults = yaml.safe_load(src)
 
         # add defaults to configuration
         #cfg = update(defaults, cfg)
