@@ -27,7 +27,9 @@ def add_observations(sfrdata, data, flowline_routing=None,
                      line_id_column=None,
                      rno_column=None,
                      obstype_column=None,
-                     obsname_column='site_no'):
+                     obsname_column='site_no',
+                     site_location_distance_threshold=1000,
+                     ):
     """Add SFR observations to the observations DataFrame
     attribute of an sfrdata instance. Observations can
     by located on the SFR network by specifying reach number
@@ -76,7 +78,9 @@ def add_observations(sfrdata, data, flowline_routing=None,
         If obstype and obstype_column_in_data are none, the default of 'downstream-flow' will be used.
     obsname_column : str
         Column in data with unique identifier (e.g. site number or name) for observation sites.
-
+    site_location_distance_threshold : scalar
+        Only consider sites within this distance of a stream line-arc (only applies if x_location_column 
+        and y_location_column are being used to located the observations).
 
     Notes
     -----
@@ -118,7 +122,8 @@ def add_observations(sfrdata, data, flowline_routing=None,
                                 x_column_in_data=x_location_column,
                                 y_column_in_data=y_location_column,
                                 reach_id_col='rno',  # reach number column in reach_data
-                                site_number_col=obsname_column
+                                site_number_col=obsname_column,
+                                distance_threshold=site_location_distance_threshold
                                 )
             data[rno_column] = locs['rno']
 
