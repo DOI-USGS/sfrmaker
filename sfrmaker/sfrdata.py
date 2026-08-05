@@ -832,7 +832,8 @@ class SFRData(DataPackage):
                          rno_column=None,
                          obstype_column=None,
                          obsname_column='site_no',
-                         gage_starting_unit_number=250):
+                         gage_starting_unit_number=250,
+                         site_location_distance_threshold=1000):
         self.gage_starting_unit_number = gage_starting_unit_number
         added_obs = add_observations(self, data, flowline_routing=flowline_routing,
                                      obstype=obstype, sfrlines_shapefile=sfrlines_shapefile,
@@ -841,7 +842,9 @@ class SFRData(DataPackage):
                                      line_id_column=line_id_column,
                                      rno_column=rno_column,
                                      obstype_column=obstype_column,
-                                     obsname_column=obsname_column)
+                                     obsname_column=obsname_column,
+                                     site_location_distance_threshold=site_location_distance_threshold
+                                     )
 
         # replace any observations that area already in the observations table
         if isinstance(self._observations, pd.DataFrame):
