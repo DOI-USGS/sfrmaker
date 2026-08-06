@@ -517,11 +517,6 @@ def convert_id_column_to_strings(id_series):
         return new_values
     except:
         pass
-    try:
-        new_values = id_series.astype(str)
-        return new_values
-    except:
-        pass
     # case of mixed types
     new_values = list()
     for identifier in id_series:
