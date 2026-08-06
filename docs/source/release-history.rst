@@ -2,6 +2,17 @@
 Release History
 ===============
 
+Version 0.14.0 (2026-08-06)
+-------------------------------
+**New Features:**
+* Added route_lines_by_proximity function to the routing module. This function will develop routing connections between flowlines based on proximity between flowline ends and starts, enabling the use of input hydrography datasets that don't have pre-defined routing connections.
+* Added site_location_distance_threshold arg to add_observations to allow for adjustment of the threshold distance for matching streamgage x,y locations with flowlines. Previously this value was effective hard-coded at 1,000, which may be inappropriate for very coarsely-gridded models with units of feet, especially when the consolidate_conductance option is selected.
+* Added support for reach/segment renumbering that ensures increasing values when there are diversions or bifurcations in the stream network. Refactored `routing.renumber_segments` to implement Kahn's algorithm, so this change chould be transparent from a user perspective.
+
+**Bug Fixes:**
+* fix UnboundLocalError in SFRData.write_package() when a caller-supplied options list (with no existing OBS6 FILEIN entry) is passed and observations are present (issue #102)
+* other minor fixes
+
 Version 0.13.2 (2026-03-12)
 ---------------------------
 **Bug Fixes:**
