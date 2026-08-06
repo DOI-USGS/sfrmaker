@@ -138,6 +138,21 @@ def test_from_shapefile(crs, prjfile):
         elevation_units='feet',  # units of source data
         prjfile=prjfile, crs=crs
         )
+    # check routing consistency for just one case to avoid redundancy
+    if prjfile is None:
+        routing = lines.routing.copy()
+        lines = sfrmaker.Lines.from_shapefile(
+            shapefile='examples/meras/flowlines.shp',
+            id_column='COMID',  # arguments to sfrmaker.Lines.from_shapefile
+            routing_column='tocomid',
+            up_elevation_column='elevupsmo',
+            dn_elevation_column='elevdnsmo',
+            name_column='gnis_name',
+            width_units='feet',  # units of source data
+            elevation_units='feet',  # units of source data
+            prjfile=prjfile, crs=crs
+            )
+        assert lines.routing == routing
     assert lines.df.crs == lines.crs
     if crs is not None:
         assert lines.crs == get_authority_crs(crs)
