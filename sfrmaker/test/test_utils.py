@@ -96,8 +96,13 @@ def test_make_config_summary():
 @pytest.mark.parametrize('id_series,expected', (
     (pd.Series(['1a', '2b']), ['1a', '2b']),
     (pd.Series(['1', '2']), ['1', '2']),
+    (pd.Series(['1', 2]), ['1', '2']),
     (pd.Series([1, 2]), ['1', '2']),
     (pd.Series([1., 2.]), ['1', '2']),
+    (pd.Series([1., '2.']), ['1.0', '2.']),
+    (pd.Series([1, '2']), ['1', '2']),
+    (pd.Series([1, 'a']), ['1', 'a']),
+    (pd.Series(['a', 'b']), ['a', 'b']),
     (pd.Series([1.1, 2.9]), ['1.1', '2.9']),
     (pd.Series([1.234]), ['1.234']),
     (pd.Series([1.23423409285e-11]), ['1.23423409285e-11']),
