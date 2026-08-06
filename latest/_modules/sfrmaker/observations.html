@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>sfrmaker.observations &mdash; SFRmaker 0.13.0.post23.dev0+gd495c68 documentation</title>
+  <title>sfrmaker.observations &mdash; SFRmaker 0.13.0.post24.dev0+gfbab447 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=e41a914e"></script>
+      <script src="../../_static/documentation_options.js?v=20e5990a"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -127,7 +127,9 @@
                      <span class="n">line_id_column</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                      <span class="n">rno_column</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                      <span class="n">obstype_column</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                     <span class="n">obsname_column</span><span class="o">=</span><span class="s1">&#39;site_no&#39;</span><span class="p">):</span>
+                     <span class="n">obsname_column</span><span class="o">=</span><span class="s1">&#39;site_no&#39;</span><span class="p">,</span>
+                     <span class="n">site_location_distance_threshold</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+                     <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Add SFR observations to the observations DataFrame</span>
 <span class="sd">    attribute of an sfrdata instance. Observations can</span>
 <span class="sd">    by located on the SFR network by specifying reach number</span>
@@ -176,7 +178,9 @@
 <span class="sd">        If obstype and obstype_column_in_data are none, the default of &#39;downstream-flow&#39; will be used.</span>
 <span class="sd">    obsname_column : str</span>
 <span class="sd">        Column in data with unique identifier (e.g. site number or name) for observation sites.</span>
-
+<span class="sd">    site_location_distance_threshold : scalar</span>
+<span class="sd">        Only consider sites within this distance of a stream line-arc (only applies if x_location_column </span>
+<span class="sd">        and y_location_column are being used to located the observations).</span>
 
 <span class="sd">    Notes</span>
 <span class="sd">    -----</span>
@@ -218,7 +222,8 @@
                                 <span class="n">x_column_in_data</span><span class="o">=</span><span class="n">x_location_column</span><span class="p">,</span>
                                 <span class="n">y_column_in_data</span><span class="o">=</span><span class="n">y_location_column</span><span class="p">,</span>
                                 <span class="n">reach_id_col</span><span class="o">=</span><span class="s1">&#39;rno&#39;</span><span class="p">,</span>  <span class="c1"># reach number column in reach_data</span>
-                                <span class="n">site_number_col</span><span class="o">=</span><span class="n">obsname_column</span>
+                                <span class="n">site_number_col</span><span class="o">=</span><span class="n">obsname_column</span><span class="p">,</span>
+                                <span class="n">distance_threshold</span><span class="o">=</span><span class="n">site_location_distance_threshold</span>
                                 <span class="p">)</span>
             <span class="n">data</span><span class="p">[</span><span class="n">rno_column</span><span class="p">]</span> <span class="o">=</span> <span class="n">locs</span><span class="p">[</span><span class="s1">&#39;rno&#39;</span><span class="p">]</span>
 
@@ -653,7 +658,7 @@
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Aug 03, 2026.
+      <span class="lastupdated">Last updated on Aug 06, 2026.
       </span></p>
   </div>
 

@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>sfrmaker.sfrdata &mdash; SFRmaker 0.13.0.post23.dev0+gd495c68 documentation</title>
+  <title>sfrmaker.sfrdata &mdash; SFRmaker 0.13.0.post24.dev0+gfbab447 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=e41a914e"></script>
+      <script src="../../_static/documentation_options.js?v=20e5990a"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -967,7 +967,8 @@
                          <span class="n">rno_column</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                          <span class="n">obstype_column</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                          <span class="n">obsname_column</span><span class="o">=</span><span class="s1">&#39;site_no&#39;</span><span class="p">,</span>
-                         <span class="n">gage_starting_unit_number</span><span class="o">=</span><span class="mi">250</span><span class="p">):</span>
+                         <span class="n">gage_starting_unit_number</span><span class="o">=</span><span class="mi">250</span><span class="p">,</span>
+                         <span class="n">site_location_distance_threshold</span><span class="o">=</span><span class="mi">1000</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">gage_starting_unit_number</span> <span class="o">=</span> <span class="n">gage_starting_unit_number</span>
         <span class="n">added_obs</span> <span class="o">=</span> <span class="n">add_observations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">flowline_routing</span><span class="o">=</span><span class="n">flowline_routing</span><span class="p">,</span>
                                      <span class="n">obstype</span><span class="o">=</span><span class="n">obstype</span><span class="p">,</span> <span class="n">sfrlines_shapefile</span><span class="o">=</span><span class="n">sfrlines_shapefile</span><span class="p">,</span>
@@ -976,7 +977,9 @@
                                      <span class="n">line_id_column</span><span class="o">=</span><span class="n">line_id_column</span><span class="p">,</span>
                                      <span class="n">rno_column</span><span class="o">=</span><span class="n">rno_column</span><span class="p">,</span>
                                      <span class="n">obstype_column</span><span class="o">=</span><span class="n">obstype_column</span><span class="p">,</span>
-                                     <span class="n">obsname_column</span><span class="o">=</span><span class="n">obsname_column</span><span class="p">)</span>
+                                     <span class="n">obsname_column</span><span class="o">=</span><span class="n">obsname_column</span><span class="p">,</span>
+                                     <span class="n">site_location_distance_threshold</span><span class="o">=</span><span class="n">site_location_distance_threshold</span>
+                                     <span class="p">)</span>
 
         <span class="c1"># replace any observations that area already in the observations table</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_observations</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
@@ -2047,7 +2050,7 @@
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Aug 03, 2026.
+      <span class="lastupdated">Last updated on Aug 06, 2026.
       </span></p>
   </div>
 

@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>The Observations Module &mdash; SFRmaker 0.13.0.post23.dev0+gd495c68 documentation</title>
+  <title>The Observations Module &mdash; SFRmaker 0.13.0.post24.dev0+gfbab447 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
@@ -15,7 +15,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=e41a914e"></script>
+      <script src="../_static/documentation_options.js?v=20e5990a"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -121,7 +121,7 @@
 <p>Functions for handling observations of SFR package output.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="sfrmaker.observations.add_observations">
-<span class="sig-prename descclassname"><span class="pre">sfrmaker.observations.</span></span><span class="sig-name descname"><span class="pre">add_observations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sfrdata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flowline_routing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obstype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sfrlines_shapefile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rno_column_in_sfrlines</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rno'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_location_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_location_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line_id_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rno_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obstype_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obsname_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'site_no'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/observations.html#add_observations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.observations.add_observations" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">sfrmaker.observations.</span></span><span class="sig-name descname"><span class="pre">add_observations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sfrdata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flowline_routing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obstype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sfrlines_shapefile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rno_column_in_sfrlines</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rno'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_location_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_location_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line_id_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rno_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obstype_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obsname_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'site_no'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site_location_distance_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sfrmaker/observations.html#add_observations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sfrmaker.observations.add_observations" title="Link to this definition"></a></dt>
 <dd><p>Add SFR observations to the observations DataFrame
 attribute of an sfrdata instance. Observations can
 by located on the SFR network by specifying reach number
@@ -169,6 +169,9 @@ that is represented in the SFR network.</p>
 If obstype and obstype_column_in_data are none, the default of ‘downstream-flow’ will be used.</p>
 </dd>
 <dt><strong>obsname_column</strong><span class="classifier">str</span></dt><dd><p>Column in data with unique identifier (e.g. site number or name) for observation sites.</p>
+</dd>
+<dt><strong>site_location_distance_threshold</strong><span class="classifier">scalar</span></dt><dd><p>Only consider sites within this distance of a stream line-arc (only applies if x_location_column 
+and y_location_column are being used to located the observations).</p>
 </dd>
 </dl>
 </dd>
@@ -359,7 +362,7 @@ will be written to the listing file immediately after it is read.</p>
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Aug 03, 2026.
+      <span class="lastupdated">Last updated on Aug 06, 2026.
       </span></p>
   </div>
 
