@@ -28,10 +28,10 @@
    "id": "619f9195",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-08-06T13:46:04.200041Z",
-     "iopub.status.busy": "2026-08-06T13:46:04.199926Z",
-     "iopub.status.idle": "2026-08-06T13:46:05.930796Z",
-     "shell.execute_reply": "2026-08-06T13:46:05.929646Z"
+     "iopub.execute_input": "2026-08-07T02:14:15.696913Z",
+     "iopub.status.busy": "2026-08-07T02:14:15.696468Z",
+     "iopub.status.idle": "2026-08-07T02:14:18.349302Z",
+     "shell.execute_reply": "2026-08-07T02:14:18.346847Z"
     }
    },
    "outputs": [],
@@ -58,10 +58,10 @@
    "id": "bb1d52ad",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-08-06T13:46:05.933326Z",
-     "iopub.status.busy": "2026-08-06T13:46:05.932900Z",
-     "iopub.status.idle": "2026-08-06T13:46:05.939428Z",
-     "shell.execute_reply": "2026-08-06T13:46:05.938577Z"
+     "iopub.execute_input": "2026-08-07T02:14:18.354992Z",
+     "iopub.status.busy": "2026-08-07T02:14:18.354364Z",
+     "iopub.status.idle": "2026-08-07T02:14:18.363316Z",
+     "shell.execute_reply": "2026-08-07T02:14:18.362053Z"
     }
    },
    "outputs": [],
@@ -95,10 +95,10 @@
    "id": "3235b2fb",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-08-06T13:46:05.941418Z",
-     "iopub.status.busy": "2026-08-06T13:46:05.941316Z",
-     "iopub.status.idle": "2026-08-06T13:46:06.092027Z",
-     "shell.execute_reply": "2026-08-06T13:46:06.091181Z"
+     "iopub.execute_input": "2026-08-07T02:14:18.365930Z",
+     "iopub.status.busy": "2026-08-07T02:14:18.365762Z",
+     "iopub.status.idle": "2026-08-07T02:14:18.560047Z",
+     "shell.execute_reply": "2026-08-07T02:14:18.558292Z"
     }
    },
    "outputs": [
@@ -112,7 +112,7 @@
       "Getting routing information from NHDPlus HR Plusflow table...\n",
       "finished in 0.00s\n",
       "\n",
-      "finished in 0.07s\n",
+      "finished in 0.10s\n",
       "\n",
       "reading ../neversink_rondout/NHDPLUS_HR_2.gdb...\n",
       "filtering flowlines...\n",
@@ -120,7 +120,7 @@
       "Getting routing information from NHDPlus HR Plusflow table...\n",
       "finished in 0.00s\n",
       "\n",
-      "finished in 0.11s\n",
+      "finished in 0.15s\n",
       "\n",
       "wrote output/preprocessed_flowlines.shp\n"
      ]
@@ -161,10 +161,10 @@
    "id": "47229b35",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-08-06T13:46:06.094056Z",
-     "iopub.status.busy": "2026-08-06T13:46:06.093951Z",
-     "iopub.status.idle": "2026-08-06T13:46:06.115671Z",
-     "shell.execute_reply": "2026-08-06T13:46:06.114838Z"
+     "iopub.execute_input": "2026-08-07T02:14:18.562660Z",
+     "iopub.status.busy": "2026-08-07T02:14:18.562515Z",
+     "iopub.status.idle": "2026-08-07T02:14:18.592089Z",
+     "shell.execute_reply": "2026-08-07T02:14:18.590727Z"
     }
    },
    "outputs": [
@@ -204,10 +204,10 @@
    "id": "08783e35",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-08-06T13:46:06.117561Z",
-     "iopub.status.busy": "2026-08-06T13:46:06.117428Z",
-     "iopub.status.idle": "2026-08-06T13:46:06.120183Z",
-     "shell.execute_reply": "2026-08-06T13:46:06.119426Z"
+     "iopub.execute_input": "2026-08-07T02:14:18.594960Z",
+     "iopub.status.busy": "2026-08-07T02:14:18.594819Z",
+     "iopub.status.idle": "2026-08-07T02:14:18.598443Z",
+     "shell.execute_reply": "2026-08-07T02:14:18.597269Z"
     }
    },
    "outputs": [],
@@ -236,10 +236,10 @@
    "id": "f61d69a1",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-08-06T13:46:06.122104Z",
-     "iopub.status.busy": "2026-08-06T13:46:06.121978Z",
-     "iopub.status.idle": "2026-08-06T13:46:06.124114Z",
-     "shell.execute_reply": "2026-08-06T13:46:06.123454Z"
+     "iopub.execute_input": "2026-08-07T02:14:18.600838Z",
+     "iopub.status.busy": "2026-08-07T02:14:18.600712Z",
+     "iopub.status.idle": "2026-08-07T02:14:18.609137Z",
+     "shell.execute_reply": "2026-08-07T02:14:18.607513Z"
     }
    },
    "outputs": [],
@@ -278,10 +278,10 @@
    "id": "84909bed",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-08-06T13:46:06.125952Z",
-     "iopub.status.busy": "2026-08-06T13:46:06.125833Z",
-     "iopub.status.idle": "2026-08-06T13:46:06.238561Z",
-     "shell.execute_reply": "2026-08-06T13:46:06.237946Z"
+     "iopub.execute_input": "2026-08-07T02:14:18.611077Z",
+     "iopub.status.busy": "2026-08-07T02:14:18.610913Z",
+     "iopub.status.idle": "2026-08-07T02:14:18.746313Z",
+     "shell.execute_reply": "2026-08-07T02:14:18.745237Z"
     }
    },
    "outputs": [
@@ -292,13 +292,7 @@
       "for basins:\n",
       "../tylerforks/NHDPlus/\n",
       "\n",
-      "reading ../tylerforks/active_area.shp...\n"
-     ]
-    },
-    {
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
+      "reading ../tylerforks/active_area.shp...\n",
       "--> building dataframe... (may take a while for large shapefiles)\n",
       "writing output/PlusFlowlineVAA_gt3km.dbf... Done\n",
       "writing output/PlusFlow_gt3km.dbf... Done\n",
@@ -339,10 +333,10 @@
    "id": "ec5ad987",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-08-06T13:46:06.240407Z",
-     "iopub.status.busy": "2026-08-06T13:46:06.240315Z",
-     "iopub.status.idle": "2026-08-06T13:46:06.246480Z",
-     "shell.execute_reply": "2026-08-06T13:46:06.245867Z"
+     "iopub.execute_input": "2026-08-07T02:14:18.749409Z",
+     "iopub.status.busy": "2026-08-07T02:14:18.749242Z",
+     "iopub.status.idle": "2026-08-07T02:14:18.754505Z",
+     "shell.execute_reply": "2026-08-07T02:14:18.753131Z"
     }
    },
    "outputs": [
@@ -379,10 +373,10 @@
    "id": "20e6d318",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-08-06T13:46:06.248318Z",
-     "iopub.status.busy": "2026-08-06T13:46:06.248213Z",
-     "iopub.status.idle": "2026-08-06T13:46:06.450073Z",
-     "shell.execute_reply": "2026-08-06T13:46:06.446667Z"
+     "iopub.execute_input": "2026-08-07T02:14:18.758436Z",
+     "iopub.status.busy": "2026-08-07T02:14:18.758074Z",
+     "iopub.status.idle": "2026-08-07T02:14:19.000147Z",
+     "shell.execute_reply": "2026-08-07T02:14:18.998982Z"
     }
    },
    "outputs": [
@@ -448,22 +442,13 @@
    "id": "7ce511f7",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-08-06T13:46:06.456330Z",
-     "iopub.status.busy": "2026-08-06T13:46:06.455801Z",
-     "iopub.status.idle": "2026-08-06T13:46:06.739591Z",
-     "shell.execute_reply": "2026-08-06T13:46:06.738817Z"
+     "iopub.execute_input": "2026-08-07T02:14:19.004497Z",
+     "iopub.status.busy": "2026-08-07T02:14:19.004157Z",
+     "iopub.status.idle": "2026-08-07T02:14:19.363415Z",
+     "shell.execute_reply": "2026-08-07T02:14:19.361889Z"
     }
    },
    "outputs": [
-    {
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "\n",
-      "Smoothing elevations...\n",
-      "finished in 0.00s\n"
-     ]
-    },
     {
      "name": "stderr",
      "output_type": "stream",
@@ -521,7 +506,22 @@
       "  new_array = self.src.read(\n",
       "/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.14/site-packages/rasterstats/io.py:458: DeprecationWarning: Setting the shape on a NumPy array has been deprecated in NumPy 2.5.\n",
       "As an alternative, you can create a new view using np.reshape (with copy=False if needed).\n",
-      "  new_array = self.src.read(\n",
+      "  new_array = self.src.read(\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "\n",
+      "Smoothing elevations...\n",
+      "finished in 0.00s\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
       "/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.14/site-packages/rasterstats/io.py:458: DeprecationWarning: Setting the shape on a NumPy array has been deprecated in NumPy 2.5.\n",
       "As an alternative, you can create a new view using np.reshape (with copy=False if needed).\n",
       "  new_array = self.src.read(\n",
@@ -565,10 +565,10 @@
    "id": "d659de74",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-08-06T13:46:06.741952Z",
-     "iopub.status.busy": "2026-08-06T13:46:06.741779Z",
-     "iopub.status.idle": "2026-08-06T13:46:06.754483Z",
-     "shell.execute_reply": "2026-08-06T13:46:06.753709Z"
+     "iopub.execute_input": "2026-08-07T02:14:19.367877Z",
+     "iopub.status.busy": "2026-08-07T02:14:19.367412Z",
+     "iopub.status.idle": "2026-08-07T02:14:19.385618Z",
+     "shell.execute_reply": "2026-08-07T02:14:19.383973Z"
     }
    },
    "outputs": [
@@ -817,10 +817,10 @@
    "id": "50dba987",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-08-06T13:46:06.756594Z",
-     "iopub.status.busy": "2026-08-06T13:46:06.756437Z",
-     "iopub.status.idle": "2026-08-06T13:46:06.891068Z",
-     "shell.execute_reply": "2026-08-06T13:46:06.890332Z"
+     "iopub.execute_input": "2026-08-07T02:14:19.389498Z",
+     "iopub.status.busy": "2026-08-07T02:14:19.389095Z",
+     "iopub.status.idle": "2026-08-07T02:14:19.495157Z",
+     "shell.execute_reply": "2026-08-07T02:14:19.493785Z"
     }
    },
    "outputs": [
@@ -865,36 +865,30 @@
    "id": "39a289bb",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-08-06T13:46:06.894044Z",
-     "iopub.status.busy": "2026-08-06T13:46:06.893852Z",
-     "iopub.status.idle": "2026-08-06T13:46:06.936851Z",
-     "shell.execute_reply": "2026-08-06T13:46:06.936118Z"
+     "iopub.execute_input": "2026-08-07T02:14:19.498245Z",
+     "iopub.status.busy": "2026-08-07T02:14:19.497978Z",
+     "iopub.status.idle": "2026-08-07T02:14:19.546768Z",
+     "shell.execute_reply": "2026-08-07T02:14:19.545531Z"
     }
    },
    "outputs": [
-    {
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "\n",
-      "reading ../tylerforks/active_area.shp...\n",
-      "--> building dataframe... (may take a while for large shapefiles)\n"
-     ]
-    },
-    {
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "starting lines: 19\n",
-      "remaining lines: 11\n"
-     ]
-    },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
       "/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.14/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0\n",
       "  props['geometry'] = line.get('geometry', None)\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "\n",
+      "reading ../tylerforks/active_area.shp...\n",
+      "--> building dataframe... (may take a while for large shapefiles)\n",
+      "starting lines: 19\n",
+      "remaining lines: 11\n"
      ]
     }
    ],
@@ -910,10 +904,10 @@
    "id": "a60e8b64",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-08-06T13:46:06.939278Z",
-     "iopub.status.busy": "2026-08-06T13:46:06.939155Z",
-     "iopub.status.idle": "2026-08-06T13:46:06.997454Z",
-     "shell.execute_reply": "2026-08-06T13:46:06.996817Z"
+     "iopub.execute_input": "2026-08-07T02:14:19.549216Z",
+     "iopub.status.busy": "2026-08-07T02:14:19.549066Z",
+     "iopub.status.idle": "2026-08-07T02:14:19.623384Z",
+     "shell.execute_reply": "2026-08-07T02:14:19.622519Z"
     }
    },
    "outputs": [
