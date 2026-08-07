@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>sfrmaker.flows &mdash; SFRmaker 0.13.2.post0.dev0+gf99ac67 documentation</title>
+  <title>sfrmaker.flows &mdash; SFRmaker 0.14.0.post0.dev0+gf6f52b1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
@@ -14,9 +14,9 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=6d0ec869"></script>
-      <script src="../../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/documentation_options.js?v=0921dceb"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
       <script src="../../_static/copybutton.js?v=f281be69"></script>
       <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -112,6 +112,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">.fileio</span><span class="w"> </span><span class="kn">import</span> <span class="n">read_tables</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.routing</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_next_id_in_subset</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sfrmaker.fileio</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_modelgrid</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sfrmaker.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">convert_id_column_to_strings</span>
 
 
 <div class="viewcode-block" id="get_inflow_locations_from_parent_model">
@@ -179,7 +180,7 @@
         <span class="n">prd</span><span class="p">[</span><span class="s1">&#39;ireach&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="n">mustinclude_cols</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;line_id&#39;</span><span class="p">,</span> <span class="s1">&#39;rno&#39;</span><span class="p">,</span> <span class="s1">&#39;iseg&#39;</span><span class="p">,</span> <span class="s1">&#39;ireach&#39;</span><span class="p">,</span> <span class="s1">&#39;geometry&#39;</span><span class="p">}</span>
     <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">mustinclude_cols</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">prd</span><span class="o">.</span><span class="n">columns</span><span class="p">))</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">mustinclude_cols</span><span class="p">)</span>
-    <span class="n">prd</span><span class="p">[</span><span class="s1">&#39;line_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">prd</span><span class="p">[</span><span class="s1">&#39;line_id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+    <span class="n">prd</span><span class="p">[</span><span class="s1">&#39;line_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">convert_id_column_to_strings</span><span class="p">(</span><span class="n">prd</span><span class="p">[</span><span class="s1">&#39;line_id&#39;</span><span class="p">])</span>
     
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">inset_reach_data</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">inset_reach_data</span><span class="p">,</span> <span class="n">Path</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">inset_reach_data</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.shp&#39;</span><span class="p">):</span>
@@ -195,7 +196,7 @@
         <span class="n">ird</span><span class="p">[</span><span class="s1">&#39;ireach&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="n">mustinclude_cols</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;line_id&#39;</span><span class="p">,</span> <span class="s1">&#39;rno&#39;</span><span class="p">,</span> <span class="s1">&#39;iseg&#39;</span><span class="p">,</span> <span class="s1">&#39;ireach&#39;</span><span class="p">}</span>
     <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">mustinclude_cols</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">ird</span><span class="o">.</span><span class="n">columns</span><span class="p">))</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">mustinclude_cols</span><span class="p">)</span>
-    <span class="n">ird</span><span class="p">[</span><span class="s1">&#39;line_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ird</span><span class="p">[</span><span class="s1">&#39;line_id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+    <span class="n">ird</span><span class="p">[</span><span class="s1">&#39;line_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">convert_id_column_to_strings</span><span class="p">(</span><span class="n">ird</span><span class="p">[</span><span class="s1">&#39;line_id&#39;</span><span class="p">])</span>
     
     <span class="n">graph</span> <span class="o">=</span> <span class="n">make_graph</span><span class="p">(</span><span class="n">ird</span><span class="o">.</span><span class="n">rno</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">ird</span><span class="o">.</span><span class="n">outreach</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">one_to_many</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
@@ -379,7 +380,7 @@
     
     <span class="c1"># convert line IDs to strings</span>
     <span class="k">if</span> <span class="n">line_id_column</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
-        <span class="n">data</span><span class="p">[</span><span class="n">line_id_column</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">line_id_column</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+        <span class="n">data</span><span class="p">[</span><span class="n">line_id_column</span><span class="p">]</span> <span class="o">=</span> <span class="n">convert_id_column_to_strings</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">line_id_column</span><span class="p">])</span>
 
     <span class="c1"># map NHDPlus COMIDs to reach numbers</span>
     <span class="k">if</span> <span class="n">flowline_routing</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -710,7 +711,7 @@
 
   <div role="contentinfo">
     <p>
-      <span class="lastupdated">Last updated on Mar 13, 2026.
+      <span class="lastupdated">Last updated on Aug 07, 2026.
       </span></p>
   </div>
 
