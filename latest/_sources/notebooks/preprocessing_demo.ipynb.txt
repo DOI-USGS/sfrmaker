@@ -28,10 +28,10 @@
    "id": "619f9195",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-08-07T02:14:15.696913Z",
-     "iopub.status.busy": "2026-08-07T02:14:15.696468Z",
-     "iopub.status.idle": "2026-08-07T02:14:18.349302Z",
-     "shell.execute_reply": "2026-08-07T02:14:18.346847Z"
+     "iopub.execute_input": "2026-08-07T13:45:18.529463Z",
+     "iopub.status.busy": "2026-08-07T13:45:18.529281Z",
+     "iopub.status.idle": "2026-08-07T13:45:21.440955Z",
+     "shell.execute_reply": "2026-08-07T13:45:21.439452Z"
     }
    },
    "outputs": [],
@@ -58,10 +58,10 @@
    "id": "bb1d52ad",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-08-07T02:14:18.354992Z",
-     "iopub.status.busy": "2026-08-07T02:14:18.354364Z",
-     "iopub.status.idle": "2026-08-07T02:14:18.363316Z",
-     "shell.execute_reply": "2026-08-07T02:14:18.362053Z"
+     "iopub.execute_input": "2026-08-07T13:45:21.444311Z",
+     "iopub.status.busy": "2026-08-07T13:45:21.443819Z",
+     "iopub.status.idle": "2026-08-07T13:45:21.452141Z",
+     "shell.execute_reply": "2026-08-07T13:45:21.451290Z"
     }
    },
    "outputs": [],
@@ -95,10 +95,10 @@
    "id": "3235b2fb",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-08-07T02:14:18.365930Z",
-     "iopub.status.busy": "2026-08-07T02:14:18.365762Z",
-     "iopub.status.idle": "2026-08-07T02:14:18.560047Z",
-     "shell.execute_reply": "2026-08-07T02:14:18.558292Z"
+     "iopub.execute_input": "2026-08-07T13:45:21.454369Z",
+     "iopub.status.busy": "2026-08-07T13:45:21.454245Z",
+     "iopub.status.idle": "2026-08-07T13:45:21.648604Z",
+     "shell.execute_reply": "2026-08-07T13:45:21.647634Z"
     }
    },
    "outputs": [
@@ -112,7 +112,7 @@
       "Getting routing information from NHDPlus HR Plusflow table...\n",
       "finished in 0.00s\n",
       "\n",
-      "finished in 0.10s\n",
+      "finished in 0.08s\n",
       "\n",
       "reading ../neversink_rondout/NHDPLUS_HR_2.gdb...\n",
       "filtering flowlines...\n",
@@ -120,7 +120,7 @@
       "Getting routing information from NHDPlus HR Plusflow table...\n",
       "finished in 0.00s\n",
       "\n",
-      "finished in 0.15s\n",
+      "finished in 0.14s\n",
       "\n",
       "wrote output/preprocessed_flowlines.shp\n"
      ]
@@ -161,10 +161,10 @@
    "id": "47229b35",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-08-07T02:14:18.562660Z",
-     "iopub.status.busy": "2026-08-07T02:14:18.562515Z",
-     "iopub.status.idle": "2026-08-07T02:14:18.592089Z",
-     "shell.execute_reply": "2026-08-07T02:14:18.590727Z"
+     "iopub.execute_input": "2026-08-07T13:45:21.652373Z",
+     "iopub.status.busy": "2026-08-07T13:45:21.652205Z",
+     "iopub.status.idle": "2026-08-07T13:45:21.680284Z",
+     "shell.execute_reply": "2026-08-07T13:45:21.679125Z"
     }
    },
    "outputs": [
@@ -204,10 +204,10 @@
    "id": "08783e35",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-08-07T02:14:18.594960Z",
-     "iopub.status.busy": "2026-08-07T02:14:18.594819Z",
-     "iopub.status.idle": "2026-08-07T02:14:18.598443Z",
-     "shell.execute_reply": "2026-08-07T02:14:18.597269Z"
+     "iopub.execute_input": "2026-08-07T13:45:21.683357Z",
+     "iopub.status.busy": "2026-08-07T13:45:21.683225Z",
+     "iopub.status.idle": "2026-08-07T13:45:21.687228Z",
+     "shell.execute_reply": "2026-08-07T13:45:21.685942Z"
     }
    },
    "outputs": [],
@@ -236,10 +236,10 @@
    "id": "f61d69a1",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-08-07T02:14:18.600838Z",
-     "iopub.status.busy": "2026-08-07T02:14:18.600712Z",
-     "iopub.status.idle": "2026-08-07T02:14:18.609137Z",
-     "shell.execute_reply": "2026-08-07T02:14:18.607513Z"
+     "iopub.execute_input": "2026-08-07T13:45:21.690359Z",
+     "iopub.status.busy": "2026-08-07T13:45:21.690202Z",
+     "iopub.status.idle": "2026-08-07T13:45:21.693878Z",
+     "shell.execute_reply": "2026-08-07T13:45:21.692419Z"
     }
    },
    "outputs": [],
@@ -278,10 +278,10 @@
    "id": "84909bed",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-08-07T02:14:18.611077Z",
-     "iopub.status.busy": "2026-08-07T02:14:18.610913Z",
-     "iopub.status.idle": "2026-08-07T02:14:18.746313Z",
-     "shell.execute_reply": "2026-08-07T02:14:18.745237Z"
+     "iopub.execute_input": "2026-08-07T13:45:21.696690Z",
+     "iopub.status.busy": "2026-08-07T13:45:21.696553Z",
+     "iopub.status.idle": "2026-08-07T13:45:21.857126Z",
+     "shell.execute_reply": "2026-08-07T13:45:21.855729Z"
     }
    },
    "outputs": [
@@ -333,10 +333,10 @@
    "id": "ec5ad987",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-08-07T02:14:18.749409Z",
-     "iopub.status.busy": "2026-08-07T02:14:18.749242Z",
-     "iopub.status.idle": "2026-08-07T02:14:18.754505Z",
-     "shell.execute_reply": "2026-08-07T02:14:18.753131Z"
+     "iopub.execute_input": "2026-08-07T13:45:21.860754Z",
+     "iopub.status.busy": "2026-08-07T13:45:21.860554Z",
+     "iopub.status.idle": "2026-08-07T13:45:21.867633Z",
+     "shell.execute_reply": "2026-08-07T13:45:21.865936Z"
     }
    },
    "outputs": [
@@ -373,10 +373,10 @@
    "id": "20e6d318",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-08-07T02:14:18.758436Z",
-     "iopub.status.busy": "2026-08-07T02:14:18.758074Z",
-     "iopub.status.idle": "2026-08-07T02:14:19.000147Z",
-     "shell.execute_reply": "2026-08-07T02:14:18.998982Z"
+     "iopub.execute_input": "2026-08-07T13:45:21.871620Z",
+     "iopub.status.busy": "2026-08-07T13:45:21.871410Z",
+     "iopub.status.idle": "2026-08-07T13:45:22.217252Z",
+     "shell.execute_reply": "2026-08-07T13:45:22.216020Z"
     }
    },
    "outputs": [
@@ -442,10 +442,10 @@
    "id": "7ce511f7",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-08-07T02:14:19.004497Z",
-     "iopub.status.busy": "2026-08-07T02:14:19.004157Z",
-     "iopub.status.idle": "2026-08-07T02:14:19.363415Z",
-     "shell.execute_reply": "2026-08-07T02:14:19.361889Z"
+     "iopub.execute_input": "2026-08-07T13:45:22.219702Z",
+     "iopub.status.busy": "2026-08-07T13:45:22.219553Z",
+     "iopub.status.idle": "2026-08-07T13:45:22.544275Z",
+     "shell.execute_reply": "2026-08-07T13:45:22.542749Z"
     }
    },
    "outputs": [
@@ -453,6 +453,12 @@
      "name": "stderr",
      "output_type": "stream",
      "text": [
+      "/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.14/site-packages/rasterstats/io.py:458: DeprecationWarning: Setting the shape on a NumPy array has been deprecated in NumPy 2.5.\n",
+      "As an alternative, you can create a new view using np.reshape (with copy=False if needed).\n",
+      "  new_array = self.src.read(\n",
+      "/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.14/site-packages/rasterstats/io.py:458: DeprecationWarning: Setting the shape on a NumPy array has been deprecated in NumPy 2.5.\n",
+      "As an alternative, you can create a new view using np.reshape (with copy=False if needed).\n",
+      "  new_array = self.src.read(\n",
       "/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.14/site-packages/rasterstats/io.py:458: DeprecationWarning: Setting the shape on a NumPy array has been deprecated in NumPy 2.5.\n",
       "As an alternative, you can create a new view using np.reshape (with copy=False if needed).\n",
       "  new_array = self.src.read(\n",
@@ -517,18 +523,6 @@
       "Smoothing elevations...\n",
       "finished in 0.00s\n"
      ]
-    },
-    {
-     "name": "stderr",
-     "output_type": "stream",
-     "text": [
-      "/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.14/site-packages/rasterstats/io.py:458: DeprecationWarning: Setting the shape on a NumPy array has been deprecated in NumPy 2.5.\n",
-      "As an alternative, you can create a new view using np.reshape (with copy=False if needed).\n",
-      "  new_array = self.src.read(\n",
-      "/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.14/site-packages/rasterstats/io.py:458: DeprecationWarning: Setting the shape on a NumPy array has been deprecated in NumPy 2.5.\n",
-      "As an alternative, you can create a new view using np.reshape (with copy=False if needed).\n",
-      "  new_array = self.src.read(\n"
-     ]
     }
    ],
    "source": [
@@ -565,10 +559,10 @@
    "id": "d659de74",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-08-07T02:14:19.367877Z",
-     "iopub.status.busy": "2026-08-07T02:14:19.367412Z",
-     "iopub.status.idle": "2026-08-07T02:14:19.385618Z",
-     "shell.execute_reply": "2026-08-07T02:14:19.383973Z"
+     "iopub.execute_input": "2026-08-07T13:45:22.546794Z",
+     "iopub.status.busy": "2026-08-07T13:45:22.546636Z",
+     "iopub.status.idle": "2026-08-07T13:45:22.566809Z",
+     "shell.execute_reply": "2026-08-07T13:45:22.565216Z"
     }
    },
    "outputs": [
@@ -817,10 +811,10 @@
    "id": "50dba987",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-08-07T02:14:19.389498Z",
-     "iopub.status.busy": "2026-08-07T02:14:19.389095Z",
-     "iopub.status.idle": "2026-08-07T02:14:19.495157Z",
-     "shell.execute_reply": "2026-08-07T02:14:19.493785Z"
+     "iopub.execute_input": "2026-08-07T13:45:22.569637Z",
+     "iopub.status.busy": "2026-08-07T13:45:22.569458Z",
+     "iopub.status.idle": "2026-08-07T13:45:22.674165Z",
+     "shell.execute_reply": "2026-08-07T13:45:22.672731Z"
     }
    },
    "outputs": [
@@ -865,21 +859,13 @@
    "id": "39a289bb",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-08-07T02:14:19.498245Z",
-     "iopub.status.busy": "2026-08-07T02:14:19.497978Z",
-     "iopub.status.idle": "2026-08-07T02:14:19.546768Z",
-     "shell.execute_reply": "2026-08-07T02:14:19.545531Z"
+     "iopub.execute_input": "2026-08-07T13:45:22.678034Z",
+     "iopub.status.busy": "2026-08-07T13:45:22.677762Z",
+     "iopub.status.idle": "2026-08-07T13:45:22.725946Z",
+     "shell.execute_reply": "2026-08-07T13:45:22.724275Z"
     }
    },
    "outputs": [
-    {
-     "name": "stderr",
-     "output_type": "stream",
-     "text": [
-      "/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.14/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0\n",
-      "  props['geometry'] = line.get('geometry', None)\n"
-     ]
-    },
     {
      "name": "stdout",
      "output_type": "stream",
@@ -889,6 +875,14 @@
       "--> building dataframe... (may take a while for large shapefiles)\n",
       "starting lines: 19\n",
       "remaining lines: 11\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "/Users/runner/micromamba/envs/sfrmaker_ci/lib/python3.14/site-packages/gisutils/shapefile.py:278: FionaDeprecationWarning: instances of this class -- CRS, geometry, and feature objects -- will become immutable in fiona version 2.0\n",
+      "  props['geometry'] = line.get('geometry', None)\n"
      ]
     }
    ],
@@ -904,10 +898,10 @@
    "id": "a60e8b64",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-08-07T02:14:19.549216Z",
-     "iopub.status.busy": "2026-08-07T02:14:19.549066Z",
-     "iopub.status.idle": "2026-08-07T02:14:19.623384Z",
-     "shell.execute_reply": "2026-08-07T02:14:19.622519Z"
+     "iopub.execute_input": "2026-08-07T13:45:22.728755Z",
+     "iopub.status.busy": "2026-08-07T13:45:22.728575Z",
+     "iopub.status.idle": "2026-08-07T13:45:22.803049Z",
+     "shell.execute_reply": "2026-08-07T13:45:22.799492Z"
     }
    },
    "outputs": [
